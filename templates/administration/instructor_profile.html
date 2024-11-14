@@ -1,0 +1,209 @@
+{% extends "administration/base.html" %} {% load static %} 
+{% block title %} {{ instructor.first_name }} -> Profile {% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold">Profile</h5>
+      <p class="mb-0">Ye Profile Nahi, Tumhari 'Pehchaan' Hai🔥</p>
+    </div>
+  </div>
+
+  {% for message in messages %}
+
+  <div class="alert {{ message.tags }} alert-dismissible fade show m-n2" role="alert">
+    <strong>{{ message.tag }}</strong> {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  {% endfor %}
+
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="card mb-4">
+          <div class="card-body text-center">
+            <img src="{{ instructor.profile_pic.url }}" alt="avatar" class="rounded-circle img-fluid"
+              style="width: 150px;" />
+            <h5 class="my-3">
+              {{ instructor.first_name }} {{ instructor.last_name }}
+            </h5>
+            <p class="text-muted mb-1">
+              <b>{{ instructor.username }} </b>
+            </p>
+            <p class="text-muted mb-4">{{ instructor.college }}</p>
+            <div class="d-flex justify-content-center mb-2">
+              <a type="button" href="{% url 'edit_instructor_profile' %}" class="btn btn-outline-primary ms-1 w-100">
+                Update Profile
+              </a>
+            </div>
+            <div class="d-flex justify-content-center mb-2">
+              <button type="button" id="change_password_btn" onclick="return display_change_password();"
+                class="btn btn-success ms-1 w-100">
+                Change Password
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- =============================== CHANGE PASSWORD ============================== -->
+
+
+        <div class="card mb-4" id="change_password" style="display: none;">
+          <div class="card-body text-center">
+            <h5 class="mt-n3">
+              Change Password
+            </h5>
+
+            <form action="{% url 'change_instructor_password' %}" method="POST" >
+              {% csrf_token %}
+              <div class="mb-3">
+                <input type="password" name="old_password" id="password" class="form-control" placeholder="Old Password"/>
+              </div>
+
+
+              <div class="mb-3">
+                <input type="password" name="new_password" class="form-control" placeholder="New Password" />
+              </div>
+
+
+              <div class="mb-3">
+                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" />
+              </div>
+              <button type="submit" class="btn btn-outline-success w-100">
+                Change Password
+              </button>
+
+          </div>
+        </div>
+
+
+        <!-- ============================================================================== -->
+
+      </div>
+
+
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Name</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="text-muted mb-0">
+                  {{ instructor.first_name }} {{ instructor.last_name }}
+                </p>
+              </div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Email</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="text-muted mb-0">{{ instructor.email }}</p>
+              </div>
+            </div>
+            <hr />
+            <!-- <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Phone</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="text-muted mb-0">+91 {{ instructor.mobile_number }}</p>
+              </div>
+            </div>
+            <hr /> -->
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">LinkedIn</p>
+              </div>
+              <div class="col-sm-9">
+
+                {% if not instructor.linkedin_id %}
+
+                <a href="{% url 'edit_instructor_profile' %}" class="btn btn-dark mb-0">Not Available</a>
+
+                {% else %}
+
+                <a href="{{ instructor.linkedin_id }}" target="_blank" class="btn btn-outline-secondary mb-0">{{ instructor.linkedin_id }}</a>
+
+                {% endif %}
+              </div>
+            </div>
+            <!-- <hr />
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">GitHub</p>
+              </div>
+              <div class="col-sm-9">
+
+                {% if not instructor.github_id %}
+
+                <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
+
+                {% else %}
+
+                <a href="{{ instructor.github_id }}" target="_blank" class="btn btn-outline-dark mb-0">{{ instructor.github_id }}</a>
+
+                {% endif %}
+
+              </div>
+            </div> -->
+
+            <hr />
+
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Gender</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="text-muted mb-0">{{ instructor.gender }}</p>
+              </div>
+            </div>
+            <hr />
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Download Date🙃</p>
+              </div>
+              <div class="col-sm-9">
+
+                {% if not instructor.dob %}
+                <button class="btn btn-dark  text-white mb-0">Not Available☹️</button>
+                {% else %}
+                <p class="text-muted mb-0">{{ instructor.dob }}</p>
+                {% endif %}
+              </div>
+            </div>
+            <hr />
+            <a href="{% url 'edit_instructor_profile' %}" class="btn btn-outline-warning w-100">Edit Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function display_change_password() {
+    var box = document.getElementById("change_password");
+    var btn = document.getElementById("change_password_btn");
+    if (box.style.display === "none") {
+      box.style.display = "block";
+      btn.innerHTML = "I Don't Want To Change Password🙃";
+      btn.classList.remove("btn-success");
+      btn.classList.add("btn-danger");
+    } else {
+      box.style.display = "none";
+      btn.innerHTML = "Change Password";
+      btn.classList.remove("btn-danger");
+      btn.classList.add("btn-success");
+    }
+  }
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,672 @@
+{% extends 'administration/base.html' %}
+{% load static %}
+
+{% block title %}
+Administration -> Home
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    @property --progress-value {
+        syntax: "<integer>";
+        inherits: false;
+        initial-value: 0;
+    }
+
+    @-webkit-keyframes html-progress {
+        to {
+            --progress-value: 45;
+        }
+    }
+
+    @keyframes html-progress {
+        to {
+            --progress-value: {{ total_completed_sessions_percentage }};
+        }
+    }
+
+    @-webkit-keyframes css-progress {
+        to {
+            --progress-value: 50;
+        }
+    }
+
+    @keyframes css-progress {
+        to {
+            --progress-value: 100;
+        }
+    }
+
+    @-webkit-keyframes js-progress {
+        to {
+            --progress-value: 43;
+        }
+    }
+
+    @keyframes js-progress {
+        to {
+            --progress-value: 100;
+        }
+    }
+
+    .progress-bar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        /* to center the percentage value */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .progress-bar::before {
+        counter-reset: percentage var(--progress-value);
+        content: counter(percentage) "%";
+    }
+
+    .html {
+        background: radial-gradient(closest-side, white 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
+        -webkit-animation: html-progress 2s 1 forwards;
+        animation: html-progress 2s 1 forwards;
+    }
+
+    .html::before {
+        -webkit-animation: html-progress 2s 1 forwards;
+        animation: html-progress 2s 1 forwards;
+    }
+
+    .css {
+        background: radial-gradient(closest-side, white 79%, transparent 80% 100%, white 0), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
+        -webkit-animation: css-progress 2s 1 forwards;
+        animation: css-progress 2s 1 forwards;
+    }
+
+    .css::before {
+        -webkit-animation: css-progress 2s 1 forwards;
+        animation: css-progress 2s 1 forwards;
+    }
+
+    .js {
+        background: radial-gradient(closest-side, white 79%, transparent 80% 100%, white 0), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
+        -webkit-animation: js-progress 2s 1 forwards;
+        animation: js-progress 2s 1 forwards;
+    }
+
+    .js::before {
+        -webkit-animation: js-progress 2s 1 forwards;
+        animation: js-progress 2s 1 forwards;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    progress {
+        visibility: hidden;
+        width: 0;
+        height: 0;
+    }
+    
+</style>
+
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    {% for notification in notifications %}
+
+    <div class="alert alert-{{ notification.type }} alert-dismissible fade show" role="alert">
+        <strong>{{ notification.title|title }}</strong> {{ notification.description }}
+
+        {% if not notification.is_fixed %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {% endif %}
+    </div>
+
+    {% endfor %}
+
+    <!--  Row 1 -->
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card overflow-hidden">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-9 fw-semibold">Total Sessions🏛️</h5>
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h4 class="fw-semibold mb-3">
+                                        {{ total_sessions }}
+                                    </h4>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span class="">
+                                            <i class=""></i>
+                                        </span>
+                                        <p class=" me-1 fs-3 mb-0"></p>
+                                        <p class="fs-3 mb-0"></p>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-4">
+                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
+                                            <span class="fs-2">Completed</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="progress-bar-container">
+
+                                            <div class="progress-bar html">
+                                                <progress id="html" min="0" max="100" value="70"></progress>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card overflow-hidden">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-9 fw-semibold">Total Registrations 👥</h5>
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h4 class="fw-semibold mb-3">
+                                        {{ total_enrolled_students }}
+                                    </h4>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <p class=" me-1 fs-3 mb-0">Matters? Yes😁</p>
+                                        <!-- <p class="fs-3 mb-0">Keep it up</p> -->
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-4">
+                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
+                                            <span class="fs-2">Active Students</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="progress-bar-container">
+
+                                            <div class="progress-bar css">
+                                                <progress id="css" min="0" max="100" value="30"></progress>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <!-- <div class="col-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card overflow-hidden">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-9 fw-semibold">Profile Score</h5>
+
+                            
+
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h4 class="fw-semibold mb-3">{{ student.get_profile_score }}</h4>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span
+                                            class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-arrow-up-right text-success"></i>
+                                        </span>
+                                        <p class=" me-1 fs-3 mb-0">Top</p>
+
+
+
+                                        {% if student.get_profile_score == 100 %}
+                                        <p class="fs-3 mb-0">1%</p>
+
+                                        {% elif student.get_profile_score >= 90 %}
+                                        <p class="fs-3 mb-0">30%</p>
+
+                                        {% elif student.get_profile_score >= 60 %}
+                                        <p class="fs-3 mb-0">50%</p>
+
+                                        {% elif student.get_profile_score >= 30 %}
+
+                                        <p class="fs-3 mb-0">90%</p>
+
+                                        {% else %}
+                                        <p class="fs-3 mb-0">Not Available</p>
+
+                                        {% endif %}
+
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-4">
+                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
+                                            <span class="fs-2">Completed</span>
+                                        </div>
+                                        <div>
+                                            <span
+                                                class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
+                                            <span class="fs-2">Left</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="progress-bar-container">
+
+                                            <div class="progress-bar js">
+                                                <progress id="js" min="0" max="100" value="70"></progress>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            
+
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <div class="col-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Yearly Breakup -->
+                    <div class="card overflow-hidden p-1" style="max-width: 100%; max-height: 31.7vh;">
+
+                        <!-- <h5 class="card-title mb-9 fw-semibold">Avg. Test Series Result</h5>
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h4 class="fw-semibold mb-3">43%</h4>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span
+                                            class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-arrow-down-left text-danger"></i>
+                                        </span>
+                                        <p class=" me-1 fs-3 mb-0">-13%</p>
+                                        <p class="fs-3 mb-0">last test</p>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-4">
+                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
+                                            <span class="fs-2">Completed</span>
+                                        </div>
+                                        <div>
+                                            <span
+                                                class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
+                                            <span class="fs-2">Left</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="progress-bar-container">
+
+                                            <div class="progress-bar html">
+                                                <progress id="html" min="0" max="100" value="70"></progress>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> -->
+
+                        <img src="{{ course.thumbnail.url }}"
+                            height="182vh" style="border-radius: 5px;" alt="">
+                    </div>
+                </div>
+
+                <!-- <div class="col-lg-12">
+            <div class="card">
+              <div class="card-body">
+                <div class="row alig n-items-Coming Soon">
+                  <div class="col-8">
+                    <h5 class="card-title mb-9 fw-semibold"> Rank Score </h5>
+                    <h4 class="fw-semibold mb-3">69</h4>
+                    <div class="d-flex align-items-center pb-1">
+                      <span
+                        class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-arrow-down-right text-danger"></i>
+                      </span>
+                      <p class=" me-1 fs-3 mb-0">+9%</p>
+                      <p class="fs-3 mb-0">last year</p>
+                    </div>
+                  </div>
+                  <div class="col-4">
+                    <div class="d-flex justify-content-end">
+                      <div
+                        class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-user fs-6"></i>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================= Schedule ====================================== -->
+
+    <div class="row">
+
+        <div class="col-lg-4 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h5 class="card-title fw-semibold">Latest Schedule</h5>
+                    </div>
+
+                    <ul class="timeline-widget mb-0 position-relative mb-n3">
+
+
+                      {% if sessions %}
+                        {% for session in sessions %}
+
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">
+                                <span class="fw-bolder">({{ session.course.name }})</span>
+                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{ session.topic|title|truncatechars:6 }}</span>
+                            </div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1">{{ session.session_time }}
+                                <br>
+
+                                {% if session.get_meeting_status.status == "Ongoing" %}
+
+                                <a href="{{ session.link }}" class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                    {{ session.get_meeting_status.status }}... Join
+                                </a>
+
+                                {% else %}
+
+                                <a class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                    {{ session.get_meeting_status.status }}
+                                </a>
+
+                                {% endif %}
+
+                                <!-- <a href="#"
+                                    class="text-primary d-block fw-normal">Know More
+                                </a> -->
+                            </div>
+                            
+                        </li>
+
+
+                        {% endfor %}
+
+                        
+                        {% else %}
+
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
+                            </div>
+                        </li>                   
+
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================ Last 3 sessions JOBS ============================ -->
+
+        <div class="col-lg-8 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-semibold mb-4">Pending Task 🔥</h5>
+                    <div class="table-responsive">
+                        <table class="table text-nowrap mb-0 align-middle">
+                            <thead class=" fs-4">
+
+                                <tr>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            #
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Topic
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Time
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Status
+                                        </h6>
+                                    </th>
+                                    
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Action
+                                        </h6>
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for session in sessions %}
+
+                                <tr>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0 text-center">{{ session.id }}</h6>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{ session.topic|truncatechars:10 }}</h6>
+                                        <span class="fw-normal">{{ session.course.name }}</span>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <p class="mb-0 fw-normal">{{ session.session_time }}</p>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0 fs-4">
+                                            <span class="badge bg-{{ session.get_meeting_status.color }}">
+                                                {{ session.get_meeting_status.status }}
+                                            </span>
+                                        </h6>
+                                    </td>
+
+                                    <td class="border-bottom-0 text-center">
+                                        <div class="d-flex align-items-center gap-2">
+
+                                            {% if session.get_meeting_status.status == "Upcoming" %}
+
+                                            <a href="{% url 'edit_session' session.id %}" class="btn btn-outline-info">Edit📝
+                                            </a>
+
+                                            {% elif not session.is_completed %}
+
+                                            <a href="{% url 'mark_session_completed' session.id %}" class="btn btn-outline-success">Mark Complete ✅
+                                            </a>
+
+                                            {% elif session.recorded_session_link == None %}
+
+                                            <button class="btn btn-outline-dark text-blue float-end" data-bs-toggle="modal" data-bs-target="#uploadRecordedSessionModal" data-session-id="{{ session.id }}" session-topic="{{ session.topic }}">Upload Recording↗️</button>
+                                            
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- ================================= ALL ELIGIBLE JOBS ============================ -->
+    
+    <!-- <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4 text-white">Commpanies Only For You 🔥</h5>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Eligible Companies</h5>
+        </div>
+    </div> -->
+
+    <!-- <div class="col-lg- d-flex align-items-strech">
+
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+
+            {% for job in all_eligible_jobs %}
+
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="#" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ job.company.name|title|truncatechars:10 }} For ({{ job.title|truncatechars:5 }})</h5>
+                        <p class="card-text">
+                            {{ job.description|truncatechars:25 }}...
+                        </p>
+                        <p class="card-text">
+                            Package: ₹{{ job.salary_range }}
+                        </p>
+
+                        <a href="#" class="btn btn-primary">More Details</a>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+
+
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/cd/Facebook_logo_%28square%29.png"
+                        class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Facebook</h5>
+                        <p class="card-text"></p>
+                        <a href="#" class="btn btn-primary">Apply</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="https://cdn.w3villa.com/production/assets/w3villa-technologies-og-8b76c7b0c5541f2c668251897aac2f9a600904052e2aa8655a131662b9019a74.webp"
+                        class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">W3 villa</h5>
+                        <p class="card-text"></p>
+                        <a href="#" class="btn btn-primary">Apply</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="https://www.logodesignlove.com/images/monograms/tesla-symbol.jpg" class="card-img-top"
+                        alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Tesla</h5>
+                        <p class="card-text"></p>
+                        <a href="#" class="btn btn-primary">Apply</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="https://img.freepik.com/premium-vector/experience-design-abstract-concept-vector-illustration_107173-24976.jpg?w=2000"
+                        class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Company Name</h5>
+                        <p class="card-text"></p>
+                        <a href="#" class="btn btn-primary">Apply</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div> -->
+
+    <div class="py-6 px-6 text-center">
+        <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
+                class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
+<!--                 
+            All Rights Reserved by <a href="https://gla.ac.in" target="_blank"
+                class="pe-1 text-primary text-decoration-underline">GLA University</a> -->
+
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}

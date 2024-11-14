@@ -1,0 +1,302 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> Playground
+{% endblock %}
+
+{% block extra_css %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    h3.question {
+        font-family: "Roboto", sans-serif;
+        font-size: 24px;
+        text-align: center;
+        font-weight: 100;
+    }
+
+    .editor-container {
+        width: 100%;
+        height: 60vh;
+        margin: 20px auto;
+        position: relative;
+    }
+
+    #editor {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+        border-radius: 8px;
+        font-size: 20px;
+    }
+
+    #language,
+    option {
+        color: rgb(19, 19, 19);
+    }
+
+    [data-bs-theme="dark"] {
+        #language {
+            color: white;
+        }
+
+        option {
+            color: black
+        }
+
+        #op-div {
+            color: white;
+        }
+    }
+</style>
+
+
+
+{% endblock %}
+
+
+{% block body %}
+
+
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold">Let's Learn and Test🔥</h5>
+        </div>
+    </div>
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Play with the Code 🔥
+            </h5>
+            <form id="codeForm">
+
+                {% csrf_token %}
+
+                <label for="language">Select Language:</label>
+
+                <select class="form-select form-control" id="language" name="language" required>
+
+                </select>
+
+                <label for="code" class="mt-3 mb-n2">Code:</label><br>
+
+                <div class="editor-container">
+                    <div id="editor"></div>
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100" id="submit-btn" accesskey="enter">Submit</button>
+            </form>
+
+            <h3 class="mt-4">Output:</h3>
+            <div id="output">
+                <pre class="fs-4" id="op-div"></pre>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+{% block myjs %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
+
+<!-- ================ EDITOR SCRIPT =============== -->
+
+<script>
+    $(document).ready(function () {
+        const editor = ace.edit("editor");
+        const languageSelect = $("#language");
+
+        // Define top languages (example)
+        const topLanguages = [
+            { id: 71, name: "Python" },
+            { id: 50, name: "C" },
+            { id: 54, name: "C++" },
+            { id: 62, name: "Java" }
+        ];
+
+        // Default code snippets for specific languages
+        const defaultCode = {
+            71: "# Chal beta hoja shuru... Krde mera naam roshan 🔥\n", // Python default
+            50: `#include <stdio.h>\n\nint main() {\n\t// Write your C code here\n\treturn 0;\n}`, // C default
+            54: `#include <iostream>\nusing namespace std;\n\nint main() {\n\t// Write your C++ code here\n\treturn 0;\n}`, // C++ default
+            62: `public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}` // Java default
+            // Add more language defaults as needed
+        };
+
+        // Function to set editor content based on selected language
+        function setEditorContent(languageId) {
+            if (defaultCode[languageId]) {
+                editor.setValue(defaultCode[languageId], -1); // Set default code
+            } else {
+                editor.setValue("// Start coding...", -1); // Fallback default
+            }
+        }
+
+        // Fetch languages from API
+        $.ajax({
+            url: "https://theangaarbatch.in/judge0/languages",
+            type: "GET",
+            success: function (response) {
+                // Append top languages
+                topLanguages.forEach(function (language) {
+                    languageSelect.append(
+                        `<option value="${language.id}">${language.name}</option>`
+                    );
+                });
+
+                // Filter out top languages and sort others alphabetically
+                let otherLanguages = response.filter(function (language) {
+                    return !topLanguages.some(topLang => topLang.id === language.id);
+                });
+                otherLanguages.sort((a, b) => a.name.localeCompare(b.name));
+
+                // Append sorted languages
+                otherLanguages.forEach(function (language) {
+                    languageSelect.append(
+                        `<option value="${language.id}">${language.name}</option>`
+                    );
+                });
+
+                // Set initial default code for the first language (if any)
+                let initialLanguageId = languageSelect.val();
+                setEditorContent(initialLanguageId);
+            },
+            error: function (xhr, status, error) {
+                alert("Error fetching languages: " + error);
+            }
+        });
+
+        // Trigger when the language is changed
+        languageSelect.change(function () {
+            let selectedLanguageId = $(this).val();
+            setEditorContent(selectedLanguageId); // Set the default code for the selected language
+
+            // reset the output div
+            $("#output").addClass("d-none");
+            $("#output pre").text("");
+
+        });
+
+    });
+
+
+
+</script>
+
+<script>
+    $(document).ready(function () {
+
+        const editor = ace.edit("editor");
+
+        // change the theme of ace editor based on selected theme of the website
+        let theme = localStorage.getItem("theme");
+        if (theme == "dark") {
+            editor.setTheme("ace/theme/twilight");
+        } else {
+            editor.setTheme("ace/theme/chrome");
+        }
+
+        // editor.setTheme("ace/theme/twilight");
+
+        // get selected language and set editor mode
+        let selectedLanguage = $("#language").val();
+
+
+        editor.session.setMode("ace/mode/python");
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            cursorStyle: "smooth",
+            enableEmmet: true,
+        });
+
+        // change the editor mode based on selected language
+        $("#language").change(function () {
+            let selectedLanguage = $(this).val();
+            if (selectedLanguage == 71) {
+                editor.session.setMode("ace/mode/python");
+            } else if (selectedLanguage == 50) {
+                editor.session.setMode("ace/mode/c_cpp");
+            } else if (selectedLanguage == 54) {
+                editor.session.setMode("ace/mode/c_cpp");
+            } else if (selectedLanguage == 62) {
+                editor.session.setMode("ace/mode/java");
+            }
+        });
+
+        $(document).keydown(function (event) {
+            // Check if Ctrl + Enter is pressed
+            if ((event.ctrlKey || event.altKey) && event.key === "Enter") {
+                event.preventDefault();
+                console.log("Ctrl+Enter or Alt+Enter pressed"); // For debugging
+                document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
+                $("#submit-btn").click();  // Trigger the submit button
+            }
+        });
+
+
+        $("#codeForm").off("submit").submit(function (event) {
+            event.preventDefault();
+
+            $("#output").addClass("d-none");
+            const submit_btn = $("#submit-btn");
+
+            submit_btn.prop("disabled", true);
+            submit_btn.text("Submitting...");
+
+            let languageId = $("#language").val();
+            let sourceCode = editor.getValue();
+
+            $.ajax({
+                url: "{% url 'execute_code' %}",  // Django view URL
+                type: "POST",
+                data: {
+                    language_id: languageId,
+                    source_code: sourceCode,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (response) {
+
+                    submit_btn.prop("disabled", false);
+                    submit_btn.text("Submit");
+                    $("#output").removeClass("d-none");
+                    $("#output pre").text(response.output);
+
+                    console.log(response); // For debugging
+                    // scroll to op-div to show output
+                    document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById("op-div").scrollIntoView(false);
+                },
+                error: function (xhr, status, error) {
+                    alert("Error from AJAX: " + error);
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
+
+
+{% endblock %}

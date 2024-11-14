@@ -1,0 +1,164 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ instructor.first_name}}'s Messages
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    .star {
+        color: red;
+        display: inline;
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+
+
+    <div class="row">
+        <div class="d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-semibold mb-4">My Messages 📝</h5>
+                    <div class="table-responsive">
+
+                        {% if my_messages %}
+
+                        <table class="table text-nowrap mb-0 align-middle">
+                            <thead class="text-dark fs-4">
+
+                                <tr>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            #
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Message
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            At
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Status
+                                        </h6>
+                                    </th>
+
+                                </tr>
+                            </thead>
+
+
+                            <tbody>
+
+                                {% for message in my_messages %}
+
+                                <tr class="alert alert-success alert-dismissible fade show">
+
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">{{ message.student.first_name }}
+                                            {{message.student.last_name }}:</h6>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            title="{{ message.message }}">{{ message.message|truncatechars:10 }}</h6>
+                                        <span class="fw-normal"></span>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <p class="mb-0 fw-normal text-black">
+                                            {{ message.sent_at }}
+                                        </p>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if not message.is_replied %}
+                                            <a href="{% url 'reply_message' message.id %}" class="btn btn-outline-danger">Reply</a>
+                                            {% else %}
+                                            <span class="badge bg-success">Replied</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% if not message.is_replied %}
+                                <tr class="alert alert-success alert-dismissible fade show">
+                                    {% else %}
+                                <tr class="alert alert-danger alert-dismissible fade show">
+
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">{{ message.instructor.first_name|title }}:</h6>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="{{ message.reply }}">{{ message.reply|truncatechars:10 }}</h6>
+                                        <span class="fw-normal"></span>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <p class="mb-0 fw-normal text-black">
+                                            {{ message.replied_at }}
+                                        </p>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="{% url 'edit_reply' message.id %}" class="btn btn-outline-secondary float-end">Edit reply</a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                
+                                {% endif %}
+
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+                        
+                        {% endif %}
+                        <hr>
+                    </div>
+
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+
+
+
+</div>
+
+{% endblock %}

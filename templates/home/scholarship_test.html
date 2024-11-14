@@ -1,0 +1,189 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="apple-touch-icon" sizes="76x76" href="{% static 'img/apple-icon.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <title>
+        Scholarship Test🔥
+    </title>
+    <!--     Fonts and icons     -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+    <!-- Nucleo Icons -->
+    <link href="{% static 'css/nucleo-icons.css' %}" rel="stylesheet" />
+    <link href="{% static 'css/nucleo-svg.css' %}" rel="stylesheet" />
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    <link href="{% static 'css/accounts/nucleo-svg.css' %}" rel="stylesheet" />
+    <!-- CSS Files -->
+    <link id="pagestyle" href="{% static 'css/accounts/argon-dashboard.css' %}" rel="stylesheet" />
+
+    <style>
+        body {
+            background-image: url("{% static 'img/accounts/login_bg.jpg' %}");
+            background-size: contain;
+
+            background-attachment: fixed;
+
+        }
+
+        .input-container {
+            position: relative;
+        }
+
+        .validation-icon {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            background-size: cover;
+            display: none;
+        }
+
+        #password-input:valid+.validation-icon {
+            background-image: url('https://img.icons8.com/glyph-neue/64/40C057/double-tick.png');
+            /* Replace with your green check icon image path */
+            display: block;
+        }
+
+        #password-input:invalid+.validation-icon {
+            background-image: url('https://img.icons8.com/emoji/48/cross-mark-emoji.png');
+            /* Replace with your red cross icon image path */
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            #my-alert {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body class="">
+    <main class="main-content ">
+
+        <section>
+            <div class="page-header min-vh-100">
+                <div class="container" style="height: 90vh;">
+                    <div class="row m-0" id="my-alert">
+                        <div class="alert alert-secondary fade show" role="alert">
+                            <span class="alert-text text-white"><strong>Sun! </strong>Ab Aaya H To Kuch Seekh Ke Ja</span>
+                        </div>
+                        <a href="{% url 'home' %}" class="btn btn-sm mb-n1 btn-outline-white float-end mt-n1">
+                            Home
+                        </a>
+                    </div>
+
+                    {% for message in messages %}
+
+                    <div class="row">
+                        <div class="alert {{ message.tags }} fade show" role="alert">
+                            <span class="alert-text text-white"><strong>{{ message.tag }}</strong>{{ message }}</span>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+
+                    <br>
+                    <div class="row mb-2">
+                        <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+                            <div class="card card-plain" style="background-color: white;">
+                                <div class="card-header pb-0 text-start">
+                                    <h4 class="font-weight-bolder">Login To Learn</h4>
+                                    <p class="mb-0">Enter your Username and Password</p>
+                                </div>
+                                <div class="card-body">
+                                    <form role="form" method="post">
+                                        {% csrf_token %}
+                                        <div class="mb-3">
+                                            <input type="text" class="form-control form-control-lg"
+                                                placeholder="Username" aria-label="Username" name="username"
+                                                maxlength="20">
+                                        </div>
+                                        <div class="mb-3">
+
+                                            <!-- <input type="password" class="form-control form-control-lg" placeholder="Password"
+                        aria-label="Password" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"> -->
+
+                                            <div class="input-container">
+                                                <input type="password" class="form-control form-control-lg"
+                                                    placeholder="Password" aria-label="Password" name="password"
+                                                    id="password-input" maxlength="20"
+                                                    title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
+                                                    required>
+                                                <div class="validation-icon"></div>
+
+                                                <!-- pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,}$" -->
+                                            </div>
+
+
+                                        </div>
+
+
+
+                                        <div class="text-center">
+                                            <button type="submit"
+                                                class="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0">Enter The
+                                                World</button>
+                                        </div></a>
+                                    </form>
+
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!--   Core JS Files   -->
+    <script src="../js/core/popper.min.js"></script>
+    <script src="../js/core/bootstrap.min.js"></script>
+    <script src="../js/plugins/perfect-scrollbar.min.js"></script>
+    <script src="../js/plugins/smooth-scrollbar.min.js"></script>
+    <script>
+        var win = navigator.platform.indexOf('Win') > -1;
+        if (win && document.querySelector('#sidenav-scrollbar')) {
+            var options = {
+                damping: '0.5'
+            }
+            Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+        }
+    </script>
+
+    <script>
+        /* document.addEventListener("DOMContentLoaded", function () {
+            const passwordInput = document.getElementById("password-input");
+        
+            passwordInput.addEventListener("input", function () {
+                const isValid = passwordInput.checkValidity();
+        
+                if (isValid) {
+                    passwordInput.style.border = "1px solid green";
+                } else {
+                    passwordInput.style.border = "1px solid red";
+                }
+            });
+        });
+    
+        */
+    </script>
+
+
+
+    <!-- Github buttons -->
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+    <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
+    <script src="/js/argon-dashboard.min.js"></script>
+</body>
+
+</html>

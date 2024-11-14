@@ -1,0 +1,132 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Add Test Case for {{ question.title }}
+{% endblock %}
+
+{% block problem_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">{{ question.title }}</i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+
+                        <div class="card">
+                            <div class="card-header">Add Test Case</div>
+                            <div class="card-body h-100">
+
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Input
+                                            <div class="star">*</div>
+                                        </label>
+                                        <textarea class="form-control" id="job_title" name="input_data" rows="5"
+                                            placeholder="Input here..."></textarea>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Expected Output
+                                            <div class="star">*</div>
+                                        </label>
+                                        <textarea class="form-control" id="job_title" name="expected_output" rows="10"
+                                            placeholder="Expected Output here..." required></textarea>
+                                        <!-- <iframe frameBorder="0" height="450px"
+                                            src="https://onecompiler.com/embed/html?theme=dark" width="100%"></iframe> -->
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <!-- <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="interview_date" class="form-label">Due Date & Time
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="datetime-local" class="form-control" id="interview_date"
+                                                name="due_date" required>
+                                        </div>
+                                    </div> -->
+
+
+                                </div>
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="assignment_type" class="form-label">Is Sample Test Case?
+                                            <div class="star">*</div>
+                                        </label>
+                                        <input type="checkbox" class="form-check-input" id="assignment_type"
+                                            name="is_sample">
+                                    </div>
+                                </div>
+
+                                <!-- <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_type" class="form-label">For & By</label>
+                                            <input type="text" class="form-control" id="job_type"
+                                                value="{{ course.name|title }} by {{ instructor.first_name }}" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="deadline" class="form-label">Created At</label>
+                                            <input type="text" class="form-control" id="deadline"
+                                                value="{% now 'l, F j, Y g:i A' %}" disabled>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Add Test Case</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+        </div>
+
+
+
+
+
+        </form>
+
+    </div>
+</div>
+
+
+
+{% endblock %}

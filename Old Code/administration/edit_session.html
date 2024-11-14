@@ -1,0 +1,107 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Edit Session for {{ course.name }}
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Edit Session for {{ session.course.name }} </i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form action="#" method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+
+                        <div class="card">
+                            <div class="card-header">Edit Details</div>
+                            <div class="card-body h-100">
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_title" class="form-label">Topic
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="text" class="form-control" id="job_title" name="topic"
+                                            placeholder="Enter the topic of the session"
+                                            value="{{ session.topic }}"
+                                             required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="interview_date" class="form-label">Date & Time
+                                                <small>(set again) </small>
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="datetime-local" class="form-control" id="interview_date" name="session_time" required>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-3">
+                                            <label for="tenth" class="form-label">Joining Link
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="text" class="form-control" id="tenth" name="link" 
+                                            placeholder="Enter the joining link for the session"
+                                            value="{{ session.link }}"
+                                             required>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_type" class="form-label">For & By</label>
+                                            <input type="text" class="form-control" id="job_type" value="{{ session.course.name|title }} by {{ instructor.first_name }}" disabled>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="deadline" class="form-label">Created At</label>
+                                            <input type="text" class="form-control" id="deadline"
+                                                value="{{ session.created_at|date:'l, F j, Y g:i A' }}" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Edit Session</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+        </div>
+
+
+
+
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

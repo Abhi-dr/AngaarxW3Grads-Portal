@@ -1,0 +1,106 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Edit Question
+{% endblock %}
+
+{% block problem_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Edit Question</i> </h5>
+            <p>➡️ {{ question.title }}</p>
+
+        </div>
+        <div class="container px-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+
+                        <div class="card">
+                            <div class="card-body h-100">
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Title
+                                        <div class="star">*</div>
+                                    </label>
+                                    <input type="text" class="form-control" id="question_title" name="title"
+                                        value="{{ question.title }}" required>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Scenario <small>(optional)</small>
+                                        <div class="star"></div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="scenario" rows="5">{{ question.scenario }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Problem Description
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="description" rows="5"
+                                    required>{{ question.description }}</textarea>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Constraints
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="constraints" rows="5"
+                                     required>{{ question.constraints }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="assignment_type" class="form-label">Difficulty Level
+                                        <div class="star">*</div>
+                                    </label>
+                                    <select class="form-select form-control" name="difficulty_level"
+                                        id="assignment_type" required>
+                                        <!-- <option value="" selected disabled>Select Level</option> -->
+                                        <option value="Easy" {% if question.difficulty_level == "Easy" %} selected {% endif %}>Easy</option>
+                                        <option value="Medium" {% if question.difficulty_level == "Medium" %} selected {% endif %}>Medium</option>
+                                        <option value="Hard" {% if question.difficulty_level == "Hard" %} selected {% endif %}>Hard</option>
+
+                                    </select>
+                                </div>
+
+
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Edit &nbsp; Question</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+
+</form>
+
+</div>
+</div>
+
+{% endblock %}

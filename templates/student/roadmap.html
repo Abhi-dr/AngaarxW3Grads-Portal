@@ -1,0 +1,50 @@
+{% extends "student/base.html" %} {% load static %} {% block title %} Student ->
+Roadmap {% endblock %} {% block body %}
+
+<div class="container-fluid">
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-2">The Way You Go🔥</h5>
+            <p class="mb-2">Is the way you grow🔥</p>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for course in courses %}
+
+        <div class="col-md-3">
+            <h5 class="card-title fw-semibold mb-4"></h5>
+            <div class="card">
+                <a href="{% url 'view_roadmap' course.id %}">
+                    <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="..." />
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {{ course.name|title }}
+                        </h5>
+                        <p class="card-text mb-2">
+                            By {{ course.instructor.first_name }}
+                        </p>
+                        <!-- <p class="card-text text-black mb-1">
+                            Total Registrations: {{ company.job_set.all }}
+                        </p> -->
+                        <a href="{% url 'view_roadmap' course.id %}" class="btn btn-outline-dark w-100">View Roadmap</a>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+</div>

@@ -1,0 +1,246 @@
+{% extends "student/base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+
+{% block title %}
+Problems -> All
+{% endblock %}
+
+{% block pp_active %}
+active
+{% endblock %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .fa-youtube-play {
+        font-size: 220%;
+        color: red
+    }
+
+    .text-color {
+        color: white;
+    }
+
+    [data-bs-theme="dark"] {
+        .fa-youtube-play {
+            font-size: 220%;
+            color: red;
+        }
+
+        .text-color {
+            color: rgb(33, 33, 33);
+            font-weight: 500;
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Problem Set</span>
+                <span class="fs-4">
+                    <a href="{% url 'student_add_question' %}" class="btn float-end btn-outline-primary">Add
+                        Question</a>
+                </span>
+            </h3>
+        </div>
+    </div>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- ========================== SEARCH BAR ==================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Search Question 🔍</h5>
+            <form onsubmit="event.preventDefault();">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by ID, Topic or Course"
+                        oninput="searchQuestions()" />
+                    <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =================================  QUESTIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4" id="questionHeading">QUESTIONS 🔥
+
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Title 📚
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Level 📊
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Youtube 🎥
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Status🚦
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Practice Link 🔗
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="questionTableBody">
+
+
+
+                    </tbody>
+
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Script to dynamically set modal content -->
+<script>
+    var questionModal = document.getElementById('questionModal');
+    questionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var title = button.getAttribute('data-title'); // Extract info from data-* attributes
+        var description = button.getAttribute('data-description');
+
+        // Update the modal's content.
+        var modalTitle = questionModal.querySelector('.modal-title');
+        var modalBody = questionModal.querySelector('.modal-body p');
+
+        modalTitle.textContent = title;
+        modalBody.innerHTML = description;
+    });
+</script>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchQuestions();  // Load all questions initially
+    });
+
+
+    function searchQuestions() {
+        const query = document.getElementById("searchInput").value;
+        fetch("{% url 'fetch_questions' %}?query=" + encodeURIComponent(query))
+            .then(response => response.json())
+            .then(data => {
+                displayQuestions(data.questions);
+                const heading = document.getElementById("questionHeading");
+                if (query) {
+                    heading.innerHTML = `QUESTIONS 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`;
+                } else {
+                    heading.innerHTML = "QUESTIONS 🔥";
+                }
+            })
+            .catch(error => console.error("Error fetching questions:", error));
+    }
+
+    function clearSearch() {
+        document.getElementById("searchInput").value = "";
+        fetchQuestions();  // Reload all questions after clearing
+    }
+
+    function fetchQuestions() {
+        fetch("{% url 'fetch_questions' %}")
+            .then(response => response.json())
+            .then(data => {
+                displayQuestions(data.questions);
+            })
+            .catch(error => console.error("Error fetching questions:", error));
+    }
+
+
+    function displayQuestions(questions) {
+        const questionTableBody = document.getElementById("questionTableBody");
+        questionTableBody.innerHTML = "";  // Clear existing rows
+
+        questions.forEach((question, index) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>
+                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" data-bs-toggle="modal" data-bs-target="#questionModal" title="${question.title}">${question.title}</h6>
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge bg-${question.difficulty_color}">${question.difficulty_level}</span>
+                </td>
+                <td style="text-align: center;">
+                    ${question.youtube_link ? '<i class="fa fa-youtube-play"></i>' : '<p>Coming Soon...</p>'}
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge bg-${question.color}">${question.status}</span>
+                </td>
+                <td>
+                    <a href="problem/${question.slug}" class="btn btn-dark">Try Now🔥</a>
+                </td>
+            `;
+
+            questionTableBody.appendChild(row);
+        });
+    }
+</script>
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<!-- and it's easy to individually load additional languages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+
+<script>hljs.highlightAll();</script>
+
+
+{% endblock %}

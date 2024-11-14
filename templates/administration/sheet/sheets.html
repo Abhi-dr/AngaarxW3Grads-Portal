@@ -1,0 +1,86 @@
+{% extends 'administration/base.html' %}
+
+{% load custom_filters %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block title %}
+My Courses
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">S H E E T S 🔥</span>
+                <span class="fs-4"> | Angaar x W3Grads
+                </span>
+            </h3>
+        </div>
+        <a href="{% url 'instructor_add_sheet' %}" class="btn btn-outline-primary button mt-n3 m-3 ">Add Sheet</a>
+    </div>
+
+
+
+    <!-- ======================== COURSE CODE ====================== -->
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        {% for sheet in sheets %}
+
+        <div class="col-md-3">
+            <h5 class="card-title fw-semibold mb-0"></h5>
+            <div class="card">
+                <a href="{% url 'instructor_sheet' sheet.slug %}">
+                    <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {{ sheet.name }}🔥
+                        </h5>
+                        <p class="card-text mb-2"><b>Batches: </b><br>
+
+                            {% if sheet.batches.all.count == 0 %}
+                            <span class="text-success">Open to all</span>
+
+                            {% else %}
+
+                            {% for batch in sheet.batches.all %}
+                            <a href="{% url 'instructor_sheet' sheet.slug %}">{{ batch.name }}</a>{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+
+                            {% endif %}
+                        </p>
+                        <p class="card-text mb-1">
+                            Total Questions: {{ sheet.get_total_questions }}
+                        </p>
+                        <a href="#" class="btn btn-outline-secondary w-100">View More</a>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    
+
+</div>
+
+{% endblock %}

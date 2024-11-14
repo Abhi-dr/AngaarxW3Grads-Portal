@@ -1,0 +1,73 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> Feedback
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Feedback</h5>
+      <p class="mb-0">Your feedback matters to us!</p>
+    </div>
+  </div>
+
+  {% for message in messages %}
+
+  <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+      <strong>{{ message.tag }}</strong> {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  {% endfor %}
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+
+        {% csrf_token %}
+
+        <div class="row flex-row">
+
+        <div class="mb-3 col-6">
+          <label for="exampleInputEmail1" class="form-label">Name</label>
+          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ student.first_name }} {{ student.last_name }}" disabled>
+        </div>
+
+        <div class="mb-3 col-6">
+          <label for="exampleInputEmail1" class="form-label">Email address</label>
+          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ student.email }}" disabled>
+          <div id="emailHelp" class="form-text">Your Email will not be shared</div>
+        </div>
+
+      </div>
+
+      <div class="mb-3">
+        <label for="exampleInputEmail1" class="form-label">Subject <small style="color: red;">*</small></label>
+        <input type="text" class="form-control" id="exampleInputEmail1" name="subject" aria-describedby="emailHelp" required placeholder="Enter the subject"
+        maxlength="50"
+        >
+      </div>
+
+        <div class="mb-3">
+          <label for="feedback" class="form-label">Feedback <small style="color: red;">*</small> </label>
+          <textarea rows="5" class="form-control" id="exampleInputPassword1" name="message" required placeholder="Your Feedback is valuable for us..."></textarea>
+        </div>
+
+        <!-- <div class="mb-3 form-check">
+          <input type="checkbox" class="form-check-input" id="exampleCheck1">
+          <label class="form-check-label" for="exampleCheck1">Confirmation</label>
+          <label class="form-check-label" for="exampleCheck1">Terms & Policies</label>
+        </div> -->
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

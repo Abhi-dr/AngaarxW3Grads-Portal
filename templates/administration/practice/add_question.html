@@ -1,0 +1,166 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Add Question
+{% endblock %}
+
+{% block problem_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Add Question</i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+
+                        <div class="card">
+                            <div class="card-header">Sheet
+
+                            </div>
+                            <div class="card-body h-100">
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="assignment_type" class="form-label">Sheet
+                                            <div class="star">*</div>
+                                        </label>
+                                        <select class="form-select form-control" name="sheet" id="assignment_type"
+                                            multiple>
+
+                                            {% for sheet in sheets %}
+
+                                            <option value="{{ sheet.id }}">{{ sheet.name }}</option>
+
+                                            {% endfor %}
+
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Title
+                                        <div class="star">*</div>
+                                    </label>
+                                    <input type="text" class="form-control" id="question_title" name="title"
+                                        placeholder="Title goes here..." required>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Scenario <small>(optional)</small>
+                                        <div class="star"></div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="scenario" rows="5"
+                                        placeholder="Scenario here..."></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Problem Description
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="description" rows="5"
+                                        placeholder="Description here..." required></textarea>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Constraints
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="constraints" rows="5"
+                                        placeholder="Description here..." required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="assignment_type" class="form-label">Difficulty Level
+                                        <div class="star">*</div>
+                                    </label>
+                                    <select class="form-select form-control" name="difficulty_level"
+                                        id="assignment_type" required>
+                                        <!-- <option value="" selected disabled>Select Level</option> -->
+                                        <option value="Easy">Easy</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Hard">Hard</option>
+
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Add &nbsp;
+                                            Question</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+        </div>
+        </form>
+
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('#generateQuestionBtn').click(function (e) {
+            e.preventDefault();
+            var title = $('#question_title').val();  // Assuming you have an input for the title
+            var btn = $(this);
+            btn.prop('disabled', true);
+            btn.text('Generating...');
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url "generate_description" %}',  // Use the URL name you defined
+                contentType: 'application/json',  // Send data as JSON
+                data: JSON.stringify({
+                    'title': title,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
+                }),
+                success: function (response) {
+                    if (response.response) {
+                        // Update the textarea with the generated HTML code
+                        $('#question_description').val(response.response);
+                        btn.prop('disabled', false);
+                        btn.text('Generate Question using AI');
+                    } else {
+                        alert("Error: " + response.error);
+                    }
+                },
+                error: function (xhr) {
+                    alert('Error: ' + xhr.responseJSON.error);
+                }
+            });
+        });
+    });
+</script>
+
+
+
+{% endblock %}

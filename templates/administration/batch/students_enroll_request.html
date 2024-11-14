@@ -1,0 +1,277 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Enrollment Requests
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Angaari Public🔥 &nbsp;({{ total_pending_requests }})</span>
+            </h3>
+        </div>
+    </div>
+
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- create a search bar -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search by ID, Name, Email or Phone Number"
+                        aria-label="Search by ID, Name, Email or Phone Number" aria-describedby="button-addon2"
+                        name="query">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <!-- make a button to clear the search -->
+                    <a href="#" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Pending Requests 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Name
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Batch
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Status
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Date
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="enrollmentTableBody">
+
+
+
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====================================== REJECTED REQUESTS =================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Rejected Requests 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Name
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Batch
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Status
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Date
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="enrollmentRejectedTableBody">
+
+
+
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchPendingEnrollments();
+        fetchRejectedEnrollments();
+    });
+
+    function fetchPendingEnrollments() {
+        fetch("{% url 'instructor_fetch_pending_enrollments' %}")
+            .then(response => response.json())
+            .then(data => {
+                display_pending_requests(data.data);
+
+            })
+            .catch(error => console.error("Error fetching questions:", error));
+    }
+
+
+    function display_pending_requests(enrollments) {
+        const dataTableBody = document.getElementById("enrollmentTableBody");
+        dataTableBody.innerHTML = "";  // Clear existing rows
+
+        enrollments.forEach((student, index) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>
+                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
+                </td>
+                <td style="text-align: center;">
+                    <p class="fw-semibold mb-1 text-wrap">${student.batch_name}</p>
+                </td>
+               
+                <td style="text-align: center;">
+                    <span class="badge bg-${student.status_color}">${student.status}</span>
+                </td>
+
+                <td style="text-align: center;">
+                    <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
+                </td>
+                <td>
+                    <a href="/administration/reject_enrollment/${student.id}" onclick="return confirm('Are you sure you want to REJECT the request?');" class="btn btn-outline-danger">Reject</a>
+                </td>
+                <td>
+                    <a href="/administration/approve_enrollment/${student.id}" onclick="return confirm('Are you sure you want to APPROVE the request?');" class="btn btn-success">Approve</a>
+                </td>
+                `;
+
+            dataTableBody.appendChild(row);
+        });
+    }
+
+
+    function fetchRejectedEnrollments() {
+        fetch("{% url 'instructor_fetch_rejected_enrollments' %}")
+            .then(response => response.json())
+            .then(data => {
+                display_rejected_requests(data.data);
+
+            })
+            .catch(error => console.error("Error fetching questions:", error));
+    }
+
+    function display_rejected_requests(enrollments) {
+        const dataTableBody = document.getElementById("enrollmentRejectedTableBody");
+        dataTableBody.innerHTML = "";  // Clear existing rows
+
+        enrollments.forEach((student, index) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>
+                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
+                </td>
+                <td style="text-align: center;">
+                    <p class="fw-semibold mb-1 text-wrap">${student.batch_name}</p>
+                </td>
+               
+                <td style="text-align: center;">
+                    <span class="badge bg-${student.status_color}">${student.status}</span>
+                </td>
+
+                <td style="text-align: center;">
+                    <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
+                </td>
+                <td>
+                    <a href="/administration/approve_enrollment/${student.id}" onclick="return confirm('Are you sure you want to APPROVE the request?');" class="btn btn-success">Approve</a>
+                </td>
+                `;
+
+            dataTableBody.appendChild(row);
+        });
+    }
+
+</script>
+
+
+
+{% endblock %}

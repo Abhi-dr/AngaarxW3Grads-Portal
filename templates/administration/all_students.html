@@ -1,0 +1,281 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Administration -> Students
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Angaari Public🔥 &nbsp;({{ students.count }})</span>
+            </h3>
+        </div>
+    </div>
+
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- create a search bar -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search by ID, Name, Email or Phone Number"
+                        aria-label="Search by ID, Name, Email or Phone Number" aria-describedby="button-addon2"
+                        name="query">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <!-- make a button to clear the search -->
+                    <a href="{% url 'all_students' %}" class="btn btn-outline-danger">Clear</a>
+                </div>
+
+                <!-- search on the basis of tags -->
+
+
+
+            </form>
+        </div>
+
+
+    </div>
+
+    <!-- ============================================= BIRTHDAYS ================================ -->
+
+    {% if students_birthday %}
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">BIRTHDAYS🥳
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Name
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Courses
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    College/University
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Contacts
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for student in students_birthday %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{ student.first_name }} {{student.last_name }}</h6>
+                                <span class="fw-semibold">{{ student.username }}</span>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    {% for course in student.courses.all %}
+                                    <span style="font-weight: bold; color: black;">{{ course.name }}</span>
+                                    <br>
+                                    {% endfor %}
+                                </p>
+
+                            </td>
+
+                            <td class="border-bottom-0 ">
+                                <p class="fw-semibold mb-0">
+                                    {{ student.college }}
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="mailto:{{ student.email }}"
+                                        class="btn btn-outline-warning text-red float-end">Mail</a>
+
+                                    <a href="tel:{{ student.mobile_number }}"
+                                        class="btn btn-outline-indigo text-green float-end">Call</a>
+                                </div>
+                            </td>
+
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endif %}
+
+    <!-- ======================================================================================== -->
+
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Apni Angaari Public 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Name
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Courses
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    College/University
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Social Links
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Contacts
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for student in students %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ student.id }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{ student.first_name }} {{student.last_name }}</h6>
+                                <span class="fw-semibold">{{ student.username }}</span>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    {% for course in student.courses.all %}
+                                    <span style="font-weight: bold; color: black;">{{ course.name }}</span>
+                                    <br>
+                                    {% endfor %}
+                                </p>
+
+                            </td>
+
+                            <td class="border-bottom-0 ">
+                                <p class="fw-semibold mb-0">
+                                    {{ student.college }}
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="{{ student.linkedin_id }}" target="_blank"
+                                        class="btn btn-outline-info text-red float-end">LinkedIn</a>
+
+                                    <a href="{{ student.github_id }}" target="_blank"
+                                        class="btn btn-outline-dark text-green float-end">GitHub</a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="mailto:{{ student.email }}"
+                                        class="btn btn-outline-warning text-red float-end">Mail</a>
+
+                                    <a href="tel:{{ student.mobile_number }}"
+                                        class="btn btn-outline-indigo text-green float-end">Call</a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    {% if student.is_active %}
+                                    <a href="{% url 'block_student' student.id %}" class="btn btn-danger text-red float-end" onclick="return confirm('Are you sure you want to block the Student?');">Block Student</a>
+                                    {% else %}
+                                    <a href="{% url 'unblock_student' student.id %}" class="btn btn-warning text-green float-end" onclick="return confirm('Are you sure you want to unblock the Student?');">Unblock Student</a>
+                                    {% endif %}
+                                </div>
+                            </td>
+
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+{% endblock %}

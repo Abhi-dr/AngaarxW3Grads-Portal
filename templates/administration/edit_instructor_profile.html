@@ -1,0 +1,193 @@
+{% extends 'administration/base.html' %}
+{% load static %}
+
+{% block title %}
+{{ instructor.first_name }} -> Edit Profile
+{% endblock %}
+
+{% block extra_css %}
+
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+            <strong>{{ message.tag }}</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        {% endfor %}
+
+    <div class="card">
+        <!-- <div class="card-body">
+            <h5 class="card-title fw-semibold">Edit Profile</h5>
+            <p>For any corrections, contact 
+                <a href="#">
+                Technical Team
+            </a>
+        </p>
+        </div> -->
+
+        
+
+        <div class="container-xl px-4">
+
+            <hr class="mt-0">
+            <div class="row">
+                <div class="col-xl-4">
+                    <!-- Profile picture card-->
+                    <div class="card mb-4 mb-xl-0">
+
+                        <form action="{% url 'upload_instructor_profile' %}" method="post" enctype="multipart/form-data">
+
+                            {% csrf_token %}
+
+                            <div class="card-header">Profile Picture</div>
+                            <div class="card-body text-center">
+                                <!-- Profile picture image-->
+
+                                <img style="max-width: 100%; width: 90%;"
+                                    class="img-account-profile rounded-circle mb-2" src="{{ instructor.profile_pic.url }}"
+                                    alt="">
+                                <!-- Profile picture help block-->
+                                <div class="small font-italic text-muted mb-4">JPG or PNG no larger than 5 MB</div>
+
+                                <label for="file-upload" class="custom-file-upload mb-3">
+                                    <i class="fa fa-cloud-upload"></i> Choose Profile Picture
+                                </label>
+                                <input class="form-control" type="file" id="formFile" name="profile_pic"
+                                    accept=".webp, .png, .jpg, .jpeg" required />
+
+                                <br>
+
+                                <!-- Profile picture upload button-->
+                                <button class="btn btn-primary" type="submit">Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="col-xl-8">
+                    <!-- Account details card-->
+                    <div class="card mb-4">
+                        <div class="card-header">Your Details</div>
+                        <div class="card-body">
+                            <form method="post">
+
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label class="small mb-1" for="inputUsername">Username</label>
+                                    <input class="form-control" id="inputUsername" type="text"
+                                        value="{{ instructor.username }}" disabled>
+                                </div>
+
+                                <!-- Form Row-->
+                                <div class="row gx-3 mb-3">
+                                    <!-- Form Group (first name)-->
+                                    <div class="col-md-6">
+                                        <label class="small mb-1" for="inputFirstName">First name</label>
+                                        <input type="text" class="form-control" value="{{ instructor.first_name }}"
+                                            aria-label="first_name" name="first_name" maxlength="20" required>
+                                    </div>
+                                    <!-- Form Group (last name)-->
+                                    <div class="col-md-6">
+                                        <label class="small mb-1" for="inputLastName">Last name</label>
+                                        <input class="form-control" id="inputLastName" type="text"
+                                            placeholder="Enter your last name" name="last_name"
+                                            value="{{ instructor.last_name }}" axlength="20">
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <label class="small mb-1" for="inputUsername">Email Address</label>
+                                        <input class="form-control" id="inputUsername" type="email" name="email"
+                                            value="{{ instructor.email }}" maxlength="40">
+                                    </div>
+
+                                </div>
+
+                                <div class="row gx-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="small mb-1" for="inputLocation">Gender</label>
+
+                                        <select class="form-select form-control" name="gender" id="gender" required>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
+                                            <option value="Other">Other</option>
+
+                                        </select>
+                                    </div>
+                                    <!-- Form Group (location)-->
+                                    <div class="col-md-6">
+                                        <label class="small mb-1" for="inputLocation">College/University</label>
+                                        <select name="college" id="college" class="form-select form-control" required>
+
+                                            <option value="GLA University">GLA University</option>
+                                            <option value="GL Bajaj, Mathura">GL Bajaj, Mathura</option>
+                                            <option value="LPU, Jalandhar">LPU, Jalandhar</option>
+                                            <option value="Other">Other</option>
+                        
+                                          </select>
+                                    </div>
+
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="small mb-1" for="inputUsername">LinkedIn</label>
+
+                                    {% if instructor.linkedin_id %}
+
+                                    <input class="form-control" id="inputUsername" type="text" name="linkedin_id"
+                                        value="{{ instructor.linkedin_id }}">
+
+                                    {% else %}
+
+                                    <input class="form-control" id="inputUsername" type="text" name="linkedin_id"
+                                        placeholder="Enter your LinkedIn ID">
+
+                                    {% endif %}
+                                </div>
+
+                                <!-- Form Row-->
+                                <div class="row gx-3 mb-3">
+                                    <!-- Form Group (phone number)-->
+                                    <div class="col-md-6">
+                                        <label class="small mb-1" for="inputPhone">Date of Birth</label>
+
+                                        {% if instructor.dob %}
+
+                                        <input class="form-control" id="inputPhone" type="datetime"
+                                            value="{{ instructor.dob }}" disabled>
+
+                                            {% else %}
+
+                                            <input class="form-control" id="inputPhone" type="date" name="dob"
+                                                placeholder="Enter your date of birth" required>
+
+                                            {% endif %}
+                                    </div>
+                                    <!-- Form Group (birthday)-->
+                                    <div class="col-md-6">
+                                        <label class="small mb-1" for="inputBirthday">Date of joining</label>
+                                        <input class="form-control" id="inputBirthday" type="text"
+                                            value="{{ instructor.date_joined }}" disabled>
+                                    </div>
+                                </div>
+                                <!-- Save changes button-->
+                                <button class="btn btn-success w-100" type="submit">Save changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

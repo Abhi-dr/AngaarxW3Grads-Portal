@@ -1,0 +1,59 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> Assignments
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title fw-semibold">More Submissions, More Learning🔥</h2>
+        </div>
+    </div>
+
+    {% for assignment in assignments %}
+
+    <div class="card" id="card-title-2">
+        <div class="card-header ">
+            <h5 class="card-title"><strong>({{ assignment.course.name }}) Title:</strong> {{ assignment.title }}</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ assignment.description|linebreaks }}</p>
+        </div>
+        <div class="card-footer d-sm-flex justify-content-between align-items-center">
+            <div class="card-footer-link mb-4 mb-sm-0">
+                <p class="card-text d-inline">
+                    <strong>Due Date:</strong> {{ assignment.due_date }}
+                </p>
+            </div>
+            <div class="d-inline-flex">
+                {% if assignment.id in submitted_assignments %}
+                <button class="btn btn-outline-dark mx-1" disabled>Submitted</button> 
+                <a href="{% url 'view_submission' assignment.id %}" class="btn btn-outline-success mx-1">View Submission</a> 
+                {% elif assignment.due_date < current_time %}
+                <button class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>
+                {% else %}
+                <a href="{% url 'submit_assignment' assignment.id %}" class="btn btn-outline-primary mx-1" id="viewbtn">Submit Assignment</a>
+                {% endif %}
+            </div>
+        </div>
+
+
+
+    </div>
+    {% endfor %}
+
+    {% endblock %}

@@ -1,0 +1,126 @@
+{% extends 'student/base.html' %}
+
+{% load custom_filters %}
+
+{% block my_batches_active %}
+active
+{% endblock %}
+
+{% block title %}
+My Courses
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    
+    <div class="card">
+        {% if student_batches %}
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">M Y &nbsp; C O U R S E S 🔥</span>
+                <span class="fs-4"> | Angaar x W3Grads
+                </span>
+            </h3>
+        </div>
+        {% endif %}
+    </div>
+
+
+
+    <!-- ======================== COURSE CODE ====================== -->
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        {% for batch in student_batches %}
+
+        <div class="col-md-3">
+            <h5 class="card-title fw-semibold mb-0"></h5>
+            <div class="card">
+                <a href="{% url 'batch' batch.slug %}">
+                    <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {{ batch.name }}🔥
+                        </h5>
+                        <!-- <p class="card-text mb-2">
+                            Total Sawal : {{ sheet.get_total_questions }}
+                        </p> -->
+                        <!-- <p class="card-text text-black mb-1">
+                            Total Registrations: {{ company.job_set.all }}
+                        </p> -->
+                        <a href="{% url 'batch' batch.slug %}" class="btn btn-outline-secondary w-100">View More</a>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <!-- ======================== ALL BATCH DATA TABLE ====================== -->
+
+    <div class="card">
+
+        {% if all_batches %}
+
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">A L L &nbsp; C O U R S E S 🔥</span>
+                <span class="fs-4"> | Angaar x W3Grads
+                </span>
+            </h3>
+        </div>
+
+        {% endif %}
+    </div>
+
+
+    <!-- ======================== COURSE CODE ====================== -->
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        {% for batch in all_batches %}
+
+        <div class="col-md-3">
+            <h5 class="card-title fw-semibold mb-0"></h5>
+            <div class="card">
+                <a href="#">
+                    <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {{ batch.name }}🔥
+                        </h5>
+                        <!-- <p class="card-text mb-2">
+                            Total Sawal : {{ sheet.get_total_questions }}
+                        </p> -->
+                        <!-- <p class="card-text text-black mb-1">
+                            Total Registrations: {{ company.job_set.all }}
+                        </p> -->
+
+                        <a href="{% url 'enroll_batch' batch.id %}" class="btn btn-success w-100">Enroll Now</a>
+                       
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,205 @@
+{% extends 'administration/base.html' %}
+
+{% block title %}
+{{ meeting.name }}'s Attendace
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    .form-check-input[type='checkbox'] {
+        border-color: black;
+    }
+
+    .form-check-input[type='checkbox']:checked {
+        background-color: rgba(52, 179, 252, 0.776);
+    }
+
+    [data-bs-theme="dark"] .form-check-input[type='checkbox'] {
+        border-color: white;
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Mark Attendace for {{ meeting.name }}</span>
+                <span class="fs-4"> | 🔥{{ meeting.date }}🔥</span>
+                <br>
+                <div class="mt-2">
+                <span class="fw-semibold fs-5">Scrum Masters🔥</span>
+                <span class="fs-3">{{ meeting.description|linebreaks}}</span>
+            </div>
+            </h3>
+        </div>
+    </div>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- ========================== SEARCH BAR ==================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search by ID, Name, Email or Phone Number"
+                        aria-label="Search by ID, Name, Email or Phone Number" aria-describedby="button-addon2"
+                        name="query">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <!-- make a button to clear the search -->
+                    <a href="{% url 'mark_attendance' meeting.id %}" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+
+            <div class="d-inline-flex">
+
+                <h5 class="card-title fw-semibold mb-4">{{ meeting.name }} 🔥
+                    {% if query %}
+                    <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                    {% endif %}
+                </h5>
+                <button id="toggle-button" class="btn btn-primary mb-3" onclick="toggleCheckboxes()">Check All</button>
+            </div>
+
+        </div>
+
+        <div class="table-responsive">
+            <form method="post">
+                <input type="hidden" name="attendance_form" value="1">
+
+                {% csrf_token %}
+
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Student👤
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Current Attendace%
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#
+                                </h6>
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for student in students %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span style="font-weight: bold;"> {{ student.first_name }} {{ student.last_name }}
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+
+                                    {% if student.get_attendance_percentage < 50 %} <span
+                                        style="font-weight: bold; color: rgb(255, 57, 57)">
+                                        {{student.get_attendance_percentage }}%
+                                        </span>
+
+                                        {% else %}
+
+                                        <span style="font-weight: bold; color: rgb(72, 223, 72)">
+                                            {{student.get_attendance_percentage }}%
+                                        </span>
+
+                                        {% endif %}
+
+                                </p>
+                            </td>
+
+                            <td>
+                                <input class="form-check-input" type="checkbox" name="attendance_{{ student.id }}"
+                                    id="attendance_{{ student.id }}" {% if student.id in attendances %}checked{% endif %}>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+
+                </table>
+                
+                <button type="submit" class="btn btn-success w-100 mt-3 mb-2">Save Attendace</button>
+            </form>
+            
+            
+        </div>
+        
+    </div>
+</div>
+
+
+</div>
+
+
+{% block myjs %}
+
+<script>
+    let isChecked = false;
+
+    function toggleCheckboxes() {
+        // Get all checkboxes
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        // Toggle check state
+        isChecked = !isChecked;
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+        // Update button text
+        document.getElementById('toggle-button').innerText = isChecked ? 'Uncheck All' : 'Check All';
+    }
+</script>
+
+{% endblock %}
+
+{% endblock %}

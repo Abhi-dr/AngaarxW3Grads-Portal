@@ -1,0 +1,276 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Angaar++🔥🔥</title>
+
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
+
+  <link rel="stylesheet" href="{% static 'css/home/css/nav.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/home/css/landing.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/home/css/footer.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  {% block css %}
+  {% endblock %}
+
+</head>
+
+<body>
+  <!-- Navbaar -->
+  <nav class="navbar">
+    <div class="fix">
+      <div class="logo">
+        <a href="{% url 'home' %}">
+          <img src="{% static 'assets/angaar.svg' %}" alt="Logo">
+        </a>
+      </div>
+      <div class="hamburger " id="hamburger">
+        <i class="fas fa-bars"></i>
+      </div>
+    </div>
+
+    <ul class="nav-links" id="nav-links" style="justify-content: center;">
+      <li><a href="/">Home</a></li>
+      <li><a href="{% url 'about' %}">About Us</a></li>
+    </ul>
+    <div class="auth" id="auth">
+      <!-- <a href="{% url 'register' %}" class="login" style="margin-top: 2%; text-decoration: none;">Sign Up</a> -->
+      <a href="{% url 'login' %}" class="signup" style="margin-top: 2%; text-decoration: none;">Login</a>
+      <br>
+    </div>
+
+
+  </nav>
+  <div class="alert">
+    <h1>🚀 Limited Seats left for ANGAAR++🔥 <span>Hurry Up!!</span></h1>
+  </div>
+  <main>
+
+
+    <div class="landing-image">
+      <img src="{% static 'assets/courses.svg' %}" alt="landing" />
+    </div>
+    <br><br><br><br><br><br><br>
+
+    <section class="courses" id="courses">
+
+      <div class="card">
+        <div class="card-header">
+          <!-- <div class="circle"></div> -->
+          <div class="title">
+            <h2>Full Stack Dev With Gen AI</h2>
+            <p>DK</p>
+          </div>
+          <div class="details">
+            <p>Duration: 45 Days</p>
+            <p>Start Date: 10th June, 2024</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3>Who is this for?</h3>
+          <ul>
+            <li>Bas seekhne ki Angaar honi chaiye🔥</li>
+            <li>Internship ready developer in less than 2 months</li>
+            <li>Opportunities to meet industry experts</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <del>₹2499</del> <span>₹499</span>
+          <a href="https://rzp.io/l/Angaar_Full_Stack_With_AI" target="_blank" class="explore-button">Register
+            Now</a>
+        </div>
+      </div>
+
+
+      <div class="card">
+        <div class="card-header">
+          <!-- <div class="circle"></div> -->
+          <div class="title">
+            <h2>Java Basics with DSA</h2>
+            <p>Naman Sharma</p>
+          </div>
+          <div class="details">
+            <p>Duration: 45 Days</p>
+            <p>Start Date: 10th June, 2024</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3>Who is this for?</h3>
+          <ul>
+            <li>Uske liye jo seekhna chahta h🔥</li>
+            <li>100+ Problems of different coding platforms</li>
+            <li>More logic, less programming language dependent</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <del>₹2499</del> <span>₹499</span>
+          <a href="https://rzp.io/l/Angaar-Basic-Java-With-DSA" target="_blank" class="explore-button">Register
+            Now</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <!-- <div class="circle"></div> -->
+          <div class="title">
+            <h2>Generative AI with Real World Projects</h2>
+            <p>Chirag</p>
+          </div>
+          <div class="details">
+            <p>Duration: 45 Days</p>
+            <p>Start Date: 10th June, 2024</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3>Who is this for?</h3>
+          <ul>
+            <li>AI Tools use krne k sath sath bnana seekho🔥</li>
+            <li>Learn the real world usage of Gen AI</li>
+            <li>More Projects, Less Theory</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <del>₹4999</del> <span>₹899</span>
+          <a href="https://rzp.io/l/Angaar_Gen_AI" target="_blank" class="explore-button">Register Now</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <!-- <div class="circle"></div> -->
+          <div class="title">
+            <h2>Game Development with MetaKraft</h2>
+            <p>Unrevealed👀</p>
+          </div>
+          <div class="details">
+            <p>Duration: 45 Days</p>
+            <p>Start Date: 10th June, 2024</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3>Who is this for?</h3>
+          <ul>
+            <li>Game khele? Chal ab bnate hn🔥</li>
+            <li>Mentoring with a 7-digit Startup</li>
+            <li>Internship opportunity by the Company</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <del>₹5999</del> <span>₹999</span>
+          <a href="https://rzp.io/l/Angaar_Game_Dev_With_MetaKraft" target="_blank" class="explore-button">Register Now</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <!-- <div class="circle"></div> -->
+          <div class="title">
+            <h2>Advance Java</h2>
+            <p>Yash Bhargava</p>
+          </div>
+          <div class="details">
+            <p>Duration: 45 Days</p>
+            <p>Start Date: 10th June, 2024</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3>Who is this for?</h3>
+          <ul>
+            <li>Know basics of Java? Let's Compete🔥</li>
+            <li>Revision of Basics + Advanced Topics</li>
+            <li>More focused on Fast Problem Solving Techniques</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <del>₹3999</del> <span>₹899</span>
+          <a href="https://rzp.io/l/Angaar-Advance-Java" target="_blank" class="explore-button">Register Now</a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <!-- <div class="circle"></div> -->
+          <div class="title">
+            <h2>Cyber Security and EH</h2>
+            <p>Unrevealed👀</p>
+          </div>
+          <div class="details">
+            <p>Duration: 45 Days</p>
+            <p>Start Date: 10th June, 2024</p>
+          </div>
+        </div>
+        <div class="card-body">
+          <h3>Who is this for?</h3>
+          <ul>
+            <li>Unrevealed👀</li>
+            <li>Unrevealed👀</li>
+            <li>Unrevealed👀</li>
+          </ul>
+        </div>
+        <div class="card-footer">
+          <del>₹3999</del> <span>₹499</span>
+          <a href="https://rzp.io/l/Angaar_Cyber_Security_With_EH" target="_blank" class="explore-button">Register Now</a>
+        </div>
+      </div>
+
+
+    </section>
+  </main>
+  <footer>
+    <div class="footer-container">
+      <div class="logo-section">
+        <div class="angaar-btn">
+          <img src="{% static 'assets/angaar.svg' %}" alt="Angaar Logo" width="80%" class="logo">
+          <p>theangaarbatch.in</p>
+        </div>
+        <p>Join us only if you want to learn🔥</p>
+        <!-- <div class="app-links">
+                <a href="#"><img src="path/to/google-play-badge.png" alt="Google Play"></a>
+                <a href="#"><img src="path/to/app-store-badge.png" alt="App Store"></a>
+            </div> -->
+      </div>
+      <!-- <div class="pages-section">
+            <h4>Pages</h4>
+            <ul>
+                <li><a href="#">Home it work</a></li>
+                <li><a href="#">Pricing</a></li>
+                <li><a href="#">Blog</a></li>
+                <li><a href="#">Demo</a></li>
+            </ul>
+        </div>
+        <div class="service-section">
+            <h4>Service</h4>
+            <ul>
+                <li><a href="#">Shopify</a></li>
+                <li><a href="#">WordPress</a></li>
+                <li><a href="#">UI/UX Design</a></li>
+            </ul>
+        </div> -->
+      <div class="contact-section">
+        <h4>Contact</h4>
+        <p><i class="fa fa-phone"></i> +91 8273619318</p>
+        <p><i class="fa fa-envelope"></i> info@theangaarbatch.in</p>
+        <!-- <p><i class="fa fa-map-marker"></i> 2972 Westheimer Rd. Santa Ana, Illinois 85486</p> -->
+      </div>
+      <div class="social-media-section">
+        <h4>Social media</h4>
+        <div class="social-icons">
+          <a href="https://www.linkedin.com/company/the-angaar-batch/" target="_blank"><i
+              class="fab fa-linkedin"></i></a>
+          <a href="https://www.instagram.com/the_angaar_batch/" target="_blank"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script src="{% static 'js/home/js/nav.js' %}"></script>
+</body>
+
+</html>

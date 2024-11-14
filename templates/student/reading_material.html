@@ -1,0 +1,83 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> Reading Material
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  @media (max-width: 768px) {
+
+    /* Adjustments for mobile devices */
+    #pdfContainer {
+      height: 400px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold mb-4">Reading Material</h5>
+      <p class="mb-0">Mudda sikhane ka hai, chahe kse bhi sikhaye🔥.</p>
+    </div>
+
+  </div>
+
+  {% for note in notes %}
+
+  <div class="card" id="card-title-2">
+    <div class="card-header ">
+      <h5 class="card-title">{{ note.course.name|title }}</h5>
+    </div>
+    <div class="card-body">
+      <p class="card-text">{{ note.title|title }}</p>
+    </div>
+    <div class="card-footer d-sm-flex justify-content-between align-items-center">
+      <div class="card-footer-link mb-4 mb-sm-0">
+        <p class="card-text d-inline">At {{ note.created_at }}</p>
+      </div>
+
+      <div class="d-inline-flex">
+        <a href="{{ note.file.url }}" download class="btn btn-outline-primary text-blue mx-1">Download</a>
+
+        <a class="btn btn-outline-primary text-blue float-end" id="viewbtn-{{ note.id }}"
+          onclick="return myf({{ note.id }});">
+          View
+        </a>
+
+      </div>
+
+     
+    </div>
+    <embed id="pdfContainer-{{ note.id }}" style="display: none; border-radius: 10px; margin:3%;"
+    src="{{ note.file.url }}" type="application/pdf" width="94%" height="400px" />
+  </div>
+
+
+  <script>
+    function myf(pdfId) {
+        var x = document.getElementById("pdfContainer-" + pdfId);
+        var btn = document.getElementById("viewbtn-" + pdfId);
+
+        if (x.style.display === "none") {
+            btn.innerHTML = "Close";
+            x.style.display = "block";
+            card.style.height = "600px";
+        } else {
+            btn.innerHTML = "View";
+            x.style.display = "none";
+            card.style.height = "auto";
+        }
+    }
+</script>
+
+  {% endfor %}
+
+</div>
+
+{% endblock %}
