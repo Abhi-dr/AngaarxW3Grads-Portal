@@ -171,7 +171,7 @@
                 letter-spacing: 3px;
             }
 
-            .nav-item{
+            .nav-item {
                 margin-top: 2%;
             }
         }
@@ -221,6 +221,52 @@
         }
 
         button:active {
+            transform: scale(80%);
+        }
+
+        #register-btn {
+            padding: 10px 25px;
+            border: 0;
+            border-radius: 15px;
+            color: #212121;
+            z-index: 1;
+            background: #ff6026;
+            position: relative;
+            font-weight: 1000;
+            font-size: 17px;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+            overflow: hidden;
+        }
+
+        #register-btn::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 0;
+            width: 0;
+            border-radius: 14px;
+            background-color: #212121;
+            z-index: -1;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+        }
+
+        #register-btn:hover {
+            color: #ff4f0f;
+        }
+
+        #register-btn:hover::before {
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+        }
+
+        #register-btn:active {
             transform: scale(80%);
         }
     </style>
@@ -1032,7 +1078,8 @@
                 <span class="navbar-toggler-icon"></span>
             </button> -->
 
-            <button class="navbar-toggler menu" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-expanded="false" aria-label="Toggle navigation"
+            <button class="navbar-toggler menu" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation"
                 onclick="this.classList.toggle('opened');this.setAttribute('aria-expanded', this.classList.contains('opened'))"
                 aria-label="Main Menu">
                 <svg width="60" height="40" viewBox="0 0 100 100">
@@ -1045,7 +1092,7 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+                <!-- <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="#">Home</a>
                     </li>
@@ -1054,8 +1101,8 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Contact</a>
-                    </li>   
-                </ul>
+                    </li>
+                </ul> -->
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item mx-1">
                         <a href="{% url 'login' %}">
@@ -1065,7 +1112,7 @@
 
                     <li class="nav-item mx-1">
                         <a href="{% url 'register' %}">
-                            <button style="width: 100%;">Register</button>
+                            <button id="register-btn" style="width: 100%;">Register</button>
                         </a>
                     </li>
                 </ul>
@@ -1098,8 +1145,6 @@
             <div class="content-inner">
                 <div class="content-center">
                     <h1>TO LEARN</h1>
-                    
-
                 </div>
             </div>
         </div>
