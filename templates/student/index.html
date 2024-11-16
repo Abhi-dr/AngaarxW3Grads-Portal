@@ -555,7 +555,7 @@ Student -> Home
     <div class="col-lg-8 d-flex align-items-stretch">
         <div class="card w-100">
             <div class="card-body p-4">
-                <h5 class="card-title fw-semibold mb-4">Recorded Sessions 🔥</h5>
+                <h5 class="card-title fw-semibold mb-4">Next Questions 🔥</h5>
                 <div class="table-responsive">
                     <table class="table text-nowrap mb-0 align-middle">
                         <thead class="text-dark fs-4">
@@ -568,12 +568,12 @@ Student -> Home
                                 </th>
                                 <th class="border-bottom-0">
                                     <h6 class="fw-semibold mb-0">
-                                        Topic
+                                        Title
                                     </h6>
                                 </th>
                                 <th class="border-bottom-0">
                                     <h6 class="fw-semibold mb-0">
-                                        Time
+                                        Level
                                     </h6>
                                 </th>
 
@@ -587,28 +587,30 @@ Student -> Home
 
                         <tbody>
 
-                            {% if last_3_completed_sessions %}
+                            {% if next_three_questions %}
 
-                            {% for session in last_3_completed_sessions %}
+                            {% for question in next_three_questions %}
 
                             <tr>
                                 <td class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0 text-center">{{ session.id }}</h6>
+                                    <h6 class="fw-semibold mb-0 text-center">{{ question.position }}</h6>
                                 </td>
                                 <td class="border-bottom-0">
                                     <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
                                         title="{{ session.topic }}">{{ session.topic|truncatechars:10 }}</h6>
-                                    <span class="fw-normal">{{ session.course.name }}</span>
+                                    <span class="fw-normal">{{ question.title|truncatechars:20 }}</span>
                                 </td>
                                 <td class="border-bottom-0">
-                                    <p class="mb-0 fw-normal">{{ session.session_time }}</p>
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
                                 </td>
 
                                 <td class="border-bottom-0 text-center">
                                     <div class="d-flex align-items-center gap-2">
 
-                                        <a href="{{ session.recorded_session_link }}" target="_blank"
-                                            class="btn btn-outline-dark">Watch Now 💛
+                                        <a href="{% url 'problem' question.slug %}" target="_blank"
+                                            class="btn btn-outline-danger">Do It Now 🔥
                                         </a>
 
                                     </div>

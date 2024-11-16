@@ -33,6 +33,8 @@ def dashboard(request):
     
     pod = POD.objects.filter(date=datetime.now().date()).first()
     
+    next_three_questions = Question.objects.filter(is_approved=True).exclude(id__in=Submission.objects.filter(user=request.user.student).values('question').distinct()).order_by("?")[:3]
+    
     is_birthday = False
     if request.user.student.dob:
     
@@ -47,7 +49,8 @@ def dashboard(request):
         "total_questions_solved": total_questions_solved,
         "total_questions_solved_percentage": total_questions_solved_percentage,
         "questions_left": questions_left,
-        "pod": pod
+        "pod": pod,
+        "next_three_questions": next_three_questions
         
         
         # "sessions": sessions,
