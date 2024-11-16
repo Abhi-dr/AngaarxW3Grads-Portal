@@ -101,6 +101,36 @@ active
 </style>
 
 
+<style>
+    /* General Styles */
+    .card {
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Dark Mode */
+    body[data-theme='dark'] .card {
+        background-color: #2c2c2c;
+        color: #ddd;
+        border-color: #444;
+    }
+
+    body[data-theme='dark'] .card-header {
+        background-color: #3c3c3c;
+        color: #ddd;
+    }
+
+    body[data-theme='dark'] .btn-outline-primary {
+        color: #ddd;
+        border-color: #888;
+    }
+
+    body[data-theme='dark'] .btn-outline-primary:hover {
+        background-color: #444;
+        border-color: #666;
+    }
+</style>
+
+
 
 {% endblock %}
 
@@ -271,10 +301,10 @@ active
     <div class="row mt-4">
         <div class="col-lg-12">
             <h4>Test Case Results:</h4>
-            <div id="testCaseResults" class="mt-3">
-                
+            <div id="testCaseResults" class="container my-4">
+
             </div>
-            
+
         </div>
 
     </div>
@@ -437,84 +467,6 @@ active
     });
 
 </script>
-<!-- 
-<script>
-
-    document.getElementById('codeSubmissionForm').addEventListener('submit', function (event) {
-        event.preventDefault();  // Prevent default form submission
-
-        const editor = ace.edit('editor');
-
-        const run_btn = $("#run-btn");
-
-        run_btn.prop("disabled", true);
-        run_btn.text("Submitting...");
-
-        let code = editor.getValue();
-        document.getElementById('submission_code').value = code;
-
-        const formData = new FormData(this);
-
-        fetch("{% url 'run_code' question.slug %}", {
-            method: 'POST',
-            body: formData,
-        })
-            .then(response => response.json())
-            .then(data => {
-                const testCaseResultsDiv = document.getElementById('testCaseResults');
-                testCaseResultsDiv.innerHTML = '';  // Clear previous results
-
-                run_btn.prop("disabled", false);
-                run_btn.text("Submit");
-
-                document.getElementById("testCaseResults").scrollIntoView({ behavior: 'smooth' });
-                document.getElementById("testCaseResults").scrollIntoView(true);
-
-                if (data.test_case_results) {
-                    data.test_case_results.forEach((result, index) => {
-                        const resultDiv = document.createElement('div');
-                        resultDiv.classList.add('test-case-result', result.passed ? 'success' : 'failure');
-
-                        resultDiv.innerHTML = `
-                    <div class="card mt-2 p-3">
-                        <h6><strong>Test Case ${index + 1}:</strong></h6>
-                        <p><strong>Input:</strong> <code>${result.input}</code></p>
-                        <p><strong>Expected Output:</strong><pre><code>${result.expected_output} </code></pre></p>
-                <p><strong>Your Output:</strong><pre><code>${result.user_output}</code> </pre></p>
-                        <p><strong>Status:</strong> 
-                            <span class="badge 
-                                ${result.passed ? 'bg-success' :
-                                result.status === 'Time Limit Exceeded' ? 'bg-warning' :
-                                    result.status === 'Compilation Error' ? 'bg-info' :
-                                        result.status === 'Runtime Error' ? 'bg-danger' :
-                                            result.status === 'Memory Limit Exceeded' ? 'bg-warning' :
-                                                result.status === 'Output Limit Exceeded' ? 'bg-warning' :
-                                                    result.status === 'Internal Error' ? 'bg-danger' : 'bg-danger'}">
-                                
-                                ${result.passed ? 'Passed' :
-                                result.status === 'Time Limit Exceeded' ? 'Time Limit Exceeded' :
-                                    result.status === 'Compilation Error' ? 'Compilation Error' :
-                                        result.status === 'Runtime Error' ? 'Runtime Error' :
-                                            result.status === 'Memory Limit Exceeded' ? 'Memory Limit Exceeded' :
-                                                result.status === 'Output Limit Exceeded' ? 'Output Limit Exceeded' :
-                                                    result.status === 'Internal Error' ? 'Internal Error' : "Kuch to bhayankar gdbd h"}
-                        </span></p>
-                    </div>
-                `;
-                        testCaseResultsDiv.appendChild(resultDiv);
-                    });
-                } else if (data.error) {
-                    testCaseResultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-                }
-
-                testCaseResultsDiv.scrollIntoView({ behavior: 'smooth' });
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    });
-
-</script> -->
 
 <script>
 
@@ -563,48 +515,84 @@ active
                 if (data.test_case_results) {
                     data.test_case_results.forEach((result, index) => {
                         const resultDiv = document.createElement('div');
-                        resultDiv.classList.add('test-case-result', result.passed ? 'success' : 'failure');
+                        resultDiv.classList.add(
+                            'card',
+                            'mb-3',
+                            'test-case-result',
+                            result.passed ? 'border-success' : 'border-danger',
+                            'shadow-sm'
+                        );
 
                         resultDiv.innerHTML = `
-                    <div class="card mt-2 p-3">
-                        <h6><strong>Test Case ${index + 1}:</strong></h6>
-
-
-                        ${result.input
-                                ? `<p><strong>Input:</strong> <code>${result.input}</code></p>`
-                                : `<p><strong>Input:</strong> <code>No Input Required</code></p>`
-                            }
-
-
-                        <p><strong>Expected Output:</strong><pre><code>${result.expected_output} </code></pre></p>
-                <p><strong>Your Output:</strong><pre><code>${result.user_output}</code> </pre></p>
-                        <p><strong>Status:</strong> 
-                            <span class="badge 
-                                ${result.passed ? 'bg-success' :
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>
+            <strong>Test Case ${index + 1}</strong> - 
+            <span class="badge 
+                ${result.passed ? 'bg-success' :
                                 result.status === 'Time Limit Exceeded' ? 'bg-warning' :
                                     result.status === 'Compilation Error' ? 'bg-info' :
                                         result.status === 'Runtime Error' ? 'bg-danger' :
                                             result.status === 'Memory Limit Exceeded' ? 'bg-warning' :
                                                 result.status === 'Output Limit Exceeded' ? 'bg-warning' :
                                                     result.status === 'Internal Error' ? 'bg-danger' : 'bg-danger'}">
-                                
-                                ${result.passed ? 'Passed' :
+                ${result.passed ? 'Passed' :
                                 result.status === 'Time Limit Exceeded' ? 'Time Limit Exceeded' :
                                     result.status === 'Compilation Error' ? 'Compilation Error' :
                                         result.status === 'Runtime Error' ? 'Runtime Error' :
                                             result.status === 'Memory Limit Exceeded' ? 'Memory Limit Exceeded' :
                                                 result.status === 'Output Limit Exceeded' ? 'Output Limit Exceeded' :
-                                                    result.status === 'Internal Error' ? 'Internal Error' : "Kuch to gdbd hai!!"}
-                        </span></p>
-                    </div>
-                `;
+                                                    result.status === 'Internal Error' ? 'Internal Error' : `${result.status}`}
+            </span>
+        </span>
+        <button 
+            class="btn btn-sm btn-outline-primary toggle-details" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#details-${index}" 
+            aria-expanded="false" 
+            aria-controls="details-${index}">
+            Show
+        </button>
+    </div>
+    <div id="details-${index}" class="collapse">
+        <div class="card-body">
+            <p><strong>Input:</strong></p>
+            <pre class="p-2 rounded">${result.input}</pre>
+            <p><strong>Expected Output:</strong></p>
+            <pre class="p-2 rounded">${result.expected_output}</pre>
+            <p><strong>Your Output:</strong></p>
+            <pre class="p-2 rounded">${result.user_output}</pre>
+            <p><strong>Status:</strong> 
+                <span class="badge 
+                    ${result.passed ? 'bg-success' :
+                                result.status === 'Time Limit Exceeded' ? 'bg-warning' :
+                                    result.status === 'Compilation Error' ? 'bg-info' :
+                                        result.status === 'Runtime Error' ? 'bg-danger' :
+                                            result.status === 'Memory Limit Exceeded' ? 'bg-warning' :
+                                                result.status === 'Output Limit Exceeded' ? 'bg-warning' :
+                                                    result.status === 'Internal Error' ? 'bg-danger' : 'bg-danger'}">
+                    ${result.passed ? 'Passed' :
+                                result.status === 'Time Limit Exceeded' ? 'Time Limit Exceeded' :
+                                    result.status === 'Compilation Error' ? 'Compilation Error' :
+                                        result.status === 'Runtime Error' ? 'Runtime Error' :
+                                            result.status === 'Memory Limit Exceeded' ? 'Memory Limit Exceeded' :
+                                                result.status === 'Output Limit Exceeded' ? 'Output Limit Exceeded' :
+                                                    result.status === 'Internal Error' ? 'Internal Error' : `${result.status}`}
+                </span>
+            </p>
+        </div>
+    </div>
+`;
+
+
+
                         testCaseResultsDiv.appendChild(resultDiv);
                     });
-                } else if (data.error) {
-                    testCaseResultsDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
                 }
 
-                testCaseResultsDiv.scrollIntoView({ behavior: 'smooth' });
+
+
+
                 submit_btn.text("Submit Code");
             })
             .catch(error => {
@@ -615,5 +603,6 @@ active
             });
     });
 </script>
+
 
 {% endblock %}

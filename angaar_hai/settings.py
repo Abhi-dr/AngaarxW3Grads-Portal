@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'administration.apps.AdministrationConfig',
     'practice.apps.PracticeConfig',
     
-    'single_session',
+    # 'single_session',
     'import_export',
     'corsheaders'
 ]
@@ -113,7 +113,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/kolkata'
+TIME_ZONE = 'Asia/Kolkata'
 
 USE_I18N = True
 

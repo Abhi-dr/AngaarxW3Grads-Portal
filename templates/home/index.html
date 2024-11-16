@@ -170,6 +170,10 @@
             .section a {
                 letter-spacing: 3px;
             }
+
+            .nav-item{
+                margin-top: 2%;
+            }
         }
 
         /* Button styling */
@@ -1050,13 +1054,18 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Contact</a>
-                    </li>
+                    </li>   
                 </ul>
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
+                    <li class="nav-item mx-1">
                         <a href="{% url 'login' %}">
                             <button style="width: 100%;">Login</button>
+                        </a>
+                    </li>
 
+                    <li class="nav-item mx-1">
+                        <a href="{% url 'register' %}">
+                            <button style="width: 100%;">Register</button>
                         </a>
                     </li>
                 </ul>
