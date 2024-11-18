@@ -46,7 +46,7 @@ My Courses
         <div class="col-md-3">
             <h5 class="card-title fw-semibold mb-0"></h5>
             <div class="card">
-                <a href="{% url 'batch' batch.slug %}">
+                <a href="{% url 'instructor_batch' batch.slug %}">
                     <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
                     <div class="card-body">
                         <h5 class="card-title">
@@ -58,7 +58,7 @@ My Courses
                         <!-- <p class="card-text text-black mb-1">
                             Total Registrations: {{ company.job_set.all }}
                         </p> -->
-                        <a href="{% url 'batch' batch.slug %}" class="btn btn-outline-secondary w-100">View More</a>
+                        <a href="{% url 'instructor_batch' batch.slug %}" class="btn btn-outline-secondary w-100">View More</a>
                     </div>
                 </a>
             </div>
@@ -109,7 +109,7 @@ My Courses
                             Total Registrations: {{ company.job_set.all }}
                         </p> -->
 
-                        <a href="{% url 'enroll_batch' batch.id %}" class="btn btn-success w-100">Enroll Now</a>
+                        <a href="{% url 'instructor_batch' batch.slug %}" class="btn btn-success w-100">Enroll Now</a>
                        
                     </div>
                 </a>

@@ -1,0 +1,82 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Set POO for {{ batch.name }}
+{% endblock %}
+
+{% block my_batches_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <!-- <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Problem of the day</span>
+                <span class="fs-4"> | 🔥Total: {{ pods.count }}🔥</span>
+            </h3>
+        </div>
+        <a href="#" class="btn btn-outline-primary button mt-n3 mx-4 m-3">Set PODs</a>
+    </div> -->
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+
+
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">{{ batch.name }}</i> </h5>
+
+        </div>
+        <div class="container px-4">
+
+
+            <hr class="mt-0">
+            <div class="row">
+
+                <div class="w-100">
+
+                    <div class="card p-4">
+
+                        <form method="post">
+
+                            {% csrf_token %}
+
+                            <div class="mb-3">
+                                <label for="questionSelect" class="form-label">Select Question</label>
+                                <select name="question_id" id="questionSelect" class="form-control">
+                                    {% for question in questions %}
+                                    <option value="{{ question.id }}" class="text-black">{{ question.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Set POD</button>
+                        </form>
+
+                        <a href="{% url 'instructor_batch' batch.slug %}" class="btn btn-secondary mt-3">Back to Batches</a>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+{% endblock %}

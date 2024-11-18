@@ -156,3 +156,75 @@ def reject_enrollment(request, id):
     messages.success(request, "Enrollment request rejected")
     return redirect('instructor_enrollment_requests')
 
+
+# =============================== BATCH DETAILS ==============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def batch(request, slug):
+    
+    instructor = Instructor.objects.get(id=request.user.id)
+    batch = Batch.objects.get(slug=slug)
+    
+        
+    try:
+        pod = POD.objects.get(batch=batch, date=datetime.date.today())
+    except POD.DoesNotExist:
+        pod = None
+    
+
+    parameters = {
+        "instructor": instructor,
+        "batch": batch,
+        "pod": pod
+    }
+    
+    return render(request, 'administration/batch/batch.html', parameters)
+
+# =============================== SET POD FOR BATCH ==============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def instructor_set_pod_for_batch(request, slug):
+    
+    batch = get_object_or_404(Batch, slug=slug)
+    
+    # Fetch the instructor and questions without existing PODs
+    instructor = Instructor.objects.get(id=request.user.id)
+    questions = Question.objects.filter(pods__isnull=True)
+    
+    # check if pod for that day is already set
+    pod = POD.objects.filter(batch=batch, date=datetime.date.today())
+    
+    
+    if pod:
+        messages.warning(request, f"POD for today is already set for batch '{batch.name}'.")
+        return redirect('instructor_batch' , slug=slug)
+    
+    if request.method == "POST":
+        question_id = request.POST.get("question_id")
+        
+        if question_id:
+            question = get_object_or_404(Question, id=question_id)
+            
+            # Create or update the POD for this batch
+            pod, created = POD.objects.get_or_create(question=question, batch=batch)
+            
+            if created:
+                messages.success(request, f"POD set successfully for batch '{batch.name}'.")
+            else:
+                messages.warning(request, "This question is already set as POD for this batch.")
+            return redirect('instructor_set_pod_for_batch', slug=slug)
+        else:
+            messages.error(request, "Please select a valid question.")
+    
+    parameters = {
+        "instructor": instructor,
+        "questions": questions,
+        "batch": batch,
+        "pod": pod
+    }
+    
+    return render(request, 'administration/batch/set_pod.html', parameters)
+
+
