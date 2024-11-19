@@ -1,13 +1,43 @@
-{% extends "student/base.html" %}
+{% extends "administration/base.html" %}
 {% load static %}
+{% load custom_filters %}
+
 
 {% block title %}
-Assignment -> View Submission
+Submissions: {{ question.title }}
+{% endblock %}
+
+{% block pp_active %}
+active
 {% endblock %}
 
 {% block extra_css %}
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <style>
+    .fa-youtube-play {
+        font-size: 220%;
+        color: red
+    }
+
+    .text-color {
+        color: white;
+    }
+
+    [data-bs-theme="dark"] {
+        .fa-youtube-play {
+            font-size: 220%;
+            color: red;
+        }
+
+        .text-color {
+            color: rgb(33, 33, 33);
+            font-weight: 500;
+        }
+    }
+
+
     h3.question {
         font-family: "Roboto", sans-serif;
         font-size: 24px;
@@ -22,161 +52,211 @@ Assignment -> View Submission
         position: relative;
     }
 
-    #editor {
+    #code-view-editor {
+        font-size: 100%;
         position: absolute;
-        left: 0;
-        right: 0;
         top: 0;
         bottom: 0;
-        height: 100%;
-        width: 100%;
-        border-radius: 8px;
-        font-size: 20px;
+        left: 0;
+        right: 0;
     }
 </style>
+
 
 {% endblock %}
 
 {% block body %}
+
 <div class="container-fluid">
 
     {% for message in messages %}
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
         <strong>{{ message.tag }}</strong> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+
     {% endfor %}
 
-    <div class="card" id="card-title-2">
-        <div class="card-header">
-            <h5 class="card-title"><strong>({{ assignment.course.name }}) Title:</strong> {{ assignment.title }}</h5>
-        </div>
-        
-        <div class="card-body">
-            <p class="card-text">{{ assignment.description|linebreaks }}</p>
-        </div>
-        <div class="card-footer d-sm-flex justify-content-between align-items-center">
-            <div class="card-footer-link mb-sm-0">
-                <p class="card-text d-inline">
-                    <strong>Due Date:</strong> {{ assignment.due_date }}
-                </p>
-            </div>
+    <!-- ========================== SEARCH BAR ==================================== -->
 
-            <!-- {% if submission.status == 'Accepted' %}
+    <!-- <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Search Question 🔍</h5>
+            <form method="post">
 
-            <a class="btn btn-success mt-3 float-end">
-                {{ submission.status }}
-            </a>
-
-            {% elif submission.status == 'Rejected' %}
-
-            <a class="btn btn-danger mt-3 float-end">
-                {{ submission.status }}
-            </a>
-
-            {% else %}
-            <a class="btn btn-warning mt-3 float-end">
-                {{ submission.status }}
-            </a>
-
-            {% endif %} -->
-
-        </div>
-
-
-    </div>
-
-
-    <div class="card mt-4">
-        <div class="card-body">
-            <h4>
-                Submission Type ({{ assignment.assignment_type }})
-            </h4>
-            <form method="post" enctype="multipart/form-data" id="assignmentForm">
                 {% csrf_token %}
 
-                {% if assignment.assignment_type == 'Coding' %}
-                <div class="mb-3">
-                    <label for="submission_code" class="form-label">Your Submitted Code:
-                    </label>
+                <div class="input-group">
 
-                    <div class="editor-container">
-                        <div id="editor"></div>
+                    {% if query %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query" value="{{ query }}">
+
+                        {% else %}
+
+                        <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
+
+                        {% endif %}
+
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    make a button to clear the search 
+                    <button class="btn btn-outline-danger">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div> -->
+
+    <!-- =================================  QUESTIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">{{ question.title }}'s Submissions 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Status🚦
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Score 🎯
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Submitted At ⏰
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Code 📝
+                                </h6>
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for submission in submissions %}
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">
+                                    {{ submission.status }}</span>
+                            </td>
+                            <td class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0 fs-4">
+                                    <span class="badge bg-{{ submission.status|get_status_color }} text-color">
+                                        {{ submission.score }}
+                                    </span>
+                                </h6>
+                            </td>
+                            <td class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">{{ submission.submitted_at }}</h6>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                        data-bs-target="#viewCodeModal" data-code="{{ submission.code }}">
+                                        View Code
+                                    </button>
+                                </div>
+                            </td>
+                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <div class="modal fade" id="viewCodeModal" tabindex="-1" aria-labelledby="viewCodeModalLabel"
+                        aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="viewCodeModalLabel">Submitted Code</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="editor-container">
+                                        <div id="code-view-editor"></div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <input type="hidden" id="submission_code" name="submission_code">
-                </div>
 
 
-                {% elif assignment.assignment_type == 'Text' %}
-                <div class="mb-3">
-                    <label for="submission_text" class="form-label">Your Submitted Text:</label>
-                    <textarea id="submission_text" rows="5" class="form-control" disabled>{{ submission.submission_text }}</textarea>
-                </div>
+                </table>
+            </div>
 
-
-                {% elif assignment.assignment_type == 'File' %}
-                <div class="mb-3">
-                    <label for="submission_file" class="form-label">Uploaded File:
-                    </label>
-                    <h4>CAN'T VIEW</h4>
-                </div>
-
-
-                {% elif assignment.assignment_type == 'Image' %}
-                <div class="mb-3">
-                    <label for="submission_image" class="form-label">Uploaded Image:
-                    </label>
-                    <img src="{{ submission.submission_image.url }}" class="img-fluid" alt="Uploaded Image">
-                </div>
-
-                {% elif assignment.assignment_type == 'Link' %}
-
-                <div class="mb-3">
-                    <label for="submission_link" class="form-label
-                        ">Your Submitted Link:</label>
-                    <input type="url" id="submission_link" value="{{ submission.submission_link }}" class="form-control" disabled readonly>
-                </div>
-
-                {% endif %}
-
-                <!-- ================================ EXTRA INFO =================== -->
-
-                {% if submission.extra_info %}
-
-                <div class="mb-3 mt-4">
-                    <label for="extra_info" class="form-label">Extra Information:</label>
-                    <textarea id="extra_info" name="extra_info" rows="2" class="form-control" disabled>{{ submission.extra_info }}</textarea>
-                </div>
-
-                {% endif %}
-                <a class="btn btn-outline-danger mt-3 float-end" href="{% url 'delete_submission' submission.id %}" onclick="confirm('Are you sure?')">Delete Submission</a>
-
-            </form> 
         </div>
     </div>
+
 
 </div>
 
-{% block myjs %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
+<!-- and it's easy to individually load additional languages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+
+<script>hljs.highlightAll();</script>
 
 <script>
-    const editor = ace.edit("editor");
-    editor.setTheme("ace/theme/twilight");
-    editor.session.setMode("ace/mode/python");
-    editor.session.setValue(`{{ submission.submission_code }}`);
-    editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: true,
-        cursorStyle: "smooth",
-        enableEmmet: true,
+    var viewCodeModal = document.getElementById('viewCodeModal');
+    viewCodeModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var code = button.getAttribute('data-code');  // Get the code from the button
+
+        var editor = ace.edit("code-view-editor");
+        editor.setTheme("ace/theme/twilight");
+        editor.session.setMode("ace/mode/python");  // Change to the mode of your preferred language
+        editor.setValue(code, 1);  // Set the code into the editor and move cursor to the end
+
+        // Make the editor read-only and hide the cursor
+        editor.setOptions({
+            readOnly: true,
+            highlightActiveLine: false,
+            highlightGutterLine: false,
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
+
+
+
+        editor.renderer.$cursorLayer.element.style.display = "none";  // Hide the cursor
     });
+
 </script>
 
-{% endblock %}
+
 
 
 {% endblock %}

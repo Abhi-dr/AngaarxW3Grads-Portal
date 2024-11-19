@@ -228,3 +228,19 @@ def instructor_set_pod_for_batch(request, slug):
     return render(request, 'administration/batch/set_pod.html', parameters)
 
 
+# =============================== VIEW SUBMISSIONS ==============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def view_submissions(request, slug):
+    
+    batch = get_object_or_404(Batch, slug=slug)
+    submissions = Submission.objects.filter(batch=batch).order_by('-submitted_on')
+    
+    parameters = {
+        "batch": batch,
+        "submissions": submissions
+    }
+    
+    return render(request, 'administration/batch/view_submissions.html', parameters)
+

@@ -69,6 +69,7 @@ urlpatterns += [
     
     path("batch/<slug:slug>/", batch_views.batch, name="instructor_batch"),
     path("instructor_set_pod_for_batch/<slug:slug>/", batch_views.instructor_set_pod_for_batch, name="instructor_set_pod_for_batch"),
+    path("view_submissions/<slug:slug>/", batch_views.view_submissions, name="instructor_view_submissions"),
    
 ]
 
