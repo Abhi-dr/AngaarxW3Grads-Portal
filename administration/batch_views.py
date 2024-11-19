@@ -234,11 +234,11 @@ def instructor_set_pod_for_batch(request, slug):
 @staff_member_required(login_url='login')
 def view_submissions(request, slug):
     
-    batch = get_object_or_404(Batch, slug=slug)
-    submissions = Submission.objects.filter(batch=batch).order_by('-submitted_on')
+    question = get_object_or_404(Question, slug=slug)
+    submissions = Submission.objects.filter(question=question).order_by('-submitted_at')
     
     parameters = {
-        "batch": batch,
+        "question": question,
         "submissions": submissions
     }
     
