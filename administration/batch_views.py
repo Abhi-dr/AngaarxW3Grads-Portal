@@ -96,7 +96,7 @@ def fetch_pending_enrollments(request):
     for request_obj in enrollment_requests:
         data.append({
             'id': request_obj.id,
-            'student_name': request_obj.student.first_name + request_obj.student.last_name,
+            'student_name': request_obj.student.first_name + " " + request_obj.student.last_name,
             'batch_name': request_obj.batch.name,
             'status': request_obj.status,
             "status_color": "success" if request_obj.status == "Accepted" else "danger",
