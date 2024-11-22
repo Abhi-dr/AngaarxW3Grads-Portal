@@ -325,15 +325,28 @@ active
 
         // Define top languages (example)
         const topLanguages = [
-            { id: 62, name: "Java" },
             { id: 71, name: "Python" },
+            { id: 62, name: "Java" },
             { id: 50, name: "C" },
             { id: 54, name: "C++" },
         ];
 
         // Default code snippets for specific languages
         const defaultCode = {
-            71: "# Chal beta hoja shuru... Krde mera naam roshan 🔥\n", // Python default
+            71: `t = int(input())
+while(t>0):
+    
+    text = input()
+    
+    revsersed = text[::-1]
+    
+    if text == revsersed:
+        print("ghjk")
+    
+    else:
+        print(False)
+    
+    t=t-1;`, // Python default
             50: `#include <stdio.h>\n\nint main() {\n\t// Write your C code here\n\treturn 0;\n}`, // C default
             54: `#include <iostream>\nusing namespace std;\n\nint main() {\n\t// Write your C++ code here\n\treturn 0;\n}`, // C++ default
             62: `public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}` // Java default
@@ -519,29 +532,18 @@ active
                             'card',
                             'mb-3',
                             'test-case-result',
-                            result.passed ? 'border-success' : 'border-danger',
+                            result.status ? 'border-success' : 'border-danger',
                             'shadow-sm'
                         );
+
 
                         resultDiv.innerHTML = `
     <div class="card-header d-flex justify-content-between align-items-center">
         <span>
             <strong>Test Case ${index + 1}</strong> - 
             <span class="badge 
-                ${result.passed ? 'bg-success' :
-                                result.status === 'Time Limit Exceeded' ? 'bg-warning' :
-                                    result.status === 'Compilation Error' ? 'bg-info' :
-                                        result.status === 'Runtime Error' ? 'bg-danger' :
-                                            result.status === 'Memory Limit Exceeded' ? 'bg-warning' :
-                                                result.status === 'Output Limit Exceeded' ? 'bg-warning' :
-                                                    result.status === 'Internal Error' ? 'bg-danger' : 'bg-danger'}">
-                ${result.passed ? 'Passed' :
-                                result.status === 'Time Limit Exceeded' ? 'Time Limit Exceeded' :
-                                    result.status === 'Compilation Error' ? 'Compilation Error' :
-                                        result.status === 'Runtime Error' ? 'Runtime Error' :
-                                            result.status === 'Memory Limit Exceeded' ? 'Memory Limit Exceeded' :
-                                                result.status === 'Output Limit Exceeded' ? 'Output Limit Exceeded' :
-                                                    result.status === 'Internal Error' ? 'Internal Error' : `${result.status}`}
+                ${result.status == "Passed" ? 'bg-success' : 'bg-danger'}">
+                ${result.status}
             </span>
         </span>
         <button 
@@ -564,35 +566,19 @@ active
             <pre class="p-2 rounded">${result.user_output}</pre>
             <p><strong>Status:</strong> 
                 <span class="badge 
-                    ${result.passed ? 'bg-success' :
-                                result.status === 'Time Limit Exceeded' ? 'bg-warning' :
-                                    result.status === 'Compilation Error' ? 'bg-info' :
-                                        result.status === 'Runtime Error' ? 'bg-danger' :
-                                            result.status === 'Memory Limit Exceeded' ? 'bg-warning' :
-                                                result.status === 'Output Limit Exceeded' ? 'bg-warning' :
-                                                    result.status === 'Internal Error' ? 'bg-danger' : 'bg-danger'}">
-                    ${result.passed ? 'Passed' :
-                                result.status === 'Time Limit Exceeded' ? 'Time Limit Exceeded' :
-                                    result.status === 'Compilation Error' ? 'Compilation Error' :
-                                        result.status === 'Runtime Error' ? 'Runtime Error' :
-                                            result.status === 'Memory Limit Exceeded' ? 'Memory Limit Exceeded' :
-                                                result.status === 'Output Limit Exceeded' ? 'Output Limit Exceeded' :
-                                                    result.status === 'Internal Error' ? 'Internal Error' : `${result.status}`}
+                    ${result.status == "Passed" ? 'bg-success' : 'bg-danger'}">
+                    ${result.status}
                 </span>
             </p>
         </div>
     </div>
 `;
 
-
-
                         testCaseResultsDiv.appendChild(resultDiv);
                     });
+
+                    console.log(testCaseResultsDiv)
                 }
-
-
-
-
                 submit_btn.text("Submit Code");
             })
             .catch(error => {

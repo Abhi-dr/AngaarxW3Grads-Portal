@@ -125,84 +125,82 @@ def create_submission(user, question, source_code, language_id):
 
 def run_code_on_judge0(source_code, language_id, test_cases):
     """Submit the code to Judge0 API with multiple test cases."""
-    submissions = []
     
-    # Create a list of all test cases for batch submission
+    stdin = f"{len(test_cases)}\n"
+    
     for test_case in test_cases:
-        submissions.append({
-            "source_code": source_code,
-            "language_id": language_id,
-            "stdin": test_case.input_data,
-            "expected_output": test_case.expected_output,
-            "cpu_time_limit": 1,
-            "cpu_extra_time": 1
-        })
-
-    # Prepare the batch request payload
-    batch_data = {
-        "submissions": submissions
-    }
+        stdin += f"{test_case.input_data}\n"
+            
+    # Create a list of all test cases for batch submission
+    # for test_case in test_cases:
+    #     submissions.append({
+    #         "source_code": source_code,
+    #         "language_id": language_id,
+    #         "stdin": test_case.input_data,
+    #         "expected_output": test_case.expected_output,
+    #         "cpu_time_limit": 1,
+    #         "cpu_extra_time": 1
+    #     })
     
-    # Send a POST request with batch data
-    response = requests.post(JUDGE0_URL + "/batch/", json=batch_data, headers=HEADERS)    
-
-    if response.status_code == 201:
-        
-        
-        # Retrieve tokens for all test cases
-        tokens = [d['token'] for d in response.json()]
-                
-        # Check if tokens are retrieved
-        if not tokens:
-            print("No tokens received.")
-            return []
-
-        results = []
-        for token in tokens:
-            # Fetch the result of each test case
-            for _ in range(10):  # Retry up to 10 times if result is in progress
-                result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
-                result = result_response.json()
-
-                if result['status']['id'] not in (1, 2):  # Not in progress or queued
-                    results.append(result)
-                    break
-
-                time.sleep(2)  # Wait for 2 seconds before checking again
-
-        return results
-    else:
-        print(f"Error submitting batch request: {response.status_code} - {response.text}")
-        return []
-   
-def process_test_case_result(status_id, output, expected_output, test_case, test_case_results):
-    """Process each test case result based on the Judge0 status."""
-    if status_id == 3:  # Accepted
-        passed = output == expected_output
-        status = "Passed" if passed else "Wrong Answer"
-    elif status_id == 4:
-        status = "Wrong Answer"
-    elif status_id == 5:
-        status = "Time Limit Exceeded"
-    elif status_id == 6:
-        status = "Compilation Error"
-    elif status_id == 7:
-        status = "Runtime Error"
-    elif status_id == 8:
-        status = "Memory Limit Exceeded"
-    else:
-        status = "Unknown Error"
-
-    test_case_result = {
-        "input": test_case.input_data,
-        "expected_output": expected_output,
-        "user_output": output,
-        "passed": passed if status == "Passed" else False,
-        "status": status
+    
+    submission = {
+        "source_code": source_code,
+        "language_id": language_id,
+        "stdin": stdin,
+        "cpu_time_limit": 1,
+        "cpu_extra_time": 1
     }
 
-    test_case_results.append(test_case_result)
-    return passed if status == "Passed" else False
+    response = requests.post(JUDGE0_URL, json=submission, headers=HEADERS)
+    
+    token = response.json().get('token')
+    
+    print("TOKEN", token)
+    
+    if response.status_code != 201:
+        print(f"Error submitting batch: {response.status_code}, {response.text}")
+        return []
+
+    # print("Batch submission response:", response_data)  # Debugging line
+
+    # # Extract tokens from response
+    # tokens = [submission['token'] for submission in response_data[0]]
+
+    # if not tokens:
+    #     print("No tokens found in batch submission response.")
+        # return []
+
+    # Fetch results using tokens
+    
+    response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
+    
+    result = response.json()
+    
+    outputs = result.get('stdout', '')    
+    
+    outputs = outputs.split("\n")
+    outputs.pop()
+        
+    return outputs
+
+   
+def process_test_case_result(inputs, outputs, expected_output):    
+    test_case_results = []
+    
+    for input, expected_output, output in zip(inputs, expected_output, outputs): 
+        
+        test_case_result = {
+            "input": input,
+            "expected_output": expected_output,
+            "user_output": output,
+            "passed": "Passed" if output == expected_output else "Wrong Answer",
+            "status": "Passed" if output == expected_output else "Wrong Answer"
+        }
+
+        test_case_results.append(test_case_result)
+    
+    return test_case_results
+        
 
 def update_submission_status(submission, passed_test_cases, total_test_cases):
     """Update the status and score of a submission."""
@@ -215,33 +213,32 @@ def update_submission_status(submission, passed_test_cases, total_test_cases):
     submission.save()
     
 def run_code_against_test_cases(source_code, language_id, test_cases):
-    """Run the submitted code against all test cases using batch submission."""
-    test_case_results = []
     passed_test_cases = 0
 
     # Submit the code and retrieve results for all test cases
-    results = run_code_on_judge0(source_code, language_id, test_cases)
+    outputs = run_code_on_judge0(source_code, language_id, test_cases)
+    expected_outputs = [output.expected_output for output in test_cases]
     
-    if results:
-        for i, result in enumerate(results):
-            test_case = test_cases[i]
-            
-            output = normalize_output(result.get('stdout', ''))
-            expected_output = normalize_output(test_case.expected_output)
-            status_id = result['status']['id']
+    inputs = [output.input_data for output in test_cases]
 
-            passed = process_test_case_result(
-                status_id, output, expected_output, test_case, test_case_results
-            )
+    print("EXPECTED OUTPUTS", expected_outputs)
+    
+    if outputs:
 
-            if passed:
-                passed_test_cases += 1
-        print(f"Test case results: {test_case_results}")
+        test_case_results = process_test_case_result(
+            inputs, outputs, expected_outputs
+        )
+        
+        passed_test_cases = sum(
+            1 for test_case in test_case_results if test_case['passed'] == 'Passed'
+        )
+        
+        print(f"-----------------------------Passed test cases: {passed_test_cases}")
+                
     else:
         print("No results were retrieved.")
 
     return test_case_results, passed_test_cases
-
 
 def normalize_output(output):
     
@@ -279,9 +276,6 @@ def submit_code(request, slug):
 
             language_id = request.POST.get('language_id')
             source_code = request.POST.get('submission_code')
-            
-            print("LANGUAGE", language_id)
-            print("SOURCE CODE", source_code)
 
             test_cases = get_test_cases(question)
 
@@ -301,6 +295,8 @@ def submit_code(request, slug):
             end = time.time()
             
             print(end - start)
+
+            print(submission.status)
 
             return JsonResponse({
                 "test_case_results": test_case_results,
