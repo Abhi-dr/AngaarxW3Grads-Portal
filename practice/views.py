@@ -180,7 +180,10 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         
         # Fetch results
         result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
-        result_response.raise_for_status()
+        
+        while result_response.json().get("status").get("id") == 2:
+            time.sleep(1)
+            result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
 
         result = result_response.json()
         
