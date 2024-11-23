@@ -202,7 +202,7 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         print("="*30)
         
         # outputs = [normalize_output(output) for output in outputs if output.strip()]  # Normalize and remove empty lines
-        outputs = outputs.split("\n")
+        outputs = [output.strip() for output in outputs.split("\n")]
                 
         return outputs
 
