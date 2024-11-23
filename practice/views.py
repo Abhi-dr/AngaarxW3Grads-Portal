@@ -173,7 +173,7 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         
         token = response.json().get('token')
         
-        print("Token", token, end="\n\n")
+        # print("Token", token, end="\n\n")
         
         if not token:
             raise Exception("No token received from Judge0.")
@@ -187,19 +187,19 @@ def run_code_on_judge0(source_code, language_id, test_cases):
 
         result = result_response.json()
         
-        print("Result", result, end="\n\n")
+        # print("Result", result, end="\n\n")
         
         outputs = result.get('stdout', '')
         
-        print("Outputs", outputs, end="\n\n")
+        # print("Outputs", outputs, end="\n\n")
         
-        print("="*30)
+        # print("="*30)
         
-        for output in outputs:
-            if output.strip():
-                print(normalize_output(output))
+        # for output in outputs:
+        #     if output.strip():
+        #         print(normalize_output(output))
         
-        print("="*30)
+        # print("="*30)
         
         # outputs = [normalize_output(output) for output in outputs if output.strip()]  # Normalize and remove empty lines
         outputs = [output.strip() for output in outputs.split("\n")]
@@ -291,9 +291,9 @@ def submit_code(request, slug):
             expected_outputs = [normalize_output(tc.expected_output) for tc in test_cases]
             inputs = [tc.input_data for tc in test_cases]
             
-            print("OUTPUTS", outputs, end="\n\n")
-            print("EXPECTED OUTPUTS", expected_outputs, end="\n\n")
-            print("INPUTS", inputs, end="\n\n")
+            # print("OUTPUTS", outputs, end="\n\n")
+            # print("EXPECTED OUTPUTS", expected_outputs, end="\n\n")
+            # print("INPUTS", inputs, end="\n\n")
 
             test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
             passed_test_cases = sum(1 for result in test_case_results if result['passed'])
@@ -303,7 +303,7 @@ def submit_code(request, slug):
                 
             end = time.time()
 
-            print(f"Time taken: {end - start:.2f} seconds")
+            # print(f"Time taken: {end - start:.2f} seconds")
 
             return JsonResponse({
                 "test_case_results": test_case_results,
