@@ -108,195 +108,182 @@ def execute_code(request):
 # =====================================================================================================
 # ========================================= HELPER FUNCTIONS ==========================================
 # =====================================================================================================
+def normalize_output(output):
+    """
+    Normalize output for consistent comparison by stripping extra spaces
+    and normalizing newline characters.
+    """
+        
+    if not output:
+        return ""
+    return output.replace("\r\n", "\n").strip()
+
 
 def get_test_cases(question):
-    """Retrieve all test cases for a specific question."""
-    return question.test_cases.all()
+    """
+    Get all test cases associated with the question.
+    """
+    try:
+        return question.test_cases.all()
+    except Exception as e:
+        print(f"Error fetching test cases: {e}")
+        return []
+
 
 def create_submission(user, question, source_code, language_id):
-    """Create a submission entry for the user."""
-    return Submission.objects.create(
-        user=user,
-        question=question,
-        code=source_code,
-        language=language_id,
-        status='Pending'
-    )
+    """
+    Create a new submission entry in the database.
+    """
+    try:
+        return Submission.objects.create(
+            user=user,
+            question=question,
+            code=source_code,
+            language=language_id,
+            status='Pending'
+        )
+    except Exception as e:
+        print(f"Error creating submission: {e}")
+        raise Exception("Could not create submission.")
+
 
 def run_code_on_judge0(source_code, language_id, test_cases):
-    """Submit the code to Judge0 API with multiple test cases."""
-    
+    """
+    Send the code to Judge0 API for execution against multiple test cases.
+    """
+    # Prepare single stdin batch input for Judge0
     stdin = f"{len(test_cases)}\n"
-    
     for test_case in test_cases:
         stdin += f"{test_case.input_data}\n"
-            
-    # Create a list of all test cases for batch submission
-    # for test_case in test_cases:
-    #     submissions.append({
-    #         "source_code": source_code,
-    #         "language_id": language_id,
-    #         "stdin": test_case.input_data,
-    #         "expected_output": test_case.expected_output,
-    #         "cpu_time_limit": 1,
-    #         "cpu_extra_time": 1
-    #     })
-    
-    
-    submission = {
+        
+    submission_data = {
         "source_code": source_code,
         "language_id": language_id,
         "stdin": stdin,
-        "cpu_time_limit": 1,
-        "cpu_extra_time": 1
+        "cpu_time_limit": 5,
+        "cpu_extra_time": 5,
+        "max_processes_and_or_threads": 100,
+        "enable_per_process_and_thread_time_limit": True,
+        "enable_per_process_and_thread_memory_limit": True,
     }
 
-    response = requests.post(JUDGE0_URL, json=submission, headers=HEADERS)
-    
-    token = response.json().get('token')
-    
-    print("TOKEN", token)
-    
-    if response.status_code != 201:
-        print(f"Error submitting batch: {response.status_code}, {response.text}")
-        return []
-
-    # print("Batch submission response:", response_data)  # Debugging line
-
-    # # Extract tokens from response
-    # tokens = [submission['token'] for submission in response_data[0]]
-
-    # if not tokens:
-    #     print("No tokens found in batch submission response.")
-        # return []
-
-    # Fetch results using tokens
-    
-    response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
-    
-    result = response.json()
-    
-    outputs = result.get('stdout', '')    
-    
-    outputs = outputs.split("\n")
-    outputs.pop()
+    try:
+        # Submit the code to Judge0
+        response = requests.post(JUDGE0_URL, json=submission_data, headers=HEADERS)
+        response.raise_for_status()
         
-    return outputs
-
-   
-def process_test_case_result(inputs, outputs, expected_output):    
-    test_case_results = []
-    
-    for input, expected_output, output in zip(inputs, expected_output, outputs): 
+        token = response.json().get('token')
+        if not token:
+            raise Exception("No token received from Judge0.")
         
-        test_case_result = {
-            "input": input,
+        # Fetch results
+        result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
+        result_response.raise_for_status()
+
+        result = result_response.json()
+        outputs = result.get('stdout', '').split("\n")
+        outputs = [normalize_output(output) for output in outputs if output.strip()]  # Normalize and remove empty lines
+                
+        return outputs
+
+    except requests.exceptions.RequestException as e:
+        print(f"Judge0 API error: {e}")
+        raise Exception("Error connecting to Compiler.")
+    except Exception as e:
+        print(f"Error during code execution: {e}")
+        raise Exception("Error occurred while executing the code.")
+
+def process_test_case_result(inputs, outputs, expected_outputs):
+    """
+    Compare outputs against expected outputs and prepare detailed results.
+    """
+    results = []
+    for input_data, expected_output, output in zip(inputs, expected_outputs, outputs):
+        result = {
+            "input": input_data,
             "expected_output": expected_output,
             "user_output": output,
-            "passed": "Passed" if output == expected_output else "Wrong Answer",
+            "passed": output == expected_output,
             "status": "Passed" if output == expected_output else "Wrong Answer"
         }
+        results.append(result)
+    return results
 
-        test_case_results.append(test_case_result)
-    
-    return test_case_results
-        
 
-def update_submission_status(submission, passed_test_cases, total_test_cases):
-    """Update the status and score of a submission."""
-    if passed_test_cases == total_test_cases:
-        submission.status = 'Accepted'
-    else:
-        submission.status = 'Wrong Answer'
-    
-    submission.score = int((passed_test_cases / total_test_cases) * 100) if total_test_cases > 0 else 0
-    submission.save()
-    
-def run_code_against_test_cases(source_code, language_id, test_cases):
-    passed_test_cases = 0
-
-    # Submit the code and retrieve results for all test cases
-    outputs = run_code_on_judge0(source_code, language_id, test_cases)
-    expected_outputs = [output.expected_output for output in test_cases]
-    
-    inputs = [output.input_data for output in test_cases]
-
-    print("EXPECTED OUTPUTS", expected_outputs)
-    
-    if outputs:
-
-        test_case_results = process_test_case_result(
-            inputs, outputs, expected_outputs
-        )
-        
-        passed_test_cases = sum(
-            1 for test_case in test_case_results if test_case['passed'] == 'Passed'
-        )
-        
-        print(f"-----------------------------Passed test cases: {passed_test_cases}")
-                
-    else:
-        print("No results were retrieved.")
-
-    return test_case_results, passed_test_cases
-
-def normalize_output(output):
-    
-    if not output:
-        return output    
-    return output.replace('\r\n', '\n').strip()
-
-# ======================================================================================================
-# ========================================= PROBLEM SUBMISSION =========================================
-# ======================================================================================================
-
+def update_submission_status(submission, passed, total):
+    """
+    Update the submission status and score in the database.
+    """
+    try:
+        submission.status = 'Accepted' if passed == total else 'Wrong Answer'
+        submission.score = int((passed / total) * 100) if total > 0 else 0
+        submission.save()
+    except Exception as e:
+        print(f"Error updating submission: {e}")
+        raise Exception("Could not update submission status.")
 @login_required(login_url="login")
-def problem(request, slug):
-    
-    question = get_object_or_404(Question, slug=slug)
-    sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
-    
-    parameters = {
-        'question': question,
-        'sample_test_cases': sample_test_cases,
-    }
-    return render(request, 'practice/problem.html', parameters)
 
-# ========================================== SUBMIT CODE ===============================================
+def problem(request, slug):
+    """
+    Render the problem page with question details and sample test cases.
+    """
+    try:
+        question = get_object_or_404(Question, slug=slug)
+        sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
+        return render(request, 'practice/problem.html', {
+            'question': question,
+            'sample_test_cases': sample_test_cases
+        })
+    except Exception as e:
+        print(f"Error loading problem page: {e}")
+        return JsonResponse({"error": "Could not load problem."}, status=500)
+
 
 @csrf_exempt
 def submit_code(request, slug):
+    """
+    Handle user code submission for a problem.
+    """
     
     start = time.time()
     
     if request.method == 'POST':
         try:
-            question = Question.objects.get(slug=slug)
+            # Validate inputs
+            question = get_object_or_404(Question, slug=slug)
             user = request.user.student
 
             language_id = request.POST.get('language_id')
             source_code = request.POST.get('submission_code')
 
+            if not language_id or not source_code:
+                return JsonResponse({"error": "Missing language ID or source code."}, status=400)
+
             test_cases = get_test_cases(question)
-
-            # Handle submission creation and validation
-            submission = create_submission(user, question, source_code, language_id)
             if not test_cases:
-                return JsonResponse({"error": "No test cases available for this question"}, status=400)
+                return JsonResponse({"error": "No test cases available for this question."}, status=400)
 
-            # Run code against test cases and process results
-            test_case_results, passed_test_cases = run_code_against_test_cases(
-                source_code, language_id, test_cases
-            )
+            # Create a submission record
+            submission = create_submission(user, question, source_code, language_id)
 
-            # Update submission status and score
+            # Run the code and process results
+            outputs = run_code_on_judge0(source_code, language_id, test_cases)
+            expected_outputs = [normalize_output(tc.expected_output) for tc in test_cases]
+            inputs = [tc.input_data for tc in test_cases]
+            
+            print("OUTPUTS", outputs, end="\n\n")
+            print("EXPECTED OUTPUTS", expected_outputs, end="\n\n")
+            print("INPUTS", inputs, end="\n\n")
+
+            test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
+            passed_test_cases = sum(1 for result in test_case_results if result['passed'])
+
+            # Update submission
             update_submission_status(submission, passed_test_cases, len(test_cases))
-            
+                
             end = time.time()
-            
-            print(end - start)
 
-            print(submission.status)
+            print(f"Time taken: {end - start:.2f} seconds")
 
             return JsonResponse({
                 "test_case_results": test_case_results,
@@ -306,13 +293,14 @@ def submit_code(request, slug):
             })
 
         except Question.DoesNotExist:
-            return JsonResponse({"error": "Question not found"}, status=404)
+            return JsonResponse({"error": "Question not found."}, status=404)
         except Exception as e:
-            print(f"Error: {str(e)}")  # Debugging error
-            return JsonResponse({"error": str(e)}, status=500)
+            print(f"Error during submission: {e}")
+            return JsonResponse({"error": "An unexpected error occurred."}, status=500)
 
-    return JsonResponse({"error": "Invalid request method"}, status=400)
+    return JsonResponse({"error": "Invalid request method."}, status=400)
 
+# ========================================== SUBMIT CODE ===============================================
 
 # ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================
 
@@ -335,14 +323,14 @@ def run_code(request, slug):
             if not test_cases:
                 return JsonResponse({"error": "No test cases available for this question"}, status=400)
 
-            test_case_results, passed_test_cases = run_code_against_test_cases(
-                source_code, language_id, test_cases
-            )
+            # test_case_results, passed_test_cases = run_code_against_test_cases(
+            #     source_code, language_id, test_cases
+            # )
             
 
             return JsonResponse({
-                "test_case_results": test_case_results,
-                "passed_test_cases": passed_test_cases,
+                # "test_case_results": test_case_results,
+                # "passed_test_cases": passed_test_cases,
                 "total_test_cases": len(test_cases)
             })
 

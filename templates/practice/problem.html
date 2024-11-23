@@ -331,22 +331,10 @@ active
             { id: 54, name: "C++" },
         ];
 
+
         // Default code snippets for specific languages
         const defaultCode = {
-            71: `t = int(input())
-while(t>0):
-    
-    text = input()
-    
-    revsersed = text[::-1]
-    
-    if text == revsersed:
-        print("ghjk")
-    
-    else:
-        print(False)
-    
-    t=t-1;`, // Python default
+            71: `{{ question.driver_code|safe    }}`, // Python default
             50: `#include <stdio.h>\n\nint main() {\n\t// Write your C code here\n\treturn 0;\n}`, // C default
             54: `#include <iostream>\nusing namespace std;\n\nint main() {\n\t// Write your C++ code here\n\treturn 0;\n}`, // C++ default
             62: `public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}` // Java default

@@ -49,11 +49,14 @@ def add_question(request):
         title = request.POST.get('title')
         description = request.POST.get('description')
         difficulty_level = request.POST.get('difficulty_level')
+        driver_code = request.POST.get('driver_code')
         
         question = Question(
             title=title,
             description=description,
-            difficulty_level=difficulty_level
+            difficulty_level=difficulty_level,
+            driver_code=driver_code,
+            is_approved=True
         )
         
         question.save()

@@ -102,6 +102,11 @@ class Question(models.Model):
     description = models.TextField()
     constraints = models.TextField(blank=True, null=True)
     
+    input_format = models.TextField(blank=True, null=True)
+    output_format = models.TextField(blank=True, null=True)
+    
+    driver_code = models.TextField(blank=True, null=True)
+    
     difficulty_level = models.CharField(max_length=50, choices=[
         ('Easy', 'Easy'),
         ('Medium', 'Medium'),
