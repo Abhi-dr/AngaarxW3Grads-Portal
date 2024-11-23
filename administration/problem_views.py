@@ -48,6 +48,7 @@ def add_question(request):
         sheet = request.POST.getlist('sheet')
         title = request.POST.get('title')
         description = request.POST.get('description')
+        constraints = request.POST.get('constraints')
         difficulty_level = request.POST.get('difficulty_level')
         driver_code = request.POST.get('driver_code')
         

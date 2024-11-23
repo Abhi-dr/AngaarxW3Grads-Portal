@@ -164,8 +164,7 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         "cpu_extra_time": 5,
         "max_processes_and_or_threads": 100,
         "enable_per_process_and_thread_time_limit": True,
-        "enable_per_process_and_thread_memory_limit": True,
-    }
+    }   
 
     try:
         # Submit the code to Judge0
@@ -173,6 +172,9 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         response.raise_for_status()
         
         token = response.json().get('token')
+        
+        print("Token", token, end="\n\n")
+        
         if not token:
             raise Exception("No token received from Judge0.")
         
@@ -181,8 +183,23 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         result_response.raise_for_status()
 
         result = result_response.json()
-        outputs = result.get('stdout', '').split("\n")
-        outputs = [normalize_output(output) for output in outputs if output.strip()]  # Normalize and remove empty lines
+        
+        print("Result", result, end="\n\n")
+        
+        outputs = result.get('stdout', '')
+        
+        print("Outputs", outputs, end="\n\n")
+        
+        print("="*30)
+        
+        for output in outputs:
+            if output.strip():
+                print(normalize_output(output))
+        
+        print("="*30)
+        
+        # outputs = [normalize_output(output) for output in outputs if output.strip()]  # Normalize and remove empty lines
+        outputs = outputs.split("\n")
                 
         return outputs
 
