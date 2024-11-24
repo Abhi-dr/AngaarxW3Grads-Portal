@@ -506,14 +506,19 @@
                             result.status === "Passed" ? 'border-success' : 'border-danger',
                             'shadow-sm'
                         );
+
+                        resultDiv.id = "test-case-result-id";
             
                         // Include compiler output only when the test case fails
-                        let compilerOutputHTML = '';
+                        const compilerOutputHTML = document.createElement('div');
+                        compilerOutputHTML.id = "compiler-output";
                         if (result.compiler_output) {
-                            compilerOutputHTML = `
+                            compilerOutputHTML += `
                                 <p><strong>Compiler Output:</strong></p>
                                 <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
                             `;
+
+                            document.getElementById("compiler-output").scrollIntoView({ behavior: 'smooth' });
 
                             console.log(result.compiler_output);
                         }
