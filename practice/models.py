@@ -165,7 +165,7 @@ class Question(models.Model):
             return 'dark'
     
     def how_many_users_solved(self):
-        return self.submissions.filter(status='Accepted').count()
+        return self.submissions.filter(status='Accepted').distinct().count()
     
     def how_many_users_attempted(self):
         return self.submissions.count()

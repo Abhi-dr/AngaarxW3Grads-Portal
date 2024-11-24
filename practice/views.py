@@ -313,8 +313,6 @@ def submit_code(request, slug):
 
             # Update submission
             update_submission_status(submission, passed_test_cases, len(test_cases))
-                
-            end = time.time()
 
             return JsonResponse({
                 "test_case_results": test_case_results,
@@ -434,7 +432,6 @@ def fetch_questions(request):
 
 @login_required(login_url="login")
 def next_question(request):
-    # get the next question which is not solved by the user and is approved
     question = Question.objects.filter(is_approved=True).exclude(submissions__user=request.user.student).first()
     
     return problem(request, question.slug)
