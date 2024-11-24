@@ -173,7 +173,7 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         
         token = response.json().get('token')
         
-        print("Token", token, end="\n\n")
+        print("TOKEN", token)
         
         if not token:
             raise Exception("No token received from Judge0.")
@@ -181,30 +181,35 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         # Fetch results
         result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
         
-        while result_response.json().get("status").get("id") == 2:
+        while result_response.json().get("status").get("id") == 2:  # Status 'In Queue'
             time.sleep(1)
             result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
 
         result = result_response.json()
         
-        # print("Result", result, end="\n\n")
+        print("RESULT:", result)
         
+        if result.get("compile_output"):
+            return {
+            "error": result["compile_output"].strip(),
+            "outputs": None
+        }
+
+        # Check for runtime errors
+        if result.get("stderr"):
+            return {
+                "error": result["stderr"].strip(),
+                "outputs": None
+            }
+        
+        # Process execution results
         outputs = result.get('stdout', '')
-        
-        # print("Outputs", outputs, end="\n\n")
-        
-        # print("="*30)
-        
-        # for output in outputs:
-        #     if output.strip():
-        #         print(normalize_output(output))
-        
-        # print("="*30)
-        
-        # outputs = [normalize_output(output) for output in outputs if output.strip()]  # Normalize and remove empty lines
         outputs = [output.strip() for output in outputs.split("\n")]
-                
-        return outputs
+        
+        return {
+        "error": None,
+        "outputs": outputs
+    }
 
     except requests.exceptions.RequestException as e:
         print(f"Judge0 API error: {e}")
@@ -212,6 +217,8 @@ def run_code_on_judge0(source_code, language_id, test_cases):
     except Exception as e:
         print(f"Error during code execution: {e}")
         raise Exception("Error occurred while executing the code.")
+
+
 
 def process_test_case_result(inputs, outputs, expected_outputs):
     """
@@ -260,11 +267,11 @@ def problem(request, slug):
 
 
 @csrf_exempt
+@csrf_exempt
 def submit_code(request, slug):
     """
     Handle user code submission for a problem.
     """
-    
     start = time.time()
     
     if request.method == 'POST':
@@ -287,14 +294,22 @@ def submit_code(request, slug):
             submission = create_submission(user, question, source_code, language_id)
 
             # Run the code and process results
-            outputs = run_code_on_judge0(source_code, language_id, test_cases)
+            judge0_response = run_code_on_judge0(source_code, language_id, test_cases)
+            
+            if judge0_response["error"]:  # Compilation error
+                update_submission_status(submission, 0, len(test_cases))  # Mark all as failed
+                return JsonResponse({
+                    "submission_id": submission.id,
+                    "status": "Compilation Error",
+                    "score": 0,
+                    "compiler_output": judge0_response["error"]
+                })
+
+            # Process successful outputs
+            outputs = judge0_response["outputs"]
             expected_outputs = [normalize_output(tc.expected_output) for tc in test_cases]
             inputs = [tc.input_data for tc in test_cases]
             
-            print("OUTPUTS", outputs, end="\n\n")
-            print("EXPECTED OUTPUTS", expected_outputs, end="\n\n")
-            print("INPUTS", inputs, end="\n\n")
-
             test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
             passed_test_cases = sum(1 for result in test_case_results if result['passed'])
 
@@ -303,13 +318,12 @@ def submit_code(request, slug):
                 
             end = time.time()
 
-            print(f"Time taken: {end - start:.2f} seconds")
-
             return JsonResponse({
                 "test_case_results": test_case_results,
                 "submission_id": submission.id,
                 "status": submission.status,
-                "score": submission.score
+                "score": submission.score,
+                "compile_output": None  # No compilation error
             })
 
         except Question.DoesNotExist:
@@ -319,6 +333,7 @@ def submit_code(request, slug):
             return JsonResponse({"error": "An unexpected error occurred."}, status=500)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
+
 
 # ========================================== SUBMIT CODE ===============================================
 

@@ -180,7 +180,7 @@ active
                                     </button>
                                 </div>
                             </td>
-                            
+
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -200,6 +200,7 @@ active
                                     </div>
                                 </div>
                                 <div class="modal-footer">
+                                    <button type="button" id="copybtn" class="btn btn-success" onclick="copyToClipboard();">Copy</button>
                                     <button type="button" class="btn btn-secondary"
                                         data-bs-dismiss="modal">Close</button>
                                 </div>
@@ -253,6 +254,24 @@ active
 
         editor.renderer.$cursorLayer.element.style.display = "none";  // Hide the cursor
     });
+
+    function copyToClipboard() {
+        var editor = ace.edit("code-view-editor");
+        var code = editor.getValue();
+        navigator.clipboard.writeText(code).then(function () {
+            copybtn = document.getElementById('copybtn');
+            copybtn.innerHTML = 'Copied!';
+            copybtn.classList.remove('btn-success');
+            copybtn.classList.add('btn-info');
+            setTimeout(() => {
+                copybtn.innerHTML = 'Copy';
+                copybtn.classList.remove('btn-info');
+                copybtn.classList.add('btn-success');
+            }, 2000);
+        }, function (err) {
+            alert('Failed to copy code to clipboard');
+        });
+    }
 
 </script>
 

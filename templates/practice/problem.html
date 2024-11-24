@@ -468,6 +468,12 @@
 
 
         let code = editor.getValue();
+
+        if (!code.trim()) {
+            alert("Code cannot be empty!");
+            event.preventDefault(); // Prevent form submission
+        }
+
         document.getElementById('submission_code').value = code;
 
         const formData = new FormData(this);
@@ -480,18 +486,16 @@
             .then(data => {
                 const testCaseResultsDiv = document.getElementById('testCaseResults');
                 testCaseResultsDiv.innerHTML = ''; // Clear previous results
-
+            
                 clearInterval(countdownInterval); // Clear the interval
                 submit_btn.prop("disabled", false);
                 submit_btn.text("Submit Code");
-
-
-
+            
                 testCaseResultsDiv.scrollIntoView({
                     behavior: 'smooth'
                 });
-                testCaseResultsDiv.scrollIntoView(true);
-
+            
+                // If there are test case results, display them
                 if (data.test_case_results) {
                     data.test_case_results.forEach((result, index) => {
                         const resultDiv = document.createElement('div');
@@ -499,57 +503,78 @@
                             'card',
                             'mb-3',
                             'test-case-result',
-                            result.status ? 'border-success' : 'border-danger',
+                            result.status === "Passed" ? 'border-success' : 'border-danger',
                             'shadow-sm'
                         );
-                        resultDiv.id = `test-case-result-id`;
+            
+                        // Include compiler output only when the test case fails
+                        let compilerOutputHTML = '';
+                        if (result.compiler_output) {
+                            compilerOutputHTML = `
+                                <p><strong>Compiler Output:</strong></p>
+                                <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
+                            `;
 
-
+                            console.log(result.compiler_output);
+                        }
+            
                         resultDiv.innerHTML = `
-                                                <div class="card-header d-flex justify-content-between align-items-center">
-                                                    <span>
-                                                        <strong>Test Case ${index + 1}</strong> - 
-                                                        <span class="badge 
-                                                            ${result.status == "Passed" ? 'bg-success' : 'bg-danger'}">
-                                                            ${result.status}
-                                                        </span>
-                                                    </span>
-                                                    <button 
-                                                        class="btn btn-sm btn-outline-primary toggle-details" 
-                                                        type="button" 
-                                                        data-bs-toggle="collapse" 
-                                                        data-bs-target="#details-${index}" 
-                                                        aria-expanded="false" 
-                                                        aria-controls="details-${index}">
-                                                        Show
-                                                    </button>
-                                                </div>
-                                                <div id="details-${index}" class="collapse">
-                                                    <div class="card-body">
-                                                        <p><strong>Input:</strong></p>
-                                                        <pre class="p-2 rounded">${result.input}</pre>
-                                                        <p><strong>Expected Output:</strong></p>
-                                                        <pre class="p-2 rounded">${result.expected_output}</pre>
-                                                        <p><strong>Your Output:</strong></p>
-                                                        <pre class="p-2 rounded">${result.user_output}</pre>
-                                                        <p><strong>Status:</strong> 
-                                                            <span class="badge 
-                                                                ${result.status == "Passed" ? 'bg-success' : 'bg-danger'}">
-                                                                ${result.status}
-                                                            </span>
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            `;
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>
+                                    <strong>Test Case ${index + 1}</strong> - 
+                                    <span class="badge 
+                                        ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">
+                                        ${result.status}
+                                    </span>
+                                </span>
+                                <button 
+                                    class="btn btn-sm btn-outline-primary toggle-details" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#details-${index}" 
+                                    aria-expanded="false" 
+                                    aria-controls="details-${index}">
+                                    Show
+                                </button>
+                            </div>
+                            <div id="details-${index}" class="collapse">
+                                <div class="card-body">
+                                    <p><strong>Input:</strong></p>
+                                    <pre class="p-2 rounded">${result.input}</pre>
+                                    <p><strong>Expected Output:</strong></p>
+                                    <pre class="p-2 rounded">${result.expected_output}</pre>
+                                    <p><strong>Your Output:</strong></p>
+                                    <pre class="p-2 rounded">${result.user_output}</pre>
+                                    ${compilerOutputHTML}
+                                    <p><strong>Status:</strong> 
+                                        <span class="badge 
+                                            ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">
+                                            ${result.status}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+                        `;
                         testCaseResultsDiv.appendChild(resultDiv);
                     });
-
+            
                     document.getElementById("test-case-result-id").scrollIntoView({ behavior: 'smooth' });
-
-                    console.log(testCaseResultsDiv)
                 }
-                submit_btn.text("Submit Code");
+            
+                // If there's a global compiler error (e.g., server-side), display it
+                if (data.compiler_output) {
+                    const globalErrorDiv = document.createElement('div');
+                    globalErrorDiv.classList.add('alert', 'alert-danger');
+                    globalErrorDiv.innerHTML = `
+                        <h5>Compiler Error</h5>
+                        <pre>${data.compiler_output}</pre>
+                    `;
+                    testCaseResultsDiv.prepend(globalErrorDiv);
+                }
+            
+                console.log(testCaseResultsDiv);
             })
+            
             .catch(error => {
                 console.error('Error:', error);
                 clearInterval(countdownInterval); // Clear the interval
