@@ -219,7 +219,6 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         raise Exception("Error occurred while executing the code.")
 
 
-
 def process_test_case_result(inputs, outputs, expected_outputs):
     """
     Compare outputs against expected outputs and prepare detailed results.
@@ -266,7 +265,6 @@ def problem(request, slug):
         return JsonResponse({"error": "Could not load problem."}, status=500)
 
 
-@csrf_exempt
 @csrf_exempt
 def submit_code(request, slug):
     """
@@ -430,6 +428,16 @@ def fetch_questions(request):
         for question in questions
     ]
     return JsonResponse({"questions": data})
+
+
+# ========================================== NEXT QUESTION ==========================================
+
+@login_required(login_url="login")
+def next_question(request):
+    # get the next question which is not solved by the user and is approved
+    question = Question.objects.filter(is_approved=True).exclude(submissions__user=request.user.student).first()
+    
+    return problem(request, question.slug)
 
 # ====================================================================================================
 # ====================================== STUDENT QUESTION CRUD =======================================

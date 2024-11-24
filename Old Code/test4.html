@@ -1,570 +1,147 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
-    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="en">
+
 <head>
-<meta name="generator"  content="lshw-" />
-<style type="text/css">
-  .first {font-weight: bold; margin-left: none; padding-right: 1em;vertical-align: top; }
-  .second {padding-left: 1em; width: 100%; vertical-align: center; }
-  .id {font-family: monospace;}
-  .indented {margin-left: 2em; border-left: dotted thin #dde; padding-bottom: 1em; }
-  .node {border: solid thin #ffcc66; padding: 1em; background: #ffffcc; }
-  .node-unclaimed {border: dotted thin #c3c3c3; padding: 1em; background: #fafafa; color: red; }
-  .node-disabled {border: solid thin #f55; padding: 1em; background: #fee; color: gray; }
-</style>
-<title>judge0compiler</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>Bootstrap demo</title>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+      <style>
+            /* Modal animation */
+            .modal-dialog {
+                  transform: scale(0.8);
+                  transition: transform 0.3s ease-in-out;
+            }
+
+            .modal.fade.show .modal-dialog {
+                  transform: scale(1);
+                  /* Pop-out effect */
+            }
+
+            /* SVG Trophy Animation */
+            svg {
+                  animation: bounce 2s infinite;
+            }
+
+            @keyframes bounce {
+
+                  0%,
+                  100% {
+                        transform: translateY(0);
+                  }
+
+                  50% {
+                        transform: translateY(-10px);
+                  }
+            }
+
+            /* Button Styling */
+            #nextQuestionBtn {
+                  background-color: #00c853;
+                  color: white;
+                  border: none;
+                  transition: background-color 0.3s ease-in-out, transform 0.2s;
+            }
+
+            #nextQuestionBtn:hover {
+                  background-color: #00e676;
+                  transform: scale(1.05);
+            }
+      </style>
+
+
+
 </head>
+
 <body>
-<div class="indented">
-<table width="100%" class="node" summary="attributes of judge0compiler">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">judge0compiler</div></td></tr></thead>
- <tbody>
-    <tr><td class="first">description: </td><td class="second">Computer</td></tr>
-    <tr><td class="first">product: </td><td class="second">Droplet</td></tr>
-    <tr><td class="first">vendor: </td><td class="second">DigitalOcean</td></tr>
-    <tr><td class="first">version: </td><td class="second">20171212</td></tr>
-    <tr><td class="first">serial: </td><td class="second">457306931</td></tr>
-    <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-    <tr><td class="first">capabilities: </td><td class="second"><dfn title="SMBIOS version 2.8">smbios-2.8</dfn> <dfn title="DMI version 2.8">dmi-2.8</dfn> <dfn title="Symmetric Multi-Processing">smp</dfn> <dfn title="32-bit processes">vsyscall32</dfn> </td></tr>
-    <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of judge0compiler"><tr><td class="sub-first"> boot</td><td>=</td><td>normal</td></tr><tr><td class="sub-first"> family</td><td>=</td><td>DigitalOcean_Droplet</td></tr><tr><td class="sub-first"> uuid</td><td>=</td><td>24C3143D-58E8-4E4B-86A6-55BF5DF9B8F4</td></tr></table></td></tr>
- </tbody></table></div>
-<div class="indented">
-        <div class="indented">
-    <table width="100%" class="node" summary="attributes of core">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">core</div></td></tr></thead>
- <tbody>
-       <tr><td class="first">description: </td><td class="second">Motherboard</td></tr>
-       <tr><td class="first">product: </td><td class="second">Droplet</td></tr>
-       <tr><td class="first">vendor: </td><td class="second">DigitalOcean</td></tr>
-       <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-       <tr><td class="first">version: </td><td class="second">20171212</td></tr>
-       <tr><td class="first">serial: </td><td class="second">457306931</td></tr>
- </tbody>    </table></div>
-<div class="indented">
-              <div class="indented">
-       <table width="100%" class="node" summary="attributes of firmware">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">firmware</div></td></tr></thead>
- <tbody>
-          <tr><td class="first">description: </td><td class="second">BIOS</td></tr>
-          <tr><td class="first">vendor: </td><td class="second">DigitalOcean</td></tr>
-          <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-          <tr><td class="first">version: </td><td class="second">20171212</td></tr>
-          <tr><td class="first">date: </td><td class="second">12/12/2017</td></tr>
-          <tr><td class="first">size: </td><td class="second">96KiB</td></tr>
-          <tr><td class="first">capabilities: </td><td class="second"><dfn title="This machine is a virtual machine">virtualmachine</dfn> </td></tr>
- </tbody>       </table></div>
-       </div>
-<div class="indented">
-              <div class="indented">
-       <table width="100%" class="node" summary="attributes of cpu">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">cpu</div></td></tr></thead>
- <tbody>
-          <tr><td class="first">description: </td><td class="second">CPU</td></tr>
-          <tr><td class="first">product: </td><td class="second">DO-Premium-Intel</td></tr>
-          <tr><td class="first">vendor: </td><td class="second">Intel Corp.</td></tr>
-          <tr><td class="first">physical id: </td><td class="second"><div class="id">400</div></td></tr>
-          <tr><td class="first">bus info: </td><td class="second"><div class="id">cpu@0</div></td></tr>
-          <tr><td class="first">version: </td><td class="second">pc-i440fx-6.1</td></tr>
-          <tr><td class="first">slot: </td><td class="second">CPU 0</td></tr>
-          <tr><td class="first">size: </td><td class="second">2GHz</td></tr>
-          <tr><td class="first">capacity: </td><td class="second">2GHz</td></tr>
-          <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-          <tr><td class="first">capabilities: </td><td class="second"><dfn title="mathematical co-processor">fpu</dfn> <dfn title="FPU exceptions reporting">fpu_exception</dfn> <dfn title="">wp</dfn> <dfn title="virtual mode extensions">vme</dfn> <dfn title="debugging extensions">de</dfn> <dfn title="page size extensions">pse</dfn> <dfn title="time stamp counter">tsc</dfn> <dfn title="model-specific registers">msr</dfn> <dfn title="4GB+ memory addressing (Physical Address Extension)">pae</dfn> <dfn title="machine check exceptions">mce</dfn> <dfn title="compare and exchange 8-byte">cx8</dfn> <dfn title="on-chip advanced programmable interrupt controller (APIC)">apic</dfn> <dfn title="fast system calls">sep</dfn> <dfn title="memory type range registers">mtrr</dfn> <dfn title="page global enable">pge</dfn> <dfn title="machine check architecture">mca</dfn> <dfn title="conditional move instruction">cmov</dfn> <dfn title="page attribute table">pat</dfn> <dfn title="36-bit page size extensions">pse36</dfn> <dfn title="">clflush</dfn> <dfn title="multimedia extensions (MMX)">mmx</dfn> <dfn title="fast floating point save/restore">fxsr</dfn> <dfn title="streaming SIMD extensions (SSE)">sse</dfn> <dfn title="streaming SIMD extensions (SSE2)">sse2</dfn> <dfn title="HyperThreading">ht</dfn> <dfn title="fast system calls">syscall</dfn> <dfn title="no-execute bit (NX)">nx</dfn> <dfn title="">pdpe1gb</dfn> <dfn title="">rdtscp</dfn> <dfn title="64bits extensions (x86-64)">x86-64</dfn> <dfn title="">constant_tsc</dfn> <dfn title="">rep_good</dfn> <dfn title="">nopl</dfn> <dfn title="">xtopology</dfn> <dfn title="">cpuid</dfn> <dfn title="">tsc_known_freq</dfn> <dfn title="">pni</dfn> <dfn title="">pclmulqdq</dfn> <dfn title="">vmx</dfn> <dfn title="">ssse3</dfn> <dfn title="">fma</dfn> <dfn title="">cx16</dfn> <dfn title="">pcid</dfn> <dfn title="">sse4_1</dfn> <dfn title="">sse4_2</dfn> <dfn title="">x2apic</dfn> <dfn title="">movbe</dfn> <dfn title="">popcnt</dfn> <dfn title="">tsc_deadline_timer</dfn> <dfn title="">aes</dfn> <dfn title="">xsave</dfn> <dfn title="">avx</dfn> <dfn title="">f16c</dfn> <dfn title="">rdrand</dfn> <dfn title="">hypervisor</dfn> <dfn title="">lahf_lm</dfn> <dfn title="">abm</dfn> <dfn title="">3dnowprefetch</dfn> <dfn title="">cpuid_fault</dfn> <dfn title="">invpcid_single</dfn> <dfn title="">ssbd</dfn> <dfn title="">ibrs</dfn> <dfn title="">ibpb</dfn> <dfn title="">ibrs_enhanced</dfn> <dfn title="">tpr_shadow</dfn> <dfn title="">vnmi</dfn> <dfn title="">flexpriority</dfn> <dfn title="">ept</dfn> <dfn title="">vpid</dfn> <dfn title="">ept_ad</dfn> <dfn title="">fsgsbase</dfn> <dfn title="">bmi1</dfn> <dfn title="">avx2</dfn> <dfn title="">smep</dfn> <dfn title="">bmi2</dfn> <dfn title="">erms</dfn> <dfn title="">invpcid</dfn> <dfn title="">rdseed</dfn> <dfn title="">adx</dfn> <dfn title="">smap</dfn> <dfn title="">clflushopt</dfn> <dfn title="">clwb</dfn> <dfn title="">xsaveopt</dfn> <dfn title="">xsavec</dfn> <dfn title="">xgetbv1</dfn> <dfn title="">arat</dfn> <dfn title="">pku</dfn> <dfn title="">ospke</dfn> <dfn title="">arch_capabilities</dfn> </td></tr>
-          <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of cpu"><tr><td class="sub-first"> cores</td><td>=</td><td>2</td></tr><tr><td class="sub-first"> enabledcores</td><td>=</td><td>2</td></tr><tr><td class="sub-first"> threads</td><td>=</td><td>1</td></tr></table></td></tr>
- </tbody>       </table></div>
-       </div>
-<div class="indented">
-              <div class="indented">
-       <table width="100%" class="node" summary="attributes of memory">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">memory</div></td></tr></thead>
- <tbody>
-          <tr><td class="first">description: </td><td class="second">System Memory</td></tr>
-          <tr><td class="first">physical id: </td><td class="second"><div class="id">1000</div></td></tr>
-          <tr><td class="first">size: </td><td class="second">4GiB</td></tr>
-          <tr><td class="first">capabilities: </td><td class="second"><dfn title="Multi-bit error-correcting code (ECC)">ecc</dfn> </td></tr>
-          <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of memory"><tr><td class="sub-first"> errordetection</td><td>=</td><td>multi-bit-ecc</td></tr></table></td></tr>
- </tbody>       </table></div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of bank">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">bank</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">DIMM RAM</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">QEMU</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-             <tr><td class="first">slot: </td><td class="second">DIMM 0</td></tr>
-             <tr><td class="first">size: </td><td class="second">4GiB</td></tr>
- </tbody>          </table></div>
-          </div>
-       </div>
-<div class="indented">
-              <div class="indented">
-       <table width="100%" class="node" summary="attributes of pci">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">pci</div></td></tr></thead>
- <tbody>
-          <tr><td class="first">description: </td><td class="second">Host bridge</td></tr>
-          <tr><td class="first">product: </td><td class="second">440FX - 82441FX PMC [Natoma]</td></tr>
-          <tr><td class="first">vendor: </td><td class="second">Intel Corporation</td></tr>
-          <tr><td class="first">physical id: </td><td class="second"><div class="id">100</div></td></tr>
-          <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:00.0</div></td></tr>
-          <tr><td class="first">version: </td><td class="second">02</td></tr>
-          <tr><td class="first">width: </td><td class="second">32 bits</td></tr>
-          <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
- </tbody>       </table></div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of isa">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">isa</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">ISA bridge</td></tr>
-             <tr><td class="first">product: </td><td class="second">82371SB PIIX3 ISA [Natoma/Triton II]</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Intel Corporation</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">1</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:01.0</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">00</td></tr>
-             <tr><td class="first">width: </td><td class="second">32 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="">isa</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of isa"><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
- </tbody>          </table></div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of ide">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">ide</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">IDE interface</td></tr>
-             <tr><td class="first">product: </td><td class="second">82371SB PIIX3 IDE [Natoma/Triton II]</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Intel Corporation</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">1.1</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:01.1</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">00</td></tr>
-             <tr><td class="first">width: </td><td class="second">32 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="">ide</dfn> <dfn title="ISA compatibility mode">isa_compat_mode</dfn> <dfn title="bus mastering">bus_master</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of ide"><tr><td class="sub-first"> driver</td><td>=</td><td>ata_piix</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of ide"><tr><td class="sub-first"> irq</td><td>:</td><td>0</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>1f0(size=8)</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>3f6</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>170(size=8)</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>376</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>c1e0(size=16)</td></tr></table></td></tr>
- </tbody>          </table></div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of usb">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">usb</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">USB controller</td></tr>
-             <tr><td class="first">product: </td><td class="second">82371SB PIIX3 USB [Natoma/Triton II]</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Intel Corporation</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">1.2</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:01.2</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">01</td></tr>
-             <tr><td class="first">width: </td><td class="second">32 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="Universal Host Controller Interface (USB1)">uhci</dfn> <dfn title="bus mastering">bus_master</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of usb"><tr><td class="sub-first"> driver</td><td>=</td><td>uhci_hcd</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of usb"><tr><td class="sub-first"> irq</td><td>:</td><td>11</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>c180(size=32)</td></tr></table></td></tr>
- </tbody>          </table></div>
-<div class="indented">
-                          <div class="indented">
-             <table width="100%" class="node" summary="attributes of usbhost">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">usbhost</div></td></tr></thead>
- <tbody>
-                <tr><td class="first">product: </td><td class="second">UHCI Host Controller</td></tr>
-                <tr><td class="first">vendor: </td><td class="second">Linux 5.4.0-122-generic uhci_hcd</td></tr>
-                <tr><td class="first">physical id: </td><td class="second"><div class="id">1</div></td></tr>
-                <tr><td class="first">bus info: </td><td class="second"><div class="id">usb@1</div></td></tr>
-                <tr><td class="first">logical name: </td><td class="second"><div class="id">usb1</div></td></tr>
-                <tr><td class="first">version: </td><td class="second">5.04</td></tr>
-                <tr><td class="first">capabilities: </td><td class="second"><dfn title="USB 1.1">usb-1.10</dfn> </td></tr>
-                <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of usbhost"><tr><td class="sub-first"> driver</td><td>=</td><td>hub</td></tr><tr><td class="sub-first"> slots</td><td>=</td><td>2</td></tr><tr><td class="sub-first"> speed</td><td>=</td><td>12Mbit/s</td></tr></table></td></tr>
- </tbody>             </table></div>
-             </div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node-unclaimed" summary="attributes of bridge">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">bridge</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">Bridge</td></tr>
-             <tr><td class="first">product: </td><td class="second">82371AB/EB/MB PIIX4 ACPI</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Intel Corporation</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">1.3</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:01.3</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">03</td></tr>
-             <tr><td class="first">width: </td><td class="second">32 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="">bridge</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of bridge"><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
- </tbody>          </table></div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of display">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">display</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">VGA compatible controller</td></tr>
-             <tr><td class="first">product: </td><td class="second">Virtio GPU</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Red Hat, Inc.</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">2</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:02.0</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">01</td></tr>
-             <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="MSI-X">msix</dfn> <dfn title="">vga_controller</dfn> <dfn title="bus mastering">bus_master</dfn> <dfn title="PCI capabilities listing">cap_list</dfn> <dfn title="extension ROM">rom</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of display"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio-pci</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of display"><tr><td class="sub-first"> irq</td><td>:</td><td>10</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>fe000000-fe7fffff</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>fe800000-fe803fff</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>febf0000-febf0fff</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>c0000-dffff</td></tr></table></td></tr>
- </tbody>          </table></div>
-<div class="indented">
-                          <div class="indented">
-             <table width="100%" class="node-unclaimed" summary="attributes of virtio0">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">virtio0</div></td></tr></thead>
- <tbody>
-                <tr><td class="first">description: </td><td class="second">Virtual I/O device</td></tr>
-                <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-                <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@0</div></td></tr>
-                <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of virtio0"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio_gpu</td></tr></table></td></tr>
- </tbody>             </table></div>
-             </div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of network:0">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">network:0</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">Ethernet controller</td></tr>
-             <tr><td class="first">product: </td><td class="second">Virtio network device</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Red Hat, Inc.</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">3</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:03.0</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">00</td></tr>
-             <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="MSI-X">msix</dfn> <dfn title="bus mastering">bus_master</dfn> <dfn title="PCI capabilities listing">cap_list</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of network:0"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio-pci</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of network:0"><tr><td class="sub-first"> irq</td><td>:</td><td>11</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>c1a0(size=32)</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>febf1000-febf1fff</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>fe804000-fe807fff</td></tr></table></td></tr>
- </tbody>          </table></div>
-<div class="indented">
-                          <div class="indented">
-             <table width="100%" class="node" summary="attributes of virtio1">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">virtio1</div></td></tr></thead>
- <tbody>
-                <tr><td class="first">description: </td><td class="second">Ethernet interface</td></tr>
-                <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-                <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@1</div></td></tr>
-                <tr><td class="first">logical name: </td><td class="second"><div class="id">eth0</div></td></tr>
-                <tr><td class="first">serial: </td><td class="second">7e:e6:20:76:ef:6c</td></tr>
-                <tr><td class="first">capabilities: </td><td class="second"><dfn title="">ethernet</dfn> <dfn title="Physical interface">physical</dfn> </td></tr>
-                <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of virtio1"><tr><td class="sub-first"> autonegotiation</td><td>=</td><td>off</td></tr><tr><td class="sub-first"> broadcast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> driver</td><td>=</td><td>virtio_net</td></tr><tr><td class="sub-first"> driverversion</td><td>=</td><td>1.0.0</td></tr><tr><td class="sub-first"> ip</td><td>=</td><td>139.59.58.80</td></tr><tr><td class="sub-first"> link</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> multicast</td><td>=</td><td>yes</td></tr></table></td></tr>
- </tbody>             </table></div>
-             </div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of network:1">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">network:1</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">Ethernet controller</td></tr>
-             <tr><td class="first">product: </td><td class="second">Virtio network device</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Red Hat, Inc.</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">4</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:04.0</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">00</td></tr>
-             <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="MSI-X">msix</dfn> <dfn title="bus mastering">bus_master</dfn> <dfn title="PCI capabilities listing">cap_list</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of network:1"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio-pci</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of network:1"><tr><td class="sub-first"> irq</td><td>:</td><td>11</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>c1c0(size=32)</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>febf2000-febf2fff</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>fe808000-fe80bfff</td></tr></table></td></tr>
- </tbody>          </table></div>
-<div class="indented">
-                          <div class="indented">
-             <table width="100%" class="node" summary="attributes of virtio2">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">virtio2</div></td></tr></thead>
- <tbody>
-                <tr><td class="first">description: </td><td class="second">Ethernet interface</td></tr>
-                <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-                <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@2</div></td></tr>
-                <tr><td class="first">logical name: </td><td class="second"><div class="id">eth1</div></td></tr>
-                <tr><td class="first">serial: </td><td class="second">ce:71:8e:64:47:6b</td></tr>
-                <tr><td class="first">capabilities: </td><td class="second"><dfn title="">ethernet</dfn> <dfn title="Physical interface">physical</dfn> </td></tr>
-                <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of virtio2"><tr><td class="sub-first"> autonegotiation</td><td>=</td><td>off</td></tr><tr><td class="sub-first"> broadcast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> driver</td><td>=</td><td>virtio_net</td></tr><tr><td class="sub-first"> driverversion</td><td>=</td><td>1.0.0</td></tr><tr><td class="sub-first"> ip</td><td>=</td><td>10.122.0.3</td></tr><tr><td class="sub-first"> link</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> multicast</td><td>=</td><td>yes</td></tr></table></td></tr>
- </tbody>             </table></div>
-             </div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of scsi:0">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">scsi:0</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">SCSI storage controller</td></tr>
-             <tr><td class="first">product: </td><td class="second">Virtio SCSI</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Red Hat, Inc.</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">5</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:05.0</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">00</td></tr>
-             <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="">scsi</dfn> <dfn title="MSI-X">msix</dfn> <dfn title="bus mastering">bus_master</dfn> <dfn title="PCI capabilities listing">cap_list</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of scsi:0"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio-pci</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of scsi:0"><tr><td class="sub-first"> irq</td><td>:</td><td>10</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>c100(size=64)</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>febf3000-febf3fff</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>fe80c000-fe80ffff</td></tr></table></td></tr>
- </tbody>          </table></div>
-<div class="indented">
-                          <div class="indented">
-             <table width="100%" class="node-unclaimed" summary="attributes of virtio3">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">virtio3</div></td></tr></thead>
- <tbody>
-                <tr><td class="first">description: </td><td class="second">Virtual I/O device</td></tr>
-                <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-                <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@3</div></td></tr>
-                <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of virtio3"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio_scsi</td></tr></table></td></tr>
- </tbody>             </table></div>
-             </div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of scsi:1">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">scsi:1</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">SCSI storage controller</td></tr>
-             <tr><td class="first">product: </td><td class="second">Virtio block device</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Red Hat, Inc.</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">6</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:06.0</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">00</td></tr>
-             <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="">scsi</dfn> <dfn title="MSI-X">msix</dfn> <dfn title="bus mastering">bus_master</dfn> <dfn title="PCI capabilities listing">cap_list</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of scsi:1"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio-pci</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of scsi:1"><tr><td class="sub-first"> irq</td><td>:</td><td>10</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>c000(size=128)</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>febf4000-febf4fff</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>fe810000-fe813fff</td></tr></table></td></tr>
- </tbody>          </table></div>
-<div class="indented">
-                          <div class="indented">
-             <table width="100%" class="node" summary="attributes of virtio4">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">virtio4</div></td></tr></thead>
- <tbody>
-                <tr><td class="first">description: </td><td class="second">Virtual I/O device</td></tr>
-                <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-                <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@4</div></td></tr>
-                <tr><td class="first">logical name: </td><td class="second"><div class="id">/dev/vda</div></td></tr>
-                <tr><td class="first">size: </td><td class="second">120GiB (128GB)</td></tr>
-                <tr><td class="first">capabilities: </td><td class="second"><dfn title="GUID Partition Table version 1.00">gpt-1.00</dfn> <dfn title="Partitioned disk">partitioned</dfn> <dfn title="GUID partition table">partitioned:gpt</dfn> </td></tr>
-                <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of virtio4"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio_blk</td></tr><tr><td class="sub-first"> guid</td><td>=</td><td>2639d658-4a1f-4ebb-a35e-7175bfcd220a</td></tr><tr><td class="sub-first"> logicalsectorsize</td><td>=</td><td>512</td></tr><tr><td class="sub-first"> sectorsize</td><td>=</td><td>512</td></tr></table></td></tr>
- </tbody>             </table></div>
-<div class="indented">
-                                <div class="indented">
-                <table width="100%" class="node" summary="attributes of volume:0">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">volume:0</div></td></tr></thead>
- <tbody>
-                   <tr><td class="first">description: </td><td class="second">EXT4 volume</td></tr>
-                   <tr><td class="first">vendor: </td><td class="second">Linux</td></tr>
-                   <tr><td class="first">physical id: </td><td class="second"><div class="id">1</div></td></tr>
-                   <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@4,1</div></td></tr>
-                   <tr><td class="first">logical name: </td><td class="second"><div class="id">/dev/vda1</div></td></tr>
-                   <tr><td class="first">logical name: </td><td class="second"><div class="id">/</div></td></tr>
-                   <tr><td class="first">version: </td><td class="second">1.0</td></tr>
-                   <tr><td class="first">serial: </td><td class="second">74dd579c-a377-487d-b8f7-bc7c6df13ba1</td></tr>
-                   <tr><td class="first">size: </td><td class="second">119GiB</td></tr>
-                   <tr><td class="first">capacity: </td><td class="second">119GiB</td></tr>
-                   <tr><td class="first">capabilities: </td><td class="second"><dfn title="">journaled</dfn> <dfn title="Extended Attributes">extended_attributes</dfn> <dfn title="4GB+ files">large_files</dfn> <dfn title="16TB+ files">huge_files</dfn> <dfn title="directories with 65000+ subdirs">dir_nlink</dfn> <dfn title="needs recovery">recover</dfn> <dfn title="64bit filesystem">64bit</dfn> <dfn title="extent-based allocation">extents</dfn> <dfn title="">ext4</dfn> <dfn title="EXT2/EXT3">ext2</dfn> <dfn title="initialized volume">initialized</dfn> </td></tr>
-                   <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of volume:0"><tr><td class="sub-first"> created</td><td>=</td><td>2022-07-11 21:41:44</td></tr><tr><td class="sub-first"> filesystem</td><td>=</td><td>ext4</td></tr><tr><td class="sub-first"> label</td><td>=</td><td>cloudimg-rootfs</td></tr><tr><td class="sub-first"> lastmountpoint</td><td>=</td><td>/</td></tr><tr><td class="sub-first"> modified</td><td>=</td><td>2024-11-13 03:22:07</td></tr><tr><td class="sub-first"> mount.fstype</td><td>=</td><td>ext4</td></tr><tr><td class="sub-first"> mount.options</td><td>=</td><td>rw,relatime</td></tr><tr><td class="sub-first"> mounted</td><td>=</td><td>2024-11-13 03:36:45</td></tr><tr><td class="sub-first"> state</td><td>=</td><td>mounted</td></tr></table></td></tr>
- </tbody>                </table></div>
-                </div>
-<div class="indented">
-                                <div class="indented">
-                <table width="100%" class="node" summary="attributes of volume:1">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">volume:1</div></td></tr></thead>
- <tbody>
-                   <tr><td class="first">description: </td><td class="second">BIOS Boot partition</td></tr>
-                   <tr><td class="first">vendor: </td><td class="second">EFI</td></tr>
-                   <tr><td class="first">physical id: </td><td class="second"><div class="id">e</div></td></tr>
-                   <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@4,14</div></td></tr>
-                   <tr><td class="first">logical name: </td><td class="second"><div class="id">/dev/vda14</div></td></tr>
-                   <tr><td class="first">serial: </td><td class="second">dd783830-0088-44a8-a97a-58b68f442914</td></tr>
-                   <tr><td class="first">capacity: </td><td class="second">4095KiB</td></tr>
-                   <tr><td class="first">capabilities: </td><td class="second"><dfn title="No filesystem">nofs</dfn> </td></tr>
- </tbody>                </table></div>
-                </div>
-<div class="indented">
-                                <div class="indented">
-                <table width="100%" class="node" summary="attributes of volume:2">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">volume:2</div></td></tr></thead>
- <tbody>
-                   <tr><td class="first">description: </td><td class="second">Windows FAT volume</td></tr>
-                   <tr><td class="first">vendor: </td><td class="second">mkfs.fat</td></tr>
-                   <tr><td class="first">physical id: </td><td class="second"><div class="id">f</div></td></tr>
-                   <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@4,15</div></td></tr>
-                   <tr><td class="first">logical name: </td><td class="second"><div class="id">/dev/vda15</div></td></tr>
-                   <tr><td class="first">logical name: </td><td class="second"><div class="id">/boot/efi</div></td></tr>
-                   <tr><td class="first">version: </td><td class="second">FAT32</td></tr>
-                   <tr><td class="first">serial: </td><td class="second">922e-54a6</td></tr>
-                   <tr><td class="first">size: </td><td class="second">105MiB</td></tr>
-                   <tr><td class="first">capacity: </td><td class="second">105MiB</td></tr>
-                   <tr><td class="first">capabilities: </td><td class="second"><dfn title="Contains boot code">boot</dfn> <dfn title="Windows FAT">fat</dfn> <dfn title="initialized volume">initialized</dfn> </td></tr>
-                   <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of volume:2"><tr><td class="sub-first"> FATs</td><td>=</td><td>2</td></tr><tr><td class="sub-first"> filesystem</td><td>=</td><td>fat</td></tr><tr><td class="sub-first"> label</td><td>=</td><td>UEFI</td></tr><tr><td class="sub-first"> mount.fstype</td><td>=</td><td>vfat</td></tr><tr><td class="sub-first"> mount.options</td><td>=</td><td>rw,relatime,fmask=0077,dmask=0077,codepage=437,iocharset=iso8859-1,shortname=mixed,errors=remount-ro</td></tr><tr><td class="sub-first"> state</td><td>=</td><td>mounted</td></tr></table></td></tr>
- </tbody>                </table></div>
-                </div>
-             </div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of scsi:2">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">scsi:2</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">SCSI storage controller</td></tr>
-             <tr><td class="first">product: </td><td class="second">Virtio block device</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Red Hat, Inc.</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">7</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:07.0</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">00</td></tr>
-             <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="">scsi</dfn> <dfn title="MSI-X">msix</dfn> <dfn title="bus mastering">bus_master</dfn> <dfn title="PCI capabilities listing">cap_list</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of scsi:2"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio-pci</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of scsi:2"><tr><td class="sub-first"> irq</td><td>:</td><td>11</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>c080(size=128)</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>febf5000-febf5fff</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>fe814000-fe817fff</td></tr></table></td></tr>
- </tbody>          </table></div>
-<div class="indented">
-                          <div class="indented">
-             <table width="100%" class="node" summary="attributes of virtio5">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">virtio5</div></td></tr></thead>
- <tbody>
-                <tr><td class="first">description: </td><td class="second">Virtual I/O device</td></tr>
-                <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-                <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@5</div></td></tr>
-                <tr><td class="first">logical name: </td><td class="second"><div class="id">/dev/vdb</div></td></tr>
-                <tr><td class="first">size: </td><td class="second">482KiB (493KB)</td></tr>
-                <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of virtio5"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio_blk</td></tr><tr><td class="sub-first"> logicalsectorsize</td><td>=</td><td>512</td></tr><tr><td class="sub-first"> sectorsize</td><td>=</td><td>512</td></tr></table></td></tr>
- </tbody>             </table></div>
-             </div>
-          </div>
-<div class="indented">
-                    <div class="indented">
-          <table width="100%" class="node" summary="attributes of generic">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">generic</div></td></tr></thead>
- <tbody>
-             <tr><td class="first">description: </td><td class="second">Unclassified device</td></tr>
-             <tr><td class="first">product: </td><td class="second">Virtio memory balloon</td></tr>
-             <tr><td class="first">vendor: </td><td class="second">Red Hat, Inc.</td></tr>
-             <tr><td class="first">physical id: </td><td class="second"><div class="id">8</div></td></tr>
-             <tr><td class="first">bus info: </td><td class="second"><div class="id">pci@0000:00:08.0</div></td></tr>
-             <tr><td class="first">version: </td><td class="second">00</td></tr>
-             <tr><td class="first">width: </td><td class="second">64 bits</td></tr>
-             <tr><td class="first">clock: </td><td class="second">33MHz</td></tr>
-             <tr><td class="first">capabilities: </td><td class="second"><dfn title="bus mastering">bus_master</dfn> <dfn title="PCI capabilities listing">cap_list</dfn> </td></tr>
-             <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of generic"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio-pci</td></tr><tr><td class="sub-first"> latency</td><td>=</td><td>0</td></tr></table></td></tr>
-             <tr><td class="first">resources:</td><td class="second"><table summary="resources of generic"><tr><td class="sub-first"> irq</td><td>:</td><td>11</td></tr><tr><td class="sub-first"> ioport</td><td>:</td><td>c140(size=64)</td></tr><tr><td class="sub-first"> memory</td><td>:</td><td>fe818000-fe81bfff</td></tr></table></td></tr>
- </tbody>          </table></div>
-<div class="indented">
-                          <div class="indented">
-             <table width="100%" class="node-unclaimed" summary="attributes of virtio6">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">virtio6</div></td></tr></thead>
- <tbody>
-                <tr><td class="first">description: </td><td class="second">Virtual I/O device</td></tr>
-                <tr><td class="first">physical id: </td><td class="second"><div class="id">0</div></td></tr>
-                <tr><td class="first">bus info: </td><td class="second"><div class="id">virtio@6</div></td></tr>
-                <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of virtio6"><tr><td class="sub-first"> driver</td><td>=</td><td>virtio_balloon</td></tr></table></td></tr>
- </tbody>             </table></div>
-             </div>
-          </div>
-       </div>
-<div class="indented">
-              <div class="indented">
-       <table width="100%" class="node" summary="attributes of pnp00:00">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">pnp00:00</div></td></tr></thead>
- <tbody>
-          <tr><td class="first">product: </td><td class="second">PnP device PNP0501</td></tr>
-          <tr><td class="first">physical id: </td><td class="second"><div class="id">1</div></td></tr>
-          <tr><td class="first">capabilities: </td><td class="second"><dfn title="">pnp</dfn> </td></tr>
-          <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of pnp00:00"><tr><td class="sub-first"> driver</td><td>=</td><td>serial</td></tr></table></td></tr>
- </tbody>       </table></div>
-       </div>
-<div class="indented">
-              <div class="indented">
-       <table width="100%" class="node" summary="attributes of pnp00:01">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">pnp00:01</div></td></tr></thead>
- <tbody>
-          <tr><td class="first">product: </td><td class="second">PnP device PNP0303</td></tr>
-          <tr><td class="first">physical id: </td><td class="second"><div class="id">2</div></td></tr>
-          <tr><td class="first">capabilities: </td><td class="second"><dfn title="">pnp</dfn> </td></tr>
-          <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of pnp00:01"><tr><td class="sub-first"> driver</td><td>=</td><td>i8042 kbd</td></tr></table></td></tr>
- </tbody>       </table></div>
-       </div>
-<div class="indented">
-              <div class="indented">
-       <table width="100%" class="node" summary="attributes of pnp00:02">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">pnp00:02</div></td></tr></thead>
- <tbody>
-          <tr><td class="first">product: </td><td class="second">PnP device PNP0f13</td></tr>
-          <tr><td class="first">physical id: </td><td class="second"><div class="id">3</div></td></tr>
-          <tr><td class="first">capabilities: </td><td class="second"><dfn title="">pnp</dfn> </td></tr>
-          <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of pnp00:02"><tr><td class="sub-first"> driver</td><td>=</td><td>i8042 aux</td></tr></table></td></tr>
- </tbody>       </table></div>
-       </div>
-<div class="indented">
-              <div class="indented">
-       <table width="100%" class="node" summary="attributes of pnp00:03">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">pnp00:03</div></td></tr></thead>
- <tbody>
-          <tr><td class="first">product: </td><td class="second">PnP device PNP0b00</td></tr>
-          <tr><td class="first">physical id: </td><td class="second"><div class="id">4</div></td></tr>
-          <tr><td class="first">capabilities: </td><td class="second"><dfn title="">pnp</dfn> </td></tr>
-          <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of pnp00:03"><tr><td class="sub-first"> driver</td><td>=</td><td>rtc_cmos</td></tr></table></td></tr>
- </tbody>       </table></div>
-       </div>
-    </div>
-<div class="indented">
-        <div class="indented">
-    <table width="100%" class="node" summary="attributes of network:0">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">network:0</div></td></tr></thead>
- <tbody>
-       <tr><td class="first">description: </td><td class="second">Ethernet interface</td></tr>
-       <tr><td class="first">physical id: </td><td class="second"><div class="id">1</div></td></tr>
-       <tr><td class="first">logical name: </td><td class="second"><div class="id">veth32f82ad</div></td></tr>
-       <tr><td class="first">serial: </td><td class="second">8e:0e:ae:e5:99:fc</td></tr>
-       <tr><td class="first">size: </td><td class="second">10Gbit/s</td></tr>
-       <tr><td class="first">capabilities: </td><td class="second"><dfn title="">ethernet</dfn> <dfn title="Physical interface">physical</dfn> </td></tr>
-       <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of network:0"><tr><td class="sub-first"> autonegotiation</td><td>=</td><td>off</td></tr><tr><td class="sub-first"> broadcast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> driver</td><td>=</td><td>veth</td></tr><tr><td class="sub-first"> driverversion</td><td>=</td><td>1.0</td></tr><tr><td class="sub-first"> duplex</td><td>=</td><td>full</td></tr><tr><td class="sub-first"> link</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> multicast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> port</td><td>=</td><td>twisted pair</td></tr><tr><td class="sub-first"> speed</td><td>=</td><td>10Gbit/s</td></tr></table></td></tr>
- </tbody>    </table></div>
-    </div>
-<div class="indented">
-        <div class="indented">
-    <table width="100%" class="node" summary="attributes of network:1">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">network:1</div></td></tr></thead>
- <tbody>
-       <tr><td class="first">description: </td><td class="second">Ethernet interface</td></tr>
-       <tr><td class="first">physical id: </td><td class="second"><div class="id">2</div></td></tr>
-       <tr><td class="first">logical name: </td><td class="second"><div class="id">vethfb1fae4</div></td></tr>
-       <tr><td class="first">serial: </td><td class="second">82:5b:e9:6d:0c:76</td></tr>
-       <tr><td class="first">size: </td><td class="second">10Gbit/s</td></tr>
-       <tr><td class="first">capabilities: </td><td class="second"><dfn title="">ethernet</dfn> <dfn title="Physical interface">physical</dfn> </td></tr>
-       <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of network:1"><tr><td class="sub-first"> autonegotiation</td><td>=</td><td>off</td></tr><tr><td class="sub-first"> broadcast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> driver</td><td>=</td><td>veth</td></tr><tr><td class="sub-first"> driverversion</td><td>=</td><td>1.0</td></tr><tr><td class="sub-first"> duplex</td><td>=</td><td>full</td></tr><tr><td class="sub-first"> link</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> multicast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> port</td><td>=</td><td>twisted pair</td></tr><tr><td class="sub-first"> speed</td><td>=</td><td>10Gbit/s</td></tr></table></td></tr>
- </tbody>    </table></div>
-    </div>
-<div class="indented">
-        <div class="indented">
-    <table width="100%" class="node" summary="attributes of network:2">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">network:2</div></td></tr></thead>
- <tbody>
-       <tr><td class="first">description: </td><td class="second">Ethernet interface</td></tr>
-       <tr><td class="first">physical id: </td><td class="second"><div class="id">3</div></td></tr>
-       <tr><td class="first">logical name: </td><td class="second"><div class="id">veth4304f1f</div></td></tr>
-       <tr><td class="first">serial: </td><td class="second">da:60:65:35:4d:12</td></tr>
-       <tr><td class="first">size: </td><td class="second">10Gbit/s</td></tr>
-       <tr><td class="first">capabilities: </td><td class="second"><dfn title="">ethernet</dfn> <dfn title="Physical interface">physical</dfn> </td></tr>
-       <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of network:2"><tr><td class="sub-first"> autonegotiation</td><td>=</td><td>off</td></tr><tr><td class="sub-first"> broadcast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> driver</td><td>=</td><td>veth</td></tr><tr><td class="sub-first"> driverversion</td><td>=</td><td>1.0</td></tr><tr><td class="sub-first"> duplex</td><td>=</td><td>full</td></tr><tr><td class="sub-first"> link</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> multicast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> port</td><td>=</td><td>twisted pair</td></tr><tr><td class="sub-first"> speed</td><td>=</td><td>10Gbit/s</td></tr></table></td></tr>
- </tbody>    </table></div>
-    </div>
-<div class="indented">
-        <div class="indented">
-    <table width="100%" class="node" summary="attributes of network:3">
- <thead><tr><td class="first">id:</td><td class="second"><div class="id">network:3</div></td></tr></thead>
- <tbody>
-       <tr><td class="first">description: </td><td class="second">Ethernet interface</td></tr>
-       <tr><td class="first">physical id: </td><td class="second"><div class="id">4</div></td></tr>
-       <tr><td class="first">logical name: </td><td class="second"><div class="id">veth77c7b11</div></td></tr>
-       <tr><td class="first">serial: </td><td class="second">16:c1:ce:04:01:36</td></tr>
-       <tr><td class="first">size: </td><td class="second">10Gbit/s</td></tr>
-       <tr><td class="first">capabilities: </td><td class="second"><dfn title="">ethernet</dfn> <dfn title="Physical interface">physical</dfn> </td></tr>
-       <tr><td class="first">configuration:</td><td class="second"><table summary="configuration of network:3"><tr><td class="sub-first"> autonegotiation</td><td>=</td><td>off</td></tr><tr><td class="sub-first"> broadcast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> driver</td><td>=</td><td>veth</td></tr><tr><td class="sub-first"> driverversion</td><td>=</td><td>1.0</td></tr><tr><td class="sub-first"> duplex</td><td>=</td><td>full</td></tr><tr><td class="sub-first"> link</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> multicast</td><td>=</td><td>yes</td></tr><tr><td class="sub-first"> port</td><td>=</td><td>twisted pair</td></tr><tr><td class="sub-first"> speed</td><td>=</td><td>10Gbit/s</td></tr></table></td></tr>
- </tbody>    </table></div>
-    </div>
+
+      <!-- Success Modal -->
+      <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content"
+                        style="background-color: #1e1e2f; color: #e0e0e0; border: 2px solid #fe7d14; border-radius: 15px;">
+                        <div class="modal-header"
+                              style="border-bottom: 1px solid #fe7d14; text-align: center; justify-content: center;">
+                              <h5 class="modal-title" id="successModalLabel" style="font-weight: bold; color: #fe7d14;">
+                                    🎉 Congratulations! 🎉
+                              </h5>
+                        </div>
+                        <div class="modal-body text-center">
+                              <!-- Trophy or celebratory SVG -->
+                              <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.00 512.00"
+                                    xml:space="preserve" width="87px" height="87px" fill="#000000" stroke="#000000"
+                                    stroke-width="0.00512" transform="rotate(0)">
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                                    <g id="SVGRepo_iconCarrier">
+                                          <path style="fill:#ECF0F1;"
+                                                d="M369.059,52.352v153.537c0,14.104-3.141,27.6-7.329,40.049v0.01 c-16.753,42.384-57.426,72.497-105.474,72.497c-47.975,0-88.98-30.018-105.157-72.298c-0.031-0.063-0.117-0.136-0.138-0.199 c-2.974-7.779-5.095-15.978-6.257-24.469c-0.346-2.544-0.463-5.11-0.641-7.706c-0.178-2.607-0.117-5.235-0.117-7.884V52.352H369.059 z">
+                                          </path>
+                                          <rect x="229.813" y="319.869" style="fill:#ff9742;" width="52.352"
+                                                height="76.434"></rect>
+                                          <path style="fill:#ECF0F1;"
+                                                d="M329.283,448.654H182.698v-20.581c0-17.546,14.224-31.771,31.771-31.771h83.043 c17.546,0,31.771,14.224,31.771,31.771v20.581H329.283z">
+                                          </path>
+                                          <g>
+                                                <path style="fill:#ff9742;"
+                                                      d="M371.164,501.006H140.816v-20.581c0-17.546,14.224-31.771,31.771-31.771h166.806 c17.546,0,31.771,14.224,31.771,31.771v20.581H371.164z">
+                                                </path>
+                                                <rect x="143.433" y="9.566" style="fill:#ff9742;" width="225.112"
+                                                      height="41.881"></rect>
+                                                <path style="fill:#ff9742;"
+                                                      d="M151.039,245.948c-31.17-4.24-59.223-18.711-80.415-39.892 c-25.453-25.453-41.255-60.163-41.255-98.997c0-24.679,19.944-44.237,44.623-44.237h69.956v41.881H74.002 c-1.55,0-2.454,0.806-2.454,2.356c0,45.2,30.517,82.957,72.398,94.631v4.199C143.947,219.992,146.286,233.499,151.039,245.948z">
+                                                </path>
+                                                <path style="fill:#ff9742;"
+                                                      d="M482.67,107.059c0,38.835-15.737,73.769-41.19,99.222c-21.171,21.161-48.894,35.498-80.024,39.768 c4.754-12.449,7.603-26.059,7.603-40.161v-4.146c40.834-11.601,71.993-49.41,71.993-94.683c0-1.55-1.519-2.356-3.069-2.356h-68.923 V62.822h68.923C462.661,62.822,482.67,82.381,482.67,107.059z">
+                                                </path>
+                                                <path style="fill:#ff9742;"
+                                                      d="M314.82,181.996c0,9.537-14.27,15.332-18.725,23.034c-4.596,7.945-2.637,23.153-10.582,27.751 c-7.701,4.455-19.789-4.714-29.325-4.714c-9.537,0-21.624,9.17-29.325,4.714c-7.945-4.596-5.986-19.806-10.582-27.751 c-4.455-7.701-18.726-13.496-18.726-23.034s14.27-15.332,18.725-23.034c4.596-7.945,2.637-23.153,10.582-27.751 c7.701-4.456,19.789,4.714,29.325,4.714c9.537,0,21.624-9.17,29.325-4.714c7.945,4.596,5.986,19.806,10.582,27.751 C300.55,166.663,314.82,172.458,314.82,181.996z">
+                                                </path>
+                                          </g>
+                                          <g>
+                                                <path style="fill:#231F20;"
+                                                      d="M368.757,255.406c30.472-5.416,58.07-19.807,80.124-41.852 c28.54-28.54,44.259-66.191,44.259-106.495c0-30.311-24.743-54.708-55.157-54.708h-58.453c0-1.047,0-1.877,0-2.526V9.566 c0-5.783-5.202-9.566-10.983-9.566H143.435c-5.782,0-9.957,3.783-9.957,9.566v41.881c0,0.129-0.498-0.142-0.494,0.905H73.992 c-30.401,0-55.133,24.388-55.133,54.698c0,40.226,15.726,77.966,44.283,106.524c21.807,21.795,50.146,36.46,80.351,41.837 c9.052,20.653,23.513,38.302,42.126,51.346c10.426,7.306,22.196,12.842,33.713,16.576v63.023h-4.865 c-23.292,0-42.252,18.426-42.252,41.718v10.12c-23.035,0.195-41.881,19.061-41.881,42.232v20.581 c0,5.783,4.698,10.994,10.481,10.994h230.348c5.782,0,10.46-5.211,10.46-10.994v-20.581c0-23.171-18.847-42.037-41.881-42.232 v-10.12c0-23.292-18.939-41.718-42.231-41.718h-4.885v-62.974C326.131,313.015,353.777,288.661,368.757,255.406z M82.214,115.174 h51.263v71.538C105.207,173.57,85.054,145.538,82.214,115.174z M379.53,115.174h50.54c-2.835,30.364-22.27,58.376-50.54,71.562 V115.174z M437.983,73.292c18.869,0,34.218,15.004,34.218,33.767c0,34.71-13.54,67.234-38.123,91.817 c-16.244,16.235-35.974,27.586-57.758,33.471c1.671-7.529,2.622-15.211,2.843-22.923c42.885-15.496,72.201-56.357,72.201-102.349 c0-7.217-6.003-12.843-13.381-12.843h-58.453v-20.94H437.983z M154.417,20.941h204.172v20.941H154.417L154.417,20.941 L154.417,20.941z M77.948,198.653c-24.6-24.601-38.149-56.961-38.149-91.594c0-18.763,15.339-33.767,34.193-33.767h59.485v20.941 H74.002c-7.337,0-13.083,5.488-13.083,12.826c0,24.3,7.814,47.135,22.597,66.286c12.701,16.453,30.134,29.018,49.689,36.066 c0.005,0.192,0.216,12.659,2.723,22.863C114.169,226.347,94.005,214.702,77.948,198.653z M160.799,242.405 c-0.076-0.199,0-0.396-0.088-0.589c-2.621-6.945-6.294-24.425-6.294-35.927V62.822h204.172v143.067 c0,11.082-2.356,23.028-6.875,36.515c-15.889,39.843-53.401,65.571-95.538,65.571C214.182,307.975,175.805,281.625,160.799,242.405 z M360.683,480.426v10.634H151.276v-10.634c0-11.746,9.566-20.777,21.311-20.777h166.806 C351.138,459.648,360.683,468.68,360.683,480.426z M318.802,428.074v10.634H193.157v-10.634c0-11.746,9.566-20.777,21.311-20.777 h83.043C309.257,407.297,318.802,416.328,318.802,428.074z M271.685,386.356h-31.411V327.89c5.235,0.668,10.487,1.025,15.813,1.025 c5.27,0,10.363-0.352,15.598-1.002V386.356z">
+                                                </path>
+                                                <path style="fill:#231F20;"
+                                                      d="M265.132,240.953c4.656,1.641,10.016,3.531,15.5,3.531c3.372,0,6.792-0.715,10.123-2.642 c8.961-5.184,10.768-15.102,12.221-23.074c0.589-3.233,1.256-6.898,2.181-8.497c0.823-1.422,3.681-3.814,5.978-5.737 c5.974-5.003,14.157-11.853,14.157-22.54c0-10.686-8.182-17.537-14.157-22.54c-2.296-1.922-5.155-4.316-5.976-5.737 c-0.926-1.6-1.594-5.264-2.183-8.498c-1.453-7.97-3.26-17.889-12.219-23.071c-8.745-5.06-18.103-1.763-25.624,0.888 c-3.215,1.134-6.861,2.419-8.946,2.419c-2.085,0-5.73-1.285-8.946-2.419c-7.517-2.649-16.875-5.95-25.623-0.888 c-8.961,5.184-10.768,15.102-12.22,23.074c-0.589,3.233-1.257,6.897-2.182,8.496c-0.823,1.422-3.681,3.815-5.978,5.738 c-5.974,5.003-14.157,11.853-14.157,22.54c0,10.686,8.182,17.538,14.157,22.54c2.296,1.923,5.155,4.317,5.976,5.737 c0.926,1.6,1.594,5.264,2.183,8.498c1.453,7.97,3.26,17.889,12.22,23.072c8.744,5.059,18.103,1.762,25.623-0.889 c3.215-1.134,6.861-2.419,8.946-2.419S261.916,239.82,265.132,240.953z M240.279,221.204c-2.428,0.855-6.329,2.23-8.146,2.332 c-0.878-1.629-1.653-5.881-2.134-8.521c-0.895-4.912-1.91-10.479-4.658-15.229c-2.672-4.618-6.732-8.018-10.659-11.306 c-2.226-1.864-5.882-4.926-6.603-6.484c0.72-1.558,4.377-4.621,6.603-6.484c3.926-3.288,7.987-6.686,10.66-11.306 c2.747-4.75,3.762-10.317,4.657-15.228c0.481-2.64,1.255-6.893,2.134-8.521c1.816,0.101,5.718,1.476,8.146,2.332 c4.8,1.692,10.24,3.609,15.907,3.609s11.107-1.917,15.907-3.609c2.428-0.855,6.329-2.231,8.146-2.332 c0.877,1.629,1.653,5.881,2.134,8.521c0.895,4.912,1.91,10.479,4.658,15.229c2.672,4.618,6.732,8.018,10.659,11.305 c2.226,1.864,5.882,4.926,6.603,6.484c-0.72,1.558-4.377,4.621-6.603,6.484c-3.926,3.288-7.987,6.686-10.66,11.306 c-2.747,4.75-3.762,10.317-4.657,15.229c-0.481,2.64-1.255,6.893-2.134,8.521c-1.816-0.101-5.718-1.475-8.146-2.332 c-4.8-1.692-10.239-3.609-15.907-3.609S245.079,219.512,240.279,221.204z">
+                                                </path>
+                                          </g>
+                                    </g>
+                              </svg>
+                              <p style="font-size: 1.2rem;">
+                                    All test cases passed!
+                              </p>
+                        </div>
+                        <div class="modal-footer" style="border-top: 1px solid #fe7d14; justify-content: center;">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                              <button type="button" class="btn btn-success" id="nextQuestionBtn">Next Question</button>
+                        </div>
+                  </div>
+            </div>
+      </div>
+
+
+
+
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+
+      <script>
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'), {
+                  keyboard: false
+            });
+
+            successModal.show();
+
+            document.getElementById('nextQuestionBtn').addEventListener('click', () => {
+                  window.location.href = 'test5.html';
+            });
+      </script>
 </body>
+
 </html>
