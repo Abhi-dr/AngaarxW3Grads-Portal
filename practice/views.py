@@ -173,7 +173,7 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         
         token = response.json().get('token')
         
-        # print("Token", token, end="\n\n")
+        print("Token", token, end="\n\n")
         
         if not token:
             raise Exception("No token received from Judge0.")
@@ -291,9 +291,9 @@ def submit_code(request, slug):
             expected_outputs = [normalize_output(tc.expected_output) for tc in test_cases]
             inputs = [tc.input_data for tc in test_cases]
             
-            # print("OUTPUTS", outputs, end="\n\n")
-            # print("EXPECTED OUTPUTS", expected_outputs, end="\n\n")
-            # print("INPUTS", inputs, end="\n\n")
+            print("OUTPUTS", outputs, end="\n\n")
+            print("EXPECTED OUTPUTS", expected_outputs, end="\n\n")
+            print("INPUTS", inputs, end="\n\n")
 
             test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
             passed_test_cases = sum(1 for result in test_case_results if result['passed'])
@@ -303,7 +303,7 @@ def submit_code(request, slug):
                 
             end = time.time()
 
-            # print(f"Time taken: {end - start:.2f} seconds")
+            print(f"Time taken: {end - start:.2f} seconds")
 
             return JsonResponse({
                 "test_case_results": test_case_results,
