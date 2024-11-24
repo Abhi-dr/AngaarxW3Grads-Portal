@@ -302,6 +302,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
+<script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
 
 
 <script>
@@ -562,7 +563,11 @@
                         `;
                         testCaseResultsDiv.appendChild(resultDiv);
                     });
-            
+
+
+                    if (data.score == 100) {
+                        submission_accepted();
+                    }
                     document.getElementById("test-case-result-id").scrollIntoView({ behavior: 'smooth' });
                 }
             
@@ -587,6 +592,19 @@
                 submit_btn.text("Submit Code");
             });
     });
+
+    function submission_accepted(){
+        const start = () => {
+            confetti.start(); // Start the confetti
+            setTimeout(function () {
+                confetti.stop(); // Stop the confetti after 5 seconds
+            }, 5000); // 5000 milliseconds = 5 seconds
+        };
+        
+        start();
+        
+    }
+
 </script>
 
 
