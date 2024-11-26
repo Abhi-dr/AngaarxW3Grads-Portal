@@ -19,7 +19,7 @@ urlpatterns = [
     path("problem_set", views.problem_set, name="problem_set"),
     path("fetch_questions", views.fetch_questions, name="fetch_questions"),
     
-    path("next-question", views.next_question, name="next_question"),
+    path("next-question/<slug:slug>", views.next_question, name="next_question"),
     
     # path("submission/<slug:slug>/", views.submission, name="submission"),
     

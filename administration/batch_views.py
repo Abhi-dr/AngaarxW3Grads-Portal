@@ -9,8 +9,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from accounts.models import Student, Instructor
-from student.models import Notification, Anonymous_Message
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
+from django.db.models import Subquery, OuterRef
 
 import datetime
 
@@ -235,11 +235,24 @@ def instructor_set_pod_for_batch(request, slug):
 def view_submissions(request, slug):
     
     question = get_object_or_404(Question, slug=slug)
-    submissions = Submission.objects.filter(question=question).order_by('-submitted_at')
+    # submissions = Submission.objects.filter(question=question, status="Accepted").distinct().order_by('-submitted_at')
+    
+    latest_submission_time = Submission.objects.filter(
+        question=question, 
+        user=OuterRef('user'), 
+        status="Accepted"
+    ).order_by('-submitted_at').values('submitted_at')[:1]
+
+    # Filter submissions to include only the latest submission per student
+    latest_submissions = Submission.objects.filter(
+        question=question, 
+        status="Accepted", 
+        submitted_at=Subquery(latest_submission_time)
+    )
     
     parameters = {
         "question": question,
-        "submissions": submissions
+        "submissions": latest_submissions
     }
     
     return render(request, 'administration/batch/view_submissions.html', parameters)

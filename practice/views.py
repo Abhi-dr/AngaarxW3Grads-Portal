@@ -160,8 +160,8 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         "source_code": source_code,
         "language_id": language_id,
         "stdin": stdin,
-        "cpu_time_limit": 5,
-        "cpu_extra_time": 5,
+        "cpu_time_limit": 3,
+        "cpu_extra_time": 3,
         "max_processes_and_or_threads": 100,
         "enable_per_process_and_thread_time_limit": True,
     }   
@@ -431,10 +431,23 @@ def fetch_questions(request):
 # ========================================== NEXT QUESTION ==========================================
 
 @login_required(login_url="login")
-def next_question(request):
-    question = Question.objects.filter(is_approved=True).exclude(submissions__user=request.user.student).first()
+# get next question of the current sheet but not in json
+def next_question(request, slug):
     
-    return problem(request, question.slug)
+    sheet = get_object_or_404(Sheet, slug=slug)
+    questions = sheet.questions.filter(is_approved=True)
+    
+    user_submissions = {
+        submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=questions)
+        }
+    
+    # Get the next question that has not been attempted yet
+    for question in questions:
+        if question.id not in user_submissions:
+            return redirect('problem', slug=question.slug)
+    
+    messages.info(request, "You have completed all questions in this sheet.")
+    return redirect('sheet', slug=sheet.slug)
 
 # ====================================================================================================
 # ====================================== STUDENT QUESTION CRUD =======================================

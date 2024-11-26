@@ -495,7 +495,7 @@
                 </div>
                 <div class="modal-footer" style="border-top: 1px solid #fe7d14; justify-content: center;">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <a href="{% url 'next_question' %}" class="btn btn-success" id="nextQuestionBtn">Next Question</a>
+                    <a href="#" class="btn btn-success" id="nextQuestionBtn">Next Question</a>
                 </div>
             </div>
         </div>
@@ -599,11 +599,11 @@
 
         editor.session.setMode("ace/mode/python");
         editor.setOptions({
-            enableBasicAutocompletion: true,
+            //enableBasicAutocompletion: true,
             enableSnippets: true,
-            enableLiveAutocompletion: true,
+            //enableLiveAutocompletion: true,
             cursorStyle: "smooth",
-            enableEmmet: true,
+            //enableEmmet: true,
         });
 
         // change the editor mode based on selected language
@@ -791,7 +791,7 @@
             })
 
             .catch(error => {
-                console.error('Error:', error);
+                console.log('Error:', error);
                 clearInterval(countdownInterval); // Clear the interval
                 submit_btn.prop("disabled", false);
                 submit_btn.text("Submit Code");
