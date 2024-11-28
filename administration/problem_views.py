@@ -111,11 +111,15 @@ def edit_question(request, id):
         description = request.POST.get('description')
         difficulty_level = request.POST.get('difficulty_level')
         position = request.POST.get('position')
+        cpu_time_limit = request.POST.get('cpu_time_limit')
+        memory_limit = request.POST.get('memory_limit')
         
         question.title = title
         question.description = description
         question.difficulty_level = difficulty_level
         question.position = position
+        question.cpu_time_limit = float(cpu_time_limit)
+        question.memory_limit = int(memory_limit)
         
         question.save()
         

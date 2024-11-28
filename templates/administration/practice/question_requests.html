@@ -107,6 +107,11 @@ Questions Add Requests
                             </th>
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
                                     Action#2
                                 </h6>
                             </th>
@@ -157,6 +162,13 @@ Questions Add Requests
                                     <a href="{% url 'test_cases' question.slug %}"
                                         class="btn btn-outline-success text-blue float-end">Test Cases
                                         ({{question.test_cases.count }})</a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'edit_question' question.id %}"
+                                        class="btn btn-outline-success text-blue float-end">Edit</a>
                                 </div>
                             </td>
 

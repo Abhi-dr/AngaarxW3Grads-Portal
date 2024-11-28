@@ -21,7 +21,8 @@ Problem Set🔥
                     Question</a>
             </div>
             <div class="col-md-5">
-                <a href="{% url 'question_requests' %}" class="btn btn-outline-warning button mt-n3 m-3 w-100">Question Requests ({{unapproved_question_number}})</a>
+                <a href="{% url 'question_requests' %}" class="btn btn-outline-warning button mt-n3 m-3 w-100">Question
+                    Requests ({{unapproved_question_number}})</a>
             </div>
         </div>
     </div>
@@ -102,7 +103,7 @@ Problem Set🔥
 
                             <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">
-                                    Position
+                                    Extra
                                 </h6>
                             </th>
                             <th class="border-bottom-0 justify-content-center">
@@ -163,8 +164,17 @@ Problem Set🔥
 
                             <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0 fs-4">
+                                    <!-- <span class="badge bg-{{ session.get_meeting_status.color }}">
+                                        Position: {{ question.position }}
+                                    </span> -->
+                                    <br>
                                     <span class="badge bg-{{ session.get_meeting_status.color }}">
-                                        {{ question.position }}
+                                        CPU Limit: <strong>{{ question.cpu_time_limit }}
+                                    </span>
+                                    <br>
+                                    <span class="badge bg-{{ session.get_meeting_status.color }}">
+                                        Memory Limit: <strong>{{ question.memory_limit }}</strong>
+                                    </strong>
                                     </span>
                                 </h6>
                             </td>
@@ -182,7 +192,8 @@ Problem Set🔥
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
                                     <a href="{% url 'test_cases' question.slug %}"
-                                        class="btn btn-outline-success text-blue float-end">Test Cases ({{question.test_cases.count }})</a>
+                                        class="btn btn-outline-success text-blue float-end">Test Cases
+                                        ({{question.test_cases.count }})</a>
                                 </div>
                             </td>
 

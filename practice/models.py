@@ -95,7 +95,6 @@ class Sheet(models.Model):
 
 class Question(models.Model):
     sheets = models.ManyToManyField(Sheet, related_name="questions", blank=True)
-
     
     title = models.CharField(max_length=255)
     scenario = models.TextField(blank=True, null=True)
@@ -106,6 +105,9 @@ class Question(models.Model):
     output_format = models.TextField(blank=True, null=True)
     
     driver_code = models.TextField(blank=True, null=True)
+    
+    cpu_time_limit = models.FloatField(default=1, blank=True, null=True)
+    memory_limit = models.PositiveIntegerField(default=256, blank=True, null=True)    
     
     difficulty_level = models.CharField(max_length=50, choices=[
         ('Easy', 'Easy'),
@@ -211,7 +213,18 @@ class Question(models.Model):
         
         super().save(*args, **kwargs)
         
-        
+    
+# ============================== DRIVER CODE MODEL =========================
+
+class DriverCode(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='driver_codes')
+    language_id = models.IntegerField(default=0)
+    code = models.TextField()
+    
+    def __str__(self):
+        return f"Driver Code for {self.question.title}"
+
+
 # ============================== TEST CASE MODEL =========================
 
 class TestCase(models.Model):
@@ -288,3 +301,26 @@ class Streak(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.current_streak} day streak"
+    
+    
+# ============================== SOLUTION MODEL =========================
+
+class Solution(models.Model):
+    
+    LANGUAGE_CHOICES = [
+        ('Python', 'Python'),
+        ("C", "C"),
+        ('C++', 'C++'),
+        ('Java', 'Java'),
+    ]
+    
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="solutions")
+    language_id = models.IntegerField(default=0)
+    code = models.TextField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    
+    def get_langauge_name_through_id(self):
+        return dict(self.LANGUAGE_CHOICES).get(self.language)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.question.title}"

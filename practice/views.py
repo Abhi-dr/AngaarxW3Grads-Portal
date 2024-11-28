@@ -147,7 +147,7 @@ def create_submission(user, question, source_code, language_id):
         raise Exception("Could not create submission.")
 
 
-def run_code_on_judge0(source_code, language_id, test_cases):
+def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, memory_limit):
     """
     Send the code to Judge0 API for execution against multiple test cases.
     """
@@ -160,10 +160,11 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         "source_code": source_code,
         "language_id": language_id,
         "stdin": stdin,
-        "cpu_time_limit": 1,
+        "cpu_time_limit": 2,
         "wall_time_limit": 2,
+        "memory_limit": memory_limit * 1000,
         "enable_per_process_and_thread_time_limit": True,
-    }   
+    }
 
     try:
         # Submit the code to Judge0
@@ -215,7 +216,9 @@ def run_code_on_judge0(source_code, language_id, test_cases):
 
     except requests.exceptions.RequestException as e:
         print(f"Judge0 API error: {e}")
-        raise Exception("Error connecting to Compiler.")
+        return {
+            "error": "Cannot connect to Compier \n Error: " + str(e),
+        }
     except Exception as e:
         print(f"Error during code execution with token {token}: {e}")
         return {
@@ -298,7 +301,7 @@ def submit_code(request, slug):
 
             # Run the code and process results
             start = time.time()
-            judge0_response = run_code_on_judge0(source_code, language_id, test_cases)
+            judge0_response = run_code_on_judge0(source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
             end = time.time()
             
             print("Time Taken:", end - start)

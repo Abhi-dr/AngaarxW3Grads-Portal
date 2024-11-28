@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Sheet, Question, TestCase, Submission, POD, Streak, Batch, EnrollmentRequest
+from .models import Sheet, Question, TestCase, Submission, POD, Streak, Batch, EnrollmentRequest, DriverCode
 
 @admin.register(Sheet)
 class SheetAdmin(admin.ModelAdmin):
@@ -10,14 +10,19 @@ class SheetAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['title', 'difficulty_level', 'position', "is_approved"]
+    list_display = ['title', 'difficulty_level', 'position', "is_approved", "cpu_time_limit", "memory_limit"]
     search_fields = ['title', 'sheets__name']  # Use 'sheets__name' since it's now ManyToMany
     list_per_page = 30
     list_filter = ['difficulty_level']  # Use 'sheets' for filtering by associated sheets
     ordering = ['position']
     list_editable = ['position']
     
-    
+@admin.register(DriverCode)
+class DriverCodeAdmin(admin.ModelAdmin):
+    list_display = ['question', 'language_id']
+    search_fields = ['question__title', 'language_id']
+    list_per_page = 30
+    list_filter = ['language_id']
 
 @admin.register(TestCase)
 class TestCaseAdmin(admin.ModelAdmin):
