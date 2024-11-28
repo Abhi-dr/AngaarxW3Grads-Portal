@@ -160,9 +160,8 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         "source_code": source_code,
         "language_id": language_id,
         "stdin": stdin,
-        "cpu_time_limit": 3,
-        "cpu_extra_time": 3,
-        "max_processes_and_or_threads": 100,
+        "cpu_time_limit": 1,
+        "wall_time_limit": 2,
         "enable_per_process_and_thread_time_limit": True,
     }   
 
@@ -277,7 +276,6 @@ def submit_code(request, slug):
     """
     Handle user code submission for a problem.
     """
-    start = time.time()
     
     if request.method == 'POST':
         try:
@@ -299,7 +297,11 @@ def submit_code(request, slug):
             submission = create_submission(user, question, source_code, language_id)
 
             # Run the code and process results
+            start = time.time()
             judge0_response = run_code_on_judge0(source_code, language_id, test_cases)
+            end = time.time()
+            
+            print("Time Taken:", end - start)
             
             if judge0_response["error"]:  # Compilation error
                 update_submission_status(submission, 0, len(test_cases))  # Mark all as failed
