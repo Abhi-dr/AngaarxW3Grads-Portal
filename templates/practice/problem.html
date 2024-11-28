@@ -690,6 +690,7 @@
         })
             .then(response => response.json())
             .then(data => {
+                console.log("TOKEN: ", data.token);
                 const testCaseResultsDiv = document.getElementById('testCaseResults');
                 testCaseResultsDiv.innerHTML = ''; // Clear previous results
 
@@ -725,8 +726,6 @@
                             `;
 
                             document.getElementById("compiler-output").scrollIntoView({ behavior: 'smooth' });
-
-                            console.log(result.compiler_output);
                         }
 
                         resultDiv.innerHTML = `
@@ -786,12 +785,12 @@
                     `;
                     testCaseResultsDiv.prepend(globalErrorDiv);
                 }
-
-                console.log(testCaseResultsDiv);
             })
 
             .catch(error => {
                 console.log('Error:', error);
+                // print the token from response                
+                console.log("TOKEN: ", error.token);
                 clearInterval(countdownInterval); // Clear the interval
                 submit_btn.prop("disabled", false);
                 submit_btn.text("Submit Code");

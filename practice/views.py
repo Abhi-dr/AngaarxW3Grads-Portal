@@ -192,14 +192,16 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         if result.get("compile_output"):
             return {
             "error": result["compile_output"].strip(),
-            "outputs": None
+            "outputs": None,
+            "token": token
         }
 
         # Check for runtime errors
         if result.get("stderr"):
             return {
                 "error": result["stderr"].strip(),
-                "outputs": None
+                "outputs": None,
+                "token": token
             }
         
         # Process execution results
@@ -208,15 +210,20 @@ def run_code_on_judge0(source_code, language_id, test_cases):
         
         return {
         "error": None,
-        "outputs": outputs
+        "outputs": outputs,
+        "token": token
     }
 
     except requests.exceptions.RequestException as e:
         print(f"Judge0 API error: {e}")
         raise Exception("Error connecting to Compiler.")
     except Exception as e:
-        print(f"Error during code execution: {e}")
-        raise Exception("Error occurred while executing the code.")
+        print(f"Error during code execution with token {token}: {e}")
+        return {
+            "error": result.get("status").get("description"),
+            "outputs": None,
+            "token": token
+        }
 
 
 def process_test_case_result(inputs, outputs, expected_outputs):
@@ -300,7 +307,8 @@ def submit_code(request, slug):
                     "submission_id": submission.id,
                     "status": "Compilation Error",
                     "score": 0,
-                    "compiler_output": judge0_response["error"]
+                    "compiler_output": judge0_response["error"],
+                    "token": judge0_response.get("token")
                 })
 
             # Process successful outputs
@@ -319,14 +327,21 @@ def submit_code(request, slug):
                 "submission_id": submission.id,
                 "status": submission.status,
                 "score": submission.score,
-                "compile_output": None  # No compilation error
+                "compile_output": None,  # No compilation error
+                "token": judge0_response.get("token")
             })
 
         except Question.DoesNotExist:
-            return JsonResponse({"error": "Question not found."}, status=404)
+            return JsonResponse({
+                "error": "Question not found.",
+                "token": judge0_response.get("token")
+                }, status=404)
         except Exception as e:
             print(f"Error during submission: {e}")
-            return JsonResponse({"error": "An unexpected error occurred."}, status=500)
+            return JsonResponse({
+                "error": "An unexpected error occurred.",
+                "token": judge0_response.get("token")
+                }, status=500)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
