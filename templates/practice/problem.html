@@ -543,13 +543,29 @@
             // Add more language defaults as needed
         };
 
+        const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
+        console.log("BASE URL: ", baseUrl);
+
         // Function to set editor content based on selected language
         function setEditorContent(languageId) {
-            if (defaultCode[languageId]) {
-                editor.setValue(defaultCode[languageId], -1); // Set default code
-            } else {
-                editor.setValue(`{{ question.driver_code|safe    }}`, -1); // Fallback default
-            }
+            const url = baseUrl.replace("0", languageId); 
+
+            console.log("URL: ", url);
+
+            // Fetch the driver code asynchronously
+            fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    if (data.success) {
+                        editor.setValue(data.code, -1); // Set the fetched driver code
+                    } else {
+                        editor.setValue("// Driver code not found for this language", -1); // Fallback
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error fetching driver code:", error);
+                    editor.setValue("// Error fetching driver code", -1); // Error fallback
+                });
         }
 
         // Fetch languages from API
@@ -560,13 +576,14 @@
         });
 
         const initialLanguageId = languageSelect.val();
-        setEditorContent(initialLanguageId);
-
-
+        console.log("Initial Language ID: ", initialLanguageId);
+        setEditorContent(initialLanguageId); // Load the initial driver code
+        
+        
         // Trigger when the language is changed
         languageSelect.change(function () {
-            let selectedLanguageId = $(this).val();
-            setEditorContent(selectedLanguageId); // Set the default code for the selected language
+            const selectedLanguageId = $(this).val();
+            setEditorContent(selectedLanguageId); // Fetch and set driver code for the new language
 
             // reset the output div
             $("#output").addClass("d-none");
@@ -591,7 +608,6 @@
             editor.setTheme("ace/theme/chrome");
         }
 
-        // editor.setTheme("ace/theme/twilight");
 
         // get selected language and set editor mode
         let selectedLanguage = $("#language").val();
@@ -781,7 +797,8 @@
                     globalErrorDiv.classList.add('alert', 'alert-danger');
                     globalErrorDiv.innerHTML = `
                         <h5>Compiler Error</h5>
-                        <pre>${data.compiler_output}</pre>
+                        Message: <pre>${data.message}</pre>
+                        Info: <pre>${data.compiler_output}</pre>
                     `;
                     testCaseResultsDiv.prepend(globalErrorDiv);
                 }
@@ -797,6 +814,8 @@
             });
     });
 
+
+    // On successful submission... confetti animation
     function submission_accepted() {
         const start = () => {
             confetti.start();
@@ -807,7 +826,7 @@
 
         const successModal = new bootstrap.Modal(document.getElementById('next-modal-btn'), {
             keyboard: false
-      });
+        });
 
         successModal.show();
 
@@ -816,6 +835,8 @@
     }
 
 </script>
+
+<!-- <script src="{% static 'js/dashboard/editorScript.js' %}"></script> -->
 
 
 {% endblock %}

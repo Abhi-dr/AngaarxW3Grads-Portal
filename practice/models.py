@@ -221,8 +221,17 @@ class DriverCode(models.Model):
     language_id = models.IntegerField(default=0)
     code = models.TextField()
     
+    class Meta:
+        indexes = [
+        models.Index(fields=['question', 'language_id']),
+    ]
+    unique_together = ('question', 'language_id')  # Prevent duplicate driver codes
+
+    
     def __str__(self):
         return f"Driver Code for {self.question.title}"
+    
+    
 
 
 # ============================== TEST CASE MODEL =========================

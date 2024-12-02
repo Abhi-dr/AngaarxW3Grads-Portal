@@ -21,7 +21,7 @@ HEADERS = {
 }
 
 
-from .models import Sheet, Question, TestCase, Submission, Streak
+from .models import Sheet, Question, TestCase, Submission, DriverCode
 
 @login_required(login_url="login")
 def practice(request):
@@ -273,7 +273,6 @@ def problem(request, slug):
         print(f"Error loading problem page: {e}")
         return JsonResponse({"error": "Could not load problem."}, status=500)
 
-
 @csrf_exempt
 def submit_code(request, slug):
     """
@@ -351,7 +350,13 @@ def submit_code(request, slug):
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
 
-# ========================================== SUBMIT CODE ===============================================
+# ============================================== DRIVER CODE FETCHING ===============================================
+
+def get_driver_code(request, question_id, language_id):
+    driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()
+    if driver_code:
+        return JsonResponse({"success": True, "code": driver_code.code})
+    return JsonResponse({"success": False, "message": "Driver code not found."}, status=404)
 
 # ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================
 
