@@ -44,7 +44,7 @@ def instructor_problems(request):
 def fetch_problems(request):
     
     query = request.GET.get("query", "").strip()
-    questions = Question.objects.filter(is_approved=True)
+    questions = Question.objects.filter(is_approved=True).order_by('-id')   
 
     
     if query:
@@ -442,3 +442,22 @@ def save_pod(request, id):
         messages.error(request, 'Please select a date')
             
     return redirect('set_pod')
+
+
+# ================================================================================================
+# ========================================= TEST CODE ============================================
+# ================================================================================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def test_code(request, slug):
+    
+    instructor = Instructor.objects.get(id=request.user.id)
+    question = Question.objects.get(slug=slug)
+    
+    parameters = {
+        'instructor': instructor,
+        'question': question
+    }
+    
+    return render(request, 'administration/practice/test_code.html', parameters)

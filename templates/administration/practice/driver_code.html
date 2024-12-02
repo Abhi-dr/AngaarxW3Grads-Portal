@@ -139,11 +139,13 @@ Driver Code | {{ question.title }}
 
         // Set default code for each language
         const driverCodes = {
-            71: "{{ driver_codes.71|default:'// Set the driver code now' }}",
-            50: "{{ driver_codes.50|default:'// Set the driver code now' }}",
-            54: "{{ driver_codes.54|default:'// Set the driver code now' }}",
-            62: "{{ driver_codes.62|default:'// Set the driver code now' }}"
+            71: "{% if driver_codes.71 %}{{ driver_codes.71|escapejs }}{% else %}// Set the driver code now{% endif %}",
+            50: "{% if driver_codes.50 %}{{ driver_codes.50|escapejs }}{% else %}// Set the driver code now{% endif %}",
+            54: "{% if driver_codes.54 %}{{ driver_codes.54|escapejs }}{% else %}// Set the driver code now{% endif %}",
+            62: "{% if driver_codes.62 %}{{ driver_codes.62|escapejs }}{% else %}public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}{% endif %}"
         };
+
+        console.log(driverCodes);
 
         // Set initial code based on selected language
         function setEditorContent(languageId) {

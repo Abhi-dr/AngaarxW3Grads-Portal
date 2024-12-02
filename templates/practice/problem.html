@@ -539,7 +539,7 @@
                 .then((response) => response.json())
                 .then((data) => {
                     if (data.success) {
-                        editor.setValue(data.code, -1); // Set the fetched driver code
+                        editor.setValue(data.code, -1);
                     } else {
                         editor.setValue("// Driver code not found for this language", -1); // Fallback
                     }
@@ -565,6 +565,7 @@
         languageSelect.change(function () {
             const selectedLanguageId = $(this).val();
             setEditorContent(selectedLanguageId); // Fetch and set driver code for the new language
+            editor.setReadOnly(true);
 
             // reset the output div
             $("#output").addClass("d-none");
@@ -752,7 +753,6 @@
                                     <pre class="p-2 rounded">${result.expected_output}</pre>
                                     <p><strong>Your Output:</strong></p>
                                     <pre class="p-2 rounded">${result.user_output}</pre>
-                                    ${compilerOutputHTML}
                                     <p><strong>Status:</strong> 
                                         <span class="badge 
                                             ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">

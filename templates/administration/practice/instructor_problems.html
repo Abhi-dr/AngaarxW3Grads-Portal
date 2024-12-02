@@ -108,6 +108,12 @@ Problem Set🔥
                                 </h6>
                             </th>
 
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#4
+                                </h6>
+                            </th>
+
                         </tr>
                     </thead>
 
@@ -239,8 +245,11 @@ Problem Set🔥
                     </h6>
                 </td>
                 <td class="border-bottom-0">
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 mb-1">
                         <a href="/administration/edit_question/${question.id}" class="btn btn-outline-secondary float-end">Edit</a>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
                         <a href="/administration/delete_question/${question.id}" class="btn btn-danger float-end"
                            onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
                     </div>
@@ -261,6 +270,12 @@ Problem Set🔥
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
                         <a href="#" class="btn btn-outline-info text-blue float-end">Submissions</a>
+                    </div>
+                </td>
+
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href=""/administration/test_code/${question.slug}"" class="btn btn-info text-blue float-end">TEST CODE</a>
                     </div>
                 </td>
             `;
