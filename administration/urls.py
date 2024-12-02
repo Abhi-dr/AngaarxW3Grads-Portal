@@ -40,6 +40,8 @@ urlpatterns = [
     path("delete_test_case/<int:id>/", problem_views.delete_test_case, name="delete_test_case"),
     path("edit_test_case/<int:id>/", problem_views.edit_test_case, name="edit_test_case"),
     
+    path("driver_code/<slug:slug>/", problem_views.driver_code, name="driver_code"),
+    
     path("question_requests/", problem_views.question_requests, name="question_requests"),
     path("approve_question/<int:id>/", problem_views.approve_question, name="approve_question"),
     path("reject_question/<int:id>/", problem_views.reject_question, name="reject_question"),

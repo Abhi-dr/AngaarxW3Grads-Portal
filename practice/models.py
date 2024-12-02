@@ -149,6 +149,7 @@ class Question(models.Model):
     def get_user_status(self, user):
         if self.submissions.filter(user=user, status='Accepted').exists():
             return 'Accepted'
+        
         elif self.submissions.filter(user=user).exists():
             return self.submissions.filter(user=user).last().status
     
@@ -221,15 +222,24 @@ class DriverCode(models.Model):
     language_id = models.IntegerField(default=0)
     code = models.TextField()
     
+    LANGUAGE_CHOICES = {
+        71: 'Python',
+        50: 'C',
+        54: 'C++',
+        62: 'Java',
+    }
+    
     class Meta:
         indexes = [
         models.Index(fields=['question', 'language_id']),
     ]
     unique_together = ('question', 'language_id')  # Prevent duplicate driver codes
-
     
     def __str__(self):
         return f"Driver Code for {self.question.title}"
+    
+    def get_name_through_id(self):
+        return dict(self.LANGUAGE_CHOICES).get(self.language_id)
     
     
 

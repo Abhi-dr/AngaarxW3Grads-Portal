@@ -8,11 +8,19 @@ from django.http import JsonResponse
 
 
 
-from practice.models import POD, Question, Sheet, Submission, TestCase
+from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode
 from django.views.decorators.cache import cache_control
 
-
 import datetime
+
+
+LANGUAGE_IDS = {
+    'C': 50,
+    'C++': 54,
+    'Java': 62,
+    'Python': 71
+}
+
 # ======================================== PROBLEMS ======================================
 
 @login_required(login_url='login')
@@ -101,7 +109,7 @@ def add_question(request):
         
         
         messages.success(request, 'Problem added successfully. Add Test Cases for the problem')
-        return redirect('add_test_case', slug=question.slug)
+        return redirect('test_cases', slug=question.slug)
     
     parameters = {
         'instructor': instructor,
@@ -252,34 +260,34 @@ def test_cases(request, slug):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def add_test_case(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
-    
-    question = Question.objects.get(slug=slug)
-    
-    if request.method == 'POST':
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        question = Question.objects.get(slug=slug)
         
         input_data = request.POST.get('input_data')
         expected_output = request.POST.get('expected_output')
-        is_sample = 'is_sample' in request.POST  # Check if the checkbox is checked
-            
+        is_sample = 'is_sample' in request.POST
+        
         test_case = TestCase(
             question=question,
             input_data=input_data,
             expected_output=expected_output,
             is_sample=is_sample
         )
-        
         test_case.save()
         
-        messages.success(request, 'Test case added successfully. Add More Test Cases')
-        return redirect('add_test_case', slug=slug)
+        # Return the newly added test case as JSON
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Test case added successfully.',
+            'test_case': {
+                'id': test_case.id,
+                'input_data': test_case.input_data,
+                'expected_output': test_case.expected_output,
+                'is_sample': test_case.is_sample
+            }
+        })
     
-    parameters = {
-        'instructor': instructor,
-        'question': question
-    }
-    
-    return render(request, 'administration/practice/add_test_case.html', parameters)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request.'}, status=400)
 
 
 # ======================================== EDIT TEST CASE ======================================
@@ -328,6 +336,45 @@ def delete_test_case(request, id):
     
     messages.success(request, 'Test case deleted successfully')
     return redirect('test_cases', slug=test_case.question.slug)
+
+
+# ======================================== DRIVER CODE ======================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def driver_code(request, slug):
+    
+    instructor = Instructor.objects.get(id=request.user.id)
+    question = Question.objects.get(slug=slug)
+    
+    driver_codes = {code.language_id: code.code for code in DriverCode.objects.filter(question=question)}
+    
+    print(driver_codes)
+        
+    if request.method == 'POST':
+        
+        language_id = request.POST.get('language_id')
+        code = request.POST.get('code')
+
+        # Check if a driver code already exists for the given language
+        existing_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
+        if existing_code:
+            existing_code.code = code
+            existing_code.save()
+            return JsonResponse({"success": True, "message": f"Driver code for {question.title} updated successfully."})
+        else:
+            driver_code = DriverCode(question=question, language_id=language_id, code=code)
+            driver_code.save()
+            return JsonResponse({"success": True, "message": f"Driver code for {question.title} added successfully."})
+
+    parameters = {
+        "instructor": instructor,
+        'question': question,
+        'driver_codes': driver_codes
+    }
+
+    return render(request, 'administration/practice/driver_code.html', parameters)
 
 
 # ================================================================================================

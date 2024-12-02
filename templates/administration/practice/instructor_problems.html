@@ -40,11 +40,10 @@ Problem Set🔥
 
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Search Question 🔍</h5>
             <form onsubmit="event.preventDefault();">
                 <div class="input-group">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by ID, Topic or Course"
-                        oninput="searchQuestions()" />
+                    <input type="text" class="form-control" id="searchInput"
+                        placeholder="Search by ID, Topic or Description" oninput="searchQuestions()" />
                     <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
                 </div>
             </form>
@@ -247,10 +246,16 @@ Problem Set🔥
                     </div>
                 </td>
                 <td class="border-bottom-0">
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-2 mb-1">
                         <a href="/administration/test_cases/${question.slug}" class="btn btn-outline-success text-blue float-end">
                             Test Cases (${question.test_cases_count})
                         </a>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/administration/driver_code/${question.slug}" class="btn btn-outline-warning text-blue float-end">
+                            Driver Codes
+                        </a>
+                    </div>
                     </div>
                 </td>
                 <td class="border-bottom-0">

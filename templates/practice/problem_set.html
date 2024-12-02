@@ -68,12 +68,11 @@ active
 
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Search Question 🔍</h5>
             <form onsubmit="event.preventDefault();">
                 <div class="input-group">
                     <input type="text" class="form-control" id="searchInput" placeholder="Search by ID, Topic or Course"
                         oninput="searchQuestions()" />
-                    <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
+                    <button type="button" class="btn btn-outline-danger" id="clearSearchButton">Clear</button>
                 </div>
             </form>
         </div>
@@ -107,11 +106,11 @@ active
                                 </h6>
                             </th>
 
-                            <th class="border-bottom-0" style="text-align: center;">
+                            <!-- <th class="border-bottom-0" style="text-align: center;">
                                 <h6 class="fw-semibold mb-0">
                                     Youtube 🎥
                                 </h6>
-                            </th>
+                            </th> -->
 
                             <th class="border-bottom-0" style="text-align: center;">
                                 <h6 class="fw-semibold mb-0">
@@ -127,9 +126,16 @@ active
                         </tr>
                     </thead>
 
+                    
                     <tbody id="questionTableBody">
 
-
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
 
                     </tbody>
 
@@ -166,70 +172,121 @@ active
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        fetchQuestions();  // Load all questions initially
-    });
-
-
-    function searchQuestions() {
-        const query = document.getElementById("searchInput").value;
-        fetch("{% url 'fetch_questions' %}?query=" + encodeURIComponent(query))
-            .then(response => response.json())
-            .then(data => {
-                displayQuestions(data.questions);
-                const heading = document.getElementById("questionHeading");
-                if (query) {
-                    heading.innerHTML = `QUESTIONS 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`;
-                } else {
-                    heading.innerHTML = "QUESTIONS 🔥";
-                }
-            })
-            .catch(error => console.error("Error fetching questions:", error));
-    }
-
-    function clearSearch() {
-        document.getElementById("searchInput").value = "";
-        fetchQuestions();  // Reload all questions after clearing
-    }
-
-    function fetchQuestions() {
-        fetch("{% url 'fetch_questions' %}")
-            .then(response => response.json())
-            .then(data => {
-                displayQuestions(data.questions);
-            })
-            .catch(error => console.error("Error fetching questions:", error));
-    }
-
-
-    function displayQuestions(questions) {
+        const searchInput = document.getElementById("searchInput");
         const questionTableBody = document.getElementById("questionTableBody");
-        questionTableBody.innerHTML = "";  // Clear existing rows
-
-        questions.forEach((question, index) => {
-            const row = document.createElement("tr");
-
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>
-                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" data-bs-toggle="modal" data-bs-target="#questionModal" title="${question.title}">${question.title}</h6>
-                </td>
-                <td style="text-align: center;">
-                    <span class="badge bg-${question.difficulty_color}">${question.difficulty_level}</span>
-                </td>
-                <td style="text-align: center;">
-                    ${question.youtube_link ? '<i class="fa fa-youtube-play"></i>' : '<p>Coming Soon...</p>'}
-                </td>
-                <td style="text-align: center;">
-                    <span class="badge bg-${question.color}">${question.status}</span>
-                </td>
-                <td>
-                    <a href="problem/${question.slug}" class="btn btn-dark">Try Now🔥</a>
-                </td>
-            `;
-
-            questionTableBody.appendChild(row);
+        const questionHeading = document.getElementById("questionHeading");
+        const clearSearchButton = document.getElementById("clearSearchButton");
+    
+        let allQuestions = []; // To store all questions
+    
+        // Fetch all questions on page load
+        fetchQuestions();
+    
+        // Add event listener for search input
+        searchInput.addEventListener("input", () => {
+            const query = searchInput.value.trim();
+            if (query) {
+                filterQuestions(query);
+            } else {
+                displayQuestions(allQuestions);
+                updateHeading("QUESTIONS 🔥");
+            }
         });
-    }
+    
+        // Add event listener for clear button
+        clearSearchButton.addEventListener("click", () => {
+            searchInput.value = "";
+            displayQuestions(allQuestions);
+            updateHeading("QUESTIONS 🔥");
+        });
+    
+        // Fetch all questions once
+        function fetchQuestions() {
+            fetch("{% url 'fetch_questions' %}")
+                .then((response) => response.json())
+                .then((data) => {
+                    allQuestions = data.questions; // Store all questions
+                    displayQuestions(allQuestions); // Display them initially
+                })
+                .catch((error) => console.error("Error fetching questions:", error));
+        }
+    
+        // Filter questions based on the query
+        function filterQuestions(query) {
+            const filteredQuestions = allQuestions.filter((question) =>
+                question.title.toLowerCase().includes(query.toLowerCase()) ||
+                question.id.toString().includes(query) ||
+                question.difficulty_level.toLowerCase().includes(query.toLowerCase())
+            );
+    
+            displayQuestions(filteredQuestions);
+            updateHeading(
+                `QUESTIONS 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`
+            );
+        }
+    
+        // Update the heading dynamically
+        function updateHeading(content) {
+            questionHeading.innerHTML = content;
+        }
+    
+        // Display questions in the table
+        function displayQuestions(questions) {
+            questionTableBody.innerHTML = ""; // Clear existing rows
+    
+            if (questions.length === 0) {
+                questionTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No questions found</td></tr>`;
+                return;
+            }
+    
+            questions.forEach((question) => {
+                const row = document.createElement("tr");
+                const highlightedTitle = highlightText(
+                    question.title,
+                    searchInput.value.trim()
+                );
+    
+                row.innerHTML = `
+                    <td><h6>${question.id}</h6></td>
+                    <td>
+                        <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#questionModal" 
+                            title="${question.title}">
+                            ${highlightedTitle}
+                        </h6>
+                    </td>
+                    <td style="text-align: center;">
+                        <span class="badge bg-${question.difficulty_color}">${question.difficulty_level}</span>
+                    </td>
+                    <!-- <td style="text-align: center;">
+                        ${
+                            question.youtube_link
+                                ? '<i class="fa fa-youtube-play"></i>'
+                                : "<p>Coming Soon...</p>"
+                        }
+                    </td> -->
+                    <td style="text-align: center;">
+                        <span class="badge bg-${question.color}">${question.status}</span>
+                    </td>
+                    <td>
+                        <a href="problem/${question.slug}" class="btn btn-dark">Try Now🔥</a>
+                    </td>
+                `;
+    
+                questionTableBody.appendChild(row);
+            });
+        }
+    
+        // Highlight matching text in the search results
+        function highlightText(text, query) {
+            if (!query) return text;
+    
+            const regex = new RegExp(`(${query})`, "gi");
+            return text.replace(regex, '<span class="text-highlight">$1</span>');
+        }
+    });
+    
 </script>
 
 
