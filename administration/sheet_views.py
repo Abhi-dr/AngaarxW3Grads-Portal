@@ -114,8 +114,6 @@ def get_excluded_questions(request, sheet_id):
         for question in excluded_questions
     ]
     
-    print(data)
-    
     return JsonResponse(data, safe=False)
 
 # ========================= ADD QUESTION TO SHEET ==========================

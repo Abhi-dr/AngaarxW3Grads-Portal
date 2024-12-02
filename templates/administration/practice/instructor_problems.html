@@ -204,12 +204,12 @@ Problem Set🔥
         const totalQustions = document.getElementById("totalQustions");
         totalQustions.textContent = questions.length;
 
-        questions.forEach((question, index) => {
+        questions.forEach((question) => {
             const row = document.createElement("tr");
 
             row.innerHTML = `
                 <td class="border-bottom-0">
-                    <h6 class="fw-semibold mb-0">${index + 1}</h6>
+                    <h6 class="fw-semibold mb-0">${question.id}</h6>
                 </td>
                 <td class="border-bottom-0">
                     <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" data-bs-toggle="tooltip" title="${question.title}">
