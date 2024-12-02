@@ -43,6 +43,8 @@ urlpatterns = [
     path("driver_code/<slug:slug>/", problem_views.driver_code, name="driver_code"),
     
     path("test_code/<slug:slug>/", problem_views.test_code, name="test_code"),
+    path('submit_code/<slug:slug>/', problem_views.submit_code, name='instructor_submit_code'),
+
     
     path("question_requests/", problem_views.question_requests, name="question_requests"),
     path("approve_question/<int:id>/", problem_views.approve_question, name="approve_question"),

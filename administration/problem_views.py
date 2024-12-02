@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.db.models import Q
 from accounts.models import Instructor
 from django.http import JsonResponse
-
+import requests, time
+from django.views.decorators.csrf import csrf_exempt
 
 
 from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode
@@ -448,16 +449,219 @@ def save_pod(request, id):
 # ========================================= TEST CODE ============================================
 # ================================================================================================
 
+JUDGE0_URL = "https://theangaarbatch.in/judge0/submissions"
+
+HEADERS = {
+    "X-RapidAPI-Host": "98.83.136.105:2358",
+    "Content-Type": "application/json"
+}
+
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 def test_code(request, slug):
     
     instructor = Instructor.objects.get(id=request.user.id)
-    question = Question.objects.get(slug=slug)
+    question = get_object_or_404(Question, slug=slug)
+    sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
     
     parameters = {
         'instructor': instructor,
-        'question': question
+        'question': question,
+        'sample_test_cases': sample_test_cases
     }
     
     return render(request, 'administration/practice/test_code.html', parameters)
+
+
+def normalize_output(output):
+    """
+    Normalize output for consistent comparison by stripping extra spaces
+    and normalizing newline characters.
+    """
+        
+    if not output:
+        return ""
+    return output.replace("\r\n", "\n").strip()
+
+
+def get_test_cases(question):
+    """
+    Get all test cases associated with the question.
+    """
+    try:
+        return question.test_cases.all()
+    except Exception as e:
+        print(f"Error fetching test cases: {e}")
+        return []
+
+
+def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, memory_limit):
+    """
+    Send the code to Judge0 API for execution against multiple test cases.
+    """
+    # Prepare single stdin batch input for Judge0
+    stdin = f"{len(test_cases)}\n"
+    for test_case in test_cases:
+        stdin += f"{test_case.input_data}\n"
+        
+    submission_data = {
+        "source_code": source_code,
+        "language_id": language_id,
+        "stdin": stdin,
+        "cpu_time_limit": 2,
+        "wall_time_limit": 2,
+        "memory_limit": memory_limit * 1000,
+        "enable_per_process_and_thread_time_limit": True,
+    }
+
+    try:
+        # Submit the code to Judge0
+        response = requests.post(JUDGE0_URL, json=submission_data, headers=HEADERS)
+        response.raise_for_status()
+        
+        token = response.json().get('token')
+        
+        print("TOKEN", token)
+        
+        if not token:
+            raise Exception("No token received from Judge0.")
+        
+        # Fetch results
+        result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
+        
+        while result_response.json().get("status").get("id") == 2:  # Status 'In Queue'
+            time.sleep(1)
+            result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
+
+        result = result_response.json()
+        
+        print("RESULT:", result)
+        
+        if result.get("compile_output"):
+            return {
+            "error": result["compile_output"].strip(),
+            "outputs": None,
+            "token": token
+        }
+
+        # Check for runtime errors
+        if result.get("stderr"):
+            return {
+                "error": result["stderr"].strip(),
+                "outputs": None,
+                "token": token
+            }
+        
+        # Process execution results
+        outputs = result.get('stdout', '')
+        outputs = [output.strip() for output in outputs.split("\n")]
+        
+        return {
+        "error": None,
+        "outputs": outputs,
+        "token": token
+    }
+
+    except requests.exceptions.RequestException as e:
+        print(f"Judge0 API error: {e}")
+        return {
+            "error": "Cannot connect to Compier \n Error: " + str(e),
+        }
+    except Exception as e:
+        print(f"Error during code execution with token {token}: {e}")
+        return {
+            "error": result.get("status").get("description"),
+            "outputs": None,
+            "token": token
+        }
+
+
+def process_test_case_result(inputs, outputs, expected_outputs):
+    """
+    Compare outputs against expected outputs and prepare detailed results.
+    """
+    results = []
+    for input_data, expected_output, output in zip(inputs, expected_outputs, outputs):
+        result = {
+            "input": input_data,
+            "expected_output": expected_output,
+            "user_output": output,
+            "passed": output == expected_output,
+            "status": "Passed" if output == expected_output else "Wrong Answer"
+        }
+        results.append(result)
+    return results
+
+
+@csrf_exempt
+def submit_code(request, slug):
+    """
+    Handle user code submission for a problem.
+    """
+    
+    if request.method == 'POST':
+        try:
+            # Validate inputs
+            question = get_object_or_404(Question, slug=slug)
+
+            language_id = request.POST.get('language_id')
+            source_code = request.POST.get('submission_code')
+
+            if not language_id or not source_code:
+                return JsonResponse({"error": "Missing language ID or source code."}, status=400)
+
+            test_cases = get_test_cases(question)
+            if not test_cases:
+                return JsonResponse({"error": "No test cases available for this question."}, status=400)
+
+            # Create a submission record
+            submission = {"question":question,
+            "code":source_code,
+            "language":language_id,
+            "status":'Pending'}
+
+            # Run the code and process results
+            start = time.time()
+            judge0_response = run_code_on_judge0(source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
+            end = time.time()
+            
+            print("Time Taken:", end - start)
+            
+            if judge0_response["error"]:  # Compilation error
+                return JsonResponse({
+                    "submission_id": submission.id,
+                    "status": "Compilation Error",
+                    "score": 0,
+                    "compiler_output": judge0_response["error"],
+                    "token": judge0_response.get("token")
+                })
+
+            # Process successful outputs
+            outputs = judge0_response["outputs"]
+            expected_outputs = [normalize_output(tc.expected_output) for tc in test_cases]
+            inputs = [tc.input_data for tc in test_cases]
+            
+            test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
+            passed_test_cases = sum(1 for result in test_case_results if result['passed'])
+
+
+            return JsonResponse({
+                "test_case_results": test_case_results,
+                "status": submission["status"],
+                "compile_output": None,  # No compilation error
+                "token": judge0_response.get("token")
+            })
+
+        except Question.DoesNotExist:
+            return JsonResponse({
+                "error": "Question not found.",
+                "token": judge0_response.get("token")
+                }, status=404)
+        except Exception as e:
+            print(f"Error during submission: {e}")
+            return JsonResponse({
+                "error": "An unexpected error occurred.",
+                "token": judge0_response.get("token")
+                }, status=500)
+
+    return JsonResponse({"error": "Invalid request method."}, status=400)
