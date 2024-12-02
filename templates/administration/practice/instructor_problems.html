@@ -12,7 +12,7 @@ Problem Set🔥
         <div class="card-body">
             <h3 class="heading">
                 <span class="fw-semibold">Problem Set</span>
-                <span class="fs-4"> | 🔥Total: {{ questions.count }}🔥</span>
+                <span class="fs-4"> | 🔥Total: <span id="totalQustions">{{ questions.count }}</span>🔥</span>
             </h3>
         </div>
         <div class="row">
@@ -38,32 +38,18 @@ Problem Set🔥
 
     <!-- ========================== SEARCH BAR ==================================== -->
 
-    <!-- <div class="card w-100">
+    <div class="card w-100">
         <div class="card-body p-4">
-            <form method="post">
-
-                {% csrf_token %}
-
+            <h5 class="card-title fw-semibold mb-4">Search Question 🔍</h5>
+            <form onsubmit="event.preventDefault();">
                 <div class="input-group">
-
-                    {% if query %}
-
-                    <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
-                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query" value="{{ query }}">
-
-                        {% else %}
-
-                        <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
-                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
-
-                        {% endif %}
-
-                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
-                    <a href="#" class="btn btn-outline-danger">Clear</a>
+                    <input type="text" class="form-control" id="searchInput" placeholder="Search by ID, Topic or Course"
+                        oninput="searchQuestions()" />
+                    <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
                 </div>
             </form>
         </div>
-    </div> -->
+    </div>
 
     <!-- ================================= SESSIONS TABLE ================================== -->
 
@@ -126,87 +112,10 @@ Problem Set🔥
                         </tr>
                     </thead>
 
-                    <tbody>
-
-                        {% for question in questions %}
-
-                        <tr>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ question.title }}">{{ question.title|truncatechars:25 }}</h6>
-
-                                {% for sheet in question.sheets.all %}
-                                <span style="font-weight: bold;"> {{ sheet.name }} |
-                                </span>
-                                {% endfor %}
-
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width: 100%;"
-                                        data-bs-toggle="modal" data-bs-target="#questionModal"
-                                        data-title="{{ question.title }}" data-description="{{ question.description }}"
-                                        title="{{ question.title }}"> View</button>
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
-                                        {{ question.difficulty_level }}
-                                    </span>
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0 fs-4">
-                                    <!-- <span class="badge bg-{{ session.get_meeting_status.color }}">
-                                        Position: {{ question.position }}
-                                    </span> -->
-                                    <br>
-                                    <span class="badge bg-{{ session.get_meeting_status.color }}">
-                                        CPU Limit: <strong>{{ question.cpu_time_limit }}
-                                    </span>
-                                    <br>
-                                    <span class="badge bg-{{ session.get_meeting_status.color }}">
-                                        Memory Limit: <strong>{{ question.memory_limit }}</strong>
-                                    </strong>
-                                    </span>
-                                </h6>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'edit_question' question.id %}"
-                                        class="btn btn-outline-secondary float-end">Edit</a>
-                                    <a href="{% url 'delete_question' question.id %}" class="btn btn-danger float-end"
-                                        onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
-                                </div>
-                            </td>
-
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'test_cases' question.slug %}"
-                                        class="btn btn-outline-success text-blue float-end">Test Cases
-                                        ({{question.test_cases.count }})</a>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="#" class="btn btn-outline-info text-blue float-end">Submissions </a>
-                                </div>
-                            </td>
-                        </tr>
-
-                        {% endfor %}
+                    <tbody id="questionTableBody">
 
                     </tbody>
+
                 </table>
             </div>
 
@@ -249,6 +158,116 @@ Problem Set🔥
         modalTitle.textContent = title;
         modalBody.innerHTML = description;
     });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetchQuestions();  // Load all questions initially
+    });
+
+
+    function searchQuestions() {
+        const query = document.getElementById("searchInput").value;
+        fetch("{% url 'instructor_fetch_problems' %}?query=" + encodeURIComponent(query))
+            .then(response => response.json())
+            .then(data => {
+                displayQuestions(data.questions);
+                const heading = document.getElementById("questionHeading");
+                if (query) {
+                    heading.innerHTML = `QUESTIONS 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`;
+                } else {
+                    heading.innerHTML = "QUESTIONS 🔥";
+                }
+            })
+            .catch(error => console.error("Error fetching questions:", error));
+    }
+
+    function clearSearch() {
+        document.getElementById("searchInput").value = "";
+        fetchQuestions();  // Reload all questions after clearing
+    }
+
+    function fetchQuestions() {
+        fetch("{% url 'instructor_fetch_problems' %}")
+            .then(response => response.json())
+            .then(data => {
+                displayQuestions(data.questions);
+            })
+            .catch(error => console.error("Error fetching questions:", error));
+    }
+
+
+    function displayQuestions(questions) {
+        const questionTableBody = document.getElementById("questionTableBody");
+        questionTableBody.innerHTML = "";  // Clear existing rows
+
+        const totalQustions = document.getElementById("totalQustions");
+        totalQustions.textContent = questions.length;
+
+        questions.forEach((question, index) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">${index + 1}</h6>
+                </td>
+                <td class="border-bottom-0">
+                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" data-bs-toggle="tooltip" title="${question.title}">
+                        ${question.title.length > 25 ? question.title.slice(0, 25) + "..." : question.title}
+                    </h6>
+                    ${question.sheets.map(sheet => `<span style="font-weight: bold;">${sheet.name} | </span>`).join("")}
+                </td>
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">
+                        <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width: 100%;" data-bs-toggle="modal" 
+                                data-bs-target="#questionModal" data-title="${question.title}" data-description="${question.description}" 
+                                title="${question.title}">
+                            View
+                        </button>
+                    </p>
+                </td>
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">
+                        <span class="badge bg-${question.difficulty_color} text-color">
+                            ${question.difficulty_level}
+                        </span>
+                    </p>
+                </td>
+                <td class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0 fs-4">
+                        <span class="badge bg-body-tertiary mb-1">CPU Limit: <strong>${question.cpu_time_limit} s</strong></span><br>
+                        <span class="badge bg-body-tertiary">Memory Limit: <strong>${question.memory_limit} MB</strong></span>
+                    </h6>
+                </td>
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/administration/edit_question/${question.id}" class="btn btn-outline-secondary float-end">Edit</a>
+                        <a href="/administration/delete_question/${question.id}" class="btn btn-danger float-end"
+                           onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
+                    </div>
+                </td>
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/administration/test_cases/${question.slug}" class="btn btn-outline-success text-blue float-end">
+                            Test Cases (${question.test_cases_count})
+                        </a>
+                    </div>
+                </td>
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="#" class="btn btn-outline-info text-blue float-end">Submissions</a>
+                    </div>
+                </td>
+            `;
+
+            questionTableBody.appendChild(row);
+        });
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+
+    }
 </script>
 
 {% endblock %}

@@ -21,17 +21,49 @@ import datetime
 def instructor_problems(request):
     
     instructor = Instructor.objects.get(id=request.user.id)
-
-    questions = Question.objects.filter(is_approved=True).order_by('position')
     unapproved_question_number = Question.objects.filter(is_approved=False).count()
     
     parameters = {
         'instructor': instructor,
-        'questions': questions,
         'unapproved_question_number': unapproved_question_number
     }
     return render(request, 'administration/practice/instructor_problems.html', parameters)
 
+# ======================================== FETCH PROBLEMS ======================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def fetch_problems(request):
+    
+    query = request.GET.get("query", "").strip()
+    questions = Question.objects.filter(is_approved=True)
+
+    
+    if query:
+        questions = questions.filter(
+            Q(title__icontains=query) | 
+            Q(slug__icontains=query) | 
+            Q(id__icontains=query)
+        )
+        
+    question_list = [{
+        "id": q.id,
+        "title": q.title,
+        "slug": q.slug,
+        "difficulty_level": q.difficulty_level,
+        "difficulty_color": q.get_difficulty_level_color(),
+        "description": q.description,
+        "cpu_time_limit": q.cpu_time_limit,
+        "memory_limit": q.memory_limit,
+        "test_cases_count": q.test_cases.count(),
+        "status": "Active",  # Example status
+        "color": "success",  # Example color
+        "sheets": [{"name": sheet.name} for sheet in q.sheets.all()],
+    } for q in questions]
+    return JsonResponse({
+            "questions": question_list,
+            "total_questions": questions.count()
+         })
 
 # ======================================== ADD PROBLEM ======================================
 

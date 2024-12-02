@@ -29,6 +29,8 @@ urlpatterns = [
     # ============================ PROBLMES WORK ==========================
     
     path("instructor_problems/", problem_views.instructor_problems, name="instructor_problems"),
+    path("fetch_problems/", problem_views.fetch_problems, name="instructor_fetch_problems"),
+    
     path("add_question/", problem_views.add_question, name="add_question"),
     path("delete_question/<int:id>", problem_views.delete_question, name="delete_question"),
     path("edit_question/<int:id>", problem_views.edit_question, name="edit_question"),
