@@ -1,8 +1,8 @@
 from django.db import models
+from django.db.models import Sum, Min, F
 from datetime import datetime, timedelta
 
 from accounts.models import Student
-
 
 # ============================== BATCH MODEL =========================
 
@@ -240,8 +240,6 @@ class DriverCode(models.Model):
     
     def get_name_through_id(self):
         return dict(self.LANGUAGE_CHOICES).get(self.language_id)
-    
-    
 
 
 # ============================== TEST CASE MODEL =========================

@@ -31,6 +31,9 @@ active
                 <a href="{% url 'question_requests' %}" class="btn btn-outline-warning button mt-n3 m-3 w-100">Question
                     Requests ({{unapproved_question_number}})</a>
             </div>
+            <div class="col-md-4 mb-2">
+                <a href="{% url 'instructor_leaderboard' sheet.slug %}" class="btn btn-warning button mt-n3 m-3 w-100">Leaderboard</a>
+            </div>
             <div class="col-md-3 mb-2">
                 <a href="{% url 'instructor_delete_sheet' sheet.id %}" class="btn btn-danger button mt-n3 m-3 w-100"
                     onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete Sheet</a>
@@ -46,35 +49,6 @@ active
     </div>
 
     {% endfor %}
-
-    <!-- ========================== SEARCH BAR ==================================== -->
-
-    <!-- <div class="card w-100">
-        <div class="card-body p-4">
-            <form method="post">
-
-                {% csrf_token %}
-
-                <div class="input-group">
-
-                    {% if query %}
-
-                    <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
-                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query" value="{{ query }}">
-
-                        {% else %}
-
-                        <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
-                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
-
-                        {% endif %}
-
-                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
-                    <a href="#" class="btn btn-outline-danger">Clear</a>
-                </div>
-            </form>
-        </div>
-    </div> -->
 
     <!-- ================================= SESSIONS TABLE ================================== -->
 

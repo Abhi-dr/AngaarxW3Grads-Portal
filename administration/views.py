@@ -19,7 +19,7 @@ def index(request):
     
     instructor = Instructor.objects.get(id=request.user.id)
     latest_sheet = Sheet.objects.latest('id')
-    last_3_questions = Question.objects.order_by('-created_at')[:3]
+    # last_3_questions = Question.objects.order_by('-created_at')[:3]
 
     
     # sessions = Session.objects.filter(instructor=instructor, recorded_session_link=None).order_by("-session_time")

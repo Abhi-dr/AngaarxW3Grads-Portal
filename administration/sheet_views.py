@@ -144,3 +144,51 @@ def remove_question_from_sheet(request, sheet_id, question_id):
     
     return redirect('instructor_sheet', slug=sheet.slug)
 
+# =========================== LEADERBOARD ===========================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def leaderboard(request, slug):
+    
+    instructor = Instructor.objects.get(id=request.user.id)
+    sheet = Sheet.objects.get(slug=slug)
+    
+    parameters = {
+        "instructor": instructor,
+        "sheet": sheet,
+    }
+    
+    return render(request, 'administration/sheet/leaderboard.html', parameters)
+
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.db.models import Sum, Min
+
+def sheet_leaderboard(request, slug):
+    sheet = get_object_or_404(Sheet, slug=slug)
+
+    leaderboard_data = Submission.objects.filter(
+        question__in=sheet.questions.all(),
+        status='Accepted'
+    ).values('user').annotate(
+        total_score=Sum('score'),
+        earliest_submission=Min('submitted_at'),
+        solved_problems=Sum(1)  # Count of accepted problems per user
+    ).order_by('-total_score', 'earliest_submission')
+
+    # Format the data
+    leaderboard = [
+        {
+            'student': {
+                'id': entry['user'],
+                'name': Student.objects.get(id=entry['user']).first_name + " " + Student.objects.get(id=entry['user']).last_name,
+            },
+            'total_score': entry['total_score'],
+            'earliest_submission': entry['earliest_submission'],
+            'solved_problems': entry['solved_problems'],
+        }
+        for entry in leaderboard_data
+    ]
+
+    return JsonResponse({'leaderboard': leaderboard})
