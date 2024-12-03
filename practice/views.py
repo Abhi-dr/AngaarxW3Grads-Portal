@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-import time
+import time, json
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -186,9 +186,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
             result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
 
         result = result_response.json()
-        
-        print("RESULT:", result)
-        
+                
         if result.get("compile_output"):
             return {
             "error": result["compile_output"].strip(),
@@ -364,38 +362,54 @@ def get_driver_code(request, question_id, language_id):
 def run_code(request, slug):
     if request.method == 'POST':
         try:
+            question = get_object_or_404(Question, slug=slug)
+            user = request.user.student
             
-            print("FUNCTION CALLED")
-            question = Question.objects.get(slug=slug)
-            language_id = request.POST.get('language_id')
-            source_code = request.POST.get('submission_code')
+            data = json.loads(request.body)
+            language_id = data.get('language_id')
+            source_code = data.get('code')            
+
+            if not language_id or not source_code:
+                return JsonResponse({"error": "Missing language ID or source code."}, status=400)
+
+            # Fetch sample test cases
+            sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
+            if not sample_test_cases:
+                return JsonResponse({"error": "No sample test cases available."}, status=400)
+
+            # Execute code against sample test cases
+            judge0_response = run_code_on_judge0(
+                source_code,
+                language_id,
+                sample_test_cases,
+                question.cpu_time_limit,
+                question.memory_limit
+            )
             
-            print("QUESTION", question)
-            print("LANGUAGE", language_id)
-            print("SOURCE CODE", source_code)
+            if judge0_response["error"]:
+                return JsonResponse({
+                    "status": "Error",
+                    "compiler_output": judge0_response["error"]
+                })
 
-            test_cases = TestCase.objects.filter(question=question, is_sample=True)
+            # Process outputs
+            outputs = judge0_response["outputs"]
+            expected_outputs = [normalize_output(tc.expected_output) for tc in sample_test_cases]
+            inputs = [tc.input_data for tc in sample_test_cases]
 
-            if not test_cases:
-                return JsonResponse({"error": "No test cases available for this question"}, status=400)
-
-            # test_case_results, passed_test_cases = run_code_against_test_cases(
-            #     source_code, language_id, test_cases
-            # )
-            
-
+            test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
+                        
             return JsonResponse({
-                # "test_case_results": test_case_results,
-                # "passed_test_cases": passed_test_cases,
-                "total_test_cases": len(test_cases)
+                "status": "Success",
+                "test_case_results": test_case_results
             })
 
-        except Question.DoesNotExist:
-            return JsonResponse({"error": "Question not found"}, status=404)
         except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
+            print(f"Error during code execution: {e}")
+            return JsonResponse({"error": "An unexpected error occurred."}, status=500)
 
-    return JsonResponse({"error": "Invalid request method"}, status=400)
+    return JsonResponse({"error": "Invalid request method."}, status=400)
+
 
 
 # ====================================================================================================

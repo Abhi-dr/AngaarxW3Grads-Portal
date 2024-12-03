@@ -11,6 +11,7 @@ urlpatterns = [
     path("execute_code", views.execute_code, name="execute_code"),
     
     path("run_code/<slug:slug>/", views.run_code, name="run_code"),
+    
     path('submit_code/<slug:slug>/', views.submit_code, name='submit_code'),
     
     path("problem/<slug:slug>/", views.problem, name="problem"),
