@@ -96,6 +96,7 @@ def add_question(request):
         question = Question(
             title=title,
             description=description,
+            constraints = constraints,
             difficulty_level=difficulty_level,
             driver_code=driver_code,
             is_approved=True
