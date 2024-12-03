@@ -6,6 +6,7 @@ from accounts.views import logout as account_logout
 from django.db.models import Q
 from accounts.models import Instructor, Student
 from student.models import Notification, Anonymous_Message
+from practice.models import Sheet, Submission
 
 
 import datetime
@@ -17,6 +18,7 @@ import datetime
 def index(request):
     
     instructor = Instructor.objects.get(id=request.user.id)
+    latest_sheet = Sheet.objects.latest('id')
     
     # sessions = Session.objects.filter(instructor=instructor, recorded_session_link=None).order_by("-session_time")
     
@@ -32,6 +34,7 @@ def index(request):
     
     parameters = {
         "instructor": instructor,
+        "latest_sheet": latest_sheet,
         # "total_enrolled_students": total_enrolled_students,
         # "total_sessions": total_sessions,
         # "sessions": sessions,
