@@ -3,7 +3,7 @@ from .models import Sheet, Question, TestCase, Submission, POD, Streak, Batch, E
 
 @admin.register(Sheet)
 class SheetAdmin(admin.ModelAdmin):
-    list_display = ['name']
+    list_display = ['name', "is_enabled"]
     search_fields = ['name']
     list_per_page = 10
 

@@ -709,6 +709,14 @@
                 .then(data => {
                     console.log("TOKEN: ", data.token);
                     const testCaseResultsDiv = document.getElementById('testCaseResults');
+
+
+                    if (data.error) {
+                        alert(data.error);
+                        // rediret to practice page
+                        window.location.href = "{% url 'practice' %}";
+                    }
+
                     testCaseResultsDiv.innerHTML = '<h4>Test Case Results:</h4>'; // Clear previous results
 
                     clearInterval(countdownInterval); // Clear the interval
@@ -800,6 +808,7 @@
                         Message: <pre>${data.message}</pre>
                         Info: <pre>${data.compiler_output}</pre>
                     `;
+
                         testCaseResultsDiv.prepend(globalErrorDiv);
                     }
                 })

@@ -95,6 +95,17 @@ def sheet(request, slug):
     
     return render(request, 'administration/sheet/sheet.html', parameters)
 
+# ========================= TOGGLE SHEET STATUS ==========================
+
+@login_required
+@staff_member_required
+def toggle_sheet_status(request, slug):
+    if request.method == "POST":
+        sheet = get_object_or_404(Sheet, slug=slug)
+        sheet.is_enabled = not sheet.is_enabled
+        sheet.save()
+        return JsonResponse({'status': sheet.is_enabled})
+
 # ========================= GET EXCLUDED QUESTIONS ==========================
 
 @login_required(login_url='login')

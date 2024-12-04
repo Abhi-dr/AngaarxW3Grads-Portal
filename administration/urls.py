@@ -94,5 +94,11 @@ urlpatterns += [
     path("remove_question_from_sheet/<int:sheet_id>/<int:question_id>/", sheet_views.remove_question_from_sheet, name="instructor_remove_from_sheet"),
     
     path("leaderboard/<slug:slug>", sheet_views.leaderboard, name="instructor_leaderboard"),
-    path("sheet_leaderboard/<slug:slug>", sheet_views.sheet_leaderboard, name="instructor_sheet_leaderboard")
+    path("sheet_leaderboard/<slug:slug>", sheet_views.sheet_leaderboard, name="instructor_sheet_leaderboard"),
+    
+    
+    # ====================================== ENABLE / DISABLE SHEET ===================================
+    
+    path('sheet/<slug:slug>/toggle-status/', sheet_views.toggle_sheet_status, name='toggle_sheet_status'),
+
 ]

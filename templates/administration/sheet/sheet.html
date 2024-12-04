@@ -32,11 +32,18 @@ active
                     Requests ({{unapproved_question_number}})</a>
             </div>
             <div class="col-md-4 mb-2">
-                <a href="{% url 'instructor_leaderboard' sheet.slug %}" class="btn btn-warning button mt-n3 m-3 w-100">Leaderboard</a>
+                <a href="{% url 'instructor_leaderboard' sheet.slug %}"
+                    class="btn btn-warning button mt-n3 m-3 w-100">Leaderboard</a>
             </div>
             <div class="col-md-3 mb-2">
                 <a href="{% url 'instructor_delete_sheet' sheet.id %}" class="btn btn-danger button mt-n3 m-3 w-100"
                     onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete Sheet</a>
+            </div>
+            <div class="col-md-3 mb-2">
+                <button id="toggle-status" class="btn btn-info button mt-n3 m-3 w-100"
+                    data-sheet-slug="{{ sheet.slug }}">
+                    {% if sheet.is_enabled %} Disable {% else %} Enable {% endif %}
+                </button>
             </div>
         </div>
     </div>
@@ -236,29 +243,30 @@ active
         const addQuestionModal = document.getElementById("addQuestionModal");
         const questionList = document.getElementById("questionList");
         const searchInput = document.getElementById("searchInput");
-        const sheetId = {{ sheet.id }}; // Embed sheet.id directly
-        let allQuestions = []; // Store all questions for searching
+        const sheetId = {{ sheet.id }
+    }; // Embed sheet.id directly
+    let allQuestions = []; // Store all questions for searching
 
-        // Fetch and populate questions when the modal is shown
-        addQuestionModal.addEventListener("show.bs.modal", () => {
-            if (!sheetId) return;
+    // Fetch and populate questions when the modal is shown
+    addQuestionModal.addEventListener("show.bs.modal", () => {
+        if (!sheetId) return;
 
-            fetch("{% url 'get_excluded_questions' 0 %}".replace("0", sheetId))
-                .then((response) => response.json())
-                .then((questions) => {
-                    allQuestions = questions; // Cache the full list of questions
-                    renderQuestions(allQuestions); // Initial rendering
-                })
-                .catch((error) => console.error("Error fetching questions:", error));
-        });
+        fetch("{% url 'get_excluded_questions' 0 %}".replace("0", sheetId))
+            .then((response) => response.json())
+            .then((questions) => {
+                allQuestions = questions; // Cache the full list of questions
+                renderQuestions(allQuestions); // Initial rendering
+            })
+            .catch((error) => console.error("Error fetching questions:", error));
+    });
 
-        // Render questions in the table
-        function renderQuestions(questions) {
-            questionList.innerHTML = ""; // Clear existing content
+    // Render questions in the table
+    function renderQuestions(questions) {
+        questionList.innerHTML = ""; // Clear existing content
 
-            questions.forEach((question) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
+        questions.forEach((question) => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
                     <td>
                         <h6 class="fw-semibold mb-1 text-wrap">${question.id}</h6>
                     </td>
@@ -274,67 +282,83 @@ active
                         </button>
                     </td>
                 `;
-                questionList.appendChild(row);
-            });
-
-            // final call to add the queston in the sheet
-            document.querySelectorAll(".add-question-btn").forEach((btn) => {
-                btn.addEventListener("click", (e) => {
-                    const questionId = e.target.getAttribute("data-question-id");
-                    addQuestionToSheet(sheetId, questionId);
-                });
-            });
-        }
-
-        // search button...
-        searchInput.addEventListener("input", () => {
-            const searchTerm = searchInput.value.toLowerCase();
-
-            const filteredQuestions = allQuestions.filter((question) => {
-                const titleMatch = question.title.toLowerCase().includes(searchTerm);
-                const idMatch = question.id.toString().includes(searchTerm);
-                const courseMatch = question.course ? question.course.toLowerCase().includes(searchTerm) : false;
-
-                return titleMatch || idMatch || courseMatch;
-            });
-
-            renderQuestions(filteredQuestions);
+            questionList.appendChild(row);
         });
 
-        // Clear search input and restore the full question list
-        window.clearSearch = () => {
-            searchInput.value = "";
-            renderQuestions(allQuestions);
-        };
+        // final call to add the queston in the sheet
+        document.querySelectorAll(".add-question-btn").forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+                const questionId = e.target.getAttribute("data-question-id");
+                addQuestionToSheet(sheetId, questionId);
+            });
+        });
+    }
 
-        // Add question to sheet
-        function addQuestionToSheet(sheetId, questionId) {
-            sheetId = sheetId.toString();
-            console.log(sheetId, questionId);
-            if (!sheetId || !questionId) return;
+    // search button...
+    searchInput.addEventListener("input", () => {
+        const searchTerm = searchInput.value.toLowerCase();
 
-            const url = `/administration/add_question_to_sheet/${sheetId}/${questionId}/`;
-            console.log(url);
-            fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}",
-                },
+        const filteredQuestions = allQuestions.filter((question) => {
+            const titleMatch = question.title.toLowerCase().includes(searchTerm);
+            const idMatch = question.id.toString().includes(searchTerm);
+            const courseMatch = question.course ? question.course.toLowerCase().includes(searchTerm) : false;
+
+            return titleMatch || idMatch || courseMatch;
+        });
+
+        renderQuestions(filteredQuestions);
+    });
+
+    // Clear search input and restore the full question list
+    window.clearSearch = () => {
+        searchInput.value = "";
+        renderQuestions(allQuestions);
+    };
+
+    // Add question to sheet
+    function addQuestionToSheet(sheetId, questionId) {
+        sheetId = sheetId.toString();
+        console.log(sheetId, questionId);
+        if (!sheetId || !questionId) return;
+
+        const url = `/administration/add_question_to_sheet/${sheetId}/${questionId}/`;
+        console.log(url);
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+        })
+            .then((response) => {
+                console.log(response);
+                if (response.ok) {
+                    // Successfully added; refresh questions
+                    document.querySelector(`button[data-question-id="${questionId}"]`).parentElement.parentElement.remove();
+                } else {
+                    alert("Failed to add question. (html)");
+                }
             })
-                .then((response) => {
-                    console.log(response);
-                    if (response.ok) {
-                        // Successfully added; refresh questions
-                        document.querySelector(`button[data-question-id="${questionId}"]`).parentElement.parentElement.remove();
-                    } else {
-                        alert("Failed to add question. (html)");
-                    }
-                })
-                .catch((error) => console.error("Error adding question:", error));
-        }
+            .catch((error) => console.error("Error adding question:", error));
+    }
     });
 </script>
 
+<script>
+    document.getElementById('toggle-status').addEventListener('click', function () {
+        const slug = this.getAttribute('data-sheet-slug');
+        fetch(`/administration/sheet/${slug}/toggle-status/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.status ? 'Sheet Enabled' : 'Sheet Disabled');
+                this.textContent = data.status ? 'Disable' : 'Enable';
+            });
+    });
+</script>
 
 {% endblock %}

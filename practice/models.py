@@ -52,8 +52,9 @@ class Sheet(models.Model):
     slug = models.SlugField(unique=True, blank=True, null=True)
     
     thumbnail = models.ImageField(upload_to='sheets/thumbnails/', blank=True, null=True)
-    
     batches = models.ManyToManyField(Batch, related_name="sheets", blank=True)
+    
+    is_enabled = models.BooleanField(default=True)  
 
 
     def __str__(self):

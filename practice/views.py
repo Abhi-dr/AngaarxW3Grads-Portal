@@ -52,6 +52,10 @@ def sheet(request, slug):
     user_submissions = {
         submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=questions)
         }
+    
+    if not sheet.is_enabled:
+        messages.info(request, "This sheet is not enabled.")
+        return redirect('practice')
 
     parameters = {
         "sheet": sheet,
@@ -288,11 +292,11 @@ def submit_code(request, slug):
     Handle user code submission for a problem.
     """
     
-    if request.method == 'POST':
+    if request.method == 'POST':      
         try:
             # Validate inputs
             question = get_object_or_404(Question, slug=slug)
-            user = request.user.student
+            user = request.user.student            
 
             language_id = request.POST.get('language_id')
             source_code = request.POST.get('submission_code')
@@ -303,6 +307,11 @@ def submit_code(request, slug):
             test_cases = get_test_cases(question)
             if not test_cases:
                 return JsonResponse({"error": "No test cases available for this question."}, status=400)
+
+            sheet = Sheet.objects.filter(questions=question).first()
+
+            if sheet and not sheet.is_enabled:
+                return JsonResponse({"error": "Sheet not enabled."}, status=400)
 
             # Create a submission record
             submission = create_submission(user, question, source_code, language_id)
@@ -315,7 +324,6 @@ def submit_code(request, slug):
             print("Time Taken:", end - start)
             
             if judge0_response["error"]:  # Compilation error
-                update_submission_status(submission, 0, len(test_cases))  # Mark all as failed
                 return JsonResponse({
                     "submission_id": submission.id,
                     "status": "Compilation Error",
