@@ -7,6 +7,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 
+import base64
+
+
 from django.views.decorators.cache import cache_control
 
 # Judge0 API endpoint and key
@@ -179,13 +182,15 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
             raise Exception("No token received from Judge0.")
         
         # Fetch results
-        result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS)
+        result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
         
         while result_response.json().get("status").get("id") == 2:  # Status 'In Queue'
             time.sleep(1)
             result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
 
         result = result_response.json()
+        
+        print("RESULT:", result)
                 
         if result.get("compile_output"):
             return {
@@ -243,19 +248,25 @@ def process_test_case_result(inputs, outputs, expected_outputs):
     return results
 
 
-def update_submission_status(submission, passed, total):
+def update_submission_status(submission, passed, total, total_submission_count):
     """
     Update the submission status and score in the database.
     """
     try:
         submission.status = 'Accepted' if passed == total else 'Wrong Answer'
-        submission.score = int((passed / total) * 100) if total > 0 else 0
+        
+        score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))
+        submission.score = score
         submission.save()
+        
+        print("AFTER UPDATE:", submission.score)
+        
     except Exception as e:
         print(f"Error updating submission: {e}")
         raise Exception("Could not update submission status.")
-@login_required(login_url="login")
 
+
+@login_required(login_url="login")
 def problem(request, slug):
     """
     Render the problem page with question details and sample test cases.
@@ -320,9 +331,10 @@ def submit_code(request, slug):
             
             test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
             passed_test_cases = sum(1 for result in test_case_results if result['passed'])
-
+            
+            total_submission_count = Submission.objects.filter(user=user, question=question).count()            
             # Update submission
-            update_submission_status(submission, passed_test_cases, len(test_cases))
+            update_submission_status(submission, passed_test_cases, len(test_cases), total_submission_count)
 
             return JsonResponse({
                 "test_case_results": test_case_results,

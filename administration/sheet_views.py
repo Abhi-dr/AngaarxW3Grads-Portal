@@ -160,35 +160,58 @@ def leaderboard(request, slug):
     
     return render(request, 'administration/sheet/leaderboard.html', parameters)
 
-
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.db.models import Sum, Min
+# ===============================================================================================
+# ===============================================================================================
+# ===============================================================================================
+from django.db.models import Max, Sum, Min, OuterRef, Subquery
 
 def sheet_leaderboard(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
 
-    leaderboard_data = Submission.objects.filter(
-        question__in=sheet.questions.all(),
-        status='Accepted'
-    ).values('user').annotate(
-        total_score=Sum('score'),
-        earliest_submission=Min('submitted_at'),
-        solved_problems=Sum(1)  # Count of accepted problems per user
-    ).order_by('-total_score', 'earliest_submission')
+    # Get all questions in the sheet
+    total_questions = sheet.questions.all()
 
-    # Format the data
-    leaderboard = [
-        {
+    # Subquery to get the maximum score for each user and question
+    max_score_subquery = Submission.objects.filter(
+        user=OuterRef('user'),
+        question=OuterRef('question'),
+        status='Accepted'
+    ).order_by('-score').values('score')[:1]
+
+    # Annotate maximum scores and aggregate for total score and earliest submission time
+    leaderboard_data = (
+        Submission.objects.filter(
+            question__in=total_questions,
+            status='Accepted'
+        )
+        .values('user')  # Group by user
+        .annotate(
+            total_score=Sum(Subquery(max_score_subquery)),  # Sum max scores per user
+            earliest_submission=Min('submitted_at')  # Get the earliest submission time
+        )
+        .order_by('-total_score', 'earliest_submission')  # Sort by total score and earliest submission
+    )
+
+    # Format the leaderboard data
+    leaderboard = []
+    for entry in leaderboard_data:
+        user_id = entry['user']
+        user = Student.objects.get(id=user_id)
+        solved_problems = Submission.objects.filter(
+            user=user_id,
+            question__in=total_questions,
+            status='Accepted'
+        ).values('question').distinct().count()  # Count distinct problems solved by the user
+
+        leaderboard.append({
             'student': {
-                'id': entry['user'],
-                'name': Student.objects.get(id=entry['user']).first_name + " " + Student.objects.get(id=entry['user']).last_name,
+                'id': user_id,
+                'name': f"{user.first_name} {user.last_name}",
             },
             'total_score': entry['total_score'],
             'earliest_submission': entry['earliest_submission'],
-            'solved_problems': entry['solved_problems'],
-        }
-        for entry in leaderboard_data
-    ]
+            'solved_problems': solved_problems,
+        })
 
     return JsonResponse({'leaderboard': leaderboard})
+
