@@ -536,11 +536,16 @@
                     name: "C++"
                 },];
 
-            const baseUrl = "{% url 'get_driver_code' question.id languageId %}";
+
+
+            const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
 
             // Function to set editor content based on selected language
             function setEditorContent(languageId) {
-                const url = baseUrl.replace("languageId", languageId);
+                console.log("LANGUAGE ID:", languageId);
+
+                // Replace the placeholder '0' with the actual value of `languageId`
+                const url = baseUrl.replace("/0", `/${languageId}`);
 
                 console.log("SENT URL FOR DRIVER CODE: ", url);
 
@@ -552,6 +557,7 @@
                             console.log(data);
                             editor.setValue(data.code, -1);
                         } else {
+                            console.log(data);
                             editor.setValue("// Driver code not found for this language", -1); // Fallback
                         }
                     })
@@ -575,6 +581,9 @@
             // Trigger when the language is changed
             languageSelect.change(function () {
                 const selectedLanguageId = $(this).val();
+
+                console.log("Language id after change: ", selectedLanguageId);
+
                 setEditorContent(selectedLanguageId); // Fetch and set driver code for the new language
 
                 // reset the output div
