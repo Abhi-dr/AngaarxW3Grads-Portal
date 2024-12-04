@@ -504,10 +504,12 @@ Test Code | {{ question.title }}
                 name: "C++"
             },];
 
-        const baseUrl = "{% url 'driver_code' question.slug %}";
+        const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
 
         // Function to set editor content based on selected language
         function setEditorContent(languageId) {
+            const url = baseUrl.replace("/0", `/${languageId}`);
+
             // Fetch the driver code asynchronously
             fetch(url)
                 .then((response) => response.json())
