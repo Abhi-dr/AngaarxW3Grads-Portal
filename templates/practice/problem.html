@@ -536,14 +536,14 @@
                     name: "C++"
                 },];
 
-            const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
+            const baseUrl = "{% url 'get_driver_code' question.slug languageId %}";
 
             // Function to set editor content based on selected language
             function setEditorContent(languageId) {
 
                 console.log("LANGUAGE ID:", languageId);
 
-                const url = baseUrl.replace("0", languageId);
+                const url = baseUrl.replace("languageId", languageId);
 
                 console.log("SENT URL FOR DRIVER CODE: ", url);
 
