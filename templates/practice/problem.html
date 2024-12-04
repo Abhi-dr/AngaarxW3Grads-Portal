@@ -542,13 +542,17 @@
             function setEditorContent(languageId) {
                 const url = baseUrl.replace("0", languageId);
 
+                console.log("SENT URL FOR DRIVER CODE: ", url);
+
                 // Fetch the driver code asynchronously
                 fetch(url)
                     .then((response) => response.json())
                     .then((data) => {
                         if (data.success) {
+                            console.log(data);
                             editor.setValue(data.code, -1);
                         } else {
+                            console.log(data);
                             editor.setValue("// Driver code not found for this language", -1); // Fallback
                         }
                     })
