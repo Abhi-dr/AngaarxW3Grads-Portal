@@ -540,6 +540,9 @@
 
             // Function to set editor content based on selected language
             function setEditorContent(languageId) {
+
+                console.log("LANGUAGE ID:", languageId);
+
                 const url = baseUrl.replace("0", languageId);
 
                 console.log("SENT URL FOR DRIVER CODE: ", url);
@@ -576,6 +579,9 @@
             // Trigger when the language is changed
             languageSelect.change(function () {
                 const selectedLanguageId = $(this).val();
+
+                console.log("Language id after change: ", selectedLanguageId);
+
                 setEditorContent(selectedLanguageId); // Fetch and set driver code for the new language
 
                 // reset the output div
