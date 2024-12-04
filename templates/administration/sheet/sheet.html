@@ -313,7 +313,7 @@ active
             console.log(sheetId, questionId);
             if (!sheetId || !questionId) return;
 
-            const url = "{% url 'add_question_to_sheet' 0 1 %}".replace("/0", `/${sheetId}`).replace("/1", `/${questionId}`);
+            const url = `/administration/add_question_to_sheet/${sheetId}/${questionId}/`;
             console.log(url);
             fetch(url, {
                 method: "POST",
