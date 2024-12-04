@@ -97,6 +97,9 @@ def my_sheet(request, slug):
     
     sheet = get_object_or_404(Sheet, slug=slug)
     
+    if not sheet.is_enabled:
+        messages.info(request, "This sheet is not enabled.")
+        return redirect('batch' , slug=sheet.batches.first().slug)
     
     parameters = {
         "sheet": sheet
