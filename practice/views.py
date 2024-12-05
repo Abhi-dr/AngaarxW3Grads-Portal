@@ -264,9 +264,7 @@ def update_submission_status(submission, passed, total, total_submission_count):
         score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))
         submission.score = score
         submission.save()
-        
-        print("AFTER UPDATE:", submission.score)
-        
+                
     except Exception as e:
         print(f"Error updating submission: {e}")
         raise Exception("Could not update submission status.")
@@ -353,7 +351,6 @@ def submit_code(request, slug):
             # Update submission
             update_submission_status(submission, passed_test_cases, len(test_cases), total_submission_count)
             
-            print("\n\n\nALL TEST CASES PASSED:", passed_test_cases == len(test_cases), "\n\n\n")
 
             return JsonResponse({
                 "test_case_results": test_case_results,
@@ -418,9 +415,7 @@ def run_code(request, slug):
                 question.cpu_time_limit,
                 question.memory_limit
             )
-            
-            print("\n\n\nJUDGE0 RESPONSE:", judge0_response, "\n\n\n")
-            
+                        
             if judge0_response["error"]:
                 return JsonResponse({
                     "status": "Error",
@@ -432,11 +427,11 @@ def run_code(request, slug):
             
             if outputs == None:
                 print("\n\n\nNO OUTPUT FROM JUDGE0\n\n\n")
-            return {
-                "error": "No Output. Probably you forgot to return the output or there is some error in your code.",
-                "outputs": None,
-            }
-            
+                return {
+                    "error": "No Output. Probably you forgot to return the output or there is some error in your code.",
+                    "outputs": None,
+                }
+                
             expected_outputs = [normalize_output(tc.expected_output) for tc in sample_test_cases]
             inputs = [tc.input_data for tc in sample_test_cases]
 

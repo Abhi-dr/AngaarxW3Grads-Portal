@@ -230,5 +230,8 @@ def sheet_leaderboard(request, slug):
         })
 
     leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
+    
+    # i need the count of students solving how many questions
+
 
     return JsonResponse({'leaderboard': leaderboard})

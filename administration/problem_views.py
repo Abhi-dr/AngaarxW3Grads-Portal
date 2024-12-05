@@ -502,7 +502,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
     stdin = f"{len(test_cases)}\n"
     for test_case in test_cases:
         stdin += f"{test_case.input_data}\n"
-        
+
     submission_data = {
         "source_code": source_code,
         "language_id": language_id,
@@ -517,61 +517,62 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         # Submit the code to Judge0
         response = requests.post(JUDGE0_URL, json=submission_data, headers=HEADERS)
         response.raise_for_status()
-        
-        token = response.json().get('token')
-        
-        print("TOKEN", token)
-        
+
+        token = response.json().get("token")
         if not token:
-            raise Exception("No token received from Judge0.")
-        
+            return {"error": "No token received from Judge0.", "outputs": None, "token": None}
+
         # Fetch results
         result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
-        
-        while result_response.json().get("status").get("id") == 2:  # Status 'In Queue'
+        while result_response.json().get("status", {}).get("id") == 2:  # Status 'In Queue'
             time.sleep(1)
             result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
 
         result = result_response.json()
         
         print("RESULT:", result)
-        
+
         if result.get("compile_output"):
             return {
-            "error": result["compile_output"].strip(),
-            "outputs": None,
-            "token": token
-        }
+                "error": (result.get("compile_output", "")).strip(),
+                "outputs": None,
+                "token": token,
+            }
 
         # Check for runtime errors
         if result.get("stderr"):
             return {
-                "error": result["stderr"].strip(),
+                "error": (result.get("stderr", "")).strip(),
                 "outputs": None,
-                "token": token
+                "token": token,
+            }
+
+        # Process execution results
+        outputs = result.get("stdout")
+        
+        if outputs == None:
+            print("\n\n\nNO OUTPUT FROM JUDGE0\n\n\n")
+            return {
+                "error": "No Output. Probably you forgot to return the output or there is some error in your code.",
+                "outputs": None,
+                "token": token,
             }
         
-        # Process execution results
-        outputs = result.get('stdout', '')
-        outputs = [output.strip() for output in outputs.split("\n")]
-        
-        return {
-        "error": None,
-        "outputs": outputs,
-        "token": token
-    }
+        outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
+
+        return {"error": None, "outputs": outputs, "token": token}
 
     except requests.exceptions.RequestException as e:
-        print(f"Judge0 API error: {e}")
         return {
-            "error": "Cannot connect to Compier \n Error: " + str(e),
+            "error": f"Cannot connect to Compiler. Error: {str(e)}",
+            "outputs": None,
+            "token": None,
         }
     except Exception as e:
-        print(f"Error during code execution with token {token}: {e}")
         return {
-            "error": result.get("status").get("description"),
+            "error": f"Unexpected error occurred: {str(e)}",
             "outputs": None,
-            "token": token
+            "token": None,
         }
 
 
