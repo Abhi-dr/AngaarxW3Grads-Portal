@@ -379,7 +379,10 @@ active
         <div class="col-md-3">
             <h5 class="card-title fw-semibold mb-0"></h5>
             <div class="card">
-                <a href="{% url 'my_sheet' sheet.slug %}">
+
+                {% if sheet.is_enabled %}
+                <a href="{% url 'sheet' sheet.slug %}">
+                {% endif %}
                     <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
                     <div class="card-body">
                         <h5 class="card-title">
@@ -388,7 +391,15 @@ active
                         <p class="card-text mb-2">
                             Total Sawal : {{ sheet.get_total_questions }}
                         </p>
-                        <a href="{% url 'my_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">View More</a>
+                        <!-- <p class="card-text text-black mb-1">
+                            Total Registrations: {{ company.job_set.all }}
+                        </p> -->
+                        
+                        {% if sheet.is_enabled %}
+                        <a href="{% url 'sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue Solving</a>
+                        {% else %}
+                        <a href="#" class="btn btn-outline-light-danger w-100 disabled">Curently Unavailable</a>
+                        {% endif %}
                     </div>
                 </a>
             </div>

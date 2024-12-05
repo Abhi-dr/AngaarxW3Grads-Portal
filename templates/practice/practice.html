@@ -36,7 +36,10 @@ Practice
         <div class="col-md-3">
             <h5 class="card-title fw-semibold mb-0"></h5>
             <div class="card">
+
+                {% if sheet.is_enabled %}
                 <a href="{% url 'sheet' sheet.slug %}">
+                {% endif %}
                     <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
                     <div class="card-body">
                         <h5 class="card-title">
@@ -48,7 +51,12 @@ Practice
                         <!-- <p class="card-text text-black mb-1">
                             Total Registrations: {{ company.job_set.all }}
                         </p> -->
+                        
+                        {% if sheet.is_enabled %}
                         <a href="{% url 'sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue Solving</a>
+                        {% else %}
+                        <a href="#" class="btn btn-dark w-100 disabled">Wait {{ student.first_name }}</a>
+                        {% endif %}
                     </div>
                 </a>
             </div>

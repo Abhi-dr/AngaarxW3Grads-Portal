@@ -68,6 +68,10 @@ My Courses
                         <p class="card-text mb-1">
                             Total Questions: {{ sheet.get_total_questions }}
                         </p>
+                        
+                        <p class="card-text mb-1">
+                            {{ sheet.is_enabled }}
+                        </p>
                         <a href="{% url 'instructor_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">View More</a>
                     </div>
                 </a>
