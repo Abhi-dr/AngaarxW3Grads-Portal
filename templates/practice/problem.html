@@ -523,11 +523,12 @@
             // Define top languages (example)
             const topLanguages = [
                 {
-                    id: 71,
-                    name: "Python"
-                }, {
                     id: 62,
                     name: "Java"
+                },
+                {
+                    id: 71,
+                    name: "Python"
                 }, {
                     id: 50,
                     name: "C"
@@ -614,7 +615,7 @@
             let selectedLanguage = $("#language").val();
 
 
-            editor.session.setMode("ace/mode/python");
+            editor.session.setMode("ace/mode/java");
             editor.setOptions({
                 //enableBasicAutocompletion: true,
                 enableSnippets: true,
@@ -711,8 +712,8 @@
                     const testCaseResultsDiv = document.getElementById('testCaseResults');
 
 
-                    if (data.error) {
-                        alert(data.error);
+                    if (data.sheet_disabled) {
+                        alert(data.sheet_disabled);
                         // rediret to practice page
                         window.location.href = "{% url 'practice' %}";
                     }
@@ -793,7 +794,7 @@
                         });
 
 
-                        if (data.score == 100) {
+                        if (data.is_all_test_cases_passed) {
                             submission_accepted();
                         }
                         document.getElementById("test-case-result-id").scrollIntoView({ behavior: 'smooth' });
@@ -966,12 +967,12 @@
                             outputDiv.appendChild(resultDiv);
                         });
 
-                    } else if (data.compiler_output) {
+                    } else if (data.error) {
                         const errorDiv = document.createElement('div');
                         errorDiv.classList.add('alert', 'alert-danger');
                         errorDiv.innerHTML = `
                             <h5>Compiler Error</h5>
-                            <p>${data.compiler_output}</p>
+                            <p>${data.error}</p>
                         `;
                         outputDiv.appendChild(errorDiv);
                     }

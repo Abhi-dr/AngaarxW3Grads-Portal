@@ -37,7 +37,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     list_display = ['user', 'question', 'status', 'language']
     search_fields = ['user__username', 'question__title', 'status', 'language']
     list_per_page = 30
-    list_filter = ['status', 'language']
+    list_filter = ['status', 'language', "question"]
 
 @admin.register(POD)
 class PODAdmin(admin.ModelAdmin):

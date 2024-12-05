@@ -162,7 +162,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
     stdin = f"{len(test_cases)}\n"
     for test_case in test_cases:
         stdin += f"{test_case.input_data}\n"
-        
+
     submission_data = {
         "source_code": source_code,
         "language_id": language_id,
@@ -177,62 +177,55 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         # Submit the code to Judge0
         response = requests.post(JUDGE0_URL, json=submission_data, headers=HEADERS)
         response.raise_for_status()
-        
-        token = response.json().get('token')
-        
-        print("TOKEN", token)
-        
+
+        token = response.json().get("token")
         if not token:
-            raise Exception("No token received from Judge0.")
-        
+            return {"error": "No token received from Judge0.", "outputs": None, "token": None}
+
         # Fetch results
         result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
-        
-        while result_response.json().get("status").get("id") == 2:  # Status 'In Queue'
+        while result_response.json().get("status", {}).get("id") == 2:  # Status 'In Queue'
             time.sleep(1)
             result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
 
         result = result_response.json()
         
         print("RESULT:", result)
-                
+
         if result.get("compile_output"):
             return {
-            "error": result["compile_output"].strip(),
-            "outputs": None,
-            "token": token
-        }
+                "error": (result.get("compile_output", "")).strip(),
+                "outputs": None,
+                "token": token,
+            }
 
         # Check for runtime errors
         if result.get("stderr"):
             return {
-                "error": result["stderr"].strip(),
+                "error": (result.get("stderr", "")).strip(),
                 "outputs": None,
-                "token": token
+                "token": token,
             }
-        
+
         # Process execution results
-        outputs = result.get('stdout', '')
-        outputs = [output.strip() for output in outputs.split("\n")]
-        
-        return {
-        "error": None,
-        "outputs": outputs,
-        "token": token
-    }
+        outputs = result.get("stdout", "")
+        outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
+
+        return {"error": None, "outputs": outputs, "token": token}
 
     except requests.exceptions.RequestException as e:
-        print(f"Judge0 API error: {e}")
         return {
-            "error": "Cannot connect to Compier \n Error: " + str(e),
+            "error": f"Cannot connect to Compiler. Error: {str(e)}",
+            "outputs": None,
+            "token": None,
         }
     except Exception as e:
-        print(f"Error during code execution with token {token}: {e}")
         return {
-            "error": result.get("status").get("description"),
+            "error": f"Unexpected error occurred: {str(e)}",
             "outputs": None,
-            "token": token
+            "token": None,
         }
+
 
 
 def process_test_case_result(inputs, outputs, expected_outputs):
@@ -311,7 +304,7 @@ def submit_code(request, slug):
             sheet = Sheet.objects.filter(questions=question).first()
 
             if sheet and not sheet.is_enabled:
-                return JsonResponse({"error": "Sheet not enabled."}, status=400)
+                return JsonResponse({"sheet_disabled": "Sheet not enabled."}, status=400)
 
             # Create a submission record
             submission = create_submission(user, question, source_code, language_id)
@@ -343,6 +336,8 @@ def submit_code(request, slug):
             total_submission_count = Submission.objects.filter(user=user, question=question).count()            
             # Update submission
             update_submission_status(submission, passed_test_cases, len(test_cases), total_submission_count)
+            
+            print("\n\n\nALL TEST CASES PASSED:", passed_test_cases == len(test_cases), "\n\n\n")
 
             return JsonResponse({
                 "test_case_results": test_case_results,
@@ -350,7 +345,8 @@ def submit_code(request, slug):
                 "status": submission.status,
                 "score": submission.score,
                 "compile_output": None,  # No compilation error
-                "token": judge0_response.get("token")
+                "token": judge0_response.get("token"),
+                "is_all_test_cases_passed": passed_test_cases == len(test_cases)
             })
 
         except Question.DoesNotExist:
@@ -407,10 +403,12 @@ def run_code(request, slug):
                 question.memory_limit
             )
             
+            print("\n\n\nJUDGE0 RESPONSE:", judge0_response, "\n\n\n")
+            
             if judge0_response["error"]:
                 return JsonResponse({
                     "status": "Error",
-                    "compiler_output": judge0_response["error"]
+                    "error": judge0_response["error"].strip(),
                 })
 
             # Process outputs
@@ -427,7 +425,9 @@ def run_code(request, slug):
 
         except Exception as e:
             print(f"Error during code execution: {e}")
-            return JsonResponse({"error": "An unexpected error occurred."}, status=500)
+            return JsonResponse({
+                "error": "Some Error Occued. Check Your Code 🙂",
+                }, status=500)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
