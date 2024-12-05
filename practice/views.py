@@ -209,6 +209,14 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
 
         # Process execution results
         outputs = result.get("stdout", "")
+        
+        if outputs == "":
+            return {
+                "error": "No output received from Judge0.",
+                "outputs": None,
+                "token": token,
+            }
+        
         outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
 
         return {"error": None, "outputs": outputs, "token": token}
@@ -270,6 +278,13 @@ def problem(request, slug):
     """
     try:
         question = get_object_or_404(Question, slug=slug)
+        
+        sheet = Sheet.objects.filter(questions=question).first()
+
+        if sheet and not sheet.is_enabled:
+            messages.info(request, "This question is in the sheet which is disabled now. Try Later.")
+            return redirect('problem_set')
+        
         sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
         return render(request, 'practice/problem.html', {
             'question': question,
