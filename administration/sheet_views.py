@@ -178,41 +178,57 @@ from django.db.models import Max, Sum, Min, OuterRef, Subquery, Count
 
 def sheet_leaderboard(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
+    total_questions = sheet.questions.all()
 
-    # Subquery to get the maximum score for each user and question
-    max_score_subquery = Submission.objects.filter(
-        question=OuterRef('question'),
-        user=OuterRef('user')
-    ).values('user', 'question').annotate(
-        max_score=Max('score')
-    ).values('max_score')
-
-    # Filter submissions to include only the highest-scored submission for each user and question
-    best_submissions = Submission.objects.filter(
-        score=Subquery(max_score_subquery)
+    # Fetch all submissions for the sheet
+    submissions = Submission.objects.filter(
+        question__in=total_questions,
+        status='Accepted'
     )
 
-    # Aggregating total scores and solved problems for each user
-    leaderboard_data = best_submissions.filter(
-        question__in=sheet.questions.all()
-    ).values('user').annotate(
-        total_score=Sum('score'),
-        solved_problems=Count('question', distinct=True),
-        earliest_submission=Min('submitted_at')
-    ).order_by('-total_score', 'earliest_submission')
+    # Dictionary to store max scores for each user
+    user_scores = {}
+    for submission in submissions:
+        user_id = submission.user.id
+        question_id = submission.question.id
 
-    # Format leaderboard
-    leaderboard = [
-        {
+        # Initialize user entry if not present
+        if user_id not in user_scores:
+            user_scores[user_id] = {
+                'total_score': 0,
+                'earliest_submission': submission.submitted_at,
+                'solved_questions': set(),
+            }
+
+        # Update max score for the question
+        current_max_score = user_scores[user_id].get(question_id, 0)
+        user_scores[user_id][question_id] = max(current_max_score, submission.score)
+
+        # Update earliest submission
+        user_scores[user_id]['earliest_submission'] = min(
+            user_scores[user_id]['earliest_submission'], submission.submitted_at
+        )
+
+        # Track solved questions
+        user_scores[user_id]['solved_questions'].add(question_id)
+
+    # Format leaderboard data
+    leaderboard = []
+    for user_id, data in user_scores.items():
+        user = Student.objects.get(id=user_id)
+        total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
+        solved_problems = len(data['solved_questions'])
+
+        leaderboard.append({
             'student': {
-                'id': entry['user'],
-                'name': Student.objects.get(id=entry['user']).first_name + " " + Student.objects.get(id=entry['user']).last_name,
+                'id': user_id,
+                'name': f"{user.first_name} {user.last_name}",
             },
-            'total_score': entry['total_score'],
-            'solved_problems': entry['solved_problems'],
-            'earliest_submission': entry['earliest_submission'],
-        }
-        for entry in leaderboard_data
-    ]
+            'total_score': total_score,
+            'earliest_submission': data['earliest_submission'],
+            'solved_problems': solved_problems,
+        })
+
+    leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
 
     return JsonResponse({'leaderboard': leaderboard})
