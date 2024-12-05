@@ -208,11 +208,12 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
             }
 
         # Process execution results
-        outputs = result.get("stdout", "")
+        outputs = result.get("stdout")
         
-        if outputs == "":
+        if outputs == None:
+            print("\n\n\nNO OUTPUT FROM JUDGE0\n\n\n")
             return {
-                "error": "No output received from Judge0.",
+                "error": "No Output. Probably you forgot to return the output or there is some error in your code.",
                 "outputs": None,
                 "token": token,
             }
@@ -428,6 +429,14 @@ def run_code(request, slug):
 
             # Process outputs
             outputs = judge0_response["outputs"]
+            
+            if outputs == None:
+                print("\n\n\nNO OUTPUT FROM JUDGE0\n\n\n")
+            return {
+                "error": "No Output. Probably you forgot to return the output or there is some error in your code.",
+                "outputs": None,
+            }
+            
             expected_outputs = [normalize_output(tc.expected_output) for tc in sample_test_cases]
             inputs = [tc.input_data for tc in sample_test_cases]
 
