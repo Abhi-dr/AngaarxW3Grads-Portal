@@ -642,14 +642,16 @@ def submit_code(request, slug):
             inputs = [tc.input_data for tc in test_cases]
             
             test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
-            passed_test_cases = sum(1 for result in test_case_results if result['passed'])
-
+            passed_test_cases = sum(1 for result in test_case_results if result['passed'])            
 
             return JsonResponse({
                 "test_case_results": test_case_results,
-                "status": submission["status"],
+                "submission_id": submission.id,
+                "status": submission.status,
+                "score": submission.score,
                 "compile_output": None,  # No compilation error
-                "token": judge0_response.get("token")
+                "token": judge0_response.get("token"),
+                "is_all_test_cases_passed": passed_test_cases == len(test_cases)
             })
 
         except Question.DoesNotExist:
