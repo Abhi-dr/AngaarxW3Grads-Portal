@@ -182,6 +182,8 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         if not token:
             return {"error": "No token received from Judge0.", "outputs": None, "token": None}
 
+        print("TOKEN:", token)
+
         # Fetch results
         result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
         while result_response.json().get("status", {}).get("id") == 2:  # Status 'In Queue'

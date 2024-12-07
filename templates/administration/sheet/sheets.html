@@ -69,9 +69,11 @@ My Courses
                             Total Questions: {{ sheet.get_total_questions }}
                         </p>
                         
-                        <p class="card-text mb-1">
-                            {{ sheet.is_enabled }}
-                        </p>
+                        {% if sheet.is_enabled %}
+                        <span class="text-success">Public</span>
+                        {% else %}
+                        <span class="text-danger">Disabled</span>
+                        {% endif %}
                         <a href="{% url 'instructor_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">View More</a>
                     </div>
                 </a>

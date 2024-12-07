@@ -62,7 +62,7 @@ def batch(request, slug):
         messages.warning(request, "Beta tu jb paida bhi nahi hua tha tbse URL s khel rha hu m🥱")
         return redirect('my_batches')
     
-    sheets = Sheet.objects.filter(batches=batch)
+    sheets = Sheet.objects.filter(batches=batch).order_by('-id')
     
     # PROGRESS OF ALL THE QUESTION SOLVED BY THE STUDENT
     total_questions = 0

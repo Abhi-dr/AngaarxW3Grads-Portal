@@ -629,7 +629,6 @@ def submit_code(request, slug):
             
             if judge0_response["error"]:  # Compilation error
                 return JsonResponse({
-                    "submission_id": submission.id,
                     "status": "Compilation Error",
                     "score": 0,
                     "compiler_output": judge0_response["error"],
@@ -646,7 +645,6 @@ def submit_code(request, slug):
 
             return JsonResponse({
                 "test_case_results": test_case_results,
-                "submission_id": submission.id,
                 "status": submission.status,
                 "score": submission.score,
                 "compile_output": None,  # No compilation error
@@ -663,6 +661,7 @@ def submit_code(request, slug):
             print(f"Error during submission: {e}")
             return JsonResponse({
                 "error": "An unexpected error occurred.",
+                "stderr": judge0_response["stderr"] if judge0_response.get("stderr") else None,
                 "token": judge0_response.get("token")
                 }, status=500)
 
