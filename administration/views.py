@@ -5,7 +5,7 @@ from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
 from accounts.models import Instructor, Student
-from student.models import Notification, Anonymous_Message
+from student.models import Notification, Anonymous_Message, Feedback
 from practice.models import Sheet, Submission, Question
 
 
@@ -83,6 +83,22 @@ def all_students(request):
     
     return render(request, "administration/all_students.html", parameters)
 
+# ========================================= FEEDBACKS ============================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def feedbacks(request):
+        
+    instructor = Instructor.objects.get(id=request.user.id)
+    
+    feedbacks = Feedback.objects.all().order_by("-id")
+    
+    parameters = {
+        "instructor": instructor,
+        "feedbacks": feedbacks
+    }
+    
+    return render(request, "administration/feedbacks.html", parameters)
 
 # ======================================================================================================
 # ========================================= ANONYMOUS MESSAGES =========================================

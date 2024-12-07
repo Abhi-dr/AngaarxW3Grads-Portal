@@ -57,6 +57,8 @@ def enroll_batch(request, id):
 def batch(request, slug):
     batch = get_object_or_404(Batch, slug=slug)
     student = request.user.student
+    notifications = Notification.objects.filter(expiration_date__gt=timezone.now(), is_alert=True)
+
     
     if not EnrollmentRequest.objects.filter(student=student, batch=batch, status='Accepted').exists():
         messages.warning(request, "Beta tu jb paida bhi nahi hua tha tbse URL s khel rha hu m🥱")
@@ -85,7 +87,8 @@ def batch(request, slug):
         "pod": pod,
         "progress": int(progress),
         "solved_questions": solved_questions,
-        "questions_left": questions_left
+        "questions_left": questions_left,
+        "notifications": notifications
     }
     
     return render(request, 'student/batch/batch.html', parameters)

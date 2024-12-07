@@ -1,12 +1,14 @@
 from django.urls import path, include
 from . import problem_views, views, question_generator, batch_views, sheet_views
 
+
 urlpatterns = [
     path("", views.index, name="administration"),
     
     # ========================= DATA WORK ============================
     
     path("all_students/", views.all_students, name="all_students"),
+    path("feedbacks/", views.feedbacks, name="instructor_feedbacks"),
     
     # ========================= NOTIFICATIONS WORK ==========================
     
