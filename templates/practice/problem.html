@@ -698,6 +698,19 @@
                 event.preventDefault(); // Prevent form submission
             }
 
+            const testCaseResultsDiv = document.getElementById('testCaseResults');
+            testCaseResultsDiv.innerHTML = `
+                        <h4>Execution in progress...</h4>
+                        <div id='loader'>
+                            <td colspan="6" class="text-center">
+                                <div class="d-flex justify-content-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="sr-only">Loading...</span>
+                                    </div>
+                                </div>
+                            </td>
+                        </div>`;
+
             document.getElementById('submission_code').value = code;
 
             const formData = new FormData(this);
@@ -709,7 +722,6 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log("TOKEN: ", data.token);
-                    const testCaseResultsDiv = document.getElementById('testCaseResults');
 
 
                     if (data.sheet_disabled) {
@@ -717,8 +729,6 @@
                         // rediret to practice page
                         window.location.href = "{% url 'practice' %}";
                     }
-
-                    testCaseResultsDiv.innerHTML = '<h4>Test Case Results:</h4>'; // Clear previous results
 
                     clearInterval(countdownInterval); // Clear the interval
                     submit_btn.prop("disabled", false);
@@ -728,8 +738,34 @@
                         behavior: 'smooth'
                     });
 
+                    testCaseResultsDiv.innerHTML = "";
+                    // remove all prepend 
+                    while (testCaseResultsDiv.firstChild) {
+                        testCaseResultsDiv.removeChild(testCaseResultsDiv.firstChild);
+                    }
+
+                    if (data.error || data.compile_output) {
+                        const globalErrorDiv = document.createElement('div');
+
+
+                        globalErrorDiv.classList.add('alert', 'alert-danger');
+                        globalErrorDiv.innerHTML = `
+                        <h5>Compiler Error</h5>
+                        Error: <pre>${data.error}</pre>`;
+
+                        if (data.compile_output) {
+                            globalErrorDiv.innerHTML += `
+                            <h5>Compiler Output:</h5>
+                            <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>
+                        `;
+                        }
+
+                        testCaseResultsDiv.prepend(globalErrorDiv);
+                    }
+
                     // If there are test case results, display them
                     if (data.test_case_results) {
+                        testCaseResultsDiv.innerHTML = '<h4>Test Case Results:</h4>'; // Clear previous results
                         data.test_case_results.forEach((result, index) => {
                             const resultDiv = document.createElement('div');
                             resultDiv.classList.add(
@@ -801,17 +837,7 @@
                     }
 
                     // If there's a global compiler error (e.g., server-side), display it
-                    if (data.compiler_output) {
-                        const globalErrorDiv = document.createElement('div');
-                        globalErrorDiv.classList.add('alert', 'alert-danger');
-                        globalErrorDiv.innerHTML = `
-                        <h5>Compiler Error</h5>
-                        Message: <pre>${data.message}</pre>
-                        Info: <pre>${data.compiler_output}</pre>
-                    `;
 
-                        testCaseResultsDiv.prepend(globalErrorDiv);
-                    }
                 })
 
                 .catch(error => {
@@ -859,8 +885,9 @@
             run_btn.prop("disabled", true);
 
             const outputDiv = document.getElementById('testCaseResults');
-            outputDiv.innerHTML = `<h4>Sample Test Case Results:</h4> 
+            outputDiv.innerHTML = `
                         <div id='loader'>
+                            <h4>Execution in progress...</h4> 
                             <td colspan="6" class="text-center">
                                 <div class="d-flex justify-content-center">
                                     <div class="spinner-border text-primary" role="status">
@@ -917,6 +944,28 @@
                     run_btn.prop("disabled", false);
                     run_btn.text("Run Code");
 
+                    if (data.error || data.compile_output) {
+                        const testCaseResultsDiv = document.getElementById('testCaseResults');
+
+                        const globalErrorDiv = document.createElement('div');
+
+
+                        globalErrorDiv.classList.add('alert', 'alert-danger');
+                        globalErrorDiv.innerHTML = `
+                        <h5>Compiler Error</h5>
+                        Error: <pre>${data.error}</pre>`;
+
+                        if (data.compile_output) {
+                            globalErrorDiv.innerHTML += `
+                            <h5>Compiler Output:</h5>
+                            <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>
+                        `;
+                        }
+
+                        testCaseResultsDiv.prepend(globalErrorDiv);
+                    }
+                    
+
                     if (data.test_case_results) {
                         data.test_case_results.forEach((result, index) => {
                             const resultDiv = document.createElement('div');
@@ -967,15 +1016,8 @@
                             outputDiv.appendChild(resultDiv);
                         });
 
-                    } else if (data.error) {
-                        const errorDiv = document.createElement('div');
-                        errorDiv.classList.add('alert', 'alert-danger');
-                        errorDiv.innerHTML = `
-                            <h5>Compiler Error</h5>
-                            <p>${data.error}</p>
-                        `;
-                        outputDiv.appendChild(errorDiv);
                     }
+                    
                     outputDiv.removeChild(document.getElementById("loader"));
 
 
