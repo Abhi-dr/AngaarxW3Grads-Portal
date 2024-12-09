@@ -104,9 +104,7 @@ class Question(models.Model):
     
     input_format = models.TextField(blank=True, null=True)
     output_format = models.TextField(blank=True, null=True)
-    
-    driver_code = models.TextField(blank=True, null=True)
-    
+        
     cpu_time_limit = models.FloatField(default=1, blank=True, null=True)
     memory_limit = models.PositiveIntegerField(default=256, blank=True, null=True)    
     

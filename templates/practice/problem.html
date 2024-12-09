@@ -277,7 +277,7 @@
             </li>
 
             </li>
-            <li class="breadcrumb-item active" aria-current="page">Problem {{ question.position }}</li>
+            <li class="breadcrumb-item active" aria-current="page"> {{ question.title|truncatewords:5 }}</li>
         </ol>
     </nav>
 
@@ -370,6 +370,8 @@
 
         </div>
 
+        {% if question.hint %}
+
         <div class="card-footer d-sm-flex justify-content-between align-items-center">
             <div class="card-footer-link mb-2 mb-sm-0">
                 <p class="card-text d-inline">
@@ -378,6 +380,8 @@
                 </p>
             </div>
         </div>
+
+        {% endif %}
     </div>
 
     <!-- Code Editor Section -->
@@ -396,14 +400,37 @@
                 <select class="form-select form-control" id="language" name="language_id" required>
                 </select>
 
-                <label for="code" class="mt-3 mb-n2">Code:</label><br>
+                <div class="test d-inline-flex w-100">
+                    <label for="code" class="mt-3 mb-n2 w-100">Code:</label><br>
 
+
+                    <div class="button-group d-inline-flex justify-content-end w-100">
+                        <button id="save-draft-btn" type="button" class="btn btn-success mt-2 mx-1">Save as
+                            Draft</button>
+                        <button id="restore-draft-btn" type="button" class="btn btn-primary mt-2 mx-1">Restore
+                            Draft</button>
+                        <button id="reset-draft-btn" type="button" class="btn btn-warning mt-2 mx-1"
+                            onclick="return confirm('Are you sure you want to reset to the driver code?')">Reset
+                            Draft</button>
+                    </div>
+                </div>
                 <div class="editor-container">
                     <div id="editor"></div>
                 </div>
 
+
                 <div class="row justify-content-end">
-                    <div class="col-md-2">
+
+                    <div class="button-group" role="group">
+                        <button type="submit" class="btn btn-secondary float-end w-25" id="submit-btn"
+                            accesskey="enter">Submit
+                            Code</button>
+                        <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn">Run
+                            Code</button>
+                    </div>
+
+
+                    <!-- <div class="col-md-2">
                         <button type="submit" class="btn btn-dark w-100" id="run-btn">Run
                             Code</button>
                     </div>
@@ -411,10 +438,12 @@
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-secondary w-100" id="submit-btn" accesskey="enter">Submit
                             Code</button>
-                    </div>
+                    </div> -->
+
                 </div>
                 {% comment %}<a href="{% url 'submission' question.slug %}" class="btn btn-success w-100">View
                     Submission</a> {% endcomment %}
+
             </form>
 
         </div>
@@ -433,7 +462,6 @@
                 </div>
 
             </div>
-
 
             <!-- ================================== SUCCESS CONFETTI MODAL ================================ -->
 
@@ -518,6 +546,124 @@
         $(document).ready(function () {
             const editor = ace.edit("editor");
             const languageSelect = $("#language");
+            const questionId = "{{ question.id }}"; // Django template to dynamically get the question ID
+            const DRAFT_STORAGE_KEY = "draft_code_data";
+            const AUTO_SAVE_DELAY = 2000; // Throttle auto-save to every 2 seconds
+            let autoSaveTimeout; // To handle throttling
+
+            const saveButton = $("#save-draft-btn");
+            const restoreButton = $("#restore-draft-btn");
+            const resetButton = $("#reset-draft-btn");
+
+            // Function to generate a unique key for saving drafts
+            function getDraftKey() {
+                const selectedLanguage = languageSelect.val();
+                return `${DRAFT_STORAGE_KEY}_${questionId}_${selectedLanguage}`;
+            }
+
+            function resetDraft() {
+                const draftKey = getDraftKey(); // Get the unique key for the draft
+                localStorage.removeItem(draftKey); // Remove the draft from localStorage
+                console.log("Draft reset for key:", draftKey);
+
+                // Fetch and set the original driver code for the current language
+                const selectedLanguageId = languageSelect.val();
+                setEditorContent(selectedLanguageId);
+
+                alert("Draft has been reset to the original driver code!");
+            }
+
+
+            // Function to update the save button text
+            function updateSaveButtonText(status) {
+                if (status === "saving") {
+                    saveButton.text("Saving...");
+                    saveButton.prop("disabled", true); // Disable during save
+                } else if (status === "saved") {
+                    saveButton.text("Saved");
+                    saveButton.prop("disabled", true); // Disable during save
+                    setTimeout(() => saveButton.text("Save as Draft"), 2500); // Reset after 2 seconds
+                    saveButton.prop("disabled", false); // Re-enable button
+                }
+            }
+
+            // Function to save code as a draft
+            function saveDraft() {
+                const currentCode = editor.getValue();
+                const draftKey = getDraftKey();
+
+                updateSaveButtonText("saving"); // Show "Saving..."
+
+                // Simulate save operation with a slight delay (for demo purposes)
+                setTimeout(() => {
+                    localStorage.setItem(draftKey, currentCode);
+                    console.log("Draft saved for key:", draftKey);
+                    updateSaveButtonText("saved"); // Show "Saved"
+                }, 500); // Simulate saving delay
+            }
+
+
+            // Function to restore saved draft code
+            function restoreDraft() {
+                const draftKey = getDraftKey();
+
+                // Retrieve the saved draft for the unique key
+                const savedCode = localStorage.getItem(draftKey);
+                if (savedCode) {
+                    editor.setValue(savedCode, -1);
+                    console.log("Draft restored for key:", draftKey);
+                    alert("Draft restored successfully!");
+                } else {
+                    const selectedLanguageId = languageSelect.val();
+                    setEditorContent(selectedLanguageId);
+                    console.log("No draft found for key:", draftKey);
+                    alert("No saved draft found for this question and language.");
+                }
+            }
+
+            /* function autoSaveOnChange() {
+                clearTimeout(autoSaveTimeout); // Clear previous timeout
+                autoSaveTimeout = setTimeout(() => {
+                    saveDraft(); // Save the draft after the delay
+                    console.log("Auto-saved on keypress.");
+                }, AUTO_SAVE_DELAY);
+            }
+            
+            // Attach event listeners
+            editor.session.on("change", function () {
+                saveDraft(); // Trigger auto-save on every editor change
+            });
+            */
+
+            saveButton.click(function () {
+                saveDraft(); // Manual save
+            });
+
+            restoreButton.click(function () {
+                restoreDraft(); // Restore saved draft
+            });
+
+
+            // Attach the click event to the reset button
+            resetButton.click(function () {
+                resetDraft(); // Trigger the reset functionality
+            });
+
+
+            // Language switch handler
+            languageSelect.change(function () {
+                const selectedLanguageId = $(this).val();
+                setEditorContent(selectedLanguageId); // Update driver code
+                autoSaveCode(); // Save current state
+            });
+
+            // Bind Ctrl+S to manual save
+            $(document).keydown(function (event) {
+                if (event.ctrlKey && event.key === "s") {
+                    event.preventDefault();
+                    saveDraft();
+                }
+            });
 
 
             // Define top languages (example)
@@ -543,29 +689,35 @@
 
             // Function to set editor content based on selected language
             function setEditorContent(languageId) {
-                console.log("LANGUAGE ID:", languageId);
-
                 // Replace the placeholder '0' with the actual value of `languageId`
                 const url = baseUrl.replace("/0", `/${languageId}`);
+                const draftKey = getDraftKey(); // Get the unique key for the draft
+                const savedDraft = localStorage.getItem(draftKey); // Retrieve saved draft
 
-                console.log("SENT URL FOR DRIVER CODE: ", url);
+                if (savedDraft) {
+                    // If a saved draft exists, restore it
+                    editor.setValue(savedDraft, -1);
+                    console.log("Draft restored from localStorage:", draftKey);
+                } else {
 
-                // Fetch the driver code asynchronously
-                fetch(url)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        if (data.success) {
-                            console.log(data);
-                            editor.setValue(data.code, -1);
-                        } else {
-                            console.log(data);
-                            editor.setValue("// Driver code not found for this language", -1); // Fallback
-                        }
-                    })
-                    .catch((error) => {
-                        console.error("Error fetching driver code:", error);
-                        editor.setValue("// Error fetching driver code", -1); // Error fallback
-                    });
+                    fetch(url)
+                        .then((response) => response.json())
+                        .then((data) => {
+                            if (data.success) {
+                                console.log(data);
+                                editor.setValue(data.code, -1);
+                            } else {
+                                console.log(data);
+                                editor.setValue("// Driver code not found for this language", -1); // Fallback
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Error fetching driver code:", error);
+                            editor.setValue("// Error fetching driver code", -1); // Error fallback
+                        });
+
+
+                }
             }
 
             // Fetch languages from API
@@ -593,7 +745,10 @@
 
             });
 
+
+            restoreAutoSave();
         });
+
     </script>
 
 
@@ -665,9 +820,16 @@
                 event.preventDefault();
                 console.log("Alt + Enter is pressed"); // For debugging
                 $("#run-btn").click(); // Trigger the run button
+
+                document.getElementById("testCaseResults").scrollIntoView({
+                    behavior: 'smooth'
+                });
             }
         });
     </script>
+
+    <!-- ================================== SUBMIT CODE FUNCTION ================================================ -->
+
 
     <script>
         document.getElementById('codeSubmissionForm').addEventListener('submit', function (event) {
@@ -964,7 +1126,7 @@
 
                         testCaseResultsDiv.prepend(globalErrorDiv);
                     }
-                    
+
 
                     if (data.test_case_results) {
                         data.test_case_results.forEach((result, index) => {
@@ -1017,7 +1179,7 @@
                         });
 
                     }
-                    
+
                     outputDiv.removeChild(document.getElementById("loader"));
 
 
