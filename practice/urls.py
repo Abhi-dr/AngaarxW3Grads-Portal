@@ -11,8 +11,8 @@ urlpatterns = [
     path("execute_code", views.execute_code, name="execute_code"),
     
     path("run_code/<slug:slug>/", views.run_code, name="run_code"),
-    
     path('submit_code/<slug:slug>/', views.submit_code, name='submit_code'),
+    path("custom_input/<slug:slug>/", views.custom_input, name="custom_input"),
     
     path("problem/<slug:slug>/", views.problem, name="problem"),
     path("get-driver-code/<int:question_id>/<int:language_id>", views.get_driver_code, name='get_driver_code'),

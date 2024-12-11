@@ -239,7 +239,6 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         }
 
 
-
 def process_test_case_result(inputs, outputs, expected_outputs):
     """
     Compare outputs against expected outputs and prepare detailed results.
@@ -456,7 +455,63 @@ def run_code(request, slug):
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
+# ========================================== CUSTOM INPUT ==========================================
 
+def custom_input(request, slug):
+    
+    if request.method == 'POST':
+        question = get_object_or_404(Question, slug=slug)
+                
+        data = json.loads(request.body)
+        language_id = data.get('language_id')
+        source_code = data.get('code')
+        input_data = data.get('input')
+        
+        if not language_id or not source_code or not input_data:
+            return JsonResponse({"error": "Missing language ID, source code, or input data."}, status=400)
+        
+        test_case = TestCase(question=question, input_data=input_data, expected_output="")
+        test_case.save()
+        
+        judge0_response = run_code_on_judge0(
+            source_code,
+            language_id,
+            [test_case],
+            question.cpu_time_limit,
+            question.memory_limit
+        )
+        
+        if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
+                                
+            result = {
+                "error": judge0_response.get("error"),
+                "token": judge0_response.get("token")
+            }
+            
+            if judge0_response.get("compile_output"):
+                result["compile_output"] = judge0_response.get("compile_output")
+            
+            return JsonResponse(result, status=400)
+        
+        outputs = judge0_response["outputs"]
+        expected_output = test_case.expected_output
+        input_data = test_case.input_data
+        
+        test_case.expected_output = outputs[0]
+        
+        result = {
+            "input": input_data,
+            "expected_output": test_case.expected_output,
+        }
+        
+        return JsonResponse({
+            "status": "Success",
+            "test_case_result": result
+        })
+        
+    return JsonResponse({"error": "Invalid request method."}, status=400)   
+
+    
 
 # ====================================================================================================
 # ========================================== MY SUBMISSIONS ==========================================
