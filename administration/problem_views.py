@@ -305,13 +305,15 @@ def edit_test_case(request, id):
         
         input_data = request.POST.get('input_data')
         expected_output = request.POST.get('expected_output')
-        is_sample = 'is_sample' in request.POST  # Check if the checkbox is checked
-        
+        is_sample = 'is_sample' in request.POST
+                
         test_case.input_data = input_data
         test_case.expected_output = expected_output
         test_case.is_sample = is_sample
 
         test_case.save()
+        
+        print(test_case.is_sample)
         
         messages.success(request, 'Test case updated successfully')
         return redirect('test_cases', slug=test_case.question.slug)
