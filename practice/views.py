@@ -386,7 +386,6 @@ def submit_code(request, slug):
 # ============================================== DRIVER CODE FETCHING ===============================================
 
 def get_driver_code(request, question_id, language_id):
-    print("DRIVER CODE FUNCTION CALLED")
     driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()
     if driver_code:
         return JsonResponse({"success": True, "code": driver_code.code})
@@ -510,8 +509,6 @@ def custom_input(request, slug):
         })
         
     return JsonResponse({"error": "Invalid request method."}, status=400)   
-
-    
 
 # ====================================================================================================
 # ========================================== MY SUBMISSIONS ==========================================

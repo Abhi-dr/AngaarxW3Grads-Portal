@@ -405,8 +405,10 @@
 
 
                     <div class="button-group d-inline-flex justify-content-end w-100">
-                        <button id="save-draft-btn" type="button" class="btn btn-success mt-2 mx-1">Save as
-                            Draft</button>
+                        <button id="save-draft-btn" type="button" class="btn btn-success mt-2 mx-1"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + s">Save as
+                            Draft
+                        </button>
                         <button id="restore-draft-btn" type="button" class="btn btn-primary mt-2 mx-1">Restore
                             Draft</button>
                         <button id="reset-draft-btn" type="button" class="btn btn-warning mt-2 mx-1"
@@ -425,25 +427,16 @@
                             Input</button>
 
                         <button type="submit" class="btn btn-secondary float-end w-25" id="submit-btn"
-                            accesskey="enter">Submit Code</button>
-                        <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn">Run Code</button>
+                            accesskey="enter"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + Enter"
+                            >Submit Code</button>
+                        <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn"
+                        data-bs-toggle="tooltip" data-bs-placement="top" title="Alt + Enter"
+                        >Run Code</button>
                     </div>
 
                     <div id="customOutput" class="mt-3"></div>
-
-                    <!-- <div class="col-md-2">
-                        <button type="submit" class="btn btn-dark w-100" id="run-btn">Run
-                            Code</button>
-                    </div>
-
-                    <div class="col-md-4">
-                        <button type="submit" class="btn btn-secondary w-100" id="submit-btn" accesskey="enter">Submit
-                            Code</button>
-                    </div> -->
-
                 </div>
-                {% comment %}<a href="{% url 'submission' question.slug %}" class="btn btn-success w-100">View
-                    Submission</a> {% endcomment %}
 
             </form>
 
@@ -1142,7 +1135,7 @@
                         globalErrorDiv.classList.add('alert', 'alert-danger');
                         globalErrorDiv.innerHTML = `
                         <h5>Compiler Error</h5>
-                        Error: <pre>${data.error}</pre>`;
+                        <pre>${data.error}</pre>`;
 
                         if (data.compile_output) {
                             globalErrorDiv.innerHTML += `
