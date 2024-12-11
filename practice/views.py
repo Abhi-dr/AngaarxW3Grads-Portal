@@ -469,9 +469,14 @@ def custom_input(request, slug):
         if not language_id or not source_code or not input_data:
             return JsonResponse({"error": "Missing language ID, source code, or input data."}, status=400)
         
-        test_case = TestCase(question=question, input_data=input_data, expected_output="")
-        test_case.save()
         
+        # check if test case with same input data already exists
+        if question.test_cases.filter(input_data=input_data).count() > 0:            
+            test_case = question.test_cases.filter(input_data=input_data).first()
+        else:
+            test_case = TestCase(question=question, input_data=input_data, expected_output="")
+            test_case.save()
+            
         judge0_response = run_code_on_judge0(
             source_code,
             language_id,
@@ -481,7 +486,7 @@ def custom_input(request, slug):
         )
         
         if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
-                                
+            
             result = {
                 "error": judge0_response.get("error"),
                 "token": judge0_response.get("token")
@@ -493,10 +498,14 @@ def custom_input(request, slug):
             return JsonResponse(result, status=400)
         
         outputs = judge0_response["outputs"]
-        expected_output = test_case.expected_output
         input_data = test_case.input_data
         
-        test_case.expected_output = outputs[0]
+        # check if the expected output of the test case is already set
+        if test_case.expected_output == "":
+            print("EXPECTED OUTPUT SETTING")
+            test_case.expected_output = outputs[0]
+            test_case.save()
+        
         
         result = {
             "input": input_data,

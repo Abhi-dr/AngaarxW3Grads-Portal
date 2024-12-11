@@ -26,7 +26,7 @@ class DriverCodeAdmin(admin.ModelAdmin):
 
 @admin.register(TestCase)
 class TestCaseAdmin(admin.ModelAdmin):
-    list_display = ['question']
+    list_display = ['question', "input_data", "expected_output"]
     search_fields = ['question__title']
     list_per_page = 30
     list_filter = ['question__title']

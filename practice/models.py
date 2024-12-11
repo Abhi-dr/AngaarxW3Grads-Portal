@@ -251,6 +251,24 @@ class TestCase(models.Model):
 
     def __str__(self):
         return f"Test Case for {self.question.title}"
+    
+    # do not allow duplicate test cases
+    class Meta:
+        indexes = [
+        models.Index(fields=['question', 'input_data', 'expected_output']),
+    ]
+    
+    # prevent duplicate test cases and if duplicate then do not save
+    def save(self, *args, **kwargs):
+        # Prevent duplicate test cases
+        if not TestCase.objects.filter(
+            question=self.question,
+            input_data=self.input_data,
+            expected_output=self.expected_output
+        ).exists():
+            super().save(*args, **kwargs)
+            
+
 
 
 # ============================== SUBMISSION MODEL =========================

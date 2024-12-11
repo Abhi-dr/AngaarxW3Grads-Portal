@@ -426,13 +426,10 @@
                         <button type="button" class="btn btn-info" id="custom-input-btn" accesskey="enter">Custom
                             Input</button>
 
-                        <button type="submit" class="btn btn-secondary float-end w-25" id="submit-btn"
-                            accesskey="enter"
-                            data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + Enter"
-                            >Submit Code</button>
-                        <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn"
-                        data-bs-toggle="tooltip" data-bs-placement="top" title="Alt + Enter"
-                        >Run Code</button>
+                        <button type="submit" class="btn btn-secondary float-end w-25" id="submit-btn" accesskey="enter"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + Enter">Submit Code</button>
+                        <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn" data-bs-toggle="tooltip"
+                            data-bs-placement="top" title="Alt + Enter">Run Code</button>
                     </div>
 
                     <div id="customOutput" class="mt-3"></div>
@@ -562,6 +559,8 @@
     <script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
 
 
+    <!-- ===================================== EDITOR SETTINGS ================================================ -->
+
     <script>
         $(document).ready(function () {
             const editor = ace.edit("editor");
@@ -574,279 +573,142 @@
             const saveButton = $("#save-draft-btn");
             const restoreButton = $("#restore-draft-btn");
             const resetButton = $("#reset-draft-btn");
+            const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
 
-            // Function to generate a unique key for saving drafts
+            // Define supported languages
+            const topLanguages = [
+                { id: 62, name: "Java", mode: "java" },
+                { id: 71, name: "Python", mode: "python" },
+                { id: 50, name: "C", mode: "c_cpp" },
+                { id: 54, name: "C++", mode: "c_cpp" }
+            ];
+
+            // Initialize ACE editor settings
+            function initializeEditor() {
+                let theme = localStorage.getItem("theme");
+                editor.setTheme(theme === "dark" ? "ace/theme/twilight" : "ace/theme/chrome");
+                editor.setOptions({
+                    enableSnippets: true,
+                    cursorStyle: "smooth",
+                });
+                updateEditorMode(languageSelect.val());
+            }
+
+            function updateEditorMode(languageId) {
+                const selectedLanguage = topLanguages.find(lang => lang.id == languageId);
+                if (selectedLanguage) {
+                    editor.session.setMode(`ace/mode/${selectedLanguage.mode}`);
+                }
+            }
+
             function getDraftKey() {
                 const selectedLanguage = languageSelect.val();
                 return `${DRAFT_STORAGE_KEY}_${questionId}_${selectedLanguage}`;
             }
 
-            function resetDraft() {
-                const draftKey = getDraftKey(); // Get the unique key for the draft
-                localStorage.removeItem(draftKey); // Remove the draft from localStorage
-                console.log("Draft reset for key:", draftKey);
-
-                // Fetch and set the original driver code for the current language
-                const selectedLanguageId = languageSelect.val();
-                setEditorContent(selectedLanguageId);
-
-                alert("Draft has been reset to the original driver code!");
-            }
-
-
-            // Function to update the save button text
-            function updateSaveButtonText(status) {
-                if (status === "saving") {
-                    saveButton.text("Saving...");
-                    saveButton.prop("disabled", true); // Disable during save
-                } else if (status === "saved") {
-                    saveButton.text("Saved");
-                    saveButton.prop("disabled", true); // Disable during save
-                    setTimeout(() => saveButton.text("Save as Draft"), 2500); // Reset after 2 seconds
-                    saveButton.prop("disabled", false); // Re-enable button
-                }
-            }
-
-            // Function to save code as a draft
             function saveDraft() {
                 const currentCode = editor.getValue();
                 const draftKey = getDraftKey();
 
-                updateSaveButtonText("saving"); // Show "Saving..."
-
-                // Simulate save operation with a slight delay (for demo purposes)
+                updateSaveButtonText("saving");
                 setTimeout(() => {
                     localStorage.setItem(draftKey, currentCode);
                     console.log("Draft saved for key:", draftKey);
-                    updateSaveButtonText("saved"); // Show "Saved"
-                }, 500); // Simulate saving delay
+                    updateSaveButtonText("saved");
+                }, 500);
             }
 
+            function updateSaveButtonText(status) {
+                if (status === "saving") {
+                    saveButton.text("Saving...").prop("disabled", true);
+                } else if (status === "saved") {
+                    saveButton.text("Saved").prop("disabled", true);
+                    setTimeout(() => saveButton.text("Save as Draft").prop("disabled", false), 2500);
+                }
+            }
 
-            // Function to restore saved draft code
             function restoreDraft() {
                 const draftKey = getDraftKey();
-
-                // Retrieve the saved draft for the unique key
                 const savedCode = localStorage.getItem(draftKey);
+
                 if (savedCode) {
                     editor.setValue(savedCode, -1);
-                    console.log("Draft restored for key:", draftKey);
                     alert("Draft restored successfully!");
                 } else {
-                    const selectedLanguageId = languageSelect.val();
-                    setEditorContent(selectedLanguageId);
-                    console.log("No draft found for key:", draftKey);
+                    fetchDriverCode(languageSelect.val());
                     alert("No saved draft found for this question and language.");
                 }
             }
 
-            /* function autoSaveOnChange() {
-                clearTimeout(autoSaveTimeout); // Clear previous timeout
-                autoSaveTimeout = setTimeout(() => {
-                    saveDraft(); // Save the draft after the delay
-                    console.log("Auto-saved on keypress.");
-                }, AUTO_SAVE_DELAY);
+            function resetDraft() {
+                const draftKey = getDraftKey();
+                localStorage.removeItem(draftKey);
+                fetchDriverCode(languageSelect.val());
+                alert("Draft has been reset to the original driver code!");
             }
-            
-            // Attach event listeners
-            editor.session.on("change", function () {
-                saveDraft(); // Trigger auto-save on every editor change
-            });
-            */
 
-            saveButton.click(function () {
-                saveDraft(); // Manual save
-            });
+            function fetchDriverCode(languageId) {
+                const url = baseUrl.replace("/0", `/${languageId}`);
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            editor.setValue(data.code, -1);
+                        } else {
+                            editor.setValue("// Driver code not found for this language", -1);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error fetching driver code:", error);
+                        editor.setValue("// Error fetching driver code", -1);
+                    });
+            }
 
-            restoreButton.click(function () {
-                restoreDraft(); // Restore saved draft
-            });
+            function autoSaveCode() {
+                clearTimeout(autoSaveTimeout);
+                autoSaveTimeout = setTimeout(() => saveDraft(), AUTO_SAVE_DELAY);
+            }
 
+            // Event Handlers
+            saveButton.click(saveDraft);
+            restoreButton.click(restoreDraft);
+            resetButton.click(resetDraft);
 
-            // Attach the click event to the reset button
-            resetButton.click(function () {
-                resetDraft(); // Trigger the reset functionality
-            });
-
-
-            // Language switch handler
             languageSelect.change(function () {
                 const selectedLanguageId = $(this).val();
-                setEditorContent(selectedLanguageId); // Update driver code
-                autoSaveCode(); // Save current state
+                updateEditorMode(selectedLanguageId);
+                fetchDriverCode(selectedLanguageId);
             });
 
-            // Bind Ctrl+S to manual save
+
             $(document).keydown(function (event) {
                 if (event.ctrlKey && event.key === "s") {
                     event.preventDefault();
                     saveDraft();
+                } else if (event.ctrlKey && event.key === "Enter") {
+                    event.preventDefault();
+                    $("#submit-btn").click();
+                    $("#testCaseResults").empty().scrollIntoView({ behavior: 'smooth' });
+                } else if (event.altKey && event.key === "Enter") {
+                    event.preventDefault();
+                    $("#run-btn").click();
+                    $("#testCaseResults").scrollIntoView({ behavior: 'smooth' });
                 }
             });
 
-
-            // Define top languages (example)
-            const topLanguages = [
-                {
-                    id: 62,
-                    name: "Java"
-                },
-                {
-                    id: 71,
-                    name: "Python"
-                }, {
-                    id: 50,
-                    name: "C"
-                }, {
-                    id: 54,
-                    name: "C++"
-                },];
-
-
-
-            const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
-
-            // Function to set editor content based on selected language
-            function setEditorContent(languageId) {
-                // Replace the placeholder '0' with the actual value of `languageId`
-                const url = baseUrl.replace("/0", `/${languageId}`);
-                const draftKey = getDraftKey(); // Get the unique key for the draft
-                const savedDraft = localStorage.getItem(draftKey); // Retrieve saved draft
-
-                if (savedDraft) {
-                    // If a saved draft exists, restore it
-                    editor.setValue(savedDraft, -1);
-                    console.log("Draft restored from localStorage:", draftKey);
-                } else {
-
-                    fetch(url)
-                        .then((response) => response.json())
-                        .then((data) => {
-                            if (data.success) {
-                                console.log(data);
-                                editor.setValue(data.code, -1);
-                            } else {
-                                console.log(data);
-                                editor.setValue("// Driver code not found for this language", -1); // Fallback
-                            }
-                        })
-                        .catch((error) => {
-                            console.error("Error fetching driver code:", error);
-                            editor.setValue("// Error fetching driver code", -1); // Error fallback
-                        });
-
-
-                }
-            }
-
-            // Fetch languages from API
-            topLanguages.forEach(function (language) {
+            // Populate language dropdown
+            topLanguages.forEach(language => {
                 languageSelect.append(
                     `<option value="${language.id}">${language.name}</option>`
                 );
             });
 
-            const initialLanguageId = languageSelect.val();
-            setEditorContent(initialLanguageId); // Load the initial driver code
-
-
-            // Trigger when the language is changed
-            languageSelect.change(function () {
-                const selectedLanguageId = $(this).val();
-
-                console.log("Language id after change: ", selectedLanguageId);
-
-                setEditorContent(selectedLanguageId); // Fetch and set driver code for the new language
-
-                // reset the output div
-                $("#output").addClass("d-none");
-                $("#output pre").text("");
-
-            });
-
-
-            restoreAutoSave();
-        });
-
-    </script>
-
-
-    <script>
-        $(document).ready(function () {
-
-            const editor = ace.edit("editor");
-
-            // change the theme of ace editor based on selected theme of the website
-            let theme = localStorage.getItem("theme");
-            if (theme == "dark") {
-                editor.setTheme("ace/theme/twilight");
-            } else {
-                editor.setTheme("ace/theme/chrome");
-            }
-
-
-            // get selected language and set editor mode
-            let selectedLanguage = $("#language").val();
-
-
-            editor.session.setMode("ace/mode/java");
-            editor.setOptions({
-                //enableBasicAutocompletion: true,
-                enableSnippets: true,
-                //enableLiveAutocompletion: true,
-                cursorStyle: "smooth",
-                //enableEmmet: true,
-            });
-
-            // change the editor mode based on selected language
-            $("#language").change(function () {
-                let selectedLanguage = $(this).val();
-                if (selectedLanguage == 71) {
-                    editor.session.setMode("ace/mode/python");
-                } else if (selectedLanguage == 50) {
-                    editor.session.setMode("ace/mode/c_cpp");
-                } else if (selectedLanguage == 54) {
-                    editor.session.setMode("ace/mode/c_cpp");
-                } else if (selectedLanguage == 62) {
-                    editor.session.setMode("ace/mode/java");
-                }
-            });
-
-
-        });
-
-
-        $(document).keydown(function (event) {
-            // Check if Ctrl + Enter is pressed
-            if (event.ctrlKey && event.key === "Enter") {
-                event.preventDefault();
-                console.log("Ctrl+Enter is pressed"); // For debugging
-                $("#submit-btn").click(); // Trigger the submit button
-                const testCaseResultsDiv = document.getElementById('testCaseResults');
-
-                while (testCaseResultsDiv.firstChild) {
-                    testCaseResultsDiv.removeChild(testCaseResultsDiv.firstChild);
-                };
-
-
-                document.getElementById("testCaseResults").scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
-
-            // check if Alt + Enter is pressed
-            if (event.altKey && event.key === "Enter") {
-                event.preventDefault();
-                console.log("Alt + Enter is pressed"); // For debugging
-                $("#run-btn").click(); // Trigger the run button
-
-                document.getElementById("testCaseResults").scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
+            // Initialize editor and load the first driver code
+            initializeEditor();
+            fetchDriverCode(languageSelect.val());
         });
     </script>
+
 
     <!-- ================================== SUBMIT CODE FUNCTION ================================================ -->
 
