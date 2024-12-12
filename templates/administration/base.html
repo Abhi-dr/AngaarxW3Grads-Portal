@@ -12,7 +12,7 @@
     </title>
 
     <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
 
     <!-- <link rel="shortcut icon" type="image/png" href="{% static 'img/dashboardimages/logos/favicon.png' %}" /> -->
     <link rel="stylesheet" href="{% static 'css/student/dashboard/styles.min.css' %}" />
@@ -22,10 +22,10 @@
             background-repeat: no-repeat;
         }
 
-        [data-bs-theme="dark"] .form-control{
+        [data-bs-theme="dark"] .form-control {
             color: #f0f0f0;
         }
-        
+
         .star {
             color: red;
             display: inline;
@@ -37,16 +37,30 @@
                 background-repeat: no-repeat;
             }
 
-            aside, header{
+            aside,
+            header {
                 background: #212529;
             }
 
 
-            span, h2, h3, h4, h5, h6, p, ul, li, a, button, input, label {
+            span,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            p,
+            ul,
+            li,
+            a,
+            button,
+            input,
+            label {
                 color: #f0f0f0;
             }
 
-            .hide-menu, i{
+            .hide-menu,
+            i {
                 color: rgb(236, 236, 236);
             }
         }
@@ -79,6 +93,39 @@
             position: relative;
             top: -0.3em;
 
+        }
+    </style>
+
+    <style>
+        #scrollToTopBtn {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Fixed position */
+            bottom: 20px;
+            /* Place it at the bottom */
+            right: 30px;
+            /* Place it at the right */
+            z-index: 99;
+            /* Ensure it is visible over other elements */
+            border: none;
+            /* No borders */
+            outline: none;
+            background-color: #343333a2;
+            /* Black background */
+            color: white;
+            /* White text */
+            cursor: pointer;
+            /* Pointer/hand icon */
+            padding: 15px;
+            border-radius: 10px;
+            /* Rounded corners */
+            font-size: 18px;
+        }
+
+        #scrollToTopBtn:hover {
+            background-color: #555;
+            /* Darker background on hover */
         }
     </style>
 
@@ -152,7 +199,8 @@
                         {% endcomment %}
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block problem_active %} {% endblock %}" href="{% url 'instructor_problems' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block problem_active %} {% endblock %}"
+                                href="{% url 'instructor_problems' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-file-database"></i>
                                 </span>
@@ -161,7 +209,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block pod_active %} {% endblock %}" href="{% url 'instructor_pod' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block pod_active %} {% endblock %}"
+                                href="{% url 'instructor_pod' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-campfire"></i>
                                 </span>
@@ -170,7 +219,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block sheet_active %} {% endblock %}" href="{% url 'instructor_sheets' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block sheet_active %} {% endblock %}"
+                                href="{% url 'instructor_sheets' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-clipboard"></i>
                                 </span>
@@ -179,7 +229,7 @@
                         </li>
 
                         <!-- ============================ BATCH WORK ============================== -->
-                         
+
 
                         <li class="nav-small-cap">
                             <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
@@ -187,7 +237,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block my_batches_active %} {% endblock %}" href="{% url 'instructor_batches' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block my_batches_active %} {% endblock %}"
+                                href="{% url 'instructor_batches' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-server"></i>
                                 </span>
@@ -197,7 +248,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block enrollment_request_active %} {% endblock %}" href="{% url 'instructor_enrollment_requests' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block enrollment_request_active %} {% endblock %}"
+                                href="{% url 'instructor_enrollment_requests' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-user"></i>
                                 </span>
@@ -208,7 +260,7 @@
 
 
                         <!-- ========================= EXTRA LEARNING ============================= -->
-                      <li class="nav-small-cap">
+                        <li class="nav-small-cap">
                             <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
                             <span class="hide-menu">Data</span>
                         </li>
@@ -243,7 +295,7 @@
                             </a>
                         </li>
 
-                        
+
                         <!--               <li class="sidebar-item">
                             <a class="sidebar-link" href="{% url 'assignments' %}" aria-expanded="false">
                                 <span>
@@ -253,7 +305,7 @@
                             </a>
                         </li> -->
                         {% endcomment %}
-                            
+
                         <!-- ============================= EXTRA ==================== -->
                         <li class="nav-small-cap">
                             <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
@@ -271,7 +323,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'instructor_anonymous_message' %}" aria-expanded="false">
+                            <a class="sidebar-link" href="{% url 'instructor_anonymous_message' %}"
+                                aria-expanded="false">
                                 <span>
                                     <i class="ti ti-message"></i>
                                 </span>
@@ -329,15 +382,18 @@
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
                                     aria-labelledby="drop2">
                                     <div class="message-body">
-                                        <a href="{% url 'instructor_profile' %}" class="d-flex align-items-center gap-2 dropdown-item">
+                                        <a href="{% url 'instructor_profile' %}"
+                                            class="d-flex align-items-center gap-2 dropdown-item">
                                             <i class="ti ti-user fs-6"></i>
                                             <p class="mb-0 fs-3">My Profile</p>
                                         </a>
-                                        <a href="{% url 'edit_instructor_profile' %}" class="d-flex align-items-center gap-2 dropdown-item">
+                                        <a href="{% url 'edit_instructor_profile' %}"
+                                            class="d-flex align-items-center gap-2 dropdown-item">
                                             <i class="ti ti-mail fs-6"></i>
                                             <p class="mb-0 fs-3">Edit Profile</p>
                                         </a>
-                                        <a href="{% url 'logout' %}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                                        <a href="{% url 'logout' %}"
+                                            class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                                     </div>
                                 </div>
                             </li>
@@ -353,53 +409,83 @@
             {% block body %}
             {% endblock %}
 
+            <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top">↑</button>
+
         </div>
     </div>
 
-    
-<!-- ===================================== MODAL TO UPLOAD THE RECORDED SESSION ======================== -->
-<div class="modal fade" id="uploadRecordedSessionModal" tabindex="-1" aria-labelledby="uploadRecordedSessionModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="post" action="#">
-                {% csrf_token %}
-                <div class="modal-header">
-                    <h5 class="modal-title" id="uploadRecordedSessionModalLabel">Upload Recorded Session Link &nbsp;</h5>
-                    <span id="session-topic"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="session_id" name="session_id" value="">
-                    <div class="mb-3">
-                        <label for="recorded_session_link" class="form-label">Recorded Session Link
-                            <div class="star">*</div>
-                        </label>
-                        <input type="url" class="form-control" id="recorded_session_link"
-                        placeholder="Enter the link to the recorded session here..."
-                         name="recorded_session_link" required>
+
+    <!-- ===================================== MODAL TO UPLOAD THE RECORDED SESSION ======================== -->
+    <div class="modal fade" id="uploadRecordedSessionModal" tabindex="-1"
+        aria-labelledby="uploadRecordedSessionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="#">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadRecordedSessionModalLabel">Upload Recorded Session Link &nbsp;
+                        </h5>
+                        <span id="session-topic"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Save changes</button>
-                </div>
-            </form>
+                    <div class="modal-body">
+                        <input type="hidden" id="session_id" name="session_id" value="">
+                        <div class="mb-3">
+                            <label for="recorded_session_link" class="form-label">Recorded Session Link
+                                <div class="star">*</div>
+                            </label>
+                            <input type="url" class="form-control" id="recorded_session_link"
+                                placeholder="Enter the link to the recorded session here..."
+                                name="recorded_session_link" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Save changes</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    var uploadRecordedSessionModal = document.getElementById('uploadRecordedSessionModal')
-    uploadRecordedSessionModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget
-        var sessionId = button.getAttribute('data-session-id')
-        var modalBodyInput = uploadRecordedSessionModal.querySelector('.modal-body input#session_id')
-        var modalBodyTopic = uploadRecordedSessionModal.querySelector('.modal-header span#session-topic')
-        modalBodyTopic.innerHTML = " for " + button.getAttribute('session-topic') + "🔥"
-        
-        modalBodyInput.value = sessionId
-    })
-</script>
+
+    <script>
+        // Show the button when scrolled down 20px from the top of the document
+        window.onscroll = function () {
+            scrollFunction();
+        };
+
+        function scrollFunction() {
+            const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollToTopBtn.style.display = "block";
+            } else {
+                scrollToTopBtn.style.display = "none";
+            }
+        }
+
+        // Scroll to the top of the document when the user clicks on the button
+        function scrollToTop() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE, and Opera
+        }
+
+    </script>
+
+
+    <script>
+        var uploadRecordedSessionModal = document.getElementById('uploadRecordedSessionModal')
+        uploadRecordedSessionModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget
+            var sessionId = button.getAttribute('data-session-id')
+            var modalBodyInput = uploadRecordedSessionModal.querySelector('.modal-body input#session_id')
+            var modalBodyTopic = uploadRecordedSessionModal.querySelector('.modal-header span#session-topic')
+            modalBodyTopic.innerHTML = " for " + button.getAttribute('session-topic') + "🔥"
+
+            modalBodyInput.value = sessionId
+        })
+    </script>
 
 
     {% block myjs %}
@@ -439,14 +525,14 @@
 
     <script>
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-  return new bootstrap.Tooltip(tooltipTriggerEl)
-})
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
     </script>
 
     <script>
 
-        
+
         document.addEventListener('DOMContentLoaded', (event) => {
             const themeToggleButton = document.getElementById('theme-toggle');
             themeToggleButton.innerHTML = localStorage.getItem('theme') === 'dark' ? 'Light Mode' : 'Dark Mode';
@@ -468,13 +554,13 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                     themeToggleButton.classList.add('btn-outline-dark');
                     themeToggleButton.classList.remove('btn-outline-light');
                 }
-                
+
 
             });
         });
 
     </script>
-    
+
 </body>
 
 </html>
