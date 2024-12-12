@@ -13,6 +13,16 @@ active
 
 <div class="container-fluid">
 
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item pe-auto"><a href="{% url 'instructor_problems' %}">Question Set</a></li>
+            <li class="breadcrumb-item pe-auto">{{ test_case.question.title }}</li>
+
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Test Case</li>
+        </ol>
+    </nav>
+
     {% for message in messages %}
 
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
@@ -24,7 +34,7 @@ active
 
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title fw-semibold mb-0">{{ question.title }}</i> </h5>
+            <h5 class="card-title fw-semibold mb-0">{{ test_case.question.title }}</i> </h5>
 
         </div>
         <div class="container px-4">
@@ -46,7 +56,7 @@ active
                                         <label for="job_title" class="form-label">Input
                                             <div class="star">*</div>
                                         </label>
-                                        <textarea class="form-control" id="job_title" name="input_data" rows="5"
+                                        <textarea class="form-control" id="job_title" name="input_data" rows="3"
                                             >{{ test_case.input_data }}</textarea>
                                     </div>
                                 </div>
@@ -56,7 +66,7 @@ active
                                         <label for="job_title" class="form-label">Expected Output
                                             <div class="star">*</div>
                                         </label>
-                                        <textarea class="form-control" id="job_title" name="expected_output" rows="10"
+                                        <textarea class="form-control" id="job_title" name="expected_output" rows="5"
                                              required>{{ test_case.expected_output }}</textarea>
                                         <!-- <iframe frameBorder="0" height="450px"
                                             src="https://onecompiler.com/embed/html?theme=dark" width="100%"></iframe> -->

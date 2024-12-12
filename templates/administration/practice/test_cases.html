@@ -12,6 +12,17 @@ active
 {% block body %}
 
 <div class="container-fluid">
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item pe-auto"><a href="{% url 'instructor_problems' %}">Question Set</a></li>
+            <li class="breadcrumb-item pe-auto">{{ question.title }}</li>
+
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Test Cases</li>
+        </ol>
+    </nav>
+
     <div class="card">
         <div class="card-body">
             <h3 class="heading">

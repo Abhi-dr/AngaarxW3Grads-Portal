@@ -8,6 +8,8 @@ Problem Set🔥
 {% block body %}
 
 <div class="container-fluid">
+
+
     <div class="card">
         <div class="card-body">
             <h3 class="heading">
@@ -15,16 +17,30 @@ Problem Set🔥
                 <span class="fs-4"> | 🔥Total: <span id="totalQustions">{{ questions.count }}</span>🔥</span>
             </h3>
         </div>
-        <div class="row">
-            <div class="col-md-6">
-                <a href="{% url 'add_question' %}" class="btn btn-outline-primary button mt-n3 m-3 w-100">Add
+
+        <div class="row mt-n3">
+            <div class="col-md-5 mx-auto">
+                <a href="{% url 'add_question' %}" class="btn btn-outline-primary button w-100">Add
                     Question</a>
             </div>
-            <div class="col-md-5">
-                <a href="{% url 'question_requests' %}" class="btn btn-outline-warning button mt-n3 m-3 w-100">Question
+            <div class="col-md-5 mx-auto">
+                <a href="{% url 'question_requests' %}" class="btn btn-outline-warning button w-100">Question
                     Requests ({{unapproved_question_number}})</a>
             </div>
         </div>
+
+        <!-- ========================== SEARCH BAR ==================================== -->
+
+        <div class="card-body p-4">
+            <form onsubmit="event.preventDefault();">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput"
+                        placeholder="Search by ID, Topic or Description" oninput="searchQuestions()" />
+                    <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
+                </div>
+            </form>
+        </div>
+
     </div>
 
     {% for message in messages %}
@@ -35,20 +51,6 @@ Problem Set🔥
     </div>
 
     {% endfor %}
-
-    <!-- ========================== SEARCH BAR ==================================== -->
-
-    <div class="card w-100">
-        <div class="card-body p-4">
-            <form onsubmit="event.preventDefault();">
-                <div class="input-group">
-                    <input type="text" class="form-control" id="searchInput"
-                        placeholder="Search by ID, Topic or Description" oninput="searchQuestions()" />
-                    <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <!-- ================================= SESSIONS TABLE ================================== -->
 
@@ -269,7 +271,7 @@ Problem Set🔥
                 </td>
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
-                        <a href="#" class="btn btn-outline-info text-blue float-end">Submissions</a>
+                        <a href="/administration/view_submissions/${question.slug}" class="btn btn-outline-info text-blue float-end">Submissions</a>
                     </div>
                 </td>
 

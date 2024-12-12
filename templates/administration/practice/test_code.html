@@ -174,106 +174,21 @@ Test Code | {{ question.title }}
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
-<!-- Modal next css-->
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
-
-    button {
-        font-size: 18px;
-        font-weight: 400;
-        color: #fff;
-        padding: 14px 22px;
-        border: none;
-        background: #4070f4;
-        border-radius: 6px;
-        cursor: pointer;
-    }
-
-    button:hover {
-        background-color: #265df2;
-    }
-
-    button.show-modal,
-    .modal-box {
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    section.active .show-modal {
-        display: none;
-    }
-
-    .overlay {
-        position: fixed;
-        height: 100%;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    section.active .overlay {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .modal-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 380px;
-        width: 100%;
-        padding: 30px 20px;
-        border-radius: 24px;
-        background-color: #fff;
-        opacity: 0;
-        pointer-events: none;
-        transition: all 0.3s ease;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-
-    section.active .modal-box {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translate(-50%, -50%) scale(1);
-    }
-
-    .modal-box i {
-        font-size: 70px;
-        color: #4070f4;
-    }
-
-    .modal-box h2 {
-        margin-top: 20px;
-        font-size: 25px;
-        font-weight: 500;
-        color: #333;
-    }
-
-    .modal-box h3 {
-        font-size: 16px;
-        font-weight: 400;
-        color: #333;
-        text-align: center;
-    }
-
-    .modal-box .buttons {
-        margin-top: 25px;
-    }
-
-    .modal-box button {
-        font-size: 14px;
-        padding: 6px 12px;
-        margin: 0 10px;
-    }
-</style>
 
 {% endblock %} {% block body %}
 
 <div class="container-fluid">
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item pe-auto"><a href="{% url 'instructor_problems' %}">Question Set</a></li>
+            <li class="breadcrumb-item pe-auto">{{ question.title }}</li>
+
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Execute Code</li>
+        </ol>
+    </nav>
+
     <div class="card">
         <div class="card-body">
             <div class="row">
@@ -481,161 +396,87 @@ Test Code | {{ question.title }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
 <script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
 
-
 <script>
     $(document).ready(function () {
         const editor = ace.edit("editor");
         const languageSelect = $("#language");
-
-
-        // Define top languages (example)
-        const topLanguages = [
-            {
-                id: 62,
-                name: "Java"
-            },
-            {
-                id: 71,
-                name: "Python"
-            }, {
-                id: 50,
-                name: "C"
-            }, {
-                id: 54,
-                name: "C++"
-            },];
-
-
+        const questionId = "{{ question.id }}"; // Django template to dynamically get the question ID
 
         const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
 
-        // Function to set editor content based on selected language
-        function setEditorContent(languageId) {
-            console.log("LANGUAGE ID:", languageId);
+        // Define supported languages
+        const topLanguages = [
+            { id: 62, name: "Java", mode: "java" },
+            { id: 71, name: "Python", mode: "python" },
+            { id: 50, name: "C", mode: "c_cpp" },
+            { id: 54, name: "C++", mode: "c_cpp" }
+        ];
 
-            // Replace the placeholder '0' with the actual value of `languageId`
+        // Initialize ACE editor settings
+        function initializeEditor() {
+            let theme = localStorage.getItem("theme");
+            editor.setTheme(theme === "dark" ? "ace/theme/twilight" : "ace/theme/chrome");
+            editor.setOptions({
+                enableSnippets: true,
+                cursorStyle: "smooth",
+            });
+            updateEditorMode(languageSelect.val());
+        }
+
+        function updateEditorMode(languageId) {
+            const selectedLanguage = topLanguages.find(lang => lang.id == languageId);
+            if (selectedLanguage) {
+                editor.session.setMode(`ace/mode/${selectedLanguage.mode}`);
+            }
+        }
+
+
+        function fetchDriverCode(languageId) {
             const url = baseUrl.replace("/0", `/${languageId}`);
-
-            console.log("SENT URL FOR DRIVER CODE: ", url);
-
-            // Fetch the driver code asynchronously
             fetch(url)
-                .then((response) => response.json())
-                .then((data) => {
+                .then(response => response.json())
+                .then(data => {
                     if (data.success) {
-                        console.log(data);
                         editor.setValue(data.code, -1);
                     } else {
-                        console.log(data);
-                        editor.setValue("// Driver code not found for this language", -1); // Fallback
+                        editor.setValue("// Driver code not found for this language", -1);
                     }
                 })
-                .catch((error) => {
+                .catch(error => {
                     console.error("Error fetching driver code:", error);
-                    editor.setValue("// Error fetching driver code", -1); // Error fallback
+                    editor.setValue("// Error fetching driver code", -1);
                 });
         }
 
-        // Fetch languages from API
-        topLanguages.forEach(function (language) {
+
+        languageSelect.change(function () {
+            const selectedLanguageId = $(this).val();
+            updateEditorMode(selectedLanguageId);
+            fetchDriverCode(selectedLanguageId);
+        });
+
+
+        $(document).keydown(function (event) {
+            if (event.ctrlKey && event.key === "Enter") {
+                event.preventDefault();
+                $("#submit-btn").click();
+                $("#testCaseResults").empty().scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        // Populate language dropdown
+        topLanguages.forEach(language => {
             languageSelect.append(
                 `<option value="${language.id}">${language.name}</option>`
             );
         });
 
-        const initialLanguageId = languageSelect.val();
-        setEditorContent(initialLanguageId); // Load the initial driver code
-
-
-        // Trigger when the language is changed
-        languageSelect.change(function () {
-            const selectedLanguageId = $(this).val();
-
-            console.log("Language id after change: ", selectedLanguageId);
-
-            setEditorContent(selectedLanguageId); // Fetch and set driver code for the new language
-
-            // reset the output div
-            $("#output").addClass("d-none");
-            $("#output pre").text("");
-
-        });
-
+        // Initialize editor and load the first driver code
+        initializeEditor();
+        fetchDriverCode(languageSelect.val());
     });
 </script>
 
-
-<script>
-    $(document).ready(function () {
-
-        const editor = ace.edit("editor");
-
-        // change the theme of ace editor based on selected theme of the website
-        let theme = localStorage.getItem("theme");
-        if (theme == "dark") {
-            editor.setTheme("ace/theme/twilight");
-        } else {
-            editor.setTheme("ace/theme/chrome");
-        }
-
-
-        // get selected language and set editor mode
-        let selectedLanguage = $("#language").val();
-
-
-        editor.session.setMode("ace/mode/java");
-        editor.setOptions({
-            //enableBasicAutocompletion: true,
-            enableSnippets: true,
-            //enableLiveAutocompletion: true,
-            cursorStyle: "smooth",
-            //enableEmmet: true,
-        });
-
-        // change the editor mode based on selected language
-        $("#language").change(function () {
-            let selectedLanguage = $(this).val();
-            if (selectedLanguage == 71) {
-                editor.session.setMode("ace/mode/python");
-            } else if (selectedLanguage == 50) {
-                editor.session.setMode("ace/mode/c_cpp");
-            } else if (selectedLanguage == 54) {
-                editor.session.setMode("ace/mode/c_cpp");
-            } else if (selectedLanguage == 62) {
-                editor.session.setMode("ace/mode/java");
-            }
-        });
-
-
-    });
-
-
-    $(document).keydown(function (event) {
-        // Check if Ctrl + Enter is pressed
-        if (event.ctrlKey && event.key === "Enter") {
-            event.preventDefault();
-            console.log("Ctrl+Enter is pressed"); // For debugging
-            $("#submit-btn").click(); // Trigger the submit button
-            const testCaseResultsDiv = document.getElementById('testCaseResults');
-
-            while (testCaseResultsDiv.firstChild) {
-                testCaseResultsDiv.removeChild(testCaseResultsDiv.firstChild);
-            };
-
-
-            document.getElementById("testCaseResults").scrollIntoView({
-                behavior: 'smooth'
-            });
-        }
-
-        // check if Alt + Enter is pressed
-        if (event.altKey && event.key === "Enter") {
-            event.preventDefault();
-            console.log("Alt + Enter is pressed"); // For debugging
-            $("#run-btn").click(); // Trigger the run button
-        }
-    });
-</script>
 
 <script>
     document.getElementById('codeSubmissionForm').addEventListener('submit', function (event) {
@@ -666,6 +507,19 @@ Test Code | {{ question.title }}
             event.preventDefault(); // Prevent form submission
         }
 
+        const testCaseResultsDiv = document.getElementById('testCaseResults');
+        testCaseResultsDiv.innerHTML = `
+                    <h4>Execution in progress...</h4>
+                    <div id='loader'>
+                        <td colspan="6" class="text-center">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        </td>
+                    </div>`;
+
         document.getElementById('submission_code').value = code;
 
         const formData = new FormData(this);
@@ -677,22 +531,6 @@ Test Code | {{ question.title }}
             .then(response => response.json())
             .then(data => {
                 console.log("TOKEN: ", data.token);
-                const testCaseResultsDiv = document.getElementById('testCaseResults');
-
-                // If there's a global compiler error (e.g., server-side), display it
-                if (data.compiler_output || data.stderr) {
-                    console.log("Compiler Error: ", data.error);
-                    const globalErrorDiv = document.createElement('div');
-                    globalErrorDiv.classList.add('alert', 'alert-danger');
-                    globalErrorDiv.innerHTML = `
-                    <h5>Compiler Error</h5>
-                    Message: <pre>${data.message}</pre>
-                    Info: <pre>${data.compiler_output}</pre>
-                    Error: <pre>${data.stderr}</pre>
-                `;
-
-                    testCaseResultsDiv.prepend(globalErrorDiv);
-                }
 
 
                 if (data.sheet_disabled) {
@@ -700,8 +538,6 @@ Test Code | {{ question.title }}
                     // rediret to practice page
                     window.location.href = "{% url 'practice' %}";
                 }
-
-                testCaseResultsDiv.innerHTML = '<h4>Test Case Results:</h4>'; // Clear previous results
 
                 clearInterval(countdownInterval); // Clear the interval
                 submit_btn.prop("disabled", false);
@@ -711,8 +547,35 @@ Test Code | {{ question.title }}
                     behavior: 'smooth'
                 });
 
+                testCaseResultsDiv.innerHTML = "";
+                // remove all prepend 
+                while (testCaseResultsDiv.firstChild) {
+                    testCaseResultsDiv.removeChild(testCaseResultsDiv.firstChild);
+                }
+
+                if (data.error || data.compile_output) {
+
+                    const globalErrorDiv = document.createElement('div');
+
+
+                    globalErrorDiv.classList.add('alert', 'alert-danger');
+                    globalErrorDiv.innerHTML = `
+                    <h5>Compiler Error</h5>
+                    Error: <pre>${data.error}</pre>`;
+
+                    if (data.compile_output) {
+                        globalErrorDiv.innerHTML += `
+                        <h5>Compiler Output:</h5>
+                        <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>
+                    `;
+                    }
+
+                    testCaseResultsDiv.prepend(globalErrorDiv);
+                }
+
                 // If there are test case results, display them
                 if (data.test_case_results) {
+                    testCaseResultsDiv.innerHTML = '<h4>Test Case Results:</h4>'; // Clear previous results
                     data.test_case_results.forEach((result, index) => {
                         const resultDiv = document.createElement('div');
                         resultDiv.classList.add(
@@ -783,6 +646,8 @@ Test Code | {{ question.title }}
                     document.getElementById("test-case-result-id").scrollIntoView({ behavior: 'smooth' });
                 }
 
+                // If there's a global compiler error (e.g., server-side), display it
+
             })
 
             .catch(error => {
@@ -816,8 +681,5 @@ Test Code | {{ question.title }}
     }
 
 </script>
-
-<!-- <script src="{% static 'js/dashboard/editorScript.js' %}"></script> -->
-
 
 {% endblock %}

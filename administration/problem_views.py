@@ -497,10 +497,6 @@ def get_test_cases(question):
 
 
 def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, memory_limit):
-    """
-    Send the code to Judge0 API for execution against multiple test cases.
-    """
-    # Prepare single stdin batch input for Judge0
     stdin = f"{len(test_cases)}\n"
     for test_case in test_cases:
         stdin += f"{test_case.input_data}\n"
@@ -519,50 +515,53 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         # Submit the code to Judge0
         response = requests.post(JUDGE0_URL, json=submission_data, headers=HEADERS)
         response.raise_for_status()
-
+        
         token = response.json().get("token")
         if not token:
-            return {"error": "No token received from Judge0.", "outputs": None, "token": None}
-
-        # Fetch results
-        result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
-        while result_response.json().get("status", {}).get("id") == 2:  # Status 'In Queue'
-            time.sleep(1)
-            result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
-
-        result = result_response.json()
-        
-        print("RESULT:", result)
-
-        if result.get("compile_output"):
             return {
-                "error": (result.get("compile_output", "")).strip(),
-                "outputs": None,
-                "token": token,
+                "error": "No token received from Judge0.", 
+                "outputs": None, 
+                "token": None
             }
 
+        print("TOKEN:", token)          
+        
+        while True:
+            result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
+            result = result_response.json()
+            status_id = result.get("status", {}).get("id")
+
+            if status_id not in [1, 2]:  # Not in queue or processing
+                break
+            time.sleep(1)
+
+        if result.get("stderr") or result.get("compile_output"):            
+            errors = {
+                "error": (result.get("stderr")),
+                "token": token,
+            }
+            
+            if result.get("compile_output"):
+                errors["compile_output"] = result.get("compile_output")                
+            
+            return errors
+
         # Check for runtime errors
-        if result.get("stderr"):
+        if result.get("status").get("id") in [5, 6]: # 5 ka mtlb TLE h
             return {
-                "error": (result.get("stderr", "")).strip(),
-                "outputs": None,
+                "error": result.get("status").get("description"),
                 "token": token,
             }
 
         # Process execution results
         outputs = result.get("stdout")
         
-        if outputs == None:
-            print("\n\n\nNO OUTPUT FROM JUDGE0\n\n\n")
-            return {
-                "error": "No Output. Probably you forgot to return the output or there is some error in your code.",
-                "outputs": None,
-                "token": token,
-            }
-        
         outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
 
-        return {"error": None, "outputs": outputs, "token": token}
+        return {
+            "outputs": outputs, 
+            "token": token
+            }
 
     except requests.exceptions.RequestException as e:
         return {
@@ -572,7 +571,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         }
     except Exception as e:
         return {
-            "error": f"Unexpected error occurred: {str(e)}",
+            "error": f"Error in Run cod on judge0 function in views: {str(e)}",
             "outputs": None,
             "token": None,
         }
@@ -601,7 +600,7 @@ def submit_code(request, slug):
     Handle user code submission for a problem.
     """
     
-    if request.method == 'POST':
+    if request.method == 'POST':      
         try:
             # Validate inputs
             question = get_object_or_404(Question, slug=slug)
@@ -616,11 +615,12 @@ def submit_code(request, slug):
             if not test_cases:
                 return JsonResponse({"error": "No test cases available for this question."}, status=400)
 
+            sheet = Sheet.objects.filter(questions=question).first()
+
+            if sheet and not sheet.is_enabled:
+                return JsonResponse({"sheet_disabled": "Sheet not enabled."}, status=400)
+
             # Create a submission record
-            submission = {"question":question,
-            "code":source_code,
-            "language":language_id,
-            "status":'Pending'}
 
             # Run the code and process results
             start = time.time()
@@ -628,14 +628,19 @@ def submit_code(request, slug):
             end = time.time()
             
             print("Time Taken:", end - start)
-            
-            if judge0_response["error"]:  # Compilation error
-                return JsonResponse({
-                    "status": "Compilation Error",
-                    "score": 0,
-                    "compiler_output": judge0_response["error"],
+                        
+            if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
+                                
+                result = {
+                    "error": judge0_response.get("error"),
                     "token": judge0_response.get("token")
-                })
+                }
+                
+                if judge0_response.get("compile_output"):
+                                        
+                    result["compile_output"] = judge0_response.get("compile_output")
+                
+                return JsonResponse(result, status=400)
 
             # Process successful outputs
             outputs = judge0_response["outputs"]
@@ -647,8 +652,6 @@ def submit_code(request, slug):
 
             return JsonResponse({
                 "test_case_results": test_case_results,
-                "status": submission.status,
-                "score": submission.score,
                 "compile_output": None,  # No compilation error
                 "token": judge0_response.get("token"),
                 "is_all_test_cases_passed": passed_test_cases == len(test_cases)
@@ -660,11 +663,12 @@ def submit_code(request, slug):
                 "token": judge0_response.get("token")
                 }, status=404)
         except Exception as e:
-            print(f"Error during submission: {e}")
+            print(f"Error in submit code views: {e}")
             return JsonResponse({
-                "error": "An unexpected error occurred.",
-                "stderr": judge0_response["stderr"] if judge0_response.get("stderr") else None,
+                "error": "Error in submit code backend: " + str(e),
                 "token": judge0_response.get("token")
-                }, status=500)
+                }, status=400)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
+
+
