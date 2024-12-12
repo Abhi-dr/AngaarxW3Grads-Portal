@@ -108,10 +108,10 @@ Driver Code | {{ question.title }}
 
                 <label for="language">Select Language:</label>
                 <select class="form-select form-control" id="language" name="language" required>
-                    <option value="50">C</option>
-                    <option value="54">C++</option>
                     <option value="62">Java</option>
                     <option value="71">Python</option>
+                    <option value="50">C</option>
+                    <option value="54">C++</option>
                 </select>
 
                 <label for="code" class="mt-3 mb-n2">Driver Code:</label><br>
@@ -139,13 +139,11 @@ Driver Code | {{ question.title }}
 
         // Set default code for each language
         const driverCodes = {
-            71: "{% if driver_codes.71 %}{{ driver_codes.71|escapejs }}{% else %}// Set the driver code now{% endif %}",
-            50: "{% if driver_codes.50 %}{{ driver_codes.50|escapejs }}{% else %}// Set the driver code now{% endif %}",
+            71: "{% if driver_codes.71 %}{{ driver_codes.71|escapejs }}{% else %}def solution(n):\n\t# Write your code here...\n\n\n# DO NOT MAKE CHANGES IN THIS\nif __name__ == '__main__':\n\tt = int(input())\n\t\n\twhile t > 0:\n\t\t# Modify according to the inputs\n\t\tn = int(input())\n\t\tresult = solution(n)\n\t\tprint(result)\n\t\tt -= 1{% endif %}",
+            50: "{% if driver_codes.50 %}{{ driver_codes.50|escapejs }}{% else %}#include <stdio.h>\n\n// Write the function here...\nvoid solution(int n) {\n\t// Your code here...\n}\n\n// Driver code starts here... DO NOT CHANGE THIS\nint main() {\n\tint t;\n\tscanf(\"%d\", &t);\n\t\n\twhile (t-- > 0) {\n\t\tint n;\n\t\tscanf(\"%d\", &n);\n\t\t\n\t\t// Make changes accordingly\n\t\tsolution(n);\n\t}\n\t\n\treturn 0;\n}{% endif %}",
             54: "{% if driver_codes.54 %}{{ driver_codes.54|escapejs }}{% else %}// Set the driver code now{% endif %}",
-            62: "{% if driver_codes.62 %}{{ driver_codes.62|escapejs }}{% else %}public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}{% endif %}"
+            62: "{% if driver_codes.62 %}{{ driver_codes.62|escapejs }}{% else %}import java.io.*;\nimport java.util.*;\n\nclass Solution {\n\t// Write the function here...\n}\n\n\n// Driver code starts here... DO NOT CHANGE THIS\nclass Main {\n\tpublic static void main(String args[]) throws IOException {\n\t\tBufferedReader read = new BufferedReader(new InputStreamReader(System.in));\n\t\tint t = Integer.parseInt(read.readLine());\n\t\twhile (t-- > 0) {\n\t\t\tint n = Integer.parseInt(read.readLine().trim());\n\n\t\t\tSolution ob = new Solution();\n\t\t\t\n\t\t\t// Make changes accordingly\n\t\t\tSystem.out.println();\n\t\t}\n\t}\n}{% endif %}"
         };
-
-        console.log(driverCodes);
 
         // Set initial code based on selected language
         function setEditorContent(languageId) {
@@ -162,7 +160,7 @@ Driver Code | {{ question.title }}
 
         let selectedLanguage = $("#language").val();
 
-        editor.session.setMode("ace/mode/python");
+        editor.session.setMode("ace/mode/java");
         editor.setOptions({
             enableBasicAutocompletion: true,
             enableSnippets: true,
