@@ -313,7 +313,6 @@ def edit_test_case(request, id):
 
         test_case.save()
         
-        print(test_case.is_sample)
         
         messages.success(request, 'Test case updated successfully')
         return redirect('test_cases', slug=test_case.question.slug)
@@ -352,7 +351,6 @@ def driver_code(request, slug):
     
     driver_codes = {code.language_id: code.code for code in DriverCode.objects.filter(question=question)}
     
-    print(driver_codes)
         
     if request.method == 'POST':
         

@@ -285,7 +285,17 @@ Test Code | {{ question.title }}
                 <select class="form-select form-control" id="language" name="language_id" required>
                 </select>
 
-                <label for="code" class="mt-3 mb-n2">Code:</label><br>
+                <div class="test d-inline-flex w-100">
+                    <label for="code" class="mt-3 mb-n2 w-100">Code:</label><br>
+
+
+                    <div class="button-group d-inline-flex justify-content-end w-100">
+                        <button id="save-draft-btn" type="button" class="btn btn-success mt-2 mx-1">Driver Codes
+                        </button>
+                        <button id="restore-draft-btn" type="button" class="btn btn-primary mt-2 mx-1">Test
+                            Cases</button>
+                    </div>
+                </div>
 
                 <div class="editor-container">
                     <div id="editor"></div>
@@ -297,8 +307,7 @@ Test Code | {{ question.title }}
                             accesskey="enter">Execute</button>
                     </div>
                 </div>
-                {% comment %}<a href="{% url 'submission' question.slug %}" class="btn btn-success w-100">View
-                    Submission</a> {% endcomment %}
+
             </form>
 
         </div>
@@ -318,6 +327,25 @@ Test Code | {{ question.title }}
 
             </div>
 
+
+            <!-- ===================================== DRIVER CODE ======================================== -->
+
+            <!-- Modal -->
+            <div class="modal fade" id="customModal" tabindex="-1" aria-labelledby="customModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="customModalLabel">Custom Modal</h5> <button type="button"
+                                class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body"> <iframe id="customIframe" src="" width="100%" height="600px"
+                                frameborder="0"></iframe> </div>
+                        <div class="modal-footer"> <button type="button" class="btn btn-secondary"
+                                data-bs-dismiss="modal">Close</button> </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ================================== SUCCESS CONFETTI MODAL ================================ -->
 
@@ -395,6 +423,25 @@ Test Code | {{ question.title }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
 <script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
+
+<script>
+    $(document).ready(function () {
+        // Driver Codes Button Click
+        $("#save-draft-btn").click(function () {
+            $("#customModalLabel").text("Driver Codes");
+            $("#customIframe").attr("src", "{% url 'driver_code' question.slug %}"); // Replace with the actual URL of the driver code page
+            $("#customModal").modal('show');
+        });
+
+        // Test Cases Button Click
+        $("#restore-draft-btn").click(function () {
+            $("#customModalLabel").text("Test Cases");
+            $("#customIframe").attr("src", "{% url 'test_cases' question.slug %}"); // Replace with the actual URL of the test case page
+            $("#customModal").modal('show');
+        });
+    });
+
+</script>
 
 <script>
     $(document).ready(function () {
