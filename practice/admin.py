@@ -14,7 +14,7 @@ class QuestionAdmin(admin.ModelAdmin):
     search_fields = ['title', 'sheets__name']  # Use 'sheets__name' since it's now ManyToMany
     list_per_page = 30
     list_filter = ['difficulty_level']  # Use 'sheets' for filtering by associated sheets
-    ordering = ['position']
+    ordering = ['-id']
     list_editable = ['position']
     
 @admin.register(DriverCode)
@@ -34,7 +34,7 @@ class TestCaseAdmin(admin.ModelAdmin):
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    list_display = ['user', 'question', 'status', 'language']
+    list_display = ['user', 'question', 'status', 'language', "submitted_at"]
     search_fields = ['user__username', 'question__title', 'status', 'language']
     list_per_page = 30
     list_filter = ['status', 'language', "question"]

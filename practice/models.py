@@ -114,7 +114,6 @@ class Question(models.Model):
         ('Hard', 'Hard'),
     ])
     
-    link = models.URLField(blank=True, null=True)
     youtube_link = models.URLField(blank=True, null=True)
     
     position = models.PositiveIntegerField(default=0)
@@ -125,8 +124,14 @@ class Question(models.Model):
     
     added_by = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="questions", blank=True, null=True)
     is_approved = models.BooleanField(default=False)
+    
+    # Parent ID Concept
+    parent_id = models.IntegerField(default=-1)  # -1 means original question
 
     class Meta:
+        indexes = [
+        models.Index(fields=['position']),
+    ]
         ordering = ['position']
         verbose_name = 'Question'
         verbose_name_plural = 'Questions'
@@ -195,20 +200,26 @@ class Question(models.Model):
             
                 
         if not self.slug:
-            # replace all kind of special characters with '-' and make lowercase of title
-            
             text = ""
-            
+        
             for word in self.title.split():
-                
                 if word.isalnum():
                     text += word + "-"
-                
                 else:
                     word = ''.join(e for e in word if e.isalnum())
                     text += word + "-"
             
-            self.slug = text.lower()
+            # Generate base slug
+            base_slug = text.lower().strip("-")
+            slug = base_slug
+
+            # Check for uniqueness
+            counter = 1
+            while Question.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
 
         
         super().save(*args, **kwargs)
@@ -254,7 +265,7 @@ class TestCase(models.Model):
     
     class Meta:
         indexes = [
-        models.Index(fields=['question', 'input_data', 'expected_output']),
+        models.Index(fields=['question']),
     ]      
 
 # ============================== SUBMISSION MODEL =========================
@@ -279,6 +290,9 @@ class Submission(models.Model):
     
     def get_langauge_name_through_id(self):
         return dict(self.LANGUAGE_CHOICES).get(self.language)
+    
+    def get_todays_submissions(self, user):
+        return self.submissions.filter(user=user, submitted_at__date=datetime.now().date())
 
     def __str__(self):
         return f"{self.user.username} - {self.question.title} - {self.status}"

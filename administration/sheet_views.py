@@ -143,6 +143,69 @@ def add_question_to_sheet(request, sheet_id, question_id):
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
 
+# ========================= ADD NEW QUESTION ==========================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def add_new_question(request, slug):
+    
+    sheet = get_object_or_404(Sheet, slug=slug)
+    instructor = Instructor.objects.get(id=request.user.id)
+    
+    parameters = {
+        "sheet": sheet,
+        "instructor": instructor
+    }
+    
+    if request.method == "POST":
+        question_id = request.POST.get('question_id')
+        # make a copy of the question of the question id's question
+        question = Question.objects.get(id=question_id)
+        new_question = Question.objects.create(
+            title=question.title,
+            scenario=question.scenario,
+            description=question.description,
+            constraints=question.constraints,
+            
+            input_format=question.input_format,
+            output_format=question.output_format,
+            
+            cpu_time_limit=question.cpu_time_limit,
+            memory_limit=question.memory_limit,
+            
+            difficulty_level=question.difficulty_level,
+            
+            youtube_link=question.youtube_link,
+            hint=question.hint,
+            
+            is_approved=True,
+            parent_id=question.id
+        )
+        
+        new_question.save()
+        sheet.questions.add(new_question)
+        sheet.save()
+        
+        # copy all test cases and driver codes as well
+        for test_case in question.test_cases.all():
+            new_test_case = test_case
+            new_test_case.id = None
+            new_test_case.question = new_question
+            new_test_case.save()
+            
+        for driver_code in question.driver_codes.all():
+            new_driver_code = driver_code
+            new_driver_code.id = None
+            new_driver_code.question = new_question
+            new_driver_code.save()
+        
+        parameters['question'] = new_question
+        
+        messages.success(request, "Question added successfully!")
+        return render(request, 'administration/sheet/add_new_question.html', parameters)
+    
+    return render(request, 'administration/sheet/add_new_question.html', parameters)
+
 # ========================= REMOVE QUESTION FROM SHEET ==========================
 
 @login_required(login_url='login')
@@ -235,3 +298,4 @@ def sheet_leaderboard(request, slug):
 
 
     return JsonResponse({'leaderboard': leaderboard})
+

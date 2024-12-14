@@ -13,37 +13,46 @@ active
 
 <div class="container-fluid">
     <div class="card">
-        <div class="card-body">
+        <div class="card-body d-inline-flex">
             <h3 class="heading">
                 <span class="fw-semibold">{{ sheet.name }}</span>
                 <span class="fs-4"> | 🔥Total: {{ questions.count }}🔥</span>
             </h3>
-        </div>
-        <div class="row">
-            <div class="col-md-4 mb-2">
-                <button class="btn btn-outline-primary button mt-n3 m-3 w-100" data-bs-toggle="modal"
-                    data-bs-target="#addQuestionModal" onclick="setSheetId({{ sheet.id }})">
-                    Add Question
+
+            <div class="dropdown ms-auto">
+
+                <button class="btn btn-outline-primary " data-bs-toggle="modal" data-bs-target="#addQuestionModal"
+                    onclick="setSheetId('{{ sheet.id }}')">
+                        <i class="ti ti-plus"></i>
                 </button>
 
-            </div>
-            <div class="col-md-4 mb-2">
-                <a href="{% url 'question_requests' %}" class="btn btn-outline-warning button mt-n3 m-3 w-100">Question
-                    Requests ({{unapproved_question_number}})</a>
-            </div>
-            <div class="col-md-4 mb-2">
-                <a href="{% url 'instructor_leaderboard' sheet.slug %}"
-                    class="btn btn-warning button mt-n3 m-3 w-100">Leaderboard</a>
-            </div>
-            <div class="col-md-3 mb-2">
-                <a href="{% url 'instructor_delete_sheet' sheet.id %}" class="btn btn-danger button mt-n3 m-3 w-100"
-                    onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete Sheet</a>
-            </div>
-            <div class="col-md-3 mb-2">
-                <button id="toggle-status" class="btn btn-info button mt-n3 m-3 w-100"
-                    data-sheet-slug="{{ sheet.slug }}">
-                    {% if sheet.is_enabled %} Disable {% else %} Enable {% endif %}
+                <a class="btn btn-outline-primary "  href="{% url 'instructor_add_new_question' sheet.slug %}">
+                        Add New Question
+                </a>                
+
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
+
+                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                    <li>
+                        <a href="{% url 'instructor_leaderboard' sheet.slug %}"
+                            class="btn btn-warning button w-100">Leaderboard
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'instructor_delete_sheet' sheet.id %}" class="btn btn-danger button w-100 mt-1"
+                            onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete Sheet
+                        </a>
+                    </li>
+                    <li>
+                        <button id="toggle-status" class="btn btn-info button w-100 mt-1" data-sheet-slug="{{ sheet.slug }}">
+                            {% if sheet.is_enabled %} Disable Sheet {% else %} Enable Sheet {% endif %}
+                        </button>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
@@ -243,29 +252,29 @@ active
         const addQuestionModal = document.getElementById("addQuestionModal");
         const questionList = document.getElementById("questionList");
         const searchInput = document.getElementById("searchInput");
-        const sheetId = {{ sheet.id }}; // Embed sheet.id directly
-    let allQuestions = []; // Store all questions for searching
+        const sheetId = "{{ sheet.id }}"; // Embed sheet.id directly
+        let allQuestions = []; // Store all questions for searching
 
-    // Fetch and populate questions when the modal is shown
-    addQuestionModal.addEventListener("show.bs.modal", () => {
-        if (!sheetId) return;
+        // Fetch and populate questions when the modal is shown
+        addQuestionModal.addEventListener("show.bs.modal", () => {
+            if (!sheetId) return;
 
-        fetch("{% url 'get_excluded_questions' 0 %}".replace("0", sheetId))
-            .then((response) => response.json())
-            .then((questions) => {
-                allQuestions = questions; // Cache the full list of questions
-                renderQuestions(allQuestions); // Initial rendering
-            })
-            .catch((error) => console.error("Error fetching questions:", error));
-    });
+            fetch("{% url 'get_excluded_questions' 0 %}".replace("0", sheetId))
+                .then((response) => response.json())
+                .then((questions) => {
+                    allQuestions = questions; // Cache the full list of questions
+                    renderQuestions(allQuestions); // Initial rendering
+                })
+                .catch((error) => console.error("Error fetching questions:", error));
+        });
 
-    // Render questions in the table
-    function renderQuestions(questions) {
-        questionList.innerHTML = ""; // Clear existing content
+        // Render questions in the table
+        function renderQuestions(questions) {
+            questionList.innerHTML = ""; // Clear existing content
 
-        questions.forEach((question) => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
+            questions.forEach((question) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
                     <td>
                         <h6 class="fw-semibold mb-1 text-wrap">${question.id}</h6>
                     </td>
@@ -281,65 +290,65 @@ active
                         </button>
                     </td>
                 `;
-            questionList.appendChild(row);
-        });
-
-        // final call to add the queston in the sheet
-        document.querySelectorAll(".add-question-btn").forEach((btn) => {
-            btn.addEventListener("click", (e) => {
-                const questionId = e.target.getAttribute("data-question-id");
-                addQuestionToSheet(sheetId, questionId);
+                questionList.appendChild(row);
             });
+
+            // final call to add the queston in the sheet
+            document.querySelectorAll(".add-question-btn").forEach((btn) => {
+                btn.addEventListener("click", (e) => {
+                    const questionId = e.target.getAttribute("data-question-id");
+                    addQuestionToSheet(sheetId, questionId);
+                });
+            });
+        }
+
+        // search button...
+        searchInput.addEventListener("input", () => {
+            const searchTerm = searchInput.value.toLowerCase();
+
+            const filteredQuestions = allQuestions.filter((question) => {
+                const titleMatch = question.title.toLowerCase().includes(searchTerm);
+                const idMatch = question.id.toString().includes(searchTerm);
+                const courseMatch = question.course ? question.course.toLowerCase().includes(searchTerm) : false;
+
+                return titleMatch || idMatch || courseMatch;
+            });
+
+            renderQuestions(filteredQuestions);
         });
-    }
 
-    // search button...
-    searchInput.addEventListener("input", () => {
-        const searchTerm = searchInput.value.toLowerCase();
+        // Clear search input and restore the full question list
+        window.clearSearch = () => {
+            searchInput.value = "";
+            renderQuestions(allQuestions);
+        };
 
-        const filteredQuestions = allQuestions.filter((question) => {
-            const titleMatch = question.title.toLowerCase().includes(searchTerm);
-            const idMatch = question.id.toString().includes(searchTerm);
-            const courseMatch = question.course ? question.course.toLowerCase().includes(searchTerm) : false;
+        // Add question to sheet
+        function addQuestionToSheet(sheetId, questionId) {
+            sheetId = sheetId.toString();
+            console.log(sheetId, questionId);
+            if (!sheetId || !questionId) return;
 
-            return titleMatch || idMatch || courseMatch;
-        });
-
-        renderQuestions(filteredQuestions);
-    });
-
-    // Clear search input and restore the full question list
-    window.clearSearch = () => {
-        searchInput.value = "";
-        renderQuestions(allQuestions);
-    };
-
-    // Add question to sheet
-    function addQuestionToSheet(sheetId, questionId) {
-        sheetId = sheetId.toString();
-        console.log(sheetId, questionId);
-        if (!sheetId || !questionId) return;
-
-        const url = `/administration/add_question_to_sheet/${sheetId}/${questionId}/`;
-        console.log(url);
-        fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}",
-            },
-        })
-            .then((response) => {
-                console.log(response);
-                if (response.ok) {
-                    // Successfully added; refresh questions
-                    document.querySelector(`button[data-question-id="${questionId}"]`).parentElement.parentElement.remove();
-                } else {
-                    alert("Failed to add question. (html)");
-                }
+            const url = `/administration/add_question_to_sheet/${sheetId}/${questionId}/`;
+            console.log(url);
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
             })
-            .catch((error) => console.error("Error adding question:", error));
-    }
+                .then((response) => {
+                    console.log(response);
+                    if (response.ok) {
+                        // Successfully added; refresh questions
+                        document.querySelector(`button[data-question-id="${questionId}"]`).parentElement.parentElement.remove();
+                    } else {
+                        alert("Failed to add question. (html)");
+                    }
+                })
+                .catch((error) => console.error("Error adding question:", error));
+        }
     });
 </script>
 

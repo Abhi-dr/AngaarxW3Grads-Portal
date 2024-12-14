@@ -19,6 +19,40 @@ def index(request):
     
     instructor = Instructor.objects.get(id=request.user.id)
     latest_sheet = Sheet.objects.latest('id')
+    
+    # get the total number of submissions happened today only
+    today = datetime.date.today()
+    total_submissions_today = Submission.objects.filter(submitted_at__date=today).count()
+    print(total_submissions_today)
+
+    
+    # last_3_questions = Question.objects.order_by('-created_at')[:3]
+
+    
+    # sessions = Session.objects.filter(instructor=instructor, recorded_session_link=None).order_by("-session_time")
+    
+    # total_enrolled_students = Student.objects.filter(courses__instructor=instructor).distinct().count()
+    # total_sessions = Session.objects.filter(instructor=instructor).count()
+    
+    # course = Course.objects.get(instructor=instructor)
+    
+    # if total_sessions == 0:
+    #     total_completed_sessions_percentage = 0
+    # else:
+    #     total_completed_sessions_percentage = int((Session.objects.filter(instructor=instructor, is_completed=True).count() / total_sessions) * 100)
+    
+    parameters = {
+        "instructor": instructor,
+        "latest_sheet": latest_sheet,
+        # "total_enrolled_students": total_enrolled_students,
+        # "total_sessions": total_sessions,
+        # "sessions": sessions,
+        # "total_completed_sessions_percentage": total_completed_sessions_percentage,
+        # "course": course
+    }
+    
+    return render(request, "administration/index.html", parameters)
+    
     # last_3_questions = Question.objects.order_by('-created_at')[:3]
 
     

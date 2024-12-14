@@ -548,7 +548,7 @@ def problem_set(request):
 def fetch_questions(request):
     
     query = request.GET.get("query", "").strip()
-    questions = Question.objects.filter(is_approved=True)
+    questions = Question.objects.filter(is_approved=True, parent_id=-1)
 
     
     if query:
