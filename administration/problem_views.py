@@ -65,6 +65,7 @@ def fetch_problems(request):
         "cpu_time_limit": q.cpu_time_limit,
         "memory_limit": q.memory_limit,
         "test_cases_count": q.test_cases.count(),
+        "submission_count": q.how_many_users_solved(),
         "status": "Active",  # Example status
         "color": "success",  # Example color
         "sheets": [{"name": sheet.name} for sheet in q.sheets.all()],

@@ -100,6 +100,10 @@ urlpatterns += [
     path("leaderboard/<slug:slug>", sheet_views.leaderboard, name="instructor_leaderboard"),
     path("sheet_leaderboard/<slug:slug>", sheet_views.sheet_leaderboard, name="instructor_sheet_leaderboard"),
     
+    path("reorder/<slug:slug>/", sheet_views.reorder, name="instructor_reorder"),
+    path('update-sheet-order/<int:sheet_id>/', sheet_views.update_sheet_order, name='update_sheet_order'),
+
+    
     
     # ====================================== ENABLE / DISABLE SHEET ===================================
     

@@ -12,6 +12,7 @@ active
 {% block body %}
 
 <div class="container-fluid">
+    
     <div class="card">
         <div class="card-body d-inline-flex">
             <h3 class="heading">
@@ -25,6 +26,8 @@ active
                     onclick="setSheetId('{{ sheet.id }}')">
                     <i class="ti ti-plus"></i>
                 </button>
+
+                <a href="{% url 'instructor_reorder' sheet.slug %}"  class="btn btn-outline-primary">⬆️</a>
 
                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                     data-bs-target="#selectQuestionBtn">Duplicate a Question</button>
@@ -137,7 +140,9 @@ active
 
                         <tr>
                             <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}
+                                    <small>({{ question.id }})</small>
+                                </h6>
                             </td>
                             <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
@@ -183,6 +188,7 @@ active
                                         data-bs-toggle="dropdown" aria-expanded="false">TC/DC
                                         <span class="visually-hidden">Toggle Dropdown</span>
                                     </button>
+                                    
 
                                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
                                         <li>
@@ -204,15 +210,15 @@ active
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
                                     <a href="{% url 'instructor_view_submissions' question.slug %}"
-                                        class="btn btn-outline-info text-blue float-end">Submissions </a>
+                                        class="btn btn-outline-info text-blue float-end">Submissions ({{ question.how_many_users_solved }}) </a>
                                 </div>
                             </td>
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
-                                    <a href="/administration/test_code/${question.slug}"
+                                    <a href="{% url 'test_code' question.slug %}"
                                         class="btn btn-info text-blue float-end">TEST CODE</a>
-                                        
+
                                 </div>
                             </td>
 

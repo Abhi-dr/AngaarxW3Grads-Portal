@@ -54,8 +54,23 @@ class Sheet(models.Model):
     thumbnail = models.ImageField(upload_to='sheets/thumbnails/', blank=True, null=True)
     batches = models.ManyToManyField(Batch, related_name="sheets", blank=True)
     
-    is_enabled = models.BooleanField(default=True)  
-
+    is_enabled = models.BooleanField(default=True)
+    custom_order = models.JSONField(default=dict)  # Store order as {question_id: position}
+    
+    def get_ordered_questions(self):
+        # Get questions in the custom order
+        questions = list(self.questions.filter(is_approved=True))
+        if self.custom_order:
+            questions.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
+        return questions
+    
+    def get_next_question(self, current_question):
+        questions = self.get_ordered_questions()
+        current_index = questions.index(current_question)
+        
+        if current_index + 1 < len(questions):
+            return questions[current_index + 1]
+        return None
 
     def __str__(self):
         return self.name
@@ -172,6 +187,7 @@ class Question(models.Model):
             return 'dark'
     
     def how_many_users_solved(self):
+        # count only once by one user
         return self.submissions.filter(status='Accepted').distinct().count()
     
     def how_many_users_attempted(self):

@@ -235,6 +235,7 @@ def instructor_set_pod_for_batch(request, slug):
 def view_submissions(request, slug):
     
     question = get_object_or_404(Question, slug=slug)
+    instructor = Instructor.objects.get(id=request.user.id)
     # submissions = Submission.objects.filter(question=question, status="Accepted").distinct().order_by('-submitted_at')
     
     latest_submission_time = Submission.objects.filter(
@@ -252,7 +253,8 @@ def view_submissions(request, slug):
     
     parameters = {
         "question": question,
-        "submissions": latest_submissions
+        "submissions": latest_submissions,
+        "instructor": instructor
     }
     
     return render(request, 'administration/batch/view_submissions.html', parameters)

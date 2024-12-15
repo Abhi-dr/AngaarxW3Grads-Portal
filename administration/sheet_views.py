@@ -85,7 +85,7 @@ def sheet(request, slug):
     
     instructor = Instructor.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
-    questions = sheet.questions.all()
+    questions = sheet.get_ordered_questions()
     
     parameters = {
         "instructor": instructor,
@@ -143,7 +143,7 @@ def add_question_to_sheet(request, sheet_id, question_id):
 
     return JsonResponse({"success": False, "message": "Invalid request method."})
 
-# ========================= ADD NEW QUESTION ==========================
+# ========================= MAKE DUPLICATE ==========================
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
@@ -290,3 +290,32 @@ def sheet_leaderboard(request, slug):
 
     return JsonResponse({'leaderboard': leaderboard})
 
+
+def reorder(request, slug):
+    sheet = get_object_or_404(Sheet, slug=slug)
+    questions = sheet.get_ordered_questions()
+    instructor = Instructor.objects.get(id=request.user.id)
+    
+    parameters = {
+        "instructor": instructor,
+        "sheet": sheet,
+        "questions": questions
+    }
+    
+    return render(request, 'administration/sheet/reorder.html', parameters)
+
+def update_sheet_order(request, sheet_id):
+    if request.method == 'POST':
+        sheet = get_object_or_404(Sheet, id=sheet_id)
+        order = request.POST.getlist('order')[0].split(",") #  ['39,40,41,46,95,72,53']
+        order = [int(qid) for qid in order]
+        
+        print("\n\n", order)
+        try:
+            # Update the custom_order field with the new positions
+            sheet.custom_order = {qid: idx for idx, qid in enumerate(order)}
+            sheet.save()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

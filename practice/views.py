@@ -47,7 +47,7 @@ def sheet(request, slug):
         
     sheet = get_object_or_404(Sheet, slug=slug)
     
-    questions = sheet.questions.filter(is_approved=True)
+    questions = sheet.get_ordered_questions()
     
     user_submissions = {
         submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=questions)
