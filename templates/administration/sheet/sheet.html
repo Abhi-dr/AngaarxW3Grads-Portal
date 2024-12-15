@@ -23,12 +23,11 @@ active
 
                 <button class="btn btn-outline-primary " data-bs-toggle="modal" data-bs-target="#addQuestionModal"
                     onclick="setSheetId('{{ sheet.id }}')">
-                        <i class="ti ti-plus"></i>
+                    <i class="ti ti-plus"></i>
                 </button>
 
-                <a class="btn btn-outline-primary "  href="{% url 'instructor_add_new_question' sheet.slug %}">
-                        Add New Question
-                </a>                
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                    data-bs-target="#selectQuestionBtn">Duplicate a Question</button>
 
                 <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -48,7 +47,8 @@ active
                         </a>
                     </li>
                     <li>
-                        <button id="toggle-status" class="btn btn-info button w-100 mt-1" data-sheet-slug="{{ sheet.slug }}">
+                        <button id="toggle-status" class="btn btn-info button w-100 mt-1"
+                            data-sheet-slug="{{ sheet.slug }}">
                             {% if sheet.is_enabled %} Disable Sheet {% else %} Enable Sheet {% endif %}
                         </button>
                     </li>
@@ -123,7 +123,11 @@ active
                                     Action#3
                                 </h6>
                             </th>
-
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#4
+                                </h6>
+                            </th>
                         </tr>
                     </thead>
 
@@ -172,19 +176,28 @@ active
                             </td>
 
                             <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'instructor_remove_from_sheet' sheet.id question.id %}"
-                                        class="btn btn-danger float-end"
-                                        onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Remove</a>
-                                </div>
-                            </td>
 
+                                <div class="dropdown ms-auto">
+                                    <button type="button"
+                                        class="btn btn-outline-success text-blue dropdown-toggle dropdown-toggle-split"
+                                        data-bs-toggle="dropdown" aria-expanded="false">TC/DC
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
 
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'test_cases' question.slug %}"
-                                        class="btn btn-outline-success text-blue float-end">Test Cases
-                                        ({{question.test_cases.count }})</a>
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                                        <li>
+                                            <a href="{% url 'test_cases' question.slug %}"
+                                                class="btn btn-success mt-1 text-blue w-100">Test Cases
+                                                ({{question.test_cases.count }})</a>
+                                        </li>
+
+                                        <li>
+                                            <a href="{% url 'driver_code' question.slug %}"
+                                                class="btn btn-warning mt-1 text-blue w-100">
+                                                Driver Codes
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </div>
                             </td>
 
@@ -194,6 +207,25 @@ active
                                         class="btn btn-outline-info text-blue float-end">Submissions </a>
                                 </div>
                             </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="/administration/test_code/${question.slug}"
+                                        class="btn btn-info text-blue float-end">TEST CODE</a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="{% url 'instructor_remove_from_sheet' sheet.id question.id %}"
+                                        class="float-end"
+                                        onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">❌</a>
+
+                                    <a href="{% url 'edit_question' question.id %}" class="float-end">✏️</a>
+                                </div>
+                            </td>
+
                         </tr>
 
                         {% endfor %}
@@ -204,6 +236,31 @@ active
 
         </div>
     </div>
+
+
+    <!-- =============================== VIEW DESCRIPTION MODEL ======================= -->
+
+
+
+    <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="questionModalLabel">Question Title...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="questionDescription">Description...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================== ADD QUESTION ================================ -->
 
 
     <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel"
@@ -243,9 +300,52 @@ active
         </div>
     </div>
 
+    <!-- =============================== MAKE DUPLICATE ================================ -->
+
+    <div class="modal fade" id="selectQuestionBtn" tabindex="-1" aria-labelledby="selectQuestionBtnLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="selectQuestionBtnLabel">Enter Question ID</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{% url 'instructor_make_duplicate' sheet.slug %}" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inputData" class="form-label">Question ID</label>
+                            <input type="text" class="form-control" id="inputData" name="question_id"
+                                placeholder="Enter the question id here..." required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Make Duplicate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
 </div>
+
+<script>
+    var questionModal = document.getElementById('questionModal');
+    questionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var title = button.getAttribute('data-title'); // Extract info from data-* attributes
+        var description = button.getAttribute('data-description');
+
+        // Update the modal's content.
+        var modalTitle = questionModal.querySelector('.modal-title');
+        var modalBody = questionModal.querySelector('.modal-body p');
+
+        modalTitle.textContent = title;
+        modalBody.innerHTML = description;
+    });
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {

@@ -147,22 +147,16 @@ def add_question_to_sheet(request, sheet_id, question_id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def add_new_question(request, slug):
+def make_duplicate(request, slug):
     
-    sheet = get_object_or_404(Sheet, slug=slug)
-    instructor = Instructor.objects.get(id=request.user.id)
-    
-    parameters = {
-        "sheet": sheet,
-        "instructor": instructor
-    }
+    sheet = Sheet.objects.get(slug = slug)
     
     if request.method == "POST":
         question_id = request.POST.get('question_id')
         # make a copy of the question of the question id's question
         question = Question.objects.get(id=question_id)
         new_question = Question.objects.create(
-            title=question.title,
+            title=question.title + "- (Copy)",
             scenario=question.scenario,
             description=question.description,
             constraints=question.constraints,
@@ -186,7 +180,7 @@ def add_new_question(request, slug):
         sheet.questions.add(new_question)
         sheet.save()
         
-        # copy all test cases and driver codes as well
+        # TEST CASE AND DRIVER CODE COPY
         for test_case in question.test_cases.all():
             new_test_case = test_case
             new_test_case.id = None
@@ -199,12 +193,9 @@ def add_new_question(request, slug):
             new_driver_code.question = new_question
             new_driver_code.save()
         
-        parameters['question'] = new_question
         
         messages.success(request, "Question added successfully!")
-        return render(request, 'administration/sheet/add_new_question.html', parameters)
-    
-    return render(request, 'administration/sheet/add_new_question.html', parameters)
+        return redirect('instructor_sheet', slug=sheet.slug)
 
 # ========================= REMOVE QUESTION FROM SHEET ==========================
 

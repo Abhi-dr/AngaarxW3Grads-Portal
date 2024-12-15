@@ -95,7 +95,7 @@ urlpatterns += [
     path("add_question_to_sheet/<int:sheet_id>/<int:question_id>/", sheet_views.add_question_to_sheet, name="add_question_to_sheet"),
     path("remove_question_from_sheet/<int:sheet_id>/<int:question_id>/", sheet_views.remove_question_from_sheet, name="instructor_remove_from_sheet"),
     
-    path("add_new_question/<slug:slug>/", sheet_views.add_new_question, name="instructor_add_new_question"),
+    path("make_duplicate/<slug:slug>/", sheet_views.make_duplicate, name="instructor_make_duplicate"),
     
     path("leaderboard/<slug:slug>", sheet_views.leaderboard, name="instructor_leaderboard"),
     path("sheet_leaderboard/<slug:slug>", sheet_views.sheet_leaderboard, name="instructor_sheet_leaderboard"),
