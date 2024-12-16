@@ -476,7 +476,6 @@ def custom_input(request, slug):
             test_case = question.test_cases.filter(input_data=input_data).first()
         else:
             test_case = TestCase(question=question, input_data=input_data, expected_output="")
-            test_case.save()
             
         judge0_response = run_code_on_judge0(
             source_code,
@@ -505,7 +504,6 @@ def custom_input(request, slug):
         if test_case.expected_output == "":
             print("EXPECTED OUTPUT SETTING")
             test_case.expected_output = outputs[0]
-            test_case.save()
         
         
         result = {
