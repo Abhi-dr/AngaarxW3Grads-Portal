@@ -159,15 +159,13 @@
             /* Darker background on hover */
         }
 
-        [data-bs-theme="dark"] .form-control{
+        [data-bs-theme="dark"] .form-control {
             color: #f0f0f0;
         }
 
-        [data-bs-theme="dark"] select > option {
+        [data-bs-theme="dark"] select>option {
             color: #000000;
         }
-       
-
     </style>
 
     <style>
@@ -236,8 +234,6 @@
     </script>
 
     <style>
-
-
         .themeToggle {
             color: #bbb;
             width: 3em;
@@ -333,6 +329,7 @@
 </head>
 
 <!-- oncontextmenu="return false" -->
+
 <body style="background-attachment: fixed;">
     <!--  Body Wrapper -->
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
@@ -368,7 +365,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block my_batches_active %} {% endblock %}" href="{% url 'my_batches' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block my_batches_active %} {% endblock %}"
+                                href="{% url 'my_batches' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-bookmarks"></i>
                                 </span>
@@ -549,10 +547,11 @@
                             </a>
                         </li> -->
                         <li class="nav-item">
-                            <a class="nav-link">
+                            <a class="nav-link pe-none" id="sheet-link" href="#">
                                 <!-- data-bs-toggle="tooltip" title="Your Current Streaks🔥" data-bs-placement="bottom" -->
                                 <img id="fire-icon" src="{% static 'img/student/fire.png' %}" alt="">
-                                <span class="mx-1 badge text-bg-dark">Kya Bolti Public!</span></h1>
+                                <span class="mx-1 badge text-bg-dark" id="active-sheet-timer">Kya Bolti Public!</span>
+                                </h1>
                             </a>
                         </li>
                     </ul>
@@ -728,11 +727,62 @@
     </script>
 
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to fetch the active sheet timer
+            function fetchActiveSheetTimer() {
+                fetch("{% url 'get_active_sheet_timer' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.end_time) {
+                            const endTime = new Date(data.end_time).getTime();
+                            const sheetName = data.sheetName;
+                            const sheetSlug = data.sheetSlug;
+
+                            const badge = document.getElementById('sheet-link');
+                            badge.href = "{% url 'sheet' 0 %}".replace('0', sheetSlug);
+                            badge.classList.remove('pe-none');
+
+
+                            // Function to update the timer
+                            function updateTimer() {
+                                const now = new Date().getTime();
+                                const timeLeft = endTime - now;
+
+                                timer = document.getElementById('active-sheet-timer');
+
+                                if (timeLeft <= 0) {
+                                    timer.innerText = "Time's up!";
+                                } else {
+                                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                                    timer.innerText = `${sheetName}:`;
+                                    timer.innerText += ` ${minutes}m ${seconds}s`;
+                                }
+                            }
+
+                            // Initial call to update the timer and then every second
+                            updateTimer();
+                            setInterval(updateTimer, 1000);
+                        } else {
+                            document.getElementById('active-sheet-timer').innerText = "No active sheet.";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching sheet timer:', error);
+                    });
+            }
+
+            // Fetch the timer on page load
+            fetchActiveSheetTimer();
+        });
+    </script>
+
+    <script>
         // make the default mode as dark mode
         document.documentElement.setAttribute('data-bs-theme', 'dark');
         localStorage.setItem('theme', 'dark');
     </script>
-<!-- 
+    <!-- 
     <script>
         document.onkeydown = function (e) {
             if (event.keyCode == 123) {

@@ -65,6 +65,7 @@ def sheet(request, slug):
     
     return render(request, "practice/sheet.html", parameters)
 
+
 # ========================================== PLAYGROUND ===============================================
 
 @login_required(login_url="login")

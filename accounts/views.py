@@ -7,6 +7,9 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 from .models import Student, Instructor
 
+from django.utils.timezone import now
+from practice.models import Sheet
+
 # ===================================== LOGIN ==============================
 
 def login(request):
@@ -18,6 +21,7 @@ def login(request):
             user = auth.authenticate(username=username, password=password)
 
             if user is not None:
+                
                 try:
                     
                     
@@ -171,3 +175,19 @@ def unblock_student(request, id):
 
 def page_not_found_view(request, exception):
     return render(request, '404.html', status=404)
+
+
+# =========================================================
+
+@login_required
+def get_active_sheet_timer(request):
+    # Find the active sheet for the logged-in user
+    active_sheets = Sheet.objects.filter(
+        start_time__lte=now(), end_time__gte=now(), is_enabled=True
+    )
+    
+    if active_sheets.exists():
+        active_sheet = active_sheets.first()  # Get the first active sheet
+        return JsonResponse({'end_time': active_sheet.end_time.isoformat(), "sheetName": active_sheet.name, "sheetSlug": active_sheet.slug})
+    else:
+        return JsonResponse({'end_time': None})

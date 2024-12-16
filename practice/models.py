@@ -1,6 +1,6 @@
 from django.db import models
-from django.db.models import Sum, Min, F
 from datetime import datetime, timedelta
+from django.utils.timezone import now
 
 from accounts.models import Student
 
@@ -57,6 +57,13 @@ class Sheet(models.Model):
     is_enabled = models.BooleanField(default=True)
     custom_order = models.JSONField(default=dict)  # Store order as {question_id: position}
     
+    start_time = models.DateTimeField(null=True, blank=True)
+    end_time = models.DateTimeField(null=True, blank=True)
+    
+    def is_active(self):
+        """Checks if the sheet is active based on the current time."""
+        return self.is_enabled and (self.start_time <= now() <= self.end_time)
+    
     def get_ordered_questions(self):
         # Get questions in the custom order
         questions = list(self.questions.filter(is_approved=True))
@@ -89,7 +96,6 @@ class Sheet(models.Model):
             status='Accepted'
         ).values('question').distinct().count()
         
-    
     def get_progress(self, student):
         total_questions = self.questions.count()
         completed_questions = Submission.objects.filter(

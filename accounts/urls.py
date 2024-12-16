@@ -11,4 +11,6 @@ urlpatterns = [
     path("block_student/<int:id>/", views.block_student, name="block_student"),
     path("unblock_student/<int:id>/", views.unblock_student, name="unblock_student"),
     
+    path("get_active_sheet_timer/", views.get_active_sheet_timer, name="get_active_sheet_timer"),
+    
 ]   
