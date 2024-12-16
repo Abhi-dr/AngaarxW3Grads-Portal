@@ -12,22 +12,28 @@ active
 {% block body %}
 
 <div class="container-fluid">
-    
+
     <div class="card">
         <div class="card-body d-inline-flex">
             <h3 class="heading">
                 <span class="fw-semibold">{{ sheet.name }}</span>
-                <span class="fs-4"> | 🔥Total: {{ questions.count }}🔥</span>
+                <span class="fs-4"> | <span class="mx-1 badge text-bg-dark" id="admin-timer">No Time
+                        Set</span></span>
+
+
             </h3>
 
             <div class="dropdown ms-auto">
-
                 <button class="btn btn-outline-primary " data-bs-toggle="modal" data-bs-target="#addQuestionModal"
                     onclick="setSheetId('{{ sheet.id }}')">
                     <i class="ti ti-plus"></i>
                 </button>
 
-                <a href="{% url 'instructor_reorder' sheet.slug %}"  class="btn btn-outline-primary">⬆️</a>
+                <a href="{% url 'instructor_reorder' sheet.slug %}" class="btn btn-outline-primary">⬆️</a>
+
+                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
+                    data-bs-target="#setTimerModal">⏰</button>
+
 
                 <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
                     data-bs-target="#selectQuestionBtn">Duplicate a Question</button>
@@ -187,7 +193,7 @@ active
                                         data-bs-toggle="dropdown" aria-expanded="false">TC/DC
                                         <span class="visually-hidden">Toggle Dropdown</span>
                                     </button>
-                                    
+
 
                                     <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
                                         <li>
@@ -209,7 +215,8 @@ active
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
                                     <a href="{% url 'instructor_view_submissions' question.slug %}"
-                                        class="btn btn-outline-info text-blue float-end">Submissions ({{ question.how_many_users_solved }}) </a>
+                                        class="btn btn-outline-info text-blue float-end">Submissions
+                                        ({{question.how_many_users_solved }}) </a>
                                 </div>
                             </td>
 
@@ -334,8 +341,70 @@ active
         </div>
     </div>
 
+    <!-- =============================== SET TIMER MODAL ================================= -->
+
+
+
+    <div class="modal fade" id="setTimerModal" tabindex="-1" role="dialog" aria-labelledby="setTimerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="setTimerModalLabel">Set or Reset Timer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="end_time">End Time:</label>
+                    <input type="datetime-local" id="end_time" class="form-control"
+                        value="{{ sheet.end_time|date:' Y-m-d\\TH:i' }}">
+                    <small id="resetText" class="form-text text-muted">Leave empty to reset timer.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveTimerBtn">Save Timer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
 
 </div>
+
+<script>
+    document.getElementById('saveTimerBtn').addEventListener('click', function () {
+        var endTime = document.getElementById('end_time').value;
+
+
+        // If end_time is empty, reset the timer
+        if (!endTime) {
+            endTime = null;
+        }
+
+        // Send AJAX request to update the timer
+        fetch("{% url 'instructor_set_sheet_timer' sheet.id %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({ end_time: endTime }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Timer updated successfully!');
+                    window.location.reload();  // Reload the page to reflect the changes
+                } else {
+                    alert('Error updating timer');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
 
 <script>
     var questionModal = document.getElementById('questionModal');
@@ -475,4 +544,36 @@ active
     });
 </script>
 
+
+<script>
+    async function fetchTimer() {
+        const response = await fetch("{% url 'fetch_sheet_timer' sheet.id %}");
+        const data = await response.json();
+        const timerElement = document.getElementById("admin-timer");
+
+        if (data.end_time) {
+            const endTime = new Date(data.end_time);
+            function updateTimer() {
+                const now = new Date();
+                const diff = endTime - now;
+
+                if (diff > 0) {
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    timerElement.textContent = `Active for: ${minutes}m ${seconds}s`;
+                } else {
+                    timerElement.textContent = "Expired";
+                    clearInterval(timerInterval);
+                }
+            }
+
+            const timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+        } else {
+            timerElement.textContent = "No Timer Set";
+        }
+    }
+
+    fetchTimer();
+</script>
 {% endblock %}

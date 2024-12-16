@@ -2,7 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from django.db.models import Q
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.utils.timezone import now
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -239,6 +241,44 @@ def update_sheet_order(request, sheet_id):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+# ============================= SET SHEET TIMER =============================
+
+@csrf_exempt
+def set_sheet_timer(request, sheet_id):
+    if request.method == 'POST':
+        sheet = get_object_or_404(Sheet, id=sheet_id)
+
+        # Parse the incoming data
+        data = json.loads(request.body)
+        end_time = data.get('end_time')
+
+        if end_time:
+            # If end_time is provided, update it
+            sheet.end_time = end_time
+        else:
+            # If end_time is None, reset the timer
+            sheet.end_time = None
+
+        sheet.save()
+
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False}, status=400)
+
+# ============================= FETCH SHEET TIMER =============================
+
+def fetch_sheet_timer(request, sheet_id):
+    sheet = get_object_or_404(Sheet, id=sheet_id)
+    if sheet.end_time:
+        remaining_time = sheet.end_time - now()
+        return JsonResponse({
+            'sheet_name': sheet.name,
+            'end_time': sheet.end_time.isoformat(),
+            'remaining_time': remaining_time.total_seconds() if remaining_time.total_seconds() > 0 else 0,
+        })
+    return JsonResponse({'sheet_name': sheet.name, 'end_time': None, 'remaining_time': 0})
 
 # ===============================================================================================
 # ===============================================================================================

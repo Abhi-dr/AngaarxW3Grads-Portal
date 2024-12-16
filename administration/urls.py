@@ -103,7 +103,8 @@ urlpatterns += [
     path("reorder/<slug:slug>/", sheet_views.reorder, name="instructor_reorder"),
     path('update-sheet-order/<int:sheet_id>/', sheet_views.update_sheet_order, name='update_sheet_order'),
 
-    
+    path("instructor_set_sheet_timer/<int:sheet_id>/", sheet_views.set_sheet_timer, name="instructor_set_sheet_timer"),
+    path("fetch_sheet_timer/<int:sheet_id>/", sheet_views.fetch_sheet_timer, name="fetch_sheet_timer"),
     
     # ====================================== ENABLE / DISABLE SHEET ===================================
     
