@@ -2,14 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from accounts.views import logout as account_logout
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
 from accounts.models import Student, Instructor
-from student.models import Notification, Anonymous_Message
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 
 # ========================= SHEET WORK ==========================
@@ -209,6 +207,42 @@ def remove_question_from_sheet(request, sheet_id, question_id):
     
     return redirect('instructor_sheet', slug=sheet.slug)
 
+# ========================= REORDER SHEET QUESTIONS ==========================
+
+def reorder(request, slug):
+    sheet = get_object_or_404(Sheet, slug=slug)
+    questions = sheet.get_ordered_questions()
+    instructor = Instructor.objects.get(id=request.user.id)
+    
+    parameters = {
+        "instructor": instructor,
+        "sheet": sheet,
+        "questions": questions
+    }
+    
+    return render(request, 'administration/sheet/reorder.html', parameters)
+
+# ========================= UPDATE SHEET ORDER ==========================
+
+def update_sheet_order(request, sheet_id):
+    if request.method == 'POST':
+        sheet = get_object_or_404(Sheet, id=sheet_id)
+        order = request.POST.getlist('order')[0].split(",") #  ['39,40,41,46,95,72,53']
+        order = [int(qid) for qid in order]
+        
+        print("\n\n", order)
+        try:
+            # Update the custom_order field with the new positions
+            sheet.custom_order = {qid: idx for idx, qid in enumerate(order)}
+            sheet.save()
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+# ===============================================================================================
+# ===============================================================================================
+# ===============================================================================================
 # =========================== LEADERBOARD ===========================
 
 @login_required(login_url='login')
@@ -225,10 +259,6 @@ def leaderboard(request, slug):
     
     return render(request, 'administration/sheet/leaderboard.html', parameters)
 
-# ===============================================================================================
-# ===============================================================================================
-# ===============================================================================================
-from django.db.models import Max, Sum, Min, OuterRef, Subquery, Count
 
 def sheet_leaderboard(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
@@ -290,32 +320,3 @@ def sheet_leaderboard(request, slug):
 
     return JsonResponse({'leaderboard': leaderboard})
 
-
-def reorder(request, slug):
-    sheet = get_object_or_404(Sheet, slug=slug)
-    questions = sheet.get_ordered_questions()
-    instructor = Instructor.objects.get(id=request.user.id)
-    
-    parameters = {
-        "instructor": instructor,
-        "sheet": sheet,
-        "questions": questions
-    }
-    
-    return render(request, 'administration/sheet/reorder.html', parameters)
-
-def update_sheet_order(request, sheet_id):
-    if request.method == 'POST':
-        sheet = get_object_or_404(Sheet, id=sheet_id)
-        order = request.POST.getlist('order')[0].split(",") #  ['39,40,41,46,95,72,53']
-        order = [int(qid) for qid in order]
-        
-        print("\n\n", order)
-        try:
-            # Update the custom_order field with the new positions
-            sheet.custom_order = {qid: idx for idx, qid in enumerate(order)}
-            sheet.save()
-            return JsonResponse({'status': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)})
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

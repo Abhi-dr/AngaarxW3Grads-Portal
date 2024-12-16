@@ -21,8 +21,7 @@ urlpatterns = [
     path("problem_set", views.problem_set, name="problem_set"),
     path("fetch_questions", views.fetch_questions, name="fetch_questions"),
     
-    path("next-question/<slug:slug>", views.next_question, name="next_question"),
-    
+    path('render_next_question_in_sheet/<int:sheet_id>/<int:question_id>/', views.render_next_question_in_sheet, name='render_next_question_in_sheet'),
     # path("submission/<slug:slug>/", views.submission, name="submission"),
     
     # ============================== QUESTION CRUD =========================

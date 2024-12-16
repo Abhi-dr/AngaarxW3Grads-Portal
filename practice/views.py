@@ -289,7 +289,8 @@ def problem(request, slug):
         sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
         return render(request, 'practice/problem.html', {
             'question': question,
-            'sample_test_cases': sample_test_cases
+            'sample_test_cases': sample_test_cases,
+            'sheet': sheet
         })
     except Exception as e:
         print(f"Error loading problem page: {e}")
@@ -577,23 +578,21 @@ def fetch_questions(request):
 # ========================================== NEXT QUESTION ==========================================
 
 @login_required(login_url="login")
-# get next question of the current sheet but not in json
-def next_question(request, slug):
-    
-    sheet = get_object_or_404(Sheet, slug=slug)
-    questions = sheet.questions.filter(is_approved=True)
-    
-    user_submissions = {
-        submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=questions)
-        }
-    
-    # Get the next question that has not been attempted yet
-    for question in questions:
-        if question.id not in user_submissions:
-            return redirect('problem', slug=question.slug)
-    
-    messages.info(request, "You have completed all questions in this sheet.")
-    return redirect('sheet', slug=sheet.slug)
+def render_next_question_in_sheet(request, sheet_id, question_id):
+    sheet = get_object_or_404(Sheet, id=sheet_id)
+    current_question = get_object_or_404(Question, id=question_id)
+
+    if current_question not in sheet.questions.all():
+        messages.error(request, "This question is not a part of the sheet.")
+        return redirect('sheet', slug=sheet.slug)
+
+    # Get the next question in the sheet
+    next_question = sheet.get_next_question(current_question)
+
+    if next_question:
+        # Render the next question
+        return redirect('problem', slug=next_question.slug)
+
 
 # ====================================================================================================
 # ====================================== STUDENT QUESTION CRUD =======================================

@@ -356,9 +356,6 @@
                     <br> {% endif %}
 
                 </p>
-
-
-
                 <p class="card-text d-inline">
                     <strong>Sample Output {{ forloop.counter }}:
                     </strong><code>{{ test_case.expected_output|linebreaks }}</code>
@@ -410,10 +407,10 @@
                             Draft
                         </button>
                         <button id="restore-draft-btn" type="button" class="btn btn-primary mt-2 mx-1">Restore
-                            </button>
+                        </button>
                         <button id="reset-draft-btn" type="button" class="btn btn-warning mt-2 mx-1"
                             onclick="return confirm('Are you sure you want to reset to the driver code?')">Reset
-                            </button>
+                        </button>
                     </div>
                 </div>
                 <div class="editor-container">
@@ -515,10 +512,19 @@
                                 All test cases passed!
                             </p>
                         </div>
+
+
+
                         <div class="modal-footer" style="border-top: 1px solid #fe7d14; justify-content: center;">
+
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <a href="#" class="btn btn-success" id="nextQuestionBtn">Next Question</a>
+
+                            {% if sheet %}
+                            <a href="{% url 'render_next_question_in_sheet' sheet.id question.id %}"
+                                class="btn btn-success" id="nextQuestionBtn">Next Question</a>
+                            {% endif %}
                         </div>
+
                     </div>
                 </div>
             </div>
