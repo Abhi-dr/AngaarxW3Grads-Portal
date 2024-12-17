@@ -43,10 +43,12 @@ def add_sheet(request):
         name = request.POST.get('name')
         batches = request.POST.getlist('batches')
         thumbnail = request.FILES.get('thumbnail')
+        is_sequential = 'is_sequential' in request.POST
         
         sheet = Sheet.objects.create(
             name=name,
-            thumbnail=thumbnail
+            thumbnail=thumbnail,
+            is_sequential=is_sequential,
         )
         
         for batch in batches:
@@ -56,7 +58,7 @@ def add_sheet(request):
         sheet.save()
         
         messages.success(request, "Sheet added successfully!")
-        return redirect('instructor_sheets')
+        return redirect('instructor_sheet', slug=sheet.slug)
     
     parameters = {
         "instructor": instructor,
@@ -64,6 +66,48 @@ def add_sheet(request):
     }
     
     return render(request, 'administration/sheet/add_sheet.html', parameters)
+
+
+# ========================= EDIT SHEET ==========================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def edit_sheet(request, slug):
+    
+    instructor = Instructor.objects.get(id=request.user.id)
+    sheet = Sheet.objects.get(slug=slug)
+    batches = Batch.objects.all()
+    
+    if request.method == "POST":
+        
+        name = request.POST.get('name')
+        batches = request.POST.getlist('batches')
+        thumbnail = request.FILES.get('thumbnail')
+        is_sequential = 'is_sequential' in request.POST
+        
+        sheet.name = name        
+        sheet.is_sequential = is_sequential
+        sheet.batches.clear()
+        
+        if thumbnail:
+            sheet.thumbnail = thumbnail
+        
+        for batch in batches:
+            batch = Batch.objects.get(id=batch)
+            sheet.batches.add(batch)
+            
+        sheet.save()
+        
+        messages.success(request, "Sheet updated successfully!")
+        return redirect('instructor_sheet', slug=sheet.slug)
+    
+    parameters = {
+        "instructor": instructor,
+        "sheet": sheet,
+        "batches": batches
+    }
+    
+    return render(request, 'administration/sheet/edit_sheet.html', parameters)
 
 # ========================= DELETE SHEET ==========================
 

@@ -53,6 +53,12 @@ active
                             onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete Sheet
                         </a>
                     </li>
+
+                    <li>
+                        <a href="{% url 'instructor_edit_sheet' sheet.slug %}" class="btn btn-primary button w-100 mt-1">Edit Sheet
+                        </a>
+                    </li>
+
                     <li>
                         <button id="toggle-status" class="btn btn-info button w-100 mt-1"
                             data-sheet-slug="{{ sheet.slug }}">
@@ -61,6 +67,7 @@ active
                     </li>
                 </ul>
             </div>
+
         </div>
     </div>
 
@@ -229,7 +236,8 @@ active
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
 
-                                    <a href="{% url 'instructor_remove_from_sheet' sheet.id question.id %}"
+                                    <!-- <a href="{% url 'instructor_remove_from_sheet' sheet.id question.id %}" -->
+                                    <a href="{% url 'delete_question' question.id %}"
                                         class="float-end"
                                         onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">❌</a>
 

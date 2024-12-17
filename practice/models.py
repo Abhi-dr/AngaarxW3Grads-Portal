@@ -54,11 +54,16 @@ class Sheet(models.Model):
     thumbnail = models.ImageField(upload_to='sheets/thumbnails/', blank=True, null=True)
     batches = models.ManyToManyField(Batch, related_name="sheets", blank=True)
     
-    is_enabled = models.BooleanField(default=True)
     custom_order = models.JSONField(default=dict)  # Store order as {question_id: position}
     
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
+    
+    # Field to check if the sheet will be treated as a STORYLINE
+    is_sequential = models.BooleanField(default=False)
+    
+    # Is sheet enabled or not
+    is_enabled = models.BooleanField(default=True)
     
     def is_active(self):
         """Checks if the sheet is active based on the current time."""
@@ -358,7 +363,7 @@ class Streak(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.current_streak} day streak"
     
-    
+
 # ============================== SOLUTION MODEL =========================
 
 class Solution(models.Model):

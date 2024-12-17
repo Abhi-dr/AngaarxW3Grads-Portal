@@ -12,7 +12,7 @@ class QuestionInline(admin.TabularInline):
 
 @admin.register(Sheet)
 class SheetAdmin(admin.ModelAdmin):
-    list_display = ['name', "is_enabled"]
+    list_display = ['name', "is_enabled", "is_sequential"]
     search_fields = ['name']
     list_per_page = 10
 
