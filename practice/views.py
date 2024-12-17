@@ -296,7 +296,7 @@ def problem(request, slug):
             # Check if the question is enabled for the user
             if question not in enabled_questions:
                 messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
-                return redirect('sheet_detail', slug=sheet.slug)  # You can redirect to the sheet or show an error
+                return redirect('sheet', slug=sheet.slug)  # You can redirect to the sheet or show an error
         
         sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
         return render(request, 'practice/problem.html', {
