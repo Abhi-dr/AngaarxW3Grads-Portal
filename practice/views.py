@@ -267,6 +267,8 @@ def update_submission_status(submission, passed, total, total_submission_count):
         score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))
         submission.score = score
         submission.save()
+        
+        return score
                 
     except Exception as e:
         print(f"Error updating submission: {e}")
@@ -296,6 +298,28 @@ def problem(request, slug):
     except Exception as e:
         print(f"Error loading problem page: {e}")
         return JsonResponse({"error": "Could not load problem."}, status=500)
+
+# ============================================ UPDATE COINS ===============================================
+
+def update_coin(user, score, question):
+    
+    # update the coins only if the user has submitted the code for the first time successfully
+    if Submission.objects.filter(user=user, question=question).count() > 1:
+        return
+    
+    if score == 100:
+        user.coins += 5
+    elif score >= 75:
+        user.coins += 4
+    elif score >= 50:
+        user.coins += 3
+    elif score >= 25:
+        user.coins += 2
+    else:
+        user.coins += 1
+    user.save()
+
+# ============================================ SUBMIT CODE ===============================================
 
 @csrf_exempt
 def submit_code(request, slug):
@@ -357,8 +381,10 @@ def submit_code(request, slug):
             
             total_submission_count = Submission.objects.filter(user=user, question=question).count()            
             # Update submission
-            update_submission_status(submission, passed_test_cases, len(test_cases), total_submission_count)
+            score = update_submission_status(submission, passed_test_cases, len(test_cases), total_submission_count)
             
+            # Update user coins
+            update_coin(user, score, question)            
 
             return JsonResponse({
                 "test_case_results": test_case_results,
@@ -534,7 +560,6 @@ def my_submissions(request, slug):
     }
     
     return render(request, 'practice/my_submissions.html', parameters)
-
 
 # ========================================== PROBLEM SET ==========================================
 

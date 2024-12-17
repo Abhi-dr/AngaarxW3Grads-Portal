@@ -41,6 +41,8 @@ class Student(User):
     linkedin_id = models.URLField(blank=True, null=True)
     github_id = models.URLField(blank=True, null=True)
     
+    coins = models.IntegerField(default=100)
+    
     # courses = models.ManyToManyField(Course, blank=True)
     
     def __str__(self):
