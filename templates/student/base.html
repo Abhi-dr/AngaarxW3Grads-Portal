@@ -733,36 +733,43 @@
                 fetch("{% url 'get_active_sheet_timer' %}")
                     .then(response => response.json())
                     .then(data => {
-                        if (data.end_time) {
+                        if (data.start_time && data.end_time) {
+                            const startTime = new Date(data.start_time).getTime();
                             const endTime = new Date(data.end_time).getTime();
                             const sheetName = data.sheetName;
                             const sheetSlug = data.sheetSlug;
 
+                            
+
                             const badge = document.getElementById('sheet-link');
-                            badge.href = "{% url 'sheet' 0 %}".replace('0', sheetSlug);
-                            badge.classList.remove('pe-none');
-
-
+                            
                             // Function to update the timer
                             function updateTimer() {
                                 const now = new Date().getTime();
-                                const timeLeft = endTime - now;
+                                const timer = document.getElementById('active-sheet-timer');
 
-                                timer = document.getElementById('active-sheet-timer');
+                                if (now < startTime) {
+                                    const diff = startTime - now;
+                                    const minutes = Math.floor(diff / 60000);
+                                    const seconds = Math.floor((diff % 60000) / 1000);
+                                    timer.innerText = `${sheetName} will be enabled in: ${minutes}m ${seconds}s`;
+                                } else if (now >= startTime && now <= endTime) {
+                                    const diff = endTime - now;
+                                    const minutes = Math.floor(diff / 60000);
+                                    const seconds = Math.floor((diff % 60000) / 1000);
+                                    timer.innerText = `${sheetName}: Active for: ${minutes}m ${seconds}s`;
+                                    badge.href = "{% url 'sheet' 0 %}".replace('0', sheetSlug);
+                                    badge.classList.remove('pe-none');
 
-                                if (timeLeft <= 0) {
-                                    timer.innerText = "Time's up!";
                                 } else {
-                                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                                    timer.innerText = `${sheetName}:`;
-                                    timer.innerText += ` ${minutes}m ${seconds}s`;
+                                    timerElement.textContent = "Expired";
+                                    clearInterval(timerInterval);
                                 }
                             }
 
                             // Initial call to update the timer and then every second
+                            const timerInterval = setInterval(updateTimer, 1000);
                             updateTimer();
-                            setInterval(updateTimer, 1000);
                         } else {
                             document.getElementById('active-sheet-timer').innerText = "No active sheet.";
                         }

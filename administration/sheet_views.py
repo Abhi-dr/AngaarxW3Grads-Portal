@@ -252,13 +252,15 @@ def set_sheet_timer(request, sheet_id):
 
         # Parse the incoming data
         data = json.loads(request.body)
+        start_time  = data.get("start_time")
         end_time = data.get('end_time')
 
-        if end_time:
-            # If end_time is provided, update it
+        if start_time and end_time:
+            sheet.start_time = start_time 
             sheet.end_time = end_time
         else:
             # If end_time is None, reset the timer
+            sheet.start_time = None
             sheet.end_time = None
 
         sheet.save()
@@ -275,6 +277,7 @@ def fetch_sheet_timer(request, sheet_id):
         remaining_time = sheet.end_time - now()
         return JsonResponse({
             'sheet_name': sheet.name,
+            'start_time': sheet.start_time.isoformat(),
             'end_time': sheet.end_time.isoformat(),
             'remaining_time': remaining_time.total_seconds() if remaining_time.total_seconds() > 0 else 0,
         })

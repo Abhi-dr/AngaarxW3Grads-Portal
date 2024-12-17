@@ -183,11 +183,16 @@ def page_not_found_view(request, exception):
 def get_active_sheet_timer(request):
     # Find the active sheet for the logged-in user
     active_sheets = Sheet.objects.filter(
-        start_time__lte=now(), end_time__gte=now(), is_enabled=True
+        end_time__gte=now()
     )
     
     if active_sheets.exists():
         active_sheet = active_sheets.first()  # Get the first active sheet
-        return JsonResponse({'end_time': active_sheet.end_time.isoformat(), "sheetName": active_sheet.name, "sheetSlug": active_sheet.slug})
+        return JsonResponse({
+            'start_time': active_sheet.start_time.isoformat(),
+            'end_time': active_sheet.end_time.isoformat(),
+            'sheetName': active_sheet.name,
+            'sheetSlug': active_sheet.slug
+        })
     else:
-        return JsonResponse({'end_time': None})
+        return JsonResponse({'start_time': None, 'end_time': None})

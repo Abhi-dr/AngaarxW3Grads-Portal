@@ -353,12 +353,20 @@ active
                     <h5 class="modal-title" id="setTimerModalLabel">Set or Reset Timer</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+
+                <div class="modal-body">
+                    <label for="end_time">Start Time:</label>
+                    <input type="datetime-local" id="start_time" class="form-control"
+                        value="{{ sheet.start_time|date:' Y-m-d\\TH:i' }}">
+                </div>
+
                 <div class="modal-body">
                     <label for="end_time">End Time:</label>
                     <input type="datetime-local" id="end_time" class="form-control"
                         value="{{ sheet.end_time|date:' Y-m-d\\TH:i' }}">
                     <small id="resetText" class="form-text text-muted">Leave empty to reset timer.</small>
                 </div>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="saveTimerBtn">Save Timer</button>
@@ -374,11 +382,14 @@ active
 
 <script>
     document.getElementById('saveTimerBtn').addEventListener('click', function () {
+
+        var startTime = document.getElementById('start_time').value;
         var endTime = document.getElementById('end_time').value;
 
 
         // If end_time is empty, reset the timer
-        if (!endTime) {
+        if (!endTime || !startTime) {
+            startTime = null;
             endTime = null;
         }
 
@@ -389,7 +400,7 @@ active
                 'Content-Type': 'application/json',
                 'X-CSRFToken': '{{ csrf_token }}',
             },
-            body: JSON.stringify({ end_time: endTime }),
+            body: JSON.stringify({ start_time: startTime, end_time: endTime }),
         })
             .then(response => response.json())
             .then(data => {
@@ -551,13 +562,20 @@ active
         const data = await response.json();
         const timerElement = document.getElementById("admin-timer");
 
-        if (data.end_time) {
+        if (data.start_time && data.end_time) {
+            const startTime = new Date(data.start_time);
             const endTime = new Date(data.end_time);
+
             function updateTimer() {
                 const now = new Date();
-                const diff = endTime - now;
 
-                if (diff > 0) {
+                if (now < startTime) {
+                    const diff = startTime - now;
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    timerElement.textContent = `Will be enabled in: ${minutes}m ${seconds}s`;
+                } else if (now >= startTime && now <= endTime) {
+                    const diff = endTime - now;
                     const minutes = Math.floor(diff / 60000);
                     const seconds = Math.floor((diff % 60000) / 1000);
                     timerElement.textContent = `Active for: ${minutes}m ${seconds}s`;
