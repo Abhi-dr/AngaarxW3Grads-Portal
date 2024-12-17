@@ -1,0 +1,118 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ sheet.name }} | Add Question
+{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item pe-auto">
+                <a href="{% url 'instructor_sheet' sheet.slug %}">{{ sheet.name }}</a>
+            </li>
+
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Add Question</li>
+        </ol>
+    </nav>
+
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Add Question to {{ sheet.name }}</i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+                    <div class="w-100 mt-n4">
+
+                        <div class="card-body h-100">
+
+                            <div class="mb-3">
+                                <label for="job_title" class="form-label">Title
+                                    <div class="star">*</div>
+                                </label>
+                                <input type="text" class="form-control" id="question_title" name="title"
+                                    placeholder="Title goes here..." required>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label for="job_title" class="form-label">Scenario <small>(optional)</small>
+                                    <div class="star"></div>
+                                </label>
+                                <textarea class="form-control" id="question_description" name="scenario" rows="5"
+                                    placeholder="Scenario here..."></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="job_title" class="form-label">Problem Description
+                                    <div class="star">*</div>
+                                </label>
+                                <textarea class="form-control" id="question_description" name="description" rows="5"
+                                    placeholder="Description here..." required></textarea>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label for="job_title" class="form-label">Constraints
+                                    <div class="star">*</div>
+                                </label>
+                                <textarea class="form-control" id="question_description" name="constraints" rows="5"
+                                    placeholder="Description here..." required></textarea>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label for="assignment_type" class="form-label">Difficulty Level
+                                    <div class="star">*</div>
+                                </label>
+                                <select class="form-select form-control" name="difficulty_level" id="assignment_type"
+                                    required>
+                                    <!-- <option value="" selected disabled>Select Level</option> -->
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
+
+                                </select>
+                            </div>
+
+                            <div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-success w-100 mt-3">Add &nbsp;
+                                        Question</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% endblock %}

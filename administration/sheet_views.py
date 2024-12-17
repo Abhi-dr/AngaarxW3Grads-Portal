@@ -171,32 +171,57 @@ def get_excluded_questions(request, sheet_id):
     
     return JsonResponse(data, safe=False)
 
-# ========================= ADD QUESTION TO SHEET ==========================
+# ========================= ADD NEW QUESTION TO SHEET ==========================
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def add_question_to_sheet(request, sheet_id, question_id):
+def add_new_question(request, slug):
+    sheet = get_object_or_404(Sheet, slug=slug)
+    instructor = Instructor.objects.get(id=request.user.id)
+    
     if request.method == "POST":
-        sheet = get_object_or_404(Sheet, id=sheet_id)
-        question = get_object_or_404(Question, id=question_id)
+        title = request.POST.get('title')
+        scenario = request.POST.get('scenario')
+        description = request.POST.get('description')
+        constraints = request.POST.get('constraints')
+        difficulty_level = request.POST.get('difficulty_level')
+        
+        question = Question(
+            title=title,
+            scenario=scenario,
+            description=description,
+            constraints = constraints,
+            difficulty_level=difficulty_level,
+            is_approved=True
+        )
+        
+        question.save()
         
         sheet.questions.add(question)
-        sheet.save()
         
-        return JsonResponse({"success": True, "message": "Question added to sheet successfully."})
-
-    return JsonResponse({"success": False, "message": "Invalid request method."})
+        messages.success(request, "Question added successfully!")
+        return redirect('instructor_sheet', slug=sheet.slug)
+    
+    parameters = {
+        "instructor": instructor,
+        "sheet": sheet,
+    }
+    
+    return render(request, 'administration/sheet/add_new_question.html', parameters)
+        
+        
+    
+    
 
 # ========================= MAKE DUPLICATE ==========================
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def make_duplicate(request, slug):
+def make_duplicate(request, sheet_id, question_id):
     
-    sheet = Sheet.objects.get(slug = slug)
+    sheet = Sheet.objects.get(id = sheet_id)
     
     if request.method == "POST":
-        question_id = request.POST.get('question_id')
         # make a copy of the question of the question id's question
         question = Question.objects.get(id=question_id)
         new_question = Question.objects.create(

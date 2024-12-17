@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     
     # 'single_session',
     'import_export',
-    'corsheaders'
+    'corsheaders',
+    'dbbackup'
 ]
 
 MIDDLEWARE = [
@@ -170,3 +171,6 @@ CORS_ALLOW_CREDENTIALS = True
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 SINGLE_USER_SESSION = True
+
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE_OPTIONS = {'location': 'backups'}
