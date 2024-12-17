@@ -118,6 +118,19 @@ active
         width: 0;
         height: 0;
     }
+
+    ::-webkit-scrollbar {
+        height: 10px;
+        /* For horizontal scrollbar */
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: #6499da;
+        /* Scrollbar thumb color */
+        border-radius: 10px;
+    }
+
+
 </style>
 
 
@@ -153,7 +166,7 @@ active
     <div class="card">
         <div class="card-body">
             <h3 class="heading">
-                <span class="fw-semibold">I M P O R T A N T &nbsp; L I N K S 🔥</span>
+                <span class="fw-semibold">{{ batch.name }} 🔥</span>
                 <span class="fs-4"> | Angaar x W3Grads
                 </span>
             </h3>
@@ -171,6 +184,7 @@ active
     {% if pod %}
 
     <div class="row">
+
         <div class="col-lg-4">
             <div class="row">
                 <div class="col-lg-12">
@@ -182,22 +196,13 @@ active
 
                                 <div class="row align-items-center">
                                     <div class="col-8">
-
-                                        
-
                                         <h4 class="fw-semibold mb-3">{{ pod.question.title|truncatewords:6 }}</h4>
                                         <div class="d-flex align-items-center pb-1">
                                             <small>{{ pod.date }}</small>
                                         </div>
-
-                                        
                                     </div>
                                 </div>
-
                             </div>
-
-
-
                         </div>
                     </div>
 
@@ -207,314 +212,264 @@ active
 
         {% endif %}
 
-        <!-- ==================================================================================================== -->
+        <!-- =========================================== SHEETS =========================================== -->
 
-        <div class="row">
+        <div class="container mb-2">
+            <div class="d-flex flex-row overflow-auto" style="gap: 1rem;">
+                {% for sheet in sheets %}
 
-            <div class="col-lg-4 d-flex align-items-stretch">
-                <div class="card w-100">
-                    <div class="card-body p-4">
-                        <div class="mb-4">
-                            <h5 class="card-title fw-semibold">Latest Schedule</h5>
-                        </div>
-
-                        <ul class="timeline-widget mb-0 position-relative mb-n3">
-
-
-                            {% if sessions %}
-                            {% for session in sessions %}
-
-                            <li class="timeline-item d-flex position-relative overflow-hidden">
-                                <div class="timeline-time  flex-shrink-0 text-end">
-                                    <span class="fw-bolder">({{ session.course.name }})</span>
-                                    <span data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="{{ session.topic }}">{{
-                                        session.topic|title|truncatechars:6 }}</span>
-                                </div>
-                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                    <span
-                                        class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
-                                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                </div>
-                                <div class="timeline-desc fs-3  mt-n1">{{ session.session_time }}
-                                    <br>
-
-                                    {% if session.get_meeting_status.status == "Ongoing" %}
-
-                                    <a href="{{ session.link }}"
-                                        class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
-                                        {{ session.get_meeting_status.status }}... Join
-                                    </a>
-
+                <div class="col-md-3">
+                    <div class="card">
+                        <a href="{% url 'instructor_sheet' sheet.slug %}">
+                            <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    {{ sheet.name }}🔥
+                                </h5>
+                                <p class="card-text mb-2"><b>Batches: </b><br>
+        
+                                    {% if sheet.batches.all.count == 0 %}
+                                    <span class="text-success">Open to all</span>
+        
                                     {% else %}
-
-                                    <a class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
-                                        {{ session.get_meeting_status.status }}
-                                    </a>
-
+        
+                                    {% for batch in sheet.batches.all %}
+                                    <a href="{% url 'instructor_sheet' sheet.slug %}">{{ batch.name }}</a>{% if not forloop.last %}, {% endif %}
+                                    {% endfor %}
+        
                                     {% endif %}
+                                </p>
+                                <p class="card-text mb-1">
+                                    Total Questions: {{ sheet.get_total_questions }}
+                                </p>
+                                
+                                {% if sheet.is_enabled %}
+                                <span class="text-success">Public</span>
+                                {% else %}
+                                <span class="text-danger">Disabled</span>
+                                {% endif %}
+                                <a href="{% url 'instructor_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">View More</a>
+                            </div>
+                        </a>
+                    </div>
+                </div>
 
-                                    <!-- <a href="#"
+                {% endfor %}
+
+            </div>
+        </div>
+
+    <!-- ======================================= OTHER DATA ========================================= -->
+
+    <div class="row">
+
+        <div class="col-lg-4 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h5 class="card-title fw-semibold">Latest Schedule</h5>
+                    </div>
+
+                    <ul class="timeline-widget mb-0 position-relative mb-n3">
+
+
+                        {% if sessions %}
+                        {% for session in sessions %}
+
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">
+                                <span class="fw-bolder">({{ session.course.name }})</span>
+                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{
+                                    session.topic|title|truncatechars:6 }}</span>
+                            </div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span
+                                    class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1">{{ session.session_time }}
+                                <br>
+
+                                {% if session.get_meeting_status.status == "Ongoing" %}
+
+                                <a href="{{ session.link }}"
+                                    class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                    {{ session.get_meeting_status.status }}... Join
+                                </a>
+
+                                {% else %}
+
+                                <a class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                    {{ session.get_meeting_status.status }}
+                                </a>
+
+                                {% endif %}
+
+                                <!-- <a href="#"
                                     class="text-primary d-block fw-normal">Know More
                                 </a> -->
-                                </div>
+                            </div>
 
-                            </li>
-
-
-                            {% endfor %}
+                        </li>
 
 
-                            {% else %}
+                        {% endfor %}
 
-                            <li class="timeline-item d-flex position-relative overflow-hidden">
-                                <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
-                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                    <span
-                                        class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
-                                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                </div>
-                                <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
-                                </div>
-                            </li>
-                            <li class="timeline-item d-flex position-relative overflow-hidden">
-                                <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
-                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                    <span
-                                        class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                </div>
-                                <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
-                                </div>
-                            </li>
-                            <li class="timeline-item d-flex position-relative overflow-hidden">
-                                <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
-                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                    <span
-                                        class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
-                                    <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                                </div>
-                                <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
-                                </div>
-                            </li>
-                            <li class="timeline-item d-flex position-relative overflow-hidden">
-                                <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
-                                <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                    <span
-                                        class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
-                                </div>
-                                <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
-                                </div>
-                            </li>
 
-                            {% endif %}
-                        </ul>
-                    </div>
+                        {% else %}
+
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time  flex-shrink-0 text-end">Not Available</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
+                            </div>
+                            <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+
+                        {% endif %}
+                    </ul>
                 </div>
             </div>
-
-            <!-- ================================ Last 3 sessions JOBS ============================ -->
-
-            <div class="col-lg-8 d-flex align-items-stretch">
-                <div class="card w-100">
-                    <div class="card-body p-4">
-                        <h5 class="card-title fw-semibold mb-4">Pending Task 🔥</h5>
-                        <div class="table-responsive">
-                            <table class="table text-nowrap mb-0 align-middle">
-                                <thead class=" fs-4">
-
-                                    <tr>
-                                        <th class="border-bottom-0">
-                                            <h6 class="fw-semibold mb-0">
-                                                #
-                                            </h6>
-                                        </th>
-                                        <th class="border-bottom-0">
-                                            <h6 class="fw-semibold mb-0">
-                                                Topic
-                                            </h6>
-                                        </th>
-                                        <th class="border-bottom-0">
-                                            <h6 class="fw-semibold mb-0">
-                                                Time
-                                            </h6>
-                                        </th>
-
-                                        <th class="border-bottom-0">
-                                            <h6 class="fw-semibold mb-0">
-                                                Status
-                                            </h6>
-                                        </th>
-
-                                        <th class="border-bottom-0">
-                                            <h6 class="fw-semibold mb-0">
-                                                Action
-                                            </h6>
-                                        </th>
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-
-                                    {% for session in sessions %}
-
-                                    <tr>
-                                        <td class="border-bottom-0">
-                                            <h6 class="fw-semibold mb-0 text-center">{{ session.id }}</h6>
-                                        </td>
-                                        <td class="border-bottom-0">
-                                            <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip"
-                                                data-bs-placement="top" title="{{ session.topic }}">{{
-                                                session.topic|truncatechars:10 }}</h6>
-                                            <span class="fw-normal">{{ session.course.name }}</span>
-                                        </td>
-                                        <td class="border-bottom-0">
-                                            <p class="mb-0 fw-normal">{{ session.session_time }}</p>
-                                        </td>
-
-                                        <td class="border-bottom-0">
-                                            <h6 class="fw-semibold mb-0 fs-4">
-                                                <span class="badge bg-{{ session.get_meeting_status.color }}">
-                                                    {{ session.get_meeting_status.status }}
-                                                </span>
-                                            </h6>
-                                        </td>
-
-                                        <td class="border-bottom-0 text-center">
-                                            <div class="d-flex align-items-center gap-2">
-
-                                                {% if session.get_meeting_status.status == "Upcoming" %}
-
-                                                <a href="{% url 'edit_session' session.id %}"
-                                                    class="btn btn-outline-info">Edit📝
-                                                </a>
-
-                                                {% elif not session.is_completed %}
-
-                                                <a href="{% url 'mark_session_completed' session.id %}"
-                                                    class="btn btn-outline-success">Mark Complete ✅
-                                                </a>
-
-                                                {% elif session.recorded_session_link == None %}
-
-                                                <button class="btn btn-outline-dark text-blue float-end"
-                                                    data-bs-toggle="modal" data-bs-target="#uploadRecordedSessionModal"
-                                                    data-session-id="{{ session.id }}"
-                                                    session-topic="{{ session.topic }}">Upload Recording↗️</button>
-
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <!-- ================================= ALL ELIGIBLE JOBS ============================ -->
-
-        <!-- <div class="card-body">
-        <h5 class="card-title fw-semibold mb-4 text-white">Commpanies Only For You 🔥</h5>
-    </div>
-    
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title fw-semibold mb-0">Eligible Companies</h5>
-        </div>
-    </div> -->
-
-        <!-- <div class="col-lg- d-flex align-items-strech">
-
-
-        <div class="row row-cols-1 row-cols-md-3 g-4">
-
-            {% for job in all_eligible_jobs %}
-
-            <div class="col-md-3">
-                <div class="card">
-                    <img src="#" class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ job.company.name|title|truncatechars:10 }} For ({{ job.title|truncatechars:5 }})</h5>
-                        <p class="card-text">
-                            {{ job.description|truncatechars:25 }}...
-                        </p>
-                        <p class="card-text">
-                            Package: ₹{{ job.salary_range }}
-                        </p>
-
-                        <a href="#" class="btn btn-primary">More Details</a>
-                    </div>
-                </div>
-            </div>
-
-            {% endfor %}
-
-
-            <div class="col-md-3">
-                <div class="card">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/cd/Facebook_logo_%28square%29.png"
-                        class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">Facebook</h5>
-                        <p class="card-text"></p>
-                        <a href="#" class="btn btn-primary">Apply</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <img src="https://cdn.w3villa.com/production/assets/w3villa-technologies-og-8b76c7b0c5541f2c668251897aac2f9a600904052e2aa8655a131662b9019a74.webp"
-                        class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">W3 villa</h5>
-                        <p class="card-text"></p>
-                        <a href="#" class="btn btn-primary">Apply</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <img src="https://www.logodesignlove.com/images/monograms/tesla-symbol.jpg" class="card-img-top"
-                        alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">Tesla</h5>
-                        <p class="card-text"></p>
-                        <a href="#" class="btn btn-primary">Apply</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3">
-                <div class="card">
-                    <img src="https://img.freepik.com/premium-vector/experience-design-abstract-concept-vector-illustration_107173-24976.jpg?w=2000"
-                        class="card-img-top" alt="...">
-                    <div class="card-body">
-                        <h5 class="card-title">Company Name</h5>
-                        <p class="card-text"></p>
-                        <a href="#" class="btn btn-primary">Apply</a>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
-    </div> -->
+        <!-- ================================ Last 3 sessions JOBS ============================ -->
 
-        <div class="py-6 px-6 text-center">
-            <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
-                    class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
-                <!--                 
-            All Rights Reserved by <a href="https://gla.ac.in" target="_blank"
-                class="pe-1 text-primary text-decoration-underline">GLA University</a> -->
+        <div class="col-lg-8 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-semibold mb-4">Pending Task 🔥</h5>
+                    <div class="table-responsive">
+                        <table class="table text-nowrap mb-0 align-middle">
+                            <thead class=" fs-4">
 
-            </p>
+                                <tr>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            #
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Topic
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Time
+                                        </h6>
+                                    </th>
 
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Status
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Action
+                                        </h6>
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for session in sessions %}
+
+                                <tr>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0 text-center">{{ session.id }}</h6>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            title="{{ session.topic }}">{{
+                                            session.topic|truncatechars:10 }}</h6>
+                                        <span class="fw-normal">{{ session.course.name }}</span>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <p class="mb-0 fw-normal">{{ session.session_time }}</p>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0 fs-4">
+                                            <span class="badge bg-{{ session.get_meeting_status.color }}">
+                                                {{ session.get_meeting_status.status }}
+                                            </span>
+                                        </h6>
+                                    </td>
+
+                                    <td class="border-bottom-0 text-center">
+                                        <div class="d-flex align-items-center gap-2">
+
+                                            {% if session.get_meeting_status.status == "Upcoming" %}
+
+                                            <a href="{% url 'edit_session' session.id %}"
+                                                class="btn btn-outline-info">Edit📝
+                                            </a>
+
+                                            {% elif not session.is_completed %}
+
+                                            <a href="{% url 'mark_session_completed' session.id %}"
+                                                class="btn btn-outline-success">Mark Complete ✅
+                                            </a>
+
+                                            {% elif session.recorded_session_link == None %}
+
+                                            <button class="btn btn-outline-dark text-blue float-end"
+                                                data-bs-toggle="modal" data-bs-target="#uploadRecordedSessionModal"
+                                                data-session-id="{{ session.id }}"
+                                                session-topic="{{ session.topic }}">Upload Recording↗️</button>
+
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
+
     </div>
 
-    {% endblock %}
+
+    <div class="py-6 px-6 text-center">
+        <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
+                class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
+        </p>
+    </div>
+</div>
+
+{% endblock %}

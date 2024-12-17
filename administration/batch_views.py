@@ -166,6 +166,8 @@ def batch(request, slug):
     instructor = Instructor.objects.get(id=request.user.id)
     batch = Batch.objects.get(slug=slug)
     
+    # Fetch all the sheets for this batch
+    sheets = batch.sheets.all().order_by("-id")
         
     try:
         pod = POD.objects.get(batch=batch, date=datetime.date.today())
@@ -176,6 +178,7 @@ def batch(request, slug):
     parameters = {
         "instructor": instructor,
         "batch": batch,
+        "sheets": sheets,
         "pod": pod
     }
     
