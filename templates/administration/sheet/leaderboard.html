@@ -77,74 +77,73 @@ active
 
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">
+            <h5 class="card-title fw-semibold mb-4">Leaderboard 🔥
                 {% if query %}
                 <span class="fs-6"> | Search Results for "{{ query }}"</span>
                 {% endif %}
             </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
 
-            <table class="table text-nowrap mb-0 align-middle">
-                <thead class="text-dark fs-4">
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Rank
+                                </h6>
+                            </th>
 
-                    <tr>
-                    <tr>
-                        <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">
-                                Rank
-                            </h6>
-                        </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Student
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Total Score
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Earliest Submission
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Solved Problem
+                                </h6>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard">
 
-                        <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">
-                                Student
-                            </h6>
-                        </th>
-                        <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">
-                                Total Score
-                            </h6>
-                        </th>
-                        <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">
-                                Earliest Submission
-                            </h6>
-                        </th>
-                        <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0">
-                                Solved Problem
-                            </h6>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="leaderboard">
-
-                </tbody>
-            </table>
+                    </tbody>
+                </table>
+            </div>
 
         </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const leaderboardContainer = document.getElementById('leaderboard');
-        const filterForm = document.getElementById('filter-form');
-        const apiUrl = "{% url 'instructor_sheet_leaderboard' sheet.slug %}"; // Replace `sheetSlug` dynamically
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const leaderboardContainer = document.getElementById('leaderboard');
+            const filterForm = document.getElementById('filter-form');
+            const apiUrl = "{% url 'instructor_sheet_leaderboard' sheet.slug %}"; // Replace `sheetSlug` dynamically
 
-        console.log(apiUrl);
+            console.log(apiUrl);
 
-        async function fetchLeaderboard() {
-            const response = await fetch(apiUrl);
-            const data = await response.json();
-            console.log(data);
-            renderLeaderboard(data.leaderboard);
-        }
+            async function fetchLeaderboard() {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                console.log(data);
+                renderLeaderboard(data.leaderboard);
+            }
 
-        function renderLeaderboard(leaderboard) {
-            leaderboardContainer.innerHTML = '';
+            function renderLeaderboard(leaderboard) {
+                leaderboardContainer.innerHTML = '';
 
-            leaderboard.forEach((entry, index) => {
-                const row = `
+                leaderboard.forEach((entry, index) => {
+                    const row = `
                     <tr>
                         <td class="border-bottom-0">
                             <p class="fw-semibold mb-0">${index + 1}</p>
@@ -163,14 +162,14 @@ active
                         </td>
                     </tr>
                 `;
-                leaderboardContainer.innerHTML += row;
-            });
-        }
+                    leaderboardContainer.innerHTML += row;
+                });
+            }
 
-        fetchLeaderboard(); // Initial fetch
-    });
+            fetchLeaderboard(); // Initial fetch
+        });
 
-</script>
+    </script>
 
 
-{% endblock %}
+    {% endblock %}
