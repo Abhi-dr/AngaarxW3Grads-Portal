@@ -69,6 +69,26 @@ class Sheet(models.Model):
         """Checks if the sheet is active based on the current time."""
         return self.is_enabled and (self.start_time <= now() <= self.end_time)
     
+    def get_enabled_questions_for_user(self, user):
+        """
+        Returns the questions that should be enabled for the user based on sequential logic.
+        """
+        if not self.is_sequential:
+            return self.get_ordered_questions()  # Return all questions if not sequential
+        
+        # Get all questions sorted by their custom order or default order
+        questions = self.get_ordered_questions()
+        solved_questions = Submission.objects.filter(
+            user=user,
+            question__in=questions,
+            status='Accepted'
+        ).values('question').distinct()  # Get questions solved by the user
+
+        # Enable only the solved questions and the first unsolved question
+        enabled_questions = questions[:len(solved_questions) + 1]
+
+        return enabled_questions
+    
     def get_ordered_questions(self):
         # Get questions in the custom order
         questions = list(self.questions.filter(is_approved=True))

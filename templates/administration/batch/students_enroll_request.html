@@ -11,7 +11,14 @@ Enrollment Requests
     <div class="card">
         <div class="card-body">
             <h3 class="heading">
-                <span class="fw-semibold">Angaari Public🔥 &nbsp;({{ total_pending_requests }})</span>
+                <h3 class="heading">
+                    <span class="fw-semibold">
+                        &nbsp;Pending Requests: ({{ total_pending_requests }})
+                    </span>
+                    <a href="{% url 'approve_all_enrollments' %}" class="btn btn-success btn-lg">
+                        Approve All
+                    </a>                    
+                    </h3>
             </h3>
         </div>
     </div>

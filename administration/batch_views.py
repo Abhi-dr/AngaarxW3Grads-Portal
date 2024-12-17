@@ -83,6 +83,19 @@ def enrollment_requests(request):
     
     return render(request, "administration/batch/students_enroll_request.html", parameters)
 
+# ================================ APPROVE ALL ENROLLMENT REQUESTS ====================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def approve_all_enrollments(request):
+    enrollment_requests = EnrollmentRequest.objects.filter(status="Pending")
+    for request in enrollment_requests:
+        request.status = "Accepted"
+        request.save()
+        
+    messages.success(request, "All pending enrollment requests have been accepted.")
+    return redirect('instructor_enrollment_requests')
+
 # =============================== FETCH PENDING ENROLLMENT REQUESTS ==============================
 
 @login_required(login_url='login')

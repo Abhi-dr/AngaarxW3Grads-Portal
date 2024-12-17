@@ -47,10 +47,10 @@ def sheet(request, slug):
         
     sheet = get_object_or_404(Sheet, slug=slug)
     
-    questions = sheet.get_ordered_questions()
+    enabled_questions = sheet.get_enabled_questions_for_user(request.user.student)
     
     user_submissions = {
-        submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=questions)
+        submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=enabled_questions)
         }
     
     if not sheet.is_enabled:
@@ -59,7 +59,7 @@ def sheet(request, slug):
 
     parameters = {
         "sheet": sheet,
-        "questions": questions,
+        "enabled_questions": enabled_questions,
         "user_submissions": user_submissions,  # Pass the submissions to the template
     }   
     
@@ -288,6 +288,15 @@ def problem(request, slug):
         if sheet and not sheet.is_enabled:
             messages.info(request, "This question is in the sheet which is disabled now. Try Later.")
             return redirect('problem_set')
+        
+        if sheet and sheet.is_sequential:
+            # Get all enabled questions for the user
+            enabled_questions = sheet.get_enabled_questions_for_user(request.user)
+            
+            # Check if the question is enabled for the user
+            if question not in enabled_questions:
+                messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
+                return redirect('sheet_detail', slug=sheet.slug)  # You can redirect to the sheet or show an error
         
         sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
         return render(request, 'practice/problem.html', {

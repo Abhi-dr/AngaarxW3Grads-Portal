@@ -74,6 +74,7 @@ urlpatterns += [
     path("fetch_pending_enrollments/", batch_views.fetch_pending_enrollments, name="instructor_fetch_pending_enrollments"),
     path("fetch_rejected_enrollments/", batch_views.fetch_rejected_enrollments, name="instructor_fetch_rejected_enrollments"),
     
+    path('approve-all/', batch_views.approve_all_enrollments, name='approve_all_enrollments'),
     path("approve_enrollment/<int:id>", batch_views.approve_enrollment, name="instructor_approve_enrollment"),
     path("reject_enrollment/<int:id>", batch_views.reject_enrollment, name="instructor_reject_enrollment"),
     

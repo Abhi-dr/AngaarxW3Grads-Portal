@@ -151,7 +151,7 @@ active
                     <tbody>
 
                         <!-- style="background-color: rgba(66, 66, 66, 0.639);" -->
-                        {% for question in questions %}
+                        {% for question in sheet.get_ordered_questions %}
                         <tr>
                             <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
@@ -178,19 +178,31 @@ active
                             </td>
                             <td class="border-bottom-0" style="text-align: center;">
                                 {% if user_submissions|get_item:question.id %}
-                                    {% with submission=user_submissions|get_item:question.id %}
-                                    <span class="badge bg-{{ submission.status|get_status_color }} text-color">{{ submission.status }}</span>
-                                    <br><a href="{% url 'my_submissions' question.slug %}" class=" mt-1 btn btn-sm btn-outline-warning">View Submissions</a>
-                                    {% endwith %}
+                                {% with submission=user_submissions|get_item:question.id %}
+                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">{{ submission.status }}</span>
+                                <br><a href="{% url 'my_submissions' question.slug %}"
+                                    class=" mt-1 btn btn-sm btn-outline-warning">View Submissions</a>
+                                {% endwith %}
                                 {% else %}
-                                    <p>Not Attempted</p>
+                                <p>Not Attempted</p>
                                 {% endif %}
                             </td>
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
+
+                                    {% if question in enabled_questions %}
+
                                     <a href="{% url 'problem' question.slug %}" class="btn btn-dark">
                                         Try Now🔥
                                     </a>
+
+                                    {% else %}
+
+                                    <button class="btn btn-dark" disabled>
+                                        LOCKED
+                                    </button>
+
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>
