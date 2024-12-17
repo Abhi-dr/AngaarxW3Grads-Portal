@@ -106,6 +106,9 @@ urlpatterns += [
     path("instructor_set_sheet_timer/<int:sheet_id>/", sheet_views.set_sheet_timer, name="instructor_set_sheet_timer"),
     path("fetch_sheet_timer/<int:sheet_id>/", sheet_views.fetch_sheet_timer, name="fetch_sheet_timer"),
     
+    path('download-leaderboard/<slug:slug>/', sheet_views.download_leaderboard_excel, name='download_leaderboard'),
+
+    
     # ====================================== ENABLE / DISABLE SHEET ===================================
     
     path('sheet/<slug:slug>/toggle-status/', sheet_views.toggle_sheet_status, name='toggle_sheet_status'),

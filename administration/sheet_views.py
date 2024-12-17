@@ -363,3 +363,75 @@ def sheet_leaderboard(request, slug):
 
     return JsonResponse({'leaderboard': leaderboard})
 
+# =========================================== DOWNLOAD LEADERBOARD =============================
+import pandas as pd
+from django.http import HttpResponse
+from django.utils.timezone import make_naive
+
+def download_leaderboard_excel(request, slug):
+    sheet = get_object_or_404(Sheet, slug=slug)
+    total_questions = sheet.questions.all()
+
+    # Fetch all submissions for the sheet
+    submissions = Submission.objects.filter(
+        question__in=total_questions,
+        status='Accepted'
+    )
+
+    # Dictionary to store max scores for each user
+    user_scores = {}
+    for submission in submissions:
+        user_id = submission.user.id
+        question_id = submission.question.id
+
+        # Initialize user entry if not present
+        if user_id not in user_scores:
+            user_scores[user_id] = {
+                'total_score': 0,
+                'earliest_submission': submission.submitted_at,
+                'solved_questions': set(),
+            }
+
+        # Update max score for the question
+        current_max_score = user_scores[user_id].get(question_id, 0)
+        user_scores[user_id][question_id] = max(current_max_score, submission.score)
+
+        # Update earliest submission
+        user_scores[user_id]['earliest_submission'] = min(
+            user_scores[user_id]['earliest_submission'], submission.submitted_at
+        )
+
+        # Track solved questions
+        user_scores[user_id]['solved_questions'].add(question_id)
+
+    # Format leaderboard data for DataFrame
+    leaderboard = []
+    for user_id, data in user_scores.items():
+        user = Student.objects.get(id=user_id)
+        total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
+        solved_problems = len(data['solved_questions'])
+
+        # Convert timezone-aware datetime to naive
+        earliest_submission_naive = make_naive(data['earliest_submission'])
+
+        leaderboard.append({
+            'Student ID': user_id,
+            'Student Name': f"{user.first_name} {user.last_name}",
+            'Total Score': total_score,
+            'Earliest Submission': earliest_submission_naive,
+            'Solved Problems': solved_problems,
+        })
+
+    # Create a DataFrame from the leaderboard data
+    df = pd.DataFrame(leaderboard)
+
+    # Generate Excel file
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="leaderboard_{slug}.xlsx"'
+
+    with pd.ExcelWriter(response, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="Leaderboard")
+
+    return response
