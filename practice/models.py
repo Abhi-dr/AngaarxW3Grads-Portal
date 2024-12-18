@@ -21,6 +21,10 @@ class Batch(models.Model):
     def save(self, *args, **kwargs):
         self.slug = self.name.replace(" ", "-").lower()
         super(Batch, self).save(*args, **kwargs)
+        
+        
+    def get_today_pod_for_batch(self):
+        return self.pods.filter(date=datetime.now().date()).first()
     
 # ============================== ENROLLMENT REQUEST MODEL =========================
 
@@ -229,7 +233,25 @@ class Question(models.Model):
             return 'Approved'        
         else:
             return 'Pending'
-        
+    
+    def how_many_users_solved_today(self):
+        start_of_day = now().replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = start_of_day + timedelta(days=1)
+        result = self.submissions.filter(
+            submitted_at__gte=start_of_day,
+            submitted_at__lt=end_of_day,
+            status='Accepted'
+        ).count()
+        return result
+
+    def how_many_users_attempted_today(self):
+        start_of_day = now().replace(hour=0, minute=0, second=0, microsecond=0)
+        end_of_day = start_of_day + timedelta(days=1)
+        result = self.submissions.filter(
+            submitted_at__gte=start_of_day,
+            submitted_at__lt=end_of_day
+        ).count()
+        return result
     
     def get_approved_status_color(self):
         if self.is_approved:
@@ -353,13 +375,12 @@ class POD(models.Model):
     
     batch = models.ForeignKey(Batch, on_delete=models.SET_NULL, related_name="pods", null=True, blank=True)
 
-
     def __str__(self):
         return f"{self.question.title} - {self.date}"
     
     def is_solved_by_user(self, user):
         return self.question.submissions.filter(user=user, status='Accepted').exists()
-        
+
 
 # ============================== STREAK MODEL =========================
 

@@ -2,17 +2,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
-from accounts.views import logout as account_logout
-from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils.timezone import now
 
 from accounts.models import Student, Instructor
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 from django.db.models import Subquery, OuterRef
 
 import datetime
+
 
 
 # ========================= BATCH WORK ==========================
@@ -202,46 +202,65 @@ def batch(request, slug):
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 def instructor_set_pod_for_batch(request, slug):
-    
     batch = get_object_or_404(Batch, slug=slug)
-    
-    # Fetch the instructor and questions without existing PODs
+
+    # Fetch the instructor and questions without existing PODs for the selected batch
     instructor = Instructor.objects.get(id=request.user.id)
-    questions = Question.objects.filter(pods__isnull=True)
-    
-    # check if pod for that day is already set
-    pod = POD.objects.filter(batch=batch, date=datetime.date.today())
-    
-    
-    if pod:
-        messages.warning(request, f"POD for today is already set for batch '{batch.name}'.")
-        return redirect('instructor_batch' , slug=slug)
-    
+    questions = Question.objects.filter(pods__batch__isnull=True)
+
+    # Fetch existing PODs for the batch
+    today_pod = POD.objects.filter(batch=batch, date=datetime.datetime.today().date())
+    past_pods = POD.objects.filter(batch=batch).order_by('-date').exclude(date__gt=datetime.datetime.today().date())
+    upcoming_pods = POD.objects.filter(batch=batch, date__gt=datetime.datetime.today().date()).order_by('date')
+
     if request.method == "POST":
         question_id = request.POST.get("question_id")
+        pod_date = request.POST.get("pod_date")  # Fetch the date from the form
         
-        if question_id:
-            question = get_object_or_404(Question, id=question_id)
-            
-            # Create or update the POD for this batch
-            pod, created = POD.objects.get_or_create(question=question, batch=batch)
-            
-            if created:
-                messages.success(request, f"POD set successfully for batch '{batch.name}'.")
-            else:
-                messages.warning(request, "This question is already set as POD for this batch.")
-            return redirect('instructor_set_pod_for_batch', slug=slug)
+        if question_id and pod_date:
+            try:
+                pod_date = datetime.datetime.strptime(pod_date, "%Y-%m-%d").date()  # Parse the date
+                
+                if pod_date < now().date():
+                    messages.error(request, "You cannot set a POD for a past date.")
+                    return redirect('instructor_set_pod_for_batch', slug=slug)
+                
+                if pod_date == now().date() and today_pod.exists():
+                    messages.warning(request, f"POD for today is already set for batch '{batch.name}'.")
+                    return redirect('instructor_set_pod_for_batch', slug=slug)
+                
+                else:
+                    question = get_object_or_404(Question, id=question_id)
+                    
+                    # Check if a POD already exists for this batch and date
+                    today_pod = POD.objects.create(
+                        question=question, 
+                        batch=batch, 
+                        date=pod_date
+                    )
+                    
+                    today_pod.save()
+                    
+                    messages.success(request, f"POD set successfully for batch '{batch.name}'")
+                    return redirect('instructor_set_pod_for_batch', slug=slug)
+                
+            except ValueError:
+                messages.error(request, "Invalid date format. Please select a valid date.")
         else:
-            messages.error(request, "Please select a valid question.")
-    
+            messages.error(request, "Please select a valid question and date.")
+
     parameters = {
         "instructor": instructor,
         "questions": questions,
         "batch": batch,
-        "pod": pod
+        "pod": today_pod,
+        "past_pods": past_pods,
+        "upcoming_pods": upcoming_pods,
+        "default_date": now().date().isoformat(),  # Set default date for the form
     }
-    
+
     return render(request, 'administration/batch/set_pod.html', parameters)
+
 
 
 # =============================== VIEW SUBMISSIONS ==============================

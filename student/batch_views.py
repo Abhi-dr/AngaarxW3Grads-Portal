@@ -79,7 +79,10 @@ def batch(request, slug):
         progress = (solved_questions / total_questions) * 100
     
     questions_left = total_questions - solved_questions
-    pod = POD.objects.filter(batch=batch).first()
+        
+    # today's batch pod
+    pod = batch.get_today_pod_for_batch()
+    
     
     parameters = {
         "batch": batch,
