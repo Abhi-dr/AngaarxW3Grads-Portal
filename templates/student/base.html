@@ -42,6 +42,13 @@
             }
         }
 
+        #coin-icon {
+            width: 50%;
+            height: 20px;
+        }
+
+    
+
         [data-bs-theme="dark"] {
             body {
                 background: linear-gradient(to bottom right, #000000, #4f4f4f);
@@ -551,9 +558,11 @@
                                 <!-- data-bs-toggle="tooltip" title="Your Current Streaks🔥" data-bs-placement="bottom" -->
                                 <!-- <img id="fire-icon" src="{% static 'img/student/fire.png' %}" alt=""> -->
                                 <span class="mx-1 badge text-bg-dark" id="active-sheet-timer"></span>
-                                <span class="mx-1 badge text-bg-dark">🔥 {{ streak.current_streak }}</span>
-                                <span class="mx-1 badge text-bg-dark">🪙{{ student.coins }}</span>
+                                <span class="mx-1 badge text-bg-dark">
+                                    <img id="coin-icon" src="{% static 'img/student/coin.png' %}"  alt="">
+                                    {{ student.coins }}</span>
                                 </h1>
+                                <span class="mx-1 badge text-bg-dark">🔥 {{ streak.current_streak }}</span>
                             </a>
                         </li>
                     </ul>
