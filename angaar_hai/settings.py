@@ -73,6 +73,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'student.context_processors.student_context_processor',
+                'student.context_processors.streak_context',
             ],
         },
     },

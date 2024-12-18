@@ -8,13 +8,12 @@ from django.db.models import Q
 
 from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
-from practice.models import POD, Submission, Question, Sheet
+from practice.models import POD, Submission, Question, Sheet, Streak
 
 # ========================================= DASHBOARD =========================================
 
 @login_required(login_url="login")
 def dashboard(request):
-    
 
     # sessions = Session.objects.filter(course__in=request.user.student.courses.all(), is_completed=False)
     # last_3_completed_sessions = [session for session in Session.objects.order_by("-session_time").filter(course__in=request.user.student.courses.all(), is_completed=True) if session.recorded_session_link is not None][:3]
@@ -33,6 +32,7 @@ def dashboard(request):
     
     pod = POD.objects.filter(date=datetime.now().date()).first()
     
+    
     next_three_questions = Question.objects.filter(is_approved=True).exclude(id__in=Submission.objects.filter(user=request.user.student).values('question').distinct()).order_by("?")[:3]
     
     is_birthday = False
@@ -50,7 +50,7 @@ def dashboard(request):
         "total_questions_solved_percentage": total_questions_solved_percentage,
         "questions_left": questions_left,
         "pod": pod,
-        "next_three_questions": next_three_questions
+        "next_three_questions": next_three_questions,
         
         
         # "sessions": sessions,

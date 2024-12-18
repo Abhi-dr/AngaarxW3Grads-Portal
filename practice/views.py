@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 
 import base64
+from .models import Streak
 
 
 from django.views.decorators.cache import cache_control
@@ -264,6 +265,10 @@ def update_submission_status(submission, passed, total, total_submission_count):
     try:
         submission.status = 'Accepted' if passed == total else 'Wrong Answer'
         
+        # update streaks 
+        if submission.status == 'Accepted':
+            update_user_streak(submission.user)
+        
         score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))
         submission.score = score
         submission.save()
@@ -327,6 +332,18 @@ def update_coin(user, score, question):
     else:
         user.coins += 1
     user.save()
+
+
+# ============================================ UPDATE STREAKS =============================================
+
+
+def update_user_streak(user):
+    # Fetch or create the user's streak record
+    streak, created = Streak.objects.get_or_create(user=user)
+
+    # Update the streak
+    streak.update_streak()
+
 
 # ============================================ SUBMIT CODE ===============================================
 

@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-
 # ================================================= Instructor ==========================================
 
 class Instructor(User):
@@ -65,6 +64,7 @@ class Student(User):
     class Meta:
         verbose_name_plural = "Students"
         verbose_name = "Student"
+
     
     # def get_attendance_percentage(self):
     #     total = ScrumMeeting.objects.count()
