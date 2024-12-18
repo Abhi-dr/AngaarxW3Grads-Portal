@@ -1,16 +1,13 @@
-# import os
-# import io
-# import django
-# from django.core.management import call_command
+import re
 
-# # Step 1: Set DJANGO_SETTINGS_MODULE
-# os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'angaar_hai.settings')  # Replace 'your_project_name' with your Django project name
+def convert_backticks_to_code(text):
+    pattern = r"`(.*?)`"
 
-# # Step 2: Setup Django
-# django.setup()
+    result = re.sub(pattern, r"<code>\1</code>", text)
+    return result
 
-# # Step 3: Dump Data
-# with io.open('data.json', 'w', encoding='utf-8') as f:
-#     call_command('dumpdata', '--natural-primary', '--natural-foreign', '--indent', '4', stdout=f)
 
+input_text = input("Enter text: ")
+output_text = convert_backticks_to_code(input_text)
+print(output_text)
 

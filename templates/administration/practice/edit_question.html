@@ -70,16 +70,42 @@ active
                                     </div>
                                 </div>
 
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Scenario
+                                        <div class="star"></div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="scenario" rows="7"
+                                        placeholder="Scenario here...">{{ question.scenario }}</textarea>
+                                </div>
+
                                 <div>
                                     <div class="mb-3">
                                         <label for="job_title" class="form-label">Description
                                             <div class="star">*</div>
                                         </label>
-                                        <textarea class="form-control" id="job_title" name="description" rows="10"
+                                        <textarea class="form-control" id="job_title" name="description" rows="5"
                                             required>{{ question.description }}</textarea>
                                         <!-- <iframe frameBorder="0" height="450px"
                                             src="https://onecompiler.com/embed/html?theme=dark" width="100%"></iframe> -->
                                     </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Input Format
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="input_format" name="input_format" rows="5"
+                                        placeholder="Input format here..."
+                                        required>{{ question.input_format }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Output Format
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="output_format" name="output_format" rows="5"
+                                        placeholder="Output format here..."
+                                        required>{{ question.output_format }}</textarea>
                                 </div>
 
                                 <div class="row">
@@ -117,19 +143,24 @@ active
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="assignment_type" class="form-label">CPU TIME LIMIT <small>(in seconds)</small>
+                                            <label for="assignment_type" class="form-label">CPU TIME LIMIT <small>(in
+                                                    seconds)</small>
                                                 <div class="star">*</div>
                                             </label>
-                                            <input type="text" value="{{ question.cpu_time_limit }}" class="form-control" name="cpu_time_limit" placeholder="CPU time limit here..." required>
+                                            <input type="text" value="{{ question.cpu_time_limit }}"
+                                                class="form-control" name="cpu_time_limit"
+                                                placeholder="CPU time limit here..." required>
                                         </div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="job_title" class="form-label">MEMORY LIMIT <small>(in kilobytes)</small>
+                                            <label for="job_title" class="form-label">MEMORY LIMIT <small>(in
+                                                    kilobytes)</small>
                                                 <div class="star">*</div>
                                             </label>
-                                            <input type="text" value="{{ question.memory_limit }}" class="form-control" name="memory_limit" placeholder="Memory limit here..." required>
+                                            <input type="text" value="{{ question.memory_limit }}" class="form-control"
+                                                name="memory_limit" placeholder="Memory limit here..." required>
                                         </div>
                                     </div>
 

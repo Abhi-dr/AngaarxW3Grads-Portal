@@ -5,7 +5,7 @@ from django.contrib import messages
 from django.db.models import Q
 from accounts.models import Instructor
 from django.http import JsonResponse
-import requests, time
+import requests, time, re
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -83,19 +83,25 @@ def fetch_problems(request):
 def add_question(request):
     
     instructor = Instructor.objects.get(id=request.user.id)
-    sheets = Sheet.objects.all()
+    sheets = Sheet.objects.all().order_by('-id')
     
     if request.method == 'POST':
         
         sheet = request.POST.getlist('sheet')
         title = request.POST.get('title')
         description = request.POST.get('description')
+        input_format = request.POST.get('input_format')
+        output_format = request.POST.get('output_format')
         constraints = request.POST.get('constraints')
         difficulty_level = request.POST.get('difficulty_level')
+        
+        description = convert_backticks_to_code(description)
         
         question = Question(
             title=title,
             description=description,
+            input_format = input_format,
+            output_format = output_format,
             constraints = constraints,
             difficulty_level=difficulty_level,
             is_approved=True
@@ -106,8 +112,6 @@ def add_question(request):
         for sheet_id in sheet:
             sheet = Sheet.objects.get(id=sheet_id)
             question.sheets.add(sheet)
-        
-        
         
         messages.success(request, 'Problem added successfully. Add Test Cases for the problem')
         return redirect('test_cases', slug=question.slug)
@@ -143,20 +147,27 @@ def edit_question(request, id):
     
     instructor = Instructor.objects.get(id=request.user.id)
     question = Question.objects.get(id=id)
-    sheets = Sheet.objects.all()
+    sheets = Sheet.objects.all().order_by('-id')
     
     if request.method == 'POST':
         
         sheet = request.POST.getlist('sheet')
         title = request.POST.get('title')
         description = request.POST.get('description')
+        input_format = request.POST.get('input_format')
+        output_format = request.POST.get('output_format')
         difficulty_level = request.POST.get('difficulty_level')
         position = request.POST.get('position')
         cpu_time_limit = request.POST.get('cpu_time_limit')
         memory_limit = request.POST.get('memory_limit')
         
+        description = convert_backticks_to_code(description)
+
+        
         question.title = title
         question.description = description
+        question.input_format = input_format
+        question.output_format = output_format
         question.difficulty_level = difficulty_level
         question.position = position
         question.cpu_time_limit = float(cpu_time_limit)
@@ -671,3 +682,9 @@ def submit_code(request, slug):
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
 
+# ========================================== Convert to code ==========================================
+
+def convert_backticks_to_code(text):
+    pattern = r"`(.*?)`"
+    result = re.sub(pattern, r"<code style='font-size: 110%'>\1</code>", text)
+    return result

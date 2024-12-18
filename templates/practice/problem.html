@@ -333,10 +333,31 @@
         </div>
         {% endif %}
 
+        {% autoescape off %}
+
         <div class="card-body mb-n7">
             <h6 class="card-title">Description:</h6>
             <p>{{ question.description }}</p>
         </div>
+
+        {% endautoescape %}
+
+        {% if question.input_format %}
+
+        <div class="card-body mb-n7">
+            <h6 class="card-title fs-4">Input Format:</h6>
+            <code>{{ question.input_format }}</code>
+        </div>
+
+        {% endif %}
+
+        {% if question.output_format %}
+        <div class="card-body mb-n7">
+            <h6 class="card-title fs-4">Output Format:</h6>
+            <code>{{ question.output_format }}</code>
+        </div>
+
+        {% endif %}
 
         <div class="card-body mb-n7">
             <h6 class="card-title">Constraints:</h6>

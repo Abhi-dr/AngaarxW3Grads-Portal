@@ -47,7 +47,7 @@
             height: 20px;
         }
 
-    
+
 
         [data-bs-theme="dark"] {
             body {
@@ -554,16 +554,23 @@
                             </a>
                         </li> -->
                         <li class="nav-item">
-                            <a class="nav-link pe-none" id="sheet-link" href="#">
+                            <div class="nav-link" id="sheet-link" >
                                 <!-- data-bs-toggle="tooltip" title="Your Current Streaks🔥" data-bs-placement="bottom" -->
                                 <!-- <img id="fire-icon" src="{% static 'img/student/fire.png' %}" alt=""> -->
                                 <span class="mx-1 badge text-bg-dark" id="active-sheet-timer"></span>
-                                <span class="mx-1 badge text-bg-dark">
-                                    <img id="coin-icon" src="{% static 'img/student/coin.png' %}"  alt="">
-                                    {{ student.coins }}</span>
-                                </h1>
-                                <span class="mx-1 badge text-bg-dark">🔥 {{ streak.current_streak }}</span>
-                            </a>
+                                <button id="coinbtn" type="button" class="btn badge text-bg-dark mx-1"
+                                    data-bs-toggle="modal" data-bs-target="#coinModal"
+                                    data-bs-toggle="tooltip" title="Your Total Sparks💥">
+                                    <img id="coin-icon" src="{% static 'img/student/coin.png' %}" alt=""> 
+                                    {{ student.coins }}
+                                </button>
+
+                                <button id="streakbtn" type="button" class="btn badge text-bg-dark mx-1"
+                                    data-bs-toggle="modal" data-bs-target="#streakModal"
+                                    data-bs-toggle="tooltip" title="Your Current Streaks🔥">
+                                    <span class="fire-emoji">🔥</span>{{ streak.current_streak }}
+                                </button>
+                            </div>
                         </li>
                     </ul>
                     <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
@@ -638,6 +645,71 @@
         </div>
 
         <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top">↑</button>
+    </div>
+
+    <!--Coin modal-->
+    <div class="modal fade" id="coinModal" tabindex="-1" aria-labelledby="coinModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 class="modal-title text-center">You have total <strong>{{ student.coins }} Sparks</strong> <img
+                            width="7%" src="{% static 'img/student/coin.png' %}" alt=""> </h4>
+                    <p class="text-center mt-3">Sparks are a symbol of your coding achievements. Here's how they work:
+                    </p>
+                    <ul class="mt-3">
+                        <li>🧩 <strong>Solving Coding Challenges:</strong> Earn Sparks based on the complexity of the
+                            challenges.</li>
+                        <li>🔥 <strong>Maintaining Streaks:</strong> Keep solving daily to earn bonus Sparks and grow
+                            your streak.</li>
+                    </ul>
+                    <p class="text-center mt-3">
+                        Use your Sparks to unlock premium features, redeem exciting rewards, or showcase your coding
+                        journey. Keep stacking up! 💪
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--streak modal-->
+    <div class="modal fade" id="streakModal" tabindex="-1" aria-labelledby="streakModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 class="modal-title text-center">Your Current Streak: <strong>{{ streak.current_streak
+                            }}</strong> Days 🔥</h4>
+                    <p class="text-center mt-3">Streaks are a great way to stay consistent and boost your rewards.
+                        Here's how they work:</p>
+                    <ul class="mt-3">
+                        <li>📅 <strong>What is a Streak?</strong> A streak is the number of consecutive days you've
+                            solved coding challenges.</li>
+                        <li>🔥 <strong>Why Maintain a Streak?</strong> Longer streaks earn you bonus Sparks and
+                            exclusive rewards.</li>
+                        <li>🎯 <strong>How to Keep a Streak?</strong> Solve at least one challenge daily to maintain
+                            your streak.</li>
+                        <li>💔 <strong>What Happens if You Break It?</strong> Missing a day resets your streak to zero,
+                            so stay consistent!</li>
+                    </ul>
+                    <p class="text-center mt-3">
+                        Build your streak to show off your dedication and earn extra Sparks. Don’t let the fire go out!
+                        🔥
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+        
     </div>
 
     {% block myjs %}
@@ -750,10 +822,10 @@
                             const sheetName = data.sheetName;
                             const sheetSlug = data.sheetSlug;
 
-                            
+
 
                             const badge = document.getElementById('sheet-link');
-                            
+
                             // Function to update the timer
                             function updateTimer() {
                                 const now = new Date().getTime();

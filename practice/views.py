@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 
 import base64
+import re
 from .models import Streak
 
 
@@ -127,6 +128,8 @@ def normalize_output(output):
         return ""
     return output.replace("\r\n", "\n").strip()
 
+
+# ==========================================
 
 def get_test_cases(question):
     """
@@ -302,7 +305,7 @@ def problem(request, slug):
             if question not in enabled_questions:
                 messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
                 return redirect('sheet', slug=sheet.slug)  # You can redirect to the sheet or show an error
-        
+                
         sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
         return render(request, 'practice/problem.html', {
             'question': question,
@@ -318,7 +321,7 @@ def problem(request, slug):
 def update_coin(user, score, question):
     
     # update the coins only if the user has submitted the code for the first time successfully
-    if Submission.objects.filter(user=user, question=question).count() > 1:
+    if Submission.objects.filter(user=user, question=question, status="Accepted").count() > 1:
         return
     
     if score == 100:
@@ -335,7 +338,6 @@ def update_coin(user, score, question):
 
 
 # ============================================ UPDATE STREAKS =============================================
-
 
 def update_user_streak(user):
     # Fetch or create the user's streak record
