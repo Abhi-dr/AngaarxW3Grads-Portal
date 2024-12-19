@@ -1,16 +1,40 @@
-from django.contrib.auth import get_user_model
-from accounts.models import Student
+from accounts.models import Student, Instructor, Administrator
 from practice.models import Streak
 
-def student_context_processor(request):
-    student = None
+# def student_context_processor(request):
+#     student = None
+#     if request.user.is_authenticated:
+#         User = get_user_model()
+#         try:
+#             student = request.user.student
+#         except Student.DoesNotExist:
+#             pass
+#     return {'student': student}
+
+
+def user_context_processor(request):
+    user_type = None
+    user_object = None
+
     if request.user.is_authenticated:
-        User = get_user_model()
         try:
-            student = request.user.student
-        except Student.DoesNotExist:
+            if hasattr(request.user, 'student'):
+                user_type = 'student'
+                user_object = request.user.student
+            elif hasattr(request.user, 'instructor'):
+                user_type = 'instructor'
+                user_object = request.user.instructor
+            elif hasattr(request.user, 'administrator'):
+                user_type = 'administrator'
+                user_object = request.user.administrator
+        except (Student.DoesNotExist, Instructor.DoesNotExist, Administrator.DoesNotExist):
             pass
-    return {'student': student}
+
+    return {
+        'user_type': user_type,
+        'user': user_object,
+    }
+
 
 def streak_context(request):
     if request.user.is_authenticated:  # Ensure the user is logged in

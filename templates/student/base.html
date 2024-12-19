@@ -562,7 +562,7 @@
                                     data-bs-toggle="modal" data-bs-target="#coinModal"
                                     data-bs-toggle="tooltip" title="Your Total Sparks💥">
                                     <img id="coin-icon" src="{% static 'img/student/coin.png' %}" alt=""> 
-                                    {{ student.coins }}
+                                    {{ user.coins }}
                                 </button>
 
                                 <button id="streakbtn" type="button" class="btn badge text-bg-dark mx-1"
@@ -609,7 +609,7 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link nav-icon-hover show" href="javascript:void(0)" id="drop2"
                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                    <img src="{{ student.profile_pic.url }}" alt="" width="35" height="35"
+                                    <img src="{{ user.profile_pic.url }}" alt="" width="35" height="35"
                                         class="rounded-circle">
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
@@ -633,7 +633,7 @@
                         </ul>
                     </div>
                     <div class="row-cols-lg-3">
-                        <span class="fw-semibold">Hi, {{ student.first_name }}</span>
+                        <span class="fw-semibold">Hi, {{ user.first_name }}</span>
                     </div>
                 </nav>
             </header>
@@ -652,7 +652,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body mt-2">
-                    <h4 class="modal-title text-center mb-2">You have total <strong>{{ student.coins }} Sparks</strong> <img
+                    <h4 class="modal-title text-center mb-2">You have total <strong>{{ user.coins }} Sparks</strong> <img
                         width="7%" src="{% static 'img/student/coin.png' %}" alt=""> </h4>
                     <p class="text-center">Sparks aren’t just coins, they are the badge of your coding achievements! While it’s not real money, it is gonna help you to earn it 😉.
                     </p>

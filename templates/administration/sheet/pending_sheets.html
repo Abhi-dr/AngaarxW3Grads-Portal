@@ -7,7 +7,7 @@ active
 {% endblock %}
 
 {% block title %}
-Administration | Sheets
+Administration | Pending Sheets
 {% endblock %}
 
 {% block body %}
@@ -27,22 +27,22 @@ Administration | Sheets
     <div class="card">
         <div class="card-body">
             <h3 class="heading">
-                <span class="fw-semibold">S H E E T S 🔥</span>
+                <span class="fw-semibold">P E N D I N G &nbsp; S H E E T S 🔥</span>
                 <span class="fs-4"> | Angaar x W3Grads
                 </span>
             </h3>
         </div>
 
-        <div class="row mt-n3">
+        <!-- <div class="row mt-n3">
             <div class="col-md-5 mx-auto">
                 <a href="{% url 'administrator_add_sheet' %}" class="btn btn-outline-primary button mt-n2 mb-3 w-100 ">Add Sheet</a>
 
             </div>
             <div class="col-md-5 mx-auto">
-                <a href="{% url 'administrator_pending_sheet' %}" class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Pendng Sheets</a>
+                <a href="{% url 'administrator_pending_sheet' %}" class="btn btn-outline-primary button mt-n2 mb-3 w-100 ">Pendng Sheets</a>
 
             </div>
-        </div>
+        </div> -->
 
     </div>
 
@@ -63,6 +63,10 @@ Administration | Sheets
                         <h5 class="card-title">
                             {{ sheet.name }}🔥
                         </h5>
+                        <p class="card-text mb-1">
+                            Total Questions: {{ sheet.get_total_questions }}
+                        </p>
+
                         <p class="card-text mb-2"><b>Batches: </b><br>
 
                             {% if sheet.batches.all.count == 0 %}
@@ -76,16 +80,18 @@ Administration | Sheets
 
                             {% endif %}
                         </p>
+
+                        {% if sheet.created_by %}
+
                         <p class="card-text mb-1">
-                            Total Questions: {{ sheet.get_total_questions }}
+                            By: {{ sheet.created_by.first_name }} {{ sheet.created_by.last_name }}
                         </p>
-                        
-                        {% if sheet.is_enabled %}
-                        <span class="text-success">Public</span>
-                        {% else %}
-                        <span class="text-danger">Disabled</span>
+
                         {% endif %}
+                        
                         <a href="{% url 'administrator_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">View More</a>
+
+                        <a href="{% url 'administrator_approve_sheet' sheet.id %}" class="btn btn-success w-100 mt-2">Approve</a>
                     </div>
                 </a>
             </div>

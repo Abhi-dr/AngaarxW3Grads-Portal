@@ -437,8 +437,7 @@
                         </button>
                         <button id="restore-draft-btn" type="button" class="btn btn-primary mt-2 mx-1">Restore
                         </button>
-                        <button id="reset-draft-btn" type="button" class="btn btn-warning mt-2 mx-1"
-                            onclick="return confirm('Are you sure you want to reset to the driver code?')">Reset
+                        <button id="reset-draft-btn" type="button" class="btn btn-warning mt-2 mx-1">Reset
                         </button>
                     </div>
                 </div>
@@ -680,6 +679,12 @@
             }
 
             function resetDraft() {
+
+                const choice = confirm("Are you sure you want to reset the draft to the original driver code?");
+                if (!choice) {
+                    return;
+                }
+
                 const draftKey = getDraftKey();
                 localStorage.removeItem(draftKey);
                 fetchDriverCode(languageSelect.val());

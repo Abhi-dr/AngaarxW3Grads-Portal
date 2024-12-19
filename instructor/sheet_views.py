@@ -22,7 +22,7 @@ from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCo
 def sheets(request):
     
     instructor = Instructor.objects.get(id=request.user.id)
-    sheets = Sheet.objects.all().order_by('-id')
+    sheets = Sheet.objects.filter(created_by=instructor).order_by("-id")
     
     parameters = {
         "instructor": instructor,
@@ -51,6 +51,7 @@ def add_sheet(request):
             name=name,
             thumbnail=thumbnail,
             is_sequential=is_sequential,
+            created_by=instructor
         )
         
         for batch in batches:

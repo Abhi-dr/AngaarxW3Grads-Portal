@@ -2,7 +2,7 @@ from django.db import models
 from datetime import datetime, timedelta
 from django.utils.timezone import now
 
-from accounts.models import Student
+from accounts.models import Student, Instructor
 
 # ============================== BATCH MODEL =========================
 
@@ -58,6 +58,8 @@ class Sheet(models.Model):
     thumbnail = models.ImageField(upload_to='sheets/thumbnails/', blank=True, null=True)
     batches = models.ManyToManyField(Batch, related_name="sheets", blank=True)
     
+    created_by = models.ForeignKey(Instructor, on_delete=models.CASCADE, related_name="sheets", blank=True, null=True)
+    
     custom_order = models.JSONField(default=dict)  # Store order as {question_id: position}
     
     start_time = models.DateTimeField(null=True, blank=True)
@@ -68,6 +70,8 @@ class Sheet(models.Model):
     
     # Is sheet enabled or not
     is_enabled = models.BooleanField(default=True)
+    
+    is_approved = models.BooleanField(default=False)
     
     def is_active(self):
         """Checks if the sheet is active based on the current time."""

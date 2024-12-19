@@ -31,7 +31,7 @@ from .models import Sheet, Question, TestCase, Submission, DriverCode
 @login_required(login_url="login")
 def practice(request):
     
-    sheets = Sheet.objects.all()
+    sheets = Sheet.objects.filter(is_approved=True)
     
     # fetch only those sheets which are not a part of any batch
     sheets = [sheet for sheet in sheets if not sheet.batches.exists()]
@@ -47,7 +47,7 @@ def practice(request):
 @login_required(login_url="login")
 def sheet(request, slug):
         
-    sheet = get_object_or_404(Sheet, slug=slug)
+    sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
     
     enabled_questions = sheet.get_enabled_questions_for_user(request.user.student)
     
@@ -291,7 +291,7 @@ def problem(request, slug):
     try:
         question = get_object_or_404(Question, slug=slug)
         
-        sheet = Sheet.objects.filter(questions=question).first()
+        sheet = Sheet.objects.filter(questions=question, is_approved=True).first()
 
         if sheet and not sheet.is_enabled:
             messages.info(request, "This question is in the sheet which is disabled now. Try Later.")
@@ -371,7 +371,7 @@ def submit_code(request, slug):
             if not test_cases:
                 return JsonResponse({"error": "No test cases available for this question."}, status=400)
 
-            sheet = Sheet.objects.filter(questions=question).first()
+            sheet = Sheet.objects.filter(questions=question, is_approved=True).first()
 
             if sheet and not sheet.is_enabled:
                 return JsonResponse({"sheet_disabled": "Sheet not enabled."}, status=400)
@@ -631,7 +631,7 @@ def fetch_questions(request):
 
 @login_required(login_url="login")
 def render_next_question_in_sheet(request, sheet_id, question_id):
-    sheet = get_object_or_404(Sheet, id=sheet_id)
+    sheet = get_object_or_404(Sheet, id=sheet_id, is_approved=True)
     current_question = get_object_or_404(Question, id=question_id)
 
     if current_question not in sheet.questions.all():

@@ -19,7 +19,7 @@ from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRe
 def sheets(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
-    sheets = Sheet.objects.all().order_by('-id')
+    sheets = Sheet.objects.filter(is_approved = True).order_by('-id')
     
     parameters = {
         "administrator": administrator,
@@ -120,6 +120,36 @@ def delete_sheet(request, id):
     
     messages.success(request, "Sheet deleted successfully!")
     return redirect('administrator_sheets')
+
+
+# ========================= PENDING SHEET ==========================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def administrator_pending_sheet(request):
+    
+    administrator = Administrator.objects.get(id=request.user.id)
+    sheets = Sheet.objects.filter(is_approved=False).order_by("-id")
+    
+    parameters = {
+        "administrator": administrator,
+        "sheets": sheets
+    }
+    
+    return render(request, 'administration/sheet/pending_sheets.html', parameters)
+
+# ========================= APPROVE SHEET ==========================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def administrator_approve_sheet(request, id):
+    
+    sheet = get_object_or_404(Sheet, id=id)
+    sheet.is_approved = True
+    sheet.save()
+    
+    messages.success(request, "Sheet approved successfully!")
+    return redirect('administrator_pending_sheet')
 
 # ========================= SHEET ==========================
 

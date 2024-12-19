@@ -75,6 +75,12 @@ My Courses
                         <span class="text-danger">Disabled</span>
                         {% endif %}
                         <a href="{% url 'instructor_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">View More</a>
+
+                        {% if not sheet.is_approved %}
+
+                        <button class="btn bg-danger w-100 mt-2 mb-n3 pe-none">NOT APPROVED</button>
+
+                        {% endif %}
                     </div>
                 </a>
             </div>
