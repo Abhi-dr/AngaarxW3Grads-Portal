@@ -327,17 +327,25 @@
         </div>
 
         {% if question.scenario %}
+
+        {% autoescape off %}
+
+
         <div class="card-body mb-n7">
             <h4 class="card-title text-">Scenario:</h4>
             <p>{{ question.scenario|linebreaks }}</p>
         </div>
+
+        {% endautoescape %}
+
+
         {% endif %}
 
         {% autoescape off %}
 
         <div class="card-body mb-n7">
             <h6 class="card-title">Description:</h6>
-            <p>{{ question.description }}</p>
+            <p>{{ question.description|linebreaks }}</p>
         </div>
 
         {% endautoescape %}
@@ -621,19 +629,15 @@
                     showFoldWidgets: true, // Ensure fold widgets are visible in the gutter
 
                 });
-                editor.session.foldAll();
                 updateEditorMode(languageSelect.val());
             }
-
-            setTimeout(() => {
-                editor.session.foldAll(); // Collapse all foldable regions
-            }, 100);
 
             function updateEditorMode(languageId) {
                 const selectedLanguage = topLanguages.find(lang => lang.id == languageId);
                 if (selectedLanguage) {
                     editor.session.setMode(`ace/mode/${selectedLanguage.mode}`);
                 }
+
             }
 
             function getDraftKey() {
@@ -689,6 +693,8 @@
                     .then(data => {
                         if (data.success) {
                             editor.setValue(data.code, -1);
+                            editor.session.foldAll();
+
                         } else {
                             editor.setValue("// Driver code not found for this language", -1);
                         }

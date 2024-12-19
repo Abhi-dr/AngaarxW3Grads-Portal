@@ -11,10 +11,8 @@ class Instructor(User):
     gender = models.CharField(max_length=19)
     linkedin_id = models.URLField(blank=True, null=True)
     dob = models.DateField(blank=True, null=True)
-
     
     college = models.CharField(max_length=100, blank=True, null=True)
-
 
     class Meta:
         verbose_name_plural = "Instructors"

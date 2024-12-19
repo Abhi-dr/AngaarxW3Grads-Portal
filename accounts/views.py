@@ -23,8 +23,6 @@ def login(request):
             if user is not None:
                 
                 try:
-                    
-                    
                     # check if the student is enrolled in any batch and get
                     if user.student.enrollment_requests.filter(status='Accepted').exists():
                         batch = user.student.enrollment_requests.filter(status='Accepted')
@@ -33,7 +31,7 @@ def login(request):
                             batch = batch[0].batch
                             auth.login(request, user)
                             return redirect('batch', slug=batch.slug)
-                        else:     
+                        else:
                             auth.login(request, user)
                             return redirect('my_batches')
                     
@@ -65,7 +63,7 @@ def login(request):
             else:
                 messages.error(request, "Invalid Password")
                 return redirect("login")
-            
+        
         else:
             messages.error(request, "Invalid Username or Password")
             return redirect("login")

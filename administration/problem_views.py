@@ -182,7 +182,9 @@ def edit_question(request, id):
             question.sheets.add(sheet)
         
         messages.success(request, 'Problem updated successfully')
-        return redirect('instructor_problems')
+        return redirect('edit_question', id=question.id)
+    
+    question.description = convert_code_to_backticks(question.description)
     
     parameters = {
         'instructor': instructor,
@@ -687,4 +689,12 @@ def submit_code(request, slug):
 def convert_backticks_to_code(text):
     pattern = r"`(.*?)`"
     result = re.sub(pattern, r"<code style='font-size: 110%'>\1</code>", text)
+    return result
+
+
+def convert_code_to_backticks(text):
+
+    pattern = r"<code style='font-size: 110%'>(.*?)</code>"
+
+    result = re.sub(pattern, r"`\1`", text)
     return result
