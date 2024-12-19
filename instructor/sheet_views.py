@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-import json
+import json, re
 from django.utils.timezone import now
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -614,7 +614,7 @@ def delete_test_case(request, id):
     test_case.delete()
     
     messages.success(request, 'Test case deleted successfully')
-    return redirect('test_cases', slug=test_case.question.slug)
+    return redirect('instructor_test_cases', slug=test_case.question.slug)
 
 
 # ======================================== DRIVER CODE ======================================
@@ -667,6 +667,110 @@ def test_code(request, slug):
     
     parameters = {
         'instructor': instructor,
+        'question': question,
+        'sample_test_cases': sample_test_cases
+    }
+    
+    return render(request, 'instructor/sheet/test_code.html', parameters)
+
+
+# ======================================== DELETE PROBLEM ======================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def delete_question(request, id):
+    
+    question = Question.objects.get(id=id)
+    slug = question.sheets.first().slug
+    
+    question.delete()
+    
+    
+    messages.success(request, 'Problem deleted successfully')
+    return redirect('instructor_sheet', slug=slug)
+
+
+# ======================================== EDIT PROBLEM ======================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def edit_question(request, id):
+    
+    question = Question.objects.get(id=id)
+    sheets = Sheet.objects.all().order_by('-id')
+    
+    if request.method == 'POST':
+        
+        sheet = request.POST.getlist('sheet')
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        input_format = request.POST.get('input_format')
+        output_format = request.POST.get('output_format')
+        difficulty_level = request.POST.get('difficulty_level')
+        position = request.POST.get('position')
+        cpu_time_limit = request.POST.get('cpu_time_limit')
+        memory_limit = request.POST.get('memory_limit')
+        
+        description = convert_backticks_to_code(description)
+
+        
+        question.title = title
+        question.description = description
+        question.input_format = input_format
+        question.output_format = output_format
+        question.difficulty_level = difficulty_level
+        question.position = position
+        question.cpu_time_limit = float(cpu_time_limit)
+        question.memory_limit = int(memory_limit)
+        
+        question.save()
+        
+        question.sheets.clear()
+        
+        for sheet_id in sheet:
+            sheet = Sheet.objects.get(id=sheet_id)
+            question.sheets.add(sheet)
+        
+        messages.success(request, 'Problem updated successfully')
+        return redirect('instructor_edit_question', id=question.id)
+    
+    question.description = convert_code_to_backticks(question.description)
+    
+    parameters = {
+        'question': question,
+        'sheets': sheets
+    }
+    return render(request, 'instructor/sheet/edit_question.html', parameters)
+
+# ========================================== Convert to code ==========================================
+
+def convert_backticks_to_code(text):
+    pattern = r"`(.*?)`"
+    result = re.sub(pattern, r"<code style='font-size: 110%'>\1</code>", text)
+    return result
+
+
+def convert_code_to_backticks(text):
+
+    pattern = r"<code style='font-size: 110%'>(.*?)</code>"
+
+    result = re.sub(pattern, r"`\1`", text)
+    return result
+
+# =====================================================================================================
+# ============================================= TEST CODE =============================================
+# =====================================================================================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def test_code(request, slug):
+    
+    question = get_object_or_404(Question, slug=slug)
+    sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
+    
+    parameters = {
         'question': question,
         'sample_test_cases': sample_test_cases
     }

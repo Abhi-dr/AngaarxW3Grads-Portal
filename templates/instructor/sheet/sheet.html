@@ -226,7 +226,7 @@ active
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'test_code' question.slug %}"
+                                    <a href="{% url 'instructor_test_code' question.slug %}"
                                         class="btn btn-info text-blue float-end">TEST CODE</a>
 
                                 </div>
@@ -236,11 +236,11 @@ active
                                 <div class="d-flex align-items-center gap-2">
 
                                     <!-- <a href="{% url 'instructor_remove_from_sheet' sheet.id question.id %}" -->
-                                    <a href="{% url 'delete_question' question.id %}"
+                                    <a href="{% url 'instructor_delete_question' question.id %}"
                                         class="float-end"
                                         onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">❌</a>
 
-                                    <a href="{% url 'edit_question' question.id %}" class="float-end">✏️</a>
+                                    <a href="{% url 'instructor_edit_question' question.id %}" class="float-end">✏️</a>
                                 </div>
                             </td>
 

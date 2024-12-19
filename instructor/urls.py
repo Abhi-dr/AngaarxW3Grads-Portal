@@ -50,6 +50,11 @@ urlpatterns = [
     path("fetch_sheet_timer/<int:sheet_id>/", sheet_views.fetch_sheet_timer, name="fetch_sheet_timer"),
     
     path('download-leaderboard/<slug:slug>/', sheet_views.download_leaderboard_excel, name='download_leaderboard'),
+    
+    path("delete_question/<int:id>", sheet_views.delete_question, name="instructor_delete_question"),
+    path("edit_question/<int:id>", sheet_views.edit_question, name="instructor_edit_question"),
+    
+    path("test_code/<slug:slug>/", sheet_views.test_code, name="instructor_test_code"),
 
     
     # ====================================== ENABLE / DISABLE SHEET ===================================
