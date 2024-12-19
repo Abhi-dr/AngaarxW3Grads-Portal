@@ -618,9 +618,16 @@
                     enableSnippets: true,
                     cursorStyle: "smooth",
                     enableAutoIndent: true,
+                    showFoldWidgets: true, // Ensure fold widgets are visible in the gutter
+
                 });
+                editor.session.foldAll();
                 updateEditorMode(languageSelect.val());
             }
+
+            setTimeout(() => {
+                editor.session.foldAll(); // Collapse all foldable regions
+            }, 100);
 
             function updateEditorMode(languageId) {
                 const selectedLanguage = topLanguages.find(lang => lang.id == languageId);
