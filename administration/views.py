@@ -4,7 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
-from accounts.models import Instructor, Student
+from accounts.models import Administrator, Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
 from practice.models import Sheet, Submission, Question
 
@@ -17,7 +17,7 @@ import datetime
 @staff_member_required(login_url='login')
 def index(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     latest_sheet = Sheet.objects.latest('id')
     
     # get the total number of submissions happened today only
@@ -29,20 +29,20 @@ def index(request):
     # last_3_questions = Question.objects.order_by('-created_at')[:3]
 
     
-    # sessions = Session.objects.filter(instructor=instructor, recorded_session_link=None).order_by("-session_time")
+    # sessions = Session.objects.filter(administrator=administrator, recorded_session_link=None).order_by("-session_time")
     
-    # total_enrolled_students = Student.objects.filter(courses__instructor=instructor).distinct().count()
-    # total_sessions = Session.objects.filter(instructor=instructor).count()
+    # total_enrolled_students = Student.objects.filter(courses__administrator=administrator).distinct().count()
+    # total_sessions = Session.objects.filter(administrator=administrator).count()
     
-    # course = Course.objects.get(instructor=instructor)
+    # course = Course.objects.get(administrator=administrator)
     
     # if total_sessions == 0:
     #     total_completed_sessions_percentage = 0
     # else:
-    #     total_completed_sessions_percentage = int((Session.objects.filter(instructor=instructor, is_completed=True).count() / total_sessions) * 100)
+    #     total_completed_sessions_percentage = int((Session.objects.filter(administrator=administrator, is_completed=True).count() / total_sessions) * 100)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "latest_sheet": latest_sheet,
         # "total_enrolled_students": total_enrolled_students,
         # "total_sessions": total_sessions,
@@ -56,20 +56,20 @@ def index(request):
     # last_3_questions = Question.objects.order_by('-created_at')[:3]
 
     
-    # sessions = Session.objects.filter(instructor=instructor, recorded_session_link=None).order_by("-session_time")
+    # sessions = Session.objects.filter(administrator=administrator, recorded_session_link=None).order_by("-session_time")
     
-    # total_enrolled_students = Student.objects.filter(courses__instructor=instructor).distinct().count()
-    # total_sessions = Session.objects.filter(instructor=instructor).count()
+    # total_enrolled_students = Student.objects.filter(courses__administrator=administrator).distinct().count()
+    # total_sessions = Session.objects.filter(administrator=administrator).count()
     
-    # course = Course.objects.get(instructor=instructor)
+    # course = Course.objects.get(administrator=administrator)
     
     # if total_sessions == 0:
     #     total_completed_sessions_percentage = 0
     # else:
-    #     total_completed_sessions_percentage = int((Session.objects.filter(instructor=instructor, is_completed=True).count() / total_sessions) * 100)
+    #     total_completed_sessions_percentage = int((Session.objects.filter(administrator=administrator, is_completed=True).count() / total_sessions) * 100)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "latest_sheet": latest_sheet,
         # "total_enrolled_students": total_enrolled_students,
         # "total_sessions": total_sessions,
@@ -88,9 +88,9 @@ def index(request):
 @staff_member_required(login_url='login')
 def all_students(request):
         
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
-    # students = Student.objects.filter(courses__instructor=instructor).distinct()
+    # students = Student.objects.filter(courses__administrator=administrator).distinct()
     students = Student.objects.all().distinct()
     
     # fetch those students who has their birthdays today
@@ -109,7 +109,7 @@ def all_students(request):
             )
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "students": students,
         "students_birthday": students_birthday,
         "query": query
@@ -123,12 +123,12 @@ def all_students(request):
 @staff_member_required(login_url='login')
 def feedbacks(request):
         
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     feedbacks = Feedback.objects.all().order_by("-id")
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "feedbacks": feedbacks
     }
     
@@ -140,18 +140,18 @@ def feedbacks(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def instructor_anonymous_message(request):
+def administrator_anonymous_message(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
-    my_messages = Anonymous_Message.objects.filter(instructor=instructor)
+    my_messages = Anonymous_Message.objects.filter(administrator=administrator)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "my_messages": my_messages
     }
     
-    return render(request, "administration/instructor_anonymous_message.html", parameters)
+    return render(request, "administration/administrator_anonymous_message.html", parameters)
 
 
 # ======================================== REPLY MESSAGE ==========================================
@@ -160,7 +160,7 @@ def instructor_anonymous_message(request):
 @staff_member_required(login_url='login')
 def reply_message(request, id):
         
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     message = Anonymous_Message.objects.get(id=id)
     
@@ -172,10 +172,10 @@ def reply_message(request, id):
         
         messages.success(request, "Message replied successfully!")
         
-        return redirect("instructor_anonymous_message")
+        return redirect("administrator_anonymous_message")
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "message": message
     }
     
@@ -188,7 +188,7 @@ def reply_message(request, id):
 @staff_member_required(login_url='login')
 def edit_reply(request, id):
         
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     message = Anonymous_Message.objects.get(id=id)
     
@@ -199,10 +199,10 @@ def edit_reply(request, id):
         
         messages.success(request, "Reply updated successfully!")
         
-        return redirect("instructor_anonymous_message")
+        return redirect("administrator_anonymous_message")
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "message": message
     }
     
@@ -215,83 +215,83 @@ def edit_reply(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def instructor_profile(request):
+def administrator_profile(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     parameters = {
-        "instructor": instructor
+        "administrator": administrator
     }
     
-    return render(request, "administration/instructor_profile.html", parameters)
+    return render(request, "administration/administrator_profile.html", parameters)
 
 # ========================================= EDIT PROFILE =========================================
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def edit_instructor_profile(request):
+def edit_administrator_profile(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     if request.method == "POST":
-        instructor.first_name = request.POST.get("first_name")
-        instructor.last_name = request.POST.get("last_name")
-        instructor.email = request.POST.get("email")
-        instructor.college = request.POST.get("college")
-        instructor.gender = request.POST.get("gender")
-        instructor.linkedin_id = request.POST.get("linkedin_id")
+        administrator.first_name = request.POST.get("first_name")
+        administrator.last_name = request.POST.get("last_name")
+        administrator.email = request.POST.get("email")
+        administrator.college = request.POST.get("college")
+        administrator.gender = request.POST.get("gender")
+        administrator.linkedin_id = request.POST.get("linkedin_id")
         
         if request.POST.get("dob"):
-            instructor.dob = request.POST.get("dob")         
+            administrator.dob = request.POST.get("dob")         
         
-        instructor.save()
+        administrator.save()
         
         messages.success(request, "Profile updated successfully!")
         
-        return redirect("instructor_profile")
+        return redirect("administrator_profile")
     
     parameters = {
-        "instructor": instructor
+        "administrator": administrator
     }
     
-    return render(request, "administration/edit_instructor_profile.html", parameters)
+    return render(request, "administration/edit_administrator_profile.html", parameters)
 
 # ========================================= UPLOAD PROFILE =========================================
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def upload_instructor_profile(request):
+def upload_administrator_profile(request):
 
     if request.method == 'POST':
 
-        instructor = Instructor.objects.get(id=request.user.id)
+        administrator = Administrator.objects.get(id=request.user.id)
 
-        instructor.profile_pic = request.FILES['profile_pic']
+        administrator.profile_pic = request.FILES['profile_pic']
         
-        if instructor.profile_pic.size > 5242880:
+        if administrator.profile_pic.size > 5242880:
             messages.error(request, 'Profile Picture size should be less than 5MB')
-            return redirect('instructor_profile')
+            return redirect('administrator_profile')
         
-        instructor.save()
+        administrator.save()
 
         messages.success(request, 'Profile Picture Updated Successfully')
 
-        return redirect('instructor_profile')
+        return redirect('administrator_profile')
     
 # ========================================= CHANGE PASSWORD =========================================
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def change_instructor_password(request):
+def change_administrator_password(request):
         
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
-    if instructor.check_password(request.POST.get("old_password")):
+    if administrator.check_password(request.POST.get("old_password")):
         
         if request.POST.get("new_password") == request.POST.get("confirm_password"):
             
-            instructor.set_password(request.POST.get("new_password"))
-            instructor.save()
+            administrator.set_password(request.POST.get("new_password"))
+            administrator.save()
             
             messages.success(request, "Password changed successfully! Please login Again!")
             
@@ -299,11 +299,11 @@ def change_instructor_password(request):
         
         else:
             messages.error(request, "New password and confirm password do not match!")
-            return redirect("instructor_profile")
+            return redirect("administrator_profile")
     
     else:
         messages.error(request, "Old password is incorrect!")
-        return redirect("instructor_profile")
+        return redirect("administrator_profile")
 
 
 
@@ -315,7 +315,7 @@ def change_instructor_password(request):
 @staff_member_required(login_url='login')
 def notifications(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     notifications = Notification.objects.all().order_by("-expiration_date")
     
     if request.method == "POST":
@@ -347,14 +347,14 @@ def notifications(request):
         
         except:
             messages.error(request, "An error occurred while sending notification!")
-            return redirect("instructor_notifications")
+            return redirect("administrator_notifications")
         
         messages.success(request, "Notification sent successfully!")
         
-        return redirect("instructor_notifications")
+        return redirect("administrator_notifications")
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "notifications": notifications
     }
     
@@ -372,7 +372,7 @@ def delete_notification(request, id):
     
     messages.success(request, "Notification deleted successfully!")
     
-    return redirect("instructor_notifications")
+    return redirect("administrator_notifications")
 
 
 # ======================================== EDIT NOTIFICATION ===================================
@@ -381,7 +381,7 @@ def delete_notification(request, id):
 @staff_member_required(login_url='login')
 def edit_notification(request, id):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     notification = Notification.objects.get(id=id)
     
@@ -406,10 +406,10 @@ def edit_notification(request, id):
         
         messages.success(request, "Notification updated successfully!")
         
-        return redirect("instructor_notifications")
+        return redirect("administrator_notifications")
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "notification": notification
     }
     

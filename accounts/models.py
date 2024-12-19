@@ -2,6 +2,26 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+# ================================================= ADMINISTRATOR ==========================================
+
+class Administrator(User):
+    profile_pic = models.ImageField(
+        upload_to="teacher_profile", blank=True, null=True, default="/student_profile/default.jpg")
+
+    gender = models.CharField(max_length=19)
+    linkedin_id = models.URLField(blank=True, null=True)
+    dob = models.DateField(blank=True, null=True)
+    
+    college = models.CharField(max_length=100, blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = "Administrators"
+        verbose_name = "Administrator"
+         
+    def __str__(self):
+        return self.username
+
+
 # ================================================= Instructor ==========================================
 
 class Instructor(User):

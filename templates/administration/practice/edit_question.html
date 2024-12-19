@@ -15,7 +15,7 @@ active
 
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item pe-auto"><a href="{% url 'instructor_problems' %}">Question Set</a></li>
+            <li class="breadcrumb-item pe-auto"><a href="{% url 'administrator_problems' %}">Question Set</a></li>
             <li class="breadcrumb-item pe-auto">{{ question.title }}</li>
 
             </li>
@@ -23,153 +23,155 @@ active
         </ol>
     </nav>
 
-    {% for message in messages %}
-
-    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-        <strong>{{ message.tag }}</strong> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    {% endfor %}
-
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title fw-semibold mb-0">Edit <pre class="d-inline-flex"> {{ question.title }}</pre></h5>
+            <h5 class="card-title fw-semibold mb-0">Edit Question</i> </h5>
+
         </div>
         <div class="container px-4">
-            <hr class="mt-0">
             <form method="POST">
                 {% csrf_token %}
+
+                <hr class="mt-0">
                 <div class="row">
-                    <div class="card-body h-100">
 
-                        <div>
-                            <div class="mb-3">
-                                <label for="assignment_type" class="form-label">Sheets
-                                    <div class="star">*</div>
-                                </label>
-                                <select class="form-select form-control" name="sheet" id="assignment_type" multiple>
+                    <div class="w-100">
 
-                                    {% for sheet in sheets %}
+                        <div class="card">
+                            <div class="card-header">Sheet</div>
+                            <div class="card-body h-100">
 
-                                    <option value="{{ sheet.id }}">{{ sheet.name }}</option>
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="assignment_type" class="form-label">Sheets
+                                            <div class="star">*</div>
+                                        </label>
+                                        <select class="form-select form-control" name="sheet" id="assignment_type"
+                                            multiple>
 
-                                    {% endfor %}
+                                            {% for sheet in sheets %}
 
-                                </select>
-                            </div>
-                        </div>
+                                            <option value="{{ sheet.id }}">{{ sheet.name }}</option>
+
+                                            {% endfor %}
+
+                                        </select>
+                                    </div>
+                                </div>
 
 
-                        <div>
-                            <div class="mb-3">
-                                <label for="job_title" class="form-label">Title
-                                    <div class="star">*</div>
-                                </label>
-                                <input type="text" class="form-control" id="job_title" name="title"
-                                    value="{{ question.title }}" required>
-                            </div>
-                        </div>
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Title
+                                            <div class="star">*</div>
+                                        </label>
+                                        <input type="text" class="form-control" id="job_title" name="title"
+                                            value="{{ question.title }}" required>
+                                    </div>
+                                </div>
 
-                        <div class="mb-3">
-                            <label for="job_title" class="form-label">Scenario
-                                <div class="star"></div>
-                            </label>
-                            <textarea class="form-control" id="question_description" name="scenario" rows="7"
-                                placeholder="Scenario here...">{{ question.scenario }}</textarea>
-                        </div>
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Scenario
+                                        <div class="star"></div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="scenario" rows="7"
+                                        placeholder="Scenario here...">{{ question.scenario }}</textarea>
+                                </div>
 
-                        <div>
-                            <div class="mb-3">
-                                <label for="job_title" class="form-label">Description
-                                    <div class="star">*</div>
-                                </label>
-                                <textarea class="form-control" id="job_title" name="description" rows="5"
-                                    required>{{ question.description }}</textarea>
-                                <!-- <iframe frameBorder="0" height="450px"
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Description
+                                            <div class="star">*</div>
+                                        </label>
+                                        <textarea class="form-control" id="job_title" name="description" rows="5"
+                                            required>{{ question.description }}</textarea>
+                                        <!-- <iframe frameBorder="0" height="450px"
                                             src="https://onecompiler.com/embed/html?theme=dark" width="100%"></iframe> -->
-                            </div>
-                        </div>
+                                    </div>
+                                </div>
 
-                        <div class="mb-3">
-                            <label for="job_title" class="form-label">Input Format
-                                <div class="star">*</div>
-                            </label>
-                            <textarea class="form-control" id="input_format" name="input_format" rows="5"
-                                placeholder="Input format here...">{{ question.input_format }}</textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="job_title" class="form-label">Output Format
-                                <div class="star">*</div>
-                            </label>
-                            <textarea class="form-control" id="output_format" name="output_format" rows="5"
-                                placeholder="Output format here...">{{ question.output_format }}</textarea>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="assignment_type" class="form-label">Difficulty Level
+                                    <label for="job_title" class="form-label">Input Format
                                         <div class="star">*</div>
                                     </label>
-                                    <select class="form-select form-control" name="difficulty_level"
-                                        id="assignment_type" required>
-                                        <!-- <option value="" selected disabled>Select Level</option> -->
-                                        <option value="Easy">Easy</option>
-                                        <option value="Medium">Medium</option>
-                                        <option value="Hard">Hard</option>
-
-                                    </select>
+                                    <textarea class="form-control" id="input_format" name="input_format" rows="5"
+                                        placeholder="Input format here..."
+                                        required>{{ question.input_format }}</textarea>
                                 </div>
-                            </div>
 
-                            <div class="col-md-6">
                                 <div class="mb-3">
-                                    <label for="job_title" class="form-label">Position
+                                    <label for="job_title" class="form-label">Output Format
                                         <div class="star">*</div>
                                     </label>
-                                    <input type="number" class="form-control" id="job_title" name="position"
-                                        value="{{ question.position }}" required>
-
-                                    </select>
+                                    <textarea class="form-control" id="output_format" name="output_format" rows="5"
+                                        placeholder="Output format here..."
+                                        required>{{ question.output_format }}</textarea>
                                 </div>
-                            </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="assignment_type" class="form-label">Difficulty Level
+                                                <div class="star">*</div>
+                                            </label>
+                                            <select class="form-select form-control" name="difficulty_level"
+                                                id="assignment_type" required>
+                                                <!-- <option value="" selected disabled>Select Level</option> -->
+                                                <option value="Easy">Easy</option>
+                                                <option value="Medium">Medium</option>
+                                                <option value="Hard">Hard</option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_title" class="form-label">Position
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="number" class="form-control" id="job_title" name="position"
+                                                value="{{ question.position }}" required>
+
+                                            </select>
+                                        </div>
+                                    </div>
 
 
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="assignment_type" class="form-label">CPU TIME LIMIT <small>(in
-                                            seconds)</small>
-                                        <div class="star">*</div>
-                                    </label>
-                                    <input type="text" value="{{ question.cpu_time_limit }}" class="form-control"
-                                        name="cpu_time_limit" placeholder="CPU time limit here..." required>
                                 </div>
-                            </div>
 
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="job_title" class="form-label">MEMORY LIMIT <small>(in
-                                            kilobytes)</small>
-                                        <div class="star">*</div>
-                                    </label>
-                                    <input type="text" value="{{ question.memory_limit }}" class="form-control"
-                                        name="memory_limit" placeholder="Memory limit here..." required>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="assignment_type" class="form-label">CPU TIME LIMIT <small>(in
+                                                    seconds)</small>
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="text" value="{{ question.cpu_time_limit }}"
+                                                class="form-control" name="cpu_time_limit"
+                                                placeholder="CPU time limit here..." required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_title" class="form-label">MEMORY LIMIT <small>(in
+                                                    kilobytes)</small>
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="text" value="{{ question.memory_limit }}" class="form-control"
+                                                name="memory_limit" placeholder="Memory limit here..." required>
+                                        </div>
+                                    </div>
+
+
                                 </div>
-                            </div>
 
+                                <div>
 
-                        </div>
+                                </div>
 
-                        <div>
-
-                        </div>
-
-                        <!-- <div class="row">
+                                <!-- <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label for="job_type" class="form-label">For & By</label>
@@ -187,18 +189,26 @@ active
                                     </div>
                                 </div> -->
 
-                        <div>
-                            <div class="col-md-12">
-                                <button type="submit" class="btn btn-success w-100 mt-3">Edit &nbsp;
-                                    Question</button>
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Edit &nbsp;
+                                            Question</button>
+                                    </div>
+                                </div>
                             </div>
+
                         </div>
+
                     </div>
-
                 </div>
-
-            </form>
         </div>
+
+
+
+
+
+        </form>
+
     </div>
 </div>
 

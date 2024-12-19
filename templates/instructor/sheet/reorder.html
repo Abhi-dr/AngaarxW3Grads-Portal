@@ -1,0 +1,108 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block title %}
+Reorder {{ sheet.name }}
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    .dragging {
+        background-color: #313131;
+        border: 2px dashed #007bff;
+    }
+</style>
+
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item pe-auto"><a href="{% url 'instructor_sheets' %}">Sheets</a></li>
+            <li class="breadcrumb-item pe-auto"><a href="{% url 'instructor_sheet' sheet.slug %}">{{ sheet.name }}</a></li>
+
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Reorder</li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-body d-inline-flex">
+            <h3 class="heading">
+                <span class="fw-semibold">Reorder <small>{{ sheet.name }}</small> </span>
+            </h3>
+        </div>
+    </div>
+
+
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+
+            <ul id="question-list" class="list-group">
+                {% for question in questions %}
+                <li class="list-group-item d-flex justify-content-between align-items-center"
+                    data-id="{{ question.id }}">
+                    <span class="float-start">{{ forloop.counter }}</span>
+                    <span class="">{{ question.title }}</span>
+                    <span class="drag-handle" style="cursor: grab;">&#9776;</span> <!-- Drag icon -->
+                </li>
+                {% endfor %}
+            </ul>
+            <button class="btn btn-primary mt-3" onclick="saveOrder()">Save Order</button>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+
+    <script>
+        // Initialize Sortable.js
+        const sortable = new Sortable(document.getElementById('question-list'), {
+            animation: 150,
+            handle: '.drag-handle',
+
+            onStart: function (evt) {
+                evt.item.classList.add('dragging');
+            },
+            onEnd: function (evt) {
+                evt.item.classList.remove('dragging');
+            }
+        });
+
+        function saveOrder() {
+            const order = Array.from(document.querySelectorAll('#question-list li'))
+                .map(item => item.getAttribute('data-id'));
+
+            console.log(order);
+
+            fetch("{% url 'update_sheet_order' sheet.id %}", {  // Update this with your Django URL name
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({ 'order': order })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response from server:", data);  // Debug the server response
+                    if (data.status === 'success') alert('Order updated!');
+                    else alert(`Error: ${data.message}`);
+                })
+                .catch(err => console.error("Fetch error:", err));
+        }
+    </script>
+
+
+    {% endblock %}

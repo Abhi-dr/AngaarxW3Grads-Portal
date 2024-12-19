@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.db.models import Q
-from accounts.models import Instructor
+from accounts.models import Administrator
 from django.http import JsonResponse
 import requests, time, re
 from django.views.decorators.csrf import csrf_exempt
@@ -27,16 +27,16 @@ LANGUAGE_IDS = {
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def instructor_problems(request):
+def administrator_problems(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     unapproved_question_number = Question.objects.filter(is_approved=False).count()
     
     parameters = {
-        'instructor': instructor,
+        'administrator': administrator,
         'unapproved_question_number': unapproved_question_number
     }
-    return render(request, 'administration/practice/instructor_problems.html', parameters)
+    return render(request, 'administration/practice/administrator_problems.html', parameters)
 
 # ======================================== FETCH PROBLEMS ======================================
 
@@ -82,7 +82,7 @@ def fetch_problems(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def add_question(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     sheets = Sheet.objects.all().order_by('-id')
     
     if request.method == 'POST':
@@ -117,7 +117,7 @@ def add_question(request):
         return redirect('test_cases', slug=question.slug)
     
     parameters = {
-        'instructor': instructor,
+        'administrator': administrator,
         'sheets': sheets
     }
     return render(request, 'administration/practice/add_question.html', parameters)
@@ -135,7 +135,7 @@ def delete_question(request, id):
     question.delete()
     
     messages.success(request, 'Problem deleted successfully')
-    return redirect('instructor_problems')
+    return redirect('administrator_problems')
 
 
 # ======================================== EDIT PROBLEM ======================================
@@ -145,7 +145,7 @@ def delete_question(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_question(request, id):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     question = Question.objects.get(id=id)
     sheets = Sheet.objects.all().order_by('-id')
     
@@ -187,7 +187,7 @@ def edit_question(request, id):
     question.description = convert_code_to_backticks(question.description)
     
     parameters = {
-        'instructor': instructor,
+        'administrator': administrator,
         'question': question,
         'sheets': sheets
     }
@@ -201,12 +201,12 @@ def edit_question(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def question_requests(request):
         
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     questions = Question.objects.filter(is_approved=False)
     
     parameters = {
-        'instructor': instructor,
+        'administrator': administrator,
         'questions': questions
     }
     return render(request, 'administration/practice/question_requests.html', parameters)
@@ -253,14 +253,14 @@ def reject_question(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def test_cases(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     question = Question.objects.get(slug=slug)
     
     test_cases = TestCase.objects.filter(question=question)
     
     parameters = {
-        'instructor': instructor,
+        'administrator': administrator,
         'question': question,
         'test_cases': test_cases
     }
@@ -311,7 +311,7 @@ def add_test_case(request, slug):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_test_case(request, id):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     test_case = TestCase.objects.get(id=id)
     
@@ -332,7 +332,7 @@ def edit_test_case(request, id):
         return redirect('test_cases', slug=test_case.question.slug)
     
     parameters = {
-        'instructor': instructor,
+        'administrator': administrator,
         'test_case': test_case
     }
     
@@ -360,7 +360,7 @@ def delete_test_case(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def driver_code(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     question = Question.objects.get(slug=slug)
     
     driver_codes = {code.language_id: code.code for code in DriverCode.objects.filter(question=question)}
@@ -383,7 +383,7 @@ def driver_code(request, slug):
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} added successfully."})
 
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         'question': question,
         'driver_codes': driver_codes
     }
@@ -398,17 +398,17 @@ def driver_code(request, slug):
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
-def instructor_pod(request):
-    instructor = Instructor.objects.get(id=request.user.id)
+def administrator_pod(request):
+    administrator = Administrator.objects.get(id=request.user.id)
     
     pods = POD.objects.filter(date__lte=datetime.date.today()).order_by('-date')
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "pods": pods
     }
 
-    return render(request, "administration/practice/instructor_pod.html", parameters)
+    return render(request, "administration/practice/administrator_pod.html", parameters)
 
 
 # =========================================== SET POD PAGE ================================
@@ -419,11 +419,11 @@ def instructor_pod(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def set_pod(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     questions = Question.objects.filter(pods__isnull=True)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "questions": questions
     }
 
@@ -473,12 +473,12 @@ HEADERS = {
 @staff_member_required(login_url='login')
 def test_code(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     question = get_object_or_404(Question, slug=slug)
     sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
     
     parameters = {
-        'instructor': instructor,
+        'administrator': administrator,
         'question': question,
         'sample_test_cases': sample_test_cases
     }

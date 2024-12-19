@@ -189,7 +189,7 @@ Enrollment Requests
     });
 
     function fetchPendingEnrollments() {
-        fetch("{% url 'instructor_fetch_pending_enrollments' %}")
+        fetch("{% url 'administrator_fetch_pending_enrollments' %}")
             .then(response => response.json())
             .then(data => {
                 display_pending_requests(data.data);
@@ -236,7 +236,7 @@ Enrollment Requests
 
 
     function fetchRejectedEnrollments() {
-        fetch("{% url 'instructor_fetch_rejected_enrollments' %}")
+        fetch("{% url 'administrator_fetch_rejected_enrollments' %}")
             .then(response => response.json())
             .then(data => {
                 display_rejected_requests(data.data);

@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'student.apps.StudentConfig',
     'administration.apps.AdministrationConfig',
     'practice.apps.PracticeConfig',
+    'instructor.apps.InstructorConfig',
     
     # 'single_session',
     'import_export',

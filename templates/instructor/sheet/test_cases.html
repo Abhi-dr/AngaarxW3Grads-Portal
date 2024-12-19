@@ -1,0 +1,274 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block title %}
+Test Cases🔥
+{% endblock %}
+
+{% block problem_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+   
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Test Cases for {{ question.title }}</span>
+                <span class="fs-4"> | 🔥Total: {{ test_cases.count }}🔥</span>
+            </h3>
+        </div>
+
+        <div class="row">
+
+            <button type="button" class="btn btn-outline-primary button mt-n3 m-3 col-8" data-bs-toggle="modal"
+                data-bs-target="#addTestCaseModal">
+                Add Test Case
+            </button>
+
+            <a href="{% url 'instructor_driver_code' question.slug %}" class="btn btn-outline-warning button mt-n3 m-3 col-3">
+                Driver Code
+            </a>
+
+        </div>
+
+    </div>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Test Cases 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Input
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Expected
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Sample
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th>
+
+
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for test_case in test_cases %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+
+                                {% if test_case.input_data %}
+
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ test_case.input_data }}">{{ test_case.input_data|linebreaksbr|truncatechars:10 }}</h6>
+
+                                {% else %}
+
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ question.title }}">No Input Data</h6>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <!-- <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap"
+                                        data-bs-toggle="modal" data-bs-target="#questionModal" style="width: 50%;"
+                                        data-title="{{ test_case.input_data }}"
+                                        data-description="{{ test_case.expected_output|linebreaksbr }}"
+                                        title="{{ test_case.input_data }}">View</button> -->
+                                    {{ test_case.expected_output|linebreaksbr }}
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    {% if test_case.is_sample %}
+                                    <span class="badge bg-success">Yes</span>
+                                    {% else %}
+                                    <span class="badge bg-danger">No</span>
+                                    {% endif %}
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'instructor_edit_test_case' test_case.id %}"
+                                        class="btn btn-outline-secondary float-end">Modify</a>
+                                </div>
+                            </td>
+
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'delete_test_case' test_case.id %}" class="btn btn-danger float-end"
+                                        onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
+
+                                </div>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+    {% autoescape off %}
+    <!-- Add Test Case Modal -->
+    <div class="modal fade" id="addTestCaseModal" tabindex="-1" aria-labelledby="addTestCaseModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTestCaseModalLabel">Add Test Case</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addTestCaseForm" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inputData" class="form-label">Input Data</label>
+                            <textarea class="form-control" id="inputData" placeholder="Enter the input here..."
+                                name="input_data" rows="5" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expectedOutput" class="form-label">Expected Output</label>
+                            <textarea class="form-control" id="expectedOutput"
+                                placeholder="Enter the expected output here..." name="expected_output" rows="5"
+                                required></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="isSample" name="is_sample">
+                            <label class="form-check-label" for="isSample">Is Sample Test Case?</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Test Case</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% endautoescape %}
+
+
+</div>
+
+<script>
+    document.getElementById('addTestCaseForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const questionSlug = "{{ question.slug }}";
+
+        fetch("{% url 'add_test_case' question.slug %}", {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+
+                    // Update the test cases table dynamically
+                    const newRow = `
+                    <tr>
+                        <td class="border-bottom-0"> <h6 class="fw-semibold mb-0">${data.test_case.id}</h6> </td>
+                        <td>${data.test_case.input_data}</td>
+                        <td>${data.test_case.expected_output}</td>
+                        <td>${data.test_case.is_sample ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>'}</td>
+                        <td>
+                            <a href="/edit-test-case/${data.test_case.id}/" class="btn btn-outline-secondary">Modify</a>
+                        </td>
+                        <td>
+                            <a href="/delete-test-case/${data.test_case.id}/" class="btn btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                `;
+                    document.querySelector('table tbody').insertAdjacentHTML('beforeend', newRow);
+
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addTestCaseModal'));
+                    modal.hide();
+
+                    // Reset the form
+                    form.reset();
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+    });
+</script>
+
+
+
+{% endblock %}

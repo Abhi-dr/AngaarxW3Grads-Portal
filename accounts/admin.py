@@ -1,7 +1,7 @@
 from django.contrib import admin
 from import_export.admin import ImportExportModelAdmin
 from .resources import StudentResource
-from .models import Student, Instructor
+from .models import Student, Instructor, Administrator
 
     
 class StudentAdmin(ImportExportModelAdmin):
@@ -14,6 +14,11 @@ class StudentAdmin(ImportExportModelAdmin):
 
 @admin.register(Instructor)
 class InstructorAdmin(admin.ModelAdmin):
+    list_display = ("username", "first_name", "last_name", "email")
+    exclude = ("password", "last_login", "is_superuser", "groups", "user_permissions", "is_active", "date_joined")
+
+@admin.register(Administrator)
+class AdministratorAdmin(admin.ModelAdmin):
     list_display = ("username", "first_name", "last_name", "email")
     exclude = ("password", "last_login", "is_superuser", "groups", "user_permissions", "is_active", "date_joined")
 

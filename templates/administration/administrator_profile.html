@@ -1,5 +1,5 @@
 {% extends "administration/base.html" %} {% load static %} 
-{% block title %} {{ instructor.first_name }} -> Profile {% endblock %}
+{% block title %} {{ administrator.first_name }} -> Profile {% endblock %}
 
 {% block body %}
 
@@ -25,17 +25,17 @@
       <div class="col-lg-4">
         <div class="card mb-4">
           <div class="card-body text-center">
-            <img src="{{ instructor.profile_pic.url }}" alt="avatar" class="rounded-circle img-fluid"
+            <img src="{{ administrator.profile_pic.url }}" alt="avatar" class="rounded-circle img-fluid"
               style="width: 150px;" />
             <h5 class="my-3">
-              {{ instructor.first_name }} {{ instructor.last_name }}
+              {{ administrator.first_name }} {{ administrator.last_name }}
             </h5>
             <p class="text-muted mb-1">
-              <b>{{ instructor.username }} </b>
+              <b>{{ administrator.username }} </b>
             </p>
-            <p class="text-muted mb-4">{{ instructor.college }}</p>
+            <p class="text-muted mb-4">{{ administrator.college }}</p>
             <div class="d-flex justify-content-center mb-2">
-              <a type="button" href="{% url 'edit_instructor_profile' %}" class="btn btn-outline-primary ms-1 w-100">
+              <a type="button" href="{% url 'edit_administrator_profile' %}" class="btn btn-outline-primary ms-1 w-100">
                 Update Profile
               </a>
             </div>
@@ -57,7 +57,7 @@
               Change Password
             </h5>
 
-            <form action="{% url 'change_instructor_password' %}" method="POST" >
+            <form action="{% url 'change_administrator_password' %}" method="POST" >
               {% csrf_token %}
               <div class="mb-3">
                 <input type="password" name="old_password" id="password" class="form-control" placeholder="Old Password"/>
@@ -94,7 +94,7 @@
               </div>
               <div class="col-sm-9">
                 <p class="text-muted mb-0">
-                  {{ instructor.first_name }} {{ instructor.last_name }}
+                  {{ administrator.first_name }} {{ administrator.last_name }}
                 </p>
               </div>
             </div>
@@ -104,7 +104,7 @@
                 <p class="mb-0">Email</p>
               </div>
               <div class="col-sm-9">
-                <p class="text-muted mb-0">{{ instructor.email }}</p>
+                <p class="text-muted mb-0">{{ administrator.email }}</p>
               </div>
             </div>
             <hr />
@@ -113,7 +113,7 @@
                 <p class="mb-0">Phone</p>
               </div>
               <div class="col-sm-9">
-                <p class="text-muted mb-0">+91 {{ instructor.mobile_number }}</p>
+                <p class="text-muted mb-0">+91 {{ administrator.mobile_number }}</p>
               </div>
             </div>
             <hr /> -->
@@ -123,13 +123,13 @@
               </div>
               <div class="col-sm-9">
 
-                {% if not instructor.linkedin_id %}
+                {% if not administrator.linkedin_id %}
 
-                <a href="{% url 'edit_instructor_profile' %}" class="btn btn-dark mb-0">Not Available</a>
+                <a href="{% url 'edit_administrator_profile' %}" class="btn btn-dark mb-0">Not Available</a>
 
                 {% else %}
 
-                <a href="{{ instructor.linkedin_id }}" target="_blank" class="btn btn-outline-secondary mb-0">{{ instructor.linkedin_id }}</a>
+                <a href="{{ administrator.linkedin_id }}" target="_blank" class="btn btn-outline-secondary mb-0">{{ administrator.linkedin_id }}</a>
 
                 {% endif %}
               </div>
@@ -141,13 +141,13 @@
               </div>
               <div class="col-sm-9">
 
-                {% if not instructor.github_id %}
+                {% if not administrator.github_id %}
 
                 <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
 
                 {% else %}
 
-                <a href="{{ instructor.github_id }}" target="_blank" class="btn btn-outline-dark mb-0">{{ instructor.github_id }}</a>
+                <a href="{{ administrator.github_id }}" target="_blank" class="btn btn-outline-dark mb-0">{{ administrator.github_id }}</a>
 
                 {% endif %}
 
@@ -161,7 +161,7 @@
                 <p class="mb-0">Gender</p>
               </div>
               <div class="col-sm-9">
-                <p class="text-muted mb-0">{{ instructor.gender }}</p>
+                <p class="text-muted mb-0">{{ administrator.gender }}</p>
               </div>
             </div>
             <hr />
@@ -171,15 +171,15 @@
               </div>
               <div class="col-sm-9">
 
-                {% if not instructor.dob %}
+                {% if not administrator.dob %}
                 <button class="btn btn-dark  text-white mb-0">Not Available☹️</button>
                 {% else %}
-                <p class="text-muted mb-0">{{ instructor.dob }}</p>
+                <p class="text-muted mb-0">{{ administrator.dob }}</p>
                 {% endif %}
               </div>
             </div>
             <hr />
-            <a href="{% url 'edit_instructor_profile' %}" class="btn btn-outline-warning w-100">Edit Profile</a>
+            <a href="{% url 'edit_administrator_profile' %}" class="btn btn-outline-warning w-100">Edit Profile</a>
           </div>
         </div>
       </div>

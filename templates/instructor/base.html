@@ -1,0 +1,448 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {% block title %}
+        {% endblock %}
+    </title>
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
+
+    <!-- <link rel="shortcut icon" type="image/png" href="{% static 'img/dashboardimages/logos/favicon.png' %}" /> -->
+    <link rel="stylesheet" href="{% static 'css/student/dashboard/styles.min.css' %}" />
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #e4e3e5, #fff);
+            background-repeat: no-repeat;
+        }
+
+        [data-bs-theme="dark"] .form-control {
+            color: #f0f0f0;
+        }
+
+        .star {
+            color: red;
+            display: inline;
+        }
+
+        [data-bs-theme="dark"] {
+            body {
+                background: linear-gradient(to bottom right, #000000, #4f4f4f);
+                background-repeat: no-repeat;
+            }
+
+            aside,
+            header {
+                background: #212529;
+            }
+
+
+            span,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            p,
+            ul,
+            li,
+            a,
+            button,
+            input,
+            label {
+                color: #f0f0f0;
+            }
+
+            .hide-menu,
+            i {
+                color: rgb(236, 236, 236);
+            }
+        }
+
+        span {
+            color: black;
+        }
+    </style>
+
+    <style>
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .blinking-dot {
+            animation: blink 1.5s infinite;
+            /* Adjust the animation duration as needed */
+            color: red;
+            font-size: large;
+            position: relative;
+            top: -0.3em;
+
+        }
+    </style>
+
+    <style>
+        #scrollToTopBtn {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Fixed position */
+            bottom: 20px;
+            /* Place it at the bottom */
+            right: 30px;
+            /* Place it at the right */
+            z-index: 99;
+            /* Ensure it is visible over other elements */
+            border: none;
+            /* No borders */
+            outline: none;
+            background-color: #343333a2;
+            /* Black background */
+            color: white;
+            /* White text */
+            cursor: pointer;
+            /* Pointer/hand icon */
+            padding: 15px;
+            border-radius: 10px;
+            /* Rounded corners */
+            font-size: 18px;
+        }
+
+        #scrollToTopBtn:hover {
+            background-color: #555;
+            /* Darker background on hover */
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        });
+    </script>
+
+    {% block extra_css %}
+
+    {% endblock %}
+
+</head>
+
+<body style="background-attachment: fixed;">
+    <!--  Body Wrapper -->
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+        data-sidebar-position="fixed" data-header-position="fixed">
+        <!-- Sidebar Start -->
+        <aside class="left-sidebar" id="sidebar">
+            <!-- Sidebar scroll-->
+            <div>
+                <div class="brand-logo d-flex align-items-center justify-content-between">
+                    <a href="{% url 'instructor' %}" class="text-nowrap logo-img">
+                        <img src="{% static 'img/student/logo.png' %}" alt="" style="width: 100%;" />
+                    </a>
+                    <div class="close-btn d-block  d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
+                        <i class="ti ti-x fs-8"></i>
+                    </div>
+                </div>
+                <!-- Sidebar navigation-->
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+                    <ul id="sidebarnav">
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Main Account</span>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'instructor' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-layout-dashboard"></i>
+                                </span>
+                                <span class="hide-menu">🔥 Dashboard 🔥</span>
+
+                            </a>
+                        </li>
+
+                        {% comment %}
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'instructor_sessions' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-article"></i>
+                                </span>
+                                <span class="hide-menu">My Sessions</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'instructor_assignments' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-copy"></i>
+                                </span>
+                                <span class="hide-menu">Assignments</span>
+                            </a>
+                        </li>
+
+                        {% endcomment %}
+
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link {% block sheet_active %} {% endblock %}"
+                                href="{% url 'instructor_sheets' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-clipboard"></i>
+                                </span>
+                                <span class="hide-menu">Sheets</span>
+                            </a>
+                        </li>
+
+
+                        <!-- ============================= EXTRA ==================== -->
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Profile</span>
+                        </li>
+
+
+                     
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'instructor_profile' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-user"></i>
+                                </span>
+                                <span class="hide-menu">My Profile</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!--  Sidebar End -->
+
+
+        <!--  Main wrapper -->
+        <div class="body-wrapper">
+            <!--  Header Start -->
+            <header class="app-header">
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <ul class="navbar-nav">
+                        <li class="nav-item d-block d-xl-none">
+                            <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse"
+                                href="javascript:void(0)">
+                                <i class="ti ti-menu-2"></i>
+                            </a>
+                        </li>
+                        
+                    </ul>
+                    <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+                        <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+
+                            <button id="theme-toggle" class="btn mx-2">Light Mode</button>
+
+
+                            <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="{{ instructor.profile_pic.url }}" alt="" width="35" height="35"
+                                        class="rounded-circle">
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
+                                    aria-labelledby="drop2">
+                                    <div class="message-body">
+                                        <a href="{% url 'instructor_profile' %}"
+                                            class="d-flex align-items-center gap-2 dropdown-item">
+                                            <i class="ti ti-user fs-6"></i>
+                                            <p class="mb-0 fs-3">My Profile</p>
+                                        </a>
+                                        <a href="{% url 'edit_instructor_profile' %}"
+                                            class="d-flex align-items-center gap-2 dropdown-item">
+                                            <i class="ti ti-mail fs-6"></i>
+                                            <p class="mb-0 fs-3">Edit Profile</p>
+                                        </a>
+                                        <a href="{% url 'logout' %}"
+                                            class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="row-cols-lg-3">
+                        <span class="fw-semibold">Hi, {{ instructor.first_name }}</span>
+                    </div>
+                </nav>
+            </header>
+            <!--  Header End -->
+
+            {% block body %}
+            {% endblock %}
+
+            <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top">↑</button>
+
+        </div>
+    </div>
+
+
+    <!-- ===================================== MODAL TO UPLOAD THE RECORDED SESSION ======================== -->
+    <div class="modal fade" id="uploadRecordedSessionModal" tabindex="-1"
+        aria-labelledby="uploadRecordedSessionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="#">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadRecordedSessionModalLabel">Upload Recorded Session Link &nbsp;
+                        </h5>
+                        <span id="session-topic"></span>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="session_id" name="session_id" value="">
+                        <div class="mb-3">
+                            <label for="recorded_session_link" class="form-label">Recorded Session Link
+                                <div class="star">*</div>
+                            </label>
+                            <input type="url" class="form-control" id="recorded_session_link"
+                                placeholder="Enter the link to the recorded session here..."
+                                name="recorded_session_link" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        // Show the button when scrolled down 20px from the top of the document
+        window.onscroll = function () {
+            scrollFunction();
+        };
+
+        function scrollFunction() {
+            const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollToTopBtn.style.display = "block";
+            } else {
+                scrollToTopBtn.style.display = "none";
+            }
+        }
+
+        // Scroll to the top of the document when the user clicks on the button
+        function scrollToTop() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE, and Opera
+        }
+
+    </script>
+
+
+    <script>
+        var uploadRecordedSessionModal = document.getElementById('uploadRecordedSessionModal')
+        uploadRecordedSessionModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget
+            var sessionId = button.getAttribute('data-session-id')
+            var modalBodyInput = uploadRecordedSessionModal.querySelector('.modal-body input#session_id')
+            var modalBodyTopic = uploadRecordedSessionModal.querySelector('.modal-header span#session-topic')
+            modalBodyTopic.innerHTML = " for " + button.getAttribute('session-topic') + "🔥"
+
+            modalBodyInput.value = sessionId
+        })
+    </script>
+
+
+    {% block myjs %}
+    {% endblock %}
+
+
+    <script src="{% static 'js/dashboard/libs/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'js/dashboard/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/dashboard/js/sidebarmenu.js' %}"></script>
+    <script src="{% static 'js/dashboard/js/app.min.js' %}"></script>
+    <script src="{% static 'js/dashboard/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+    <script src="{% static 'js/dashboard/libs/simplebar/dist/simplebar.js' %}"></script>
+
+    <script>
+        // Get references to the sidebar and the toggle button
+        const sidebar = document.getElementById('sidebar');
+        const sidebarCollapse = document.getElementById('sidebarCollapse');
+
+        // Function to close the sidebar
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+        }
+
+        // Event listener for clicks on the toggle button
+        sidebarCollapse.addEventListener('click', function () {
+            sidebar.classList.toggle('show');
+        });
+
+        // Event listener for clicks outside the sidebar
+        document.addEventListener('click', function (event) {
+            const target = event.target;
+            if (!sidebar.contains(target) && target !== sidebarCollapse) {
+                closeSidebar();
+            }
+        });
+    </script>
+
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+
+    <script>
+
+
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const themeToggleButton = document.getElementById('theme-toggle');
+            themeToggleButton.innerHTML = localStorage.getItem('theme') === 'dark' ? 'Light Mode' : 'Dark Mode';
+            themeToggleButton.classList.add(localStorage.getItem('theme') === 'dark' ? 'btn-outline-light' : 'btn-outline-dark');
+
+
+            themeToggleButton.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+
+                if (newTheme === 'dark') {
+                    themeToggleButton.innerHTML = 'Light Mode';
+                    themeToggleButton.classList.remove('btn-outline-dark');
+                    themeToggleButton.classList.add('btn-outline-light');
+                } else {
+                    themeToggleButton.innerHTML = 'Dark Mode';
+                    themeToggleButton.classList.add('btn-outline-dark');
+                    themeToggleButton.classList.remove('btn-outline-light');
+                }
+
+
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>

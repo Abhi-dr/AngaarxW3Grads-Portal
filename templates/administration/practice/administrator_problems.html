@@ -181,7 +181,7 @@ Problem Set🔥
 
     function searchQuestions() {
         const query = document.getElementById("searchInput").value;
-        fetch("{% url 'instructor_fetch_problems' %}?query=" + encodeURIComponent(query))
+        fetch("{% url 'administrator_fetch_problems' %}?query=" + encodeURIComponent(query))
             .then(response => response.json())
             .then(data => {
                 displayQuestions(data.questions);
@@ -201,7 +201,7 @@ Problem Set🔥
     }
 
     function fetchQuestions() {
-        fetch("{% url 'instructor_fetch_problems' %}")
+        fetch("{% url 'administrator_fetch_problems' %}")
             .then(response => response.json())
             .then(data => {
                 displayQuestions(data.questions);

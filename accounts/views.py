@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
-from .models import Student, Instructor
+from .models import Student, Instructor, Administrator
 
 from django.utils.timezone import now
 from practice.models import Sheet
@@ -54,6 +54,17 @@ def login(request):
                 return redirect("login")
             
         elif Instructor.objects.filter(username=username).exists():
+            user = auth.authenticate(username=username, password=password)
+
+            if user is not None:
+                auth.login(request, user)
+                return redirect('instructor')
+            
+            else:
+                messages.error(request, "Invalid Password")
+                return redirect("login")
+        
+        elif Administrator.objects.filter(username=username).exists():
             user = auth.authenticate(username=username, password=password)
 
             if user is not None:

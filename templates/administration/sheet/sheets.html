@@ -32,7 +32,7 @@ My Courses
                 </span>
             </h3>
         </div>
-        <a href="{% url 'instructor_add_sheet' %}" class="btn btn-outline-primary button mt-n3 m-3 ">Add Sheet</a>
+        <a href="{% url 'administrator_add_sheet' %}" class="btn btn-outline-primary button mt-n3 m-3 ">Add Sheet</a>
     </div>
 
 
@@ -46,7 +46,7 @@ My Courses
         <div class="col-md-3">
             <h5 class="card-title fw-semibold mb-0"></h5>
             <div class="card">
-                <a href="{% url 'instructor_sheet' sheet.slug %}">
+                <a href="{% url 'administrator_sheet' sheet.slug %}">
                     <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
                     <div class="card-body">
                         <h5 class="card-title">
@@ -60,7 +60,7 @@ My Courses
                             {% else %}
 
                             {% for batch in sheet.batches.all %}
-                            <a href="{% url 'instructor_sheet' sheet.slug %}">{{ batch.name }}</a>{% if not forloop.last %}, {% endif %}
+                            <a href="{% url 'administrator_sheet' sheet.slug %}">{{ batch.name }}</a>{% if not forloop.last %}, {% endif %}
                             {% endfor %}
 
                             {% endif %}
@@ -74,7 +74,7 @@ My Courses
                         {% else %}
                         <span class="text-danger">Disabled</span>
                         {% endif %}
-                        <a href="{% url 'instructor_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">View More</a>
+                        <a href="{% url 'administrator_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">View More</a>
                     </div>
                 </a>
             </div>

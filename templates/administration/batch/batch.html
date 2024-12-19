@@ -171,7 +171,7 @@ active
         </div>
 
         <div class="">
-            <a href="{% url 'instructor_set_pod_for_batch' batch.slug %}"
+            <a href="{% url 'administrator_set_pod_for_batch' batch.slug %}"
                 class="btn btn-outline-primary button mt-n3 m-3 w-25">Set POD</a>
         </div>
     </div>
@@ -233,7 +233,7 @@ active
 
                             <div class="col-md-3">
                                 <div class="card">
-                                    <a href="{% url 'instructor_sheet' sheet.slug %}">
+                                    <a href="{% url 'administrator_sheet' sheet.slug %}">
                                         <img src="{{ sheet.thumbnail.url }}" class="card-img-top"
                                             alt="Sheet Thumbnail" />
                                         <div class="card-body">
@@ -249,7 +249,7 @@ active
                                             {% else %}
                                             <span class="text-danger">Disabled</span>
                                             {% endif %}
-                                            <a href="{% url 'instructor_sheet' sheet.slug %}"
+                                            <a href="{% url 'administrator_sheet' sheet.slug %}"
                                                 class="btn btn-outline-secondary w-100">View More</a>
                                         </div>
                                     </a>

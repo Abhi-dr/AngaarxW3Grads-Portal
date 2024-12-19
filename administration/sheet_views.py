@@ -9,7 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 
-from accounts.models import Student, Instructor
+from accounts.models import Student, Administrator
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 
 # ========================= SHEET WORK ==========================
@@ -18,11 +18,11 @@ from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRe
 @staff_member_required(login_url='login')
 def sheets(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     sheets = Sheet.objects.all().order_by('-id')
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "sheets": sheets
         
     }
@@ -35,7 +35,7 @@ def sheets(request):
 @staff_member_required(login_url='login')
 def add_sheet(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     batches = Batch.objects.all()
     
     if request.method == "POST":
@@ -58,10 +58,10 @@ def add_sheet(request):
         sheet.save()
         
         messages.success(request, "Sheet added successfully!")
-        return redirect('instructor_sheet', slug=sheet.slug)
+        return redirect('administrator_sheet', slug=sheet.slug)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "batches": batches
     }
     
@@ -74,7 +74,7 @@ def add_sheet(request):
 @staff_member_required(login_url='login')
 def edit_sheet(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
     batches = Batch.objects.all()
     
@@ -99,10 +99,10 @@ def edit_sheet(request, slug):
         sheet.save()
         
         messages.success(request, "Sheet updated successfully!")
-        return redirect('instructor_sheet', slug=sheet.slug)
+        return redirect('administrator_sheet', slug=sheet.slug)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "sheet": sheet,
         "batches": batches
     }
@@ -119,7 +119,7 @@ def delete_sheet(request, id):
     sheet.delete()
     
     messages.success(request, "Sheet deleted successfully!")
-    return redirect('instructor_sheets')
+    return redirect('administrator_sheets')
 
 # ========================= SHEET ==========================
 
@@ -127,12 +127,12 @@ def delete_sheet(request, id):
 @staff_member_required(login_url='login')
 def sheet(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
     questions = sheet.get_ordered_questions()
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "sheet": sheet,
         "questions": questions
     }
@@ -177,7 +177,7 @@ def get_excluded_questions(request, sheet_id):
 @staff_member_required(login_url='login')
 def add_new_question(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     if request.method == "POST":
         title = request.POST.get('title')
@@ -200,18 +200,15 @@ def add_new_question(request, slug):
         sheet.questions.add(question)
         
         messages.success(request, "Question added successfully!")
-        return redirect('instructor_sheet', slug=sheet.slug)
+        return redirect('administrator_sheet', slug=sheet.slug)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "sheet": sheet,
     }
     
     return render(request, 'administration/sheet/add_new_question.html', parameters)
         
-        
-    
-    
 
 # ========================= MAKE DUPLICATE ==========================
 
@@ -264,7 +261,7 @@ def make_duplicate(request, sheet_id, question_id):
         
         
         messages.success(request, "Question added successfully!")
-        return redirect('instructor_sheet', slug=sheet.slug)
+        return redirect('administrator_sheet', slug=sheet.slug)
 
 # ========================= REMOVE QUESTION FROM SHEET ==========================
 
@@ -276,17 +273,17 @@ def remove_question_from_sheet(request, sheet_id, question_id):
     sheet.questions.remove(question)
     sheet.save()
     
-    return redirect('instructor_sheet', slug=sheet.slug)
+    return redirect('administrator_sheet', slug=sheet.slug)
 
 # ========================= REORDER SHEET QUESTIONS ==========================
 
 def reorder(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
     questions = sheet.get_ordered_questions()
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "sheet": sheet,
         "questions": questions
     }
@@ -361,11 +358,11 @@ def fetch_sheet_timer(request, sheet_id):
 @staff_member_required(login_url='login')
 def leaderboard(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "sheet": sheet,
     }
     

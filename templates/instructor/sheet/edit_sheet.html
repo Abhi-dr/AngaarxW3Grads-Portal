@@ -1,0 +1,109 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block title %}
+Edit Sheet | {{ sheet.name }}
+{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Edit {{ sheet.name }}</i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+                        <div class="card-body h-100">
+
+                            <div>
+                                <div class="mb-3">
+                                    <label for="assignment_type" class="form-label">Batches
+                                    </label>
+                                    <select class="form-select form-control" name="batches" id="assignment_type"
+                                        multiple>
+
+                                        {% for batch in batches %}
+                                        <option value="{{ batch.id }}">{{ batch.name }}</option>
+                                        {% endfor %}
+
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label for="job_title" class="form-label">Name
+                                    <div class="star">*</div>
+                                </label>
+                                <input type="text" class="form-control" id="question_title" name="name"
+                                    placeholder="Name goes here..." value="{{ sheet.name }}" required>
+                            </div>
+
+                            <div class="row">
+                                <div class="mb-3 col-md-9">
+                                    <label for="job_title" class="form-label">Thumbnail
+                                    </label>
+                                    <input type="file" class="form-control" id="question_title" name="thumbnail">
+                                </div>
+                                <div class="mb-3 col-md-3">
+                                    <img src="{{ sheet.thumbnail.url }}" alt="thumbnail" class="img-thumbnail"
+                                        style="height: 100px;">
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="isSample">Is It Sequential?</label>
+
+                                    {% if sheet.is_sequential %}
+
+                                    <input type="checkbox" checked class="form-check-input" id="isSample" name="is_sequential">
+
+                                    {% else %}
+
+                                    <input type="checkbox" class="form-check-input" id="isSample" name="is_sequential">
+
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-success w-100 mt-3">EDIT &nbsp; Sheet</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+        </div>
+
+        </form>
+
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+{% endblock %}

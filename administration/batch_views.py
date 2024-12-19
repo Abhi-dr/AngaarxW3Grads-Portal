@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.timezone import now
 
-from accounts.models import Student, Instructor
+from accounts.models import Student, Administrator
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 from django.db.models import Subquery, OuterRef
 
@@ -21,11 +21,11 @@ import datetime
 @staff_member_required(login_url='login')
 def batches(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     batches = Batch.objects.all()
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "batches": batches
         
     }
@@ -39,7 +39,7 @@ def batches(request):
 @staff_member_required(login_url='login')
 def add_batch(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
 
     
     if request.method == "POST":
@@ -57,10 +57,10 @@ def add_batch(request):
         batch.save()
         
         messages.success(request, "Course added successfully")
-        return redirect('instructor_batches')
+        return redirect('administrator_batches')
         
     parameters = {
-        "instructor": instructor
+        "administrator": administrator
     }
     
     return render(request, 'administration/batch/add_batch.html', parameters)
@@ -72,12 +72,12 @@ def add_batch(request):
 @staff_member_required(login_url='login')
 def enrollment_requests(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     total_pending_requests = EnrollmentRequest.objects.filter(status="Pending").count()
     
     
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "total_pending_requests": total_pending_requests
     }
     
@@ -94,7 +94,7 @@ def approve_all_enrollments(request):
         request.save()
         
     messages.success(request, "All pending enrollment requests have been accepted.")
-    return redirect('instructor_enrollment_requests')
+    return redirect('administrator_enrollment_requests')
 
 # =============================== FETCH PENDING ENROLLMENT REQUESTS ==============================
 
@@ -154,7 +154,7 @@ def approve_enrollment(request, id):
     enrollment_request.save()
     
     messages.success(request, "Enrollment request accepted")
-    return redirect('instructor_enrollment_requests')
+    return redirect('administrator_enrollment_requests')
 
 # =============================== REJECT ENROLLMENT REQUESTS ==============================
 
@@ -167,7 +167,7 @@ def reject_enrollment(request, id):
     enrollment_request.save()
     
     messages.success(request, "Enrollment request rejected")
-    return redirect('instructor_enrollment_requests')
+    return redirect('administrator_enrollment_requests')
 
 
 # =============================== BATCH DETAILS ==============================
@@ -176,7 +176,7 @@ def reject_enrollment(request, id):
 @staff_member_required(login_url='login')
 def batch(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     batch = Batch.objects.get(slug=slug)
     
     # Fetch all the sheets for this batch
@@ -189,7 +189,7 @@ def batch(request, slug):
     
 
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "batch": batch,
         "sheets": sheets,
         "pod": pod
@@ -201,11 +201,11 @@ def batch(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-def instructor_set_pod_for_batch(request, slug):
+def administrator_set_pod_for_batch(request, slug):
     batch = get_object_or_404(Batch, slug=slug)
 
-    # Fetch the instructor and questions without existing PODs for the selected batch
-    instructor = Instructor.objects.get(id=request.user.id)
+    # Fetch the administrator and questions without existing PODs for the selected batch
+    administrator = Administrator.objects.get(id=request.user.id)
     questions = Question.objects.filter(pods__batch__isnull=True)
 
     # Fetch existing PODs for the batch
@@ -223,11 +223,11 @@ def instructor_set_pod_for_batch(request, slug):
                 
                 if pod_date < now().date():
                     messages.error(request, "You cannot set a POD for a past date.")
-                    return redirect('instructor_set_pod_for_batch', slug=slug)
+                    return redirect('administrator_set_pod_for_batch', slug=slug)
                 
                 if pod_date == now().date() and today_pod.exists():
                     messages.warning(request, f"POD for today is already set for batch '{batch.name}'.")
-                    return redirect('instructor_set_pod_for_batch', slug=slug)
+                    return redirect('administrator_set_pod_for_batch', slug=slug)
                 
                 else:
                     question = get_object_or_404(Question, id=question_id)
@@ -242,7 +242,7 @@ def instructor_set_pod_for_batch(request, slug):
                     today_pod.save()
                     
                     messages.success(request, f"POD set successfully for batch '{batch.name}'")
-                    return redirect('instructor_set_pod_for_batch', slug=slug)
+                    return redirect('administrator_set_pod_for_batch', slug=slug)
                 
             except ValueError:
                 messages.error(request, "Invalid date format. Please select a valid date.")
@@ -250,7 +250,7 @@ def instructor_set_pod_for_batch(request, slug):
             messages.error(request, "Please select a valid question and date.")
 
     parameters = {
-        "instructor": instructor,
+        "administrator": administrator,
         "questions": questions,
         "batch": batch,
         "pod": today_pod,
@@ -270,7 +270,7 @@ def instructor_set_pod_for_batch(request, slug):
 def view_submissions(request, slug):
     
     question = get_object_or_404(Question, slug=slug)
-    instructor = Instructor.objects.get(id=request.user.id)
+    administrator = Administrator.objects.get(id=request.user.id)
     # submissions = Submission.objects.filter(question=question, status="Accepted").distinct().order_by('-submitted_at')
     
     latest_submission_time = Submission.objects.filter(
@@ -289,7 +289,7 @@ def view_submissions(request, slug):
     parameters = {
         "question": question,
         "submissions": latest_submissions,
-        "instructor": instructor
+        "administrator": administrator
     }
     
     return render(request, 'administration/batch/view_submissions.html', parameters)
