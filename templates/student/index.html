@@ -24,7 +24,7 @@ Student -> Home
 
     @keyframes html-progress {
         to {
-            --progress-value: {{student.get_attendance_percentage}}
+            --progress-value: {{user.get_attendance_percentage}}
 
             ;
         }
@@ -52,7 +52,7 @@ Student -> Home
 
     @keyframes js-progress {
         to {
-            --progress-value: {{student.get_profile_score}}
+            --progress-value: {{user.get_profile_score}}
 
             ;
         }
@@ -175,7 +175,7 @@ Student -> Home
 
     {% if is_birthday %}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <strong>Happy Birthday {{ student.first_name }} {{ student.last_name }} 🎂</strong> . Party do phle🥳!
+        <strong>Happy Birthday {{ user.first_name }} {{ user.last_name }} 🎂</strong> . Party do phle🥳!
     </div>
     <audio src="{% static 'assets/hbd.mp3' %}" id="myAudio" autoplay="autoplay" loop="loop"></audio>
 
@@ -359,7 +359,7 @@ Student -> Home
                             <h5 class="card-title mb-9 fw-semibold">Profile Score</h5>
                             <div class="row align-items-center">
                                 <div class="col-8">
-                                    <h4 class="fw-semibold mb-3">{{ student.get_profile_score }}</h4>
+                                    <h4 class="fw-semibold mb-3">{{ user.get_profile_score }}</h4>
                                     <div class="d-flex align-items-center mb-3">
                                         <span
                                             class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
@@ -369,16 +369,16 @@ Student -> Home
 
 
 
-                                        {% if student.get_profile_score == 100 %}
+                                        {% if user.get_profile_score == 100 %}
                                         <p class="fs-3 mb-0">1%</p>
 
-                                        {% elif student.get_profile_score >= 90 %}
+                                        {% elif user.get_profile_score >= 90 %}
                                         <p class="fs-3 mb-0">30%</p>
 
-                                        {% elif student.get_profile_score >= 60 %}
+                                        {% elif user.get_profile_score >= 60 %}
                                         <p class="fs-3 mb-0">50%</p>
 
-                                        {% elif student.get_profile_score >= 30 %}
+                                        {% elif user.get_profile_score >= 30 %}
 
                                         <p class="fs-3 mb-0">90%</p>
 

@@ -1,18 +1,11 @@
 from accounts.models import Student, Instructor, Administrator
 from practice.models import Streak
 
-# def student_context_processor(request):
-#     student = None
-#     if request.user.is_authenticated:
-#         User = get_user_model()
-#         try:
-#             student = request.user.student
-#         except Student.DoesNotExist:
-#             pass
-#     return {'student': student}
-
-
 def user_context_processor(request):
+    
+    if request.path.startswith('/tera0mera1_dknaman/'):
+        return {} 
+    
     user_type = None
     user_object = None
 
@@ -42,4 +35,15 @@ def streak_context(request):
             streak = Streak.objects.filter(user=request.user.student).first()
             return {'streak': streak}
     return {'streak': None}  # Return None if the user is not logged in or does not have a 'Student' instance
+
+
+# def student_context_processor(request):
+#     student = None
+#     if request.user.is_authenticated:
+#         User = get_user_model()
+#         try:
+#             student = request.user.student
+#         except Student.DoesNotExist:
+#             pass
+#     return {'student': student}
 
