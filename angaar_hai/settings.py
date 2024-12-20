@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
@@ -177,4 +177,11 @@ SINGLE_USER_SESSION = True
 DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': 'backups'}
 
+# settings.py
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = True
 
+SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE")
+SESSION_COOKIE_HTTPONLY = os.getenv("SESSION_COOKIE_HTTPONLY")
+CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE")
