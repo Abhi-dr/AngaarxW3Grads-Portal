@@ -24,7 +24,6 @@ def index(request):
     # get the total number of submissions happened today only
     today = datetime.date.today()
     total_submissions_today = Submission.objects.filter(submitted_at__date=today).count()
-    print(total_submissions_today)
 
     
     # last_3_questions = Question.objects.order_by('-created_at')[:3]
@@ -118,6 +117,80 @@ def all_students(request):
     }
     
     return render(request, "administration/all_students.html", parameters)
+
+# ========================================= ALL INSTRUCTORS =====================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def all_instructors(request):    
+    
+    administrator = Administrator.objects.get(id=request.user.id)
+
+    instructors = Instructor.objects.all().order_by("-id")
+    
+    query = request.POST.get("query")
+    if query:
+        instructors = Instructor.objects.filter(
+            Q(id__icontains=query) |
+            Q(first_name__icontains=query) | 
+            Q(last_name__icontains=query) | 
+            Q(email__icontains=query)
+            )
+    
+    parameters = {
+        "administrator": administrator,
+        "instructors": instructors,
+        "query": query
+    }
+    
+    return render(request, "administration/all_instructors.html", parameters)
+
+# ========================================= ADD INSTRUCTOR ============================================
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def add_instructor(request):
+    try:
+
+        if request.method == "POST":
+            username = request.POST.get("username").strip()
+            password = request.POST.get("password")
+            gender = request.POST.get("gender")
+            first_name = request.POST.get("first_name").strip()
+            last_name = request.POST.get("last_name").strip()
+            email = request.POST.get("email").strip()
+
+            if Instructor.objects.filter(username=username).exists():
+                messages.error(request, "Username is already taken. Please choose a different one.")
+                return redirect("add_instructor")
+            
+            if Instructor.objects.filter(email=email).exists():
+                messages.error(request, "Email is already registered. Please use a different email.")
+                return redirect("add_instructor")
+
+            instructor = Instructor()
+            instructor.username = username
+            instructor.gender = gender
+            instructor.first_name = first_name
+            instructor.last_name = last_name
+            instructor.email = email
+            instructor.is_staff = True
+            
+            instructor.set_password(password)
+            
+            instructor.save()
+
+            messages.success(request, f"Instructor {first_name} {last_name} added successfully!")
+            return redirect("administrator_all_instructors") 
+    
+
+    except Exception as e:
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+
+    return render(request, "administration/add_instructor.html")
 
 # ========================================= FEEDBACKS ============================================
 
@@ -346,7 +419,6 @@ def notifications(request):
             notification.type = type
             notification.expiration_date = expiration_date
             
-            print(type)
             
             if is_alert:
                 notification.is_alert = True

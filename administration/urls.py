@@ -8,6 +8,10 @@ urlpatterns = [
     # ========================= DATA WORK ============================
     
     path("all_students/", views.all_students, name="all_students"),
+
+    path("all_instructors/", views.all_instructors, name="administrator_all_instructors"),
+    path("add_instructor/", views.add_instructor, name="administrator_add_instructor"),
+    
     path("feedbacks/", views.feedbacks, name="administrator_feedbacks"),
     
     # ========================= NOTIFICATIONS WORK ==========================
