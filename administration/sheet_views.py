@@ -8,6 +8,8 @@ from django.utils.timezone import now
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from angaar_hai.custom_decorators import admin_required
+
 
 from accounts.models import Student, Administrator
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
@@ -16,6 +18,7 @@ from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRe
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def sheets(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -33,6 +36,7 @@ def sheets(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def add_sheet(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -72,6 +76,7 @@ def add_sheet(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def edit_sheet(request, slug):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -113,6 +118,7 @@ def edit_sheet(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def delete_sheet(request, id):
     
     sheet = get_object_or_404(Sheet, id=id)
@@ -126,6 +132,7 @@ def delete_sheet(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def administrator_pending_sheet(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -142,6 +149,7 @@ def administrator_pending_sheet(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def administrator_approve_sheet(request, id):
     
     sheet = get_object_or_404(Sheet, id=id)
@@ -155,6 +163,7 @@ def administrator_approve_sheet(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def sheet(request, slug):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -173,6 +182,7 @@ def sheet(request, slug):
 
 @login_required
 @staff_member_required
+@admin_required
 def toggle_sheet_status(request, slug):
     if request.method == "POST":
         sheet = get_object_or_404(Sheet, slug=slug)
@@ -184,6 +194,7 @@ def toggle_sheet_status(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def get_excluded_questions(request, sheet_id):
     sheet = get_object_or_404(Sheet, id=sheet_id)
     excluded_questions = Question.objects.exclude(sheets=sheet)
@@ -205,6 +216,7 @@ def get_excluded_questions(request, sheet_id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def add_new_question(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
     administrator = Administrator.objects.get(id=request.user.id)
@@ -244,6 +256,7 @@ def add_new_question(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def make_duplicate(request, sheet_id, question_id):
     
     sheet = Sheet.objects.get(id = sheet_id)
@@ -296,6 +309,7 @@ def make_duplicate(request, sheet_id, question_id):
 # ========================= REMOVE QUESTION FROM SHEET ==========================
 
 @login_required(login_url='login')
+@admin_required
 def remove_question_from_sheet(request, sheet_id, question_id):
     sheet = get_object_or_404(Sheet, id=sheet_id)
     question = get_object_or_404(Question, id=question_id)
@@ -307,6 +321,7 @@ def remove_question_from_sheet(request, sheet_id, question_id):
 
 # ========================= REORDER SHEET QUESTIONS ==========================
 
+@admin_required
 def reorder(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
     questions = sheet.get_ordered_questions()
@@ -322,6 +337,7 @@ def reorder(request, slug):
 
 # ========================= UPDATE SHEET ORDER ==========================
 
+@admin_required
 def update_sheet_order(request, sheet_id):
     if request.method == 'POST':
         sheet = get_object_or_404(Sheet, id=sheet_id)
@@ -367,6 +383,7 @@ def set_sheet_timer(request, sheet_id):
 
 # ============================= FETCH SHEET TIMER =============================
 
+@admin_required
 def fetch_sheet_timer(request, sheet_id):
     sheet = get_object_or_404(Sheet, id=sheet_id)
     if sheet.end_time:
@@ -386,6 +403,7 @@ def fetch_sheet_timer(request, sheet_id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def leaderboard(request, slug):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -464,6 +482,7 @@ import pandas as pd
 from django.http import HttpResponse
 from django.utils.timezone import make_naive
 
+@admin_required
 def download_leaderboard_excel(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
     total_questions = sheet.questions.all()

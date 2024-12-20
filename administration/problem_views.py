@@ -11,6 +11,8 @@ from django.views.decorators.csrf import csrf_exempt
 
 from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode
 from django.views.decorators.cache import cache_control
+from angaar_hai.custom_decorators import admin_required
+
 
 import datetime
 
@@ -26,6 +28,7 @@ LANGUAGE_IDS = {
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def administrator_problems(request):
     
@@ -42,6 +45,7 @@ def administrator_problems(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def fetch_problems(request):
     
     query = request.GET.get("query", "").strip()
@@ -79,6 +83,7 @@ def fetch_problems(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def add_question(request):
     
@@ -127,6 +132,7 @@ def add_question(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def delete_question(request, id):
     
@@ -142,6 +148,7 @@ def delete_question(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_question(request, id):
     
@@ -198,6 +205,7 @@ def edit_question(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def question_requests(request):
         
@@ -232,6 +240,7 @@ def approve_question(request, id):
 
 @login_required(login_url="login")
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def reject_question(request, id):
     if request.method == 'POST':
@@ -250,6 +259,7 @@ def reject_question(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def test_cases(request, slug):
     
@@ -271,6 +281,7 @@ def test_cases(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def add_test_case(request, slug):
     
@@ -308,6 +319,7 @@ def add_test_case(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_test_case(request, id):
     
@@ -342,6 +354,7 @@ def edit_test_case(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def delete_test_case(request, id):
     
@@ -357,6 +370,7 @@ def delete_test_case(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def driver_code(request, slug):
     
@@ -397,6 +411,7 @@ def driver_code(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def administrator_pod(request):
     administrator = Administrator.objects.get(id=request.user.id)
@@ -416,6 +431,7 @@ def administrator_pod(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def set_pod(request):
     
@@ -434,6 +450,7 @@ def set_pod(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def save_pod(request, id):
     
@@ -471,6 +488,7 @@ HEADERS = {
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def test_code(request, slug):
     
     administrator = Administrator.objects.get(id=request.user.id)

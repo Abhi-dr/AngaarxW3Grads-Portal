@@ -7,7 +7,7 @@ from django.db.models import Q
 from accounts.models import Administrator, Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
 from practice.models import Sheet, Submission, Question
-
+from angaar_hai.custom_decorators import admin_required
 
 import datetime
 
@@ -15,6 +15,7 @@ import datetime
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def index(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -86,6 +87,7 @@ def index(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def all_students(request):
         
     administrator = Administrator.objects.get(id=request.user.id)
@@ -121,6 +123,7 @@ def all_students(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def feedbacks(request):
         
     administrator = Administrator.objects.get(id=request.user.id)
@@ -140,6 +143,7 @@ def feedbacks(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def administrator_anonymous_message(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -158,6 +162,7 @@ def administrator_anonymous_message(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def reply_message(request, id):
         
     administrator = Administrator.objects.get(id=request.user.id)
@@ -186,6 +191,7 @@ def reply_message(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def edit_reply(request, id):
         
     administrator = Administrator.objects.get(id=request.user.id)
@@ -215,6 +221,7 @@ def edit_reply(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def administrator_profile(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -229,6 +236,7 @@ def administrator_profile(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def edit_administrator_profile(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -260,6 +268,7 @@ def edit_administrator_profile(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def upload_administrator_profile(request):
 
     if request.method == 'POST':
@@ -282,6 +291,7 @@ def upload_administrator_profile(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def change_administrator_password(request):
         
     administrator = Administrator.objects.get(id=request.user.id)
@@ -313,6 +323,7 @@ def change_administrator_password(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def notifications(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -365,6 +376,7 @@ def notifications(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def delete_notification(request, id):
     
     notification = Notification.objects.get(id=id)
@@ -379,6 +391,7 @@ def delete_notification(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def edit_notification(request, id):
     
     administrator = Administrator.objects.get(id=request.user.id)

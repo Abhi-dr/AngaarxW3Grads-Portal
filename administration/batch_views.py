@@ -10,6 +10,8 @@ from django.utils.timezone import now
 from accounts.models import Student, Administrator
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 from django.db.models import Subquery, OuterRef
+from angaar_hai.custom_decorators import admin_required
+
 
 import datetime
 
@@ -19,6 +21,7 @@ import datetime
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def batches(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -37,6 +40,7 @@ def batches(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def add_batch(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -70,6 +74,7 @@ def add_batch(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def enrollment_requests(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -87,6 +92,7 @@ def enrollment_requests(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def approve_all_enrollments(request):
     enrollment_requests = EnrollmentRequest.objects.filter(status="Pending")
     for request in enrollment_requests:
@@ -100,6 +106,7 @@ def approve_all_enrollments(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def fetch_pending_enrollments(request):
 
     enrollment_requests = EnrollmentRequest.objects.select_related('student', 'batch').filter(status="Pending").order_by('-request_date')
@@ -124,6 +131,7 @@ def fetch_pending_enrollments(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def fetch_rejected_enrollments(request):
     
     enrollment_requests = EnrollmentRequest.objects.select_related('student', 'batch').filter(status="Rejected").order_by('-request_date')
@@ -147,6 +155,7 @@ def fetch_rejected_enrollments(request):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def approve_enrollment(request, id):
     
     enrollment_request = EnrollmentRequest.objects.get(id=id)
@@ -160,6 +169,7 @@ def approve_enrollment(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def reject_enrollment(request, id):
     
     enrollment_request = EnrollmentRequest.objects.get(id=id)
@@ -174,6 +184,7 @@ def reject_enrollment(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def batch(request, slug):
     
     administrator = Administrator.objects.get(id=request.user.id)
@@ -201,6 +212,7 @@ def batch(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def administrator_set_pod_for_batch(request, slug):
     batch = get_object_or_404(Batch, slug=slug)
 
@@ -267,6 +279,7 @@ def administrator_set_pod_for_batch(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def view_submissions(request, slug):
     
     question = get_object_or_404(Question, slug=slug)
