@@ -70,8 +70,8 @@ active
         <div class="card-body p-4">
             <form onsubmit="event.preventDefault();">
                 <div class="input-group">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by ID, Title or Description"
-                        oninput="searchQuestions()" />
+                    <input type="text" class="form-control" id="searchInput"
+                        placeholder="Search by ID, Title or Description" />
                     <button type="button" class="btn btn-outline-danger" id="clearSearchButton">Clear</button>
                 </div>
             </form>
@@ -126,7 +126,7 @@ active
                         </tr>
                     </thead>
 
-                    
+
                     <tbody id="questionTableBody">
 
                         <tr>
@@ -141,7 +141,10 @@ active
 
 
                 </table>
+                <div id="paginationControls" class="mt-4"></div>
             </div>
+
+
 
         </div>
     </div>
@@ -176,76 +179,67 @@ active
         const questionTableBody = document.getElementById("questionTableBody");
         const questionHeading = document.getElementById("questionHeading");
         const clearSearchButton = document.getElementById("clearSearchButton");
-    
-        let allQuestions = []; // To store all questions
-    
-        // Fetch all questions on page load
-        fetchQuestions();
-    
-        // Add event listener for search input
+
+        const total_problems_count = document.getElementById("total-problems-count");
+
+        let currentPage = 1; // Tracks the current page
+
+
+        // Event listener for search input
         searchInput.addEventListener("input", () => {
             const query = searchInput.value.trim();
             if (query) {
                 filterQuestions(query);
             } else {
-                displayQuestions(allQuestions);
+                // If search is cleared, reset to show all questions with pagination
+                fetchQuestions();
                 updateHeading("QUESTIONS 🔥");
             }
         });
-    
-        // Add event listener for clear button
+
+        // Event listener for clear button
         clearSearchButton.addEventListener("click", () => {
             searchInput.value = "";
-            displayQuestions(allQuestions);
+            fetchQuestions();
             updateHeading("QUESTIONS 🔥");
         });
-    
-        // Fetch all questions once
-        function fetchQuestions() {
-            fetch("{% url 'fetch_questions' %}")
-                .then((response) => response.json())
-                .then((data) => {
-                    allQuestions = data.questions; // Store all questions
-                    displayQuestions(allQuestions); // Display them initially
-                })
-                .catch((error) => console.error("Error fetching questions:", error));
+
+        // Fetch questions with pagination
+        async function fetchQuestions(page = 1, query = "") {
+            try {
+                const response = await fetch(`{% url 'fetch_questions' %}?page=${page}&query=${query}`);
+                const data = await response.json();
+
+                // get total problems count
+                let count = data.questions.length;
+                
+                displayQuestions(data.questions);
+                updatePagination(data.has_previous, data.has_next, data.current_page, data.total_pages);
+                return count;
+            } catch (error) {
+                console.error("Error fetching questions:", error);
+            }
         }
-    
-        // Filter questions based on the query
+
+        // Filter questions based on the search query
         function filterQuestions(query) {
-            const filteredQuestions = allQuestions.filter((question) =>
-                question.title.toLowerCase().includes(query.toLowerCase()) ||
-                question.id.toString().includes(query) ||
-                question.difficulty_level.toLowerCase().includes(query.toLowerCase())
-            );
-    
-            displayQuestions(filteredQuestions);
-            updateHeading(
-                `QUESTIONS 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`
-            );
+            fetchQuestions(1, query);
+            updateHeading(`QUESTIONS 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`);
         }
-    
-        // Update the heading dynamically
-        function updateHeading(content) {
-            questionHeading.innerHTML = content;
-        }
-    
+
         // Display questions in the table
         function displayQuestions(questions) {
             questionTableBody.innerHTML = ""; // Clear existing rows
-    
+
             if (questions.length === 0) {
                 questionTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-muted">No questions found</td></tr>`;
                 return;
             }
-    
+
             questions.forEach((question) => {
                 const row = document.createElement("tr");
-                const highlightedTitle = highlightText(
-                    question.title,
-                    searchInput.value.trim()
-                );
-    
+                const highlightedTitle = highlightText(question.title, searchInput.value.trim());
+
                 row.innerHTML = `
                     <td><h6>${question.id}</h6></td>
                     <td>
@@ -257,37 +251,111 @@ active
                         </h6>
                     </td>
                     <td style="text-align: center;">
-                        <span class="badge bg-${question.difficulty_color}">${question.difficulty_level}</span>
+                        <span class="badge ${question.difficulty_color ? `bg-${question.difficulty_color}` : ''}">${question.difficulty_level}</span>
                     </td>
-                    <!-- <td style="text-align: center;">
-                        ${
-                            question.youtube_link
-                                ? '<i class="fa fa-youtube-play"></i>'
-                                : "<p>Coming Soon...</p>"
-                        }
-                    </td> -->
                     <td style="text-align: center;">
-                        <span class="badge bg-${question.color}">${question.status}</span>
+                        <span class="badge ${question.color ? `bg-${question.color}` : ''}">${question.status}</span>
                     </td>
                     <td>
                         <a href="problem/${question.slug}" class="btn btn-dark">Try Now🔥</a>
                     </td>
                 `;
-    
+
                 questionTableBody.appendChild(row);
             });
         }
-    
-        // Highlight matching text in the search results
+
+        // Update Pagination
+        function updatePagination(hasPrevious, hasNext, currentPage, totalPages) {
+            const paginationControls = document.getElementById("paginationControls");
+
+            paginationControls.innerHTML = ""; // Clear existing pagination
+
+            const paginationNav = document.createElement("nav");
+            paginationNav.setAttribute("aria-label", "Page navigation example");
+
+            const paginationUl = document.createElement("ul");
+            paginationUl.classList.add("pagination");
+            paginationUl.classList.add("justify-content-center");
+
+            // Previous button
+            const prevLi = document.createElement("li");
+            prevLi.classList.add("page-item");
+            if (!hasPrevious) {
+                prevLi.classList.add("disabled");
+            }
+            const prevLink = document.createElement("a");
+            prevLink.classList.add("page-link");
+            prevLink.setAttribute("aria-label", "Previous");
+            prevLink.addEventListener("click", (e) => {
+                e.preventDefault(); // Prevent the default anchor click behavior
+                if (hasPrevious) fetchQuestions(currentPage - 1, searchInput.value.trim());
+            });
+            prevLink.innerHTML = '<span aria-hidden="true">&laquo;</span>';
+            prevLi.appendChild(prevLink);
+            paginationUl.appendChild(prevLi);
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageLi = document.createElement("li");
+
+                if (i === currentPage) {
+                    pageLi.classList.add("page-item", "active");
+                } else {
+                    pageLi.classList.add("page-item");
+                }
+
+                const pageLink = document.createElement("a");
+                pageLink.classList.add("page-link");
+                pageLink.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    fetchQuestions(i, searchInput.value.trim());
+                });
+                pageLink.textContent = i;
+                pageLi.appendChild(pageLink);
+                paginationUl.appendChild(pageLi);
+            }
+
+            // Next button
+            const nextLi = document.createElement("li");
+            nextLi.classList.add("page-item");
+            if (!hasNext) {
+                nextLi.classList.add("disabled");
+            }
+            const nextLink = document.createElement("a");
+            nextLink.classList.add("page-link");
+            nextLink.setAttribute("aria-label", "Next");
+            nextLink.addEventListener("click", (e) => {
+                e.preventDefault(); // Prevent the default anchor click behavior
+                if (hasNext) fetchQuestions(currentPage + 1, searchInput.value.trim());
+            });
+            nextLink.innerHTML = '<span aria-hidden="true">&raquo;</span>';
+            nextLi.appendChild(nextLink);
+            paginationUl.appendChild(nextLi);
+
+            paginationNav.appendChild(paginationUl);
+            paginationControls.appendChild(paginationNav);
+        }
+
+        // Update Heading
+        function updateHeading(content) {
+            questionHeading.innerHTML = content;
+        }
+
+        // Highlight matching text in search results
         function highlightText(text, query) {
             if (!query) return text;
-    
+
             const regex = new RegExp(`(${query})`, "gi");
             return text.replace(regex, '<span class="text-highlight">$1</span>');
         }
+
+        // Fetch questions initially
+        fetchQuestions();
     });
-    
+
 </script>
+
 
 
 
