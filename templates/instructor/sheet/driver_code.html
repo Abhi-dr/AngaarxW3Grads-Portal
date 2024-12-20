@@ -211,7 +211,7 @@ Driver Code | {{ question.title }}
             const driverCode = editor.getValue();
 
             $.ajax({
-                url: "{% url 'driver_code' slug=question.slug %}",
+                url: "{% url 'instructor_driver_code' slug=question.slug %}",
                 type: "POST",
                 data: {
                     csrfmiddlewaretoken: "{{ csrf_token }}",

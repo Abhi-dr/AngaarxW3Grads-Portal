@@ -223,7 +223,7 @@ active
         const formData = new FormData(form);
         const questionSlug = "{{ question.slug }}";
 
-        fetch("{% url 'add_test_case' question.slug %}", {
+        fetch("{% url 'instructor_add_test_case' question.slug %}", {
             method: 'POST',
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'

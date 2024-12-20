@@ -86,7 +86,7 @@ Reorder {{ sheet.name }}
 
             console.log(order);
 
-            fetch("{% url 'update_sheet_order' sheet.id %}", {  // Update this with your Django URL name
+            fetch("{% url 'instructor_update_sheet_order' sheet.id %}", {  // Update this with your Django URL name
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

@@ -194,7 +194,6 @@ def toggle_sheet_status(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def get_excluded_questions(request, sheet_id):
     sheet = get_object_or_404(Sheet, id=sheet_id)
     excluded_questions = Question.objects.exclude(sheets=sheet)

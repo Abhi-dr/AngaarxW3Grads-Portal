@@ -547,7 +547,7 @@ active
 <script>
     document.getElementById('toggle-status').addEventListener('click', function () {
         const slug = this.getAttribute('data-sheet-slug');
-        fetch(`/administration/sheet/${slug}/toggle-status/`, {
+        fetch(`/instructor/sheet/${slug}/toggle-status/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': '{{ csrf_token }}',
