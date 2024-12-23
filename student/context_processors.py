@@ -1,5 +1,7 @@
 from accounts.models import Student, Instructor, Administrator
 from practice.models import Streak
+from datetime import datetime, timedelta
+
 
 def user_context_processor(request):
     
@@ -28,14 +30,16 @@ def user_context_processor(request):
         'user': user_object,
     }
 
-
 def streak_context(request):
+    context = {}
     if request.user.is_authenticated:  # Ensure the user is logged in
         if hasattr(request.user, 'student'):  # Check if the user has a related 'Student' instance
             streak = Streak.objects.filter(user=request.user.student).first()
-            return {'streak': streak}
-    return {'streak': None}  # Return None if the user is not logged in or does not have a 'Student' instance
-
+            if streak:
+                today = datetime.now().date()
+                context['streak'] = streak
+                context['can_restore_streak'] = streak.last_submission_date == today - timedelta(days=2)
+    return context
 
 # def student_context_processor(request):
 #     student = None

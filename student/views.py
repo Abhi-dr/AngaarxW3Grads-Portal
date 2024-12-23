@@ -3,8 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.utils import timezone
-from datetime import datetime
 from django.db.models import Q
+from django.http import JsonResponse
+from datetime import datetime, timedelta
+
 
 from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
@@ -285,3 +287,34 @@ def feedback(request):
 def leveller(request):
     return render(request, "student/leveller.html")
 
+# ============================================ RESTORE STREAK =======================================
+
+def restore_streak(request):
+    if request.method == 'POST' and request.user.is_authenticated:
+        student = request.user.student
+        streak = Streak.objects.filter(user=student).first()
+        
+        if not streak:
+            return JsonResponse({'status': 'error', 'message': 'No streak found for this user.'})
+        
+        today = datetime.now().date()
+        if streak.last_submission_date != today - timedelta(days=2):
+            return JsonResponse({'status': 'error', 'message': 'Streak cannot be restored.'})
+        
+        if student.coins >= 50:
+            student.coins -= 50
+            student.save()
+            
+            # Store the previous streak value before resetting
+            previous_streak = streak.current_streak
+
+            # Restore the streak
+            streak.last_submission_date = today - timedelta(days=1)  # Set to yesterday
+            streak.current_streak = previous_streak + 1  # Increase streak by 1 (restoring it)
+            streak.save()
+            
+            return JsonResponse({'status': 'success', 'message': 'Streak restored successfully!'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Not enough coins to restore streak.'})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)

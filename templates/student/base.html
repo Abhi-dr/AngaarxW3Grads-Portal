@@ -43,7 +43,7 @@
         }
 
         #coin-icon {
-            
+
             height: 20px;
         }
 
@@ -554,22 +554,31 @@
                             </a>
                         </li> -->
                         <li class="nav-item">
-                            <div class="nav-link" id="sheet-link" >
+                            <div class="nav-link" id="sheet-link">
                                 <!-- data-bs-toggle="tooltip" title="Your Current Streaks🔥" data-bs-placement="bottom" -->
                                 <!-- <img id="fire-icon" src="{% static 'img/student/fire.png' %}" alt=""> -->
                                 <span class="mx-1 badge text-bg-dark" id="active-sheet-timer"></span>
                                 <button id="coinbtn" type="button" class="btn badge text-bg-dark mx-1"
-                                    data-bs-toggle="modal" data-bs-target="#coinModal"
-                                    data-bs-toggle="tooltip" title="Your Total Sparks💥">
-                                    <img id="coin-icon" src="{% static 'img/student/coin.png' %}" alt=""> 
+                                    data-bs-toggle="modal" data-bs-target="#coinModal" data-bs-toggle="tooltip"
+                                    title="Your Total Sparks💥">
+                                    <img id="coin-icon" src="{% static 'img/student/coin.png' %}" alt="">
                                     {{ user.coins }}
                                 </button>
 
                                 <button id="streakbtn" type="button" class="btn badge text-bg-dark mx-1"
-                                    data-bs-toggle="modal" data-bs-target="#streakModal"
-                                    data-bs-toggle="tooltip" title="Your Current Streaks🔥">
+                                    data-bs-toggle="modal" data-bs-target="#streakModal" data-bs-toggle="tooltip"
+                                    title="Your Current Streaks🔥">
                                     <span class="fire-emoji">🔥</span>{{ streak.current_streak }}
                                 </button>
+
+                                {% if can_restore_streak %}
+                                <button type="button" class="btn btn-sm btn-outline-info" id="restore-streak-btn">
+                                    Restore Streak (50<img id="coin-icon" class="mt-n1"
+                                        src="{% static 'img/student/coin.png' %}" alt="">)
+                                </button>
+                                {% endif %}
+
+
                             </div>
                         </li>
                     </ul>
@@ -652,19 +661,23 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body mt-2">
-                    <h4 class="modal-title text-center mb-2">You have total <strong>{{ user.coins }} Sparks</strong> <img
-                        width="7%" src="{% static 'img/student/coin.png' %}" alt=""> </h4>
-                    <p class="text-center">Sparks aren’t just coins, they are the badge of your coding achievements! While it’s not real money, it is gonna help you to earn it 😉.
+                    <h4 class="modal-title text-center mb-2">You have total <strong>{{ user.coins }} Sparks</strong>
+                        <img width="7%" src="{% static 'img/student/coin.png' %}" alt="">
+                    </h4>
+                    <p class="text-center">Sparks aren’t just coins, they are the badge of your coding achievements!
+                        While it’s not real money, it is gonna help you to earn it 😉.
                     </p>
 
                     <ul>
-                        <li><strong>🧩 Complete your Challenges:</strong>  The tougher the challenge, the more Sparks you’ll earn!</li>
+                        <li><strong>🧩 Complete your Challenges:</strong> The tougher the challenge, the more Sparks
+                            you’ll earn!</li>
                         <br>
-                        <li><strong>🔥 Build Unstoppable Streaks:</strong> Keep solving daily to earn bonus Sparks and grow
+                        <li><strong>🔥 Build Unstoppable Streaks:</strong> Keep solving daily to earn bonus Sparks and
+                            grow
                             your streak.</li>
                     </ul>
                     <p class="text-center mt-3">
-                        Use your sparks to unlock hidden test cases and restore your broken streaks🔥💪
+                        Use your sparks to unlock hints and restore your broken streaks🔥💪
                     </p>
                     <p class="text-center mt-3">
                         <strong>
@@ -684,17 +697,21 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body">
-                    <h4 class="modal-title text-center">Your Current Streak: <strong>{{ streak.current_streak }}</strong> Days 🔥</h4>
+                    <h4 class="modal-title text-center">Your Current Streak: <strong>{{ streak.current_streak
+                            }}</strong> Days 🔥</h4>
                     <p class="text-center mt-3">Snapchat streaks are fun? Wait till you see what coding streaks can do!
-                        Other streaks might give you a red or yellow heart, but these streaks give you something even better: achievement, growth, and rewards!
-                    </p> 
+                        Other streaks might give you a red or yellow heart, but these streaks give you something even
+                        better: achievement, growth, and rewards!
+                    </p>
                     <p class="text-center mt-3">
-                    Here's how they work:</p>
+                        Here's how they work:</p>
                     <ul class="mt-3">
                         <li>📅 <strong>What is a Streak?</strong> A streak is the number of consecutive days you've
                             solved coding challenges.</li>
-                        <li>🔥 <strong>Why Maintain a Streak?</strong> The longer your streak, the more Sparks you collect.</li>
-                        <li>🎯 <strong>How to Keep a Streak?</strong> Solve at least one coding challenge daily to keep your streak alive.</li>
+                        <li>🔥 <strong>Why Maintain a Streak?</strong> The longer your streak, the more Sparks you
+                            collect.</li>
+                        <li>🎯 <strong>How to Keep a Streak?</strong> Solve at least one coding challenge daily to keep
+                            your streak alive.</li>
                         <li>💔 <strong>What Happens if You Break It?</strong> Missing a day resets your streak to zero,
                             so stay consistent!</li>
                     </ul>
@@ -708,7 +725,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
 
     {% block myjs %}
@@ -722,6 +739,32 @@
     <script src="{% static 'js/dashboard/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
     <script src="{% static 'js/dashboard/libs/simplebar/dist/simplebar.js' %}"></script>
     <script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
+
+    <script>
+        document.getElementById('restore-streak-btn').addEventListener('click', function () {
+            const choice = confirm("Are you sure you want to restore your streaks? It will use 50 Sparks!");
+
+            if (!choice){
+                return false;
+            }
+
+            fetch("{% url 'restore_streak' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("data received");
+                    console.log(data);
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        });
+    </script>
 
     <script>
         // Show the button when scrolled down 20px from the top of the document

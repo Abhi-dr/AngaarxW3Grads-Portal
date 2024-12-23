@@ -446,6 +446,21 @@ class Streak(models.Model):
         self.last_submission_date = today
         self.save()
 
+    def can_restore_streak(self):
+        today = datetime.now().date()
+        return (
+            self.last_submission_date == today - timedelta(days=2)
+            and not self.restored_today
+        )
+
+    def restore_streak(self):
+        """Restore the streak to the previous day."""
+        if self.can_restore_streak():
+            self.last_submission_date = datetime.now().date()
+            self.save()
+            return True
+        return False
+
     def __str__(self):
         return f"{self.user.username} - {self.current_streak} day streak"
     

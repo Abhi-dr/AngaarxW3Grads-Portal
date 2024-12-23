@@ -670,7 +670,6 @@ def unlock_hint(request, question_id):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
-
 # ========================================== NEXT QUESTION ==========================================
 
 @login_required(login_url="login")

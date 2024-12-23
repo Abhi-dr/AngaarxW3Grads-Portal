@@ -7,6 +7,7 @@ urlpatterns = [
     # ========================= SESSION WORK =========================
     
     path("get_random_question/", views.get_random_question, name="get_random_question"),
+    path('restore_streak/', views.restore_streak, name='restore_streak'),
     
     path("leveller", views.leveller, name="leveller"),
     
