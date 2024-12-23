@@ -41,7 +41,7 @@ def dashboard(request):
         if request.user.student.dob.day == timezone.now().day and request.user.student.dob.month == timezone.now().month:
             is_birthday = True
             
-        
+    print(is_birthday, request.user.student.first_name)
     
     parameters = {
         "notifications": notifications,

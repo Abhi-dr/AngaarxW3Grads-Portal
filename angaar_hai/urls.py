@@ -12,7 +12,7 @@ urlpatterns = [
     path("practice/", include("practice.urls")),
     
     path("instructor/", include("instructor.urls")),
-    path("administration/", include("administration.urls")),
+    path("administration/", include("administration.urls")),    
     
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -87,13 +87,13 @@ def fetch_problems(request):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def add_question(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
     sheets = Sheet.objects.all().order_by('-id')
     
     if request.method == 'POST':
         
         sheet = request.POST.getlist('sheet')
         title = request.POST.get('title')
+        scenario = request.POST.get('scenario')
         description = request.POST.get('description')
         input_format = request.POST.get('input_format')
         output_format = request.POST.get('output_format')
@@ -104,6 +104,7 @@ def add_question(request):
         
         question = Question(
             title=title,
+            scenario=scenario,
             description=description,
             input_format = input_format,
             output_format = output_format,
@@ -122,7 +123,6 @@ def add_question(request):
         return redirect('test_cases', slug=question.slug)
     
     parameters = {
-        'administrator': administrator,
         'sheets': sheets
     }
     return render(request, 'administration/practice/add_question.html', parameters)
@@ -160,6 +160,7 @@ def edit_question(request, id):
         
         sheet = request.POST.getlist('sheet')
         title = request.POST.get('title')
+        scenario = request.POST.get('scenario')
         description = request.POST.get('description')
         input_format = request.POST.get('input_format')
         output_format = request.POST.get('output_format')
@@ -173,6 +174,7 @@ def edit_question(request, id):
         
         question.title = title
         question.description = description
+        question.scenario = scenario
         question.input_format = input_format
         question.output_format = output_format
         question.difficulty_level = difficulty_level

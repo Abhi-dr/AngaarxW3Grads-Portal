@@ -1,6 +1,9 @@
 from pathlib import Path
 from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
+
+import sentry_sdk
+
 import os
 
 load_dotenv()
@@ -183,7 +186,59 @@ SESSION_COOKIE_HTTPONLY = os.getenv("SESSION_COOKIE_HTTPONLY")
 CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE")
 
 # settings.py
-SECURE_SSL_REDIRECT = os.getenv("SECURE_SSL_REDIRECT")
-SECURE_HSTS_SECONDS = 3600
-SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("SECURE_HSTS_INCLUDE_SUBDOMAINS")
-SECURE_HSTS_PRELOAD = os.getenv("SECURE_HSTS_PRELOAD")
+
+
+
+# ===================================================================================================
+
+
+# sentry_sdk.init(
+#     dsn="https://178482a94c5fcc13efdeee116f4ff919@o4508501286715392.ingest.de.sentry.io/4508501288681552",
+#     # Set traces_sample_rate to 1.0 to capture 100%
+#     # of transactions for tracing.
+#     traces_sample_rate=1.0,
+#     _experiments={
+#         # Set continuous_profiling_auto_start to True
+#         # to automatically start the profiler on when
+#         # possible.
+#         "continuous_profiling_auto_start": True,
+#     },
+# )
+
+# ==================================================================================================
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'verbose': {
+#             'format': 'Level: {levelname} | Time: {asctime} | Module: {module} | Message: {message}',
+#             'style': '{',
+#         },
+#         'simple': {
+#             'format': '{levelname} | {message}',
+#             'style': '{',
+#         },
+#     },
+#     'handlers': {
+#         'file': {
+#             'level': 'WARNING',
+#             'class': 'logging.FileHandler',
+#             'filename': 'errors.log',
+#             'formatter': 'verbose',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['file'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#         'myapp': {
+#             'handlers': ['file'],
+#             'level': 'INFO',
+#             'propagate': False,
+#         },
+#     },
+# }
+
