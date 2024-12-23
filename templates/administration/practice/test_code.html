@@ -181,9 +181,7 @@ Test Code | {{ question.title }}
 
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item pe-auto"><a href="{% url 'administrator_problems' %}">Question Set</a></li>
-            <li class="breadcrumb-item pe-auto">{{ question.title }}</li>
-
+            <li class="breadcrumb-item" style="cursor: pointer;" onclick="history.back()">{{ question.title }}</li>
             </li>
             <li class="breadcrumb-item active" aria-current="page">Execute Code</li>
         </ol>

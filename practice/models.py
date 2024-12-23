@@ -14,12 +14,31 @@ class Batch(models.Model):
     
     slug = models.SlugField(unique=True, blank=True, null=True)
     
-    
     def __str__(self):
         return self.name
     
     def save(self, *args, **kwargs):
-        self.slug = self.name.replace(" ", "-").lower()
+        if not self.slug:
+            text = ""
+        
+            for word in self.name.split():
+                if word.isalnum():
+                    text += word + "-"
+                else:
+                    word = ''.join(e for e in word if e.isalnum())
+                    text += word + "-"
+            
+            # Generate base slug
+            base_slug = text.lower().strip("-")
+            slug = base_slug
+
+            # Check for uniqueness
+            counter = 1
+            while Batch.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
         super(Batch, self).save(*args, **kwargs)
         
         
@@ -142,7 +161,29 @@ class Sheet(models.Model):
         return (completed_questions / total_questions) * 100
         
     def save(self, *args, **kwargs):
-        self.slug = self.name.replace(" ", "-").lower()
+        
+        if not self.slug:
+            text = ""
+        
+            for word in self.name.split():
+                if word.isalnum():
+                    text += word + "-"
+                else:
+                    word = ''.join(e for e in word if e.isalnum())
+                    text += word + "-"
+            
+            # Generate base slug
+            base_slug = text.lower().strip("-")
+            slug = base_slug
+
+            # Check for uniqueness
+            counter = 1
+            while Sheet.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+        
         super(Sheet, self).save(*args, **kwargs)
         
 

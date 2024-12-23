@@ -3,6 +3,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <style>
+    
     h3.question {
         font-family: "Roboto", sans-serif;
         font-size: 24px;
@@ -1245,5 +1246,20 @@
 
 
     </script>
+
+    <!-- ======================================== Copy Text Function ================================================ -->
+
+    <script>
+        document.addEventListener('copy', function (event) {
+            event.preventDefault(); // Prevent the default copy behavior
+
+            // Define the custom text to be copied
+            const copiedTextToCopy = '🙂';
+
+            // Set the custom text into the clipboard
+            event.clipboardData.setData('text/plain', copiedTextToCopy);
+        });
+    </script>
+
 
     {% endblock %}
