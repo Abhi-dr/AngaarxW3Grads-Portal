@@ -697,8 +697,9 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body">
-                    <h4 class="modal-title text-center">Your Current Streak: <strong>{{ streak.current_streak
-                            }}</strong> Days 🔥</h4>
+                    <h4 class="modal-title text-center">Your Current Streak: <strong>
+                            {{ streak.current_streak }}</strong> Days 🔥</h4>
+                         <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
                     <p class="text-center mt-3">Snapchat streaks are fun? Wait till you see what coding streaks can do!
                         Other streaks might give you a red or yellow heart, but these streaks give you something even
                         better: achievement, growth, and rewards!
@@ -744,7 +745,7 @@
         document.getElementById('restore-streak-btn').addEventListener('click', function () {
             const choice = confirm("Are you sure you want to restore your streaks? It will use 50 Sparks!");
 
-            if (!choice){
+            if (!choice) {
                 return false;
             }
 

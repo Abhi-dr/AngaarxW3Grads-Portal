@@ -388,17 +388,23 @@ Student -> Home
                                         {% endif %}
 
                                     </div>
+
+                                    {% if not user.get_profile_score == 100 %}
+
                                     <div class="d-flex align-items-center">
                                         <div class="me-4">
-                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                                            <span class="fs-2">Completed</span>
+                                            <!-- <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span> -->
+                                            <span class="fs-2">Complete to Earn More <img id="coin-icon" class="mt-n1"
+                                                src="{% static 'img/student/coin.png' %}" alt=""></span>
                                         </div>
-                                        <div>
+                                        <!-- <div>
                                             <span
                                                 class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
                                             <span class="fs-2">Left</span>
-                                        </div>
+                                        </div> -->
                                     </div>
+
+                                    {% endif %}
                                 </div>
                                 <div class="col-4">
                                     <div class="d-flex justify-content-center">

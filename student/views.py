@@ -168,34 +168,67 @@ def my_profile(request):
 def edit_profile(request):
     
     student = Student.objects.get(id=request.user.id)
-    
+
     if request.method == "POST":
+        coins_earned = 0  # Track how many coins the user earns during this update
+
+        # First Name
+        if not student.first_name and request.POST.get("first_name"):
+            coins_earned += 5
         student.first_name = request.POST.get("first_name")
+
+        # Last Name
+        if not student.last_name and request.POST.get("last_name"):
+            coins_earned += 5
         student.last_name = request.POST.get("last_name")
+
         student.email = request.POST.get("email")
         student.gender = request.POST.get("gender")
+
+        # College
+        if not student.college and request.POST.get("college"):
+            coins_earned += 5
         student.college = request.POST.get("college")
+
+        # LinkedIn
+        if not student.linkedin_id and request.POST.get("linkedin_id"):
+            coins_earned += 20
         student.linkedin_id = request.POST.get("linkedin_id")
+
+        # GitHub
+        if not student.github_id and request.POST.get("github_id"):
+            coins_earned += 20
         student.github_id = request.POST.get("github_id")
-        
+
+        # Date of Birth
+        if not student.dob and request.POST.get("dob"):
+            coins_earned += 10
         if request.POST.get("dob"):
             student.dob = request.POST.get("dob")
-            
+
+        # Mobile Number
         if request.POST.get("mobile_number"):
-        
             if request.POST.get("mobile_number").isdigit() and len(request.POST.get("mobile_number")) == 10:
+                if not student.mobile_number:
+                    coins_earned += 10
                 student.mobile_number = request.POST.get("mobile_number")
             else:
                 messages.error(request, "Invalid mobile number!")
                 return redirect("edit_profile")
-            
-        
+
+        # Update Coins if any new fields were set
+        if coins_earned > 0:
+            student.coins += coins_earned  # Assuming `coins` is a field on the student model
+
         student.save()
-        
-        messages.success(request, "Profile updated successfully!")
-        
+
+        if coins_earned > 0:
+            messages.success(request, f"Profile updated successfully! You earned {coins_earned} sparks ✨")
+        else:
+            messages.success(request, "Profile updated successfully!")
+
         return redirect("my_profile")
-    
+
     parameters = {
         "student": student
     }
@@ -219,7 +252,7 @@ def upload_profile(request):
         
         student.save()
 
-        messages.success(request, 'Profile Picture Updated Successfully')
+        messages.success(request, 'Profile Picture Updated Successfully!')
 
         return redirect('my_profile')
     

@@ -11,7 +11,8 @@ Profile {% endblock %}
   }
 
   #change_password.show {
-    max-height: 500px; /* Set a reasonable max-height value to transition smoothly */
+    max-height: 500px;
+    /* Set a reasonable max-height value to transition smoothly */
   }
 </style>
 
@@ -43,8 +44,7 @@ Profile {% endblock %}
       <div class="col-lg-4">
         <div class="card mb-2">
           <div class="card-body text-center">
-            <img src="{{ user.profile_pic.url }}" alt="avatar" class="rounded-circle img-fluid"
-              style="width: 150px;" />
+            <img src="{{ user.profile_pic.url }}" alt="avatar" class="rounded-circle img-fluid" style="width: 150px;" />
             <h5 class="my-3">
               {{ user.first_name }} {{ user.last_name }}
             </h5>
@@ -55,7 +55,7 @@ Profile {% endblock %}
             <p class="mb-4">{{ user.college }}</p>
             <div class="d-flex justify-content-center mb-2">
               <a type="button" href="{% url 'edit_profile' %}" class="btn btn-outline-primary ms-1 w-100">
-                Update Profile
+                Change Profile Photo</span>
               </a>
             </div>
 
@@ -78,10 +78,11 @@ Profile {% endblock %}
               Change Password
             </h5>
 
-            <form action="{% url 'change_password' %}" method="POST" >
+            <form action="{% url 'change_password' %}" method="POST">
               {% csrf_token %}
               <div class="mb-3">
-                <input type="password" name="old_password" id="password" class="form-control" placeholder="Old Password"/>
+                <input type="password" name="old_password" id="password" class="form-control"
+                  placeholder="Old Password" />
               </div>
 
 
@@ -109,101 +110,124 @@ Profile {% endblock %}
       <div class="col-lg-8">
         <div class="card mb-4">
           <div class="card-body">
+            <!-- Name -->
             <div class="row">
               <div class="col-sm-3">
                 <p class="mb-0">Name</p>
               </div>
               <div class="col-sm-9">
-                <p class=" mb-0">
+                <p class="mb-0">
                   {{ user.first_name }} {{ user.last_name }}
+                  {% if not user.first_name or not user.last_name %}
+                  <span class="text-success float-end">(+5 <img id="coin-icon" class="mt-n1"
+                      src="{% static 'img/student/coin.png' %}" alt="">)</span>
+                  {% endif %}
                 </p>
               </div>
             </div>
             <hr />
+
+            <!-- Email -->
             <div class="row">
               <div class="col-sm-3">
                 <p class="mb-0">Email</p>
               </div>
               <div class="col-sm-9">
-                <p class="mb-0">{{ user.email }}</p>
+                <p class="mb-0">
+                  {{ user.email }}
+                </p>
               </div>
             </div>
             <hr />
+
+            <!-- Phone -->
             <div class="row">
               <div class="col-sm-3">
                 <p class="mb-0">Phone</p>
               </div>
               <div class="col-sm-9">
-                <p class="mb-0">+91 {{ user.mobile_number }}</p>
+                <p class="mb-0">
+                  +91 {{ user.mobile_number }}
+                  {% if not user.mobile_number %}
+                  <span class="text-success float-end">(+10 <img id="coin-icon" class="mt-n1"
+                      src="{% static 'img/student/coin.png' %}" alt="">)</span>
+                  {% endif %}
+                </p>
               </div>
             </div>
             <hr />
+
+            <!-- LinkedIn -->
             <div class="row">
               <div class="col-sm-3">
                 <p class="mb-0">LinkedIn</p>
               </div>
               <div class="col-sm-9">
-
                 {% if not user.linkedin_id %}
-
                 <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
-
+                <span class="text-success float-end">(+20 <img id="coin-icon" class="mt-n1"
+                    src="{% static 'img/student/coin.png' %}" alt="">)</span>
                 {% else %}
-
-                <a href="{{ user.linkedin_id }}" target="_blank" class="btn btn-outline-secondary mb-0">{{ user.linkedin_id }}</a>
-
+                <a href="{{ user.linkedin_id }}" target="_blank" class="btn btn-outline-secondary mb-0">
+                  {{ user.linkedin_id }}</a>
                 {% endif %}
               </div>
             </div>
             <hr />
+
+            <!-- GitHub -->
             <div class="row">
               <div class="col-sm-3">
                 <p class="mb-0">GitHub</p>
               </div>
               <div class="col-sm-9">
-
                 {% if not user.github_id %}
-
                 <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
-
+                <span class="text-success float-end">(+20 <img id="coin-icon" class="mt-n1"
+                    src="{% static 'img/student/coin.png' %}" alt="">)</span>
                 {% else %}
-
-                <a href="{{ user.github_id }}" target="_blank" class="btn btn-outline-dark mb-0">{{ user.github_id }}</a>
-
+                <a href="{{ user.github_id }}" target="_blank" class="btn btn-outline-dark mb-0">
+                  {{ user.github_id }}</a>
                 {% endif %}
-
               </div>
             </div>
-
             <hr />
 
+            <!-- Gender -->
             <div class="row">
               <div class="col-sm-3">
                 <p class="mb-0">Gender</p>
               </div>
               <div class="col-sm-9">
-                <p class="mb-0">{{ user.gender }}</p>
+                <p class="mb-0">
+                  {{ user.gender }}
+                </p>
               </div>
             </div>
             <hr />
+
+            <!-- Birthday -->
             <div class="row">
               <div class="col-sm-3">
                 <p class="mb-0">Janamdin🥳</p>
               </div>
               <div class="col-sm-9">
-
                 {% if not user.dob %}
-                <button class="btn btn-dark  text-white mb-0">Not Available☹️</button>
+                <button class="btn btn-dark text-white mb-0">Not Available☹️</button>
+                <span class="text-success float-end">(+10 <img id="coin-icon" class="mt-n1"
+                    src="{% static 'img/student/coin.png' %}" alt="">)</span>
                 {% else %}
                 <p class="mb-0">{{ user.dob }}</p>
                 {% endif %}
               </div>
             </div>
             <hr />
+
             <a href="{% url 'edit_profile' %}" class="btn btn-outline-warning w-100">Edit Profile</a>
           </div>
         </div>
       </div>
+
     </div>
   </div>
 </div>
