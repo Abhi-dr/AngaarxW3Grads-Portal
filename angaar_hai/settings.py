@@ -2,8 +2,6 @@ from pathlib import Path
 from django.contrib.messages import constants as messages
 from dotenv import load_dotenv
 
-import sentry_sdk
-
 import os
 
 load_dotenv()
@@ -191,19 +189,6 @@ CSRF_COOKIE_SECURE = os.getenv("CSRF_COOKIE_SECURE")
 
 # ===================================================================================================
 
-
-# sentry_sdk.init(
-#     dsn="https://178482a94c5fcc13efdeee116f4ff919@o4508501286715392.ingest.de.sentry.io/4508501288681552",
-#     # Set traces_sample_rate to 1.0 to capture 100%
-#     # of transactions for tracing.
-#     traces_sample_rate=1.0,
-#     _experiments={
-#         # Set continuous_profiling_auto_start to True
-#         # to automatically start the profiler on when
-#         # possible.
-#         "continuous_profiling_auto_start": True,
-#     },
-# )
 
 # ==================================================================================================
 

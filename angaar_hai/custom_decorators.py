@@ -18,13 +18,13 @@ def admin_required(view_func):
             # Log any unexpected issues for debugging (optional)
             print(f"\nAccess Denied: {e}")
 
-        # Redirect unauthorized users with an error message
-        messages.error(request, "You are not authorized to access this page.")
-        data = {
-            "error": "403",
-            "message": e
-        }
-        # logout the current user
-        return render(request, "error.html", data)
+            # Redirect unauthorized users with an error message
+            messages.error(request, "You are not authorized to access this page.")
+            data = {
+                "error": "403",
+                "message": e
+            }
+            # logout the current user
+            return render(request, "error.html", data)
     
     return _wrapped_view
