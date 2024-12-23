@@ -16,6 +16,8 @@ def get_status_color(status):
         return 'danger'  # Bootstrap danger color
     elif status == 'Pending':
         return 'warning'  # Bootstrap warning color
+    elif status == 'Compilation Error':
+        return 'danger'
     else:
         return 'secondary'  # Default color for other statuses
     

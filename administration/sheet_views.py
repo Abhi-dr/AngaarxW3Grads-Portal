@@ -224,6 +224,8 @@ def add_new_question(request, slug):
         title = request.POST.get('title')
         scenario = request.POST.get('scenario')
         description = request.POST.get('description')
+        input_format = request.POST.get('input_format')
+        output_format = request.POST.get('output_format')
         constraints = request.POST.get('constraints')
         difficulty_level = request.POST.get('difficulty_level')
         
@@ -231,6 +233,8 @@ def add_new_question(request, slug):
             title=title,
             scenario=scenario,
             description=description,
+            input_format=input_format,
+            output_format=output_format,
             constraints = constraints,
             difficulty_level=difficulty_level,
             is_approved=True

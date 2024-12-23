@@ -3,7 +3,6 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <style>
-    
     h3.question {
         font-family: "Roboto", sans-serif;
         font-size: 24px;
@@ -401,10 +400,14 @@
 
         <div class="card-footer d-sm-flex justify-content-between align-items-center">
             <div class="card-footer-link mb-2 mb-sm-0">
-                <p class="card-text d-inline">
-                    <strong>Hint: </strong>
-                <pre>{{ question.hint }} </pre>
-                </p>
+                <div class="hint-section">
+                    <button class="btn btn-sm btn-outline-success fs-3" id="unlock-hint-btn"
+                        data-id="{{ question.id }}">
+                        Hint 🔒 (5<img id="coin-icon" class="mt-n1" src="{% static 'img/student/coin.png' %}" alt="">)
+                    </button>
+                    <button id="hint-text" style="display: none;" class="btn badge text-bg-light-success mx-1"></button>
+                    <p id="hint-info"></p>
+                </div>
             </div>
         </div>
 
@@ -593,6 +596,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
     <script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
 
+    <!-- ======================================= UNLOCK HINT ================================================== -->
+
+
+    <script>
+        document.getElementById('unlock-hint-btn').addEventListener('click', function () {
+            const questionId = this.getAttribute('data-id');
+            fetch("{% url 'unlock_hint' question.id %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Fetched")
+                    if (data.status === 'success') {
+                        hintBtn = document.getElementById("unlock-hint-btn");
+                        hintText = document.getElementById('hint-text');
+                        hintInfo = document.getElementById("hint-info");
+                        
+                        hintBtn.style.display = 'none';
+                        hintText.innerText = "Hint: " + data.hint;
+                        hintInfo.innerHTML = `<small>(This will be removed once you leave or reload the page) </small>`
+                        hintText.style.display = 'block';
+
+                    } else {
+
+                        alert(data.message);
+                    }
+                });
+        });
+    </script>
 
     <!-- ===================================== EDITOR SETTINGS ================================================ -->
 

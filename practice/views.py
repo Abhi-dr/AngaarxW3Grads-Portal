@@ -11,8 +11,8 @@ from django.db.models import Q
 
 import base64
 import re
-from .models import Streak
 
+from accounts.models import Student
 
 from django.views.decorators.cache import cache_control
 
@@ -28,7 +28,7 @@ HEADERS = {
 }
 
 
-from .models import Sheet, Question, TestCase, Submission, DriverCode
+from .models import Sheet, Question, TestCase, Submission, DriverCode, Streak
 
 @login_required(login_url="login")
 def practice(request):
@@ -263,14 +263,17 @@ def process_test_case_result(inputs, outputs, expected_outputs):
     return results
 
 
-def update_submission_status(submission, passed, total, total_submission_count):
+def update_submission_status(submission, passed, total, total_submission_count, status=None):
     """
     Update the submission status and score in the database.
     """
     try:
-        submission.status = 'Accepted' if passed == total else 'Wrong Answer'
+        if not status:
+            submission.status = 'Accepted' if passed == total else 'Wrong Answer'
+        else:
+            submission.status = status
         
-        # update streaks 
+        # update streaks
         if submission.status == 'Accepted':
             update_user_streak(submission.user)
         
@@ -395,7 +398,10 @@ def submit_code(request, slug):
                     "token": judge0_response.get("token")
                 }
                 
+                update_submission_status(submission, 0, len(test_cases), 0, status="Compilation Error")
+                
                 if judge0_response.get("compile_output"):
+                    
                                         
                     result["compile_output"] = judge0_response.get("compile_output")
                 
@@ -644,6 +650,26 @@ def fetch_questions(request):
 
     cache.set(cache_key, data, timeout=300)  # Cache for 5 minutes
     return JsonResponse(data)
+
+# ================================== UNLOCK HINT ==================================================
+
+def unlock_hint(request, question_id):
+    if request.method == 'POST' and request.user.is_authenticated:
+        question = get_object_or_404(Question, id=question_id)
+        student = request.user.student
+
+        if question.hint:  # Check if the question has a hint
+            if student.coins > 0:  # Check if the user has enough coins
+                student.coins -= 5  # Deduct a spark
+                student.save()
+                return JsonResponse({'status': 'success', 'hint': question.hint})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Not enough coins'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'No hint available for this question'})
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
 
 # ========================================== NEXT QUESTION ==========================================
 

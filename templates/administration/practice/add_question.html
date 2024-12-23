@@ -153,41 +153,4 @@ active
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-<script>
-    $(document).ready(function () {
-        $('#generateQuestionBtn').click(function (e) {
-            e.preventDefault();
-            var title = $('#question_title').val();  // Assuming you have an input for the title
-            var btn = $(this);
-            btn.prop('disabled', true);
-            btn.text('Generating...');
-
-            $.ajax({
-                type: 'POST',
-                url: '{% url "generate_description" %}',  // Use the URL name you defined
-                contentType: 'application/json',  // Send data as JSON
-                data: JSON.stringify({
-                    'title': title,
-                    'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
-                }),
-                success: function (response) {
-                    if (response.response) {
-                        // Update the textarea with the generated HTML code
-                        $('#question_description').val(response.response);
-                        btn.prop('disabled', false);
-                        btn.text('Generate Question using AI');
-                    } else {
-                        alert("Error: " + response.error);
-                    }
-                },
-                error: function (xhr) {
-                    alert('Error: ' + xhr.responseJSON.error);
-                }
-            });
-        });
-    });
-</script>
-
-
-
 {% endblock %}
