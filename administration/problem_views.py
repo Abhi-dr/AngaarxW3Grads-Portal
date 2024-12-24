@@ -98,6 +98,7 @@ def add_question(request):
         input_format = request.POST.get('input_format')
         output_format = request.POST.get('output_format')
         constraints = request.POST.get('constraints')
+        hint = request.POST.get('hint')
         difficulty_level = request.POST.get('difficulty_level')
         
         description = convert_backticks_to_code(description)
@@ -109,6 +110,7 @@ def add_question(request):
             input_format = input_format,
             output_format = output_format,
             constraints = constraints,
+            hint = hint,
             difficulty_level=difficulty_level,
             is_approved=True
         )
@@ -164,6 +166,8 @@ def edit_question(request, id):
         description = request.POST.get('description')
         input_format = request.POST.get('input_format')
         output_format = request.POST.get('output_format')
+        constraints = request.POST.get('constraints')
+        hint = request.POST.get('hint')
         difficulty_level = request.POST.get('difficulty_level')
         position = request.POST.get('position')
         cpu_time_limit = request.POST.get('cpu_time_limit')
@@ -177,6 +181,8 @@ def edit_question(request, id):
         question.scenario = scenario
         question.input_format = input_format
         question.output_format = output_format
+        question.constraints = constraints
+        question.hint = hint
         question.difficulty_level = difficulty_level
         question.position = position
         question.cpu_time_limit = float(cpu_time_limit)

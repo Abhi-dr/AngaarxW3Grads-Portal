@@ -599,27 +599,34 @@
     <!-- ======================================= UNLOCK HINT ================================================== -->
 
 
+    <!-- ======================================= UNLOCK HINT ================================================== -->
     <script>
-        document.getElementById('restore-streak-btn').addEventListener('click', function () {
-            console.log("called");
-            fetch("{% url 'restore_streak' %}", {
+        document.getElementById('unlock-hint-btn').addEventListener('click', function () {
+            const questionId = this.getAttribute('data-id');
+            fetch("{% url 'unlock_hint' question.id %}", {
                 method: 'POST',
                 headers: { 'X-CSRFToken': '{{ csrf_token }}' },
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log("data received");
-                console.log(data);
-                if (data.status === 'success') {
-                    alert(data.message);
-                    location.reload();
-                } else {
-                    alert(data.message);
-                }
-            });
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Fetched")
+                    if (data.status === 'success') {
+                        hintBtn = document.getElementById("unlock-hint-btn");
+                        hintText = document.getElementById('hint-text');
+                        hintInfo = document.getElementById("hint-info");
+
+                        hintBtn.style.display = 'none';
+                        hintText.innerText = "Hint: " + data.hint;
+                        hintInfo.innerHTML = `<small>(This will be removed once you leave or reload the page) </small>`
+                        hintText.style.display = 'block';
+                    } else {
+                        alert(data.message);
+                    }
+                });
         });
     </script>
-    
+
+
 
     <!-- ===================================== EDITOR SETTINGS ================================================ -->
 

@@ -227,6 +227,7 @@ def add_new_question(request, slug):
         input_format = request.POST.get('input_format')
         output_format = request.POST.get('output_format')
         constraints = request.POST.get('constraints')
+        hint = request.POST.get('hint')
         difficulty_level = request.POST.get('difficulty_level')
         
         question = Question(
@@ -236,6 +237,7 @@ def add_new_question(request, slug):
             input_format=input_format,
             output_format=output_format,
             constraints = constraints,
+            hint=hint,
             difficulty_level=difficulty_level,
             is_approved=True
         )
