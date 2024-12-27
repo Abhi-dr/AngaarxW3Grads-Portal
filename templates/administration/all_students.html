@@ -13,6 +13,9 @@ Administration -> Students
             <h3 class="heading">
                 <span class="fw-semibold">Angaari Public🔥 &nbsp; <span id="total-count"></span> </span>
             </h3>
+            <span id="students-birthday">
+                
+            </span>
         </div>
     </div>
 
@@ -93,6 +96,13 @@ Administration -> Students
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
+
+            birthdaySpan = document.getElementById('students-birthday');
+            if (data.students_birthday.length > 0) {
+                birthdaySpan.innerHTML = `<h6 class="text-success">🎉 Birthday Today: ${data.students_birthday.map(student => student.first_name + student.last_name).join(', ')} 🎉</h6>`;
+            } else {
+                birthdaySpan.innerHTML = '';
+            }
 
             document.getElementById('total-count').innerText = `(${data.total_students} 👤)`;
 

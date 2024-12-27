@@ -149,7 +149,6 @@ def fetch_all_students(request):
         ],
         "students_birthday": [
             {
-                "id": student.id,
                 "first_name": student.first_name,
                 "last_name": student.last_name,
                 "username": student.username,
