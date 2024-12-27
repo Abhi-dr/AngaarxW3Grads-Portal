@@ -14,7 +14,7 @@ Administration -> Students
                 <span class="fw-semibold">Angaari Public🔥 &nbsp; <span id="total-count"></span> </span>
             </h3>
             <span id="students-birthday">
-                
+
             </span>
         </div>
     </div>
@@ -81,6 +81,21 @@ Administration -> Students
     </div>
 </div>
 
+<!-- Modal for Profile Picture -->
+<div class="modal fade" id="profilePicModal" tabindex="-1" aria-labelledby="profilePicModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="profilePicModalLabel">Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="modalProfilePic" src="" alt="Profile Picture" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     let currentPage = 1;
@@ -125,7 +140,11 @@ Administration -> Students
                 <thead clall="text-dark fs-4">
                     <tr>
                         <th class="border-bottom-0">
-                            <h6 class="fw-semibold mb-0"> #</th> </h6>
+                            <h6 class="fw-semibold mb-0"> # </h6>
+                        </th>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0"> Profile Pic </h6>
+                        </th>
                         <th class="border-bottom-0">
                             <h6 class="fw-semibold mb-0"> Name</th> </h6>
                         <th class="border-bottom-0">
@@ -144,7 +163,16 @@ Administration -> Students
             tableHTML += `
                 <tr>
                     <td class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">${student.id} </h6> </td>
+                        <h6 class="fw-semibold mb-0">${student.id} </h6> 
+                    </td>
+
+                    <td class="border-bottom-0">
+                        <img src="${student.profile_pic}" alt="Profile Picture"
+                            class="rounded-circle student-profile-pic" width="40" height="40"
+                            data-bs-toggle="modal" data-bs-target="#profilePicModal" 
+                            onclick="showProfilePic('${student.profile_pic}')">
+                    </td>
+
                     <td class="border-bottom-0">
                         <h6 class="fw-semibold mb-0">${student.first_name} ${student.last_name} </h6> 
                         <p class="text-primary
@@ -350,6 +378,15 @@ Administration -> Students
             alert('An error occurred while changing the password');
         }
     }
+
+
+    function showProfilePic(imageUrl) {
+        const modalImage = document.getElementById('modalProfilePic');
+        if (modalImage) {
+            modalImage.src = imageUrl;
+        }
+    }
+
 
 </script>
 

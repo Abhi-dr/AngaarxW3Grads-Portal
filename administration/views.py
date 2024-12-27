@@ -103,7 +103,7 @@ def fetch_all_students(request):
     page_size = int(request.GET.get('page_size', 10))
     
     # Base QuerySet
-    students = Student.objects.all().distinct()
+    students = Student.objects.all().distinct().order_by('-id')
     
     # Apply search filter if query is present
     if query:
@@ -141,6 +141,7 @@ def fetch_all_students(request):
                 "mobile_number": student.mobile_number,
                 'sparks': student.coins,
                 "is_active": student.is_active,
+                "profile_pic": student.profile_pic.url if student.profile_pic else None,
                 
                 "block_url": reverse('block_student', args=[student.id]),
                 "unblock_url": reverse('unblock_student', args=[student.id]),
