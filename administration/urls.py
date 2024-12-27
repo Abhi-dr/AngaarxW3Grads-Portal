@@ -8,6 +8,10 @@ urlpatterns = [
     # ========================= DATA WORK ============================
     
     path("all_students/", views.all_students, name="all_students"),
+    path("fetch_all_students/", views.fetch_all_students, name="fetch_all_students"),
+    
+    path('students/<int:student_id>/change-password/', views.change_password, name='administration_change_student_password'),
+
 
     path("all_instructors/", views.all_instructors, name="administrator_all_instructors"),
     path("add_instructor/", views.add_instructor, name="administrator_add_instructor"),

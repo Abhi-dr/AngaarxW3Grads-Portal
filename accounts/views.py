@@ -47,8 +47,7 @@ def login(request):
                     except:
                         messages.error(request, "Something Went Wrong... Try Again!")
                         return redirect("login")
-                    
-                
+            
             else:                
                 messages.error(request, "Invalid Password")
                 return redirect("login")

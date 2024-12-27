@@ -34,8 +34,19 @@ def dashboard(request):
     
     pod = POD.objects.filter(date=datetime.now().date()).first()
     
-    
-    next_three_questions = Question.objects.filter(is_approved=True).exclude(id__in=Submission.objects.filter(user=request.user.student).values('question').distinct()).order_by("?")[:3]
+    next_three_questions = (
+    Question.objects
+    .filter(is_approved=True)  # Only approved questions
+    .exclude(
+        id__in=Submission.objects
+        .filter(user=request.user.student)
+        .values('question')
+        .distinct()
+    )  # Exclude already attempted questions
+    .exclude(sheets__isnull=False)  # Exclude questions linked to any sheet
+    .order_by("?")[:3]  # Randomize and limit to 3 questions
+)
+
     
     is_birthday = False
     if request.user.student.dob:

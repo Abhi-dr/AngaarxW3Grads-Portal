@@ -431,7 +431,7 @@ class POD(models.Model):
 
 class Streak(models.Model):
     user = models.ForeignKey(Student, on_delete=models.CASCADE)
-    current_streak = models.PositiveIntegerField(default=0)  # Current streak of consecutive submissions
+    current_streak = models.PositiveIntegerField(default=1)  # Current streak of consecutive submissions
     last_submission_date = models.DateField(null=True, blank=True)
 
     def update_streak(self):

@@ -8,8 +8,15 @@ from accounts.models import Administrator, Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
 from practice.models import Sheet, Submission, Question
 from angaar_hai.custom_decorators import admin_required
+from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+import json
 
 import datetime
+
+from django.http import JsonResponse
+import math
 
 # ======================================== ADMINISTRATION ======================================
 
@@ -87,37 +94,101 @@ def index(request):
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
-def all_students(request):
-        
-    administrator = Administrator.objects.get(id=request.user.id)
+def fetch_all_students(request):
+    today = datetime.date.today()
     
-    # students = Student.objects.filter(courses__administrator=administrator).distinct()
+    # Fetch query and pagination parameters
+    query = request.GET.get('query', '')
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 10))
+    
+    # Base QuerySet
     students = Student.objects.all().distinct()
     
-    # fetch those students who has their birthdays today
-    
-    today = datetime.date.today()
-    students_birthday = Student.objects.filter(dob__day=today.day, dob__month=today.month)
-    
-    
-    query = request.POST.get("query")
+    # Apply search filter if query is present
     if query:
-        students = Student.objects.filter(
+        students = students.filter(
             Q(id__icontains=query) |
-            Q(first_name__icontains=query) | 
-            Q(last_name__icontains=query) | 
+            Q(username__icontains=query) |
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
             Q(email__icontains=query)
-            )
+        )
     
-    parameters = {
-        "administrator": administrator,
-        "students": students,
-        "students_birthday": students_birthday,
-        "query": query
+    # Get students with birthdays today
+    students_birthday = students.filter(dob__day=today.day, dob__month=today.month)
+    
+    # Pagination logic
+    total_students = students.count()
+    total_pages = math.ceil(total_students / page_size)
+    start = (page - 1) * page_size
+    end = start + page_size
+    
+    students_paginated = students[start:end]
+    
+    # Prepare JSON response
+    data = {
+        "students": [
+            {
+                "id": student.id,
+                "first_name": student.first_name,
+                "last_name": student.last_name,
+                "username": student.username,
+                "email": student.email,
+                "college": student.college,
+                "linkedin_id": student.linkedin_id,
+                "github_id": student.github_id,
+                "mobile_number": student.mobile_number,
+                'sparks': student.coins,
+                "is_active": student.is_active,
+                
+                "block_url": reverse('block_student', args=[student.id]),
+                "unblock_url": reverse('unblock_student', args=[student.id]),
+            }
+            for student in students_paginated
+        ],
+        "students_birthday": [
+            {
+                "id": student.id,
+                "first_name": student.first_name,
+                "last_name": student.last_name,
+                "username": student.username,
+                "email": student.email,
+                "dob": student.dob.strftime('%Y-%m-%d'),
+            }
+            for student in students_birthday
+        ],
+        "pagination": {
+            "current_page": page,
+            "page_size": page_size,
+            "total_students": total_students,
+            "total_pages": total_pages,
+        },
+        "total_students": total_students,
     }
     
-    return render(request, "administration/all_students.html", parameters)
+    return JsonResponse(data)
 
+def all_students(request):
+    return render(request, "administration/all_students.html")
+
+
+# ===================================== CHANGE STUDENT PASSWORD API =======================
+
+@csrf_exempt
+def change_password(request, student_id):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            new_password = data.get('new_password')
+            student = User.objects.get(id=student_id)
+            student.set_password(new_password)
+            student.save()
+            return JsonResponse({'success': True, 'message': 'Password changed successfully'})
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'User not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': str(e)}, status=400)
 # ========================================= ALL INSTRUCTORS =====================================
 
 @login_required(login_url='login')

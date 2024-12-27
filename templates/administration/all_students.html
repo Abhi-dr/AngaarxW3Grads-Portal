@@ -11,271 +11,336 @@ Administration -> Students
     <div class="card">
         <div class="card-body">
             <h3 class="heading">
-                <span class="fw-semibold">Angaari Public🔥 &nbsp;({{ students.count }})</span>
+                <span class="fw-semibold">Angaari Public🔥 &nbsp; <span id="total-count"></span> </span>
             </h3>
         </div>
     </div>
 
-
     {% for message in messages %}
-
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
         <strong>{{ message.tag }}</strong> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-
     {% endfor %}
 
     <!-- create a search bar -->
-
     <div class="card w-100">
         <div class="card-body p-4">
-            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
-            <form method="post">
-
-                {% csrf_token %}
-
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search by ID, Name, Email or Phone Number"
-                        aria-label="Search by ID, Name, Email or Phone Number" aria-describedby="button-addon2"
-                        name="query">
-                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
-                    <!-- make a button to clear the search -->
-                    <a href="{% url 'all_students' %}" class="btn btn-outline-danger">Clear</a>
+            <form onsubmit="event.preventDefault();">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="searchInput"
+                        placeholder="Search by ID, Name, or Email" />
+                    <button type="button" class="btn btn-outline-danger" id="clearSearchButton">Clear</button>
                 </div>
-
-                <!-- search on the basis of tags -->
-
-
-
             </form>
-        </div>
-
-
-    </div>
-
-    <!-- ============================================= BIRTHDAYS ================================ -->
-
-    {% if students_birthday %}
-
-    <div class="card w-100">
-        <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">BIRTHDAYS🥳
-            </h5>
-            <div class="table-responsive">
-                <table class="table text-nowrap mb-0 align-middle">
-                    <thead class="text-dark fs-4">
-
-                        <tr>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    #
-                                </h6>
-                            </th>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Name
-                                </h6>
-                            </th>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Courses
-                                </h6>
-                            </th>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    College/University
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Contacts
-                                </h6>
-                            </th>
-
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {% for student in students_birthday %}
-
-                        <tr>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{ student.first_name }} {{student.last_name }}</h6>
-                                <span class="fw-semibold">{{ student.username }}</span>
-
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    {% for course in student.courses.all %}
-                                    <span style="font-weight: bold; color: black;">{{ course.name }}</span>
-                                    <br>
-                                    {% endfor %}
-                                </p>
-
-                            </td>
-
-                            <td class="border-bottom-0 ">
-                                <p class="fw-semibold mb-0">
-                                    {{ student.college }}
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-
-                                    <a href="mailto:{{ student.email }}"
-                                        class="btn btn-outline-warning text-red float-end">Mail</a>
-
-                                    <a href="tel:{{ student.mobile_number }}"
-                                        class="btn btn-outline-indigo text-green float-end">Call</a>
-                                </div>
-                            </td>
-
-                            {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            <div id="studentsTable" class="table-responsive"></div>
+            <nav>
+                <ul class="pagination justify-content-center" id="pagination"></ul>
+            </nav>
         </div>
     </div>
-
-{% endif %}
-
-    <!-- ======================================================================================== -->
-
-
-    <div class="card w-100">
-        <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Apni Angaari Public 🔥
-                {% if query %}
-                <span class="fs-6"> | Search Results for "{{ query }}"</span>
-                {% endif %}
-            </h5>
-            <div class="table-responsive">
-                <table class="table text-nowrap mb-0 align-middle">
-                    <thead class="text-dark fs-4">
-
-                        <tr>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    #
-                                </h6>
-                            </th>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Name
-                                </h6>
-                            </th>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Courses
-                                </h6>
-                            </th>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    College/University
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Social Links
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Contacts
-                                </h6>
-                            </th>
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#1
-                                </h6>
-                            </th>
-
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        {% for student in students %}
-
-                        <tr>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ student.id }}</h6>
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1">{{ student.first_name }} {{student.last_name }}</h6>
-                                <span class="fw-semibold">{{ student.username }}</span>
-
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    {% for course in student.courses.all %}
-                                    <span style="font-weight: bold; color: black;">{{ course.name }}</span>
-                                    <br>
-                                    {% endfor %}
-                                </p>
-
-                            </td>
-
-                            <td class="border-bottom-0 ">
-                                <p class="fw-semibold mb-0">
-                                    {{ student.college }}
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-
-                                <div class="d-flex align-items-center gap-2">
-
-                                    <a href="{{ student.linkedin_id }}" target="_blank"
-                                        class="btn btn-outline-info text-red float-end">LinkedIn</a>
-
-                                    <a href="{{ student.github_id }}" target="_blank"
-                                        class="btn btn-outline-dark text-green float-end">GitHub</a>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-
-                                    <a href="mailto:{{ student.email }}"
-                                        class="btn btn-outline-warning text-red float-end">Mail</a>
-
-                                    <a href="tel:{{ student.mobile_number }}"
-                                        class="btn btn-outline-indigo text-green float-end">Call</a>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-
-                                    {% if student.is_active %}
-                                    <a href="{% url 'block_student' student.id %}" class="btn btn-danger text-red float-end" onclick="return confirm('Are you sure you want to block the Student?');">Block Student</a>
-                                    {% else %}
-                                    <a href="{% url 'unblock_student' student.id %}" class="btn btn-warning text-green float-end" onclick="return confirm('Are you sure you want to unblock the Student?');">Unblock Student</a>
-                                    {% endif %}
-                                </div>
-                            </td>
-
-                            {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-
 </div>
 
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="changePasswordForm">
+
+                    {% csrf_token %}
+
+                    <input type="hidden" id="studentId">
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" class="form-control" id="newPassword" placeholder="New password..."
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword"
+                            placeholder="Confirm New Password..." required>
+                    </div>
+                    <div class="alert alert-danger d-none" id="passwordError">Passwords do not match!</div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="save-password-btn"
+                    onclick="submitChangePassword()">Change Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let currentPage = 1;
+    let currentQuery = '';
+
+    // Function to fetch students
+    async function fetchStudents(page = 1, query = '') {
+        try {
+            const url = `{% url 'fetch_all_students' %}?page=${page}&page_size=10&query=${query}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+
+            document.getElementById('total-count').innerText = `(${data.total_students} 👤)`;
+
+            renderStudents(data.students);
+            renderPagination(data.pagination);
+        } catch (error) {
+            console.error('Error fetching students:', error);
+        }
+    }
+
+    // Function to render students in a table
+    function renderStudents(students) {
+        const tableContainer = document.getElementById('studentsTable');
+        if (!tableContainer) {
+            console.error('Table container not found');
+            return;
+        }
+        let tableHTML = `
+            <table class="table text-nowrap mb-0 align-middle">
+                <thead clall="text-dark fs-4">
+                    <tr>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0"> #</th> </h6>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0"> Name</th> </h6>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0"> College</th> </h6>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0"> Social Links</th> </h6>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0"> Contacts</th> </h6>
+                        <th class="border-bottom-0">
+                            <h6 class="fw-semibold mb-0"> Action</th> </h6>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        students.forEach(student => {
+            tableHTML += `
+                <tr>
+                    <td class="border-bottom-0">
+                        <h6 class="fw-semibold mb-0">${student.id} </h6> </td>
+                    <td class="border-bottom-0">
+                        <h6 class="fw-semibold mb-0">${student.first_name} ${student.last_name} </h6> 
+                        <p class="text-primary
+                            mb-0">${student.username} | <span class="text-success">${student.sparks} sparks</span>
+                        </p>
+                    </td>
+                    <td class="border-bottom-0">
+                        <h6 class="fw-semibold mb-0">${student.college} </h6> </td>
+                    <td class="border-bottom-0">
+                        <a href="${student.linkedin_id}" target="_blank" class="btn btn-outline-info">
+                            <i class="ti ti-brand-linkedin"></i>
+                        </a>
+                        <a href="${student.github_id}" target="_blank" class="btn btn-outline-dark">
+                            <i class="ti ti-brand-github"></i>
+                        </a>
+                    </td>
+                    <td class="border-bottom-0">
+                        <a href="mailto:${student.email}" class="btn btn-outline-warning">
+                            <i class="ti ti-mail"></i>
+                        </a>
+                        <a href="tel:${student.mobile_number}" class="btn btn-outline-primary">
+                            <i class="ti ti-phone-call"></i>
+                        </a>
+                    </td>
+                   <td class="border-bottom-0">
+                    ${student.is_active
+                    ? `<a href="${student.block_url}" class="btn btn-danger btn-sm">Block</a>`
+                    : `<a href="${student.unblock_url}" class="btn btn-warning btn-sm">Unblock</a>`}
+                    <button class="btn btn-sm btn-outline-secondary" onclick="openChangePasswordModal(${student.id})">
+                        Change Password
+                    </button>
+                </td>
+
+
+                </tr>
+            `;
+        });
+        tableHTML += `</tbody></table>`;
+        tableContainer.innerHTML = tableHTML;
+    }
+
+    // Function to render pagination controls
+    function renderPagination(pagination) {
+        const paginationContainer = document.getElementById('pagination');
+        if (!paginationContainer) {
+            console.error('Pagination container not found');
+            return;
+        }
+        paginationContainer.innerHTML = '';
+
+        const { current_page, total_pages } = pagination;
+        const maxVisiblePages = 10; // Show a maximum of 10 page numbers
+
+        // Calculate start and end page numbers
+        let startPage = Math.max(current_page - Math.floor(maxVisiblePages / 2), 1);
+        let endPage = startPage + maxVisiblePages - 1;
+
+        if (endPage > total_pages) {
+            endPage = total_pages;
+            startPage = Math.max(endPage - maxVisiblePages + 1, 1);
+        }
+
+        // Previous Button
+        paginationContainer.innerHTML += `
+            <li class="page-item ${current_page === 1 ? 'disabled' : ''}">
+                <a class="page-link" href="#" aria-label="Previous" data-page="${current_page - 1}">
+                    <span aria-hidden="true">&laquo; Previous</span>
+                </a>
+            </li>
+        `;
+
+        // Page Numbers
+        for (let i = startPage; i <= endPage; i++) {
+            paginationContainer.innerHTML += `
+                <li class="page-item ${current_page === i ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">
+                        ${i}
+                    </a>
+                </li>
+            `;
+        }
+
+        // Next Button
+        paginationContainer.innerHTML += `
+            <li class="page-item ${current_page === total_pages ? 'disabled' : ''}">
+                <a class="page-link" href="#" aria-label="Next" data-page="${current_page + 1}">
+                    <span aria-hidden="true">Next &raquo;</span>
+                </a>
+            </li>
+        `;
+
+        // Attach event listeners to pagination links
+        document.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const page = parseInt(e.target.getAttribute('data-page'));
+                if (!isNaN(page) && page > 0 && page <= total_pages) {
+                    changePage(page);
+                }
+            });
+        });
+    }
+
+
+    // Change page
+    function changePage(page) {
+        currentPage = page;
+        fetchStudents(currentPage, currentQuery);
+    }
+
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+        currentQuery = e.target.value.trim();
+        currentPage = 1;
+        fetchStudents(currentPage, currentQuery);
+    });
+
+    // Clear search
+    document.getElementById('clearSearchButton').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        currentQuery = '';
+        currentPage = 1;
+        fetchStudents(currentPage, currentQuery);
+    });
+
+    // Initial fetch
+    fetchStudents();
+</script>
+
+<script>
+    // Open Change Password Modal
+    function openChangePasswordModal(studentId) {
+        document.getElementById('studentId').value = studentId;
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+        document.getElementById('passwordError').classList.add('d-none');
+
+
+        const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+        modal.show();
+    }
+
+    // Submit Change Password
+    async function submitChangePassword() {
+        const studentId = document.getElementById('studentId').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+
+        // Validate Passwords
+        if (newPassword !== confirmPassword) {
+            document.getElementById('passwordError').classList.remove('d-none');
+            return;
+        }
+
+        if (newPassword.length < 8 || confirmPassword.length < 8) {
+            alert('Password must be at least 8 characters long');
+            return;
+        }
+
+        if (newPassword.length > 50 || confirmPassword.length < 8) {
+            alert('Password must be at most 50 characters long');
+            return;
+        }
+
+        if (newPassword === '' || confirmPassword === '') {
+            alert('Password field cannot be empty');
+            return;
+        }
+
+
+        try {
+
+            savebtn = document.getElementById('save-password-btn');
+            savebtn.disabled = true;
+            savebtn.innerText = 'Please wait...';
+
+            const response = await fetch(`/administration/students/${studentId}/change-password/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ new_password: newPassword })
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to change password');
+            }
+
+            const data = await response.json();
+            if (data.success) {
+                alert('Password changed successfully');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+                // change the save button to close
+                document.getElementById('changePasswordModalLabel').innerText = 'Password Changed';
+                modal.hide();
+            } else {
+                alert('Failed: ' + data.message);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while changing the password');
+        }
+    }
+
+</script>
 
 {% endblock %}

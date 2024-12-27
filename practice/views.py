@@ -185,6 +185,8 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         response = requests.post(JUDGE0_URL, json=submission_data, headers=HEADERS)
         response.raise_for_status()
         
+        print(response)
+        
         token = response.json().get("token")
         if not token:
             return {
@@ -193,7 +195,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
                 "token": None
             }
 
-        print("TOKEN:", token)          
+        print("TOKEN:", token)
         
         while True:
             result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
