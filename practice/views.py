@@ -515,7 +515,8 @@ def run_code(request, slug):
         except Exception as e:
             print(f"Error during code execution: {e}")
             return JsonResponse({
-                "error": "Some Error Occued. Check Your Code 🙂",
+                "error": "Some Error Occued: " + str(e),
+                
                 }, status=500)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
