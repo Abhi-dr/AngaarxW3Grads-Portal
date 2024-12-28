@@ -130,8 +130,11 @@ def register(request):
         
         new_user.set_password(password)
         
-        new_user.save() 
+        send_welcome_mail(email, first_name)
+
         
+        new_user.save() 
+                
         messages.success(request, "Account created successfully! Aaja Ab🔥")
 
         return redirect("login")
@@ -204,3 +207,40 @@ def get_active_sheet_timer(request):
         })
     else:
         return JsonResponse({'start_time': None, 'end_time': None})
+
+
+# ========================================
+
+from django.core.mail import EmailMultiAlternatives
+
+
+def send_welcome_mail(to, name):
+
+    subject = 'Welcome to The Angaar Batch!🔥'
+    from_email = 'noreply@theangaarbatch.in'
+    to_email = [to]
+    
+    from_name = "The Angaar Batch "
+    from_email_full = f"{from_name} <{from_email}>"
+
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+        <div style="background-color: #f4f4f4; padding: 20px; text-align: center;">
+        <img src="https://theangaarbatch.in/static/img/home/angaari_logo.png" alt="The Angaar Batch Logo" style="width: 120px; margin-bottom: 20px;">
+        <h1 style="color: #2C3E50;">Welcome to The Angaar Batch🔥, {name}!</h1>
+        <p style="font-size: 16px; color: #555555;">We're thrilled to have you on board. Get ready to dive into an exciting journey of learning, coding, and growth.</p>
+        <p style="font-size: 16px; color: #555555;">Stay curious, stay passionate, and let's build something amazing together!</p>
+        <a href="https://theangaarbatch.in/accounts/login" style="background-color: #3498DB; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 14px; display: inline-block; margin-top: 20px;">Go to Dashboard</a>
+        <p style="font-size: 14px; color: #777777; margin-top: 30px;">If you have any questions, feel free to reply to this email.</p>
+        <p style="font-size: 14px; color: #777777;">Happy Coding! 🚀</p>
+        </div>
+    </body>
+    </html>
+    """
+
+    email = EmailMultiAlternatives(subject, '', from_email_full, to_email)
+    email.attach_alternative(html_content, 'text/html')
+    email.send()
+    
+    print(f"\nEMAIL SENT! to {to_email} \n")
