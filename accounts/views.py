@@ -244,3 +244,55 @@ def send_welcome_mail(to, name):
     email.send()
     
     print(f"\nEMAIL SENT! to {to_email} \n")
+
+# ================================================== RESET PASSWORD ==========================================
+
+
+from django.core.mail import send_mail
+from django.shortcuts import render, redirect
+from .models import Student, PasswordResetToken
+
+def request_password_reset(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = Student.objects.get(email=email)
+            token = PasswordResetToken.create_token(user)
+            from_email = 'noreply@theangaarbatch.in'
+
+
+            reset_link = request.build_absolute_uri(
+                f"/reset-password/{user.pk}/{token}/"
+            )
+
+            send_mail(
+                'Password Reset Request',
+                f'Click the link to reset your password: {reset_link}',
+                from_email,
+                [email],
+            )
+            return redirect('login')
+        except Student.DoesNotExist:
+            pass  # Prevent enumeration attacks
+    return render(request, 'accounts/request_password_reset.html')
+
+
+def reset_password(request, user_id, token):
+    try:
+        user = Student.objects.get(pk=user_id)
+        reset_token = PasswordResetToken.objects.filter(user=user).first()
+    except Student.DoesNotExist:
+        reset_token = None
+
+    if reset_token and reset_token.is_valid(token):
+        if request.method == 'POST':
+            new_password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
+            if new_password == confirm_password:
+                user.set_password(new_password)
+                user.save()
+                reset_token.invalidate()
+                return redirect('login')
+        return render(request, 'accounts/reset_password.html')
+    
+    return redirect('request_password_reset')

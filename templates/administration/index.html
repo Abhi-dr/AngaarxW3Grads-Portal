@@ -22,7 +22,13 @@ Administration -> Home
 
     @keyframes html-progress {
         to {
-            --progress-value: {{ total_completed_sessions_percentage }};
+            --progress-value: {
+                    {
+                    total_completed_sessions_percentage
+                }
+            }
+
+            ;
         }
     }
 
@@ -107,7 +113,6 @@ Administration -> Home
         width: 0;
         height: 0;
     }
-    
 </style>
 
 
@@ -221,123 +226,52 @@ Administration -> Home
 
             </div>
         </div>
-        <!-- <div class="col-lg-4">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="card overflow-hidden">
-                        <div class="card-body p-4">
-                            <h5 class="card-title mb-9 fw-semibold">Profile Score</h5>
-
-                            
-
-                            <div class="row align-items-center">
-                                <div class="col-8">
-                                    <h4 class="fw-semibold mb-3">{{ student.get_profile_score }}</h4>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <span
-                                            class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-arrow-up-right text-success"></i>
-                                        </span>
-                                        <p class=" me-1 fs-3 mb-0">Top</p>
-
-
-
-                                        {% if student.get_profile_score == 100 %}
-                                        <p class="fs-3 mb-0">1%</p>
-
-                                        {% elif student.get_profile_score >= 90 %}
-                                        <p class="fs-3 mb-0">30%</p>
-
-                                        {% elif student.get_profile_score >= 60 %}
-                                        <p class="fs-3 mb-0">50%</p>
-
-                                        {% elif student.get_profile_score >= 30 %}
-
-                                        <p class="fs-3 mb-0">90%</p>
-
-                                        {% else %}
-                                        <p class="fs-3 mb-0">Not Available</p>
-
-                                        {% endif %}
-
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-4">
-                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                                            <span class="fs-2">Completed</span>
-                                        </div>
-                                        <div>
-                                            <span
-                                                class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
-                                            <span class="fs-2">Left</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div class="d-flex justify-content-center">
-                                        <div class="progress-bar-container">
-
-                                            <div class="progress-bar js">
-                                                <progress id="js" min="0" max="100" value="70"></progress>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            
-
-                            
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
 
         <div class="col-lg-4">
             <div class="row">
                 <div class="col-lg-12">
                     <!-- Yearly Breakup -->
-                    <div class="card overflow-hidden p-1" style="max-width: 100%; max-height: 31.7vh;">
+                    <div class="card overflow-hidden p-1">
+                        <div class="card-body p-3">
 
-                        <!-- <h5 class="card-title mb-9 fw-semibold">Avg. Test Series Result</h5>
-                            <div class="row align-items-center">
-                                <div class="col-8">
-                                    <h4 class="fw-semibold mb-3">43%</h4>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <span
-                                            class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-arrow-down-left text-danger"></i>
-                                        </span>
-                                        <p class=" me-1 fs-3 mb-0">-13%</p>
-                                        <p class="fs-3 mb-0">last test</p>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-4">
-                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                                            <span class="fs-2">Completed</span>
-                                        </div>
-                                        <div>
-                                            <span
-                                                class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
-                                            <span class="fs-2">Left</span>
-                                        </div>
-                                    </div>
+                            <h5 class="fw-semibold mb-2">Total Users Active: 
+                                <span class="fs-3">-</span>
+                            </h5>
+                            <!-- <h5 class="fw-semibold mb-2">Total Users Active: 
+                                <span class="fs-3">43%</span>
+                            </h5>
+                            <h5 class="fw-semibold mb-2">Total Users Active: 
+                                <span class="fs-3">43%</span>
+                            </h5>
+                            <h5 class="fw-semibold mb-2">Total Users Active: 
+                                <span class="fs-3">43%</span>
+                            </h5>
+                            <h5 class="fw-semibold mb-2">Total Users Active: 
+                                <span class="fs-3">43%</span>
+                            </h5> -->
+
+
+                            <!-- <div class="d-flex align-items-center mb-3">
+                                <span
+                                    class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                    <i class="ti ti-arrow-down-left text-danger"></i>
+                                </span>
+                                <p class=" me-1 fs-3 mb-0">-13%</p>
+                                <p class="fs-3 mb-0">last test</p>
+                            </div>
+
+                            <div class="d-flex align-items-center">
+                                <div class="me-4">
+                                    <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
+                                    <span class="fs-2">Completed</span>
                                 </div>
-                                <div class="col-4">
-                                    <div class="d-flex justify-content-center">
-                                        <div class="progress-bar-container">
-
-                                            <div class="progress-bar html">
-                                                <progress id="html" min="0" max="100" value="70"></progress>
-                                            </div>
-                                        </div>
-                                    </div>
+                                <div>
+                                    <span class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
+                                    <span class="fs-2">Left</span>
                                 </div>
                             </div> -->
-
-                        <img src="{{ course.thumbnail.url }}"
-                            height="182vh" style="border-radius: 5px;" alt="">
+                            
+                        </div>
                     </div>
                 </div>
 
@@ -391,17 +325,20 @@ Administration -> Home
                                     <a href="{% url 'set_pod' %}" class="btn btn-outline-secondary">Set General POD</a>
                                 </td>
                                 <td class="border-bottom-0">
-                                    <a href="{% url 'administrator_add_sheet' %}" class="btn btn-outline-warning">Add Sheet</a>
+                                    <a href="{% url 'administrator_add_sheet' %}" class="btn btn-outline-warning">Add
+                                        Sheet</a>
                                 </td>
                                 <td class="border-bottom-0">
-                                    <a href="{% url 'administrator_sheet' latest_sheet.slug %}" class="btn btn-outline-info">Open {{ latest_sheet.name }} Sheet</a>
+                                    <a href="{% url 'administrator_sheet' latest_sheet.slug %}"
+                                        class="btn btn-outline-info">Open {{ latest_sheet.name }} Sheet</a>
                                 </td>
                                 <td class="border-bottom-0">
-                                    <a href="{% url 'question_requests' %}" class="btn btn-outline-indigo">Question Requests</a>
+                                    <a href="{% url 'question_requests' %}" class="btn btn-outline-indigo">Question
+                                        Requests</a>
                                 </td>
                             </tr>
 
-                            
+
                         </tbody>
                     </table>
                 </div>
@@ -421,16 +358,18 @@ Administration -> Home
                     <ul class="timeline-widget mb-0 position-relative mb-n3">
 
 
-                      {% if sessions %}
+                        {% if sessions %}
                         {% for session in sessions %}
 
                         <li class="timeline-item d-flex position-relative overflow-hidden">
                             <div class="timeline-time  flex-shrink-0 text-end">
                                 <span class="fw-bolder">({{ session.course.name }})</span>
-                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{ session.topic|title|truncatechars:6 }}</span>
+                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{
+                                    session.topic|title|truncatechars:6 }}</span>
                             </div>
                             <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                <span class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
+                                <span
+                                    class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
                                 <span class="timeline-badge-border d-block flex-shrink-0"></span>
                             </div>
                             <div class="timeline-desc fs-3  mt-n1">{{ session.session_time }}
@@ -438,7 +377,8 @@ Administration -> Home
 
                                 {% if session.get_meeting_status.status == "Ongoing" %}
 
-                                <a href="{{ session.link }}" class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                <a href="{{ session.link }}"
+                                    class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
                                     {{ session.get_meeting_status.status }}... Join
                                 </a>
 
@@ -454,13 +394,13 @@ Administration -> Home
                                     class="text-primary d-block fw-normal">Know More
                                 </a> -->
                             </div>
-                            
+
                         </li>
 
 
                         {% endfor %}
 
-                        
+
                         {% else %}
 
                         <li class="timeline-item d-flex position-relative overflow-hidden">
@@ -497,7 +437,7 @@ Administration -> Home
                             </div>
                             <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
                             </div>
-                        </li>                   
+                        </li>
 
                         {% endif %}
                     </ul>
@@ -537,7 +477,7 @@ Administration -> Home
                                             Status
                                         </h6>
                                     </th>
-                                    
+
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">
                                             Action
@@ -555,7 +495,8 @@ Administration -> Home
                                         <h6 class="fw-semibold mb-0 text-center">{{ session.id }}</h6>
                                     </td>
                                     <td class="border-bottom-0">
-                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{ session.topic|truncatechars:10 }}</h6>
+                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            title="{{ session.topic }}">{{ session.topic|truncatechars:10 }}</h6>
                                         <span class="fw-normal">{{ session.course.name }}</span>
                                     </td>
                                     <td class="border-bottom-0">
@@ -575,18 +516,23 @@ Administration -> Home
 
                                             {% if session.get_meeting_status.status == "Upcoming" %}
 
-                                            <a href="{% url 'edit_session' session.id %}" class="btn btn-outline-info">Edit📝
+                                            <a href="{% url 'edit_session' session.id %}"
+                                                class="btn btn-outline-info">Edit📝
                                             </a>
 
                                             {% elif not session.is_completed %}
 
-                                            <a href="{% url 'mark_session_completed' session.id %}" class="btn btn-outline-success">Mark Complete ✅
+                                            <a href="{% url 'mark_session_completed' session.id %}"
+                                                class="btn btn-outline-success">Mark Complete ✅
                                             </a>
 
                                             {% elif session.recorded_session_link == None %}
 
-                                            <button class="btn btn-outline-dark text-blue float-end" data-bs-toggle="modal" data-bs-target="#uploadRecordedSessionModal" data-session-id="{{ session.id }}" session-topic="{{ session.topic }}">Upload Recording↗️</button>
-                                            
+                                            <button class="btn btn-outline-dark text-blue float-end"
+                                                data-bs-toggle="modal" data-bs-target="#uploadRecordedSessionModal"
+                                                data-session-id="{{ session.id }}"
+                                                session-topic="{{ session.topic }}">Upload Recording↗️</button>
+
                                             {% endif %}
                                         </div>
                                     </td>
@@ -602,7 +548,7 @@ Administration -> Home
 
     </div>
     <!-- ================================= ALL ELIGIBLE JOBS ============================ -->
-    
+
     <!-- <div class="card-body">
         <h5 class="card-title fw-semibold mb-4 text-white">Commpanies Only For You 🔥</h5>
     </div>
@@ -693,7 +639,7 @@ Administration -> Home
     <div class="py-6 px-6 text-center">
         <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
                 class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
-<!--                 
+            <!--                 
             All Rights Reserved by <a href="https://gla.ac.in" target="_blank"
                 class="pe-1 text-primary text-decoration-underline">GLA University</a> -->
 

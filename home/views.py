@@ -8,6 +8,9 @@ def home(request):
 def about(request):
     return render(request, "home/about.html")
 
+def our_team(request):
+    return render(request, "home/team.html")
+
 def angaar_plus(request):
     return render(request, "home/angaar_plus.html")
 

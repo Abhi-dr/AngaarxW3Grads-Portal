@@ -13,4 +13,7 @@ urlpatterns = [
     
     path("get_active_sheet_timer/", views.get_active_sheet_timer, name="get_active_sheet_timer"),
     
+    path('request-password-reset/', views.request_password_reset, name='request_password_reset'),
+    path('reset-password/<int:user_id>/<str:token>/', views.reset_password, name='reset_password'),
+    
 ]   

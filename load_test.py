@@ -9,3 +9,4 @@ class AngaarUser(HttpUser):
 
 
 # URL: locust -f load_test.py --host https://theangaarbatch.in
+

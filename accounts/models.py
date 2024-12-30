@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from datetime import timedelta
+import hashlib
+import secrets
 
 # ================================================= ADMINISTRATOR ==========================================
 
@@ -94,4 +97,35 @@ class Student(User):
     #         self.is_staff = False
     #         self.set_password('angaarhai')
     #     super().save(*args, **kwargs)
+
+
+# ===================================== RESET PASSWORD ==========================================
+
+class PasswordResetToken(models.Model):
+    user = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='password_reset_tokens')
+    token_hash = models.CharField(max_length=64, unique=True)  # Store hashed token
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=15)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def create_token(cls, user):
+        raw_token = secrets.token_urlsafe(32)
+        hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
+        cls.objects.create(user=user, token_hash=hashed_token)
+        return raw_token
+
+    def is_valid(self, token):
+        hashed_input = hashlib.sha256(token.encode()).hexdigest()
+        return hashed_input == self.token_hash and timezone.now() < self.expires_at
+
+    def invalidate(self):
+        self.delete()
+
+    def __str__(self):
+        return f"Password Reset Token for {self.user.email}"
 
