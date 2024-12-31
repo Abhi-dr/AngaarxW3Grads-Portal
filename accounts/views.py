@@ -4,6 +4,10 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.utils import timezone
 
 from .models import Student, Instructor, Administrator
 
@@ -259,21 +263,39 @@ def request_password_reset(request):
             user = Student.objects.get(email=email)
             token = PasswordResetToken.create_token(user)
             from_email = 'noreply@theangaarbatch.in'
+            subject = 'Reset Your Password'
 
-
+            from_name = "The Angaar Batch "
+            from_email_full = f"{from_name} <{from_email}>"
+            
+            
             reset_link = request.build_absolute_uri(
-                f"/reset-password/{user.pk}/{token}/"
+                f"/accounts/reset-password/{user.pk}/{token}/"
             )
 
+            
+            html_message = render_to_string('accounts/reset_password_email.html', {
+            'user': user,
+            'reset_link': reset_link,
+            'current_year': timezone.now().year
+        })
+            plain_message = strip_tags(html_message)
+            
             send_mail(
-                'Password Reset Request',
-                f'Click the link to reset your password: {reset_link}',
-                from_email,
-                [email],
+                subject, 
+                plain_message, 
+                from_email_full, 
+                [email], 
+                html_message=html_message
             )
+
+            
+            messages.success(request, 'Password reset link sent to your email address!')
             return redirect('login')
         except Student.DoesNotExist:
-            pass  # Prevent enumeration attacks
+            messages.error(request, 'No user found with that email address!')
+            return redirect('request_password_reset')
+            
     return render(request, 'accounts/request_password_reset.html')
 
 
