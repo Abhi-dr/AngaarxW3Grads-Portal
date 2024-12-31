@@ -1,245 +1,87 @@
+{% extends 'home/base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}Login - Angaar{% endblock %}
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
-  <title>
-    #ANGAAR HAI
-  </title>
-  <!--     Fonts and icons     -->
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-  <!-- Nucleo Icons -->
-  <link href="{% static 'css/nucleo-icons.css' %}" rel="stylesheet" />
-  <link href="{% static 'css/nucleo-svg.css' %}" rel="stylesheet" />
-  <!-- Font Awesome Icons -->
-  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
-  <link href="{% static 'css/accounts/nucleo-svg.css' %}" rel="stylesheet" />
-  <!-- CSS Files -->
-  <link id="pagestyle" href="{% static 'css/accounts/argon-dashboard.css' %}" rel="stylesheet" />
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/accounts/login.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
 
-  <style>
-    body {
-      background-image: url("{% static 'img/accounts/login_bg.jpg' %}");
-      background-size: contain;
+<style>
+  .a-link {
+    font-weight: 600;
+    color: #5e72e4;
+  }
 
-      background-attachment: fixed;
+  .a-link:hover {
+    text-decoration: none;
+    color: #233dd2;
+  }
 
-    }
+  .btn-primary {
+    background-color: #5e72e4;
+    font-weight: 600;
+    font-size: medium;
+  }
+</style>
 
-    .input-container {
-      position: relative;
-    }
+{% endblock %}
 
-    .validation-icon {
-      position: absolute;
-      top: 50%;
-      right: 10px;
-      transform: translateY(-50%);
-      width: 20px;
-      height: 20px;
-      background-size: cover;
-      display: none;
-    }
-
-    #password-input:valid+.validation-icon {
-      background-image: url('https://img.icons8.com/glyph-neue/64/40C057/double-tick.png');
-      /* Replace with your green check icon image path */
-      display: block;
-    }
-
-    #password-input:invalid+.validation-icon {
-      background-image: url('https://img.icons8.com/emoji/48/cross-mark-emoji.png');
-      /* Replace with your red cross icon image path */
-      display: block;
-    }
-
-    #my-alert {
-      width: 60%;
-    }
-
-    @media (max-width: 768px) {
-      #my-alert {
-        width: 100%;
-      }
-    }
-  </style>
-</head>
-
-<body oncontextmenu="return false">
-  <main class="main-content ">
-
-    <section>
-      <div class="page-header min-vh-100">
-        <div class="container mt-5" style="height: 90vh;">
-
-
-          <div class="row m-0" id="my-alert">
-            <div class="alert alert-secondary fade show" role="alert">
-              <span class="alert-text text-white"><strong>Sun! </strong>Ab Aaya H To Kuch Seekh Ke Ja</span>
-            </div>
-
-            <a href="{% url 'home' %}" class="btn btn-sm mb-n1 btn-outline-white float-end mt-n1">
-              Home
-            </a>
-
-          </div>
-
-          {% for message in messages %}
-
-          <div>
-            <div class="col-md-7 m-0 mt-3 alert {{ message.tags }} fade show" role="alert">
-              <span class="alert-text text-white"><strong>{{ message.tag }}</strong>{{ message }}</span>
-            </div>
-          </div>
-
-          {% endfor %}
-
-          <br>
-          <div class="row mb-2">
-            <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
-              <div class="card card-plain" style="background-color: white;">
-                <div class="card-header pb-0 text-start">
-                  <h4 class="font-weight-bolder">Login To Learn</h4>
-                  <p class="mb-0">Enter your Username and Password</p>
-                </div>
-                <div class="card-body">
-                  <form role="form" method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                      <input type="text" class="form-control form-control-lg" placeholder="Username"
-                        aria-label="Username" name="username" maxlength="20">
-                    </div>
-                    <div class="mb-3">
-
-                      <!-- <input type="password" class="form-control form-control-lg" placeholder="Password"
-                        aria-label="Password" name="password" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"> -->
-
-                      <div class="input-container">
-                        <input type="password" class="form-control form-control-lg" placeholder="Password"
-                          aria-label="Password" name="password" id="password-input" maxlength="20"
-                          title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters"
-                          required>
-                        <div class="validation-icon"></div>
-
-
-                      </div>
-                      <div class="mt-2">
-                        Show Password <input type="checkbox" onclick="showPassword()">
-                        <a href="{% url 'request_password_reset' %}" class="text-sm font-weight-bold float-end">Forgot
-                          password?</a>
-                      </div>
-
-                    </div>
-                    <div class="text-center">
-                      <button type="submit" class="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0">Enter The
-                        World</button>
-                    </div></a>
-                  </form>
-
-
-                </div>
-
-                <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                  <p class="mb-4 text-sm mx-auto">
-                    What To Become
-                    <strong>
-                      Angaari Aawam?
-                    </strong>
-                    <a href="{% url 'register' %}" class="text-primary text-gradient font-weight-bold">Join Us</a>
-                  </p>
-                </div>
-
-              </div>
-            </div>
-            <div
-              class="col-5 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
-              <div
-                class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
-                style="background-image: url(/static/img/accounts/signin.gif);
-          background-size: cover;
-          background-repeat: no-repeat;">
-                <span class="mask bg-gradient-primary opacity-2"></span>
-                <!-- <h4 class="mt-5 text-white font-weight-bolder position-relative">"The Ignite Momevent"</h4>
-                <p class="text-white position-relative">It Is For Everyone But, Specially For You To Learn!</p> -->
-              </div>
-            </div>
-          </div>
-        </div>
+{% block body %}
+<div class="overlay"></div>
+<div class="container d-flex justify-content-center align-items-center vh-100">
+  <div class="login-container border rounded shadow p-4 bg-white" style="max-width: 400px; width: 100%;">
+    <form class="login-form" method="post">
+      {% csrf_token %}
+      <div class="text-center mb-4">
+        <img src="{% static 'img/home/angaar_logo.jpg' %}" width="80" alt="Angaar Logo" class="mb-2">
+        <h2 class="h4">Login to Learn🔥!</h2>
       </div>
-    </section>
-  </main>
-  <!--   Core JS Files   -->
-  <script src="../js/core/popper.min.js"></script>
-  <script src="../js/core/bootstrap.min.js"></script>
-  <script src="../js/plugins/perfect-scrollbar.min.js"></script>
-  <script src="../js/plugins/smooth-scrollbar.min.js"></script>
-  <script>
-    var win = navigator.platform.indexOf('Win') > -1;
-    if (win && document.querySelector('#sidenav-scrollbar')) {
-      var options = {
-        damping: '0.5'
-      }
-      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+      <div class="mb-3">
+        <input type="text" class="form-control" placeholder="Username" name="username" required>
+      </div>
+      <div class="mb-2 position-relative">
+        <input type="password" class="form-control" placeholder="Password" name="password" required id="password">
+        <span class="position-absolute top-50 end-0 translate-middle-y pe-2 show-password" onclick="togglePassword()"
+          style="cursor: pointer;">👀</span>
+      </div>
+      <!-- add the forget password link -->
+      <div class="text-end mb-3">
+        <a href="{% url 'request_password_reset' %}" class="a-link">Forget Password?</a>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="btn btn-lg btn-primary w-100 mb-0">Enter The
+          World</button>
+      </div>
+      <div class="text-center mt-3 text-black-50">
+        Want To Become <span class="text-black-50 fw-bold">Angaari Aawam?</span><a href="{% url 'register' %}"
+          class="text-black-50"> <span class="a-link">Join Us</span>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  function togglePassword() {
+    const passwordField = document.getElementById('password');
+    const passwordIcon = document.querySelector('.show-password');  // This will now target the span
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text';
+      passwordIcon.textContent = '🙈';  // Changed to a different icon to indicate the open eye state
+    } else {
+      passwordField.type = 'password';
+      passwordIcon.textContent = '👀';  // Changed to the closed eye state
     }
-  </script>
-
-  <script>
-    function showPassword() {
-      var x = document.getElementById("password-input");
-      if (x.type === "password") {
-        x.type = "text";
-      } else {
-        x.type = "password";
-      }
-    }
-  </script>
-
-  <script>
-    /* document.addEventListener("DOMContentLoaded", function () {
-        const passwordInput = document.getElementById("password-input");
-    
-        passwordInput.addEventListener("input", function () {
-            const isValid = passwordInput.checkValidity();
-    
-            if (isValid) {
-                passwordInput.style.border = "1px solid green";
-            } else {
-                passwordInput.style.border = "1px solid red";
-            }
-        });
-    });
- 
-    */
-  </script>
-
-  <script>
-    document.onkeydown = function (e) {
-      if (event.keyCode == 123) {
-        return false;
-      }
-      if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
-        return false;
-      }
-      if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
-        return false;
-      }
-      if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
-        return false;
-      }
-    }
-  </script>
+  }
 
 
+  window.onload = function () {
+    const passwordIcon = document.querySelector('.show-password');
+    passwordIcon.textContent = '👀'; // Ensure it starts as closed
+  };
 
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
-  <!-- Control Center for Soft Dashboard: parallax effects, scripts for the example pages etc -->
-  <script src="/js/argon-dashboard.min.js"></script>
-</body>
-
-</html>
+</script>
+{% endblock %}
