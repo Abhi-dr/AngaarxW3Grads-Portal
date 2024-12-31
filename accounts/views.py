@@ -259,8 +259,17 @@ from .models import Student, PasswordResetToken
 def request_password_reset(request):
     if request.method == 'POST':
         email = request.POST.get('email')
+        
         try:
             user = Student.objects.get(email=email)
+            
+            # check if the user already has a valid token
+            if PasswordResetToken.objects.filter(user=user).exists():
+                token = PasswordResetToken.objects.get(user=user)
+                if token.expires_at > timezone.now():
+                    messages.error(request, 'A password reset link has already been sent to your email address!')
+                    return redirect('request_password_reset')
+            
             token = PasswordResetToken.create_token(user)
             from_email = 'noreply@theangaarbatch.in'
             subject = 'Reset Your Password'
@@ -317,4 +326,8 @@ def reset_password(request, user_id, token):
                 return redirect('login')
         return render(request, 'accounts/reset_password.html')
     
+    elif reset_token and not reset_token.is_valid(token):
+        messages.error(request, 'Invalid or expired reset link!')
+        return redirect('request_password_reset')
+
     return redirect('request_password_reset')
