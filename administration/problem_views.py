@@ -298,12 +298,14 @@ def add_test_case(request, slug):
         
         input_data = request.POST.get('input_data')
         expected_output = request.POST.get('expected_output')
+        explaination = request.POST.get('explaination', "-")
         is_sample = 'is_sample' in request.POST
         
         test_case = TestCase(
             question=question,
             input_data=input_data,
             expected_output=expected_output,
+            explaination=explaination,
             is_sample=is_sample
         )
         test_case.save()
@@ -339,10 +341,12 @@ def edit_test_case(request, id):
         
         input_data = request.POST.get('input_data')
         expected_output = request.POST.get('expected_output')
+        explaination = request.POST.get('explaination', "-")
         is_sample = 'is_sample' in request.POST
                 
         test_case.input_data = input_data
         test_case.expected_output = expected_output
+        test_case.explaination = explaination
         test_case.is_sample = is_sample
 
         test_case.save()

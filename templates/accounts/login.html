@@ -30,9 +30,19 @@
 {% endblock %}
 
 {% block body %}
+
 <div class="overlay"></div>
 <div class="container d-flex justify-content-center align-items-center vh-100">
   <div class="login-container border rounded shadow p-4 bg-white" style="max-width: 400px; width: 100%;">
+    {% for message in messages %}
+
+    <div class="row">
+      <div class="alert {{ message.tags }} fade show" role="alert">
+        <span class="alert-text"><strong>{{ message.tag }}</strong>{{ message }}</span>
+      </div>
+    </div>
+
+    {% endfor %}
     <form class="login-form" method="post">
       {% csrf_token %}
       <div class="text-center mb-4">

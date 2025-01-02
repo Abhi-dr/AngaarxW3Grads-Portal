@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-EDIT Test Case for {{ question.title }}
+{{ test_case.question.title }} | Edit Test Case
 {% endblock %}
 
 {% block problem_active %}
@@ -51,41 +51,32 @@ active
                             <div class="card-body h-100">
 
 
-                                <div>
-                                    <div class="mb-3">
-                                        <label for="job_title" class="form-label">Input
-                                            <div class="star">*</div>
-                                        </label>
-                                        <textarea class="form-control" id="job_title" name="input_data" rows="3"
-                                            >{{ test_case.input_data }}</textarea>
-                                    </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Input
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="job_title" name="input_data"
+                                        rows="3">{{ test_case.input_data }}</textarea>
                                 </div>
 
-                                <div>
-                                    <div class="mb-3">
-                                        <label for="job_title" class="form-label">Expected Output
-                                            <div class="star">*</div>
-                                        </label>
-                                        <textarea class="form-control" id="job_title" name="expected_output" rows="5"
-                                             required>{{ test_case.expected_output }}</textarea>
-                                        <!-- <iframe frameBorder="0" height="450px"
-                                            src="https://onecompiler.com/embed/html?theme=dark" width="100%"></iframe> -->
-                                    </div>
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Expected Output
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="job_title" name="expected_output" rows="3"
+                                        required>{{ test_case.expected_output }}</textarea>
                                 </div>
 
-                                <div class="row">
-                                    <!-- <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="interview_date" class="form-label">Due Date & Time
-                                                <div class="star">*</div>
-                                            </label>
-                                            <input type="datetime-local" class="form-control" id="interview_date"
-                                                name="due_date" required>
-                                        </div>
-                                    </div> -->
-
-
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Explaination
+                                    </label>
+                                    <textarea class="form-control" id="job_title" name="explaination" rows="3"
+                                        placeholder="Enter the explaination here...">{{ test_case.explaination }}</textarea>
                                 </div>
+
 
                                 <div>
                                     <div class="mb-3">
@@ -97,7 +88,7 @@ active
 
                                         <input type="checkbox" class="form-check-input" id="assignment_type"
                                             name="is_sample" checked>
-                                        
+
                                         {% else %}
 
                                         <input type="checkbox" class="form-check-input" id="assignment_type"
@@ -127,7 +118,7 @@ active
 
                                 <div>
                                     <div class="col-md-12">
-                                        <button type="submit" class="btn btn-success w-100 mt-3">Add Test Case</button>
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Edit Test Case</button>
                                     </div>
                                 </div>
                             </div>

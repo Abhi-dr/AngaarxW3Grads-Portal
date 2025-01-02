@@ -19,7 +19,7 @@ active
                     <span class="fw-semibold">
                         &nbsp;Pending Requests: ({{ total_pending_requests }})
                     </span>
-                    <a href="{% url 'approve_all_enrollments' %}" class="btn btn-success btn-lg">
+                    <a href="{% url 'approve_all_enrollments_batch' batch.id %}" class="btn btn-success btn-lg">
                         Approve All
                     </a>
                 </h3>
@@ -262,7 +262,7 @@ active
                     <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
                 </td>
                 <td>
-                    <a href="/administration/approve_enrollment/${student.id}" onclick="return confirm('Are you sure you want to APPROVE the request?');" class="btn btn-success">Approve</a>
+                    <button onclick="approveEnrollment(${student.id}, this)" class="btn btn-success">Approve</button>
                 </td>
                 `;
 

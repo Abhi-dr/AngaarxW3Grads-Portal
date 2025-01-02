@@ -97,7 +97,7 @@ urlpatterns += [
     path("fetch_pending_enrollments_of_batch/<slug:slug>", batch_views.fetch_pending_enrollments_of_batch, name="administrator_fetch_pending_enrollments_of_batch"),
     path("fetch_rejected_enrollments_of_batch/<slug:slug>", batch_views.fetch_rejected_enrollments_of_batch, name="administrator_fetch_rejected_enrollments_of_batch"),
     
-    # path('approve-all/', batch_views.approve_all_enrollments, name='approve_all_enrollments'),
+    path('approve-all_batch/<int:id>', batch_views.approve_all_enrollments_batch, name='approve_all_enrollments_batch'),
     path("approve_enrollment_batch/<int:id>", batch_views.approve_enrollment_batch, name="administrator_approve_enrollment_batch"),
     path("reject_enrollment_batch/<int:id>", batch_views.reject_enrollment_batch, name="administrator_reject_enrollment_batch"),
    

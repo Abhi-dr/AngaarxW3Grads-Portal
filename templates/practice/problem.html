@@ -376,7 +376,7 @@
 
             {% for test_case in sample_test_cases %}
 
-            <div class="card-footer-link ">
+            <div class="card-footer-link">
                 <p class="card-text d-inline">
                     <strong>Sample Input {{ forloop.counter }}: </strong>
                     <br> {% if test_case.input_data %}
@@ -389,6 +389,13 @@
                     <strong>Sample Output {{ forloop.counter }}:
                     </strong><code>{{ test_case.expected_output|linebreaks }}</code>
                 </p>
+
+                {% if test_case.explaination %}
+                <p class="card-text d-inline">
+                    <strong>Explaination {{ forloop.counter }}:
+                    </strong><code>{{ test_case.explaination|linebreaks }}</code>
+                </p>
+                {% endif %}
                 <br>
             </div>
 

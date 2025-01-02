@@ -372,6 +372,7 @@ class TestCase(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='test_cases')
     input_data = models.TextField()
     expected_output = models.TextField()
+    explaination = models.TextField(blank=True, null=True)
     is_sample = models.BooleanField(default=False)  # For sample test cases
 
     def __str__(self):

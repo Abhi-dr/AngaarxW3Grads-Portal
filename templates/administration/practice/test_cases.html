@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Test Cases🔥
+{{ question.title }} | Test Cases
 {% endblock %}
 
 {% block problem_active %}
@@ -83,6 +83,11 @@ active
                                     Expected
                                 </h6>
                             </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Explaination
+                                </h6>
+                            </th>
 
                             <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">
@@ -144,6 +149,17 @@ active
 
                             <td class="border-bottom-0">
                                 <p class="fw-semibold mb-0">
+
+                                    {% if test_case.explaination %}
+                                    {{ test_case.explaination|linebreaksbr|truncatechars:10 }}
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
                                     {% if test_case.is_sample %}
                                     <span class="badge bg-success">Yes</span>
                                     {% else %}
@@ -195,14 +211,21 @@ active
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="inputData" class="form-label">Input Data</label>
+                            <div class="star">*</div>
                             <textarea class="form-control" id="inputData" placeholder="Enter the input here..."
-                                name="input_data" rows="5" required></textarea>
+                                name="input_data" rows="3" required></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="expectedOutput" class="form-label">Expected Output</label>
+                            <div class="star">*</div>
                             <textarea class="form-control" id="expectedOutput"
-                                placeholder="Enter the expected output here..." name="expected_output" rows="5"
+                                placeholder="Enter the expected output here..." name="expected_output" rows="3"
                                 required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="expectedOutput" class="form-label">Explaination</label>
+                            <textarea class="form-control" id="expectedOutput"
+                                placeholder="Enter the explaination here..." name="explaination" rows="3"></textarea>
                         </div>
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="isSample" name="is_sample">

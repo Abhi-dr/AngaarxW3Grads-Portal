@@ -272,8 +272,6 @@ def administrator_set_pod_for_batch(request, slug):
 
     return render(request, 'administration/batch/set_pod.html', parameters)
 
-
-
 # =============================== VIEW SUBMISSIONS ==============================
 
 @login_required(login_url='login')
@@ -423,3 +421,18 @@ def reject_enrollment_batch(request, id):
     else:
         messages.success(request, "Enrollment request rejected")
         return redirect('administrator_batch_enrollment_requests', slug=enrollment_request.batch.slug)
+    
+# ================================ APPROVE ALL ENROLLMENT BATCH ====================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def approve_all_enrollments_batch(request, id):
+    batch = Batch.objects.get(id=id)
+    enrollment_requests = EnrollmentRequest.objects.filter(batch = batch, status="Pending")
+    for req in enrollment_requests:
+        req.status = "Accepted"
+        req.save()
+        
+    messages.success(request, "All pending enrollment requests have been accepted.")
+    return redirect('administrator_batch_enrollment_requests', slug=batch.slug)
