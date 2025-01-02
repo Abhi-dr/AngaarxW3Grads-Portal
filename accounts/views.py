@@ -9,7 +9,7 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils import timezone
 
-from .models import Student, Instructor, Administrator
+from .models import Student, Instructor, Administrator, PasswordResetToken
 
 from django.utils.timezone import now
 from practice.models import Sheet
@@ -251,11 +251,6 @@ def send_welcome_mail(to, name):
 
 # ================================================== RESET PASSWORD ==========================================
 
-
-from django.core.mail import send_mail
-from django.shortcuts import render, redirect
-from .models import Student, PasswordResetToken
-
 def request_password_reset(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -298,7 +293,6 @@ def request_password_reset(request):
                 html_message=html_message
             )
 
-            
             messages.success(request, 'Password reset link sent to your email address!')
             return redirect('login')
         except Student.DoesNotExist:

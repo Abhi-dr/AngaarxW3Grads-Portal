@@ -90,6 +90,16 @@ urlpatterns += [
     path("batch/<slug:slug>/", batch_views.batch, name="administrator_batch"),
     path("administrator_set_pod_for_batch/<slug:slug>/", batch_views.administrator_set_pod_for_batch, name="administrator_set_pod_for_batch"),
     path("view_submissions/<slug:slug>/", batch_views.view_submissions, name="administrator_view_submissions"),
+    
+    # ============================ COURSE SPECIFIC ENROLLMENT WORK ===========
+    
+    path("course_enrollment_requests/<slug:slug>", batch_views.batch_enrollment_requests, name="administrator_batch_enrollment_requests"),
+    path("fetch_pending_enrollments_of_batch/<slug:slug>", batch_views.fetch_pending_enrollments_of_batch, name="administrator_fetch_pending_enrollments_of_batch"),
+    path("fetch_rejected_enrollments_of_batch/<slug:slug>", batch_views.fetch_rejected_enrollments_of_batch, name="administrator_fetch_rejected_enrollments_of_batch"),
+    
+    # path('approve-all/', batch_views.approve_all_enrollments, name='approve_all_enrollments'),
+    path("approve_enrollment_batch/<int:id>", batch_views.approve_enrollment_batch, name="administrator_approve_enrollment_batch"),
+    path("reject_enrollment_batch/<int:id>", batch_views.reject_enrollment_batch, name="administrator_reject_enrollment_batch"),
    
 ]
 

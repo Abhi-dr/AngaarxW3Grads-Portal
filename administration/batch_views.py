@@ -80,7 +80,6 @@ def enrollment_requests(request):
     administrator = Administrator.objects.get(id=request.user.id)
     total_pending_requests = EnrollmentRequest.objects.filter(status="Pending").count()
     
-    
     parameters = {
         "administrator": administrator,
         "total_pending_requests": total_pending_requests
@@ -307,3 +306,120 @@ def view_submissions(request, slug):
     
     return render(request, 'administration/batch/view_submissions.html', parameters)
 
+# ================================= BATCH ENROLLMENT REQUESTS ==================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def batch_enrollment_requests(request, slug):
+    
+    administrator = Administrator.objects.get(id=request.user.id)
+    batch = Batch.objects.get(slug=slug)
+    total_pending_requests = EnrollmentRequest.objects.filter(batch=batch, status="Pending").count()
+    
+    parameters = {
+        "administrator": administrator,
+        "batch": batch,
+        "total_pending_requests": total_pending_requests
+    }
+    
+    return render(request, "administration/batch/batch_enrollment_requests.html", parameters)
+
+# =============================== FETCH PENDING ENROLLMENT REQUESTS OF BATCH ===================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def fetch_pending_enrollments_of_batch(request, slug):
+    
+    batch = Batch.objects.get(slug=slug)
+    enrollment_requests = EnrollmentRequest.objects.select_related('student', 'batch').filter(batch=batch, status="Pending").order_by('-request_date')
+
+    # Format the data for JSON response
+    data = []
+    for request_obj in enrollment_requests:
+        data.append({
+            'id': request_obj.id,
+            'student_name': request_obj.student.first_name + " " + request_obj.student.last_name,
+            'status': request_obj.status,
+            "status_color": "success" if request_obj.status == "Accepted" else "danger",
+            'request_date': request_obj.request_date.strftime('%d %b, %Y'),
+        })
+
+    # Return the data as a JSON response
+    return JsonResponse({'success': True, 'data': data}, status=200)
+
+# =============================== FETCH REJECTED ENROLLMENT REQUESTS OF BATCH ===================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def fetch_rejected_enrollments_of_batch(request, slug):
+    
+    batch = Batch.objects.get(slug=slug)
+    enrollment_requests = EnrollmentRequest.objects.select_related('student', 'batch').filter(batch=batch, status="Rejected").order_by('-request_date')
+
+    # Format the data for JSON response
+    data = []
+    for request_obj in enrollment_requests:
+        data.append({
+            'id': request_obj.id,
+            'student_name': request_obj.student.first_name + " " + request_obj.student.last_name,
+            'status': request_obj.status,
+            "status_color": "success" if request_obj.status == "Accepted" else "danger",
+            'request_date': request_obj.request_date.strftime('%d %b, %Y'),
+        })
+
+    # Return the data as a JSON response
+    return JsonResponse({'success': True, 'data': data}, status=200)
+
+# =============================== ACCEPT ENROLLMENT REQUESTS OF BATCH ==============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def approve_enrollment_batch(request, id):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Check if the request is AJAX
+        try:
+            enrollment_request = EnrollmentRequest.objects.get(id=id)
+            enrollment_request.status = "Accepted"
+            enrollment_request.save()
+            return JsonResponse({
+                'success': True,
+                'message': 'Enrollment request accepted',
+                'id': id
+            })
+        except EnrollmentRequest.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Enrollment request not found'
+            }, status=404)
+    else:
+        messages.success(request, "Enrollment request accepted")
+        return redirect('administrator_batch_enrollment_requests', slug=enrollment_request.batch.slug)
+
+
+# =============================== REJECT ENROLLMENT REQUESTS OF BATCH ==============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def reject_enrollment_batch(request, id):
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            enrollment_request = EnrollmentRequest.objects.get(id=id)
+            enrollment_request.status = "Rejected"
+            enrollment_request.save()
+            return JsonResponse({
+                'success': True,
+                'message': 'Enrollment request rejected',
+                'id': id
+            })
+        except EnrollmentRequest.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'message': 'Enrollment request not found'
+            }, status=404)
+    else:
+        messages.success(request, "Enrollment request rejected")
+        return redirect('administrator_batch_enrollment_requests', slug=enrollment_request.batch.slug)

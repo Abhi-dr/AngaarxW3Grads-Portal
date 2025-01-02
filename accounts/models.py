@@ -113,7 +113,8 @@ class PasswordResetToken(models.Model):
         super().save(*args, **kwargs)
 
     @classmethod
-    def create_token(cls, user):
+    def create_token(cls, user):    
+        cls.objects.filter(user=user).delete()  # Remove existing tokens
         raw_token = secrets.token_urlsafe(32)
         hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
         cls.objects.create(user=user, token_hash=hashed_token)
