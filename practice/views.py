@@ -295,6 +295,7 @@ def update_submission_status(submission, passed, total, total_submission_count, 
     """
     Update the submission status and score in the database.
     """
+    
     try:
         if not status:
             submission.status = 'Accepted' if passed == total else 'Wrong Answer'
@@ -305,7 +306,9 @@ def update_submission_status(submission, passed, total, total_submission_count, 
         if submission.status == 'Accepted':
             update_user_streak(submission.user)
         
-        score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))        
+        score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))
+        
+        # past_submissions = Submission.objects.filter(user=user, question=question).count()
         
         if score < 0:
             score = 0

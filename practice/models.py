@@ -442,7 +442,7 @@ class Streak(models.Model):
         if self.last_submission_date == today - timedelta(days=1):
             self.current_streak += 1
         elif self.last_submission_date != today:
-            self.current_streak = 0  # Reset if it's not consecutive
+            self.current_streak = 1  # Reset if it's not consecutive
 
         self.last_submission_date = today
         self.save()
