@@ -151,7 +151,6 @@ def execute_code(request):
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
-
 # =====================================================================================================
 # ========================================= HELPER FUNCTIONS ==========================================
 # =====================================================================================================
@@ -559,6 +558,7 @@ def custom_input(request, slug):
         question = get_object_or_404(Question, slug=slug)
                 
         data = json.loads(request.body)
+        
         language_id = data.get('language_id')
         source_code = data.get('code')
         input_data = data.get('input')
