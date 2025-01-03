@@ -550,6 +550,9 @@
                             <p style="font-size: 1.2rem;">
                                 All test cases passed!
                             </p>
+                            <p style="font-size: 1.2rem;" id="score-div">
+                                Score: 80
+                            </p>
                         </div>
 
 
@@ -960,7 +963,7 @@
 
 
                         if (data.is_all_test_cases_passed) {
-                            submission_accepted();
+                            submission_accepted(data.score);
                         }
                         document.getElementById("test-case-result-id").scrollIntoView({ behavior: 'smooth' });
                     }
@@ -981,7 +984,7 @@
 
 
         // On successful submission... confetti animation
-        function submission_accepted() {
+        function submission_accepted(score) {
             const start = () => {
                 confetti.start();
                 setTimeout(function () {
@@ -992,6 +995,9 @@
             const successModal = new bootstrap.Modal(document.getElementById('next-modal-btn'), {
                 keyboard: false
             });
+
+            score_div = document.getElementById('score-div');
+            score_div.innerText = `Score: ${score}🔥`;
 
             successModal.show();
 

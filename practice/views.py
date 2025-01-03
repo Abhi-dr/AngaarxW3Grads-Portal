@@ -305,7 +305,7 @@ def update_submission_status(submission, passed, total, total_submission_count, 
         if submission.status == 'Accepted':
             update_user_streak(submission.user)
         
-        score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))
+        score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))        
         
         if score < 0:
             score = 0
@@ -556,7 +556,7 @@ def custom_input(request, slug):
     
     if request.method == 'POST':
         question = get_object_or_404(Question, slug=slug)
-                
+
         data = json.loads(request.body)
         
         language_id = data.get('language_id')

@@ -6,6 +6,8 @@ from django.db.models import Q
 from accounts.models import Administrator
 from django.http import JsonResponse
 import requests, time, re
+import base64
+
 from django.views.decorators.csrf import csrf_exempt
 
 
@@ -539,84 +541,78 @@ def get_test_cases(question):
 
 
 def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, memory_limit):
+    """
+    Send the code to Judge0 API for execution against multiple test cases.
+    """
+    # Prepare single stdin batch input for Judge0
     stdin = f"{len(test_cases)}\n"
     for test_case in test_cases:
         stdin += f"{test_case.input_data}\n"
+        
+    encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
+    encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
 
     submission_data = {
-        "source_code": source_code,
+        "source_code": encoded_code,
         "language_id": language_id,
-        "stdin": stdin,
-        "cpu_time_limit": 2,
-        "wall_time_limit": 2,
+        "stdin": encoded_stdin,
+        "cpu_time_limit": cpu_time_limit,
+        "wall_time_limit": cpu_time_limit,
         "memory_limit": memory_limit * 1000,
         "enable_per_process_and_thread_time_limit": True,
+        "base64_encoded": True  # Critical flag to let Judge0 know the code is Base64-encoded
     }
 
     try:
-        # Submit the code to Judge0
-        response = requests.post(JUDGE0_URL, json=submission_data, headers=HEADERS)
+        # 📝 Submit Code to Judge0
+        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS)
         response.raise_for_status()
         
         token = response.json().get("token")
         if not token:
-            return {
-                "error": "No token received from Judge0.", 
-                "outputs": None, 
-                "token": None
-            }
+            return {"error": "No token received from Judge0.", "outputs": None, "token": None}
 
-        print("TOKEN:", token)          
+        print("✅ TOKEN:", token)
         
         while True:
-            result_response = requests.get(f"{JUDGE0_URL}/{token}", headers=HEADERS)
+            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS)
             result = result_response.json()
             status_id = result.get("status", {}).get("id")
 
-            if status_id not in [1, 2]:  # Not in queue or processing
+            if status_id not in [1, 2]:  # Finished Processing
                 break
             time.sleep(1)
-
-        if result.get("stderr") or result.get("compile_output"):            
-            errors = {
-                "error": (result.get("stderr")),
-                "token": token,
-            }
             
-            if result.get("compile_output"):
-                errors["compile_output"] = result.get("compile_output")                
-            
-            return errors
 
-        # Check for runtime errors
-        if result.get("status").get("id") in [5, 6]: # 5 ka mtlb TLE h
-            return {
-                "error": result.get("status").get("description"),
-                "token": token,
-            }
+        # ❗ Handle Errors
+        if result.get("stderr"):
+            stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
+            return {"error": f"Runtime Error: {stderr}", "token": token}
 
-        # Process execution results
-        outputs = result.get("stdout")
-        
-        outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
+        if result.get("compile_output"):
+            compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
+            return {"error": f"Compile Error: {compile_output}", "token": token}
 
-        return {
-            "outputs": outputs, 
-            "token": token
-            }
+        if result.get("status", {}).get("id") == 5:
+            return {"error": "Time Limit Exceeded (TLE)", "token": token}
+
+        if result.get("status", {}).get("id") == 6:
+            return {"error": "Compilation Error", "token": token}
+
+        # ✅ Decode Outputs
+        outputs = result.get("stdout", "")
+        if outputs:
+            outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
+            outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
+        else:
+            outputs = ["No output generated."]
+
+        return {"outputs": outputs, "token": token}
 
     except requests.exceptions.RequestException as e:
-        return {
-            "error": f"Cannot connect to Compiler. Error: {str(e)}",
-            "outputs": None,
-            "token": None,
-        }
+        return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
     except Exception as e:
-        return {
-            "error": f"Error in Run cod on judge0 function in views: {str(e)}",
-            "outputs": None,
-            "token": None,
-        }
+        return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
 
 
 def process_test_case_result(inputs, outputs, expected_outputs):
