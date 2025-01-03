@@ -281,9 +281,16 @@ Student -> Playground
                     submit_btn.prop("disabled", false);
                     submit_btn.text("Submit");
                     $("#output").removeClass("d-none");
-                    $("#output pre").text(response.output);
 
-                    console.log(response); // For debugging
+                    if (response.error) {
+                        console.log(response.error);
+                        const outputDiv = $("#output pre");
+                        outputDiv.text(response.error);
+                        // add styling to error message
+                    } else {
+                        $("#output pre").text(response.output);
+                    }
+
                     // scroll to op-div to show output
                     document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
                     document.getElementById("op-div").scrollIntoView(false);

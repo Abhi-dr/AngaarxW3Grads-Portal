@@ -81,23 +81,18 @@ def execute_code(request):
     print("🛠️ execute_code called")
     
     if request.method == 'POST':
-        print("✅ Request method is POST")
         
         language_id = request.POST.get('language_id')
         source_code = request.POST.get('source_code')
         # input_data = request.POST.get('input_data')
         
-        print(f"Language_id: {language_id}, source_code: {source_code}...,")
         
         # Ensure required fields are provided
         if not (language_id and source_code):
-            print("❌ Missing required fields")
             return JsonResponse({"error": "Missing required fields (language_id, source_code)"}, status=400)
 
         # Encode source code and input data
         encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
-
-        print("✅ Source code and stdin encoded successfully")
 
         # Prepare submission payload
         data = {
@@ -108,45 +103,33 @@ def execute_code(request):
             "base64_encoded": True
         }
 
-        print("📤 Sending POST request to Judge0 for code submission...")
         try:
             response = requests.post(f"{JUDGE0_URL}?base64_encoded=true", json=data, headers=HEADERS)
             response.raise_for_status()
-            print(f"✅ Submission Response Status Code: {response.status_code}")
         except requests.exceptions.RequestException as e:
-            print(f"❌ Request failed: {e}")
             return JsonResponse({"error": f"Request failed: {str(e)}"}, status=500)
 
         if response.status_code == 201:
             token = response.json().get('token')
-            print(f"✅ Submission Token: {token}")
             
             if not token:
-                print("❌ Token not received from Judge0")
                 return JsonResponse({"error": "Failed to retrieve submission token"}, status=500)
 
-            print("⏳ Polling for results...")
             for i in range(10):  # Maximum of 10 attempts
-                print(f"🔄 Polling attempt {i + 1}")
                 try:
                     result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS)
                     result_response.raise_for_status()
                     result = result_response.json()
-                    print(f"✅ Polling Response: {result}")
                 except requests.exceptions.RequestException as e:
-                    print(f"❌ Polling failed: {e}")
                     return JsonResponse({"error": f"Polling failed: {str(e)}"}, status=500)
 
                 status_id = result.get('status', {}).get('id')
                 status_description = result.get('status', {}).get('description', 'Unknown Status')
-                print(f"📝 Status ID: {status_id}, Description: {status_description}")
 
                 if status_id == 3:  # ✅ Accepted (Successful Execution)
                     output = result.get('stdout')
-                    print(f"✅ Execution Successful. Output: {output}")
                     if output:
                         decoded_output = base64.b64decode(output).decode('utf-8')
-                        print(f"🔑 Decoded Output: {decoded_output}")
                         return JsonResponse({"output": decoded_output, "status": status_description})
 
                 elif status_id in [5, 6, 7, 11]:  # ❌ Error Cases
@@ -155,21 +138,16 @@ def execute_code(request):
                         result.get('compile_output') or
                         result.get('message')
                     )
-                    print(f"❌ Execution Error: {error_output}")
                     if error_output:
                         decoded_error = base64.b64decode(error_output).decode('utf-8', errors='replace')
-                        print(f"🔑 Decoded Error: {decoded_error}")
-                        return JsonResponse({"error": decoded_error, "status": status_description}, status=400)
-
+                        return JsonResponse({"error": decoded_error, "status": status_description})
+    
                 time.sleep(1)  # Poll every 1 second
 
-            print("❌ Timeout while waiting for the result")
             return JsonResponse({"error": "Timeout while waiting for the result"}, status=408)
 
-        print("❌ Submission failed with non-201 status code")
         return JsonResponse({"error": "Failed to submit code to Judge0"}, status=response.status_code)
 
-    print("❌ Invalid request method")
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
 
