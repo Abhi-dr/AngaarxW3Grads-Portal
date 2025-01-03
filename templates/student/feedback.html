@@ -10,7 +10,7 @@ Student -> Feedback
 <div class="container-fluid">
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title fw-semibold mb-4">Feedback</h5>
+      <h5 class="card-title fw-semibold">Feedback</h5>
       <p class="mb-0">Your feedback matters to us!</p>
     </div>
   </div>
@@ -34,12 +34,12 @@ Student -> Feedback
 
         <div class="mb-3 col-6">
           <label for="exampleInputEmail1" class="form-label">Name</label>
-          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ student.first_name }} {{ student.last_name }}" disabled>
+          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ user.first_name }} {{ user.last_name }}" disabled>
         </div>
 
         <div class="mb-3 col-6">
           <label for="exampleInputEmail1" class="form-label">Email address</label>
-          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ student.email }}" disabled>
+          <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" value="{{ user.email }}" disabled>
           <div id="emailHelp" class="form-text">Your Email will not be shared</div>
         </div>
 

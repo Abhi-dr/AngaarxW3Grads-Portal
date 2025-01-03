@@ -185,7 +185,7 @@ active
     <div class="row">
 
         <style>
-            #card-bg{
+            #card-bg {
                 background-image: url("{{ batch.thumbnail.url }}");
                 background-size: cover;
                 background-position: center;
@@ -196,17 +196,13 @@ active
 
         <div class="col-lg-4">
             <div class="row">
-                <div class="col-lg-12" >
+                <div class="col-lg-12">
                     <!-- Yearly Breakup -->
-                    <a href="{% url 'my_profile' %}" style="text-decoration: none; color: black;">
-                        <div class="card overflow-hidden" id="card-bg">
-                            <h4 class="fw-semibold p-2">
-                                {{ batch.name }} 🔥
-                            </h4>
-                            
-
-                        </div>
-                    </a>
+                    <div class="card overflow-hidden" id="card-bg">
+                        <h4 class="fw-semibold p-2">
+                            {{ batch.name }} 🔥
+                        </h4>
+                    </div>
                 </div>
 
             </div>
@@ -358,7 +354,7 @@ active
                 </div>
 
             </div>
-        </div>       
+        </div>
 
     </div>
 
@@ -382,7 +378,7 @@ active
 
                 {% if sheet.is_enabled %}
                 <a href="{% url 'sheet' sheet.slug %}">
-                {% endif %}
+                    {% endif %}
                     <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
                     <div class="card-body">
                         <h5 class="card-title">
@@ -394,9 +390,10 @@ active
                         <!-- <p class="card-text text-black mb-1">
                             Total Registrations: {{ company.job_set.all }}
                         </p> -->
-                        
+
                         {% if sheet.is_enabled %}
-                        <a href="{% url 'sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue Solving</a>
+                        <a href="{% url 'sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue
+                            Solving</a>
                         {% else %}
                         <a href="#" class="btn btn-outline-light-danger w-100 disabled">Curently Unavailable</a>
                         {% endif %}
