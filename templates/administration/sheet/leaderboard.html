@@ -130,7 +130,14 @@ active
             const filterForm = document.getElementById('filter-form');
             const apiUrl = "{% url 'administrator_sheet_leaderboard' sheet.slug %}"; // Replace `sheetSlug` dynamically
 
-            console.log(apiUrl);
+            leaderboardContainer.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>`
 
             async function fetchLeaderboard() {
                 const response = await fetch(apiUrl);

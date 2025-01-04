@@ -118,7 +118,14 @@ active
             const filterForm = document.getElementById('filter-form');
             const apiUrl = "{% url 'administrator_fetch_batch_leaderboard' batch.slug %}";
 
-            console.log(apiUrl);
+            leaderboardContainer.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>`
 
             async function fetchLeaderboard() {
                 const response = await fetch(apiUrl);
@@ -129,13 +136,13 @@ active
 
             function renderLeaderboard(leaderboard) {
                 leaderboardContainer.innerHTML = '';
-            
+
                 leaderboard.forEach((entry, index) => {
                     let sheetDetails = '';
                     for (const [sheet, count] of Object.entries(entry.sheet_breakdown)) {
                         sheetDetails += `<p class="mb-0"><strong>${sheet}:</strong> ${count}</p>`;
                     }
-            
+
                     const row = `
                     <tr>
                         <td class="border-bottom-0">
@@ -163,7 +170,7 @@ active
                     leaderboardContainer.innerHTML += row;
                 });
             }
-            
+
 
 
             fetchLeaderboard(); // Initial fetch
