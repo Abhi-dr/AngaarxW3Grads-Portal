@@ -24,9 +24,16 @@ Profile {% endblock %}
 
 <div class="container-fluid">
   <div class="card">
-    <div class="card-body">
-      <h5 class="card-title fw-semibold">Profile</h5>
-      <p class="mb-0">Yha Shakal Nahi, Akal Kaam Aati Hai🔥</p>
+    <div class="card-body d-inline-flex">
+        <h5 class="card-title fw-semibold">Profile | &nbsp;</h5>
+        <p class="mb-0">Yha Shakal Nahi, Akal Kaam Aati Hai🔥</p>
+
+        <button class="btn badge text-bg-light-danger w-md-10 px-4 ms-auto">
+          <span class="fw-bold text-black">
+            Total Score: <strong> {{ total_score }}🔥 </strong>
+          </span>
+        </button>
+
     </div>
   </div>
 
@@ -64,6 +71,15 @@ Profile {% endblock %}
                 class="btn btn-success ms-1 w-100">
                 Change Password
               </button>
+
+            </div>
+
+            <div class="d-flex justify-content-center mb-2">
+              <button type="button" class="btn btn-outline-danger ms-1 w-100" data-bs-toggle="modal"
+                data-bs-target="#deleteAccountModal">
+                Delete Account
+              </button>
+
             </div>
 
           </div>
@@ -99,7 +115,48 @@ Profile {% endblock %}
               </button>
 
           </div>
+
+
         </div>
+
+
+        <!-- =============================== DELETE ACCOUNT ================================-->
+
+        <!-- Modal for Delete Account -->
+        <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>To confirm, please enter your username to proceed with account deletion.</p>
+                <div class="mb-3">
+                  <label for="usernameInput" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="usernameInput" placeholder="Enter your username" required>
+                  <div class="invalid-feedback">
+                    Username does not match.
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <form action="{% url 'delete_account' %}" method="POST" id="deleteAccountForm">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger" id="submitDeleteBtn" disabled>Yes, Delete My
+                    Account</button>
+                </form>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
 
 
         <!-- ============================================================================== -->
@@ -213,7 +270,7 @@ Profile {% endblock %}
               </div>
               <div class="col-sm-9">
                 {% if not user.dob %}
-                <button class="btn btn-dark text-white mb-0">Not Available☹️</button>
+                <button class="btn btn-dark text-white mb-0">Not Available☹</button>
                 <span class="text-success float-end">(+10 <img id="coin-icon" class="mt-n1"
                     src="{% static 'img/student/coin.png' %}" alt="">)</span>
                 {% else %}
@@ -251,6 +308,28 @@ Profile {% endblock %}
       btn.classList.add("btn-danger");
     }
   }
+
+
+</script>
+
+<!-- =============================script of delete account ======================================-->
+<script>
+
+  document.getElementById('usernameInput').addEventListener('input', function () {
+    var username = document.getElementById('usernameInput').value.trim();
+    var submitBtn = document.getElementById('submitDeleteBtn');
+
+    // Check if the entered username matches the logged-in user's username
+    // Replace "currentUsername" with the actual username variable from Django template
+    var currentUsername = "{{ user.username }}";
+
+    if (username === currentUsername) {
+      submitBtn.disabled = false;  // Enable the submit button if the username matches
+    } else {
+      submitBtn.disabled = true;  // Disable the submit button if the username does not match
+    }
+  });
+
 </script>
 
 

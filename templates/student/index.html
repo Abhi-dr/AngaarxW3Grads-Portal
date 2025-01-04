@@ -306,11 +306,12 @@ Student -> Home
 
                                         {% else %}
 
-                                        <a href="#">
+                                        <a href="{% url 'problem_set' %}">
                                             <p class="text-danger me-1 fs-3 mb-0 d-inline">
                                                 <strong>{{ questions_left }}</strong>
                                             </p>
                                             <p class="text-danger fs-3 mb-0 d-inline">Questions left</p>
+                                            <p>{{ total_score }}</p>
                                         </a>
 
                                         {% endif %}

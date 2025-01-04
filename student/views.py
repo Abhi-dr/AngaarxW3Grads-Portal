@@ -11,8 +11,19 @@ from datetime import datetime, timedelta
 from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
 from practice.models import POD, Submission, Question, Sheet, Streak
+from django.db.models import Max, Sum
 
 # ========================================= DASHBOARD =========================================
+
+
+# def get_user_scores_by_question(user):
+#     scores = (
+#         Submission.objects
+#         .filter(user=user)
+#         .values('question__id', 'question__title')
+#         .annotate(max_score=Max('score'))
+#     )
+#     return {entry['question__title']: entry['max_score'] for entry in scores}
 
 @login_required(login_url="login")
 def dashboard(request):
@@ -54,7 +65,6 @@ def dashboard(request):
         if request.user.student.dob.day == timezone.now().day and request.user.student.dob.month == timezone.now().month:
             is_birthday = True
             
-    print(is_birthday, request.user.student.first_name)
     
     parameters = {
         "notifications": notifications,
@@ -64,6 +74,7 @@ def dashboard(request):
         "questions_left": questions_left,
         "pod": pod,
         "next_three_questions": next_three_questions,
+        "total_score": calculate_total_user_score(request.user),
         
         
         # "sessions": sessions,
@@ -170,8 +181,15 @@ def get_random_question(request):
 # ==============================================================================================
 
 @login_required(login_url="login")
-def my_profile(request):    
-    return render(request, "student/my_profile.html")
+def my_profile(request):
+    
+    total_score = calculate_total_user_score(request.user)
+    
+    parameters = {
+        "total_score": total_score
+    }
+    
+    return render(request, "student/my_profile.html", parameters)
 
 # ========================================= EDIT PROFILE =========================================
 
@@ -302,6 +320,29 @@ def change_password(request):
         messages.error(request, "Old password is incorrect!")
         return redirect("my_profile")
 
+# ========================================= DELETE ACCOUNT =========================================
+
+
+@login_required(login_url="login")
+def delete_account(request):
+    student = Student.objects.get(id=request.user.id)
+    
+    if request.method == "POST":
+    
+        # Get the username from the form input (submitted via POST)
+        username_input = request.POST.get("username", "").strip()
+
+        # Check if the entered username matches the logged-in user's username
+        if username_input == request.user.username:
+            # If the username matches, delete the account
+            student.delete()
+            messages.success(request, "Account deleted successfully!")
+            return account_logout(request)  # Log out the user after account deletion
+
+        else:
+            # If the username does not match, show an error message
+            messages.error(request, "Username is incorrect!")
+            return redirect("my_profile")  # Redirect back to the profile page
 
 # ========================================= FEEDBACK =========================================
 
@@ -362,3 +403,20 @@ def restore_streak(request):
             return JsonResponse({'status': 'error', 'message': 'Not enough coins to restore streak.'})
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+# ============================================ TOTAL SCORE ==========================================
+
+def calculate_total_user_score(user):
+    total_score = (
+        Submission.objects
+        .filter(user=user)
+        .values('question')  # Group by question
+        .annotate(max_score=Max('score'))  # Take max score per question
+        .aggregate(total_score=Sum('max_score'))  # Sum all max scores
+    )
+    
+    # user_scores = get_user_scores_by_question(user)
+
+    return total_score['total_score'] or 0
+

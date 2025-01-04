@@ -550,9 +550,6 @@
                             <p style="font-size: 1.2rem;">
                                 All test cases passed!
                             </p>
-                            <p style="font-size: 1.2rem;" id="score-div">
-                                Score: 80
-                            </p>
                         </div>
 
 
@@ -996,9 +993,6 @@
                 keyboard: false
             });
 
-            score_div = document.getElementById('score-div');
-            score_div.innerText = `Score: ${score}🔥`;
-
             successModal.show();
 
             start();
@@ -1174,8 +1168,6 @@
         $(document).ready(function () {
             const editor = ace.edit("editor");
 
-            // Existing code...
-
             // Custom Input Button Click
             $("#custom-input-btn").click(function () {
                 $("#customInputModal").modal('show');
@@ -1192,7 +1184,6 @@
                     return;
                 }
 
-
                 const code = editor.getValue();
                 if (!code.trim()) {
                     alert("Code cannot be empty!");
@@ -1207,18 +1198,15 @@
 
                 const outputDiv = document.getElementById('testCaseResults');
                 outputDiv.innerHTML = `
-                        <div id='loader'>
-                            <h4>Execution in progress...</h4> 
-                            <td colspan="6" class="text-center">
-                                <div class="d-flex justify-content-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                </div>
-                            </td>
-                        </div>`;
+                    <div id='loader'>
+                        <h4>Execution in progress...</h4> 
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>`;
                 outputDiv.classList.remove('d-none'); // Show the output div
-
                 outputDiv.scrollIntoView({ behavior: 'smooth' });
 
                 fetch("{% url 'custom_input' question.slug %}", {
@@ -1233,10 +1221,11 @@
                     .then((data) => {
                         console.log(data);
 
-                        if (data.error || data.compile_output) {
-                            const testCaseResultsDiv = document.getElementById('testCaseResults');
-                            const globalErrorDiv = document.createElement('div');
+                        outputDiv.innerHTML = ''; // Clear loader and previous content
 
+                        // Handle Compiler Error
+                        if (data.error || data.compile_output) {
+                            const globalErrorDiv = document.createElement('div');
                             globalErrorDiv.classList.add('alert', 'alert-danger');
                             globalErrorDiv.innerHTML = `
                                 <h5>Compiler Error</h5>
@@ -1249,38 +1238,41 @@
                                 `;
                             }
 
-                            testCaseResultsDiv.prepend(globalErrorDiv);
-
-                            // clear the loader
-                            outputDiv.removeChild(document.getElementById("loader"));
+                            outputDiv.appendChild(globalErrorDiv);
+                            return;
                         }
 
-                        if (data.test_case_result) {
-                            const outputDiv = document.getElementById('testCaseResults');
-                            outputDiv.innerHTML = '';
+                        // Handle Multiple Test Case Results
+                        if (data.test_case_results && Array.isArray(data.test_case_results)) {
+                            data.test_case_results.forEach((test_case_result, index) => {
+                                const resultDiv = document.createElement('div');
+                                resultDiv.classList.add(
+                                    'card',
+                                    'mb-3',
+                                    'test-case-result',
+                                    'shadow-sm'
+                                );
 
-                            test_case_result = data.test_case_result;
-
-                            const resultDiv = document.createElement('div');
-                            resultDiv.classList.add(
-                                'card',
-                                'mb-3',
-                                'test-case-result',
-                                'shadow-sm'
-                            );
-
-                            resultDiv.innerHTML = `
-                                <div class="card-body">
-                                    <p><strong>Input:</strong></p>
-                                    <pre class="px-2 rounded"><p>${test_case_result.input}</p></pre>
-                                    <p><strong>Output:</strong></p>
-                                    <pre class="px-2 rounded"><p>${test_case_result.expected_output}</p></pre>
-                                </div>
+                                resultDiv.innerHTML = `
+                                    <div class="card-header">
+                                        <strong class="text-white">Test Case ${index + 1}</strong>
+                                    </div>
+                                    <div class="card-body">
+                                        <p><strong>Input:</strong></p>
+                                        <p><strong class="px-2 rounded">${test_case_result.input || 'N/A'}</strong></p>
+                                        <p><strong>Output:</strong></p>
+                                        <p><strong class="px-2 rounded">${test_case_result.expected_output || 'N/A'}</strong></p>
+                                    </div>
                                 `;
-                            outputDiv.appendChild(resultDiv);
-
+                                outputDiv.appendChild(resultDiv);
+                            });
+                        } else {
+                            outputDiv.innerHTML = `
+                                <div class="alert alert-warning">
+                                    No test case results available.
+                                </div>
+                            `;
                         }
-
                     })
                     .catch((error) => {
                         console.error('Error:', error);
