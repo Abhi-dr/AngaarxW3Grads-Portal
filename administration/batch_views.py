@@ -490,13 +490,15 @@ def fetch_batch_leaderboard(request, slug):
             user_scores[user_id]['earliest_submission'], submission.submitted_at
         )
 
-        # Track solved questions
-        user_scores[user_id]['solved_questions'].add(question_id)
+        # Track solved questions (unique questions only)
+        if question_id not in user_scores[user_id]['solved_questions']:
+            user_scores[user_id]['solved_questions'].add(question_id)
 
-        # Update sheet breakdown
-        if sheet_id not in user_scores[user_id]['sheet_breakdown']:
-            user_scores[user_id]['sheet_breakdown'][sheet_id] = 0
-        user_scores[user_id]['sheet_breakdown'][sheet_id] += 1
+            # Update sheet breakdown (unique question per sheet)
+            if sheet_id not in user_scores[user_id]['sheet_breakdown']:
+                user_scores[user_id]['sheet_breakdown'][sheet_id] = 0
+            user_scores[user_id]['sheet_breakdown'][sheet_id] += 1
+
 
     # Format leaderboard data
     leaderboard = []

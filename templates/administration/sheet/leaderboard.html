@@ -128,7 +128,7 @@ active
         document.addEventListener('DOMContentLoaded', function () {
             const leaderboardContainer = document.getElementById('leaderboard');
             const filterForm = document.getElementById('filter-form');
-            const apiUrl = "{% url 'administrator_sheet_leaderboard' sheet.slug %}"; // Replace `sheetSlug` dynamically
+            const apiUrl = "{% url 'administrator_sheet_leaderboard' sheet.slug %}";
 
             leaderboardContainer.innerHTML = `
             <tr>
@@ -179,4 +179,4 @@ active
     </script>
 
 
-    {% endblock %}
+{% endblock %}
