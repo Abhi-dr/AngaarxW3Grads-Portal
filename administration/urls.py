@@ -91,6 +91,9 @@ urlpatterns += [
     path("administrator_set_pod_for_batch/<slug:slug>/", batch_views.administrator_set_pod_for_batch, name="administrator_set_pod_for_batch"),
     path("view_submissions/<slug:slug>/", batch_views.view_submissions, name="administrator_view_submissions"),
     
+    path("batch_leaderboard/<slug:slug>", batch_views.leaderboard, name="administrator_batch_leaderboard"),
+    path("batch_leaderboard_api/<slug:slug>", batch_views.fetch_batch_leaderboard, name="administrator_fetch_batch_leaderboard"),
+    
     # ============================ COURSE SPECIFIC ENROLLMENT WORK ===========
     
     path("course_enrollment_requests/<slug:slug>", batch_views.batch_enrollment_requests, name="administrator_batch_enrollment_requests"),
@@ -120,8 +123,8 @@ urlpatterns += [
     path("make_duplicate/<int:sheet_id>/<int:question_id>/", sheet_views.make_duplicate, name="administrator_make_duplicate"),
     path("add_new_question/<slug:slug>/", sheet_views.add_new_question, name="administrator_add_new_question"),
     
-    path("leaderboard/<slug:slug>", sheet_views.leaderboard, name="administrator_leaderboard"),
-    path("sheet_leaderboard/<slug:slug>", sheet_views.sheet_leaderboard, name="administrator_sheet_leaderboard"),
+    path("sheet_leaderboard/<slug:slug>", sheet_views.leaderboard, name="administrator_leaderboard"),
+    path("sheet_leaderboard_api/<slug:slug>", sheet_views.sheet_leaderboard, name="administrator_sheet_leaderboard"),
     
     path("reorder/<slug:slug>/", sheet_views.reorder, name="administrator_reorder"),
     path('update-sheet-order/<int:sheet_id>/', sheet_views.update_sheet_order, name='update_sheet_order'),

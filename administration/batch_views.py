@@ -15,8 +15,6 @@ from angaar_hai.custom_decorators import admin_required
 
 import datetime
 
-
-
 # ========================= BATCH WORK ==========================
 
 @login_required(login_url='login')
@@ -436,3 +434,106 @@ def approve_all_enrollments_batch(request, id):
         
     messages.success(request, "All pending enrollment requests have been accepted.")
     return redirect('administrator_batch_enrollment_requests', slug=batch.slug)
+
+
+# ======================================================== LEADERBOARD =====================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def leaderboard(request, slug):
+
+    batch = Batch.objects.get(slug=slug)
+    
+    parameters = {
+        "batch": batch,
+    }
+    
+    return render(request, 'administration/batch/leaderboard.html', parameters)
+
+
+# ==================================== FETCH LEADERBOARD ======================
+
+def fetch_batch_leaderboard(request, slug):
+    batch = get_object_or_404(Batch, slug=slug)
+    sheets = batch.sheets.all()  # Fetch all sheets in the batch
+    total_questions = [question for sheet in sheets for question in sheet.questions.all()]
+
+    # Fetch all submissions for the batch
+    submissions = Submission.objects.filter(
+        question__in=total_questions,
+        status='Accepted'
+    )
+
+    # Dictionary to store max scores for each user
+    user_scores = {}
+    for submission in submissions:
+        user_id = submission.user.id
+        question_id = submission.question.id
+        sheet_id = submission.question.sheets.first().id
+
+        # Initialize user entry if not present
+        if user_id not in user_scores:
+            user_scores[user_id] = {
+                'total_score': 0,
+                'earliest_submission': submission.submitted_at,
+                'solved_questions': set(),
+                'sheet_breakdown': {}
+            }
+
+        # Update max score for the question
+        current_max_score = user_scores[user_id].get(question_id, 0)
+        user_scores[user_id][question_id] = max(current_max_score, submission.score)
+
+        # Update earliest submission
+        user_scores[user_id]['earliest_submission'] = min(
+            user_scores[user_id]['earliest_submission'], submission.submitted_at
+        )
+
+        # Track solved questions
+        user_scores[user_id]['solved_questions'].add(question_id)
+
+        # Update sheet breakdown
+        if sheet_id not in user_scores[user_id]['sheet_breakdown']:
+            user_scores[user_id]['sheet_breakdown'][sheet_id] = 0
+        user_scores[user_id]['sheet_breakdown'][sheet_id] += 1
+
+    # Format leaderboard data
+    leaderboard = []
+    solved_question_counts = {}  # Track the count of questions solved by each user
+
+    for user_id, data in user_scores.items():
+        user = Student.objects.get(id=user_id)
+        total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
+        solved_problems = len(data['solved_questions'])
+
+        # Map sheet IDs to sheet names
+        sheet_details = {
+            Sheet.objects.get(id=sheet_id).name: count
+            for sheet_id, count in data['sheet_breakdown'].items()
+        }
+
+        leaderboard.append({
+            'student': {
+                'id': user_id,
+                'name': f"{user.first_name} {user.last_name}",
+            },
+            'total_score': total_score,
+            'earliest_submission': data['earliest_submission'],
+            'solved_problems': solved_problems,
+            'sheet_breakdown': sheet_details,
+        })
+
+        # Update solved question count
+        if solved_problems not in solved_question_counts:
+            solved_question_counts[solved_problems] = 0
+        solved_question_counts[solved_problems] += 1
+
+    # Sort leaderboard by total score (descending), then by earliest submission (ascending)
+    leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
+
+    return JsonResponse({
+        'leaderboard': leaderboard,
+        'solved_question_counts': solved_question_counts
+    })
+

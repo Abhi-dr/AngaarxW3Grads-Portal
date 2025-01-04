@@ -555,3 +555,4 @@ def download_leaderboard_excel(request, slug):
         df.to_excel(writer, index=False, sheet_name="Leaderboard")
 
     return response
+
