@@ -454,59 +454,57 @@ def leaderboard(request, slug):
 
 # ==================================== FETCH LEADERBOARD ======================
 
+from django.db.models import Count, Min, Max    
 def fetch_batch_leaderboard(request, slug):
+        
     batch = get_object_or_404(Batch, slug=slug)
-    sheets = batch.sheets.all()  # Fetch all sheets in the batch
-    total_questions = [question for sheet in sheets for question in sheet.questions.all()]
+    sheets = batch.sheets.all()
+    total_questions = Question.objects.filter(sheets__in=sheets).distinct()
 
-    # Fetch all submissions for the batch
+    # Aggregate submission data at the database level
     submissions = Submission.objects.filter(
         question__in=total_questions,
         status='Accepted'
+    ).values(
+        'user_id', 'question_id', 'question__sheets__id'
+    ).annotate(
+        max_score=Max('score'),
+        earliest_submission=Min('submitted_at')
     )
 
-    # Dictionary to store max scores for each user
+    # Process aggregated data
     user_scores = {}
-    for submission in submissions:
-        user_id = submission.user.id
-        question_id = submission.question.id
-        sheet_id = submission.question.sheets.first().id
+    for sub in submissions:
+        user_id = sub['user_id']
+        question_id = sub['question_id']
+        sheet_id = sub['question__sheets__id']
 
-        # Initialize user entry if not present
         if user_id not in user_scores:
             user_scores[user_id] = {
                 'total_score': 0,
-                'earliest_submission': submission.submitted_at,
+                'earliest_submission': sub['earliest_submission'],
                 'solved_questions': set(),
                 'sheet_breakdown': {}
             }
 
-        # Update max score for the question
-        current_max_score = user_scores[user_id].get(question_id, 0)
-        user_scores[user_id][question_id] = max(current_max_score, submission.score)
-
-        # Update earliest submission
+        # Add score
+        user_scores[user_id]['total_score'] += sub['max_score']
         user_scores[user_id]['earliest_submission'] = min(
-            user_scores[user_id]['earliest_submission'], submission.submitted_at
+            user_scores[user_id]['earliest_submission'], sub['earliest_submission']
         )
+        user_scores[user_id]['solved_questions'].add(question_id)
 
-        # Track solved questions (unique questions only)
-        if question_id not in user_scores[user_id]['solved_questions']:
-            user_scores[user_id]['solved_questions'].add(question_id)
+        # Sheet breakdown
+        if sheet_id not in user_scores[user_id]['sheet_breakdown']:
+            user_scores[user_id]['sheet_breakdown'][sheet_id] = 0
+        user_scores[user_id]['sheet_breakdown'][sheet_id] += 1
 
-            # Update sheet breakdown (unique question per sheet)
-            if sheet_id not in user_scores[user_id]['sheet_breakdown']:
-                user_scores[user_id]['sheet_breakdown'][sheet_id] = 0
-            user_scores[user_id]['sheet_breakdown'][sheet_id] += 1
-
-
-    # Format leaderboard data
+    # Format leaderboard
     leaderboard = []
-    solved_question_counts = {}  # Track the count of questions solved by each user
+    solved_question_counts = {}
 
     for user_id, data in user_scores.items():
         user = Student.objects.get(id=user_id)
-        total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
         solved_problems = len(data['solved_questions'])
 
         # Map sheet IDs to sheet names
@@ -520,22 +518,21 @@ def fetch_batch_leaderboard(request, slug):
                 'id': user_id,
                 'name': f"{user.first_name} {user.last_name}",
             },
-            'total_score': total_score,
+            'total_score': data['total_score'],
             'earliest_submission': data['earliest_submission'],
             'solved_problems': solved_problems,
             'sheet_breakdown': sheet_details,
         })
 
-        # Update solved question count
         if solved_problems not in solved_question_counts:
             solved_question_counts[solved_problems] = 0
         solved_question_counts[solved_problems] += 1
 
-    # Sort leaderboard by total score (descending), then by earliest submission (ascending)
+    # Sort leaderboard by total score and earliest submission
     leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
+    
 
     return JsonResponse({
         'leaderboard': leaderboard,
         'solved_question_counts': solved_question_counts
     })
-

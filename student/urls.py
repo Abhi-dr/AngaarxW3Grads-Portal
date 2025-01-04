@@ -40,6 +40,8 @@ urlpatterns += [
     path("sheet_progress/<int:sheet_id>/", batch_views.sheet_progress, name="sheet_progress"),
     path("fetch_sheet_questions/<int:id>/", batch_views.fetch_sheet_questions, name="fetch_sheet_questions"),
     
+    path("<slug:slug>/leaderboard", batch_views.student_batch_leaderboard, name="student_batch_leaderboard"),
+    path("batch_leaderboard_api/<slug:slug>", batch_views.student_fetch_batch_leaderboard, name="student_fetch_batch_leaderboard"),
     
 ]
 

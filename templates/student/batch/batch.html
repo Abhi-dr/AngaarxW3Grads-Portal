@@ -4,7 +4,7 @@
 {% load custom_filters %}
 
 {% block title %}
-{{ batch.name }}
+Course | {{ batch.name }}
 {% endblock %}
 
 {% block my_batches_active %}
@@ -361,10 +361,11 @@ active
     <!-- =================================  QUESTIONS TABLE ================================== -->
 
     <div class="card">
-        <div class="card-body p-4">
+        <div class="card-body p-4 d-flex">
             <h3 class="heading">
                 <span class="fw-semibold">Ongoing Sheets 🔥</span>
             </h3>
+            <a href="{% url 'student_batch_leaderboard' batch.slug %}" class="btn btn-outline-secondary w-25 ms-auto">Leaderboard 📈</a>
         </div>
     </div>
 

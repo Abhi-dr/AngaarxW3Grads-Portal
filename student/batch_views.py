@@ -155,3 +155,105 @@ def fetch_sheet_questions(request, id):
         for question in questions
     ]
     return JsonResponse({"questions": data})
+
+# ========================================== BATCH LEADERBOARD ======================================
+
+@login_required(login_url="login")
+def student_batch_leaderboard(request, slug):
+    batch = Batch.objects.get(slug=slug)
+    
+    parameters = {
+        "batch": batch
+    }
+    
+    return render(request, "student/batch/leaderboard.html", parameters)
+
+# ==================================== FETCH LEADERBOARD ======================
+from django.db.models import Count, Min, Max
+
+def student_fetch_batch_leaderboard(request, slug):    
+    
+    start = timezone.now()
+    
+    batch = get_object_or_404(Batch, slug=slug)
+    sheets = batch.sheets.all()
+    total_questions = Question.objects.filter(sheets__in=sheets).distinct()
+
+    # Aggregate submission data at the database level
+    submissions = Submission.objects.filter(
+        question__in=total_questions,
+        status='Accepted'
+    ).values(
+        'user_id', 'question_id', 'question__sheets__id'
+    ).annotate(
+        max_score=Max('score'),
+        earliest_submission=Min('submitted_at')
+    )
+
+    # Process aggregated data
+    user_scores = {}
+    for sub in submissions:
+        user_id = sub['user_id']
+        question_id = sub['question_id']
+        sheet_id = sub['question__sheets__id']
+
+        if user_id not in user_scores:
+            user_scores[user_id] = {
+                'total_score': 0,
+                'earliest_submission': sub['earliest_submission'],
+                'solved_questions': set(),
+                'sheet_breakdown': {}
+            }
+
+        # Add score
+        user_scores[user_id]['total_score'] += sub['max_score']
+        user_scores[user_id]['earliest_submission'] = min(
+            user_scores[user_id]['earliest_submission'], sub['earliest_submission']
+        )
+        user_scores[user_id]['solved_questions'].add(question_id)
+
+        # Sheet breakdown
+        if sheet_id not in user_scores[user_id]['sheet_breakdown']:
+            user_scores[user_id]['sheet_breakdown'][sheet_id] = 0
+        user_scores[user_id]['sheet_breakdown'][sheet_id] += 1
+
+    # Format leaderboard
+    leaderboard = []
+    solved_question_counts = {}
+
+    for user_id, data in user_scores.items():
+        user = Student.objects.get(id=user_id)
+        solved_problems = len(data['solved_questions'])
+
+        # Map sheet IDs to sheet names
+        sheet_details = {
+            Sheet.objects.get(id=sheet_id).name: count
+            for sheet_id, count in data['sheet_breakdown'].items()
+        }
+
+        leaderboard.append({
+            'student': {
+                'id': user_id,
+                'name': f"{user.first_name} {user.last_name}",
+            },
+            'total_score': data['total_score'],
+            'earliest_submission': data['earliest_submission'],
+            'solved_problems': solved_problems,
+            'sheet_breakdown': sheet_details,
+        })
+
+        if solved_problems not in solved_question_counts:
+            solved_question_counts[solved_problems] = 0
+        solved_question_counts[solved_problems] += 1
+
+    # Sort leaderboard by total score and earliest submission
+    leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
+    
+    end = timezone.now()
+    
+    print(f"Time taken: {end - start}")
+
+    return JsonResponse({
+        'leaderboard': leaderboard,
+        'solved_question_counts': solved_question_counts
+    })
