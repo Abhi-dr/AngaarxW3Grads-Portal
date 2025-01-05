@@ -159,11 +159,12 @@ def normalize_output(output):
     Normalize output for consistent comparison by stripping extra spaces
     and normalizing newline characters.
     """
+    
+    # print("\nOUTPUT IN NORMALIZE FUNCTION:", output)
         
     if not output:
         return ""
     return output.replace("\r\n", "\n").strip()
-
 
 # ==========================================
 
@@ -204,6 +205,8 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
     for test_case in test_cases:
         stdin += f"{test_case.input_data}\n"
         
+    # print("\nSTDIN in Execute Function:", stdin)
+        
     encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
     encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
 
@@ -239,8 +242,6 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
                 break
             time.sleep(1)
             
-        print("✅ RESULT:", result)
-
         # ❗ Handle Errors
         if result.get("stderr"):
             stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
@@ -260,9 +261,20 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
 
         # ✅ Decode Outputs
         outputs = result.get("stdout", "")
+        
         if outputs:
             outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
-            outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
+            
+            # print("\nOUTPUTS AFTER DECODING IN RUN FUNCTION:", outputs)
+            
+            if "None" in outputs:
+                outputs = [output.strip() for output in outputs.split("None") if output.strip()]
+                
+            else:
+                outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
+            
+            # print("\nOUTPUTS AFTER STRIPPING IN RUN FUNCTION:", outputs)
+            
         else:
             outputs = ["No output generated."]
 
@@ -278,6 +290,11 @@ def process_test_case_result(inputs, outputs, expected_outputs):
     """
     Compare outputs against expected outputs and prepare detailed results.
     """
+    
+    # print("\nINPUTS IN PROCESS TC:", inputs)
+    # print("\nOUTPUTS IN PROCESS TC:", outputs)
+    # print("\nEXPECTED OUTPUTS IN PROCESS TC:", expected_outputs)
+    
     results = []
     for input_data, expected_output, output in zip(inputs, expected_outputs, outputs):
         result = {
@@ -408,6 +425,9 @@ def submit_code(request, slug):
                 return JsonResponse({"error": "Missing language ID or source code."}, status=400)
 
             test_cases = get_test_cases(question)
+            
+            # print("\nTest Cases in SUBMIT FUNCTION:", test_cases)
+            
             if not test_cases:
                 return JsonResponse({"error": "No test cases available for this question."}, status=400)
 
@@ -501,7 +521,9 @@ def run_code(request, slug):
             
             data = json.loads(request.body)
             language_id = data.get('language_id')
-            source_code = data.get('code')            
+            source_code = data.get('code')   
+            
+            print("Source Code in Run Function:", source_code)
 
             if not language_id or not source_code:
                 return JsonResponse({"error": "Missing language ID or source code."}, status=400)

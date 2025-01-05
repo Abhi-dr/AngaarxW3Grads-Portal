@@ -74,7 +74,6 @@ def dashboard(request):
         "questions_left": questions_left,
         "pod": pod,
         "next_three_questions": next_three_questions,
-        "total_score": calculate_total_user_score(request.user),
         
         
         # "sessions": sessions,
