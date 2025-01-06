@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 import requests
 from django.contrib import messages
+from student.models import AIQuestion
 
 # Simulated AI response function
 def get_answer(instructor, doubt):
@@ -34,6 +35,10 @@ def ask_doubt_ajax(request):
         
         try:
             answer = get_answer(instructor, question)
+            
+            question_obj = AIQuestion(student=request.user.student, question=question, answer=answer, instructor=instructor)
+            question_obj.save()
+            
             return JsonResponse({"success": True, "answer": answer})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)})
