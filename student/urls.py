@@ -13,7 +13,8 @@ urlpatterns = [
     
     # ======================== AI DOUBT SOLVER ========================
     
-    path("AI-Doubt-Solver", doubt_solver.ask_doubt, name="doubt_solver"),
+    path('ask-doubt/', doubt_solver.ask_doubt, name='ask_doubt'),  # Main page for doubt-solving
+    path('ask-doubt/submit/', doubt_solver.ask_doubt_ajax, name='ask_doubt_ajax'),  # AJAX endpoint
     
     # ========================= PROFILE WORK =========================
     path("my_profile/", views.my_profile, name="my_profile"),
