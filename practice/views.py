@@ -84,8 +84,7 @@ def execute_code(request):
         
         language_id = request.POST.get('language_id')
         source_code = request.POST.get('source_code')
-        # input_data = request.POST.get('input_data')
-        
+        input_data = request.POST.get('input_data')  # Get input data from the request
         
         # Ensure required fields are provided
         if not (language_id and source_code):
@@ -93,6 +92,7 @@ def execute_code(request):
 
         # Encode source code and input data
         encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
+        encoded_input = base64.b64encode(input_data.encode('utf-8')).decode('utf-8') if input_data else None
 
         # Prepare submission payload
         data = {
@@ -100,7 +100,8 @@ def execute_code(request):
             "language_id": language_id,
             "cpu_time_limit": 1,
             "cpu_extra_time": 1,
-            "base64_encoded": True
+            "base64_encoded": True,
+            "stdin": encoded_input  # Add input data to the payload
         }
 
         try:
@@ -149,7 +150,6 @@ def execute_code(request):
         return JsonResponse({"error": "Failed to submit code to Judge0"}, status=response.status_code)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
-
 
 # =====================================================================================================
 # ========================================= HELPER FUNCTIONS ==========================================
@@ -574,87 +574,6 @@ def run_code(request, slug):
                 }, status=500)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
-
-# =================================== RUN CODE ON JUDGE0 FOR CUSTOM INPUT =========================
-
-def run_code_on_judge0_for_custom_input(source_code, language_id, test_cases, cpu_time_limit, memory_limit):
-    """
-    Send the code to Judge0 API for execution against multiple test cases.
-    """
-    # Prepare single stdin batch input for Judge0
-    stdin = f"{len(test_cases)}\n"
-    for test_case in test_cases:
-        stdin += f"{test_case.input_data}\n"
-        
-    encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
-    encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
-
-    submission_data = {
-        "source_code": encoded_code,
-        "language_id": language_id,
-        "stdin": encoded_stdin,
-        "cpu_time_limit": cpu_time_limit,
-        "wall_time_limit": cpu_time_limit,
-        "memory_limit": memory_limit * 1000,
-        "enable_per_process_and_thread_time_limit": True,
-        "base64_encoded": True  # Critical flag to let Judge0 know the code is Base64-encoded
-    }
-
-    try:
-        # 📝 Submit Code to Judge0
-        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS)
-        response.raise_for_status()
-        
-        token = response.json().get("token")
-        if not token:
-            return {"error": "No token received from Judge0.", "outputs": None, "token": None}
-
-        print("✅ TOKEN:", token)
-        
-        # ⏳ Poll Until Completion
-        while True:
-            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS)
-            result = result_response.json()
-            status_id = result.get("status", {}).get("id")
-
-            if status_id not in [1, 2]:  # Finished Processing
-                break
-            time.sleep(1)
-            
-        print("✅ RESULT:", result)
-
-        # ❗ Handle Errors
-        if result.get("stderr"):
-            stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
-            print("❌ STDERR:", stderr)
-            return {"error": f"Runtime Error: {stderr}", "token": token}
-
-        if result.get("compile_output"):
-            compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
-            print("❌ COMPILE OUTPUT:", compile_output)
-            return {"error": f"Compile Error: {compile_output}", "token": token}
-
-        if result.get("status", {}).get("id") == 5:
-            return {"error": "Time Limit Exceeded (TLE)", "token": token}
-
-        if result.get("status", {}).get("id") == 6:
-            return {"error": "Compilation Error", "token": token}
-
-        # ✅ Decode Outputs
-        outputs = result.get("stdout", "")
-        if outputs:
-            outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
-            outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
-        else:
-            outputs = ["No output generated."]
-
-        return {"outputs": outputs, "token": token}
-
-    except requests.exceptions.RequestException as e:
-        return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
-    except Exception as e:
-        return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
-
 
 # ========================================== CUSTOM INPUT ==========================================
 
