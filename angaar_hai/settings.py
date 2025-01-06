@@ -42,7 +42,11 @@ INSTALLED_APPS = [
     # 'single_session',
     'import_export',
     'corsheaders',
-    'dbbackup'
+    'dbbackup',
+    
+    # 'django_ratelimit',
+
+
 ]
 
 MIDDLEWARE = [
@@ -236,3 +240,12 @@ EMAIL_HOST_USER = "82930f001@smtp-brevo.com"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = 'noreply@theangaarbatch.in'
 
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+#     }
+# }
+
+
+# MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
