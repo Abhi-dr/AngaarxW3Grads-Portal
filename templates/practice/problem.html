@@ -352,18 +352,29 @@
 
         {% if question.input_format %}
 
+        {% autoescape off %}
+
         <div class="card-body mb-n7">
             <h6 class="card-title fs-4">Input Format:</h6>
             <code>{{ question.input_format }}</code>
         </div>
 
+        {% endautoescape %}
+
+
         {% endif %}
 
         {% if question.output_format %}
+
+        {% autoescape off %}
+
         <div class="card-body mb-n7">
             <h6 class="card-title fs-4">Output Format:</h6>
             <code>{{ question.output_format }}</code>
         </div>
+
+        {% endautoescape %}
+
 
         {% endif %}
 
