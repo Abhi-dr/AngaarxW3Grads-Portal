@@ -327,6 +327,21 @@
                 transform: scale(1);
             }
         }
+
+        /* Add this to your existing CSS */
+        .sidebar-collapsed {
+            display: none;
+        }
+
+        @media (min-width: 992px) {
+            .sidebar-expanded {
+                display: block;
+            }
+
+            .sidebar-collapsed {
+                display: none;
+            }
+        }
     </style>
 
     {% block extra_css %}
@@ -342,7 +357,7 @@
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
         data-sidebar-position="fixed" data-header-position="fixed">
         <!-- Sidebar Start -->
-        <aside class="left-sidebar" id="sidebar">
+        <aside class="left-sidebar sidebar-expanded" id="sidebar">
             <!-- Sidebar scroll-->
             <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">

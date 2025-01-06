@@ -21,6 +21,8 @@ DEBUG = os.getenv("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
+INTERNAL_IPS = ['127.0.0.1', "localhost"]
+
 
 # Application definition
 
@@ -45,6 +47,9 @@ INSTALLED_APPS = [
     'dbbackup',
     
     # 'django_ratelimit',
+    
+    'debug_toolbar',
+
 
 
 ]
@@ -60,6 +65,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     
     'corsheaders.middleware.CorsMiddleware',
+    
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
     
 ]
 

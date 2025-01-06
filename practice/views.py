@@ -363,6 +363,10 @@ def problem(request, slug):
                 messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
                 return redirect('sheet', slug=sheet.slug)  # You can redirect to the sheet or show an error
                 
+        
+        question.scenario = convert_backticks_to_code(question.scenario)
+        question.description = convert_backticks_to_code(question.description)
+        
         sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
         return render(request, 'practice/problem.html', {
             'question': question,
@@ -916,3 +920,8 @@ def delete_question(request, id):
     messages.success(request, 'Question deleted successfully')
     return redirect('student_add_question')
 
+# =================================================
+def convert_backticks_to_code(text):
+    pattern = r"`(.*?)`"
+    result = re.sub(pattern, r"<code style='font-size: 110%'>\1</code>", text)
+    return result
