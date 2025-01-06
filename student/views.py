@@ -155,7 +155,7 @@ def new_message(request):
 def get_random_question(request):
     
     student = request.user.student
-    question = Question.objects.order_by("?").first()
+    question = Question.objects.filter(is_approved=True).exclude(id__in=Submission.objects.filter(user=request.user.student).values('question').distinct()).exclude(sheets__isnull=False).order_by("?").first()
     
     print(question)
     if not question:
