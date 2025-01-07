@@ -5,3 +5,458 @@
 #Our Team
 {% endblock %}
 
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+
+<style>
+
+    body{
+        background-color: rgb(26, 26, 26);
+    }
+
+    img{
+        border-radius: 5%;
+    }
+
+    .text-blk {
+        margin-top: 0px;
+        margin-right: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        line-height: 25px;
+        color: white;
+    }
+
+    .responsive-container-block {
+        min-height: 75px;
+        height: fit-content;
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 0px;
+        margin-right: auto;
+        margin-bottom: 0px;
+        margin-left: auto;
+        justify-content: flex-start;
+    }
+
+    .container-block {
+        min-height: 75px;
+        height: fit-content;
+        width: 100%;
+        padding-top: 8%;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+        display: block;
+    }
+
+    .responsive-cell-block {
+        min-height: 75px;
+    }
+
+    .container {
+        max-width: 1380px;
+        margin-right: auto;
+        margin-left: auto;
+        padding-right: 30px;
+        padding-left: 30px;
+    }
+
+    .team-head-text {
+        font-size: 48px;
+        line-height: 50px;
+        font-weight: 900;
+        text-align: center;
+        margin-top: 0px;
+        margin-right: 0px;
+        margin-bottom: 70px;
+        margin-left: 0px;
+    }
+
+    .name {
+        font-size: 18px;
+        margin-top: 11px;
+        margin-right: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        font-weight: 700;
+    }
+
+    .position {
+        margin-top: 5px;
+        margin-right: 0px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+    }
+
+    .team-card-container {
+        width: 263px;
+        margin-top: 0px;
+        margin-right: 15px;
+        margin-bottom: 30px;
+        margin-left: 15px;
+    }
+
+    .teamcard-container {
+        justify-content: space-evenly;
+    }
+
+    .team-img-wrapper {
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        border-bottom-right-radius: 6px;
+        border-bottom-left-radius: 6px;
+    }
+
+    .team-img {
+        max-width: 100%;
+    }
+
+    @media (max-width: 500px) {
+
+        .container-block{
+            padding-top: 25%;
+        }
+
+        .team-card-container {
+            margin-top: 0px;
+            margin-right: 0px;
+            margin-bottom: 30px;
+            margin-left: 0px;
+            width: 100%;
+        }
+
+        .team-img {
+            width: 100%;
+        }
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700;800&amp;display=swap');
+
+    *,
+    *:before,
+    *:after {
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+    }
+
+    .wk-desk-1 {
+        width: 8.333333%;
+    }
+
+    .wk-desk-2 {
+        width: 16.666667%;
+    }
+
+    .wk-desk-3 {
+        width: 25%;
+    }
+
+    .wk-desk-4 {
+        width: 33.333333%;
+    }
+
+    .wk-desk-5 {
+        width: 41.666667%;
+    }
+
+    .wk-desk-6 {
+        width: 50%;
+    }
+
+    .wk-desk-7 {
+        width: 58.333333%;
+    }
+
+    .wk-desk-8 {
+        width: 66.666667%;
+    }
+
+    .wk-desk-9 {
+        width: 75%;
+    }
+
+    .wk-desk-10 {
+        width: 83.333333%;
+    }
+
+    .wk-desk-11 {
+        width: 91.666667%;
+    }
+
+    .wk-desk-12 {
+        width: 100%;
+    }
+
+    @media (max-width: 1024px) {
+        .container-block{
+            padding-top: 25%;
+        }
+        .wk-ipadp-1 {
+            width: 8.333333%;
+        }
+
+        .wk-ipadp-2 {
+            width: 16.666667%;
+        }
+
+        .wk-ipadp-3 {
+            width: 25%;
+        }
+
+        .wk-ipadp-4 {
+            width: 33.333333%;
+        }
+
+        .wk-ipadp-5 {
+            width: 41.666667%;
+        }
+
+        .wk-ipadp-6 {
+            width: 50%;
+        }
+
+        .wk-ipadp-7 {
+            width: 58.333333%;
+        }
+
+        .wk-ipadp-8 {
+            width: 66.666667%;
+        }
+
+        .wk-ipadp-9 {
+            width: 75%;
+        }
+
+        .wk-ipadp-10 {
+            width: 83.333333%;
+        }
+
+        .wk-ipadp-11 {
+            width: 91.666667%;
+        }
+
+        .wk-ipadp-12 {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+
+        .container-block{
+            padding-top: 25%;
+        }
+
+        .wk-tab-1 {
+            width: 8.333333%;
+        }
+
+        .wk-tab-2 {
+            width: 16.666667%;
+        }
+
+        .wk-tab-3 {
+            width: 25%;
+        }
+
+        .wk-tab-4 {
+            width: 33.333333%;
+        }
+
+        .wk-tab-5 {
+            width: 41.666667%;
+        }
+
+        .wk-tab-6 {
+            width: 50%;
+        }
+
+        .wk-tab-7 {
+            width: 58.333333%;
+        }
+
+        .wk-tab-8 {
+            width: 66.666667%;
+        }
+
+        .wk-tab-9 {
+            width: 75%;
+        }
+
+        .wk-tab-10 {
+            width: 83.333333%;
+        }
+
+        .wk-tab-11 {
+            width: 91.666667%;
+        }
+
+        .wk-tab-12 {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 500px) {
+
+        .container-block{
+            padding-top: 25%;
+        }
+        .wk-mobile-1 {
+            width: 8.333333%;
+        }
+
+        .wk-mobile-2 {
+            width: 16.666667%;
+        }
+
+        .wk-mobile-3 {
+            width: 25%;
+        }
+
+        .wk-mobile-4 {
+            width: 33.333333%;
+        }
+
+        .wk-mobile-5 {
+            width: 41.666667%;
+        }
+
+        .wk-mobile-6 {
+            width: 50%;
+        }
+
+        .wk-mobile-7 {
+            width: 58.333333%;
+        }
+
+        .wk-mobile-8 {
+            width: 66.666667%;
+        }
+
+        .wk-mobile-9 {
+            width: 75%;
+        }
+
+        .wk-mobile-10 {
+            width: 83.333333%;
+        }
+
+        .wk-mobile-11 {
+            width: 91.666667%;
+        }
+
+        .wk-mobile-12 {
+            width: 100%;
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-block container">
+    <p class="text-blk team-head-text">
+        Our Team
+    </p>
+    <div class="responsive-container-block teamcard-container">
+        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
+            <div class="team-card">
+                <div class="team-img-wrapper">
+                    <img class="team-img"
+                        src="https://media.licdn.com/dms/image/v2/D5635AQG6NVmir9pgtg/profile-framedphoto-shrink_400_400/profile-framedphoto-shrink_400_400/0/1707228328063?e=1736852400&v=beta&t=zX3Y3vPDmFY7aMqzpHORYTJZD6KUW62-40lrrfXMWiM"
+                        width="85%">
+                </div>
+                <div class="team-card-content">
+                    <p class="text-blk name">
+                        Naman Sharma
+                    </p>
+                    <p class="text-blk position">
+                        Founder and Educator
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
+            <div class="team-card">
+                <div class="team-img-wrapper">
+                    <img class="team-img"
+                        src="https://media.licdn.com/dms/image/v2/D5603AQEjjDCNI0SpwQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1702920234862?e=1741824000&v=beta&t=CEis53FB9uE2RqBhACb8nayRieQuXuHAzUL_eLfNP8A"
+                        width="85%">
+                        
+                </div>
+                <div class="team-card-content">
+                    <p class="text-blk name">
+                        Divyanshu Khandelwal
+                    </p>
+                    <p class="text-blk position">
+                        Co-Founder and Educator
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
+            <div class="team-card">
+                <div class="team-img-wrapper">
+                    <img class="team-img"
+                        src="https://media.licdn.com/dms/image/v2/D5603AQFV4cu2rVHHZw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1709533963885?e=1741824000&v=beta&t=svuFBlvM0i-t7xVD4DWzM8osX6pCDhchE9V3-_28Dfo"
+                        width="85%">
+                        
+                </div>
+                <div class="team-card-content">
+                    <p class="text-blk name">
+                        Piyush Khandelwal
+                    </p>
+                    <p class="text-blk position">
+                        Advisor and Director @W3Grads
+                    </p>
+                </div>
+            </div>
+        </div>
+    
+        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
+            <div class="team-card">
+                <div class="team-img-wrapper">
+                    <img class="team-img"
+                        src="https://media.licdn.com/dms/image/v2/D5603AQGzRz0uCzlJWQ/profile-displayphoto-shrink_400_400/B56ZRAdNPXHIAk-/0/1736248187102?e=1741824000&v=beta&t=saHL28RgTL-KZ3o5hcffJMbP7h7MLcGXSiD2on1iRmE"
+                        width="85%">
+                </div>
+                <div class="team-card-content">
+                    <p class="text-blk name">
+                        Adwait Patel
+                    </p>
+                    <p class="text-blk position">
+                        Core Technical Team
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
+            <div class="team-card">
+                <div class="team-img-wrapper">
+                    <img class="team-img"
+                        src="https://media.licdn.com/dms/image/v2/D4E03AQHECQIZzTZdCg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1713275914043?e=1741824000&v=beta&t=ZpYQUr8m7HHmn0CaL7sfXuXekbrg4clQMDwxzwRYPWs"
+                        width="85%"
+                        >
+                </div>
+                <div class="team-card-content">
+                    <p class="text-blk name">
+                        Shashank Upadhayay
+                    </p>
+                    <p class="text-blk position">
+                        Core Technical Team
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
