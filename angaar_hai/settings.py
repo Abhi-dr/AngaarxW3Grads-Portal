@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'dbbackup',
     
-    # 'django_ratelimit',
+    'django_ratelimit',
     
     'debug_toolbar',
 
@@ -249,11 +249,16 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = 'noreply@theangaarbatch.in'
 
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-#     }
-# }
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Use your Redis server address
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+    }
+}
+
 
 
 # MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

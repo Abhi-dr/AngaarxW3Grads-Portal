@@ -684,7 +684,7 @@ def fetch_questions(request):
     cache_key = f"questions_{query}_page_{page_number}"
     cached_data = cache.get(cache_key)
 
-    if cached_data:
+    if cached_data:        
         return JsonResponse(cached_data)
 
     per_page = 10

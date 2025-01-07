@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.mail import send_mail
@@ -14,16 +14,16 @@ from .models import Student, Instructor, Administrator, PasswordResetToken
 from django.utils.timezone import now
 from practice.models import Sheet
 
-# from django_ratelimit.decorators import ratelimit
+from django_ratelimit.decorators import ratelimit
 
 # ===================================== LOGIN ==============================
 
-# @ratelimit(key='user_or_ip', rate='3/m')
+@ratelimit(key='post:username', rate='3/m', method=['POST'], block=False)
 def login(request):
-    
-    # if request.limited:
-    #     return HttpResponseForbidden('Too many login attempts. Try again in a minute.')
-    
+    if getattr(request, 'limited', False):
+        messages.error(request, "Too many login attempts for this Username. Please try again after 1 minute.")
+        return redirect('login')  # Replace 'login' with your login view name or URL
+        
     if request.method == 'POST':
         username = request.POST.get('username').strip().lower()
         password = request.POST.get('password')
@@ -157,7 +157,7 @@ def register(request):
 @login_required(login_url="login")
 def logout(request):
      auth.logout(request)
-     return redirect("login")
+     return redirect("home")
 
 # ====================== check Email availability ====================
 
