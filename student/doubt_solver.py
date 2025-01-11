@@ -22,7 +22,7 @@ def get_answer(instructor, doubt):
 
 # Main Page Render
 @login_required(login_url="login")
-def ask_doubt(request):    
+def ask_doubt(request):
     return render(request, "student/ai_doubt_solver.html")
 
 

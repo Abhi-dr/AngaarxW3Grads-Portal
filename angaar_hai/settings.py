@@ -45,11 +45,9 @@ INSTALLED_APPS = [
     'import_export',
     'corsheaders',
     'dbbackup',
-    
     'django_ratelimit',
-    
     'debug_toolbar',
-
+    'django_celery_beat',
 
 
 ]
@@ -259,6 +257,14 @@ CACHES = {
     }
 }
 
+# Celery Configuration
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/2'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/2'
+
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Kolkata'
 
 
 # MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

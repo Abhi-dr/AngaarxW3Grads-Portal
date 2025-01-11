@@ -65,6 +65,7 @@ urlpatterns = [
     
     path("administrator_pod", problem_views.administrator_pod, name="administrator_pod"),
     path("set_pod", problem_views.set_pod, name="set_pod"),
+    
     path("save_pod/<int:id>/", problem_views.save_pod, name="save_pod"),
     
     path('generate-description/', question_generator.generate_description, name='generate_description'),
@@ -88,7 +89,13 @@ urlpatterns += [
     path("reject_enrollment/<int:id>", batch_views.reject_enrollment, name="administrator_reject_enrollment"),
     
     path("batch/<slug:slug>/", batch_views.batch, name="administrator_batch"),
-    path("administrator_set_pod_for_batch/<slug:slug>/", batch_views.administrator_set_pod_for_batch, name="administrator_set_pod_for_batch"),
+    
+    path("administrator_set_pod_for_batch/<slug:slug>/", batch_views.administrator_set_pod_for_batch, name="administrator_pod_for_batch"),
+    path('fetch-questions/', batch_views.fetch_questions, name='administrator_fetch_pod_questions_for_batch'),
+    path('set-pod-ajax/<slug:slug>/', batch_views.set_pod, name='administrator_set_pod_for_batch'),
+
+
+    
     path("view_submissions/<slug:slug>/", batch_views.view_submissions, name="administrator_view_submissions"),
     
     path("batch_leaderboard/<slug:slug>", batch_views.leaderboard, name="administrator_batch_leaderboard"),

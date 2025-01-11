@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Set POO for {{ batch.name }}
+Course | {{ batch.name }} | POD
 {% endblock %}
 
 {% block my_batches_active %}
@@ -12,25 +12,13 @@ active
 {% block body %}
 
 <div class="container-fluid">
-    <!-- <div class="card">
-        <div class="card-body">
-            <h3 class="heading">
-                <span class="fw-semibold">Problem of the day</span>
-                <span class="fs-4"> | 🔥Total: {{ pods.count }}🔥</span>
-            </h3>
-        </div>
-        <a href="#" class="btn btn-outline-primary button mt-n3 mx-4 m-3">Set PODs</a>
-    </div> -->
-
     {% for message in messages %}
 
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
         <strong>{{ message.tag }}</strong> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-
     {% endfor %}
-
 
 
     <!-- ================================= SESSIONS TABLE ================================== -->
@@ -38,56 +26,41 @@ active
 
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title fw-semibold mb-0">{{ batch.name }}</i> </h5>
-
+            <h5 class="card-title fw-semibold mb-0">{{ batch.name }}</h5>
         </div>
         <div class="container px-4">
-
-
             <hr class="mt-0">
             <div class="row">
-
                 <div class="w-100">
-
                     <div class="card p-4">
-
-                        <form method="post">
-
-                            {% csrf_token %}
-
+                        <div class="mb-3">
+                            <label for="searchInput" class="form-label">Search Question</label>
+                            <input type="text" id="searchInput" class="form-control" placeholder="Search question...">
+                        </div>
+                        <form id="setPodForm">
                             <div class="row">
-
                                 <div class="mb-3 col-md-6">
                                     <label for="questionSelect" class="form-label">Select Question</label>
                                     <select name="question_id" id="questionSelect" class="form-control">
-                                        {% for question in questions %}
-                                        <option value="{{ question.id }}" class="text-black">{{ question.title }}
-                                        </option>
-                                        {% endfor %}
+                                        <!-- Options will be populated dynamically via JavaScript -->
                                     </select>
                                 </div>
-
                                 <div class="mb-3 col-md-6">
                                     <label for="dateInput" class="form-label">Select Date</label>
                                     <input type="date" name="pod_date" id="dateInput" class="form-control"
                                         value="{{ default_date }}">
                                 </div>
-
                             </div>
-
                             <button type="submit" class="btn btn-primary w-100">Set POD</button>
                         </form>
-
                         <a href="{% url 'administrator_batch' batch.slug %}" class="btn btn-secondary mt-3">Back to
                             Batches</a>
-
                     </div>
-
                 </div>
-
             </div>
         </div>
     </div>
+
 
     <div class="row">
 
@@ -222,7 +195,7 @@ active
             <div class="card w-100">
 
                 <div class="card-body p-4">
-                    <h5 class="card-title fw-semibold mb-4">UPCOMING  PODs🔥
+                    <h5 class="card-title fw-semibold mb-4">UPCOMING PODs🔥
                         {% if query %}
                         <span class="fs-6"> | Search Results for "{{ query }}"</span>
                         {% endif %}
@@ -349,8 +322,81 @@ active
 
     </div>
 
-
 </div>
+
+<script>
+
+    // Disable past dates in date input (picked form stackoverflow)
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementsByName("pod_date")[0].setAttribute('min', today);
+
+    // JavaScript to handle AJAX requests and search
+    document.addEventListener("DOMContentLoaded", () => {
+        const questionSelect = document.getElementById("questionSelect");
+        const searchInput = document.getElementById("searchInput");
+        const form = document.getElementById("setPodForm");
+
+        let allQuestions = []; // To store all fetched questions
+
+        // Function to fetch questions initially
+        const fetchQuestions = () => {
+            fetch(`{% url 'administrator_fetch_pod_questions_for_batch' %}`)
+                .then(response => response.json())
+                .then(data => {
+                    allQuestions = data.questions; // Store fetched questions
+                    populateDropdown(allQuestions); // Populate dropdown with all questions
+                })
+                .catch(error => console.error("Error fetching questions:", error));
+        };
+
+        // Function to populate the dropdown
+        const populateDropdown = (questions) => {
+            questionSelect.innerHTML = ""; // Clear existing options
+            questions.forEach(question => {
+                const option = document.createElement("option");
+                option.classList.add("text-black");
+                option.value = question.id;
+                option.textContent = question.title;
+                questionSelect.appendChild(option);
+            });
+        };
+
+        // Event listener for search input to filter questions
+        searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase();
+            const filteredQuestions = allQuestions.filter(question =>
+                question.title.toLowerCase().includes(query)
+            );
+            populateDropdown(filteredQuestions); // Update dropdown with filtered questions
+        });
+
+        // Fetch questions on page load
+        fetchQuestions();
+
+        // Handle form submission via AJAX
+        form.addEventListener("submit", (e) => {
+            e.preventDefault(); // Prevent default form submission
+            const formData = new FormData(form);
+            fetch("{% url 'administrator_set_pod_for_batch' batch.slug %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error("Error setting POD:", error));
+        });
+    });
+
+</script>
 
 
 {% endblock %}

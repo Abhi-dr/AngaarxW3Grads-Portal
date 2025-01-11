@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.timezone import now
+from django.views.decorators.csrf import csrf_exempt
 
 from accounts.models import Student, Administrator
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
@@ -207,60 +208,39 @@ def batch(request, slug):
 
 # =============================== SET POD FOR BATCH ==============================
 
+from django.http import JsonResponse
+from django.db.models import Q
+
+def fetch_questions(request):
+    query = request.GET.get("query", "")
+    
+    questions = Question.objects.filter(
+        Q(title__icontains=query), 
+        pods__batch__isnull=True,
+        is_approved=True, 
+        parent_id=-1
+    ).distinct()
+    
+    
+    question_list = [{"id": q.id, "title": q.title} for q in questions]
+    return JsonResponse({"questions": question_list})
+
+
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
 def administrator_set_pod_for_batch(request, slug):
     batch = get_object_or_404(Batch, slug=slug)
 
-    # Fetch the administrator and questions without existing PODs for the selected batch
-    administrator = Administrator.objects.get(id=request.user.id)
-    questions = Question.objects.filter(pods__batch__isnull=True)
-
     # Fetch existing PODs for the batch
-    today_pod = POD.objects.filter(batch=batch, date=datetime.datetime.today().date())
-    past_pods = POD.objects.filter(batch=batch).order_by('-date').exclude(date__gt=datetime.datetime.today().date())
-    upcoming_pods = POD.objects.filter(batch=batch, date__gt=datetime.datetime.today().date()).order_by('date')
-
-    if request.method == "POST":
-        question_id = request.POST.get("question_id")
-        pod_date = request.POST.get("pod_date")  # Fetch the date from the form
-        
-        if question_id and pod_date:
-            try:
-                pod_date = datetime.datetime.strptime(pod_date, "%Y-%m-%d").date()  # Parse the date
-                
-                if pod_date < now().date():
-                    messages.error(request, "You cannot set a POD for a past date.")
-                    return redirect('administrator_set_pod_for_batch', slug=slug)
-                
-                if pod_date == now().date() and today_pod.exists():
-                    messages.warning(request, f"POD for today is already set for batch '{batch.name}'.")
-                    return redirect('administrator_set_pod_for_batch', slug=slug)
-                
-                else:
-                    question = get_object_or_404(Question, id=question_id)
-                    
-                    # Check if a POD already exists for this batch and date
-                    today_pod = POD.objects.create(
-                        question=question, 
-                        batch=batch, 
-                        date=pod_date
-                    )
-                    
-                    today_pod.save()
-                    
-                    messages.success(request, f"POD set successfully for batch '{batch.name}'")
-                    return redirect('administrator_set_pod_for_batch', slug=slug)
-                
-            except ValueError:
-                messages.error(request, "Invalid date format. Please select a valid date.")
-        else:
-            messages.error(request, "Please select a valid question and date.")
+    
+    pods = POD.objects.select_related('question').filter(batch=batch)
+    
+    today_pod = pods.filter(date=datetime.datetime.today().date())
+    past_pods = pods.order_by('-date').exclude(date__gt=datetime.datetime.today().date())
+    upcoming_pods = pods.filter(date__gt=datetime.datetime.today().date()).order_by('date')
 
     parameters = {
-        "administrator": administrator,
-        "questions": questions,
         "batch": batch,
         "pod": today_pod,
         "past_pods": past_pods,
@@ -269,6 +249,32 @@ def administrator_set_pod_for_batch(request, slug):
     }
 
     return render(request, 'administration/batch/set_pod.html', parameters)
+
+
+@csrf_exempt
+def set_pod(request, slug):
+    if request.method == "POST":
+        question_id = request.POST.get("question_id")
+        pod_date = request.POST.get("pod_date")
+        batch = get_object_or_404(Batch, slug=slug)
+
+        if question_id and pod_date:
+            try:
+                pod_date = datetime.datetime.strptime(pod_date, "%Y-%m-%d").date()
+                if pod_date < now().date():
+                    return JsonResponse({"success": False, "message": "Cannot set a POD for a past date."})
+
+                question = get_object_or_404(Question, id=question_id)
+                if POD.objects.filter(batch=batch, date=pod_date).exists():
+                    return JsonResponse({"success": False, "message": "POD already exists for the selected date."})
+
+                POD.objects.create(question=question, batch=batch, date=pod_date)
+                return JsonResponse({"success": True, "message": "POD set successfully!"})
+            except ValueError:
+                return JsonResponse({"success": False, "message": "Invalid date format."})
+
+        return JsonResponse({"success": False, "message": "Please select a valid question and date."})
+
 
 # =============================== VIEW SUBMISSIONS ==============================
 

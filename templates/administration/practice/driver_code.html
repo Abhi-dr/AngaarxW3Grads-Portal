@@ -98,18 +98,20 @@ Driver Code | {{ question.title }}
             {% for driver_code in driver_codes %}
 
             {% if driver_code == 71 %}
-            <button class="btn btn-primary">Python</button>
+            <button class="btn btn-sm btn-outline-primary">Python</button>
             {% elif driver_code == 50 %}
-            <button class="btn btn-warning">C</button>
+            <button class="btn btn-sm btn-outline-warning">C</button>
             {% elif driver_code == 54 %}
-            <button class="btn btn-info">C++</button>
+            <button class="btn btn-sm btn-outline-info">C++</button>
             {% elif driver_code == 62 %}
-            <button class="btn btn-success">Java</button>
+            <button class="btn btn-sm btn-outline-success">Java</button>
             {% endif %}
 
             {% endfor %}
 
+            <a href="{% url 'test_code' question.slug %}" class="btn btn-info float-end mx-3">TEST CODE NOW</a>
         </div>
+
 
         <div class="card-body p-4">
             <form method="post">
