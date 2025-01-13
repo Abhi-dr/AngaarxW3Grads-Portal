@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import sheet_views, views
+from . import sheet_views, batch_views, views
 
 urlpatterns = [
 
@@ -62,3 +62,11 @@ urlpatterns = [
     path('sheet/<slug:slug>/toggle-status/', sheet_views.toggle_sheet_status, name='toggle_sheet_status'),
 ]
 
+# ======================== BATCH WORK URLS =====================
+
+urlpatterns += [
+    path("courses/", batch_views.batches, name="instructor_batches"),
+    path("course/<slug:slug>/", batch_views.batch, name="instructor_batch"),
+    
+    path("<slug:slug>/set_pod", batch_views.set_pod_for_batch, name="instructor_pod_for_batch"),
+]

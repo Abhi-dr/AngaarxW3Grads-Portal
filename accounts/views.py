@@ -203,7 +203,8 @@ def page_not_found_view(request, exception):
 
 @login_required
 def get_active_sheet_timer(request):
-    # Find the active sheet for the logged-in user
+    # Find the active sheet for the logged-in user for the batch in which the user has enrolled
+    
     active_sheets = Sheet.objects.filter(
         end_time__gte=now()
     )

@@ -1,0 +1,154 @@
+{% extends 'instructor/base.html' %}
+{% load static %}
+
+{% block title %}
+Course | {{ batch.name }}
+{% endblock %}
+
+
+{% block batch_active %}
+active
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    {% for notification in notifications %}
+
+    <div class="alert alert-{{ notification.type }} alert-dismissible fade show" role="alert">
+        <strong>{{ notification.title|title }}</strong> {{ notification.description }}
+
+        {% if not notification.is_fixed %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {% endif %}
+    </div>
+
+    {% endfor %}
+
+    <!-- ================================= BATCH SHEETS ====================================== -->
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">{{ batch.name }} 🔥</span>
+                <span class="fs-4"> | Angaar x W3Grads
+                </span>
+            </h3>
+        </div>
+
+        <div class="">
+            <a href="{% url 'instructor_pod_for_batch' batch.slug %}"
+                class="btn btn-outline-primary button mt-n3 m-3 w-25">Set POD</a>
+        </div>
+    </div>
+
+
+    <!--============================================ BATCH POD =================================== -->
+
+
+
+    <div class="row">
+
+        {% if pod %}
+        <div class="col-lg-3">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card overflow-hidden">
+
+                        <div class="card-body p-4">
+                            <div class="mb-4">
+                                <h5 class="card-title mb-9 fw-semibold d-flex">POD ⛅
+                                    <div class="d-flex align-items-center ms-auto fs-3 text-white-50">
+                                        {{ pod.date }}
+                                    </div>
+                                </h5>
+                            </div>
+                            <div class="row align-items-center">
+
+                                <div class="row align-items-center">
+                                    <h4 class="fw-semibold mb-3">{{ pod.question.title }}</h4>
+
+                                </div>
+
+                                <div class="mb-2">
+                                    <h6 class="fw-semibold mb-1">Accepted Today: <span class="text-success"> {{ pod.question.how_many_users_solved_today }}</span></h6>
+                                    <h6 class="fw-semibold mb-1">Attempted: <span class="text-warning">{{ pod.question.how_many_users_attempted_today }}</span></h6>
+                                </div>
+                                <button class="btn btn-outline-primary">Submissions</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        {% endif %}
+
+        <!-- =========================================== SHEETS =========================================== -->
+
+        {% if pod %}
+        <div class="card col-lg-9">
+            {% else %}
+            <div class="card w-100">
+                {% endif %}
+                <div class="card-body p-2">
+                    <div class=" container mb-2">
+                        <div class="d-flex flex-row overflow-auto" style="gap: 1rem;">
+                            {% for sheet in sheets %}
+
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <a href="{% url 'administrator_sheet' sheet.slug %}">
+                                        <img src="{{ sheet.thumbnail.url }}" class="card-img-top"
+                                            alt="Sheet Thumbnail" />
+                                        <div class="card-body">
+                                            <h5 class="card-title">
+                                                {{ sheet.name }}🔥
+                                            </h5>
+                                            <p class="card-text mb-1">
+                                                Total Questions: {{ sheet.get_total_questions }}
+                                            </p>
+
+                                            {% if sheet.is_enabled %}
+                                            <span class="text-success">Enabled</span>
+                                            {% else %}
+                                            <span class="text-danger">Disabled</span>
+                                            {% endif %}
+                                            <a href="{% url 'administrator_sheet' sheet.slug %}"
+                                                class="btn btn-outline-secondary w-100">View More</a>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+
+                            {% endfor %}
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================= OTHER DATA ========================================= -->
+
+        <br>
+        <div class="py-6 px-6 text-center">
+            <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
+                    class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
+            </p>
+        </div>
+    </div>
+
+    {% endblock %}

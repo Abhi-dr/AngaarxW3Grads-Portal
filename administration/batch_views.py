@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Q
 
 from accounts.models import Student, Administrator
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
@@ -208,8 +209,7 @@ def batch(request, slug):
 
 # =============================== SET POD FOR BATCH ==============================
 
-from django.http import JsonResponse
-from django.db.models import Q
+
 
 def fetch_questions(request):
     query = request.GET.get("query", "")

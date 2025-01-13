@@ -361,9 +361,9 @@ def problem(request, slug):
             # Check if the question is enabled for the user
             if question not in enabled_questions:
                 messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
-                return redirect('sheet', slug=sheet.slug)  # You can redirect to the sheet or show an error
+                return redirect('sheet', slug=sheet.slug)
                 
-        
+
         question.scenario = convert_backticks_to_code(question.scenario)
         question.description = convert_backticks_to_code(question.description)
         
