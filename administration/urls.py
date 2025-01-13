@@ -48,6 +48,8 @@ urlpatterns = [
     
     path("test_cases/<slug:slug>/", problem_views.test_cases, name="test_cases"),
     path("add_test_case/<slug:slug>/", problem_views.add_test_case, name="add_test_case"),
+    path("add_test_case_using_json/<slug:slug>/", problem_views.add_test_cases, name="add_test_cases_using_json_case"),    
+    
     path("delete_test_case/<int:id>/", problem_views.delete_test_case, name="delete_test_case"),
     path("edit_test_case/<int:id>/", problem_views.edit_test_case, name="edit_test_case"),
     

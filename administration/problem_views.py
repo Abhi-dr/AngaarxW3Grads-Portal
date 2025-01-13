@@ -5,11 +5,10 @@ from django.contrib import messages
 from django.db.models import Q
 from accounts.models import Administrator
 from django.http import JsonResponse
-import requests, time, re
-import base64
+import requests, time, re, json, base64
+from django.db import transaction
 
 from django.views.decorators.csrf import csrf_exempt
-
 
 from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode
 from django.views.decorators.cache import cache_control
@@ -325,6 +324,57 @@ def add_test_case(request, slug):
         })
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request.'}, status=400)
+
+# ======================================= ADD TEST CASES USING JSON ============================
+
+
+def add_test_cases(request, slug):
+    
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        question = Question.objects.get(slug=slug)
+        
+        json_data = request.POST.get("json_data")
+        
+        try:
+        # Parse the JSON data
+            data = json.loads(json_data)
+            if not isinstance(data, dict):
+                print("JSON should be a dictionary with numeric keys.")
+                return JsonResponse({
+                    "message": "The data should be in JSON format only"
+                })
+            
+            # Prepare TestCase objects for bulk creation
+            test_cases = [  
+                TestCase(
+                    question = question,
+                    input_data=value.get('Input'), 
+                    expected_output=value.get('Output')
+                    ) for key, value in data.items() if isinstance(value, dict) and 'Input' in value and 'Output' in value
+            ]
+            
+            
+            # Use bulk_create within a transaction for efficiency
+            with transaction.atomic():
+                TestCase.objects.bulk_create(test_cases, ignore_conflicts=True)  # Prevent duplicate key errors
+
+            return JsonResponse({
+                    'status': 'success',
+                    'message': 'Test case added successfully.'
+                })
+    
+
+        except json.JSONDecodeError:
+            return JsonResponse({
+                    "message": "Invalid JSON Format. The data should be in JSON format only"
+                })
+        except Exception as e:
+            return JsonResponse({
+                    "message": "API Error:" + str(e)
+                })
+        
+        # Return the newly added test case as JSON
+
 
 
 # ======================================== EDIT TEST CASE ======================================
