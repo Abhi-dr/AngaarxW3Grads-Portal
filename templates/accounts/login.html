@@ -95,5 +95,12 @@
     passwordIcon.textContent = '👀'; // Ensure it starts as closed
   };
 
+  const loginBtn = document.getElementById("login-btn");
+  loginBtn.addEventListener("click", function () {
+    loginBtn.innerHTML = "Logging In...";
+    loginBtn.style.backgroundColor = "grey";
+
+  });
+
 </script>
 {% endblock %}

@@ -4,8 +4,10 @@ from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.utils import timezone
 from datetime import datetime
-from django.db.models import Q
+from django.db.models import Q, Case, When, Value, CharField
 from django.http import JsonResponse
+
+from django.core.paginator import Paginator
 
 from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
@@ -18,19 +20,26 @@ def my_batches(request):
     
     student = request.user.student
     
-    student_batches = Batch.objects.filter(
-        enrollment_requests__student=student,
-        enrollment_requests__status='Accepted'
-    )
-
-    all_batches = Batch.objects.exclude(
-        enrollment_requests__student=student,
-        enrollment_requests__status='Accepted'
-    )
+    # Fetch all batches with their enrollment status for the current student
+    all_batches = Batch.objects.annotate(
+        enrollment_status=Case(
+            When(enrollment_requests__student=student, enrollment_requests__status='Accepted', then=Value('Accepted')),
+            When(enrollment_requests__student=student, enrollment_requests__status='Pending', then=Value('Pending')),
+            default=Value('Not Enrolled'),
+            output_field=CharField(),
+        )
+    ).select_related().distinct()
     
+
+    # Split the batches into two lists: enrolled (Accepted) and others
+    student_batches = [batch for batch in all_batches if batch.enrollment_status == 'Accepted']
+    pending_batches = [batch for batch in all_batches if batch.enrollment_status == 'Pending']
+    other_batches = [batch for batch in all_batches if batch.enrollment_status != 'Accepted' and batch not in student_batches and batch not in pending_batches]
+
     parameters = {
-        "all_batches": all_batches,
-        "student_batches": student_batches
+        "other_batches": other_batches,  # Exclude Accepted from 'all_batches'
+        "pending_batches": pending_batches,  # Only Pending batches
+        "student_batches": student_batches,  # Only Accepted batches
     }
     
     return render(request, 'student/batch/my_batches.html', parameters)
