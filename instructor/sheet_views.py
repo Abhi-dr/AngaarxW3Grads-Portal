@@ -21,7 +21,7 @@ from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCo
 @staff_member_required(login_url='login')
 def sheets(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = request.user
     sheets = Sheet.objects.filter(created_by=instructor).order_by("-id")
     
     parameters = {

@@ -7,23 +7,27 @@ active
 {% endblock %}
 
 {% block title %}
-My Courses
+Instructor | Sheets
+{% endblock %}
+
+{% block extra_css %}
+<style>
+
+</style>
 {% endblock %}
 
 {% block body %}
-
 <div class="container-fluid">
 
+    <!-- Display Alert Messages -->
     {% for message in messages %}
-
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
         <strong>{{ message.tag }}</strong> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-
     {% endfor %}
 
-
+    <!-- Header Card with Action Buttons -->
     <div class="card">
         <div class="card-body">
             <h3 class="heading">
@@ -34,8 +38,6 @@ My Courses
         </div>
         <a href="{% url 'instructor_add_sheet' %}" class="btn btn-outline-primary button mt-n3 m-3 ">Add Sheet</a>
     </div>
-
-
 
     <!-- ======================== COURSE CODE ====================== -->
 
@@ -90,9 +92,134 @@ My Courses
 
     </div>
 
+    <div class="card">
+        <div class="card-body">
+            <h4 class="heading mb-n2 mt-n2">
+                <span class="fw-semibold">A L L &nbsp; S H E E T S</span>
+            </h4>
+        </div>
+    </div>
 
-    
+    <!-- ====== loader ============= -->
 
+    <div class="loader d-flex justify-content-center">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <!-- ======== SHeets Container ======== -->
+
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container">
+        <!-- Sheets DOM -->
+    </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sheetsContainer = document.getElementById('sheets-container');
+        const loader = document.querySelector('.loader');
+        const sheetsUrl = "{% url 'staff_fetch_all_sheets' %}"; // API endpoint
+
+        const toggleLoader = (show) => {
+            loader.classList.toggle('d-none', !show); // Show/hide loader using Bootstrap's utility class
+            sheetsContainer.classList.toggle('loading', show); // Dim the container while loading
+        };
+
+        // Fetch JSON data
+        toggleLoader(true);
+        fetch(sheetsUrl)
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                // Clear the container
+                sheetsContainer.innerHTML = '';
+
+                // Check if there are no sheets
+                if (data.data.length === 0) {
+                    sheetsContainer.innerHTML = '<p class="text-muted text-center">No sheets available at the moment.</p>';
+                    toggleLoader(false);
+                    return;
+                }
+
+                // Populate sheets dynamically with lazy-loading support
+                data.data.forEach(sheet => {
+                    const card = `
+                        <div class="col-md-3">
+                            <div class="card">
+                                <!-- Thumbnail with lazy loading -->
+                                <a href="/administrator/sheet/${sheet.id}/">
+                                    <img 
+                                        src="/static/placeholder-thumbnail.jpg" 
+                                        data-src="${sheet.thumbnail || '/static/default-thumbnail.jpg'}" 
+                                        class="card-img-top lazy-load" 
+                                        alt="${sheet.name}">
+                                </a>
+
+                                <!-- Card Body -->
+                                <div class="card-body">
+                                    <!-- Sheet Name -->
+                                    <h5 class="card-title">${sheet.name}🔥</h5>
+
+                                    <!-- Batches -->
+                                    <p class="card-text mb-2">
+                                        <b>Batches: </b>
+                                        ${sheet.batches || '<span class="text-success">Open to all</span>'}
+                                    </p>
+
+                                    <!-- Total Questions -->
+                                    <p class="card-text mb-1">Total Questions: ${sheet.questions}</p>
+
+                                    <!-- Status -->
+                                    <span class="badge ${sheet.is_enabled ? 'bg-success' : 'bg-danger'}">
+                                        ${sheet.is_enabled ? 'Public' : 'Disabled'}
+                                    </span>
+
+                                    <!-- View More Button -->
+                                    <a href="/administration/sheet/${sheet.slug}/" class="btn btn-outline-secondary w-100 mt-2">View More</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    sheetsContainer.insertAdjacentHTML('beforeend', card);
+                });
+
+                // Apply lazy loading to images
+                applyLazyLoading();
+            })
+            .catch(error => {
+                console.error('Error fetching sheets:', error);
+                sheetsContainer.innerHTML = '<p class="text-danger text-center">Failed to load sheets. Please try again later.</p>';
+            })
+            .finally(() => {
+                toggleLoader(false);
+            });
+
+        // Lazy loading function using Intersection Observer
+        function applyLazyLoading() {
+            const lazyImages = document.querySelectorAll('.lazy-load');
+            if ('IntersectionObserver' in window) {
+                const lazyImageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const img = entry.target;
+                            img.src = img.dataset.src; // Load the actual image
+                            img.classList.remove('lazy-load'); // Remove lazy-load class once loaded
+                            observer.unobserve(img); // Stop observing this image
+                        }
+                    });
+                });
+
+                lazyImages.forEach(img => lazyImageObserver.observe(img));
+            } else {
+                // Fallback for older browsers
+                lazyImages.forEach(img => {
+                    img.src = img.dataset.src;
+                });
+            }
+        }
+    });
+</script>
 {% endblock %}

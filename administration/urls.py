@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views
+from . import problem_views, views, question_generator, batch_views, sheet_views, sheet_apis
 
 
 urlpatterns = [
@@ -148,4 +148,8 @@ urlpatterns += [
     
     path('sheet/<slug:slug>/toggle-status/', sheet_views.toggle_sheet_status, name='toggle_sheet_status'),
 
+]
+
+urlpatterns += [
+    path("fetch_all_sheets/", sheet_apis.fetch_all_sheets, name="staff_fetch_all_sheets"),
 ]
