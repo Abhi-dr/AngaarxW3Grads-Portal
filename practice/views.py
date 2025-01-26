@@ -363,8 +363,8 @@ def problem(request, slug):
                 messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
                 return redirect('sheet', slug=sheet.slug)
                 
-
-        question.scenario = convert_backticks_to_code(question.scenario)
+        if question.scenario:
+            question.scenario = convert_backticks_to_code(question.scenario)
         question.description = convert_backticks_to_code(question.description)
         
         sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
@@ -375,7 +375,7 @@ def problem(request, slug):
         })
     except Exception as e:
         print(f"Error loading problem page: {e}")
-        return JsonResponse({"error": "Could not load problem."}, status=500)
+        return JsonResponse({"error": "Error from backend: {e}" + str(e)}, status=500)
 
 # ============================================ UPDATE COINS ===============================================
 
