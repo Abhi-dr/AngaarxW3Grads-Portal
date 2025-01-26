@@ -74,7 +74,7 @@ Dashboard | My Courses
 
     <div class="card">
 
-        {% if  all_batches %}
+        {% if pending_batches or other_batches or rejected_batches %}
 
         <div class="card-body">
             <h3 class="heading">
@@ -93,7 +93,39 @@ Dashboard | My Courses
     <div class="row row-cols-1 row-cols-md-3 g-4">
 
 
-        {% for batch in all_batches %}
+        {% for batch in pending_batches %}
+
+        <div class="col-md-3">
+            <div class="card">
+                <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Batch Thumbnail" />
+                <div class="card-body">
+                    <h5 class="card-title">{{ batch.name }}🔥</h5>
+                    <button class="btn btn-outline-warning w-100" disabled>Requested</button>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+
+        <!-- ====================== REJECTED BATCHES =================== -->
+
+        {% for batch in rejected_batches %}
+
+        <div class="col-md-3">
+            <div class="card">
+                <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Batch Thumbnail" />
+                <div class="card-body">
+                    <h5 class="card-title">{{ batch.name }}🔥</h5>
+                    <button class="btn btn-danger w-100" disabled>Rejected</button>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+
+        <!-- ====================== ALL OTHER BATCHES ================ -->
+
+        {% for batch in other_batches %}
 
         <div class="col-md-3">
             <div class="card">
@@ -101,12 +133,7 @@ Dashboard | My Courses
                     <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Batch Thumbnail" />
                     <div class="card-body">
                         <h5 class="card-title">{{ batch.name }}🔥</h5>
-
-                        {% if batch.is_enrolled %}
-                        <button class="btn btn-outline-success w-100" disabled>{{ batch.enrollment_status }}</button>
-                        {% else %}
                         <a href="{% url 'enroll_batch' batch.id %}" class="btn btn-success w-100">Enroll Now</a>
-                        {% endif %}
                     </div>
                 </a>
             </div>

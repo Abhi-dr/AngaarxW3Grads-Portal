@@ -23,24 +23,28 @@ def my_batches(request):
     # Fetch all batches with their enrollment status for the current student
     
     all_batches = Batch.objects.annotate(
-        enrollment_status=Case(
-            When(enrollment_requests__student=student, enrollment_requests__status='Accepted', then=Value('Accepted')),
-            When(enrollment_requests__student=student, enrollment_requests__status='Pending', then=Value('Pending')),
-            When(enrollment_requests__student=student, enrollment_requests__status='Rejected', then=Value('Rejected')),
-            default=Value('Not Enrolled'),
-            output_field=CharField(),
-        )
-    ).select_related().distinct()
-    
+            enrollment_status=Case(
+                When(enrollment_requests__student=student, enrollment_requests__status='Accepted', then=Value('Accepted')),
+                When(enrollment_requests__student=student, enrollment_requests__status='Pending', then=Value('Pending')),
+                When(enrollment_requests__student=student, enrollment_requests__status='Rejected', then=Value('Rejected')),
+                default=Value('Not Enrolled'),
+                output_field=CharField(),
+            )
+        ).select_related().distinct()  # Ensure distinct batches
 
-    # Split the batches into two lists: enrolled (Accepted) and others
-    student_batches = [batch for batch in all_batches if batch.enrollment_status == 'Accepted']
+        # Split the batches into two categories: Accepted and others
+    student_batches = all_batches.filter(enrollment_status='Accepted')
+    pending_batches = all_batches.filter(enrollment_status='Pending')
+    rejected_batches = all_batches.filter(enrollment_status='Rejected')
+    other_batches = [batch for batch in all_batches if batch not in student_batches and batch not in pending_batches and batch not in rejected_batches]
     
-    other_batches = [batch for batch in all_batches if batch not in student_batches]
+    print(other_batches)
 
     parameters = {
-        "all_batches": other_batches,
         "student_batches": student_batches,  # Only Accepted batches
+        "pending_batches": pending_batches,
+        "rejected_batches": rejected_batches,
+        "other_batches": other_batches,
     }
     
     return render(request, 'student/batch/my_batches.html', parameters)
