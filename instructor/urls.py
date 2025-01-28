@@ -32,6 +32,7 @@ urlpatterns = [
     path("add_sheet/", sheet_views.add_sheet, name="instructor_add_sheet"),
     path("sheet/<slug:slug>/edit/", sheet_views.edit_sheet, name="instructor_edit_sheet"),
     path("delete_sheet/<int:id>/", sheet_views.delete_sheet, name="instructor_delete_sheet"),
+    
     path("sheet/<slug:slug>/", sheet_views.sheet, name="instructor_sheet"),
     path("get_excluded_questions/<int:sheet_id>/", sheet_views.get_excluded_questions, name="get_excluded_questions"),
     

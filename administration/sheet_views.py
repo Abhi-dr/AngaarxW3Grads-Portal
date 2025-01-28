@@ -20,17 +20,8 @@ from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRe
 @staff_member_required(login_url='login')
 @admin_required
 def sheets(request):
-    
-    administrator = Administrator.objects.get(id=request.user.id)
-    sheets = Sheet.objects.filter(is_approved = True).order_by('-id')
-    
-    parameters = {
-        "administrator": administrator,
-        "sheets": sheets
-        
-    }
-    
-    return render(request, 'administration/sheet/sheets.html', parameters)
+    # Data is sent by staff_fetch_all_sheets
+    return render(request, 'administration/sheet/sheets.html')
 
 # ========================= ADD SHEET ==========================
 
@@ -170,6 +161,7 @@ def sheet(request, slug):
     sheet = Sheet.objects.get(slug=slug)
     questions = sheet.get_ordered_questions()
     
+    
     parameters = {
         "administrator": administrator,
         "sheet": sheet,
@@ -177,6 +169,7 @@ def sheet(request, slug):
     }
     
     return render(request, 'administration/sheet/sheet.html', parameters)
+
 
 # ========================= TOGGLE SHEET STATUS ==========================
 

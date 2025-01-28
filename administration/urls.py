@@ -124,7 +124,10 @@ urlpatterns += [
     path("administrator_approve_sheet/<int:id>", sheet_views.administrator_approve_sheet, name="administrator_approve_sheet"),
     path("sheet/<slug:slug>/edit/", sheet_views.edit_sheet, name="administrator_edit_sheet"),
     path("delete_sheet/<int:id>/", sheet_views.delete_sheet, name="administrator_delete_sheet"),
+    
+    
     path("sheet/<slug:slug>/", sheet_views.sheet, name="administrator_sheet"),
+    
     path("get_excluded_questions/<int:sheet_id>/", sheet_views.get_excluded_questions, name="get_excluded_questions"),
     
     path("remove_question_from_sheet/<int:sheet_id>/<int:question_id>/", sheet_views.remove_question_from_sheet, name="administrator_remove_from_sheet"),
@@ -152,4 +155,5 @@ urlpatterns += [
 
 urlpatterns += [
     path("fetch_all_sheets/", sheet_apis.fetch_all_sheets, name="staff_fetch_all_sheets"),
+
 ]

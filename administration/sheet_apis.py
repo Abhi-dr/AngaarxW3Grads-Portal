@@ -15,7 +15,6 @@ def fetch_all_sheets(request):
     sheets = Sheet.objects.filter(is_approved=True).prefetch_related('batches', 'questions').order_by('-id')
 
     data = [
-        
         {
             "id": sheet.id,
             "name": sheet.name,
@@ -33,3 +32,4 @@ def fetch_all_sheets(request):
     cache.set('fetch_all_sheets', data, timeout=900)  # Cache for 15 minutes
 
     return JsonResponse({'data': data})
+
