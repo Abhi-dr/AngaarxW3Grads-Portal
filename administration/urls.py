@@ -155,5 +155,6 @@ urlpatterns += [
 
 urlpatterns += [
     path("fetch_all_sheets/", sheet_apis.fetch_all_sheets, name="staff_fetch_all_sheets"),
+    path('api/submissions/<slug:slug>/', sheet_apis.fetch_question_submissions, name='fetch_question_submissions'),
 
 ]

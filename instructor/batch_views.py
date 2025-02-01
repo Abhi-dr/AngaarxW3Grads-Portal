@@ -83,3 +83,15 @@ def set_pod_for_batch(request, slug):
 
     return render(request, 'instructor/batch/set_pod.html', parameters)
 
+# =============================== VIEW SUBMISSIONS ==============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def view_submissions(request, slug):
+    question = get_object_or_404(Question, slug=slug)
+    
+    parameters = {
+        "question": question,
+    }
+    
+    return render(request, 'instructor/batch/view_submissions.html', parameters)
