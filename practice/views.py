@@ -688,7 +688,8 @@ def fetch_questions(request):
         return JsonResponse(cached_data)
 
     per_page = 10
-    questions = Question.objects.filter(is_approved=True, parent_id=-1)
+    questions = Question.objects.filter(is_approved=True, parent_id=-1, sheets__isnull=True)    
+
 
     if query:
         questions = questions.filter(
