@@ -1,0 +1,158 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Administration -> Instructors
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card flex-row align-items-center justify-content-between shadow-lg">
+        <div class="card-body">
+            <h3 class="heading mb-0">
+                <span class="fw-semibold">Apne Jawan🔥&nbsp;({{ instructors.count }})</span>
+            </h3>
+        </div>
+
+        <div class="ms-auto">
+            <a href="{% url 'administrator_add_instructor' %}" class="btn btn-outline-success py-2 mx-5">Add
+                Instructor</a>
+        </div>
+    </div>
+
+
+    <!--Info message-->
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- create a search bar -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search by ID, Name, Email or Phone Number"
+                        aria-label="Search by ID, Name, Email or Phone Number" aria-describedby="button-addon2"
+                        name="query">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <!-- make a button to clear the search -->
+                    <a href="{% url 'administrator_all_instructors' %}" class="btn btn-outline-danger">Clear</a>
+                </div>
+
+                <!-- search on the basis of tags -->
+
+
+
+            </form>
+        </div>
+
+
+    </div>
+
+
+    <!-- ======================================================================================== -->
+
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Apni Angaari Public 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Name
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Socials
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Contacts
+                                </h6>
+                            </th>
+                            <!-- <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th> -->
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for instructor in instructors %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ instructor.id }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{ instructor.first_name }} {{instructor.last_name }}</h6>
+                                <span class="fw-semibold">{{ instructor.username }}</span>
+
+                            </td>
+
+
+                            <td class="border-bottom-0">
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="{{ instructor.linkedin_id }}" target="_blank"
+                                        class="btn btn-outline-info text-red float-end">LinkedIn</a>
+
+                                    <a href="{{ instructor.github_id }}" target="_blank"
+                                        class="btn btn-outline-dark text-green float-end">GitHub</a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <a href="mailto:{{ instructor.email }}"
+                                        class="btn btn-outline-warning text-red float-end">Mail</a>
+
+                                    <a href="tel:{{ instructor.mobile_number }}"
+                                        class="btn btn-outline-indigo text-green float-end">Call</a>
+                                </div>
+                            </td>
+
+                            {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+{% endblock %}

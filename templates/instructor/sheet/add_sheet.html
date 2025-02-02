@@ -1,0 +1,174 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block title %}
+Add Sheet
+{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Add Sheet</h5>
+        </div>
+        <div class="container px-4">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <hr class="mt-0">
+                <div class="row">
+                    <div class="card-body h-100">
+
+                        <div class="mb-3">
+                            <label for="assignment_type" class="form-label">Batches</label>
+                            <select class="form-select form-control" name="batches" id="assignment_type" multiple>
+                                {% for batch in batches %}
+                                <option value="{{ batch.id }}">{{ batch.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="job_title" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="question_title" name="name"
+                                placeholder="Name goes here..." required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="thumbnail" class="form-label">Thumbnail
+                                <div class="star">*</div>
+                            </label>
+                            <input type="file" class="form-control" id="thumbnailInput" name="thumbnail" required>
+                        </div>
+
+                        <div class="form-check">
+                            <label class="form-check-label" for="isSample">Is It Sequential?</label>
+                            <input type="checkbox" class="form-check-input" id="isSample" name="is_sequential">
+                        </div>
+
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-success w-100 mt-3">Add &nbsp; Sheet</button>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        </form>
+
+        <!-- Cropper Modal -->
+        <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cropperModalLabel">Crop Image</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="img-container">
+                            <img id="image" style="max-width: 100%;" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="cropButton">Crop</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+
+<!--Crop js-->
+<script>
+    $(document).ready(function () {
+        let cropper;
+        const thumbnailInput = document.getElementById('thumbnailInput');
+        const image = document.getElementById('image');
+        const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+        const cropButton = document.getElementById('cropButton');
+
+        // Trigger modal on file selection
+        thumbnailInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    image.src = event.target.result;
+                    cropperModal.show();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Initialize Cropper.js when modal is shown
+        $('#cropperModal').on('shown.bs.modal', function () {
+            cropper = new Cropper(image, {
+                aspectRatio: 5 / 4, // Fixed Aspect Ratio
+                viewMode: 1, // Restrict the crop box to not exceed the size of the canvas
+                dragMode: 'move', // Allow only moving the crop box
+                cropBoxResizable: true, // Disable resizing
+                cropBoxMovable: true // Allow moving
+            });
+        }).on('hidden.bs.modal', function () {
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        });
+
+        // Handle crop button click
+        cropButton.addEventListener('click', function () {
+            if (cropper) {
+                const croppedImage = cropper.getCroppedCanvas().toDataURL('image/png');
+                // Convert base64 to a file object and set it as the input value
+                const blob = dataURLtoBlob(croppedImage);
+
+                // Dynamically name the cropped file based on the original image name
+                const fileName = thumbnailInput.files[0].name; // Get the original file name
+                const fileExtension = fileName.substring(fileName.lastIndexOf('.')); // Extract the file extension
+                const croppedFileName = fileName.replace(fileExtension, '') + "-cropped" + fileExtension; // Append "-cropped"
+                const file = new File([blob], croppedFileName, { type: "image/png" });
+
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                thumbnailInput.files = dataTransfer.files;
+                cropperModal.hide();
+            }
+        });
+
+
+        // Convert base64 to blob
+        function dataURLtoBlob(dataurl) {
+            const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+            const bstr = atob(arr[1]);
+            let n = bstr.length;
+            const u8arr = new Uint8Array(n);
+            while (n--) {
+                u8arr[n] = bstr.charCodeAt(n);
+            }
+            return new Blob([u8arr], { type: mime });
+        }
+    });
+</script>
+
+
+
+{% endblock %}

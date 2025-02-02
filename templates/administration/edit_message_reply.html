@@ -1,0 +1,77 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Edit Message Reply
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    .star {
+        color: red;
+        display: inline;
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Reply Messages</h5>
+
+        </div>
+        <div class="container px-4">
+
+            <hr class="mt-0">
+            <div class="row">
+
+                <div class="w-100">
+                    <!-- Account details card-->
+
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <form method="POST">
+
+                                {% csrf_token %}
+
+                                <!-- Form Group (username)-->
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <label class="mb-1" for="inputUsername">Message from {{ message.student.first_name }}
+                                        </label>
+
+                                        <textarea class="form-control" rows="10" id="inputEmailAddress" type="textarea"
+                                            readonly disabled>{{ message.message}}</textarea>
+
+                                    </div>
+
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="mb-1" for="description">Reply <div class="star">*
+                                        </div></label>
+                                    <textarea class="form-control" rows="10" id="inputEmailAddress" type="textarea"
+                                        placeholder="Reply goes here..." name="reply" required>{{ message.reply }}</textarea>
+                                </div>
+
+                                <button class="btn btn-primary" type="submit">Update Reply</button>
+                            </form>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,346 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
+  <title>
+    #ANGAARI_HAI
+  </title>
+  <!--     Fonts and icons     -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+  <!-- Nucleo Icons -->
+  <link href="{% static 'css/nucleo-icons.css' %}" rel="stylesheet" />
+  <link href="{% static 'css/nucleo-svg.css' %}" rel="stylesheet" />
+  <!-- Font Awesome Icons -->
+  <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+  <link href="{% static 'css/accounts/nucleo-svg.css' %}" rel="stylesheet" />
+  <!-- CSS Files -->
+  <link id="pagestyle" href="{% static 'css/accounts/argon-dashboard.css' %}" rel="stylesheet" />
+
+  <style>
+
+    body{
+      background-image: url("{% static 'img/accounts/login_bg.jpg' %}");
+      background-size: contain;
+      
+      background-attachment: fixed;
+      
+    }
+
+    .input-container {
+      position: relative;
+    }
+
+    .validation-icon {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      width: 20px;
+      height: 20px;
+      background-size: cover;
+      display: none;
+    }
+
+    #password-input:valid+.validation-icon {
+      background-image: url('https://img.icons8.com/glyph-neue/64/40C057/double-tick.png');
+      /* Replace with your green check icon image path */
+      display: block;
+    }
+
+    #password-input:invalid+.validation-icon {
+      background-image: url('https://img.icons8.com/emoji/48/cross-mark-emoji.png');
+      /* Replace with your red cross icon image path */
+      display: block;
+    }
+  </style>
+</head>
+
+<body class="w-100" oncontextmenu="return false">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg position-absolute top-0 z-index-3 w-100 shadow-none my-3 navbar-transparent mt-4">
+    <div class="container">
+      <a class="navbar-brand font-weight-bolder ms-lg-0 ms-3 text-white" href="{% url 'home' %}">
+        The Angaar Batch🔥
+      </a>
+
+      <!-- <button class="navbar-toggler shadow-none ms-2" type="button" data-bs-toggle="collapse"
+        data-bs-target="#navigation" aria-controls="navigation" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon mt-2">
+          <span class="navbar-toggler-bar bar1"></span>
+          <span class="navbar-toggler-bar bar2"></span>
+          <span class="navbar-toggler-bar bar3"></span>
+        </span></button> -->
+      <a class="btn btn-outline-white" href="{% url 'home' %}">
+        Home
+      </a>
+    </div>
+    
+  </nav>
+  <!-- End Navbar -->
+  <main class="main-content  mt-0">
+    <div class="page-header align-items-start min-vh-50 pt-6 pb-11 m-3 border-radius-lg"
+    style="background-image: url('/static/img/accounts/register.png'); background-position: center;">
+    <span class="mask bg-gradient-dark opacity-6"></span>
+    <div class="container">
+      {% for message in messages %}
+
+          <div class="row">
+            <div class="alert {{ message.tags }} fade show" role="alert">
+              <span class="alert-text text-white"><strong>{{ message.tag }}</strong>{{ message }}</span>
+            </div>
+          </div>
+
+          {% endfor %}
+
+      <div class="row justify-content-center">
+        <div class="col-lg-5 text-center mx-auto">
+          <h1 class="text-white mb-2 mt-5">Swagat Hai!</h1>
+            <p class="text-lead text-white">
+              Seekhna Hai, Seekh! Jeetna Hai, Jeet!
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container" >
+      <div class="row mt-lg-n10 mt-md-n11 mt-n10 justify-content-center">
+
+        <div class="col-xl-7 col-lg-5 col-md-7">
+          <div class="card z-index-0" style="border: 1px solid rgb(255, 150, 63);">
+            <div class="card-header text-center">
+              <h5>Step Forward To Learn and Earn, What? Skills </h5>
+            </div>
+            <div class="card-body">
+
+              <form role="form" method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                  <label for="subject" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="username" name="username" aria-label="username"
+                    placeholder="Enter your username" pattern="^(?!.*\s).{1,10}$" maxlength="20" minlength="4"
+                    title="Must NOT contain any Space, Must NOT have more than 10 characters" required>
+                  <span id="username-feedback"></span>
+
+                </div>
+
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="subject" class="form-label">First Name</label>
+                      <input type="text" class="form-control" placeholder="First name" aria-label="first_name"
+                        name="first_name" maxlength="20" required>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="subject" class="form-label">Last Name</label>
+                      <input type="text" class="form-control" placeholder="Last name" aria-label="last_name"
+                        name="last_name" maxlength="20" >
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="subject" class="form-label">Email Address</label>
+                  <input type="email" class="form-control" placeholder="Email" aria-label="Email" name="email"
+                    maxlength="30" required>
+                </div>
+
+                <!-- <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="subject" class="form-label">Mobile Number (WhatsApp Number Preferably)</label>
+                    <input type="text" class="form-control" maxlength="10" minlength="10"
+                      title="Must have exactly 10 digits" placeholder="Mobile Number" aria-label="Mobile Number"
+                      name="mobile_number" required>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="gender" class="form-label">Gender</label>
+
+                    <select name="gender" id="gender" class="form-control" required>
+
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Preferred Not To Say</option>
+
+                    </select>
+
+                  </div>
+
+                </div> -->
+
+                <!-- <div class="mb-3">
+                  <label for="college" class="form-label">College/University</label>
+                  <select name="college" id="college" class="form-control" required>
+
+                    <option value="GLA University">GLA University</option>
+                    <option value="GL Bajaj, Mathura">GL Bajaj, Mathura</option>
+                    <option value="LPU, Jalandhar">LPU, Jalandhar</option>
+                    <option value="Other">Other</option>
+
+                  </select>
+                </div> -->
+
+                <div class="mb-3 input-container">
+                  <label for="subject" class="form-label">Password</label>
+                  <input type="password" class="form-control form-control-lg" placeholder="Password"
+                    aria-label="Password" name="password" id="password-input" minlength="8"
+                    required>
+                    
+                    <!-- pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,}$"
+                    title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" -->
+                </div>
+
+                <div class="mb-3 input-container">
+                  <label for="subject" class="form-label">Confirm Password</label>
+                  <input type="password" class="form-control form-control-lg" placeholder="Password"
+                    aria-label="Password" name="confirm_password" id="confirm-password-input"
+                    required>
+                    
+                    <!-- pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?!.*\s).{8,}$"
+                    title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" -->
+
+                    <div id="password-match" style="color: red; display: none;">Passwords do not match!</div>
+
+
+                </div>
+
+                <!-- <div class="col-xl-4 col-lg-5 col-md-7">
+                  <div class="mb-3 text-nowrap">
+                    <ul>
+                      <li>Password must contain at least one number.</li>
+                      <li>Password must contain one Uppercase and Lowercase letter.</li>
+                      <li>Password must Have at least 8 or more characters.</li>
+                      <li>Password must <b>Not</b> Have any spaces.</li>
+                    </ul>
+                  </div>
+                </div> -->
+
+                <!-- <div class="form-check form-check-info text-start">
+                  <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" checked required>
+                  <label class="form-check-label" for="flexCheckDefault">
+                    I agree the <a href="javascript:;" class="text-dark font-weight-bolder">Terms and Conditions</a>
+                  </label>
+                </div> -->
+
+                <div class="text-center">
+                  <button type="submit" class="btn bg-gradient-dark w-100 my-4 mb-2 mybtn"
+                    id="signup-button">Register</button>
+                </div></a>
+
+                <p class="text-sm mt-3 mb-0 text-center">Already have an account? <a href="{% url 'login' %}"
+                    class="text-dark font-weight-bolder">Login</a></p>
+
+              </form>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <br><br>
+  </main>
+  <script>
+    var win = navigator.platform.indexOf('Win') > -1;
+    if (win && document.querySelector('#sidenav-scrollbar')) {
+      var options = {
+        damping: '0.5'
+      }
+      Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+    }
+  </script>
+
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      $("#username").on("input", function () {
+        var username = $(this).val();
+
+        if (username.length > 3) { // Only check when username is at least 3 characters
+          $.ajax({
+            url: "{% url 'check_username_availability' %}",
+            data: { 'username': username },
+            dataType: 'json',
+            success: function (data) {
+              if (data.is_available) {
+                $("#username-feedback").html("<span style='color:green;'>Username is available</span>");
+                button = document.getElementById("signup-button");
+                button.disabled = false;
+                button.innerHTML = "Register";
+              } else {
+                $("#username-feedback").html("<span style='color:red;'>Username is already taken</span>");
+                button = document.getElementById("signup-button");
+                button.disabled = true;
+                button.innerHTML = "Cannot Register (Username already taken)";
+              }
+            }
+          });
+        } else {
+          $("#username-feedback").empty(); // Clear feedback if username is too short
+          button = document.getElementById("signup-button");
+          button.disabled = true;
+          button.innerHTML = "Cannot Register (Username Too Short)";
+        }
+      });
+    });
+
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const passwordInput = document.getElementById('password-input');
+      const confirmPasswordInput = document.getElementById('confirm-password-input');
+      const passwordMatchMessage = document.getElementById('password-match');
+  
+      function checkPasswordMatch() {
+        if (passwordInput.value !== confirmPasswordInput.value) {
+          passwordMatchMessage.style.display = 'block';
+          button = document.getElementById("signup-button");
+          button.disabled = true;
+          button.innerHTML = "Passwords do not match!";
+        } else {
+          passwordMatchMessage.style.display = 'none';
+          button = document.getElementById("signup-button");
+          button.disabled = false;
+          button.innerHTML = "Register";
+        }
+      }
+  
+      passwordInput.addEventListener('input', checkPasswordMatch);
+      confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+    });
+  </script>
+
+  <script>
+    document.onkeydown = function (e) {
+        if (event.keyCode == 123) {
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+            return false;
+        }
+        if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+            return false;
+        }
+    }
+</script>
+
+
+  <!-- Github buttons -->
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+  
+</body>
+
+</html>

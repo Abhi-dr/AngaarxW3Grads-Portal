@@ -1,0 +1,268 @@
+{% extends "student/base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+
+{% block title %}
+{{ sheet.name }}
+{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block extra_css %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .fa-youtube-play {
+        font-size: 220%;
+        color: red
+    }
+
+    .text-color {
+        color: white;
+    }
+
+    [data-bs-theme="dark"] {
+        .fa-youtube-play {
+            font-size: 220%;
+            color: red;
+        }
+
+        .text-color {
+            color: rgb(33, 33, 33);
+            font-weight: 500;
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">{{ sheet.name }}</span>
+                <span class="fs-4"> | 🔥Isi Me To Angaar Hai🔥</span>
+            </h3>
+        </div>
+
+    </div>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- ========================== SEARCH BAR ==================================== -->
+
+    <!-- <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Search Question 🔍</h5>
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+
+                    {% if query %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query" value="{{ query }}">
+
+                        {% else %}
+
+                        <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
+
+                        {% endif %}
+
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    make a button to clear the search 
+                    <button class="btn btn-outline-danger">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div> -->
+
+    <!-- =================================  QUESTIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">QUESTIONS 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Title 📚
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Level 📊
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Youtube 🎥
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Status🚦
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Practice Link 🔗
+                                </h6>
+                            </th>
+                            <!-- <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th> -->
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <!-- style="background-color: rgba(66, 66, 66, 0.639);" -->
+                        {% for question in sheet.get_ordered_questions %}
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" style="width: 100%;"
+                                    data-bs-toggle="modal" data-bs-target="#questionModal"
+                                    data-title="{{ question.title }}" data-description="{{ question.description }}"
+                                    title="{{ question.title }}">{{ question.title }}</h6>
+                            </td>
+                            <td class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0 fs-4">
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
+                                </h6>
+                            </td>
+                            <td class="border-bottom-0" style="text-align: center;">
+                                {% if question.youtube_link %}
+                                <i class="fa fa-youtube-play"></i>
+                                {% else %}
+                                <p>Coming Soon...</p>
+                                {% endif %}
+                            </td>
+                            <td class="border-bottom-0" style="text-align: center;">
+                                {% if user_submissions|get_item:question.id %}
+                                {% with submission=user_submissions|get_item:question.id %}
+                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">{{ submission.status }}</span>
+                                <br><a href="{% url 'my_submissions' question.slug %}"
+                                    class=" mt-1 btn btn-sm btn-outline-warning">View Submissions</a>
+                                {% endwith %}
+                                {% else %}
+                                <p>Not Attempted</p>
+                                {% endif %}
+                            </td>
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    {% if question in enabled_questions %}
+
+                                    <a href="{% url 'problem' question.slug %}" class="btn btn-dark">
+                                        Try Now🔥
+                                    </a>
+
+                                    {% else %}
+
+                                    <button class="btn btn-dark" disabled>
+                                        LOCKED🔒
+                                    </button>
+
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+
+<div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="questionModalLabel">Question Title...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="questionDescription">Description...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+
+<!-- Script to dynamically set modal content -->
+<script>
+    var questionModal = document.getElementById('questionModal');
+    questionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var title = button.getAttribute('data-title'); // Extract info from data-* attributes
+        var description = button.getAttribute('data-description');
+
+        // Update the modal's content.
+        var modalTitle = questionModal.querySelector('.modal-title');
+        var modalBody = questionModal.querySelector('.modal-body p');
+
+        modalTitle.textContent = title;
+        modalBody.innerHTML = description;
+    });
+</script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<!-- and it's easy to individually load additional languages -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+
+<script>hljs.highlightAll();</script>
+
+
+{% endblock %}

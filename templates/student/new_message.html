@@ -1,0 +1,101 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> Send Messages
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    .star {
+        color: red;
+        display: inline;
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Send Messages</h5>
+
+        </div>
+        <div class="container px-4">
+
+            <hr class="mt-0">
+            <div class="row">
+
+                <div class="w-100">
+                    <!-- Account details card-->
+
+
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <form method="POST">
+
+                                {% csrf_token %}
+
+                                <!-- Form Group (username)-->
+                                <div class="row">
+                                    <div class="col-md-9 mb-3">
+                                        <label class="mb-1" for="inputUsername">To <div class="star">*</div>
+                                        </label>
+
+                                        <select class="form-select" name="instructor" required>
+                                            {% for instructor in my_instructors %}
+                                            <option value="{{ instructor.id }}">{{ instructor.first_name|title }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+
+                                    </div>
+
+                                    <div class="col-md-3 mb-3" style="margin-top: 3.5%;">
+                                        <div class="form-check form-switch">
+                                            <label class="form-check-label" for="flexSwitchCheckChecked">Send Anonymously</label>
+                                            
+                                            <input class="form-check-input" type="checkbox" role="switch"
+                                            id="flexSwitchCheckChecked" checked>
+                                            <br>
+                                            <small>If checked, Your details will not be shared...</small>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="mb-1" for="description">Message <div class="star">*
+                                        </div></label>
+                                    <textarea class="form-control" rows="10" id="inputEmailAddress" type="textarea"
+                                        placeholder="Kya dikkat aa gyi 😏." name="message" required></textarea>
+                                </div>
+
+                                <button class="btn btn-primary" type="submit">Send Message</button>
+                            </form>
+                        </div>
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

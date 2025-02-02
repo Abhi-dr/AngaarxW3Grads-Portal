@@ -1,0 +1,780 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#iAmAngaari</title>
+
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
+
+    <link rel="stylesheet" href="{% static 'css/home/css/about.css' %}">
+
+
+    <style>
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.073);
+            /* Transparent glassy effect */
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            left: 0;
+            right: 0;
+            position: fixed;
+            z-index: 999;
+            
+        }
+
+
+        /* Positioning and styling adjustments */
+
+        .navbar {
+            margin: 20px;
+            padding: 1.5%;
+        }
+
+
+        /* Styling for nav links */
+
+        .nav-link {
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #f8c146;
+            /* Hover effect color */
+        }
+
+
+        button {
+            padding: 10px 25px;
+            border: 0;
+            border-radius: 15px;
+            color: #212121;
+            z-index: 1;
+            background: #e8e8e8;
+            position: relative;
+            font-weight: 1000;
+            font-size: 17px;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 0;
+            width: 0;
+            border-radius: 14px;
+            background-color: #212121;
+            z-index: -1;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+        }
+
+        button:hover {
+            color: #ff4f0f;
+        }
+
+        button:hover::before {
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+        }
+
+        button:active {
+            transform: scale(80%);
+        }
+
+        #register-btn {
+            padding: 10px 25px;
+            border: 0;
+            border-radius: 15px;
+            color: #212121;
+            z-index: 1;
+            background: #ff6026;
+            position: relative;
+            font-weight: 1000;
+            font-size: 17px;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+            overflow: hidden;
+        }
+
+        #register-btn::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 0;
+            width: 0;
+            border-radius: 14px;
+            background-color: #212121;
+            z-index: -1;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+        }
+
+        #register-btn:hover {
+            color: #ff4f0f;
+        }
+
+        #register-btn:hover::before {
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+        }
+
+        #register-btn:active {
+            transform: scale(80%);
+        }
+
+
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+            /* Makes the outline border white */
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+            /* Sets icon color to white */
+        }
+
+        .menu {
+            background-color: transparent;
+            border: 1px solid white;
+            cursor: pointer;
+            display: flex;
+            padding: 0;
+        }
+
+        .line {
+            fill: none;
+            stroke: rgb(232, 232, 232);
+            stroke-width: 6;
+            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line1 {
+            stroke-dasharray: 60 207;
+            stroke-width: 6;
+        }
+
+        .line2 {
+            stroke-dasharray: 60 60;
+            stroke-width: 6;
+        }
+
+        .line3 {
+            stroke-dasharray: 60 207;
+            stroke-width: 6;
+        }
+
+        .opened .line1 {
+            stroke-dasharray: 90 207;
+            stroke-dashoffset: -134;
+            stroke-width: 6;
+        }
+
+        .opened .line2 {
+            stroke-dasharray: 1 60;
+            stroke-dashoffset: -30;
+            stroke-width: 6;
+        }
+
+        .opened .line3 {
+            stroke-dasharray: 90 207;
+            stroke-dashoffset: -134;
+            stroke-width: 6;
+        }
+    </style>
+
+<style>
+    
+.footer-section {
+    background: #151414;
+    position: relative;
+}
+
+.footer-cta {
+    border-bottom: 1px solid #373636;
+}
+
+.single-cta i {
+    color: #ff5e14;
+    font-size: 30px;
+    float: left;
+    margin-top: 8px;
+}
+
+.cta-text {
+    padding-left: 15px;
+    display: inline-block;
+}
+
+.cta-text h4 {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.cta-text span {
+    color: #757575;
+    font-size: 15px;
+}
+
+.footer-content {
+    position: relative;
+    z-index: 2;
+}
+
+.footer-pattern img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 330px;
+    background-size: cover;
+    background-position: 100% 100%;
+}
+
+.footer-logo {
+    margin-bottom: 30px;
+}
+
+.footer-logo img {
+    max-width: 200px;
+}
+
+.footer-text p {
+    margin-bottom: 14px;
+    font-size: 14px;
+    color: #7e7e7e;
+    line-height: 28px;
+}
+
+.footer-social-icon span {
+    color: #fff;
+    display: block;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+    margin-bottom: 20px;
+}
+
+.footer-social-icon a {
+    color: #fff;
+    font-size: 16px;
+    margin-right: 15px;
+}
+
+.footer-social-icon i {
+    height: 40px;
+    width: 40px;
+    text-align: center;
+    line-height: 38px;
+    border-radius: 50%;
+}
+
+.facebook-bg {
+    background: #3B5998;
+}
+
+.twitter-bg {
+    background: #55ACEE;
+}
+
+.google-bg {
+    background: #DD4B39;
+}
+
+.footer-widget-heading h3 {
+    color: #fff;
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.footer-widget-heading h3::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -15px;
+    height: 2px;
+    width: 50px;
+    background: #ff5e14;
+}
+
+.footer-widget ul li {
+    display: inline-block;
+    float: left;
+    width: 50%;
+    margin-bottom: 12px;
+}
+
+.footer-widget ul li a:hover {
+    color: #ff5e14;
+}
+
+.footer-widget ul li a {
+    color: #878787;
+    text-transform: capitalize;
+}
+
+.subscribe-form {
+    position: relative;
+    overflow: hidden;
+}
+
+.subscribe-form input {
+    width: 100%;
+    padding: 14px 28px;
+    background: #2E2E2E;
+    border: 1px solid #2E2E2E;
+    color: #fff;
+    margin: 1%;
+}
+
+.subscribe-form button {
+    width: 99%;
+    margin-top: 1%;
+    background: #ff5e14;
+    border: 1px solid #ff5e14;
+    float: inline-end;
+}
+
+.subscribe-form button i {
+    color: #fff;
+    font-size: 22px;
+    transform: rotate(-6deg);
+}
+
+.copyright-area {
+    background: #202020;
+    padding: 25px 0;
+}
+
+.copyright-text p {
+    margin: 0;
+    font-size: 14px;
+    color: #878787;
+}
+
+.copyright-text p a {
+    color: #ff5e14;
+}
+
+.footer-menu li {
+    display: inline-block;
+    margin-left: 20px;
+}
+
+.footer-menu li:hover a {
+    color: #ff5e14;
+}
+
+.footer-menu li a {
+    font-size: 14px;
+    color: #878787;
+}
+
+.powered-by {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    bottom: 15px;
+    right: 15px;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 5px 10px;
+    border-radius: 8px;
+    color: #ffffff;
+}
+
+.powered-by h5 {
+    margin-top: 5%;
+    font-size: 1rem;
+    /* Responsive font size */
+}
+
+.logo-img {
+    width: 100px;
+    /* Adjust width for logo */
+    height: auto;
+    margin-left: 8px;
+}
+
+</style>
+
+    <script type="text/javascript">
+        window.tailwind.config = {
+            darkMode: ['class'],
+            theme: {
+                extend: {
+                    colors: {
+                        border: 'hsl(var(--border))',
+                        input: 'hsl(var(--input))',
+                        ring: 'hsl(var(--ring))',
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
+                        primary: {
+                            DEFAULT: 'hsl(var(--primary))',
+                            foreground: 'hsl(var(--primary-foreground))'
+                        },
+                        secondary: {
+                            DEFAULT: 'hsl(var(--secondary))',
+                            foreground: 'hsl(var(--secondary-foreground))'
+                        },
+                        destructive: {
+                            DEFAULT: 'hsl(var(--destructive))',
+                            foreground: 'hsl(var(--destructive-foreground))'
+                        },
+                        muted: {
+                            DEFAULT: 'hsl(var(--muted))',
+                            foreground: 'hsl(var(--muted-foreground))'
+                        },
+                        accent: {
+                            DEFAULT: 'hsl(var(--accent))',
+                            foreground: 'hsl(var(--accent-foreground))'
+                        },
+                        popover: {
+                            DEFAULT: 'hsl(var(--popover))',
+                            foreground: 'hsl(var(--popover-foreground))'
+                        },
+                        card: {
+                            DEFAULT: 'hsl(var(--card))',
+                            foreground: 'hsl(var(--card-foreground))'
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+
+
+    <style type="text/tailwindcss">
+        @layer base {
+            :root {
+                --background: 0 0% 100%;
+--foreground: 240 10% 3.9%;
+--card: 0 0% 100%;
+--card-foreground: 240 10% 3.9%;
+--popover: 0 0% 100%;
+--popover-foreground: 240 10% 3.9%;
+--primary: 240 5.9% 10%;
+--primary-foreground: 0 0% 98%;
+--secondary: 240 4.8% 95.9%;
+--secondary-foreground: 240 5.9% 10%;
+--muted: 240 4.8% 95.9%;
+--muted-foreground: 240 3.8% 46.1%;
+--accent: 240 4.8% 95.9%;
+--accent-foreground: 240 5.9% 10%;
+--destructive: 0 84.2% 60.2%;
+--destructive-foreground: 0 0% 98%;
+--border: 240 5.9% 90%;
+--input: 240 5.9% 90%;
+--ring: 240 5.9% 10%;
+--radius: 0.5rem;
+            }
+            .dark {
+                --background: 240 10% 3.9%;
+--foreground: 0 0% 98%;
+--card: 240 10% 3.9%;
+--card-foreground: 0 0% 98%;
+--popover: 240 10% 3.9%;
+--popover-foreground: 0 0% 98%;
+--primary: 0 0% 98%;
+--primary-foreground: 240 5.9% 10%;
+--secondary: 240 3.7% 15.9%;
+--secondary-foreground: 0 0% 98%;
+--muted: 240 3.7% 15.9%;
+--muted-foreground: 240 5% 64.9%;
+--accent: 240 3.7% 15.9%;
+--accent-foreground: 0 0% 98%;
+--destructive: 0 62.8% 30.6%;
+--destructive-foreground: 0 0% 98%;
+--border: 240 3.7% 15.9%;
+--input: 240 3.7% 15.9%;
+--ring: 240 4.9% 83.9%;
+            }
+        }
+    </style>
+
+    <style>
+        #about-id {
+            background-image: url("{% static 'img/home/about-bg.jpeg' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            padding-top: 8%;
+
+        }
+
+
+        .myFont {
+            font-family: 'Dancing Script', cursive;
+        }
+
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes float-down {
+            0% {
+                transform: translateY(0);
+            }
+
+            100% {
+                transform: translateY(15px);
+            }
+        }
+
+        .float-1 {
+            animation: float-up 3s infinite alternate;
+        }
+
+        .float-2 {
+            animation: float-down 3s infinite alternate;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container-fluid">
+            <a class="navbar-brand text-white" href="/">
+                <!-- <img src="demo_static/img/home/angaar_logo-2.png" alt="The Angaar Batch" width="50" height="40" class="d-inline-block align-text-top"> -->
+                The Angaar Batch🔥
+            </a>
+
+            <!-- <button class="navbar-toggler menu" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-expanded="false" aria-label="Toggle navigation"
+                onclick="this.classList.toggle('opened');this.setAttribute('aria-expanded', this.classList.contains('opened'))"
+                aria-label="Main Menu">
+                <svg width="60" height="40" viewBox="0 0 100 100">
+                    <path class="line line1"
+                        d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
+                    <path class="line line2" d="M 20,50 H 80" />
+                    <path class="line line3"
+                        d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
+                </svg>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'about' %}">About</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item mx-1">
+                        <a href="{% url 'login' %}">
+                            <button style="width: 100%;">Login</button>
+                        </a>
+                    </li>
+
+                    <li class="nav-item mx-1">
+                        <a href="{% url 'register' %}">
+                            <button id="register-btn" style="width: 100%;">Register</button>
+                        </a>
+                    </li>
+                </ul>
+            </div> -->
+        </div>
+    </nav>
+
+    
+    <!--Header-->
+    <div class="bg-black text-orange-500 flex flex-col items-center p-10" id="about-id">
+        <h1 class="text-6xl font-bold mb-5 text-orange-500">WE ARE 🔥</h1>
+        <div class="flex flex-col items-center">
+            <div class="flex space-x-4">
+                <div
+                    class="text-9xl font-extrabold text-white transform rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
+                    A</div>
+                <div
+                    class="text-9xl font-extrabold text-white transform -rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
+                    N</div>
+                <div
+                    class="text-9xl font-extrabold text-white transform rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
+                    G</div>
+                <div
+                    class="text-9xl font-extrabold text-white transform -rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
+                    A</div>
+                <span></span>
+                <div
+                    class="text-9xl font-extrabold text-white transform rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
+                    A</div>
+                <div
+                    class="text-9xl font-extrabold text-white transform -rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
+                    R</div>
+            </div>
+            <div class="flex space-x-4 mt-2">
+                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-1">
+                    Adventurous</div>
+                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-2">Noble
+                </div>
+                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-1">
+                    Energetic</div>
+                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-2">
+                    Authentic</div>
+                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-1">
+                    Amazing</div>
+                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-2">
+                    Resilient
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--Timeline-->
+    <div class="timeline-container" id="timeline">
+        <h1 class="timeline-title">ANGAAR KI <span class="text-orange-500">SHRUAAT</span></h1>
+        <p class="timeline-subtitle">Agar aaya hai, toh sikh ke ja!</p>
+
+        <div class="timeline">
+            <!-- Timeline SVG -->
+            <img src="https://cb3img.s3.ap-south-1.amazonaws.com/img/ourjourney.svg" alt="Curvy Timeline"
+                class="timeline-svg" />
+
+            <!-- Timeline Events -->
+            <div class="timeline-event" style="top: 10%; left: 78%;" data-scroll>
+                <div class="timeline-content">
+                    <h3>2024</h3>
+                    <p>10K+ Seekhne wale</p>
+                    <p class="details">Aaj humare saath 10K se zyada learners hain jo humare classroom, interactive
+                        live, aur online guided learning programs ka hissa bane hain. Safalta ki shuruat ki hai!</p>
+                </div>
+            </div>
+
+            <div class="timeline-event" style="top: 30%; left: 55%;" data-scroll>
+                <div class="timeline-content">
+                    <h3>2023</h3>
+                    <p>Online Expansion</p>
+                    <p class="details">Noida branch ke saath humne apna business online bhi expand kiya, aur naye safar
+                        ki shuruat ki.</p>
+                </div>
+            </div>
+
+            <div class="timeline-event" style="top: 40%; left: 14%;" data-scroll>
+                <div class="timeline-content">
+                    <h3>2022</h3>
+                    <p>Partnership</p>
+                    <p class="details">Humne developers ke liye naye raste apnaye aur naye mauke diye.</p>
+                </div>
+            </div>
+
+            <!-- Additional Events -->
+            <div class="timeline-event" style="top: 60%; left: 80%;" data-scroll>
+                <div class="timeline-content">
+                    <h3>2021</h3>
+                    <p>Pehla Bada Milestone</p>
+                    <p class="details">10K se zyada learners ke saath apne pehle bade milestone ko chhuna tha, aur humne
+                        kar dikhaya!</p>
+                </div>
+            </div>
+
+            <div class="timeline-event" style="top: 89%; left: 25%;" data-scroll>
+                <div class="timeline-content">
+                    <h3>2020</h3>
+                    <p>Shuruat hui ANGAAR ki</p>
+                    <p class="details">Humne duniya bhar ke learners ko empower karne ke liye apne safar ki shuruat ki
+                        thi.</p>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <!--Team-->
+    <section class="bg-black text-white py-20 px-5 md:px-10 lg:px-20 xl:px-32" id="team-id">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-8xl font-bold mb-5">Our Team</h2>
+            <div class="relative">
+                <img src="{% static 'assets/aboutLogo.svg' %}" alt="team" class="mx-auto mb-5" />
+                <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
+                    <!-- <h3 class="text-3xl font-bold mb-3">Meet the Angaari Team</h3> -->
+                    <!-- <p class="text-lg">A team of passionate individuals dedicated to creating amazing experiences.</p> -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    
+    <footer class="footer-section">
+       
+        <div class="copyright-area">
+            <div class="container">
+                <div class="row">
+                    <div class="text-center text-lg-left">
+                        <div class="copyright-text">
+                            <p>Copyright &copy; 2024, All Right Reserved <a href="#" style="pointer-events: none;">The
+                                    Angaar Batch 🔥</a></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="powered-by" style="position: absolute">
+            <h5 class="text-white">Powered By</h5>
+            <img src="https://w3grads.com/assets/logo-44ca63025513c8116a3bb05e69891fb438ace2b576cce1e05ade3e20270fff19.png"
+                class="logo-img" alt="W3Grads Logo">
+        </div>
+    </footer>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const timelineEvents = document.querySelectorAll(".timeline-event");
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("active");
+                    } else {
+                        entry.target.classList.remove("active");
+                    }
+                });
+            }, { threshold: 0.3 });
+
+            timelineEvents.forEach((event) => observer.observe(event));
+        });
+
+    </script>
+
+
+</body>
+
+</html>

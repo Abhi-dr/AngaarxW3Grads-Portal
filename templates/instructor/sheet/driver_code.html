@@ -1,0 +1,248 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block title %}
+Driver Code | {{ question.title }}
+{% endblock %}
+
+{% block extra_css %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    h3.question {
+        font-family: "Roboto", sans-serif;
+        font-size: 24px;
+        text-align: center;
+        font-weight: 100;
+    }
+
+    .editor-container {
+        width: 100%;
+        height: 60vh;
+        margin: 20px auto;
+        position: relative;
+    }
+
+    #editor {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+        border-radius: 8px;
+        font-size: 20px;
+    }
+
+    #language,
+    option {
+        color: rgb(19, 19, 19);
+    }
+
+    [data-bs-theme="dark"] {
+        #language {
+            color: white;
+        }
+
+        option {
+            color: black;
+        }
+
+        #op-div {
+            color: white;
+        }
+    }
+</style>
+
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container-fluid">
+
+
+    {% for message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold">Driver Code for {{ question.title }}</h5>
+        </div>
+    </div>
+
+    <div class="card w-100">
+
+        <div class="mb-3 mt-2 mx-3">
+
+            <span>Already Set For </span>
+
+            {% for driver_code in driver_codes %}
+
+            {% if driver_code == 71 %}
+            <button class="btn btn-primary">Python</button>
+            {% elif driver_code == 50 %}
+            <button class="btn btn-warning">C</button>
+            {% elif driver_code == 54 %}
+            <button class="btn btn-info">C++</button>
+            {% elif driver_code == 62 %}
+            <button class="btn btn-success">Java</button>
+            {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+        <div class="card-body p-4">
+            <form method="post">
+
+                {% csrf_token %}
+
+                <label for="language">Select Language:</label>
+                <select class="form-select form-control" id="language" name="language" required>
+                    <option value="62">Java</option>
+                    <option value="71">Python</option>
+                    <option value="50">C</option>
+                    <option value="54">C++</option>
+                </select>
+
+                <label for="code" class="mt-3 mb-n2">Driver Code:</label><br>
+
+                <div class="editor-container">
+                    <div id="editor"></div>
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100">Submit Driver Code</button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+
+        const editor = ace.edit("editor");
+
+        // Set default code for each language
+        const driverCodes = {
+            71: "{% if driver_codes.71 %}{{ driver_codes.71|escapejs }}{% else %}def solution(n):\n\t# Write your code here...\n\n\n# DO NOT MAKE CHANGES IN THIS\nif __name__ == '__main__':\n\tt = int(input())\n\t\n\twhile t > 0:\n\t\t# Modify according to the inputs\n\t\tn = int(input())\n\t\tresult = solution(n)\n\t\tprint(result)\n\t\tt -= 1{% endif %}",
+            50: "{% if driver_codes.50 %}{{ driver_codes.50|escapejs }}{% else %}#include <stdio.h>\n\n// Write the function here...\nvoid solution(int n) {\n\t// Your code here...\n}\n\n// Driver code starts here... DO NOT CHANGE THIS\nint main() {\n\tint t;\n\tscanf(\"%d\", &t);\n\t\n\twhile (t-- > 0) {\n\t\tint n;\n\t\tscanf(\"%d\", &n);\n\t\t\n\t\t// Make changes accordingly\n\t\tsolution(n);\n\t}\n\t\n\treturn 0;\n}{% endif %}",
+            54: "{% if driver_codes.54 %}{{ driver_codes.54|escapejs }}{% else %}// Set the driver code now{% endif %}",
+            62: "{% if driver_codes.62 %}{{ driver_codes.62|escapejs }}{% else %}import java.io.*;\nimport java.util.*;\n\nclass Solution {\n\t// Write the function here...\n}\n\n\n// Driver code starts here... DO NOT CHANGE THIS\nclass Main {\n\tpublic static void main(String args[]) throws IOException {\n\t\tBufferedReader read = new BufferedReader(new InputStreamReader(System.in));\n\t\tint t = Integer.parseInt(read.readLine());\n\t\twhile (t-- > 0) {\n\t\t\tint n = Integer.parseInt(read.readLine().trim());\n\n\t\t\tSolution ob = new Solution();\n\t\t\t\n\t\t\t// Make changes accordingly\n\t\t\tSystem.out.println();\n\t\t}\n\t}\n}{% endif %}"
+        };
+
+        // Set initial code based on selected language
+        function setEditorContent(languageId) {
+            const code = driverCodes[languageId];
+            editor.setValue(code, -1); // Set the code in the editor
+        }
+
+        let theme = localStorage.getItem("theme");
+        if (theme == "dark") {
+            editor.setTheme("ace/theme/twilight");
+        } else {
+            editor.setTheme("ace/theme/chrome");
+        }
+
+        let selectedLanguage = $("#language").val();
+
+        editor.session.setMode("ace/mode/java");
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            cursorStyle: "smooth",
+            enableEmmet: true,
+        });
+
+        // Change the editor mode based on selected language
+        $("#language").change(function () {
+            let selectedLanguage = $(this).val();
+            if (selectedLanguage == 71) {
+                editor.session.setMode("ace/mode/python");
+            } else if (selectedLanguage == 50 || selectedLanguage == 54) {
+                editor.session.setMode("ace/mode/c_cpp");
+            } else if (selectedLanguage == 62) {
+                editor.session.setMode("ace/mode/java");
+            }
+        });
+
+        // Initialize editor with default content for selected language
+        let initialLanguageId = $("#language").val();
+        setEditorContent(initialLanguageId);
+
+        // Change the editor content when the language is changed
+        $("#language").change(function () {
+            let selectedLanguageId = $(this).val();
+            setEditorContent(selectedLanguageId);
+        });
+
+        // Flag to prevent multiple submissions
+        let isSubmitting = false;
+
+        // Form submission logic
+        $("form").submit(function (event) {
+
+            console.log("Entered in the form submission");
+
+            if (isSubmitting) {
+                return false;  // If already submitting, exit and prevent further submissions
+            }
+
+            event.preventDefault(); // Prevent default form submission
+
+            isSubmitting = true;  // Set the flag to true, indicating form is being submitted
+
+            const languageId = $("#language").val();
+            const driverCode = editor.getValue();
+
+            $.ajax({
+                url: "{% url 'instructor_driver_code' slug=question.slug %}",
+                type: "POST",
+                data: {
+                    csrfmiddlewaretoken: "{{ csrf_token }}",
+                    language_id: languageId,
+                    code: driverCode
+                },
+                success: function (response) {
+                    if (response.success) {
+                        // Show the success message
+                        console.log("Success: ", response.message);
+                        alert(response.message); // Or you can display it in a dedicated message div
+
+                        // Optionally update the editor with the new driver code
+                        editor.setValue(driverCode, -1);  // This will set the editor content to the new driver code
+                    } else {
+                        // Show the error message
+                        console.log("Error: ", response.message);
+                        alert(response.message); // Or you can display it in a dedicated message div
+                    }
+                    isSubmitting = false; // Reset the flag after completion
+                },
+                error: function (xhr, status, error) {
+                    console.log("Error: ", error);
+                    isSubmitting = false; // Reset the flag on error
+                }
+            });
+
+            return false;  // Ensure the form does not get submitted normally
+        });
+    });
+
+</script>
+
+{% endblock %}

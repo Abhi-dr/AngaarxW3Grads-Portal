@@ -1,0 +1,145 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> ASK ME🙋‍♂️
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .grow-wrap {
+        display: grid;
+    }
+
+    .grow-wrap::after {
+        content: attr(data-replicated-value) " ";
+        white-space: pre-wrap;
+        visibility: hidden;
+    }
+
+    .grow-wrap > textarea {
+        resize: none;
+        overflow: hidden;
+    }
+
+    .grow-wrap > textarea,
+    .grow-wrap::after {
+        padding: 0.5rem;
+        font: inherit;
+        grid-area: 1 / 1 / 2 / 2;
+    }
+
+    /* Dynamic answer textarea adjustment */
+    #answer {
+        transition: height 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold">Ask Me Anything🙋‍♂️</h5>
+            <p class="mb-0">Got a Question? Learning begins here🔥!</p>
+            <strong class="text-warning">
+                NOTE: Initial response may be slower. Please be patient.
+            </strong>
+        </div>
+    </div>
+
+    <div id="alert-container"></div>
+
+    <div class="card">
+        <div class="card-body">
+            <form id="doubtForm">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="instructor" class="small mb-1">To whom you want to ask the question?👨‍🏫
+                        <small style="color: red;">*</small>
+                    </label>
+                    <select class="form-select form-control" name="instructor" id="instructor" required>
+                        <option value="" selected disabled>Select Instructor</option>
+                        <option value="dk">DK</option>
+                        <option value="naman">Naman</option>
+                    </select>
+                </div>
+
+                <label for="question" class="form-label">Write your question here <small style="color: red;">*</small></label>
+                <div class="mb-3 grow-wrap">
+                    <textarea rows="3" class="form-control" id="question" name="question" required
+                        oninput="this.parentNode.dataset.replicatedValue = this.value"
+                        placeholder="Sawal ye h ki..."></textarea>
+                </div>
+
+                <label for="answer" class="form-label">Samadhaan AI🧠</label>
+                <div class="mb-3">
+                    <textarea rows="5" class="form-control" id="answer" name="answer"
+                        placeholder="Answer will be here..." disabled></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">Submit</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block myjs %}
+<script>
+    const doubtForm = document.getElementById('doubtForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const answerBox = document.getElementById('answer');
+    const alertContainer = document.getElementById('alert-container');
+
+    doubtForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Submitting...';
+        answerBox.value = 'Waiting for the response...';
+
+        const formData = new FormData(doubtForm);
+        
+        fetch("{% url 'ask_doubt_ajax' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                answerBox.value = data.answer;
+                adjustTextAreaHeight(answerBox);
+                showAlert('success', 'Question answered successfully!');
+            } else {
+                showAlert('danger', data.error || 'Failed to fetch the answer.');
+            }
+        })
+        .catch(error => {
+            showAlert('danger', 'An error occurred: ' + error);
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit';
+        });
+    });
+
+    function adjustTextAreaHeight(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
+    }
+
+    function showAlert(type, message) {
+        alertContainer.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        `;
+    }
+</script>
+{% endblock %}
+{% endblock %}

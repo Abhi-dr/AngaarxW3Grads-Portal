@@ -1,0 +1,330 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ assignment.title }}'s Submissions🔥
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .editor-container {
+        width: 100%;
+        height: 300px;
+        position: relative;
+    }
+
+    #code-view-editor {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">{{ assignment.title }}</span>
+                <span class="fs-4"> | Total Submission: {{ submissions.count }}</span>
+            </h3>
+        </div>
+    </div>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- ========================== SEARCH BAR ==================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+
+                    {% if query %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Title, Description or Type"
+                        aria-label="Search by ID, Title, Description or Type" aria-describedby="button-addon2"
+                        name="query" value="{{ query }}">
+
+                    {% else %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Title, Description or Type"
+                        aria-label="Search by ID, Title, Description or Type" aria-describedby="button-addon2"
+                        name="query">
+
+                    {% endif %}
+
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <!-- make a button to clear the search -->
+                    <a href="{% url 'view_submissions' assignment.id %}" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Submissions of {{ assignment.title }} 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Name👤
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    At⏰
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Extra Info📝
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Submission📝
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for submission in submissions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1">{{ submission.student.first_name }}
+                                    {{submission.student.last_name }}</h6>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="mb-0 fw-normal">
+                                    {{ submission.submitted_at }}
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+
+                                {% if submission.extra_info %}
+
+                                <p class="mb-0 fw-bolder" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ submission.extra_info }}">
+                                    {{ submission.extra_info|truncatechars:15 }}
+                                </p>
+
+                                {% else %}
+
+                                <p class="mb-0 fw-lighter">
+                                    Not available
+                                </p>
+
+                                {% endif %}
+                            </td>
+
+
+                            {% if assignment.assignment_type == "Coding" %}
+
+                            <td class="border-bottom-0">
+                                <!-- <p class="mb-0 fw-normal" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ submission.submission_code }}">
+                                    {{ submission.submission_code|truncatechars:30 }}
+                                </p> -->
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#viewCodeModal" data-code="{{ submission.submission_code }}">
+                                    View Code
+                                </button>
+
+                            </td>
+
+                            {% elif assignment.assignment_type == "Text" %}
+
+                            <td class="border-bottom-0">
+                                <!-- <p class="mb-0 fw-normal" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ submission.submission_text }}">
+                                    {{ submission.submission_text|truncatechars:30 }}
+                                </p> -->
+
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                    data-bs-target="#viewTextModal" data-code="{{ submission.submission_text }}">
+                                    View Submission
+                                </button>
+                            </td>
+
+                            {% elif assignment.assignment_type == "File" %}
+
+                            <td class="border-bottom-0">
+                                <a href="{{ submission.submission_file.url }}" class="btn btn-outline-info"
+                                    target="_blank">View</a>
+                                </p>
+                            </td>
+
+                            {% elif assignment.assignment_type == "Image" %}
+
+                            <td class="border-bottom-0">
+                                <a href="{{ submission.submission_image.url }}" class="btn btn-outline-info"
+                                    target="_blank">View</a>
+                            </td>
+
+                            {% elif assignment.assignment_type == "Link" %}
+
+                            <td class="border-bottom-0">
+                                <a href="{{ submission.submission_link }}" class="btn btn-outline-success"
+                                    target="_blank">Visit Site</a>
+                            </td>
+
+                            {% else %}
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'view_submissions' assignment.id %}"
+                                        class="btn btn-DANGER float-end">SOME ERROR</a>
+                                </div>
+                            </td>
+
+                            {% endif %}
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="tel:{{ submission.student.mobile_number }}"
+                                        class="btn btn-outline-dark">Call {{ submission.student.first_name }}</a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+
+                        <!-- =========================================== MODAL TO SHOW CODE ============================== -->
+
+                        <div class="modal fade" id="viewCodeModal" tabindex="-1" aria-labelledby="viewCodeModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="viewCodeModalLabel">Submitted Code</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="editor-container">
+                                            <div id="code-view-editor"></div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- =========================================== MODAL TO SHOW TEXT SUBMISSION ============================== -->
+
+                        <div class="modal fade" id="viewTextModal" tabindex="-1" aria-labelledby="viewTextModalLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="viewTextModalLabel">Submitted Text</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <textarea name="" id="" rows="10">
+                                            {{ submission.submission_text }}
+                                        </textarea>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ================================= END ======================= -->
+
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+</div>
+
+{% block myjs %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
+
+<script>
+    var viewCodeModal = document.getElementById('viewCodeModal');
+    viewCodeModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var code = button.getAttribute('data-code');
+        var editor = ace.edit("code-view-editor");
+        editor.setTheme("ace/theme/twilight");
+        editor.session.setMode("ace/mode/python");
+        editor.setValue(code, 1);  // 1 = moves cursor to end
+        editor.setOptions({
+            readOnly: true,
+            highlightActiveLine: false,
+            highlightGutterLine: false,
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true
+        });
+        editor.renderer.$cursorLayer.element.style.display = "none";  // Hide the cursor
+    });
+</script>
+
+{% endblock %}
+
+
+{% endblock %}

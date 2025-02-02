@@ -1,0 +1,143 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ test_case.question.title }} | Edit Test Case
+{% endblock %}
+
+{% block problem_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item pe-auto"><a href="{% url 'administrator_problems' %}">Question Set</a></li>
+            <li class="breadcrumb-item pe-auto">{{ test_case.question.title }}</li>
+
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Edit Test Case</li>
+        </ol>
+    </nav>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">{{ test_case.question.title }}</i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+
+                        <div class="card">
+                            <div class="card-header">Edit Test Case</div>
+                            <div class="card-body h-100">
+
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Input
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="job_title" name="input_data"
+                                        rows="3">{{ test_case.input_data }}</textarea>
+                                </div>
+
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Expected Output
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="job_title" name="expected_output" rows="3"
+                                        required>{{ test_case.expected_output }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Explaination
+                                    </label>
+                                    <textarea class="form-control" id="job_title" name="explaination" rows="3"
+                                        placeholder="Enter the explaination here...">{{ test_case.explaination }}</textarea>
+                                </div>
+
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="assignment_type" class="form-label">Is Sample Test Case?
+                                            <div class="star">*</div>
+                                        </label>
+
+                                        {% if test_case.is_sample %}
+
+                                        <input type="checkbox" class="form-check-input" id="assignment_type"
+                                            name="is_sample" checked>
+
+                                        {% else %}
+
+                                        <input type="checkbox" class="form-check-input" id="assignment_type"
+                                            name="is_sample">
+
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_type" class="form-label">For & By</label>
+                                            <input type="text" class="form-control" id="job_type"
+                                                value="{{ course.name|title }} by {{ instructor.first_name }}" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="deadline" class="form-label">Created At</label>
+                                            <input type="text" class="form-control" id="deadline"
+                                                value="{% now 'l, F j, Y g:i A' %}" disabled>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Edit Test Case</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+        </div>
+
+
+
+
+
+        </form>
+
+    </div>
+</div>
+
+
+
+{% endblock %}

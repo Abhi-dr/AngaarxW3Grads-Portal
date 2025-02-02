@@ -1,0 +1,820 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% load custom_filters %}
+
+{% block title %}
+Student -> Home
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    @property --progress-value {
+        syntax: "<integer>";
+        inherits: false;
+        initial-value: 0;
+    }
+
+    @-webkit-keyframes html-progress {
+        to {
+            --progress-value: 45;
+        }
+    }
+
+    @keyframes html-progress {
+        to {
+            --progress-value: {{user.get_attendance_percentage}}
+
+            ;
+        }
+    }
+
+    @-webkit-keyframes css-progress {
+        to {
+            --progress-value: 50;
+        }
+    }
+
+    @keyframes css-progress {
+        to {
+            --progress-value: {{total_questions_solved_percentage}}
+
+            ;
+        }
+    }
+
+    @-webkit-keyframes js-progress {
+        to {
+            --progress-value: 43;
+        }
+    }
+
+    @keyframes js-progress {
+        to {
+            --progress-value: {{user.get_profile_score}}
+
+            ;
+        }
+    }
+
+    .progress-bar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        /* to center the percentage value */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .progress-bar::before {
+        counter-reset: percentage var(--progress-value);
+        content: counter(percentage) "%";
+    }
+
+    .html {
+        background: radial-gradient(closest-side, white 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
+        -webkit-animation: html-progress 2s 1 forwards;
+        animation: html-progress 2s 1 forwards;
+    }
+
+    .html::before {
+        -webkit-animation: html-progress 2s 1 forwards;
+        animation: html-progress 2s 1 forwards;
+    }
+
+    .css {
+        background: radial-gradient(closest-side, white 79%, transparent 80% 100%, white 0), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
+        -webkit-animation: css-progress 2s 1 forwards;
+        animation: css-progress 2s 1 forwards;
+    }
+
+    .css::before {
+        -webkit-animation: css-progress 2s 1 forwards;
+        animation: css-progress 2s 1 forwards;
+    }
+
+    .js {
+        background: radial-gradient(closest-side, white 79%, transparent 80% 100%, white 0), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
+        -webkit-animation: js-progress 2s 1 forwards;
+        animation: js-progress 2s 1 forwards;
+    }
+
+    .js::before {
+        -webkit-animation: js-progress 2s 1 forwards;
+        animation: js-progress 2s 1 forwards;
+    }
+
+    [data-bs-theme="dark"] {
+
+        .html {
+            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
+            -webkit-animation: html-progress 2s 1 forwards;
+            animation: html-progress 2s 1 forwards;
+
+            color: white;
+        }
+
+        .css {
+            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
+            -webkit-animation: html-progress 2s 1 forwards;
+            animation: css-progress 2s 1 forwards;
+
+            color: white;
+        }
+
+        .css-dark {
+            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
+            -webkit-animation: html-progress 2s 1 forwards;
+            animation: css-progress 2s 1 forwards;
+
+            color: white;
+        }
+
+        .css-dark {
+            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%),
+                conic-gradient(#ff6f4b calc(var(--progress-value) * 1%), #ffffff 0);
+            color: white;
+        }
+
+        .css-dark::before {
+            color: white;
+            /* Ensures the percentage text is visible */
+        }
+
+
+        .js {
+            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
+            -webkit-animation: html-progress 2s 1 forwards;
+            animation: js-progress 2s 1 forwards;
+
+            color: white;
+        }
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    progress {
+        visibility: hidden;
+        width: 0;
+        height: 0;
+    }
+</style>
+
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <!-- check if it's student's birthday -->
+
+    {% if is_birthday %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <strong>Happy Birthday {{ user.first_name }} {{ user.last_name }} 🎂</strong> . Party do phle🥳!
+    </div>
+    <audio src="{% static 'assets/hbd.mp3' %}" id="myAudio" autoplay="autoplay" loop="loop"></audio>
+
+
+    {% endif %}
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    {% for notification in notifications %}
+
+    <div class="alert alert-{{ notification.type }} alert-dismissible fade show" role="alert">
+        <strong>{{ notification.title|title }}</strong> {{ notification.description }}
+
+        {% if not notification.is_fixed %}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        {% endif %}
+    </div>
+
+    {% endfor %}
+
+    <!--  Row 1 -->
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card overflow-hidden">
+
+                        {% if is_birthday %}
+                        <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExb2lvdnRucmNlN255cHJ4ZmdidXYyZWlwcjRsZHJrbGw1bW91YWp2MiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/VkUdMsK42kNgrPWuHd/giphy.webp"
+                            height="190vh" alt="">
+
+                        {% else %}
+
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-9 fw-semibold">POD ⛅</h5>
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h4 class="fw-semibold mb-3">{{ pod.question.title|truncatewords:4 }}</h4>
+                                    <div class="d-flex align-items-center pb-1">
+
+                                        {% if pod %}
+                                        
+                                        {% if pod|is_solved_by_user:user %}
+                                            <span class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-check text-success"></i>
+                                            </span>
+                                            <p class="s-3 mb-0">Problem Solved!</p>
+                                        {% else %}
+                                            <span class="me-2 rounded-circle bg-danger round-20 d-flex align-items-center text-dark justify-content-center">
+                                                ❌
+                                            </span>
+                                            <p class="s-3 mb-0">Not Solved</p>
+                                        {% endif %}
+
+                                        {% else %}
+                                            <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-arrow-right text-danger"></i>
+                                            </span>
+                                            <p class="s-3 mb-0">Not Available</p>
+                                        {% endif %}
+
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex justify-content-end">
+
+                                        {% if pod %}
+
+                                        <a href="{% url 'problem' pod.question.slug %}" target="_blank">
+
+                                            {% if pod|is_solved_by_user:user %}
+                                                <div class="text-white bg-success rounded-circle p-6 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-check fs-6"></i>
+                                                    <span>Done</span>
+                                                </div>
+                                            
+                                            {% else %}
+                                                <div class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                                                    <i class="ti ti-arrow-right fs-6"></i>
+                                                    <span>Go</span>
+                                                </div>
+                                            {% endif %}
+                                        </a>
+
+                                        {% else %}
+
+                                        <a id="random-question-generator1" href="{% url 'get_random_question' %}" onclick="return random_generator();" class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">Get a random question</a>
+
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {% endif %}
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card overflow-hidden">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-9 fw-semibold">Questions Completed 🏆</h5>
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h4 class="fw-semibold mb-3">
+                                        {{ total_questions_solved }}🔥
+                                    </h4>
+                                    <div class="d-flex align-items-center mb-3">
+
+                                        {% if questions_left == 0 %}
+
+                                        <p class="text-success me-1 fs-3 mb-0">
+                                            <strong>More coming soon!</strong>
+                                        </p>
+
+                                        {% else %}
+
+                                        <a href="{% url 'problem_set' %}">
+                                            <p class="text-danger me-1 fs-3 mb-0 d-inline">
+                                                <strong>{{ questions_left }}</strong>
+                                            </p>
+                                            <p class="text-danger fs-3 mb-0 d-inline">Questions left</p>
+                                        </a>
+
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-4">
+                                            <!-- <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span> -->
+
+                                            {% if total_questions_solved_percentage == 100 %}
+                                            <button class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">All Solved</button>
+                                            {% else %}
+                                            <a id="random-question-generator2" href="{% url 'get_random_question' %}" onclick="return random_generator2();" class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">Get a random question</a>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="progress-bar-container">
+
+                                            
+                                        <div class="progress-bar css">
+                                            <progress id="css" min="0" max="100" value="70"></progress>
+
+                                        </div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Yearly Breakup -->
+                <a href="{% url 'my_profile' %}" style="text-decoration: none; color: black;">
+                    <div class="card overflow-hidden">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-9 fw-semibold">Profile Score</h5>
+                            <div class="row align-items-center">
+                                <div class="col-8">
+                                    <h4 class="fw-semibold mb-3">{{ user.get_profile_score }}</h4>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span
+                                            class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-arrow-up-right text-success"></i>
+                                        </span>
+                                        <p class="me-1 fs-3 mb-0">Top</p>
+
+
+
+                                        {% if user.get_profile_score == 100 %}
+                                        <p class="fs-3 mb-0">1%</p>
+
+                                        {% elif user.get_profile_score >= 90 %}
+                                        <p class="fs-3 mb-0">30%</p>
+
+                                        {% elif user.get_profile_score >= 60 %}
+                                        <p class="fs-3 mb-0">50%</p>
+
+                                        {% elif user.get_profile_score >= 30 %}
+
+                                        <p class="fs-3 mb-0">90%</p>
+
+                                        {% else %}
+                                        <p class="fs-3 mb-0">Not Available</p>
+
+                                        {% endif %}
+
+                                    </div>
+
+                                    {% if not user.get_profile_score == 100 %}
+
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-4">
+                                            <!-- <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span> -->
+                                            <span class="fs-2">Complete to Earn More <img id="coin-icon" class="mt-n1"
+                                                src="{% static 'img/student/coin.png' %}" alt=""></span>
+                                        </div>
+                                        <!-- <div>
+                                            <span
+                                                class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
+                                            <span class="fs-2">Left</span>
+                                        </div> -->
+                                    </div>
+
+                                    {% endif %}
+                                </div>
+                                <div class="col-4">
+                                    <div class="d-flex justify-content-center">
+                                        <div class="progress-bar-container">
+
+                                            <div class="progress-bar js">
+                                                <progress id="js" min="0" max="100" value="70"></progress>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <!-- <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row alig n-items-Coming soon">
+                            <div class="col-8">
+                                <h5 class="card-title mb-9 fw-semibold"> Rank Score </h5>
+                                <h4 class="fw-semibold mb-3">69</h4>
+                                <div class="d-flex align-items-center pb-1">
+                                    <span
+                                        class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-arrow-down-right text-danger"></i>
+                                    </span>
+                                    <p class="text-dark me-1 fs-3 mb-0">+9%</p>
+                                    <p class="fs-3 mb-0">last year</p>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="d-flex justify-content-end">
+                                    <div
+                                        class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                                        <i class="ti ti-user fs-6"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<!-- ================================= Schedule ====================================== -->
+
+<div class="row">
+
+    <div class="col-lg-4 d-flex align-items-stretch">
+        <div class="card w-100">
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    <h5 class="card-title fw-semibold">Latest Schedule</h5>
+                </div>
+
+                <ul class="timeline-widget mb-0 position-relative mb-n3">
+
+
+                    {% if sessions %}
+                    {% for session in sessions %}
+
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end">
+                            <span class="fw-bolder">({{ session.course.name }})</span>
+                            <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                title="{{ session.topic }}">{{session.topic|title|truncatechars:6 }}</span>
+                        </div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span
+                                class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
+                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1">{{ session.session_time }}
+                            <br>
+
+                            {% if session.get_meeting_status.status == "Ongoing" %}
+
+                            <a href="{{ session.link }}"
+                                class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                {{ session.get_meeting_status.status }}... Join
+                            </a>
+
+                            {% else %}
+
+                            <a class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                {{ session.get_meeting_status.status }}
+                            </a>
+
+                            {% endif %}
+
+                            <!-- <a href="#"
+                                    class="text-primary d-block fw-normal">Know More
+                                </a> -->
+                        </div>
+
+                    </li>
+
+
+                    {% endfor %}
+
+
+                    {% else %}
+
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end">Not Available</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
+                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1 fw-semibold">Coming Soon!
+                        </div>
+                    </li>
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end">Not Available</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1 fw-semibold">Coming Soon!
+                        </div>
+                    </li>
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end">Not Available</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
+                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1 fw-semibold">Coming Soon!
+                        </div>
+                    </li>
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end">Not Available</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-warning flex-shrink-0 my-8"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1 fw-semibold">Coming Soon!
+                        </div>
+                    </li>
+
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================ Last 3 sessions JOBS ============================ -->
+
+    <div class="col-lg-8 d-flex align-items-stretch">
+        <div class="card w-100">
+            <div class="card-body p-4">
+                <h5 class="card-title fw-semibold mb-4">Next Questions 🔥</h5>
+                <div class="table-responsive">
+                    <table class="table text-nowrap mb-0 align-middle">
+                        <thead class="text-dark fs-4">
+
+                            <tr>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">
+                                        #
+                                    </h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">
+                                        Title
+                                    </h6>
+                                </th>
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">
+                                        Level
+                                    </h6>
+                                </th>
+
+                                <th class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0">
+                                        Action
+                                    </h6>
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            {% if next_three_questions %}
+
+                            {% for question in next_three_questions %}
+
+                            <tr>
+                                <td class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0 text-center">{{ question.position }}</h6>
+                                </td>
+                                <td class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                        title="{{ session.topic }}">{{ session.topic|truncatechars:10 }}</h6>
+                                    <span class="fw-normal">{{ question.title|truncatechars:20 }}</span>
+                                </td>
+                                <td class="border-bottom-0">
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
+                                </td>
+
+                                <td class="border-bottom-0 text-center">
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <a href="{% url 'problem' question.slug %}" target="_blank"
+                                            class="btn btn-outline-danger">Do It Now 🔥
+                                        </a>
+
+                                    </div>
+                                </td>
+
+                            </tr>
+
+                            {% endfor %}
+
+                            {% else %}
+
+                            <tr>
+                                <td class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-0 text-center">-</h6>
+                                </td>
+                                <td class="border-bottom-0">
+                                    <h6 class="fw-semibold mb-1">Not Available</h6>
+                                    <span class="fw-normal">Coming Soon!</span>
+                                </td>
+                                <td class="border-bottom-0">
+                                    <p class="mb-0 fw-normal">Not Available</p>
+                                </td>
+
+                                <td class="border-bottom-0 text-center">
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <a href="#" class="btn btn-outline-dark">Not Available
+                                        </a>
+
+                                    </div>
+                                </td>
+                            </tr>
+
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<!-- ================================= ALL ELIGIBLE JOBS ============================ -->
+
+<!-- <div class="card-body">
+        <h5 class="card-title fw-semibold mb-4 text-white">Commpanies Only For You 🔥</h5>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Eligible Companies</h5>
+        </div>
+    </div> -->
+
+<!-- <div class="col-lg- d-flex align-items-strech">
+
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+
+            {% for job in all_eligible_jobs %}
+
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="#" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ job.company.name|title|truncatechars:10 }} For ({{ job.title|truncatechars:5 }})</h5>
+                        <p class="card-text">
+                            {{ job.description|truncatechars:25 }}...
+                        </p>
+                        <p class="card-text">
+                            Package: ₹{{ job.salary_range }}
+                        </p>
+
+                        <a href="#" class="btn btn-primary">More Details</a>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+
+
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/c/cd/Facebook_logo_%28square%29.png"
+                        class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Facebook</h5>
+                        <p class="card-text"></p>
+                        <a href="#" class="btn btn-primary">Apply</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="https://cdn.w3villa.com/production/assets/w3villa-technologies-og-8b76c7b0c5541f2c668251897aac2f9a600904052e2aa8655a131662b9019a74.webp"
+                        class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">W3 villa</h5>
+                        <p class="card-text"></p>
+                        <a href="#" class="btn btn-primary">Apply</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="https://www.logodesignlove.com/images/monograms/tesla-symbol.jpg" class="card-img-top"
+                        alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Tesla</h5>
+                        <p class="card-text"></p>
+                        <a href="#" class="btn btn-primary">Apply</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="https://img.freepik.com/premium-vector/experience-design-abstract-concept-vector-illustration_107173-24976.jpg?w=2000"
+                        class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Company Name</h5>
+                        <p class="card-text"></p>
+                        <a href="#" class="btn btn-primary">Apply</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div> -->
+
+<div class="py-6 px-6 text-center">
+    <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
+            class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
+        <!--                 
+            All Rights Reserved by <a href="https://gla.ac.in" target="_blank"
+                class="pe-1 text-primary text-decoration-underline">GLA University</a> -->
+
+    </p>
+
+</div>
+</div>
+
+{% block myjs %}
+
+<script>
+    function random_generator(){
+        btn = document.getElementById('random-question-generator1');
+        btn.style.pointerEvents = 'none';
+        btn.classList.add('disabled');
+        btn.innerHTML = "Generating...";
+        setTimeout(function(){
+            btn.style.pointerEvents = 'auto';
+            btn.classList.remove('disabled');
+            btn.innerHTML = "Get a random question";
+        }, 3000);
+    }
+
+    function random_generator2(){
+        btn = document.getElementById('random-question-generator2');
+        btn.style.pointerEvents = 'none';
+        btn.classList.add('disabled');
+        btn.innerHTML = "Generating...";
+        setTimeout(function(){
+            btn.style.pointerEvents = 'auto';
+            btn.classList.remove('disabled');
+            btn.innerHTML = "Get a random question";
+        }, 3000);
+    }
+</script>
+
+
+{% if is_birthday %}
+
+<script>
+    const start = () => {
+        setTimeout(function () {
+            confetti.start()
+        }, 1000); // 1000 is time that after 1 second start the confetti ( 1000 = 1 sec)
+    };
+
+    //  for stopping the confetti 
+
+    const stop = () => {
+        setTimeout(function () {
+            confetti.stop()
+        }, 60000); // 5000 is time that after 5 second stop the confetti ( 5000 = 5 sec)
+    };
+    start();
+    stop();
+</script>
+
+<script>
+    var x = document.getElementById("myAudio").autoplay;
+</script>
+
+{% endif %}
+
+{% endblock %}
+
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> Sessions🔥
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Apni Sabha😎</span>
+                <span class="fs-4"> | 🔥Isi Me To Angaar Hai🔥</span>
+            </h3>
+        </div>
+    </div>
+
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- create a search bar -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+
+                    {% if query %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic, Instructor or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query"
+                        value="{{ query }}">
+
+                    {% else %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic, Instructor or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
+
+                    {% endif %}
+
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <!-- make a button to clear the search -->
+                    <a href="{% url 'my_sessions' %}" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="fw-semibold mb-4">Angaari Sabha 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Topic🗒️
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Kiska Kisse?🌚
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Waqt⏰
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Status
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for session in sessions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ session.id }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ session.topic }}">{{ session.topic }}</h6>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span style="font-weight: bold; "> {{ session.course.name }} </span>
+                                    <br>
+                                    by <span style="font-weight: bold;"> {{ session.instructor.first_name }}
+                                        {% if session.instructor.gender == "Male" %}
+                                        Bhaiya
+                                        {% else %}
+                                        Didi
+                                        {% endif %}
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span> {{ session.session_time|date }} </span>
+                                    <br>
+                                    <span style="font-weight: bold;">
+                                        @{{ session.session_time|time }} </span>
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0 fs-4">
+                                    <span class="badge bg-{{ session.get_meeting_status.color }}">{{session.get_meeting_status.status }}</span>
+                                </h6>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    {% if session.get_meeting_status.status == "Ongoing" %}
+                                    <a href="{{ session.link }}" target="_blank"
+                                        class="btn btn-outline-{{ session.get_meeting_status.color }} text-blue float-end">Aajao🔥</a>
+                                    {% elif session.get_meeting_status.status == "Upcoming" %}
+                                    <a href="#"
+                                        class="btn btn-outline-{{ session.get_meeting_status.color }} text-black float-end">Rukja
+                                        Abhi😎</a>
+                                    {% elif session.recorded_session_link %}
+                                    <a href="{{ session.recorded_session_link }}" target="_blank"
+                                        class="btn btn-outline-{{ session.get_meeting_status.color }} text-blue float-end">Watch
+                                        Recorded Session🔥</a>
+
+                                    {% else %}
+                                    <button class="btn btn-outline-indigo float-end">Session Ended🔥</button>
+
+                                    {% endif %}
+                                </div>
+
+            </div>
+            </td>
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+{% endblock %}

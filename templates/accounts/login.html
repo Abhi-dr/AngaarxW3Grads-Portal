@@ -1,0 +1,106 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block title %}
+#AngaarHai | Login🔥
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/accounts/login.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+
+<style>
+  .a-link {
+    font-weight: 600;
+    color: #5e72e4;
+  }
+
+  .a-link:hover {
+    text-decoration: none;
+    color: #233dd2;
+  }
+
+  .btn-primary {
+    background-color: #5e72e4;
+    font-weight: 600;
+    font-size: medium;
+  }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="overlay"></div>
+<div class="container d-flex justify-content-center align-items-center vh-100">
+  <div class="login-container border rounded shadow p-4 bg-white" style="max-width: 400px; width: 100%;">
+    {% for message in messages %}
+
+    <div class="row">
+      <div class="alert {{ message.tags }} fade show" role="alert">
+        <span class="alert-text"><strong>{{ message.tag }}</strong>{{ message }}</span>
+      </div>
+    </div>
+
+    {% endfor %}
+    <form class="login-form" method="post">
+      {% csrf_token %}
+      <div class="text-center mb-4">
+        <img src="{% static 'img/home/angaar_logo.jpg' %}" width="80" alt="Angaar Logo" class="mb-2">
+        <h2 class="h4">Login to Learn🔥!</h2>
+      </div>
+      <div class="mb-3">
+        <input type="text" class="form-control" placeholder="Username" name="username" required>
+      </div>
+      <div class="mb-2 position-relative">
+        <input type="password" class="form-control" placeholder="Password" name="password" required id="password">
+        <span class="position-absolute top-50 end-0 translate-middle-y pe-2 show-password" onclick="togglePassword()"
+          style="cursor: pointer;">👀</span>
+      </div>
+      <!-- add the forget password link -->
+      <div class="text-end mb-3">
+        <a href="{% url 'request_password_reset' %}" class="a-link">Forgot Password?</a>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" id="login-btn" class="btn btn-lg btn-primary w-100 mb-0">Enter The
+          World</button>
+      </div>
+      <div class="text-center mt-3 text-black-50">
+        Want To Become <span class="text-black-50 fw-bold">Angaari Aawam?</span><a href="{% url 'register' %}"
+          class="text-black-50"> <span class="a-link">Join Us</span>
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  function togglePassword() {
+    const passwordField = document.getElementById('password');
+    const passwordIcon = document.querySelector('.show-password');  // This will now target the span
+    if (passwordField.type === 'password') {
+      passwordField.type = 'text';
+      passwordIcon.textContent = '🙈';  // Changed to a different icon to indicate the open eye state
+    } else {
+      passwordField.type = 'password';
+      passwordIcon.textContent = '👀';  // Changed to the closed eye state
+    }
+  }
+
+
+  window.onload = function () {
+    const passwordIcon = document.querySelector('.show-password');
+    passwordIcon.textContent = '👀'; // Ensure it starts as closed
+  };
+
+  const loginBtn = document.getElementById("login-btn");
+  loginBtn.addEventListener("click", function () {
+    loginBtn.innerHTML = "Logging In...";
+    loginBtn.style.backgroundColor = "grey";
+
+  });
+
+</script>
+{% endblock %}

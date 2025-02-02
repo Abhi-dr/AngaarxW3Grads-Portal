@@ -1,0 +1,952 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<!-- data-bs-theme="dark" -->
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>
+        {% block title %}
+        {% endblock %}
+    </title>
+    <!-- <link rel="shortcut icon" type="image/png" href="{% static 'img/dashboardimages/logos/favicon.png' %}" /> -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
+    <link rel="stylesheet" href="{% static 'css/student/dashboard/styles.min.css' %}" />
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #e4e3e5, #fff);
+            background-repeat: no-repeat;
+        }
+
+        .star {
+            color: red;
+            display: inline;
+        }
+
+        .streak {
+            max-width: 100%;
+            display: inline-flex;
+            justify-content: end;
+        }
+
+        #fire-icon {
+            width: 5%;
+        }
+
+        @media (max-width: 768px) {
+            #fire-icon {
+                width: 20%;
+            }
+        }
+
+        #coin-icon {
+
+            height: 20px;
+        }
+
+
+
+        [data-bs-theme="dark"] {
+            body {
+                background: linear-gradient(to bottom right, #000000, #4f4f4f);
+                background-repeat: no-repeat;
+            }
+
+            aside,
+            header {
+                background: #212529;
+            }
+
+
+            span,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6,
+            p,
+            ul,
+            li,
+            a,
+            button,
+            input,
+            label {
+                color: #f0f0f0;
+            }
+
+            .hide-menu,
+            i {
+                color: rgb(236, 236, 236);
+            }
+
+            .dropdown-item:hover i,
+            .dropdown-item:hover p {
+                color: black;
+                /* Set the text and icon color to black on hover */
+            }
+        }
+
+        span {
+            color: black;
+        }
+
+
+        .checkbox {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .checkbox-label {
+            background-color: #111;
+            width: 50px;
+            height: 26px;
+            border-radius: 50px;
+            position: relative;
+            padding: 5px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fa-moon {
+            color: #f1c40f;
+        }
+
+        .fa-sun {
+            color: #f39c12;
+        }
+
+        .checkbox-label .ball {
+            background-color: #fff;
+            width: 22px;
+            height: 22px;
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            border-radius: 50%;
+            transition: transform 0.2s linear;
+        }
+
+        .checkbox:checked+.checkbox-label .ball {
+            transform: translateX(24px);
+        }
+
+        #scrollToTopBtn {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Fixed position */
+            bottom: 20px;
+            /* Place it at the bottom */
+            right: 30px;
+            /* Place it at the right */
+            z-index: 99;
+            /* Ensure it is visible over other elements */
+            border: none;
+            /* No borders */
+            outline: none;
+            background-color: #343333a2;
+            /* Black background */
+            color: white;
+            /* White text */
+            cursor: pointer;
+            /* Pointer/hand icon */
+            padding: 15px;
+            border-radius: 10px;
+            /* Rounded corners */
+            font-size: 18px;
+        }
+
+        #scrollToTopBtn:hover {
+            background-color: #555;
+            /* Darker background on hover */
+        }
+
+        [data-bs-theme="dark"] .form-control {
+            color: #f0f0f0;
+        }
+
+        [data-bs-theme="dark"] select>option {
+            color: #000000;
+        }
+    </style>
+
+    <style>
+        @keyframes blink {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .blinking-dot {
+            animation: blink 1.5s infinite;
+            /* Adjust the animation duration as needed */
+            color: red;
+            font-size: large;
+            position: relative;
+            top: -0.3em;
+
+        }
+    </style>
+
+    <style>
+        #leveller-btn {
+            width: 100%;
+            cursor: pointer;
+            color: #fff;
+            font-size: 17px;
+            border-radius: 1rem;
+            border: none;
+            position: relative;
+            background: #100720;
+            transition: 0.1s;
+        }
+
+        #leveller-btn::after {
+            content: '';
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(circle farthest-corner at 10% 20%, rgba(255, 94, 247, 1) 17.8%, rgba(2, 245, 255, 1) 100.2%);
+            filter: blur(15px);
+            z-index: -1;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        #leveller-btn:hover {
+            transform: scale(0.9) rotate(3deg);
+            background: radial-gradient(circle farthest-corner at 10% 20%, rgba(255, 94, 247, 1) 17.8%, rgba(2, 245, 255, 1) 100.2%);
+            transition: 0.5s;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+        });
+    </script>
+
+    <style>
+        .themeToggle {
+            color: #bbb;
+            width: 3em;
+        }
+
+        .st-sunMoonThemeToggleBtn {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput {
+            opacity: 0;
+            width: 55%;
+            aspect-ratio: 1;
+        }
+
+        .st-sunMoonThemeToggleBtn svg {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s ease;
+            transform: rotate(40deg);
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunMoon {
+            transform-origin: center center;
+            transition: inherit;
+            transform: scale(1);
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay {
+            transform-origin: center center;
+            transform: scale(0);
+        }
+
+        .st-sunMoonThemeToggleBtn svg mask>circle {
+            transition: transform 0.64s cubic-bezier(0.41, 0.64, 0.32, 1.575);
+            transform: translate(0px, 0px);
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay2 {
+            animation-delay: 0.05s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay3 {
+            animation-delay: 0.1s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay4 {
+            animation-delay: 0.17s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay5 {
+            animation-delay: 0.25s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay5 {
+            animation-delay: 0.29s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg {
+            transform: rotate(90deg);
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg mask>circle {
+            transform: translate(16px, -3px);
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunMoon {
+            transform: scale(0.55);
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunRay {
+            animation: showRay1832 0.4s ease 0s 1 forwards;
+        }
+
+        @keyframes showRay1832 {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Add this to your existing CSS */
+        .sidebar-collapsed {
+            display: none;
+        }
+
+        @media (min-width: 992px) {
+            .sidebar-expanded {
+                display: block;
+            }
+
+            .sidebar-collapsed {
+                display: none;
+            }
+        }
+    </style>
+
+    {% block extra_css %}
+
+    {% endblock %}
+
+</head>
+
+<!-- oncontextmenu="return false" -->
+
+<body style="background-attachment: fixed;">
+    <!--  Body Wrapper -->
+    <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+        data-sidebar-position="fixed" data-header-position="fixed">
+        <!-- Sidebar Start -->
+        <aside class="left-sidebar sidebar-expanded" id="sidebar">
+            <!-- Sidebar scroll-->
+            <div>
+                <div class="brand-logo d-flex align-items-center justify-content-between">
+                    <a href="{% url 'student' %}" class="text-nowrap logo-img">
+                        <img src="{% static 'img/student/logo.png' %}" alt="" style="width: 100%;" />
+                    </a>
+                    <div class="close-btn d-block  d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
+                        <i class="ti ti-x fs-8"></i>
+                    </div>
+                </div>
+                <!-- Sidebar navigation-->
+                <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
+                    <ul id="sidebarnav">
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Main Account</span>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'student' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-layout-dashboard"></i>
+                                </span>
+                                <span class="hide-menu">Dashboard 🔥</span>
+
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link {% block my_batches_active %} {% endblock %}"
+                                href="{% url 'my_batches' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-bookmarks"></i>
+                                </span>
+                                <span class="hide-menu">My Courses</span>
+
+                            </a>
+                        </li>
+
+                        {% comment %}
+
+                        <!-- <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'my_sessions' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-article"></i>
+                                </span>
+                                <span class="hide-menu">My Sessions</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'assignments' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-copy"></i>
+                                </span>
+                                <span class="hide-menu">Assignments</span>
+                            </a>
+                        </li> -->
+
+                        {% endcomment %}
+
+                        <!-- ========================== PRACTICE ================================== -->
+
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">PRACTICE</span>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link {% block pp_active %} {% endblock %}" href="{% url 'problem_set' %}"
+                                aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-rocket"></i>
+                                </span>
+                                <span class="hide-menu">Practice Problems 💀</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item" id="leveller-btn">
+                            <a class="sidebar-link {% block sheet_active %} {% endblock %}" href="{% url 'practice' %}"
+                                aria-expanded="false">
+                                <span class="text-white">
+                                    <i class="ti ti-crown"></i>
+                                </span>
+                                <span class="hide-menu text-white">Angaari Sheets🔥</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link {% block leveller_active %} {% endblock %}"
+                                href="{% url 'leveller' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-trophy"></i>
+                                </span>
+                                <span class="hide-menu">Leveller🔥🔥</span>
+                            </a>
+                        </li>
+
+                        <!-- ========================= EXTRA LEARNING ============================= -->
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Learning</span>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'playground' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-window"></i>
+                                </span>
+                                <span class="hide-menu">Coding Playground</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'ask_doubt' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-help"></i>
+                                </span>
+                                <span class="hide-menu">Samadhaan AI🧠</span>
+                            </a>
+                        </li>
+
+                        {% comment %}
+
+                        <!-- <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'reading_material' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-file-description"></i>
+                                </span>
+                                <span class="hide-menu">Reading Material</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'roadmap' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-article"></i>
+                                </span>
+                                <span class="hide-menu">My Roadmap</span>
+                            </a>
+                        </li> -->
+
+                        {% endcomment %}
+
+                        <!-- ============================= EXTRA ==================== -->
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Help Desk</span>
+                        </li>
+
+
+                        <!-- <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'notifications' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-alert-circle"></i>
+                                </span>
+                                <span class="hide-menu">What's New</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'anonymous_message' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-message"></i>
+                                </span>
+                                <span class="hide-menu">Messages</span>
+                            </a>
+                        </li> -->
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'feedback' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-typography"></i>
+                                </span>
+                                <span class="hide-menu">Feedback</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'my_profile' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-user"></i>
+                                </span>
+                                <span class="hide-menu">My Profile</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </aside>
+        <!--  Sidebar End -->
+
+        <!--  Main wrapper -->
+        <div class="body-wrapper">
+            <!--  Header Start -->
+            <header class="app-header">
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <ul class="navbar-nav">
+
+                        <li class="nav-item d-block d-xl-none">
+                            <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse"
+                                href="javascript:void(0)">
+                                <i class="ti ti-menu-2"></i>
+                            </a>
+                        </li>
+                        <!-- <li class="nav-item">
+                            <a class="nav-link" href="{% url 'notifications' %}">
+                                <i class="ti ti-bell-ringing"></i>
+                                 <div class="notification bg-primary rounded-circle"></div>
+                            </a>
+                        </li> -->
+                        <li class="nav-item">
+                            <div class="nav-link" id="sheet-link">
+                                <!-- data-bs-toggle="tooltip" title="Your Current Streaks🔥" data-bs-placement="bottom" -->
+                                <!-- <img id="fire-icon" src="{% static 'img/student/fire.png' %}" alt=""> -->
+                                <span class="mx-1 badge text-bg-dark" id="active-sheet-timer"></span>
+                                <button id="coinbtn" type="button" class="btn badge text-bg-dark mx-1"
+                                    data-bs-toggle="modal" data-bs-target="#coinModal" data-bs-toggle="tooltip"
+                                    title="Your Total Sparks💥">
+                                    <img id="coin-icon" src="{% static 'img/student/coin.png' %}" alt="">
+                                    {{ user.coins }}
+                                </button>
+
+                                <button id="streakbtn" type="button" class="btn badge text-bg-dark mx-1"
+                                    data-bs-toggle="modal" data-bs-target="#streakModal" data-bs-toggle="tooltip"
+                                    title="Your Current Streaks🔥">
+                                    <span class="fire-emoji">🔥</span>{{ streak.current_streak }}
+                                </button>
+
+                                {% if can_restore_streak %}
+                                <button type="button" class="btn btn-sm btn-outline-info" id="restore-streak-btn">
+                                    Restore Streak (50<img id="coin-icon" class="mt-n1"
+                                        src="{% static 'img/student/coin.png' %}" alt="">)
+                                </button>
+                                {% endif %}
+
+
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+                        <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+
+                            <!-- <div class="streak">
+                                <img id="fire-icon" src="{% static 'img/student/fire.png' %}" alt="">
+                                <span class="mx-1 badge text-bg-dark">10</span></h1>
+                            </div> -->
+
+                            <!-- <button id="btnSwitch" class="btn m-2 btn-outline-dark">Enable Dark More</button> -->
+                            <!-- <button id="theme-toggle" class="btn mx-2">Light Mode</button> -->
+
+                            <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
+                                <input type="checkbox" id="themeToggle" class="themeToggleInput" />
+                                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
+                                    <mask id="moon-mask">
+                                        <rect x="0" y="0" width="20" height="20" fill="white"></rect>
+                                        <circle cx="11" cy="3" r="8" fill="black"></circle>
+                                    </mask>
+                                    <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
+                                    <g>
+                                        <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+                                        <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+                                        <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+                                        <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+                                        <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+                                        <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+                                    </g>
+                                </svg>
+                            </label>
+
+
+                            <!-- <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a> -->
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link nav-icon-hover show" href="javascript:void(0)" id="drop2"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <img src="{{ user.profile_pic.url }}" alt="" width="35" height="35"
+                                        class="rounded-circle">
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
+                                    aria-labelledby="drop2">
+                                    <div class="message-body">
+                                        <a href="{% url 'my_profile' %}"
+                                            class="d-flex align-items-center gap-2 dropdown-item">
+                                            <i class="ti ti-user fs-6"></i>
+                                            <p class="mb-0 fs-3">My Profile</p>
+                                        </a>
+                                        <a href="{% url 'edit_profile' %}"
+                                            class="d-flex align-items-center gap-2 dropdown-item">
+                                            <i class="ti ti-mail fs-6"></i>
+                                            <p class="mb-0 fs-3">Edit Profile</p>
+                                        </a>
+                                        <a href="{% url 'logout' %}"
+                                            class="btn btn-primary mx-3 mt-2 d-block">Logout</a>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="row-cols-lg-3">
+                        <span class="fw-semibold">Hi, {{ user.first_name }}</span>
+                    </div>
+                </nav>
+            </header>
+            <!--  Header End -->
+
+            {% block body %}
+            {% endblock %}
+
+        </div>
+
+        <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top">↑</button>
+    </div>
+
+    <!--Coin modal-->
+    <div class="modal fade" id="coinModal" tabindex="-1" aria-labelledby="coinModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body mt-2">
+                    <h4 class="modal-title text-center mb-2">You have total <strong>{{ user.coins }} Sparks</strong>
+                        <img width="7%" src="{% static 'img/student/coin.png' %}" alt="">
+                    </h4>
+                    <p class="text-center">Sparks aren’t just coins, they are the badge of your coding achievements!
+                        While it’s not real money, it is gonna help you to earn it 😉.
+                    </p>
+
+                    <ul>
+                        <li><strong>🧩 Complete your Challenges:</strong> The tougher the challenge, the more Sparks
+                            you’ll earn!</li>
+                        <br>
+                        <li><strong>🔥 Build Unstoppable Streaks:</strong> Keep solving daily to earn bonus Sparks and
+                            grow
+                            your streak.</li>
+                    </ul>
+                    <p class="text-center mt-3">
+                        Use your sparks to unlock hints and restore your broken streaks🔥💪
+                    </p>
+                    <p class="text-center mt-3">
+                        <strong>
+                            #AngaarHai
+                        </strong>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--streak modal-->
+    <div class="modal fade" id="streakModal" tabindex="-1" aria-labelledby="streakModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h4 class="modal-title text-center">Your Current Streak: <strong>
+                            {{ streak.current_streak }}</strong> Days 🔥</h4>
+                         <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
+                    <p class="text-center mt-3">Snapchat streaks are fun? Wait till you see what coding streaks can do!
+                        Other streaks might give you a red or yellow heart, but these streaks give you something even
+                        better: achievement, growth, and rewards!
+                    </p>
+                    <p class="text-center mt-3">
+                        Here's how they work:</p>
+                    <ul class="mt-3">
+                        <li>📅 <strong>What is a Streak?</strong> A streak is the number of consecutive days you've
+                            solved coding challenges.</li>
+                        <li>🔥 <strong>Why Maintain a Streak?</strong> The longer your streak, the more Sparks you
+                            collect.</li>
+                        <li>🎯 <strong>How to Keep a Streak?</strong> Solve at least one coding challenge daily to keep
+                            your streak alive.</li>
+                        <li>💔 <strong>What Happens if You Break It?</strong> Missing a day resets your streak to zero,
+                            so stay consistent!</li>
+                    </ul>
+                    <p class="text-center mt-3">
+                        Build your streak to show off your dedication and earn extra Sparks. Don’t let the fire go out!
+                        🔥
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% block myjs %}
+    {% endblock %}
+
+
+    <script src="{% static 'js/dashboard/libs/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'js/dashboard/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/dashboard/js/sidebarmenu.js' %}"></script>
+    <script src="{% static 'js/dashboard/js/app.min.js' %}"></script>
+    <script src="{% static 'js/dashboard/libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+    <script src="{% static 'js/dashboard/libs/simplebar/dist/simplebar.js' %}"></script>
+    <script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
+
+    <script>
+        document.getElementById('restore-streak-btn').addEventListener('click', function () {
+            const choice = confirm("Are you sure you want to restore your streaks? It will use 50 Sparks!");
+
+            if (!choice) {
+                return false;
+            }
+
+            fetch("{% url 'restore_streak' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("data received");
+                    console.log(data);
+                    if (data.status === 'success') {
+                        alert(data.message);
+                        location.reload();
+                    } else {
+                        alert(data.message);
+                    }
+                });
+        });
+    </script>
+
+    <script>
+        // Show the button when scrolled down 20px from the top of the document
+        window.onscroll = function () {
+            scrollFunction();
+        };
+
+        function scrollFunction() {
+            const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                scrollToTopBtn.style.display = "block";
+            } else {
+                scrollToTopBtn.style.display = "none";
+            }
+        }
+
+        // Scroll to the top of the document when the user clicks on the button
+        function scrollToTop() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE, and Opera
+        }
+
+    </script>
+
+    <script>
+        // Get references to the sidebar and the toggle button
+        const sidebar = document.getElementById('sidebar');
+        const sidebarCollapse = document.getElementById('sidebarCollapse');
+
+        // Function to close the sidebar
+        function closeSidebar() {
+            sidebar.classList.remove('show');
+        }
+
+        // Event listener for clicks on the toggle button
+        sidebarCollapse.addEventListener('click', function () {
+            sidebar.classList.toggle('show');
+        });
+
+        // Event listener for clicks outside the sidebar
+        document.addEventListener('click', function (event) {
+            const target = event.target;
+            if (!sidebar.contains(target) && target !== sidebarCollapse) {
+                closeSidebar();
+            }
+        });
+    </script>
+
+    <script>
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        })
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const themeToggleButton = document.getElementById('themeToggle');
+            themeToggleButton.innerHTML = localStorage.getItem('theme') === 'dark' ? 'Light Mode' : 'Dark Mode';
+            themeToggleButton.classList.add(localStorage.getItem('theme') === 'dark' ? 'btn-outline-light' : 'btn-outline-dark');
+
+
+            themeToggleButton.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+
+                if (newTheme === 'dark') {
+                    themeToggleButton.innerHTML = 'Light Mode';
+                    themeToggleButton.classList.remove('btn-outline-dark');
+                    themeToggleButton.classList.add('btn-outline-light');
+                } else {
+                    themeToggleButton.innerHTML = 'Dark Mode';
+                    themeToggleButton.classList.add('btn-outline-dark');
+                    themeToggleButton.classList.remove('btn-outline-light');
+                }
+
+
+            });
+        });
+
+
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Function to fetch the active sheet timer
+            function fetchActiveSheetTimer() {
+                fetch("{% url 'get_active_sheet_timer' %}")
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.start_time && data.end_time) {
+                            const startTime = new Date(data.start_time).getTime();
+                            const endTime = new Date(data.end_time).getTime();
+                            const sheetName = data.sheetName;
+                            const sheetSlug = data.sheetSlug;
+
+
+
+                            const badge = document.getElementById('sheet-link');
+
+                            // Function to update the timer
+                            function updateTimer() {
+                                const now = new Date().getTime();
+                                const timer = document.getElementById('active-sheet-timer');
+
+                                if (now < startTime) {
+                                    const diff = startTime - now;
+                                    const minutes = Math.floor(diff / 60000);
+                                    const seconds = Math.floor((diff % 60000) / 1000);
+                                    timer.innerText = `${sheetName} will be enabled in: ${minutes}m ${seconds}s`;
+                                } else if (now >= startTime && now <= endTime) {
+                                    const diff = endTime - now;
+                                    const minutes = Math.floor(diff / 60000);
+                                    const seconds = Math.floor((diff % 60000) / 1000);
+                                    timer.innerText = `${sheetName}: Active for: ${minutes}m ${seconds}s`;
+                                    badge.href = "{% url 'sheet' 0 %}".replace('0', sheetSlug);
+                                    badge.classList.remove('pe-none');
+
+                                } else {
+                                    timerElement.textContent = "Expired";
+                                    clearInterval(timerInterval);
+                                }
+                            }
+
+                            // Initial call to update the timer and then every second
+                            const timerInterval = setInterval(updateTimer, 1000);
+                            updateTimer();
+                        } else {
+                            document.getElementById('active-sheet-timer').innerText = "";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching sheet timer:', error);
+                    });
+            }
+
+            // Fetch the timer on page load
+            fetchActiveSheetTimer();
+        });
+    </script>
+
+    <script>
+        // make the default mode as dark mode
+        document.documentElement.setAttribute('data-bs-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    </script>
+    <!-- 
+    <script>
+        document.onkeydown = function (e) {
+            if (event.keyCode == 123) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) {
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) {
+                return false;
+            }
+        }
+    </script> -->
+</body>
+
+</html>

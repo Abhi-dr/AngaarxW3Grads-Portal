@@ -1,0 +1,338 @@
+{% extends "student/base.html" %} {% load static %} {% block title %} Student ->
+Profile {% endblock %}
+
+{% block extra_css %}
+
+<style>
+  #change_password {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+  }
+
+  #change_password.show {
+    max-height: 500px;
+    /* Set a reasonable max-height value to transition smoothly */
+  }
+</style>
+
+
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-body d-inline-flex">
+        <h5 class="card-title fw-semibold">Profile | &nbsp;</h5>
+        <p class="mb-0">Yha Shakal Nahi, Akal Kaam Aati Hai🔥</p>
+
+        <button class="btn badge text-bg-light-danger w-md-10 px-4 ms-auto">
+          <span class="fw-bold text-black">
+            Total Score: <strong> {{ total_score }}🔥 </strong>
+          </span>
+        </button>
+
+    </div>
+  </div>
+
+  {% for message in messages %}
+
+  <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+    <strong>{{ message.tag }}</strong> {{ message }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  {% endfor %}
+
+  <div class="container py-2">
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="card mb-2">
+          <div class="card-body text-center">
+            <img src="{{ user.profile_pic.url }}" alt="avatar" class="rounded-circle img-fluid" style="width: 150px;" />
+            <h5 class="my-3">
+              {{ user.first_name }} {{ user.last_name }}
+            </h5>
+            <p class="mb-1">
+              <b>{{ user.username }} </b> |
+              <b>{{ user.get_profile_score }}% </b> Profile Completed
+            </p>
+            <p class="mb-4">{{ user.college }}</p>
+            <div class="d-flex justify-content-center mb-2">
+              <a type="button" href="{% url 'edit_profile' %}" class="btn btn-outline-primary ms-1 w-100">
+                Change Profile Photo</span>
+              </a>
+            </div>
+
+            <div class="d-flex justify-content-center mb-2">
+              <button type="button" id="change_password_btn" onclick="return display_change_password();"
+                class="btn btn-success ms-1 w-100">
+                Change Password
+              </button>
+
+            </div>
+
+            <div class="d-flex justify-content-center mb-2">
+              <button type="button" class="btn btn-outline-danger ms-1 w-100" data-bs-toggle="modal"
+                data-bs-target="#deleteAccountModal">
+                Delete Account
+              </button>
+
+            </div>
+
+          </div>
+        </div>
+
+        <!-- =============================== CHANGE PASSWORD ============================== -->
+
+
+        <div class="card mb-4" id="change_password">
+          <div class="card-body text-center">
+            <h5 class="mt-n3">
+              Change Password
+            </h5>
+
+            <form action="{% url 'change_password' %}" method="POST">
+              {% csrf_token %}
+              <div class="mb-3">
+                <input type="password" name="old_password" id="password" class="form-control"
+                  placeholder="Old Password" />
+              </div>
+
+
+              <div class="mb-3">
+                <input type="password" name="new_password" class="form-control" placeholder="New Password" />
+              </div>
+
+
+              <div class="mb-3">
+                <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" />
+              </div>
+              <button type="submit" class="btn btn-outline-success w-100">
+                Change Password
+              </button>
+
+          </div>
+
+
+        </div>
+
+
+        <!-- =============================== DELETE ACCOUNT ================================-->
+
+        <!-- Modal for Delete Account -->
+        <div class="modal fade" id="deleteAccountModal" tabindex="-1" aria-labelledby="deleteAccountModalLabel"
+          aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteAccountModalLabel">Confirm Account Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <p>To confirm, please enter your username to proceed with account deletion.</p>
+                <div class="mb-3">
+                  <label for="usernameInput" class="form-label">Username</label>
+                  <input type="text" class="form-control" id="usernameInput" placeholder="Enter your username" required>
+                  <div class="invalid-feedback">
+                    Username does not match.
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <form action="{% url 'delete_account' %}" method="POST" id="deleteAccountForm">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-danger" id="submitDeleteBtn" disabled>Yes, Delete My
+                    Account</button>
+                </form>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+
+
+
+
+
+        <!-- ============================================================================== -->
+
+      </div>
+
+
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-body">
+            <!-- Name -->
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Name</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="mb-0">
+                  {{ user.first_name }} {{ user.last_name }}
+                  {% if not user.first_name or not user.last_name %}
+                  <span class="text-success float-end">(+5 <img id="coin-icon" class="mt-n1"
+                      src="{% static 'img/student/coin.png' %}" alt="">)</span>
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+            <hr />
+
+            <!-- Email -->
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Email</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="mb-0">
+                  {{ user.email }}
+                </p>
+              </div>
+            </div>
+            <hr />
+
+            <!-- Phone -->
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Phone</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="mb-0">
+                  +91 {{ user.mobile_number }}
+                  {% if not user.mobile_number %}
+                  <span class="text-success float-end">(+10 <img id="coin-icon" class="mt-n1"
+                      src="{% static 'img/student/coin.png' %}" alt="">)</span>
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+            <hr />
+
+            <!-- LinkedIn -->
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">LinkedIn</p>
+              </div>
+              <div class="col-sm-9">
+                {% if not user.linkedin_id %}
+                <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
+                <span class="text-success float-end">(+20 <img id="coin-icon" class="mt-n1"
+                    src="{% static 'img/student/coin.png' %}" alt="">)</span>
+                {% else %}
+                <a href="{{ user.linkedin_id }}" target="_blank" class="btn btn-outline-secondary mb-0">
+                  {{ user.linkedin_id }}</a>
+                {% endif %}
+              </div>
+            </div>
+            <hr />
+
+            <!-- GitHub -->
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">GitHub</p>
+              </div>
+              <div class="col-sm-9">
+                {% if not user.github_id %}
+                <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
+                <span class="text-success float-end">(+20 <img id="coin-icon" class="mt-n1"
+                    src="{% static 'img/student/coin.png' %}" alt="">)</span>
+                {% else %}
+                <a href="{{ user.github_id }}" target="_blank" class="btn btn-outline-dark mb-0">
+                  {{ user.github_id }}</a>
+                {% endif %}
+              </div>
+            </div>
+            <hr />
+
+            <!-- Gender -->
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Gender</p>
+              </div>
+              <div class="col-sm-9">
+                <p class="mb-0">
+                  {{ user.gender }}
+                </p>
+              </div>
+            </div>
+            <hr />
+
+            <!-- Birthday -->
+            <div class="row">
+              <div class="col-sm-3">
+                <p class="mb-0">Janamdin🥳</p>
+              </div>
+              <div class="col-sm-9">
+                {% if not user.dob %}
+                <button class="btn btn-dark text-white mb-0">Not Available☹</button>
+                <span class="text-success float-end">(+10 <img id="coin-icon" class="mt-n1"
+                    src="{% static 'img/student/coin.png' %}" alt="">)</span>
+                {% else %}
+                <p class="mb-0">{{ user.dob }}</p>
+                {% endif %}
+              </div>
+            </div>
+            <hr />
+
+            <a href="{% url 'edit_profile' %}" class="btn btn-outline-warning w-100">Edit Profile</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function display_change_password() {
+    var box = document.getElementById("change_password");
+    var btn = document.getElementById("change_password_btn");
+
+    if (box.classList.contains("show")) {
+      box.style.maxHeight = null;
+      box.classList.remove("show");
+      btn.innerHTML = "Change Password";
+      btn.classList.remove("btn-danger");
+      btn.classList.add("btn-success");
+    } else {
+      box.style.maxHeight = box.scrollHeight + "px"; // Dynamically set the height based on content
+      box.classList.add("show");
+      btn.innerHTML = "I Don't Want To Change Password🙃";
+      btn.classList.remove("btn-success");
+      btn.classList.add("btn-danger");
+    }
+  }
+
+
+</script>
+
+<!-- =============================script of delete account ======================================-->
+<script>
+
+  document.getElementById('usernameInput').addEventListener('input', function () {
+    var username = document.getElementById('usernameInput').value.trim();
+    var submitBtn = document.getElementById('submitDeleteBtn');
+
+    // Check if the entered username matches the logged-in user's username
+    // Replace "currentUsername" with the actual username variable from Django template
+    var currentUsername = "{{ user.username }}";
+
+    if (username === currentUsername) {
+      submitBtn.disabled = false;  // Enable the submit button if the username matches
+    } else {
+      submitBtn.disabled = true;  // Disable the submit button if the username does not match
+    }
+  });
+
+</script>
+
+
+
+
+{% endblock %}

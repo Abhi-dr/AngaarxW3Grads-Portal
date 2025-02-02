@@ -1,0 +1,121 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Add Assignment for {{ course.name }}
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Add Assignment for {{ course.name }} </i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form action="#" method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+
+                        <div class="card">
+                            <div class="card-header">Add Assignment</div>
+                            <div class="card-body h-100">
+
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Title
+                                            <div class="star">*</div>
+                                        </label>
+                                        <input type="text" class="form-control" id="job_title" name="title"
+                                            placeholder="Title goes here..." required>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Description
+                                            <div class="star">*</div>
+                                        </label>
+                                        <textarea class="form-control" id="job_title" name="description" rows="5"
+                                            placeholder="Description of the assignment goes here..."
+                                            required></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="interview_date" class="form-label">Due Date & Time
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="datetime-local" class="form-control" id="interview_date"
+                                                name="due_date" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="assignment_type" class="form-label">Assignment Type
+                                                <div class="star">*</div>
+                                            </label>
+                                            <select class="form-select form-control" name="assignment_type" id="assignment_type" required>
+                                                <option value="" selected disabled>Select Assignment Type</option>
+                                                <option value="Coding">Coding</option>
+                                                <option value="Text">Text</option>
+                                                <option value="File">File Upload</option>
+                                                <option value="Image">Image</option>
+                                                <option value="Link">Link</option>
+    
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_type" class="form-label">For & By</label>
+                                            <input type="text" class="form-control" id="job_type"
+                                                value="{{ course.name|title }} by {{ instructor.first_name }}" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="deadline" class="form-label">Created At</label>
+                                            <input type="text" class="form-control" id="deadline"
+                                                value="{% now 'l, F j, Y g:i A' %}" disabled>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Add &nbsp;
+                                            Assignment</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+        </div>
+
+
+
+
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

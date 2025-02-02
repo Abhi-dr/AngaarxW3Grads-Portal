@@ -1,0 +1,589 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block title %}
+{{ sheet.name }}
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <div class="card">
+        <div class="card-body d-inline-flex">
+            <h3 class="heading">
+                <span class="fw-semibold">{{ sheet.name }}</span>
+                <span class="fs-4"> | <span class="mx-1 badge text-bg-dark" id="admin-timer">No Time
+                        Set</span></span>
+            </h3>
+
+            <div class="dropdown ms-auto">
+                <button class="btn btn-outline-primary " data-bs-toggle="modal" data-bs-target="#addQuestionModal"
+                    onclick="setSheetId('{{ sheet.id }}')">
+                    <i class="ti ti-plus"></i>
+                </button>
+
+                <a href="{% url 'administrator_reorder' sheet.slug %}" class="btn btn-outline-primary">⬆️</a>
+
+                <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
+                    data-bs-target="#setTimerModal">⏰</button>
+
+
+                <a href="{% url 'administrator_add_new_question' sheet.slug %}" class="btn btn-outline-primary">Add New Question</a>
+
+                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+
+                <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                    <li>
+                        <a href="{% url 'administrator_leaderboard' sheet.slug %}"
+                            class="btn btn-warning button w-100">Leaderboard
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'administrator_delete_sheet' sheet.id %}" class="btn btn-danger button w-100 mt-1"
+                            onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete Sheet
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'administrator_edit_sheet' sheet.slug %}" class="btn btn-primary button w-100 mt-1">Edit Sheet
+                        </a>
+                    </li>
+
+                    <li>
+                        <button id="toggle-status" class="btn btn-info button w-100 mt-1"
+                            data-sheet-slug="{{ sheet.slug }}">
+                            {% if sheet.is_enabled %} Disable Sheet {% else %} Enable Sheet {% endif %}
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Questions 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Title
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Description
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Level
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#3
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#4
+                                </h6>
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for question in questions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}
+                                </h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ question.title }}">{{ question.title|truncatechars:25 }}</h6>
+
+                                {% for sheet in question.sheets.all %}
+                                <span style="font-weight: bold;"> {{ sheet.name }} |
+                                </span>
+                                {% endfor %}
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width: 100%;"
+                                        data-bs-toggle="modal" data-bs-target="#questionModal"
+                                        data-title="{{ question.title }}" data-description="{{ question.description }}"
+                                        title="{{ question.title }}"> View</button>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+
+                                <div class="dropdown ms-auto">
+                                    <button type="button"
+                                        class="btn btn-outline-success text-blue dropdown-toggle dropdown-toggle-split"
+                                        data-bs-toggle="dropdown" aria-expanded="false">TC/DC
+                                        <span class="visually-hidden">Toggle Dropdown</span>
+                                    </button>
+
+
+                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
+                                        <li>
+                                            <a href="{% url 'test_cases' question.slug %}"
+                                                class="btn btn-success mt-1 text-blue w-100">Test Cases
+                                                ({{question.test_cases.count }})</a>
+                                        </li>
+
+                                        <li>
+                                            <a href="{% url 'driver_code' question.slug %}"
+                                                class="btn btn-warning mt-1 text-blue w-100">
+                                                Driver Codes
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'administrator_view_submissions' question.slug %}"
+                                        class="btn btn-outline-info text-blue float-end">Submissions
+                                        ({{question.how_many_users_solved }}) </a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'test_code' question.slug %}"
+                                        class="btn btn-info text-blue float-end">TEST CODE</a>
+
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    <!-- <a href="{% url 'administrator_remove_from_sheet' sheet.id question.id %}" -->
+                                    <a href="{% url 'delete_question' question.id %}"
+                                        class="float-end"
+                                        onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">❌</a>
+
+                                    <a href="{% url 'edit_question' question.id %}" class="float-end">✏️</a>
+                                </div>
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- =============================== VIEW DESCRIPTION MODEL ======================= -->
+
+
+
+    <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="questionModalLabel">Question Title...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="questionDescription">Description...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================== ADD QUESTION ================================ -->
+
+
+    <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addQuestionModalLabel">Add Questions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="mx-3">
+                    <form onsubmit="event.preventDefault();">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="searchInput"
+                                placeholder="Search by ID, Topic or Course" oninput="searchQuestions()" />
+                            <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Level</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questionList">
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================== MAKE DUPLICATE ================================ -->
+
+    <div class="modal fade" id="selectQuestionBtn" tabindex="-1" aria-labelledby="selectQuestionBtnLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="selectQuestionBtnLabel">Enter Question ID</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="#" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inputData" class="form-label">Question ID</label>
+                            <input type="text" class="form-control" id="inputData" name="question_id"
+                                placeholder="Enter the question id here..." required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Make Duplicate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================== SET TIMER MODAL ================================= -->
+
+
+
+    <div class="modal fade" id="setTimerModal" tabindex="-1" role="dialog" aria-labelledby="setTimerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="setTimerModalLabel">Set or Reset Timer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <label for="end_time">Start Time:</label>
+                    <input type="datetime-local" id="start_time" class="form-control"
+                        value="{{ sheet.start_time|date:' Y-m-d\\TH:i' }}">
+                </div>
+
+                <div class="modal-body">
+                    <label for="end_time">End Time:</label>
+                    <input type="datetime-local" id="end_time" class="form-control"
+                        value="{{ sheet.end_time|date:' Y-m-d\\TH:i' }}">
+                    <small id="resetText" class="form-text text-muted">Leave empty to reset timer.</small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveTimerBtn">Save Timer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</div>
+
+<script>
+    document.getElementById('saveTimerBtn').addEventListener('click', function () {
+
+        var startTime = document.getElementById('start_time').value;
+        var endTime = document.getElementById('end_time').value;
+
+
+        // If end_time is empty, reset the timer
+        if (!endTime || !startTime) {
+            startTime = null;
+            endTime = null;
+        }
+
+        // Send AJAX request to update the timer
+        fetch("{% url 'administrator_set_sheet_timer' sheet.id %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+            body: JSON.stringify({ start_time: startTime, end_time: endTime }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Timer updated successfully!');
+                    window.location.reload();  // Reload the page to reflect the changes
+                } else {
+                    alert('Error updating timer');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+    });
+</script>
+
+<script>
+    var questionModal = document.getElementById('questionModal');
+    questionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var title = button.getAttribute('data-title'); // Extract info from data-* attributes
+        var description = button.getAttribute('data-description');
+
+        // Update the modal's content.
+        var modalTitle = questionModal.querySelector('.modal-title');
+        var modalBody = questionModal.querySelector('.modal-body p');
+
+        modalTitle.textContent = title;
+        modalBody.innerHTML = description;
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const addQuestionModal = document.getElementById("addQuestionModal");
+        const questionList = document.getElementById("questionList");
+        const searchInput = document.getElementById("searchInput");
+        const sheetId = "{{ sheet.id }}"; // Embed sheet.id directly
+        let allQuestions = []; // Store all questions for searching
+
+        // Fetch and populate questions when the modal is shown
+        addQuestionModal.addEventListener("show.bs.modal", () => {
+            if (!sheetId) return;
+
+            fetch("{% url 'get_excluded_questions' 0 %}".replace("0", sheetId))
+                .then((response) => response.json())
+                .then((questions) => {
+                    allQuestions = questions; // Cache the full list of questions
+                    renderQuestions(allQuestions); // Initial rendering
+                })
+                .catch((error) => console.error("Error fetching questions:", error));
+        });
+
+        // Render questions in the table
+        function renderQuestions(questions) {
+            questionList.innerHTML = ""; // Clear existing content
+
+            questions.forEach((question) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>
+                        <h6 class="fw-semibold mb-1 text-wrap">${question.id}</h6>
+                    </td>
+                    <td>
+                        <h6 class="fw-semibold mb-1 text-wrap">${question.title}</h6>
+                    </td>
+                    <td>
+                        <span class="badge bg-${question.difficulty_level_color}">${question.difficulty_level}</span>    
+                    </td>
+                    <td>
+                        <button class="btn btn-outline-success add-question-btn" data-question-id="${question.id}">
+                            Add
+                        </button>
+                    </td>
+                `;
+                questionList.appendChild(row);
+            });
+
+            // final call to add the queston in the sheet
+            document.querySelectorAll(".add-question-btn").forEach((btn) => {
+                btn.addEventListener("click", (e) => {
+                    const questionId = e.target.getAttribute("data-question-id");
+                    addQuestionToSheet(sheetId, questionId);
+                });
+            });
+        }
+
+        // search button...
+        searchInput.addEventListener("input", () => {
+            const searchTerm = searchInput.value.toLowerCase();
+
+            const filteredQuestions = allQuestions.filter((question) => {
+                const titleMatch = question.title.toLowerCase().includes(searchTerm);
+                const idMatch = question.id.toString().includes(searchTerm);
+                const courseMatch = question.course ? question.course.toLowerCase().includes(searchTerm) : false;
+
+                return titleMatch || idMatch || courseMatch;
+            });
+
+            renderQuestions(filteredQuestions);
+        });
+
+        // Clear search input and restore the full question list
+        window.clearSearch = () => {
+            searchInput.value = "";
+            renderQuestions(allQuestions);
+        };
+
+        // Add question to sheet
+        function addQuestionToSheet(sheetId, questionId) {
+            sheetId = sheetId.toString();
+            console.log(sheetId, questionId);
+            if (!sheetId || !questionId) return;
+
+            const url = `/administration/make_duplicate/${sheetId}/${questionId}/`;
+            console.log(url);
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+            })
+                .then((response) => {
+                    console.log(response);
+                    if (response.ok) {
+                        // Successfully added; refresh questions
+                        document.querySelector(`button[data-question-id="${questionId}"]`).parentElement.parentElement.remove();
+                    } else {
+                        alert("Failed to add question. (html)");
+                    }
+                })
+                .catch((error) => console.error("Error adding question:", error));
+        }
+    });
+</script>
+
+<script>
+    document.getElementById('toggle-status').addEventListener('click', function () {
+        const slug = this.getAttribute('data-sheet-slug');
+        fetch(`/administration/sheet/${slug}/toggle-status/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.status ? 'Sheet Enabled' : 'Sheet Disabled');
+                this.textContent = data.status ? 'Disable' : 'Enable';
+            });
+    });
+</script>
+
+
+<script>
+    async function fetchTimer() {
+        const response = await fetch("{% url 'fetch_sheet_timer' sheet.id %}");
+        const data = await response.json();
+        const timerElement = document.getElementById("admin-timer");
+
+        if (data.start_time && data.end_time) {
+            const startTime = new Date(data.start_time);
+            const endTime = new Date(data.end_time);
+
+            function updateTimer() {
+                const now = new Date();
+
+                if (now < startTime) {
+                    const diff = startTime - now;
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    timerElement.textContent = `Will be enabled in: ${minutes}m ${seconds}s`;
+                } else if (now >= startTime && now <= endTime) {
+                    const diff = endTime - now;
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    timerElement.textContent = `Active for: ${minutes}m ${seconds}s`;
+                } else {
+                    timerElement.textContent = "Expired";
+                    clearInterval(timerInterval);
+                }
+            }
+
+            const timerInterval = setInterval(updateTimer, 1000);
+            updateTimer();
+        } else {
+            timerElement.textContent = "No Timer Set";
+        }
+    }
+
+    fetchTimer();
+</script>
+{% endblock %}

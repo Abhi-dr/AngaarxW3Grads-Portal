@@ -1,0 +1,181 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+Student -> Submit Assignment
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    h3.question {
+        font-family: "Roboto", sans-serif;
+        font-size: 24px;
+        text-align: center;
+        font-weight: 100;
+    }
+
+    .editor-container {
+        width: 100%;
+        height: 60vh;
+        margin: 20px auto;
+        position: relative;
+    }
+
+    #editor {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+        border-radius: 8px;
+        font-size: 20px;
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+
+    {% for message in messages %}
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="card" id="card-title-2">
+        <div class="card-header ">
+            <h5 class="card-title"><strong>({{ assignment.course.name }}) Title:</strong> {{ assignment.title }}</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-text">{{ assignment.description|linebreaks }}</p>
+        </div>
+        <div class="card-footer d-sm-flex justify-content-between align-items-center">
+            <div class="card-footer-link mb-4 mb-sm-0">
+                <p class="card-text d-inline">
+                    <strong>Due Date:</strong> {{ assignment.due_date }}
+                </p>
+            </div>
+        </div>
+
+
+    </div>
+
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <h4>
+                Submission Type ({{ assignment.assignment_type }})
+            </h4>
+            <form method="post" enctype="multipart/form-data" id="assignmentForm">
+                {% csrf_token %}
+
+                {% if assignment.assignment_type == 'Coding' %}
+                <div class="mb-3">
+                    <label for="submission_code" class="form-label">Your Code:
+                        <div class="star">*</div>
+                    </label>
+                    <!-- <textarea id="submission_code" name="submission_code" rows="10" class="form-control"
+                        required placeholder="// Your code goes here..."></textarea> -->
+
+                    <div class="editor-container">
+                        <div id="editor"></div>
+                    </div>
+
+                    <input type="hidden" id="submission_code" name="submission_code">
+
+                </div>
+
+
+                {% elif assignment.assignment_type == 'Text' %}
+                <div class="mb-3">
+                    <label for="submission_text" class="form-label">Your Text:
+                        <div class="star">*</div>
+                    </label>
+                    <textarea id="submission_text" name="submission_text" rows="5" class="form-control" required
+                        placeholder="// Your answer goes here..."></textarea>
+                </div>
+
+
+                {% elif assignment.assignment_type == 'File' %}
+                <div class="mb-3">
+                    <label for="submission_file" class="form-label">Upload File:
+                        <div class="star">*</div>
+                    </label>
+                    <input type="file" id="submission_file" name="submission_file" class="form-control"
+                        accept=".pdf,.doc,.docx,.txt" required>
+                </div>
+
+
+                {% elif assignment.assignment_type == 'Image' %}
+                <div class="mb-3">
+                    <label for="submission_image" class="form-label">Upload Image:
+                        <div class="star">*</div>
+                    </label>
+                    <input type="file" id="submission_image" name="submission_image" class="form-control"
+                        accept="image/*" required>
+                </div>
+
+                {% elif assignment.assignment_type == 'Link' %}
+
+                <div class="mb-3">
+                    <label for="submission_link" class="form-label
+                        ">Your Link:
+                        <div class="star">*</div></label>
+                    <input type="url" id="submission_link" name="submission_link" class="form-control" required
+                        placeholder="https://maihuangaari.com">
+                </div>
+
+                {% endif %}
+
+                <!-- ================================ EXTRA INFO =================== -->
+
+                <div class="mb-3 mt-4">
+                    <label for="extra_info" class="form-label">Any Extra Information <small>(optional)</small>:</label>
+                    <textarea id="extra_info" name="extra_info" rows="2" class="form-control"
+                        placeholder="// Anything you wanna say to {{ assignment.course.instructor.first_name }}..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-outline-success mt-3"
+                    onclick="return confirm('Are you sure?')">Submit</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% block myjs %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
+
+
+<script>
+    const editor = ace.edit("editor");
+    editor.setTheme("ace/theme/twilight");
+    editor.session.setMode("ace/mode/python");
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+        cursorStyle: "smooth",
+        enableEmmet: true,
+    });
+
+    document.getElementById('assignmentForm').addEventListener('submit', function(event) {
+        const code = editor.getValue();
+        document.getElementById('submission_code').value = code;
+        console.log('Code submitted: ', code); // Add this line to verify the code
+    });
+
+    
+
+</script>
+
+{% endblock %}
+
+
+{% endblock %}
