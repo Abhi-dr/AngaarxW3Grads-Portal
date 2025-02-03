@@ -12,6 +12,9 @@ class Batch(models.Model):
     thumbnail = models.ImageField(upload_to='batches/thumbnails/', blank=True, null=True)
     students = models.ManyToManyField(Student, related_name="batches", through="EnrollmentRequest")
     
+    required_fields = models.JSONField(default=list, blank=True)
+
+    
     slug = models.SlugField(unique=True, blank=True, null=True)
     
     def __str__(self):
@@ -58,6 +61,9 @@ class EnrollmentRequest(models.Model):
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name="enrollment_requests")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
     request_date = models.DateTimeField(auto_now_add=True)
+    
+    additional_data = models.JSONField(default=dict, blank=True)
+
 
     class Meta:
         unique_together = ('student', 'batch')  # Prevent duplicate requests

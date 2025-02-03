@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django import forms
+
 from .models import Sheet, Question, TestCase, Submission, POD, Streak, Batch, EnrollmentRequest, DriverCode
 
 
@@ -75,13 +77,6 @@ class StreakAdmin(admin.ModelAdmin):
     list_per_page = 30
     list_filter = ['current_streak']
 
-# ==================================== BATCH ====================================
-
-@admin.register(Batch)
-class BatchAdmin(admin.ModelAdmin):
-    list_display = ['name']
-    search_fields = ['name']
-    list_per_page = 30
 
 # ==================================== ENROLLMENT REQUEST ====================================
     
@@ -92,3 +87,43 @@ class EnrollmentRequestAdmin(admin.ModelAdmin):
     list_per_page = 30
     list_filter = ['batch']
     
+
+# ==================================== BATCH ====================================
+
+# @admin.register(Batch)
+# class BatchAdmin(admin.ModelAdmin):
+#     list_display = ['name']
+#     search_fields = ['name']
+#     list_per_page = 30
+
+class BatchAdminForm(forms.ModelForm):
+    REQUIRED_FIELDS_CHOICES = [
+        ("roll_number", "Roll Number"),
+        ("class_section", "Class Section"),
+        # Can add more options as needed
+    ]
+
+    required_fields = forms.MultipleChoiceField(
+        choices=REQUIRED_FIELDS_CHOICES, widget=forms.CheckboxSelectMultiple, required=False
+    )
+
+    class Meta:
+        model = Batch
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.required_fields:
+            self.initial['required_fields'] = self.instance.required_fields
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.required_fields = self.cleaned_data.get('required_fields', [])
+        if commit:
+            instance.save()
+        return instance
+
+@admin.register(Batch)
+class BatchAdmin(admin.ModelAdmin):
+    form = BatchAdminForm
+    list_display = ['name', 'description']

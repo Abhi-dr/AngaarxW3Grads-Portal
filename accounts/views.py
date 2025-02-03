@@ -141,7 +141,7 @@ def register(request):
         
         new_user.set_password(password)
         
-        # send_welcome_mail(email, first_name) #TEST_CHANGE remove comment
+        send_welcome_mail(email, first_name)
 
         
         new_user.save() 
