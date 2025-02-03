@@ -126,24 +126,116 @@ Dashboard | My Courses
         <!-- ====================== ALL OTHER BATCHES ================ -->
 
         {% for batch in other_batches %}
-
         <div class="col-md-3">
             <div class="card">
                 <a href="#">
                     <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Batch Thumbnail" />
                     <div class="card-body">
                         <h5 class="card-title">{{ batch.name }}🔥</h5>
+
+                        {% if batch.required_fields %}
+                        <!-- If extra fields exist, open modal -->
+                        <button class="btn btn-success w-100 enroll-btn" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#enrollModal" 
+                            data-batch-id="{{ batch.id }}" 
+                            data-batch-name="{{ batch.name }}"
+                            data-required-fields="{{ batch.required_fields|safe }}">
+                            Enroll Now
+                        </button>
+
+                        <p class="text-success mt-2">Required:</p>
+                        <ul>
+                            {% for field in batch.required_fields %}
+                            <li>{{ field }}</li>
+                            {% endfor %}
+                        </ul>
+
+
+                        {% else %}
+                        <!-- Direct enrollment if no extra fields -->
                         <a href="{% url 'enroll_batch' batch.id %}" class="btn btn-success w-100">Enroll Now</a>
+                        {% endif %}
+
                     </div>
                 </a>
             </div>
         </div>
-
         {% endfor %}
-
     </div>
 
 
+    <!-- Enrollment Modal -->
+    <div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="enrollModalLabel">Enroll in <span id="modalBatchName"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="enrollForm" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" name="batch_id" id="modalBatchId">
+                        <div id="extraFieldsContainer"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const enrollButtons = document.querySelectorAll(".enroll-btn");
+        const modalBatchName = document.getElementById("modalBatchName");
+        const modalBatchId = document.getElementById("modalBatchId");
+        const extraFieldsContainer = document.getElementById("extraFieldsContainer");
+        const enrollForm = document.getElementById("enrollForm");
+    
+        enrollButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                console.log("Button clicked");
+                const batchId = this.getAttribute("data-batch-id");
+                const batchName = this.getAttribute("data-batch-name");
+                let requiredFields = this.getAttribute("data-required-fields");
+                // convert requiredFields to JSON parsable string
+                requiredFields = requiredFields.replace(/'/g, '"');
+    
+                try {
+                    requiredFields = JSON.parse(requiredFields);  // Properly parse JSON
+                    console.log(requiredFields);
+                } catch (e) {
+                    requiredFields = [];  // Fallback to empty array if invalid
+                    alert("Invalid required fields data");
+                }
+    
+                // Set batch name and ID
+                modalBatchName.textContent = batchName;
+                modalBatchId.value = batchId;
+    
+                // Generate required fields dynamically
+                extraFieldsContainer.innerHTML = "";
+                requiredFields.forEach(field => {
+                    let label = field.replace("_", " ").toUpperCase();
+                    extraFieldsContainer.innerHTML += `
+                        <div class="mb-3">
+                            <label class="form-label">${label}</label>
+                            <input type="text" placeholder="Enter your ${label} here..." name="${field}" class="form-control" required>
+                        </div>
+                    `;
+                });
+    
+                // Update form action dynamically
+                enrollForm.action = `/dashboard/enroll_course/${batchId}/`;
+            });
+        });
+    });
+    
+</script>
+
 
 {% endblock %}
