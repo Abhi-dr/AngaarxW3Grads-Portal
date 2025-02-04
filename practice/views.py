@@ -13,6 +13,7 @@ import base64
 import re
 
 from accounts.models import Student
+from .models import RecommendedQuestions
 
 from django.views.decorators.cache import cache_control
 
@@ -376,6 +377,26 @@ def problem(request, slug):
     except Exception as e:
         print(f"Error loading problem page: {e}")
         return JsonResponse({"error": "Error from backend: {e}" + str(e)}, status=500)
+    
+# ========================================= RECOMMENDED QUESTIONS =========================================
+
+@login_required(login_url="login")
+def fetch_recommended_questions(request, slug):
+    question = get_object_or_404(Question, slug=slug)
+    recommended_questions = RecommendedQuestions.objects.filter(question=question)
+
+    data = [
+        {
+            "id": rq.id,
+            "title": rq.title,
+            "link": rq.link,
+            "platform": rq.platform
+        } for rq in recommended_questions
+    ]
+    
+    print(data)
+
+    return JsonResponse({"status": "success", "questions": data})
 
 # ============================================ UPDATE COINS ===============================================
 

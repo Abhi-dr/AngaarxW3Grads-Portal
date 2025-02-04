@@ -1,163 +1,408 @@
 {% extends "administration/base.html" %}
+
 {% load static %}
-
 {% block title %}
+
 Add Question
-{% endblock %}
 
+{% endblock %}
 {% block problem_active %}
+
 active
+
 {% endblock %}
-
 {% block body %}
-
 <div class="container-fluid">
+
     {% for message in messages %}
-
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+
         <strong>{{ message.tag }}</strong> {{ message }}
+
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
     </div>
-
     {% endfor %}
-
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+
         <ol class="breadcrumb">
+
             <li class="breadcrumb-item pe-auto" onClick="javascript:history.go(-1);">Question Set</li>
-
             </li>
+
             <li class="breadcrumb-item active" aria-current="page">Add Question</li>
+
         </ol>
+
     </nav>
-
-
     <div class="card">
+
         <div class="card-body">
-            <h5 class="card-title fw-semibold mb-0">Add Question</i> </h5>
 
+            <h5 class="card-title fw-semibold mb-0">Add Question</I> </h5>
         </div>
+
         <div class="container px-4">
-            <form method="POST">
+
+            <form method="POST" id="add-question-form">
                 {% csrf_token %}
-
                 <hr class="mt-0">
+
                 <div class="row">
-
                     <div class="w-100">
-
                         <div class="card">
+
                             <div class="card-header">Sheet
-
                             </div>
-                            <div class="card-body h-100">
 
+                            <div class="card-body h-100">
                                 <div>
+
                                     <div class="mb-3">
+
                                         <label for="assignment_type" class="form-label">Sheet
+
                                             <div class="star">*</div>
+
                                         </label>
+
                                         <select class="form-select form-control" name="sheet" id="assignment_type"
                                             multiple>
-
                                             {% for sheet in sheets %}
-
                                             <option value="{{ sheet.id }}">{{ sheet.name }}</option>
-
                                             {% endfor %}
-
                                         </select>
-                                    </div>
-                                </div>
 
+                                    </div>
+
+                                </div>
                                 <div class="mb-3">
+
                                     <label for="job_title" class="form-label">Title
+
                                         <div class="star">*</div>
+
                                     </label>
+
                                     <input type="text" class="form-control" id="question_title" name="title"
                                         placeholder="Title goes here..." required>
+
                                 </div>
-
-
                                 <div class="mb-3">
+
                                     <label for="job_title" class="form-label">Scenario <small>(optional)</small>
+
                                         <div class="star"></div>
+
                                     </label>
+
                                     <textarea class="form-control" id="question_description" name="scenario" rows="5"
                                         placeholder="Scenario here..."></textarea>
-                                </div>
 
+                                </div>
                                 <div class="mb-3">
+
                                     <label for="job_title" class="form-label">Problem Description
+
                                         <div class="star">*</div>
+
                                     </label>
+
                                     <textarea class="form-control" id="question_description" name="description" rows="5"
                                         placeholder="Description here..." required></textarea>
-                                </div>
 
+                                </div>
                                 <div class="mb-3">
+
                                     <label for="job_title" class="form-label">Input Format
+
                                         <div class="star">*</div>
+
                                     </label>
+
                                     <textarea class="form-control" id="input_format" name="input_format" rows="5"
                                         placeholder="Input format here..." required></textarea>
-                                </div>
 
+                                </div>
                                 <div class="mb-3">
+
                                     <label for="job_title" class="form-label">Output Format
+
                                         <div class="star">*</div>
+
                                     </label>
+
                                     <textarea class="form-control" id="output_format" name="output_format" rows="5"
                                         placeholder="Output format here..." required></textarea>
+
                                 </div>
-
-
                                 <div class="mb-3">
+
                                     <label for="job_title" class="form-label">Constraints
+
                                         <div class="star">*</div>
+
                                     </label>
+
                                     <textarea class="form-control" id="question_description" name="constraints" rows="5"
                                         placeholder="Description here..." required></textarea>
-                                </div>
 
+                                </div>
                                 <div class="mb-3">
+
                                     <label for="job_title" class="form-label">Hint <small>(optional)</small>
+
                                     </label>
+
                                     <textarea class="form-control" id="question_description" name="hint" rows="3"
                                         placeholder="Hint here..."></textarea>
+
                                 </div>
-
-
                                 <div class="mb-3">
+
                                     <label for="assignment_type" class="form-label">Difficulty Level
+
                                         <div class="star">*</div>
+
                                     </label>
+
                                     <select class="form-select form-control" name="difficulty_level"
                                         id="assignment_type" required>
+
                                         <!-- <option value="" selected disabled>Select Level</option> -->
+
                                         <option value="Easy">Easy</option>
+
                                         <option value="Medium">Medium</option>
+
                                         <option value="Hard">Hard</option>
-
                                     </select>
-                                </div>
 
-                                <div>
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-success w-100 mt-3">Add &nbsp;
-                                            Question</button>
+                                </div> <!-- ========== RECEMMONDED QUESTIONS SECTION ===========-->
+                                <label>Recommended Questions <small>(optional)</small></label>
+                                <div id="recommended-questions-container">
+
+                                    <div class="recommended-question-group row rounded border border-white p-3 m-3">
+
+                                        <div class="col-md-4">
+
+                                            <div class="mb-3">
+
+                                                <label class="form-label">Title</label>
+
+                                                <input type="text" class="form-control recommended-title" placeholder="Title here...">
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-3">
+
+                                            <div class="mb-3">
+
+                                                <label class="form-label">Platform</label>
+
+                                                <select class="form-select recommended-platform">
+
+                                                    <option value="LeetCode">LeetCode</option>
+
+                                                    <option value="GeeksForGeeks">GeeksForGeeks</option>
+
+                                                    <option value="HackerRank">HackerRank</option>
+
+                                                </select>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-5">
+
+                                            <div class="mb-3">
+
+                                                <label class="form-label">Link</label>
+
+                                                <input type="text" class="form-control recommended-link"
+                                                    placeholder="Link here...">
+
+                                            </div>
+
+                                        </div>
+                                        <!-- Add More Questions Button -->
+
+                                        <button type="button" class="btn btn-outline-primary" id="add-question-btn">+
+                                            Add Another</button>
+                                        
                                     </div>
-                                </div>
-                            </div>
 
+                                </div>
+                                <div>
+
+                                    <div class="col-md-12">
+
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Add &nbsp;
+
+                                            Question</button>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
                         </div>
+                    </div>
+
+                </div>
+
+        </div>
+
+        </form>
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const addQuestionBtn = document.getElementById("add-question-btn");
+
+        const questionsContainer = document.getElementById("recommended-questions-container");
+
+        const form = document.getElementById("add-question-form");
+        // Function to add a new recommended question group
+
+        function addRecommendedQuestion() {
+
+            let newQuestionGroup = document.createElement("div");
+
+            newQuestionGroup.classList.add("recommended-question-group", "row", "rounded", "border", "border-white", "p-3", "m-3");
+            newQuestionGroup.innerHTML = `
+
+                <div class="col-md-4">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Title</label>
+
+                        <input type="text" class="form-control recommended-title" placeholder="Title here...">
 
                     </div>
-                </div>
-        </div>
-        </form>
 
-    </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Platform</label>
+
+                        <select class="form-select recommended-platform">
+
+                            <option value="LeetCode">LeetCode</option>
+
+                            <option value="GeeksForGeeks">GeeksForGeeks</option>
+
+                            <option value="HackerRank">HackerRank</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-5">
+
+                    <div class="mb-3">
+
+                        <label class="form-label">Link</label>
+
+                        <input type="text" class="form-control recommended-link" placeholder="Link here...">
+
+                    </div>
+
+                </div>
+
+                <button type="button" class="btn btn-danger remove-question-btn">Remove</button>
+
+            `;
+            questionsContainer.appendChild(newQuestionGroup);
+            // Attach event listener to remove button
+
+            newQuestionGroup.querySelector(".remove-question-btn").addEventListener("click", function () {
+
+                newQuestionGroup.remove();
+
+            });
+
+        }
+        // Event listener for adding a new question
+
+        addQuestionBtn.addEventListener("click", addRecommendedQuestion);
+        // Event listener for form submission
+
+        form.addEventListener("submit", function (event) {
+
+            event.preventDefault(); // Prevent default form submission
+            let recommendedQuestions = [];
+            // Collect recommended questions
+
+            document.querySelectorAll(".recommended-question-group").forEach(group => {
+
+                let title = group.querySelector(".recommended-title").value.trim();
+
+                let platform = group.querySelector(".recommended-platform").value;
+
+                let link = group.querySelector(".recommended-link").value.trim();
+                if (title && platform && link) {
+
+                    recommendedQuestions.push({ title, platform, link });
+
+                }
+
+            });
+            // Create FormData object to handle normal form data
+
+            let formData = new FormData(form);
+
+            formData.append("recommended_questions", JSON.stringify(recommendedQuestions)); // Append recommended questions
+            fetch(form.action, {
+
+                method: "POST",
+
+                headers: {
+
+                    "X-CSRFToken": "{{ csrf_token }}" // Include CSRF token
+
+                },
+
+                body: formData
+
+            })
+
+                .then(response => response.json())
+
+                .then(data => {
+
+                    if (data.success) {
+
+                        alert("Question added successfully!");
+
+                        location.reload(); // Reload the page
+
+                    } else {
+
+                        alert("Error: " + data.message);
+
+                    }
+
+                })
+                .catch(error => console.error("Error:", error));
+        });
+
+    });
+
+</script>
 
 {% endblock %}

@@ -10,7 +10,7 @@ from django.db import transaction
 
 from django.views.decorators.csrf import csrf_exempt
 
-from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode
+from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode, RecommendedQuestions
 from django.views.decorators.cache import cache_control
 from angaar_hai.custom_decorators import admin_required
 
@@ -87,11 +87,9 @@ def fetch_problems(request):
 @admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def add_question(request):
-    
     sheets = Sheet.objects.all().order_by('-id')
-    
+
     if request.method == 'POST':
-        
         sheet = request.POST.getlist('sheet')
         title = request.POST.get('title')
         scenario = request.POST.get('scenario')
@@ -101,34 +99,43 @@ def add_question(request):
         constraints = request.POST.get('constraints')
         hint = request.POST.get('hint')
         difficulty_level = request.POST.get('difficulty_level')
-        
+
         description = convert_backticks_to_code(description)
-        
-        question = Question(
+
+        # Save the main question
+        question = Question.objects.create(
             title=title,
             scenario=scenario,
             description=description,
-            input_format = input_format,
-            output_format = output_format,
-            constraints = constraints,
-            hint = hint,
+            input_format=input_format,
+            output_format=output_format,
+            constraints=constraints,
+            hint=hint,
             difficulty_level=difficulty_level,
             is_approved=True
         )
-        
         question.save()
-        
-        for sheet_id in sheet:
-            sheet = Sheet.objects.get(id=sheet_id)
-            question.sheets.add(sheet)
-        
-        messages.success(request, 'Problem added successfully. Add Test Cases for the problem')
-        return redirect('test_cases', slug=question.slug)
-    
-    parameters = {
-        'sheets': sheets
-    }
-    return render(request, 'administration/practice/add_question.html', parameters)
+
+        try:
+            recommended_questions_data = json.loads(request.POST.get('recommended_questions', '[]'))
+            
+            if isinstance(recommended_questions_data, list):
+                recommended_questions = [
+                    RecommendedQuestions(
+                        question=question,
+                        title=rq["title"],
+                        platform=rq["platform"],
+                        link=rq["link"]
+                    ) for rq in recommended_questions_data
+                ]
+                RecommendedQuestions.objects.bulk_create(recommended_questions)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON data"}, status=400)
+
+        return JsonResponse({"success": True, "message": "Question added successfully!"})
+
+    return render(request, 'administration/practice/add_question.html', {'sheets': sheets})
 
 
 # ======================================== DELETE PROBLEM ======================================

@@ -331,6 +331,8 @@ def fetch_pending_enrollments_of_batch(request, slug):
             'status': request_obj.status,
             "status_color": "success" if request_obj.status == "Accepted" else "danger",
             'request_date': request_obj.request_date.strftime('%d %b, %Y'),
+            "additional_data": {request_obj.additional_data}
+
         })
 
     # Return the data as a JSON response

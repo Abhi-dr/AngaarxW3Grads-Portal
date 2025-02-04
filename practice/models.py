@@ -493,3 +493,20 @@ class Solution(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.question.title}"
+
+
+# ============================== Recommended Question MODEL =========================
+
+class RecommendedQuestions(models.Model):
+
+    platform_choices = [
+        ('LeetCode', 'LeetCode'),
+        ('HackerRank', 'HackerRank'),
+        ('GeeksForGeeks', 'GeeksForGeeks')
+    ]
+
+    question = models.ForeignKey(Question, on_delete=models.PROTECT, related_name="recommended_questions") 
+    title = models.CharField(max_length=255)
+    link = models.URLField()
+    platform = models.CharField(max_length=50, choices=platform_choices)
+    

@@ -212,10 +212,21 @@ active
         enrollments.forEach((student, index) => {
             const row = document.createElement("tr");
 
+            // create a variable of JSON of additional_fields to be displayed in the row
+            let additional_data = {};
+        try {
+            additional_data = JSON.parse(student.additional_data);
+        } catch (e) {
+            console.error("Invalid JSON in additional_data:", student.additional_data);
+        }
+
+
             row.innerHTML = `
                 <td>${index + 1}</td>
                 <td>
                     <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
+                    
+                    
                 </td>
                
                 <td style="text-align: center;">

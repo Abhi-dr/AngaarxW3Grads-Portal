@@ -430,6 +430,19 @@
         </div>
 
         {% endif %}
+
+        <!-- ======================= RECOMMENDED QUESTIONS ========================= -->
+        <div class="card-footer d-sm-flex justify-content-between align-items-center">
+            <div class="card-footer-link mb-2 mb-sm-0">
+                <div class="recommended-section">
+                    <button type="button" class="btn btn-sm btn-outline-success fs-3" id="fetch-recommended-btn">
+                        Similar Questions🔥
+                    </button>
+                    <div id="recommended-questions" class="dropdown-menu p-3" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- Code Editor Section -->
@@ -1293,6 +1306,64 @@
         });
 
 
+    </script>
+
+    <!-- ======================================== RECOMMENDED QUESTIONS ======================================= -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const fetchRecommendedBtn = document.getElementById('fetch-recommended-btn');
+            if (fetchRecommendedBtn) {
+                fetchRecommendedBtn.addEventListener('click', function () {
+                    console.log("CLICKED");
+                    const recommendedSection = document.getElementById("recommended-questions");
+
+                    // Toggle visibility
+                    if (recommendedSection.style.display === "block") {
+                        recommendedSection.style.display = "none"; // Collapse dropdown
+                        return;
+                    }
+
+                    fetch("{% url 'fetch_recommended_questions' question.slug %}", {
+                        method: 'GET',
+                        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            recommendedSection.innerHTML = ""; // Clear previous content
+
+                            if (data.questions.length > 0) {
+                                data.questions.forEach(q => {
+                                    let platformClass = "text-bg-secondary"; // Default gray background
+                                    let textClass = ""; // Default text color
+
+                                    if (q.platform === "LeetCode") {
+                                        platformClass = "text-bg-warning"; // Yellow background
+                                        textClass = "text-dark"; // Dark text
+                                    } else if (q.platform === "GeeksForGeeks") {
+                                        platformClass = "text-bg-success"; // Green background
+                                        textClass = "text-dark"; // Dark text
+                                    } else if (q.platform === "HackerRank") {
+                                        platformClass = "text-bg-dark"; // Dark background
+                                        textClass = "text-light"; // Light text
+                                    }
+
+                                    let questionBadge = `<a href="//${q.link}" target="_blank" class="px-3 py-2 rounded-pill ${platformClass} ${textClass} me-2">${q.title}</a>`;
+                                    recommendedSection.innerHTML += questionBadge;
+                                });
+                            } else {
+                                recommendedSection.innerHTML = `<span class="text-muted">No questions yet</span>`;
+                            }
+
+                            // Show the dropdown
+                            recommendedSection.style.display = "block";
+                        })
+                        .catch(error => console.error("Error fetching data:", error));
+                });
+            } else {
+                console.error("Button with ID 'fetch-recommended-btn' not found.");
+            }
+        });
     </script>
 
     <!-- ======================================== Copy Text Function ================================================ -->

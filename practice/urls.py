@@ -22,7 +22,9 @@ urlpatterns = [
     
     path("problem_set", views.problem_set, name="problem_set"),
     path("fetch_questions", views.fetch_questions, name="fetch_questions"),
+
     path('unlock-hint/<int:question_id>/', views.unlock_hint, name='unlock_hint'),
+    path("fetch_recommended_questions/<slug:slug>", views.fetch_recommended_questions, name="fetch_recommended_questions"),
 
     
     path('render_next_question_in_sheet/<int:sheet_id>/<int:question_id>/', views.render_next_question_in_sheet, name='render_next_question_in_sheet'),
