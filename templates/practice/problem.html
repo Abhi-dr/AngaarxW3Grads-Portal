@@ -414,7 +414,7 @@
 
         </div>
 
-        
+
 
         <div class="card-footer d-sm-flex justify-content-between align-items-center">
             <div class="card-footer-link mb-2 mb-sm-0">
@@ -431,16 +431,22 @@
             </div>
         </div>
 
-        
+
 
         <!-- ======================= RECOMMENDED QUESTIONS ========================= -->
         <div class="card-footer d-sm-flex justify-content-between align-items-center">
             <div class="card-footer-link mb-sm-0">
-                <div class="recommended-section d-flex">
-                    <button type="button" class="btn btn-sm btn-outline-success fs-3" id="fetch-recommended-btn">
-                        Similar Questions🔥
-                    </button>
-                    <div id="recommended-questions" class="dropdown-menu p-3" style="display: none;"></div>
+                <h5 class="mb-3">
+                    <strong>Recommended Questions</strong>
+                </h5>
+                <div class="recommended-section d-flex mb-2">
+                    <div id="recommended-questions">
+                        <!-- add a mini loader -->
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -1314,59 +1320,69 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const fetchRecommendedBtn = document.getElementById('fetch-recommended-btn');
-            if (fetchRecommendedBtn) {
-                fetchRecommendedBtn.addEventListener('click', function () {
-                    console.log("CLICKED");
-                    const recommendedSection = document.getElementById("recommended-questions");
 
-                    // Toggle visibility
-                    if (recommendedSection.style.display === "block") {
-                        recommendedSection.style.display = "none"; // Collapse dropdown
-                        return;
-                    }
+            const recommendedSection = document.getElementById("recommended-questions");
 
-                    fetch("{% url 'fetch_recommended_questions' question.slug %}", {
-                        method: 'GET',
-                        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            recommendedSection.innerHTML = ""; // Clear previous content
+            fetch("{% url 'fetch_recommended_questions' question.slug %}", {
+                method: 'GET',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    recommendedSection.innerHTML = ""
 
-                            if (data.questions.length > 0) {
-                                data.questions.forEach(q => {
-                                    let platformClass = "text-bg-secondary"; // Default gray background
-                                    let textClass = ""; // Default text color
+                    if (data.questions.length > 0) {
+                        let row = document.createElement("div");
+                        row.classList.add("row"); // Create a new row element
 
-                                    if (q.platform === "LeetCode") {
-                                        platformClass = "text-bg-warning"; // Yellow background
-                                        textClass = "text-dark"; // Dark text
-                                    } else if (q.platform === "GeeksForGeeks") {
-                                        platformClass = "text-bg-success"; // Green background
-                                        textClass = "text-dark"; // Dark text
-                                    } else if (q.platform === "HackerRank") {
-                                        platformClass = "text-bg-dark"; // Dark background
-                                        textClass = "text-light"; // Light text
-                                    }
+                        data.questions.forEach((q, index) => {
+                            let platformClass = "text-bg-dark"; // Default gray background
+                            let textClass = ""; // Default text color
+                            let logoUrl = ""; // Default empty logo URL
 
-                                    let questionBadge = `<a href="//${q.link}" target="_blank" class="px-3 py-2 rounded-pill ${platformClass} ${textClass} me-2">${q.title}</a>`;
-                                    recommendedSection.innerHTML += questionBadge;
-                                });
-                            } else {
-                                recommendedSection.innerHTML = `<span class="text-muted">No questions yet</span>`;
+                            if (q.platform === "LeetCode") {
+                                logoUrl = "https://leetcode.com/static/images/LeetCode_logo.png"; // LeetCode logo
+                            } else if (q.platform === "GeeksForGeeks") {
+                                logoUrl = "https://media.geeksforgeeks.org/wp-content/uploads/20210816073845/gfg10.png"; // GFG logo
+                            } else if (q.platform === "HackerRank") {
+                                logoUrl = "https://img1.pnghut.com/25/19/5/G9uZ6ttcU8/green-management-salary-job-interview-logo.jpg"; // HackerRank logo
                             }
 
-                            // Show the dropdown
-                            recommendedSection.style.display = "block";
-                        })
-                        .catch(error => console.error("Error fetching data:", error));
-                });
-            } else {
-                console.error("Button with ID 'fetch-recommended-btn' not found.");
-            }
+                            let col = document.createElement("div");
+                            col.classList.add("col-md-4", "mb-2"); // Create a new column element
+
+                            let questionBadge = `
+                                <a href="//${q.link}" target="_blank" class="px-4 py-2 rounded-pill d-block ${platformClass} ${textClass}">
+                                    <img src="${logoUrl}" alt="${q.platform} logo" style="width: 23px; height: 20px; margin-right: 8px;">
+                                    ${q.title}
+                                </a>`;
+                            col.innerHTML = questionBadge;
+                            row.appendChild(col);
+
+                            // Create a new row after every 3 columns for better responsiveness
+                            if ((index + 1) % 3 === 0) {
+                                recommendedSection.appendChild(row);
+                                row = document.createElement("div");
+                                row.classList.add("row");
+                            }
+                        });
+
+                        // Append the remaining row if any
+                        if (row.hasChildNodes()) {
+                            recommendedSection.appendChild(row);
+                        }
+                    } else {
+                        recommendedSection.innerHTML = `<span class="text-muted">No questions yet</span>`;
+                    }
+
+                    // Show the dropdown
+                    recommendedSection.style.display = "block";
+                })
+                .catch(error => console.error("Error fetching data:", error));
         });
     </script>
+
+
 
     <!-- ======================================== Copy Text Function ================================================ -->
 

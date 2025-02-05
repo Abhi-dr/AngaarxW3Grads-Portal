@@ -240,6 +240,7 @@ def edit_question(request, id):
         'administrator': administrator,
         'question': question,
         'sheets': sheets,
+        "selected_sheet_ids": list(question.sheets.values_list("id", flat=True)),
         'recommended_questions_json': json.dumps(recommended_questions),
     }
 

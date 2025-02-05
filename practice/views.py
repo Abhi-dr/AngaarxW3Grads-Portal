@@ -207,7 +207,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         stdin += f"{test_case.input_data}\n"
         
     # print("\nSTDIN in Execute Function:", stdin)
-        
+    
     encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
     encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
 
@@ -394,8 +394,6 @@ def fetch_recommended_questions(request, slug):
         } for rq in recommended_questions
     ]
     
-    print(data)
-
     return JsonResponse({"status": "success", "questions": data})
 
 # ============================================ UPDATE COINS ===============================================
