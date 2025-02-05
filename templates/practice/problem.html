@@ -414,10 +414,11 @@
 
         </div>
 
-        {% if question.hint %}
+        
 
         <div class="card-footer d-sm-flex justify-content-between align-items-center">
             <div class="card-footer-link mb-2 mb-sm-0">
+                {% if question.hint %}
                 <div class="hint-section">
                     <button class="btn btn-sm btn-outline-success fs-3" id="unlock-hint-btn"
                         data-id="{{ question.id }}">
@@ -426,15 +427,16 @@
                     <button id="hint-text" style="display: none;" class="btn badge text-bg-light-success mx-1"></button>
                     <p id="hint-info"></p>
                 </div>
+                {% endif %}
             </div>
         </div>
 
-        {% endif %}
+        
 
         <!-- ======================= RECOMMENDED QUESTIONS ========================= -->
         <div class="card-footer d-sm-flex justify-content-between align-items-center">
-            <div class="card-footer-link mb-2 mb-sm-0">
-                <div class="recommended-section">
+            <div class="card-footer-link mb-sm-0">
+                <div class="recommended-section d-flex">
                     <button type="button" class="btn btn-sm btn-outline-success fs-3" id="fetch-recommended-btn">
                         Similar Questions🔥
                     </button>

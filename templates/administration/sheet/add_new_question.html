@@ -107,6 +107,26 @@ active
                             </div>
 
 
+                            <div>
+                                <div class="mb-3 rounded border border-white p-3">
+                                    <!-- ========== RECOMMENDED QUESTIONS SECTION ===========-->
+                                    <label>Recommended Questions <small>(optional)</small></label>
+                                    <div id="recommended-questions-container">
+
+                                    </div>
+
+                                    <!-- Add More Questions Button -->
+                                    <button type="button" class="btn btn-outline-primary mt-2 w-100" id="add-question-btn">Add
+                                        Similar
+                                        Questions</button>
+
+                                    <!-- Hidden input to store recommended questions data -->
+                                    <input type="hidden" id="recommended-questions-data" name="recommended_questions"
+                                        value="[]">
+                                </div>
+                            </div>
+
+
                             <div class="mb-3">
                                 <label for="assignment_type" class="form-label">Difficulty Level
                                     <div class="star">*</div>
@@ -138,5 +158,96 @@ active
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const questionsContainer = document.getElementById("recommended-questions-container");
+        const addQuestionBtn = document.getElementById("add-question-btn");
+        const recommendedQuestionsInput = document.getElementById("recommended-questions-data");
+        const form = document.querySelector("form");
+
+        let recommendedQuestions = [];  // Store recommended questions
+
+        // Function to create a recommended question group
+        function createRecommendedQuestion(index, title = "", platform = "LeetCode", link = "") {
+            let newQuestionGroup = document.createElement("div");
+            newQuestionGroup.classList.add("recommended-question-group", "row", "rounded", "border", "border-white", "p-3", "m-3");
+            newQuestionGroup.dataset.index = index;
+
+            newQuestionGroup.innerHTML = `
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        <input type="text" class="form-control recommended-title" placeholder="Title here..." value="${title}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label class="form-label">Platform</label>
+                        <select class="form-select recommended-platform">
+                            <option class="text-black" value="LeetCode" ${platform === "LeetCode" ? "selected" : ""}>LeetCode</option>
+                            <option class="text-black" value="GeeksForGeeks" ${platform === "GeeksForGeeks" ? "selected" : ""}>GeeksForGeeks</option>
+                            <option class="text-black" value="HackerRank" ${platform === "HackerRank" ? "selected" : ""}>HackerRank</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label">Link</label>
+                        <input type="text" class="form-control recommended-link" placeholder="Link here..." value="${link}">
+                    </div>
+                </div>
+                <div class="">
+                    <button type="button" class="btn btn-danger remove-question-btn w-100">Remove</button>
+                </div>
+            `;
+
+            // Attach event listener to remove button
+            newQuestionGroup.querySelector(".remove-question-btn").addEventListener("click", function () {
+                recommendedQuestions.splice(index, 1);  // Remove from array
+                renderQuestions();  // Re-render the list
+            });
+
+            // Update values on change
+            newQuestionGroup.querySelector(".recommended-title").addEventListener("input", function () {
+                recommendedQuestions[index].title = this.value;
+            });
+            newQuestionGroup.querySelector(".recommended-platform").addEventListener("change", function () {
+                recommendedQuestions[index].platform = this.value;
+            });
+            newQuestionGroup.querySelector(".recommended-link").addEventListener("input", function () {
+                recommendedQuestions[index].link = this.value;
+            });
+
+            return newQuestionGroup;
+        }
+
+        // Function to render recommended questions dynamically
+        function renderQuestions() {
+            questionsContainer.innerHTML = "";  // Clear container
+            recommendedQuestions.forEach((rq, index) => {
+                questionsContainer.appendChild(createRecommendedQuestion(index, rq.title, rq.platform, rq.link));
+            });
+        }
+
+        // Add new recommended question on button click
+        addQuestionBtn.addEventListener("click", function () {
+            recommendedQuestions.push({ title: "", platform: "LeetCode", link: "" });
+            renderQuestions();
+        });
+
+        // Handle form submission
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();  // Prevent default form submission
+
+            // Update the hidden input field before sending
+            recommendedQuestionsInput.value = JSON.stringify(recommendedQuestions);
+
+            form.submit();  // Submit the form
+        });
+
+        // Initial render
+        renderQuestions();
+    });
+</script>
 
 {% endblock %}

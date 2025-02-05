@@ -13,9 +13,18 @@ active
 
 <div class="container-fluid">
 
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item pe-auto cursor-pointer"  onclick="history.back()">{{ question.title }}</li>
+            <li class="breadcrumb-item pe-auto cursor-pointer" onclick="history.back()">{{ question.title }}</li>
 
             </li>
             <li class="breadcrumb-item active" aria-current="page">Edit Question</li>
@@ -153,7 +162,31 @@ active
                                     </div>
 
 
+
+
                                 </div>
+
+                                <div class="mb-3">
+                                    <!-- Hidden input to track recommended questions -->
+                                    <!-- Pre set similar questions list from JS -->
+                                    
+                                </div>
+
+                                <div>
+                                    <div class="mb-3 rounded border border-white p-3">
+                                        <input type="hidden" id="recommended-questions-data" name="recommended_questions"
+                                        value="[]">
+
+                                    <!-- Recommended Questions Section -->
+                                    <label>Recommended Questions <small>(optional)</small></label>
+                                    <div id="recommended-questions-container"></div>
+
+                                    <!-- Add More Questions Button -->
+                                    <button type="button" class="btn btn-outline-primary m-2 w-100" id="add-question-btn">+
+                                        Add Another</button>
+                                    </div>
+                                </div>
+
 
                                 <div class="row">
                                     <div class="col-md-6">
@@ -217,14 +250,103 @@ active
                     </div>
                 </div>
         </div>
-
-
-
-
-
         </form>
-
     </div>
 </div>
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const questionsContainer = document.getElementById("recommended-questions-container");
+        const addQuestionBtn = document.getElementById("add-question-btn");
+        const recommendedQuestionsInput = document.getElementById("recommended-questions-data");
+        const form = document.querySelector("form");
+
+        let recommendedQuestions = JSON.parse('{{ recommended_questions_json|safe }}');  // Load initial data
+        let deletedQuestions = new Set();  // Track deleted questions
+
+        // Function to render questions dynamically
+        function renderQuestions() {
+            questionsContainer.innerHTML = "";  // Clear container
+
+            recommendedQuestions.forEach((rq, index) => {
+                let newQuestionGroup = document.createElement("div");
+                newQuestionGroup.classList.add("recommended-question-group", "row", "rounded", "border", "border-white", "p-3", "m-3");
+                newQuestionGroup.dataset.index = index;
+
+                newQuestionGroup.innerHTML = `
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control recommended-title" placeholder="Title here..." value="${rq.title}">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label class="form-label">Platform</label>
+                            <select class="form-select recommended-platform">
+                                <option class="text-black" value="LeetCode" ${rq.platform === "LeetCode" ? "selected" : ""}>LeetCode</option>
+                                <option class="text-black" value="GeeksForGeeks" ${rq.platform === "GeeksForGeeks" ? "selected" : ""}>GeeksForGeeks</option>
+                                <option class="text-black" value="HackerRank" ${rq.platform === "HackerRank" ? "selected" : ""}>HackerRank</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label class="form-label">Link</label>
+                            <input type="text" class="form-control recommended-link" placeholder="Link here..." value="${rq.link}">
+                        </div>
+                    </div>
+                    <div class="">
+                        <button type="button" class="btn btn-danger remove-question-btn w-100">Remove</button>
+                    </div>
+                `;
+
+                // Attach event listener to remove button
+                newQuestionGroup.querySelector(".remove-question-btn").addEventListener("click", function () {
+                    if (rq.id) deletedQuestions.add(rq.id);  // Store ID if it's an existing question
+                    recommendedQuestions.splice(index, 1);  // Remove from list
+                    renderQuestions();
+                });
+
+                // Update values on change
+                newQuestionGroup.querySelector(".recommended-title").addEventListener("input", function () {
+                    recommendedQuestions[index].title = this.value;
+                });
+                newQuestionGroup.querySelector(".recommended-platform").addEventListener("change", function () {
+                    recommendedQuestions[index].platform = this.value;
+                });
+                newQuestionGroup.querySelector(".recommended-link").addEventListener("input", function () {
+                    recommendedQuestions[index].link = this.value;
+                });
+
+                questionsContainer.appendChild(newQuestionGroup);
+            });
+        }
+
+        // Initial rendering
+        renderQuestions();
+
+        // Add new recommended question
+        addQuestionBtn.addEventListener("click", function () {
+            recommendedQuestions.push({ title: "", platform: "LeetCode", link: "" });  // Add new question
+            renderQuestions();
+        });
+
+        // Handle form submission
+        form.addEventListener("submit", function (event) {
+            event.preventDefault();  // Prevent default submission
+
+            // Update the hidden input field before sending
+            recommendedQuestionsInput.value = JSON.stringify({
+                updated: recommendedQuestions,
+                deleted: Array.from(deletedQuestions)
+            });
+
+            form.submit();  // Submit the form
+        });
+    });
+</script>
 
 {% endblock %}

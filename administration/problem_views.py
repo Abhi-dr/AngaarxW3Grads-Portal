@@ -161,13 +161,14 @@ def delete_question(request, id):
 @admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_question(request, id):
-    
     administrator = Administrator.objects.get(id=request.user.id)
     question = Question.objects.get(id=id)
     sheets = Sheet.objects.all().order_by('-id')
+
+    recommended_questions = list(RecommendedQuestions.objects.filter(question=question).values("id", "title", "platform", "link"))
     
     if request.method == 'POST':
-        
+        # Extract form data
         sheet = request.POST.getlist('sheet')
         title = request.POST.get('title')
         scenario = request.POST.get('scenario')
@@ -180,10 +181,10 @@ def edit_question(request, id):
         position = request.POST.get('position')
         cpu_time_limit = request.POST.get('cpu_time_limit')
         memory_limit = request.POST.get('memory_limit')
-        
+
         description = convert_backticks_to_code(description)
 
-        
+        # Update question details
         question.title = title
         question.description = description
         question.scenario = scenario
@@ -195,25 +196,53 @@ def edit_question(request, id):
         question.position = position
         question.cpu_time_limit = float(cpu_time_limit)
         question.memory_limit = int(memory_limit)
-        
         question.save()
-        
+
+        # Update sheets
         question.sheets.clear()
-        
         for sheet_id in sheet:
             sheet = Sheet.objects.get(id=sheet_id)
             question.sheets.add(sheet)
-        
+
+        # Handle recommended questions
+        try:
+            recommended_data = json.loads(request.POST.get("recommended_questions", "{}"))
+            updated_questions = recommended_data.get("updated", [])
+            deleted_questions = recommended_data.get("deleted", [])
+
+            # Delete removed questions
+            if deleted_questions:
+                RecommendedQuestions.objects.filter(id__in=deleted_questions).delete()
+
+            # Update or add new recommended questions
+            for rq in updated_questions:
+                if "id" in rq and rq["id"]:  # Update existing
+                    rec_q = RecommendedQuestions.objects.get(id=rq["id"])
+                    rec_q.title = rq["title"]
+                    rec_q.platform = rq["platform"]
+                    rec_q.link = rq["link"]
+                    rec_q.save()
+                else:  # Add new
+                    RecommendedQuestions.objects.create(
+                        question=question,
+                        title=rq["title"],
+                        platform=rq["platform"],
+                        link=rq["link"]
+                    )
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON data"}, status=400)
+
         messages.success(request, 'Problem updated successfully')
         return redirect('edit_question', id=question.id)
-    
-    question.description = convert_code_to_backticks(question.description)
     
     parameters = {
         'administrator': administrator,
         'question': question,
-        'sheets': sheets
+        'sheets': sheets,
+        'recommended_questions_json': json.dumps(recommended_questions),
     }
+
     return render(request, 'administration/practice/edit_question.html', parameters)
 
 

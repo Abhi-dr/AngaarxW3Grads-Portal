@@ -12,7 +12,7 @@ from angaar_hai.custom_decorators import admin_required
 
 
 from accounts.models import Student, Administrator
-from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
+from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest, RecommendedQuestions
 
 # ========================= SHEET WORK ==========================
 
@@ -212,7 +212,7 @@ def get_excluded_questions(request, sheet_id):
 def add_new_question(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
     administrator = Administrator.objects.get(id=request.user.id)
-    
+
     if request.method == "POST":
         title = request.POST.get('title')
         scenario = request.POST.get('scenario')
@@ -222,33 +222,49 @@ def add_new_question(request, slug):
         constraints = request.POST.get('constraints')
         hint = request.POST.get('hint')
         difficulty_level = request.POST.get('difficulty_level')
-        
-        question = Question(
+
+        # Save new question
+        question = Question.objects.create(
             title=title,
             scenario=scenario,
             description=description,
             input_format=input_format,
             output_format=output_format,
-            constraints = constraints,
+            constraints=constraints,
             hint=hint,
             difficulty_level=difficulty_level,
             is_approved=True
         )
-        
-        question.save()
-        
+
+        # Link question to sheet
         sheet.questions.add(question)
-        
+
+        # Handle Recommended Questions
+        try:
+            recommended_questions_data = json.loads(request.POST.get("recommended_questions", "[]"))
+
+            for rq in recommended_questions_data:
+                if rq["title"] and rq["platform"] and rq["link"]:  # Ensure valid input
+                    RecommendedQuestions.objects.create(
+                        question=question,
+                        title=rq["title"],
+                        platform=rq["platform"],
+                        link=rq["link"]
+                    )
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON data"}, status=400)
+
         messages.success(request, "Question added successfully!")
         return redirect('administrator_sheet', slug=sheet.slug)
-    
+
     parameters = {
         "administrator": administrator,
         "sheet": sheet,
     }
-    
+
     return render(request, 'administration/sheet/add_new_question.html', parameters)
-        
+
 
 # ========================= MAKE DUPLICATE ==========================
 
