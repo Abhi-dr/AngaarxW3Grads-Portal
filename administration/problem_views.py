@@ -236,6 +236,10 @@ def edit_question(request, id):
         messages.success(request, 'Problem updated successfully')
         return redirect('edit_question', id=question.id)
     
+    if question.scenario:
+        question.scenario = convert_code_to_backticks(question.scenario)
+    question.description = convert_code_to_backticks(question.description)
+    
     parameters = {
         'administrator': administrator,
         'question': question,
@@ -597,6 +601,10 @@ def test_code(request, slug):
     question = get_object_or_404(Question, slug=slug)
     sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
     
+    if question.scenario:
+            question.scenario = convert_backticks_to_code(question.scenario)
+    question.description = convert_backticks_to_code(question.description)
+    
     parameters = {
         'administrator': administrator,
         'question': question,
@@ -812,3 +820,5 @@ def convert_code_to_backticks(text):
 
     result = re.sub(pattern, r"`\1`", text)
     return result
+
+

@@ -224,10 +224,14 @@ active
         </div>
         {% endif %}
 
+        {% autoescape off %}
+
         <div class="card-body mb-n7">
             <h6 class="card-title">Description:</h6>
-            <p>{{ question.description }}</p>
+            <p>{{ question.description|linebreaks }}</p>
         </div>
+
+        {% endautoescape %}
 
         <div class="card-body mb-n7">
             <h6 class="card-title">Constraints:</h6>
