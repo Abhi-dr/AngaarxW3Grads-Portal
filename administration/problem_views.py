@@ -406,9 +406,9 @@ def add_test_cases(request, slug):
                 })
     
 
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
             return JsonResponse({
-                    "message": "Invalid JSON Format. The data should be in JSON format only"
+                    "message": f"Invalid JSON Format: {e}"
                 })
         except Exception as e:
             return JsonResponse({

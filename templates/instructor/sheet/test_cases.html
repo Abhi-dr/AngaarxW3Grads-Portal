@@ -13,7 +13,7 @@ active
 
 <div class="container-fluid">
 
-   
+
 
     <div class="card">
         <div class="card-body">
@@ -25,16 +25,23 @@ active
 
         <div class="row">
 
-            <button type="button" class="btn btn-outline-primary button mt-n3 m-3 col-8" data-bs-toggle="modal"
+            <button type="button" class="btn btn-outline-primary button mt-n3 m-3 col-4" data-bs-toggle="modal"
                 data-bs-target="#addTestCaseModal">
                 Add Test Case
             </button>
 
-            <a href="{% url 'instructor_driver_code' question.slug %}" class="btn btn-outline-warning button mt-n3 m-3 col-3">
+            <button type="button" class="btn btn-outline-warning button mt-n3 m-3 col-3" data-bs-toggle="modal"
+                data-bs-target="#addTestCaseUsingJsonModal">
+                Add Test Case using JSON
+            </button>
+
+            <a href="{% url 'instructor_driver_code' question.slug %}"
+                class="btn btn-outline-warning button mt-n3 m-3 col-3">
                 Driver Code
             </a>
 
         </div>
+
 
     </div>
 
@@ -112,7 +119,7 @@ active
                                 {% if test_case.input_data %}
 
                                 <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ test_case.input_data }}">{{ test_case.input_data|linebreaksbr|truncatechars:10 }}</h6>
+                                    title="{{ test_case.input_data }}">{{test_case.input_data|linebreaksbr|truncatechars:10 }}</h6>
 
                                 {% else %}
 
@@ -154,7 +161,8 @@ active
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'instructor_delete_test_case' test_case.id %}" class="btn btn-danger float-end"
+                                    <a href="{% url 'instructor_delete_test_case' test_case.id %}"
+                                        class="btn btn-danger float-end"
                                         onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
 
                                 </div>
@@ -204,6 +212,36 @@ active
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-primary">Add Test Case</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endautoescape %}
+
+    {% autoescape off %}
+    <!-- Add Test Case Modal  using JSON-->
+    <div class="modal fade" id="addTestCaseUsingJsonModal" tabindex="-1" aria-labelledby="addTestCaseUsingJsonModal"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addTestCaseModalLabel">Add Test Case</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addTestCaseUsingJsonForm" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="inputData" class="form-label">Input Data</label>
+                            <div class="star">*</div>
+                            <textarea class="form-control" id="inputData" placeholder="Enter the Input JSON here..."
+                                name="json_data" rows="15" required></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Test Cases</button>
                     </div>
                 </form>
             </div>
@@ -267,6 +305,42 @@ active
                 alert('An error occurred. Please try again.');
             });
     });
+
+
+    document.getElementById('addTestCaseUsingJsonForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const questionSlug = "{{ question.slug }}";
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addTestCaseUsingJsonModal'));
+
+        fetch("{% url 'add_test_cases_using_json_case' question.slug %}", {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    // Reset the form
+                    form.reset();
+                    modal.hide()
+                    window.location.reload();
+                } else {
+                    modal.hide()
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+    });
+
 </script>
 
 
