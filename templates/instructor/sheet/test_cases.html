@@ -9,6 +9,17 @@ Test Cases🔥
 active
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+
+<style>
+    pre{
+        color: #d7d7d7;
+    }
+</style>
+{% endblock %}
+
+
 {% block body %}
 
 <div class="container-fluid">
@@ -16,34 +27,38 @@ active
 
 
     <div class="card">
-        <div class="card-body">
+        <div class="card-body position-relative">
             <h3 class="heading">
                 <span class="fw-semibold">Test Cases for {{ question.title }}</span>
                 <span class="fs-4"> | 🔥Total: {{ test_cases.count }}🔥</span>
             </h3>
+            <!-- "i" info icon -->
+            <i class="ti ti-help position-absolute top-0 end-0 m-3" data-bs-toggle="modal" data-bs-target="#infoModal"
+                style="cursor: pointer; font-size: 25px;"></i>
         </div>
 
-        <div class="row">
-
-            <button type="button" class="btn btn-outline-primary button mt-n3 m-3 col-4" data-bs-toggle="modal"
-                data-bs-target="#addTestCaseModal">
-                Add Test Case
-            </button>
-
-            <button type="button" class="btn btn-outline-warning button mt-n3 m-3 col-3" data-bs-toggle="modal"
-                data-bs-target="#addTestCaseUsingJsonModal">
-                Add Test Case using JSON
-            </button>
-
-            <a href="{% url 'instructor_driver_code' question.slug %}"
-                class="btn btn-outline-warning button mt-n3 m-3 col-3">
-                Driver Code
-            </a>
-
+        <div class="row mx-2">
+            <div class="col-md-4 mb-3">
+                <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal"
+                    data-bs-target="#addTestCaseModal">
+                    Add Test Case
+                </button>
+            </div>
+            <div class="col-md-4 mb-3">
+                <button type="button" class="btn btn-outline-warning w-100" data-bs-toggle="modal"
+                    data-bs-target="#addTestCaseUsingJsonModal">
+                    Add Test Case using JSON
+                </button>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="{% url 'instructor_driver_code' question.slug %}" class="btn btn-outline-warning w-100">
+                    Driver Code
+                </a>
+            </div>
         </div>
-
-
     </div>
+
+
 
     {% for message in messages %}
 
@@ -119,7 +134,8 @@ active
                                 {% if test_case.input_data %}
 
                                 <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ test_case.input_data }}">{{test_case.input_data|linebreaksbr|truncatechars:10 }}</h6>
+                                    title="{{ test_case.input_data }}">
+                                    {{test_case.input_data|linebreaksbr|truncatechars:10 }}</h6>
 
                                 {% else %}
 
@@ -164,10 +180,8 @@ active
                                     <a href="{% url 'instructor_delete_test_case' test_case.id %}"
                                         class="btn btn-danger float-end"
                                         onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
-
                                 </div>
                             </td>
-
                         </tr>
 
                         {% endfor %}
@@ -249,6 +263,35 @@ active
     </div>
 
     {% endautoescape %}
+
+    <div class="modal fade" id="infoModal" tabindex="-1" aria-labelledby="infoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="infoModalLabel">Information</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-warning">
+                    This is the format which you have to follow while adding test cases using JSON.
+                </div>
+                <pre><code>
+    {
+    "1": {
+        "Input": "&lt;input_1&gt;",
+        "Output": "&lt;expected_output_1&gt;"
+    },
+    "2": {
+        "Input": "&lt;input_2&gt;",
+        "Output": "&lt;expected_output_2&gt;"
+    },
+    ...
+    }</code></pre>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 </div>
