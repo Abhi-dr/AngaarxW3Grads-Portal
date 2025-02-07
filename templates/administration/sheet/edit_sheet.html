@@ -42,11 +42,11 @@ active
                                     </label>
                                     <select class="form-select form-control" name="batches" id="assignment_type"
                                         multiple>
-
                                         {% for batch in batches %}
-                                        <option value="{{ batch.id }}">{{ batch.name }}</option>
+                                        <option value="{{ batch.id }}" {% if batch.id in selected_batch_ids %}selected{%endif %}>
+                                            {{ batch.name }}
+                                        </option>
                                         {% endfor %}
-
                                     </select>
                                 </div>
                             </div>
@@ -63,8 +63,7 @@ active
                             <div class="row">
                                 <div class="mb-3 col-md-9">
                                     <label for="thumbnail" class="form-label">Thumbnail</label>
-                                    <input type="file" class="form-control" id="thumbnailInput" name="thumbnail"
-                                        >
+                                    <input type="file" class="form-control" id="thumbnailInput" name="thumbnail">
                                 </div>
 
                                 <div class="mb-3 col-md-3">

@@ -100,6 +100,7 @@ def edit_sheet(request, slug):
     parameters = {
         "administrator": administrator,
         "sheet": sheet,
+        "selected_batch_ids": [batch.id for batch in sheet.batches.all()],
         "batches": batches
     }
     
