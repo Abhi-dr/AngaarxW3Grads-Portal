@@ -103,6 +103,8 @@ active
             {% else %}
             <div class="card w-100">
                 {% endif %}
+
+
                 <div class="card-body p-2">
                     <div class=" container mb-2">
                         <div class="d-flex flex-row overflow-auto" style="gap: 1rem;">
@@ -110,7 +112,7 @@ active
 
                             <div class="col-md-3">
                                 <div class="card">
-                                    <a href="{% url 'administrator_sheet' sheet.slug %}">
+                                    <a href="{% url 'instructor_sheet' sheet.slug %}">
                                         <img src="{{ sheet.thumbnail.url }}" class="card-img-top"
                                             alt="Sheet Thumbnail" />
                                         <div class="card-body">
