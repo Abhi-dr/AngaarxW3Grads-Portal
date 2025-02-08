@@ -1,6 +1,24 @@
 {% extends "instructor/base.html" %} {% load static %} 
 {% block title %} {{ instructor.first_name }} -> Profile {% endblock %}
 
+{% block extra_css %}
+
+<style>
+  #change_password {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-in-out;
+  }
+
+  #change_password.show {
+    max-height: 500px;
+    /* Set a reasonable max-height value to transition smoothly */
+  }
+</style>
+
+{% endblock %}
+
+
 {% block body %}
 
 <div class="container-fluid">
@@ -49,9 +67,7 @@
         </div>
 
         <!-- =============================== CHANGE PASSWORD ============================== -->
-
-
-        <div class="card mb-4" id="change_password" style="display: none;">
+        <div class="card mb-4" id="change_password">
           <div class="card-body text-center">
             <h5 class="mt-n3">
               Change Password
@@ -60,7 +76,8 @@
             <form action="{% url 'change_instructor_password' %}" method="POST" >
               {% csrf_token %}
               <div class="mb-3">
-                <input type="password" name="old_password" id="password" class="form-control" placeholder="Old Password"/>
+                <input type="password" name="old_password" id="password" class="form-control"
+                  placeholder="Old Password" />
               </div>
 
 
@@ -75,9 +92,14 @@
               <button type="submit" class="btn btn-outline-success w-100">
                 Change Password
               </button>
+            </form>
 
           </div>
+
+
         </div>
+
+        
 
 
         <!-- ============================================================================== -->
@@ -191,18 +213,23 @@
   function display_change_password() {
     var box = document.getElementById("change_password");
     var btn = document.getElementById("change_password_btn");
-    if (box.style.display === "none") {
-      box.style.display = "block";
-      btn.innerHTML = "I Don't Want To Change Password🙃";
-      btn.classList.remove("btn-success");
-      btn.classList.add("btn-danger");
-    } else {
-      box.style.display = "none";
+
+    if (box.classList.contains("show")) {
+      box.style.maxHeight = null;
+      box.classList.remove("show");
       btn.innerHTML = "Change Password";
       btn.classList.remove("btn-danger");
       btn.classList.add("btn-success");
+    } else {
+      box.style.maxHeight = box.scrollHeight + "px"; // Dynamically set the height based on content
+      box.classList.add("show");
+      btn.innerHTML = "I Don't Want To Change Password🙃";
+      btn.classList.remove("btn-success");
+      btn.classList.add("btn-danger");
     }
   }
+
+
 </script>
 
 

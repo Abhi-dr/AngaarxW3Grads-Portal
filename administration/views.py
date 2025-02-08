@@ -462,7 +462,7 @@ def change_administrator_password(request):
             
             messages.success(request, "Password changed successfully! Please login Again!")
             
-            account_logout(request)
+            return account_logout(request)
         
         else:
             messages.error(request, "New password and confirm password do not match!")
