@@ -83,6 +83,12 @@ active
 
                             <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">
+                                    Additional Data
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
                                     Status
                                 </h6>
                             </th>
@@ -215,7 +221,8 @@ active
             // create a variable of JSON of additional_fields to be displayed in the row
             let additional_data = {};
         try {
-            additional_data = JSON.parse(student.additional_data);
+            additional_data = student.additional_data;
+            console.log(additional_data);
         } catch (e) {
             console.error("Invalid JSON in additional_data:", student.additional_data);
         }
@@ -225,8 +232,11 @@ active
                 <td>${index + 1}</td>
                 <td>
                     <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
-                    
-                    
+                </td>
+
+                <td style="text-align: center;">
+                    <p class="fw-semibold mb-1 text-wrap">Roll No: ${additional_data.roll_number}</p>
+                    <p class="fw-semibold mb-1 text-wrap">Section: ${additional_data.class_section}</p>
                 </td>
                
                 <td style="text-align: center;">
