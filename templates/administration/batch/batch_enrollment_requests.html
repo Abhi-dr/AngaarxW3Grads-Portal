@@ -218,31 +218,34 @@ active
         enrollments.forEach((student, index) => {
             const row = document.createElement("tr");
 
-            // create a variable of JSON of additional_fields to be displayed in the row
+            // Create a variable of JSON of additional_fields to be displayed in the row
             let additional_data = {};
-        try {
-            additional_data = student.additional_data;
-            console.log(additional_data);
-        } catch (e) {
-            console.error("Invalid JSON in additional_data:", student.additional_data);
-        }
+            try {
+                additional_data = student.additional_data;
+                console.log(additional_data);
+            } catch (e) {
+                console.error("Invalid JSON in additional_data:", student.additional_data);
+            }
 
+            // Create HTML for additional fields
+            let additionalFieldsHtml = "";
+            for (const key in additional_data) {
+                if (additional_data.hasOwnProperty(key)) {
+                    additionalFieldsHtml += `<p class="fw-semibold mb-1 text-wrap">${key}: ${additional_data[key]}</p>`;
+                }
+            }
 
             row.innerHTML = `
                 <td>${index + 1}</td>
                 <td>
                     <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
                 </td>
-
                 <td style="text-align: center;">
-                    <p class="fw-semibold mb-1 text-wrap">Roll No: ${additional_data.roll_number}</p>
-                    <p class="fw-semibold mb-1 text-wrap">Section: ${additional_data.class_section}</p>
+                    ${additionalFieldsHtml}
                 </td>
-               
                 <td style="text-align: center;">
                     <span class="badge bg-${student.status_color}">${student.status}</span>
                 </td>
-
                 <td style="text-align: center;">
                     <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
                 </td>
@@ -252,11 +255,12 @@ active
                 <td>
                     <button onclick="approveEnrollment(${student.id}, this)" class="btn btn-success">Approve</button>
                 </td>
-                `;
+            `;
 
             dataTableBody.appendChild(row);
         });
     }
+
 
 
     function display_rejected_requests(enrollments) {
@@ -311,7 +315,7 @@ active
                     // Remove the row from the table or update the status
                     const row = button.closest('tr');
                     row.remove();
-                    
+
                 } else {
                     alert('Failed to approve the enrollment request: ' + data.message);
                 }

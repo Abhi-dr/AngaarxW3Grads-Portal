@@ -42,20 +42,21 @@ def batches(request):
 @staff_member_required(login_url='login')
 @admin_required
 def add_batch(request):
-    
     administrator = Administrator.objects.get(id=request.user.id)
-
     
     if request.method == "POST":
         name = request.POST.get('name')
         description = request.POST.get('description')
-        
         thumbnail = request.FILES.get('thumbnail')
         
+        # Get required fields from checkboxes
+        required_fields = request.POST.getlist('required_fields')
+
         batch = Batch.objects.create(
             name=name,
             description=description,
-            thumbnail=thumbnail
+            thumbnail=thumbnail,
+            required_fields=required_fields
         )
         
         batch.save()
@@ -68,6 +69,7 @@ def add_batch(request):
     }
     
     return render(request, 'administration/batch/add_batch.html', parameters)
+
 
 
 # =============================== ENROLLMENT REQUESTS ==============================
