@@ -106,7 +106,7 @@ def execute_code(request):
         }
 
         try:
-            response = requests.post(f"{JUDGE0_URL}?base64_encoded=true", json=data, headers=HEADERS)
+            response = requests.post(f"{JUDGE0_URL}?base64_encoded=true", json=data, headers=HEADERS, timeout=10)
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             return JsonResponse({"error": f"Request failed: {str(e)}"}, status=500)
@@ -224,7 +224,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
 
     try:
         # 📝 Submit Code to Judge0
-        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS)
+        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS, timeout=10)
         response.raise_for_status()
         
         token = response.json().get("token")
