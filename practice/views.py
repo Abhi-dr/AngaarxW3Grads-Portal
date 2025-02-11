@@ -119,7 +119,7 @@ def execute_code(request):
 
             for i in range(10):  # Maximum of 10 attempts
                 try:
-                    result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS)
+                    result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
                     result_response.raise_for_status()
                     result = result_response.json()
                 except requests.exceptions.RequestException as e:
@@ -235,7 +235,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         
         # ⏳ Poll Until Completion
         while True:
-            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS)
+            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
             result = result_response.json()
             status_id = result.get("status", {}).get("id")
 
