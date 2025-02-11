@@ -25,68 +25,95 @@ Add Batch
 
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title fw-semibold mb-0">Add Course</i> </h5>
-
+            <h5 class="card-title fw-semibold mb-0">Add Course</h5>
         </div>
         <div class="container px-4">
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-
                 <hr class="mt-0">
                 <div class="row">
-
                     <div class="w-100">
-
                         <div class="card">
-                            <div class="card-header">Add Course Form
-
-                            </div>
+                            <div class="card-header">Add Course Form</div>
                             <div class="card-body h-100">
-
                                 <div class="mb-4">
-                                    <label for="job_title" class="form-label">Name
-                                        <div class="star">*</div>
-                                    </label>
-                                    <input type="text" class="form-control" id="question_title" name="name"
-                                        placeholder="Name of the course goes here..." required>
+                                    <label for="name" class="form-label">Name <div class="star">*</div></label>
+                                    <input type="text" class="form-control" id="name" name="name" placeholder="Name of the course goes here..." required>
                                 </div>
-
                                 <div>
                                     <div class="mb-3">
-                                        <label for="job_title" class="form-label">Description
-                                            <small>(optional)</small>
-                                        </label>
-                                        <textarea class="form-control" id="question_description" name="description"
-                                            rows="10" placeholder="Description here..."></textarea>
+                                        <label for="description" class="form-label">Description <small>(optional)</small></label>
+                                        <textarea class="form-control" id="description" name="description" rows="10" placeholder="Description here..."></textarea>
                                     </div>
                                 </div>
-
                                 <div>
                                     <div class="mb-3">
-                                        <label for="job_title" class="form-label">Thumbnail
-                                            <div class="star">*</div>
-                                        </label>
-                                        <input type="file" class="form-control" id="question_title" name="thumbnail"
-                                            required>
+                                        <label for="thumbnail" class="form-label">Thumbnail <div class="star">*</div></label>
+                                        <input type="file" class="form-control" id="thumbnail" name="thumbnail" required>
                                     </div>
                                 </div>
-
                                 <div>
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-success w-100 mt-3">Add
-                                            &nbspCourse</button>
+                                    <div class="mb-3">
+                                        <label for="required_fields" class="form-label">Required Fields</label>
+                                        <div id="required-fields-container">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Roll Number" id="field1" name="required_fields">
+                                                <label class="form-check-label" for="field1">Roll Number</label>
+                                                <button type="button" class="btn btn-danger btn-sm ms-2" onclick="removeField(this)">Remove</button>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" value="Section" id="field2" name="required_fields">
+                                                <label class="form-check-label" for="field2">Section</label>
+                                                <button type="button" class="btn btn-danger btn-sm ms-2" onclick="removeField(this)">Remove</button>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3">
+                                            <input type="text" class="form-control mb-2" id="new-field-name" placeholder="Enter new field name">
+                                            <button type="button" class="btn btn-secondary" id="add-field-button">Add New Field</button>
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-success w-100 mt-3">Add Course</button>
                                 </div>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
+            </form>
         </div>
-        </form>
-
     </div>
+    
+    <!-- JavaScript to handle dynamic field addition, renaming, and removal -->
+    <script>
+        document.getElementById('add-field-button').addEventListener('click', function() {
+            const container = document.getElementById('required-fields-container');
+            const fieldName = document.getElementById('new-field-name').value.trim();
+            
+            if (fieldName) {
+                const index = container.children.length + 1;
+                const div = document.createElement('div');
+                div.className = 'form-check';
+                div.innerHTML = `
+                    <input class="form-check-input" type="checkbox" value="${fieldName}" id="field${index}" name="required_fields">
+                    <label class="form-check-label" for="field${index}">${fieldName}</label>
+                    <button type="button" class="btn btn-danger btn-sm ms-2" onclick="removeField(this)">Remove</button>
+                `;
+                container.appendChild(div);
+                document.getElementById('new-field-name').value = '';
+            } else {
+                alert('Please enter a field name.');
+            }
+        });
+    
+        function removeField(button) {
+            button.parentElement.remove();
+        }
+    </script>
+    
+
+
+
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
