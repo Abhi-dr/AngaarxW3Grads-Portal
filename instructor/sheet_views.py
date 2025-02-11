@@ -660,26 +660,6 @@ def driver_code(request, slug):
 
     return render(request, 'instructor/sheet/driver_code.html', parameters)
 
-
-# ======================================== TEST CODE ======================================
-
-@login_required(login_url='login')
-@staff_member_required(login_url='login')
-def test_code(request, slug):
-    
-    instructor = Instructor.objects.get(id=request.user.id)
-    question = get_object_or_404(Question, slug=slug)
-    sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
-    
-    parameters = {
-        'instructor': instructor,
-        'question': question,
-        'sample_test_cases': sample_test_cases
-    }
-    
-    return render(request, 'instructor/sheet/test_code.html', parameters)
-
-
 # ======================================== DELETE PROBLEM ======================================
 
 @login_required(login_url='login')
