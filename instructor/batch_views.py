@@ -95,3 +95,19 @@ def view_submissions(request, slug):
     }
     
     return render(request, 'instructor/batch/view_submissions.html', parameters)
+
+# ================================= BATCH ENROLLMENT REQUESTS ==================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def batch_enrollment_requests(request, slug):
+    
+    batch = Batch.objects.get(slug=slug)
+    total_pending_requests = EnrollmentRequest.objects.filter(batch=batch, status="Pending").count()
+    
+    parameters = {
+        "batch": batch,
+        "total_pending_requests": total_pending_requests
+    }
+    
+    return render(request, "instructor/batch/batch_enrollment_requests.html", parameters)

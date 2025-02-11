@@ -1,4 +1,4 @@
-{% extends "administration/base.html" %}
+{% extends "instructor/base.html" %}
 {% load static %}
 
 {% block title %}
@@ -183,6 +183,8 @@ active
 
 </div>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         fetchPendingEnrollments();
@@ -358,6 +360,8 @@ active
                 alert('Something went wrong!');
             });
     }
+
+
 </script>
 
 <script>
@@ -384,5 +388,7 @@ active
         });
     });
 </script>
+
+
 
 {% endblock %}

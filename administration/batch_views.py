@@ -96,9 +96,9 @@ def enrollment_requests(request):
 @admin_required
 def approve_all_enrollments(request):
     enrollment_requests = EnrollmentRequest.objects.filter(status="Pending")
-    for request in enrollment_requests:
-        request.status = "Accepted"
-        request.save()
+    for e_request in enrollment_requests:
+        e_request.status = "Accepted"
+        e_request.save()
         
     messages.success(request, "All pending enrollment requests have been accepted.")
     return redirect('administrator_enrollment_requests')
@@ -318,7 +318,6 @@ def batch_enrollment_requests(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def fetch_pending_enrollments_of_batch(request, slug):
     
     batch = Batch.objects.get(slug=slug)
@@ -344,7 +343,6 @@ def fetch_pending_enrollments_of_batch(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def fetch_rejected_enrollments_of_batch(request, slug):
     
     batch = Batch.objects.get(slug=slug)
@@ -368,7 +366,6 @@ def fetch_rejected_enrollments_of_batch(request, slug):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def approve_enrollment_batch(request, id):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':  # Check if the request is AJAX
         try:
@@ -394,7 +391,6 @@ def approve_enrollment_batch(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def reject_enrollment_batch(request, id):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         try:
@@ -419,17 +415,19 @@ def reject_enrollment_batch(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def approve_all_enrollments_batch(request, id):
-    batch = Batch.objects.get(id=id)
-    enrollment_requests = EnrollmentRequest.objects.filter(batch = batch, status="Pending")
-    for req in enrollment_requests:
-        req.status = "Accepted"
-        req.save()
-        
-    messages.success(request, "All pending enrollment requests have been accepted.")
-    return redirect('administrator_batch_enrollment_requests', slug=batch.slug)
-
+    if request.method == "POST" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        try:
+            batch = Batch.objects.get(id=id)
+            enrollment_requests = EnrollmentRequest.objects.filter(batch=batch, status="Pending")
+            for req in enrollment_requests:
+                req.status = "Accepted"
+                req.save()
+            
+            return JsonResponse({'success': True})
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
 
 # ======================================================== LEADERBOARD =====================================
 
