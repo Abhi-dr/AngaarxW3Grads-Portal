@@ -1,7 +1,0 @@
-python manage.py dumpdata practice.Question --indent 2 > question_data.json
-
-NOW SERVER
-
-iconv -f utf-16 -t utf-8 question_data.json -o question_data_utf8.json
-
-python manage.py loaddata question_data_utf8.json

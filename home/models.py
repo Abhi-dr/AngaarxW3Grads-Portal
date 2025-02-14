@@ -11,3 +11,16 @@ class Flames(models.Model):
     
     def __str__(self):
         return self.name
+    
+# ======================= JOB ARTICLE MODEL ======================
+
+class Article(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    
+    class Meta:
+        verbose_name = "Article"
+        verbose_name_plural = "Articles"
+        
+    def __str__(self):
+        return self.title
