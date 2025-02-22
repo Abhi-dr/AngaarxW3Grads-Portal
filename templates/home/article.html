@@ -2,8 +2,9 @@
 {% load static %}
 
 {% block title %}
-Articles
+Article | {{ article.title }}
 {% endblock %}
+
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
@@ -94,7 +95,10 @@ Articles
         background-color: rgb(44, 212, 18);
         color: white;
     }
-
+    .date {
+        color: #999;
+        font-size: 0.9em;
+    }
 </style>
 
 {% endblock %}
@@ -102,35 +106,17 @@ Articles
 {% block body %}
 
 <div class="container-block container">
-
-    <h1 class="fw-bold text-center" style="font-size: 50px;"> Job Articles🔥</h1>
     <div class="container mt-2">
         <div class="row g-4 mt-3 mb-4">
 
-            {% if articles.count == 0 %}
-            <div class="col-md-12">
-                <div class="alert alert-info" role="alert">
-                    No articles yet. Please check back later.
-                </div>
+            <div class="article-header">
+                <h1 class="fw-bold">{{ article.title }}</h1>
+                <p class="date">{{ article.created_at }}</p>
             </div>
-            {% endif %}
-            
-            {% for article in articles %}
-
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h6 class="card-title fw-bold">{{ article.title }}</h6>
-                        <p class="card-text">{{ article.content|truncatewords:5 }}</p>
-                        <p class="text-white-50 fs-7">{{ article.created_at }}</p>
-                        <a href="{% url 'article' article.slug %}" class="btn btn-custom">Read More</a>
-                    </div>
-                    <img src="{{ article.thumbnail.url }}" class="card-img-top"
-                        alt="Nature's Calm">
-                </div>
+    
+            <div class="article-content">
+                {{ article.content|safe }}
             </div>
-
-            {% endfor %}
             
         </div>
     </div>
