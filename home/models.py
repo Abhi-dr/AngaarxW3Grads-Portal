@@ -1,13 +1,42 @@
 from django.db import models
-
-class Flames(models.Model):
-    name = models.CharField(max_length=100)
-    whatsapp_number = models.CharField(max_length=100)
-    contact_number = models.CharField(max_length=100)
-    college = models.CharField(max_length=100)
-    mode = models.CharField(max_length=100)
     
+# ======================= JOB ARTICLE MODEL ======================
+
+class Article(models.Model):
+    title = models.CharField(max_length=100)
+    content = models.TextField()
+    thumbnail = models.ImageField(upload_to="thumbnails/")
+    
+    slug = models.SlugField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        verbose_name = "Article"
+        verbose_name_plural = "Articles"
+        
     def __str__(self):
-        return self.name
+        return self.title
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            text = ""
+        
+            for word in self.title.split():
+                if word.isalnum():
+                    text += word + "-"
+                else:
+                    word = ''.join(e for e in word if e.isalnum())
+                    text += word + "-"
+            
+            # Generate base slug
+            base_slug = text.lower().strip("-")
+            slug = base_slug
+
+            # Check for uniqueness
+            counter = 1
+            while Article.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+        super(Article, self).save(*args, **kwargs)

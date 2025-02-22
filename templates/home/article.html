@@ -1,0 +1,126 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}
+Article | {{ article.title }}
+{% endblock %}
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+
+<style>
+    body {
+        background-color: #090909;
+        color: white;
+    }
+
+    .responsive-container-block {
+        min-height: 75px;
+        height: fit-content;
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        margin-top: 0px;
+        margin-right: auto;
+        margin-bottom: 0px;
+        margin-left: auto;
+        justify-content: flex-start;
+    }
+
+    .container-block {
+        min-height: 75px;
+        height: fit-content;
+        width: 100%;
+        padding-top: 8%;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        padding-left: 10px;
+        display: block;
+    }
+
+    .responsive-cell-block {
+        min-height: 75px;
+    }
+
+    .container {
+        max-width: 1380px;
+        margin-right: auto;
+        margin-left: auto;
+        padding-right: 30px;
+        padding-left: 30px;
+    }
+
+
+
+    .card {
+        background-color: #171A1FFF;
+        color: white;
+        border: none;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 10px;
+        width: 95%;
+        min-height: 30vh;
+        max-height: 30vh;
+    }
+
+    .card img {
+        width: 50%;
+        max-width: 50%;
+        height: 25vh;
+        max-height: 25vh;
+        object-fit: cover;
+        border-radius: 5px;
+        margin-left: 15px;
+    }
+
+    .card-body {
+        padding: 5px;
+        flex: 1;
+    }
+
+    .btn-custom {
+        background-color: transparent;
+        border: 1px solid rgb(44, 212, 18);
+        color: rgb(53, 165, 35);
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: 0.3s;
+    }
+
+    .btn-custom:hover {
+        background-color: rgb(44, 212, 18);
+        color: white;
+    }
+    .date {
+        color: #999;
+        font-size: 0.9em;
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-block container">
+    <div class="container mt-2">
+        <div class="row g-4 mt-3 mb-4">
+
+            <div class="article-header">
+                <h1 class="fw-bold">{{ article.title }}</h1>
+                <p class="date">{{ article.created_at }}</p>
+            </div>
+    
+            <div class="article-content">
+                {{ article.content|safe }}
+            </div>
+            
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

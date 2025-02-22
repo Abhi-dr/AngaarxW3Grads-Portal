@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages as message
-from .models import Flames
+from .models import Article
 
 def home(request):
     return render(request, "home/index.html")
@@ -11,29 +11,27 @@ def about(request):
 def our_team(request):
     return render(request, "home/team.html")
 
-def angaar_plus(request):
-    return render(request, "home/angaar_plus.html")
+# ======================== ARTICLES ========================
 
-def flames(request):
+def articles(request):
     
-    if request.method == "POST":
-        name = request.POST.get("name")
-        whatsapp_number = request.POST.get("whatsapp_number")
-        contact_number = request.POST.get("contact_number")
-        college = request.POST.get("college")
-        mode = request.POST.get("mode")
-        
-        flames = Flames(name=name, whatsapp_number=whatsapp_number, contact_number=contact_number, college=college, mode=mode)
-        flames.save()
-        
-        message.success(request, "Your details have been submitted successfully.")
-        
-        return redirect("flames")
+    articles = Article.objects.all().order_by("-created_at")
     
-    return render(request, "home/flames.html")
+    parameters = {
+        "articles": articles
+    }
+    
+    return render(request, "home/articles.html", parameters)
 
+# ==================== ARTICLE ============================
 
-# ========================= SCHOLARSHIP TEST =========================
+def article(request, slug):
+    
+    article = Article.objects.get(slug=slug)
+    
+    parameters = {
+        "article": article
+    }
+    
+    return render(request, "home/article.html", parameters)
 
-def scholarship_test(request):
-    return render(request, "home/scholarship_test.html")
