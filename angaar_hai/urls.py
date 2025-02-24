@@ -15,7 +15,9 @@ urlpatterns = [
     path("practice/", include("practice.urls")),
     
     path("instructor/", include("instructor.urls")),
-    path("administration/", include("administration.urls")),    
+    path("administration/", include("administration.urls")), 
+    
+    path('ckeditor/', include('ckeditor_uploader.urls')),   
     
     path('__debug__/', include(debug_toolbar.urls)),
 

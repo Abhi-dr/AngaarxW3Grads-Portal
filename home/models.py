@@ -1,10 +1,11 @@
 from django.db import models
+from ckeditor_uploader.fields import RichTextUploadingField
     
 # ======================= JOB ARTICLE MODEL ======================
 
 class Article(models.Model):
     title = models.CharField(max_length=100)
-    content = models.TextField()
+    content = RichTextUploadingField()
     thumbnail = models.ImageField(upload_to="thumbnails/")
     
     slug = models.SlugField(blank=True, null=True)

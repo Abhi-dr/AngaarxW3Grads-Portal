@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views, sheet_apis
+from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis
 
 
 urlpatterns = [
@@ -151,6 +151,19 @@ urlpatterns += [
     
     path('sheet/<slug:slug>/toggle-status/', sheet_views.toggle_sheet_status, name='toggle_sheet_status'),
 
+]
+
+# ========================= ARTICLES WORK ==========================
+
+urlpatterns += [
+    path("articles/", article_views.articles, name="administrator_articles"),
+    path("article/<slug:slug>/", article_views.article, name="administrator_article"),
+    
+    path("add_article/", article_views.add_article, name="administrator_add_article"),
+    path("fetch_all_articles/", article_views.fetch_all_articles, name="administrator_fetch_all_articles"),
+    
+    path("delete_article/<int:id>/", article_views.delete_article, name="administrator_delete_article"),
+    
 ]
 
 urlpatterns += [
