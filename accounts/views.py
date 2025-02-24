@@ -163,7 +163,7 @@ def logout(request):
 
 def check_username_availability(request):
     username = request.GET.get('username', '')
-    data = {'is_available': not Student.objects.filter(username=username).exists()}
+    data = {'is_available': not Student.objects.filter(username=username).exists() or Instructor.objects.filter(username=username).exists() or Administrator.objects.filter(username=username).exists()}
     return JsonResponse(data)
 
 # ====================== block student ====================
