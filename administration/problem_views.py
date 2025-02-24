@@ -641,10 +641,13 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
     Send the code to Judge0 API for execution against multiple test cases.
     """
     # Prepare single stdin batch input for Judge0
-    stdin = f"{len(test_cases)}\n"
+    stdin = f"{len(test_cases)}~"
     for test_case in test_cases:
-        stdin += f"{test_case.input_data}\n"
-        
+        stdin += f"{test_case.input_data}~"
+
+    # ✅ Convert "~" to newline "\n" before encoding
+    stdin = stdin.replace("~", "\n")  
+    
     encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
     encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
 
@@ -661,7 +664,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
 
     try:
         # 📝 Submit Code to Judge0
-        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS)
+        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS, timeout=10)
         response.raise_for_status()
         
         token = response.json().get("token")
@@ -670,8 +673,9 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
 
         print("✅ TOKEN:", token)
         
+        # ⏳ Poll Until Completion
         while True:
-            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS)
+            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
             result = result_response.json()
             status_id = result.get("status", {}).get("id")
 
@@ -679,14 +683,15 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
                 break
             time.sleep(1)
             
-
         # ❗ Handle Errors
         if result.get("stderr"):
             stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
+            print("❌ STDERR:", stderr)
             return {"error": f"Runtime Error: {stderr}", "token": token}
 
         if result.get("compile_output"):
             compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
+            print("❌ COMPILE OUTPUT:", compile_output)
             return {"error": f"Compile Error: {compile_output}", "token": token}
 
         if result.get("status", {}).get("id") == 5:
@@ -697,9 +702,12 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
 
         # ✅ Decode Outputs
         outputs = result.get("stdout", "")
+        
         if outputs:
             outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
-            outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
+            
+            outputs = [output.strip() for output in outputs.split("~") if output.strip()]
+            
         else:
             outputs = ["No output generated."]
 
@@ -709,6 +717,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
     except Exception as e:
         return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
+
 
 
 def process_test_case_result(inputs, outputs, expected_outputs):
