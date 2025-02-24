@@ -202,11 +202,12 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
     Send the code to Judge0 API for execution against multiple test cases.
     """
     # Prepare single stdin batch input for Judge0
-    stdin = f"{len(test_cases)}\n"
+    stdin = f"{len(test_cases)}~"
     for test_case in test_cases:
-        stdin += f"{test_case.input_data}\n"
-        
-    # print("\nSTDIN in Execute Function:", stdin)
+        stdin += f"{test_case.input_data}~"
+
+    # ✅ Convert "~" to newline "\n" before encoding
+    stdin = stdin.replace("~", "\n")  
     
     encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
     encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
@@ -266,15 +267,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         if outputs:
             outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
             
-            # print("\nOUTPUTS AFTER DECODING IN RUN FUNCTION:", outputs)
-            
-            if "None" in outputs:
-                outputs = [output.strip() for output in outputs.split("None") if output.strip()]
-                
-            else:
-                outputs = [output.strip() for output in outputs.split("\n") if output.strip()]
-            
-            # print("\nOUTPUTS AFTER STRIPPING IN RUN FUNCTION:", outputs)
+            outputs = [output.strip() for output in outputs.split("~") if output.strip()]
             
         else:
             outputs = ["No output generated."]
@@ -285,6 +278,7 @@ def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, mem
         return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
     except Exception as e:
         return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
+
 
 
 def process_test_case_result(inputs, outputs, expected_outputs):
