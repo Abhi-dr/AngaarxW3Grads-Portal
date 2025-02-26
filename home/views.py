@@ -29,9 +29,16 @@ def article(request, slug):
     
     article = Article.objects.get(slug=slug)
     
-    parameters = {
-        "article": article
-    }
+    # Show only preview (first 5 lines) if user is not logged in
+    if not request.user.is_authenticated:
+        content_lines = article.content.split("\n")[:25]  # Get first 5 lines
+        preview_content = "\n".join(content_lines) + "<p>...</p>"
+    else:
+        preview_content = article.content  # Show full content if logged in
+
+    return render(request, "home/article.html", {
+        "article": article,
+        "preview_content": preview_content
+    })
     
-    return render(request, "home/article.html", parameters)
 

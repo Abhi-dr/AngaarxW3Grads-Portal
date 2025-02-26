@@ -187,6 +187,7 @@ active
     document.addEventListener("DOMContentLoaded", function () {
         fetchPendingEnrollments();
         fetchRejectedEnrollments();
+        setupWebSocket();
     });
 
     function fetchPendingEnrollments() {
@@ -194,9 +195,8 @@ active
             .then(response => response.json())
             .then(data => {
                 display_pending_requests(data.data);
-
             })
-            .catch(error => console.error("Error fetching questions:", error));
+            .catch(error => console.error("Error fetching pending enrollments:", error));
     }
 
     function fetchRejectedEnrollments() {
@@ -204,29 +204,45 @@ active
             .then(response => response.json())
             .then(data => {
                 display_rejected_requests(data.data);
-
             })
-            .catch(error => console.error("Error fetching questions:", error));
+            .catch(error => console.error("Error fetching rejected enrollments:", error));
     }
 
+    // Initialize WebSocket
+    function setupWebSocket() {
+        const batchSlug = "{{ batch.slug }}";
+        const socket = new WebSocket(`wss://${window.location.host}/ws/enrollment_updates/${batchSlug}/`);
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+
+            if (data.action === "update_pending") {
+                display_pending_requests(data.enrollments);
+            } else if (data.action === "update_rejected") {
+                display_rejected_requests(data.enrollments);
+            }
+        };
+
+        socket.onclose = function () {
+            console.error("WebSocket closed unexpectedly. Trying to reconnect...");
+            setTimeout(setupWebSocket, 5000); // Attempt reconnection after 5 seconds
+        };
+    }
 
     function display_pending_requests(enrollments) {
         const dataTableBody = document.getElementById("enrollmentTableBody");
-        dataTableBody.innerHTML = "";  // Clear existing rows
+        dataTableBody.innerHTML = "";
 
         enrollments.forEach((student, index) => {
             const row = document.createElement("tr");
 
-            // Create a variable of JSON of additional_fields to be displayed in the row
             let additional_data = {};
             try {
                 additional_data = student.additional_data;
-                console.log(additional_data);
             } catch (e) {
                 console.error("Invalid JSON in additional_data:", student.additional_data);
             }
 
-            // Create HTML for additional fields
             let additionalFieldsHtml = "";
             for (const key in additional_data) {
                 if (additional_data.hasOwnProperty(key)) {
@@ -235,70 +251,62 @@ active
             }
 
             row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>
-                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
-                </td>
-                <td style="text-align: center;">
-                    ${additionalFieldsHtml}
-                </td>
-                <td style="text-align: center;">
-                    <span class="badge bg-${student.status_color}">${student.status}</span>
-                </td>
-                <td style="text-align: center;">
-                    <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
-                </td>
-                <td>
-                    <button onclick="rejectEnrollment(${student.id}, this)" class="btn btn-outline-danger">Reject</button>
-                </td>
-                <td>
-                    <button onclick="approveEnrollment(${student.id}, this)" class="btn btn-success">Approve</button>
-                </td>
-            `;
+            <td>${index + 1}</td>
+            <td>
+                <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
+            </td>
+            <td style="text-align: center;">
+                ${additionalFieldsHtml}
+            </td>
+            <td style="text-align: center;">
+                <span class="badge bg-${student.status_color}">${student.status}</span>
+            </td>
+            <td style="text-align: center;">
+                <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
+            </td>
+            <td>
+                <button onclick="rejectEnrollment(${student.id}, this)" class="btn btn-outline-danger">Reject</button>
+            </td>
+            <td>
+                <button onclick="approveEnrollment(${student.id}, this)" class="btn btn-success">Approve</button>
+            </td>
+        `;
 
             dataTableBody.appendChild(row);
         });
     }
 
-
-
     function display_rejected_requests(enrollments) {
         const dataTableBody = document.getElementById("enrollmentRejectedTableBody");
-        dataTableBody.innerHTML = "";  // Clear existing rows
+        dataTableBody.innerHTML = "";
 
         enrollments.forEach((student, index) => {
             const row = document.createElement("tr");
 
             row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>
-                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
-                </td>
-                <td style="text-align: center;">
-                    <p class="fw-semibold mb-1 text-wrap">${student.batch_name}</p>
-                </td>
-               
-                <td style="text-align: center;">
-                    <span class="badge bg-${student.status_color}">${student.status}</span>
-                </td>
-
-                <td style="text-align: center;">
-                    <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
-                </td>
-                <td>
-                    <button onclick="approveEnrollment(${student.id}, this)" class="btn btn-success">Approve</button>
-                </td>
-                `;
+            <td>${index + 1}</td>
+            <td>
+                <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
+            </td>
+            <td style="text-align: center;">
+                <p class="fw-semibold mb-1 text-wrap">${student.batch_name}</p>
+            </td>
+            <td style="text-align: center;">
+                <span class="badge bg-${student.status_color}">${student.status}</span>
+            </td>
+            <td style="text-align: center;">
+                <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
+            </td>
+            <td>
+                <button onclick="approveEnrollment(${student.id}, this)" class="btn btn-success">Approve</button>
+            </td>
+        `;
 
             dataTableBody.appendChild(row);
         });
     }
 
-
-    // ================================== APPROVE ENRLLMENT BUTTON ===============================
-
     function approveEnrollment(id, button) {
-
         const url = "{% url 'administrator_approve_enrollment_batch' 0 %}?id=".replace("0", id);
 
         fetch(url, {
@@ -311,10 +319,7 @@ active
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Remove the row from the table or update the status
-                    const row = button.closest('tr');
-                    row.remove();
-
+                    button.closest('tr').remove();
                 } else {
                     alert('Failed to approve the enrollment request: ' + data.message);
                 }
@@ -324,9 +329,6 @@ active
                 alert('Something went wrong!');
             });
     }
-
-
-    // ================================== REJECT ENRLLMENT BUTTON ===============================
 
     function rejectEnrollment(id, button) {
         if (!confirm('Are you sure you want to REJECT the request?')) {
@@ -345,9 +347,7 @@ active
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Remove the row from the table or update the status
-                    const row = button.closest('tr');
-                    row.remove();
+                    button.closest('tr').remove();
                     alert('Enrollment request rejected successfully!');
                 } else {
                     alert('Failed to reject the enrollment request: ' + data.message);
@@ -358,10 +358,8 @@ active
                 alert('Something went wrong!');
             });
     }
-</script>
 
-<script>
-    document.getElementById('approve-all-button').addEventListener('click', function() {
+    document.getElementById('approve-all-button').addEventListener('click', function () {
         const batchId = '{{ batch.id }}';
         $.ajax({
             url: "{% url 'approve_all_enrollments_batch' batch.id %}",
@@ -369,7 +367,7 @@ active
             data: {
                 'csrfmiddlewaretoken': '{{ csrf_token }}',
             },
-            success: function(response) {
+            success: function (response) {
                 if (response.success) {
                     alert("All pending enrollment requests have been accepted.");
                     location.reload();
@@ -377,7 +375,7 @@ active
                     alert("An error occurred while processing your request.");
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.error(xhr);
                 alert("An error occurred: " + error);
             }

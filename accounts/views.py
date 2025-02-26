@@ -20,10 +20,23 @@ from django_ratelimit.decorators import ratelimit
 
 @ratelimit(key='post:username', rate='3/m', method=['POST'], block=False)
 def login(request):
+    if request.user.is_authenticated:
+        # Redirect based on user type
+        if hasattr(request.user, 'student'):
+            return redirect('student')
+        elif hasattr(request.user, 'instructor'):
+            return redirect('instructor')
+        elif hasattr(request.user, 'administrator'):
+            return redirect('administration')
+        else:
+            return redirect('home')  # Default fallback
+
     if getattr(request, 'limited', False):
         messages.error(request, "Too many login attempts for this Username. Please try again after 1 minute.")
-        return redirect('login')  # Replace 'login' with your login view name or URL
-        
+        return redirect('login')
+
+    next_url = request.GET.get('next', '')
+
     if request.method == 'POST':
         username = request.POST.get('username').strip().lower()
         password = request.POST.get('password')
@@ -32,64 +45,37 @@ def login(request):
             user = auth.authenticate(username=username, password=password)
 
             if user is not None:
-                
-                try:
-                    # check if the student is enrolled in any batch and get
-                    if user.student.enrollment_requests.filter(status='Accepted').exists():
-                        batch = user.student.enrollment_requests.filter(status='Accepted')
-                        
-                        if len(batch) == 1:
-                            batch = batch[0].batch
-                            auth.login(request, user)
-                            return redirect('batch', slug=batch.slug)
-                        else:
-                            auth.login(request, user)
-                            return redirect('my_batches')
-                    
-                    auth.login(request, user)
-                    return redirect('student')
+                auth.login(request, user)
+                return redirect(next_url if next_url else 'student')
 
-                except:
-                    
-                    try: 
-                        auth.login(request, user)
-                        return redirect('student')
-                    
-                    except:
-                        messages.error(request, "Something Went Wrong... Try Again!")
-                        return redirect("login")
-            
-            else:                
-                messages.error(request, "Invalid Password")
-                return redirect("login")
-            
+            messages.error(request, "Invalid Password")
+            return redirect("login")
+
         elif Instructor.objects.filter(username=username).exists():
             user = auth.authenticate(username=username, password=password)
 
             if user is not None:
                 auth.login(request, user)
-                return redirect('instructor')
-            
-            else:
-                messages.error(request, "Invalid Password")
-                return redirect("login")
-        
+                return redirect(next_url if next_url else 'instructor')
+
+            messages.error(request, "Invalid Password")
+            return redirect("login")
+
         elif Administrator.objects.filter(username=username).exists():
             user = auth.authenticate(username=username, password=password)
 
             if user is not None:
                 auth.login(request, user)
-                return redirect('administration')
-            
-            else:
-                messages.error(request, "Invalid Password")
-                return redirect("login")
-        
+                return redirect(next_url if next_url else 'administration')
+
+            messages.error(request, "Invalid Password")
+            return redirect("login")
+
         else:
             messages.error(request, "Invalid Username or Password")
             return redirect("login")
 
-    return render(request, 'accounts/login.html')
+    return render(request, 'accounts/login.html', {'next': next_url})
 
 # ===================================== REGISTER ==============================
 

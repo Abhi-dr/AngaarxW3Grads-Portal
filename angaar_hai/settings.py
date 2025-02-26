@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     
     'ckeditor',
     'ckeditor_uploader',
+    
+    "channels",
 
 
 ]
@@ -95,6 +97,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'angaar_hai.wsgi.application'
+
+# ASGI application
+ASGI_APPLICATION = 'angaar_hai.asgi.application'
+
+# Use Redis for Channels layer (Highly Recommended for Production)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 
 # Database
