@@ -102,7 +102,7 @@ Articles
 
 <div class="container-block container">
 
-    <h1 class="fw-bold text-center" style="font-size: 50px;"> Job Articles🔥</h1>
+    <h1 class="fw-bold text-center" style="font-size: 50px;">Job Articles🔥</h1>
     <div class="container mt-2">
         <div class="row g-4 mt-3 mb-4">
 
@@ -118,7 +118,7 @@ Articles
 
             <div class="col-md-4">
                 <a href="{% url 'article' article.slug %}" style="text-decoration: none; color:white;">
-                <div class="card">
+                    <div class="card p-0">
                         <div class="card-body">
                             <h6 class="card-title fw-bold">{{ article.title }}</h6>
                             <p class="card-text">{{ article.content|truncatechars:5 }}</p>
@@ -128,7 +128,7 @@ Articles
                         <img src="{{ article.thumbnail.url }}" class="card-img-top" alt="Nature's Calm">
                     </div>
                 </a>
-                </div>
+            </div>
 
             {% endfor %}
 
