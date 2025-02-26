@@ -100,6 +100,17 @@ Article | {{ article.title }}
         color: #999;
         font-size: 0.9em;
     }
+
+</style>
+
+<style>
+    .blur-overlay {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
 </style>
 
 {% endblock %}
@@ -118,62 +129,14 @@ Article | {{ article.title }}
                 {{ preview_content|safe }}
             </div>
             <div class="blur-overlay">
-                <a class="btn btn-primary" href="{% url 'login' %}?next={{ request.path }}">🔒Read More</a>
+                <h5 class="mx-2">Interesting?</h5>
+                <a class="btn btn-outline-success" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                <span class="mx-1">OR</span>
+                <a class="btn btn-outline-warning" href="{% url 'register' %}?next={{ request.path }}">Signup</a>
+                <span class="mx-2">to read further...</span>
             </div>
         </div>
         {% endif %}
-
-        <style>
-            .article-title {
-                font-size: 28px;
-                font-weight: bold;
-                text-align: center;
-                margin-bottom: 15px;
-            }
-
-            .article-preview {
-                position: relative;
-                max-width: 700px;
-                margin: auto;
-                text-align: justify;
-                line-height: 1.6;
-            }
-
-            .preview-text {
-                position: relative;
-                padding-bottom: 50px;
-                /* Space for blurred effect */
-            }
-
-            .blur-overlay {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100%;
-                height: 50px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .read-more-text {
-                font-size: 16px;
-                font-weight: bold;
-                color: #007bff;
-                cursor: pointer;
-            }
-
-            .read-more-text a {
-                text-decoration: none;
-                color: inherit;
-            }
-
-            .read-more-text a:hover {
-                text-decoration: underline;
-            }
-        </style>
-
-
     </div>
 
 </div>
