@@ -116,7 +116,25 @@ Article | {{ article.title }}
         position: relative;
         display: flex;
         align-items: center;
-        justify-content: center;
+        margin-bottom: 2%;
+        background-color: #1f1f1f;
+        padding: 1%;
+        width: fit-content;
+        border-radius: 13px;
+    }
+
+    .interesting-txt{
+        font-size: 20px;
+    }
+
+    @media (max-width: 768px) {
+        .blur-overlay {
+            font-size: small;
+        }
+
+        .interesting-txt{
+            font-size: 12px;
+        }
     }
 
 </style>
@@ -137,10 +155,12 @@ Article | {{ article.title }}
                 {{ preview_content|safe }}
             </div>
             <div class="blur-overlay">
-                <h5 class="mx-2">Interesting?</h5>
-                <a class="btn btn-outline-success" href="{% url 'login' %}?next={{ request.path }}">Login</a>
+                <span class="mx-2 interesting-txt">Interesting?</span>
+                <a href="{% url 'login' %}">
+                    <button style="width: 100%;">Login</button>
+                </a>
                 <span class="mx-1">OR</span>
-                <a class="btn btn-outline-warning" href="{% url 'register' %}?next={{ request.path }}">Signup</a>
+                <a class="btn" id="register-btn" href="{% url 'register' %}?next={{ request.path }}">Signup</a>
                 <span class="mx-2">to read further...</span>
             </div>
         </div>
