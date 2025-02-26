@@ -603,6 +603,7 @@ def test_code(request, slug):
     
     if question.scenario:
             question.scenario = convert_backticks_to_code(question.scenario)
+            
     question.description = convert_backticks_to_code(question.description)
     
     parameters = {
