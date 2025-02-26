@@ -96,3 +96,34 @@ def delete_article(request, id):
     cache.delete('fetch_all_articles')
     
     return redirect('administrator_articles')
+
+# ============================== EDIT ARTICLE ==============================
+@login_required(login_url='login')
+@staff_member_required
+def edit_article(request, id):
+    
+    article = get_object_or_404(Article, id=id)
+    
+    if request.method == 'POST':
+        
+        title = request.POST.get('title')
+        content = request.POST.get('content')
+        
+        thumbnail = request.FILES.get('thumbnail')
+        
+        article.title = title
+        article.content = content
+        
+        if thumbnail:
+            article.thumbnail = thumbnail
+        
+        article.save()
+        
+        messages.success(request, 'Article updated successfully')
+        
+        cache.delete('fetch_all_articles')
+        
+        return redirect('administrator_articles')
+    
+    return render(request, 'administration/articles/edit_article.html', {'article': article})
+
