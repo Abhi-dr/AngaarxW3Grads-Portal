@@ -45,6 +45,10 @@ def article(request, slug):
 # ======================================== QUERY ==================================
 
 from django.core.mail import EmailMultiAlternatives, get_connection
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 def query(user_email, user_query):
     subject = 'New User Query Received'
@@ -70,7 +74,7 @@ def query(user_email, user_query):
         host='smtp.gmail.com',
         port=587,
         username="sgnmiu@gmail.com",
-        password="kijxojsgxikhfdxo",  
+        password=os.getenv("EMAIL_HOST_PASSWORD"),  
         use_tls=True,
     )
 

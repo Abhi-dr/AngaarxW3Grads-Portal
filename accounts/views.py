@@ -229,7 +229,9 @@ def get_active_sheet_timer(request):
 # ========================================
 
 from django.core.mail import EmailMultiAlternatives, get_connection
-
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 def send_welcome_mail(to, name):
 
@@ -262,7 +264,7 @@ def send_welcome_mail(to, name):
         host='smtp-relay.brevo.com',
         port=587,
         username="82930f001@smtp-brevo.com",
-        password="xsmtpsib-ac5b13e401c83c13bb35b9af64328764d880e75f36a0bb60aa93e9921839ffce-SRA8aE0CdMzW9LtJ",
+        password = os.getenv('BREVO_SMTP_PASSWORD'),
         use_tls=True,
     )
 
