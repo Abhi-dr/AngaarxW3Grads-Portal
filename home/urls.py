@@ -8,5 +8,5 @@ urlpatterns = [
     
     path("job-articles/", views.articles, name="articles"),
     path("article/<slug:slug>/", views.article, name="article"),
-    
+    path('send-query/', views.send_query, name='send_query'),
 ]

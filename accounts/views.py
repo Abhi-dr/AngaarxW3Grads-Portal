@@ -228,7 +228,7 @@ def get_active_sheet_timer(request):
 
 # ========================================
 
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 
 
 def send_welcome_mail(to, name):
@@ -256,7 +256,17 @@ def send_welcome_mail(to, name):
     </html>
     """
 
-    email = EmailMultiAlternatives(subject, '', from_email_full, to_email)
+    # Use Brevo SMTP connection
+    brevo_connection = get_connection(
+        backend='django.core.mail.backends.smtp.EmailBackend',
+        host='smtp-relay.brevo.com',
+        port=587,
+        username="82930f001@smtp-brevo.com",
+        password="xsmtpsib-ac5b13e401c83c13bb35b9af64328764d880e75f36a0bb60aa93e9921839ffce-SRA8aE0CdMzW9LtJ",
+        use_tls=True,
+    )
+
+    email = EmailMultiAlternatives(subject, '', from_email, to_email, connection=brevo_connection)
     email.attach_alternative(html_content, 'text/html')
     email.send()
     
