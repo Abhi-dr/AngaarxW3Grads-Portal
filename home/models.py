@@ -1,5 +1,6 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
+from django.contrib.auth.models import User
     
 # ======================= JOB ARTICLE MODEL ======================
 
@@ -7,6 +8,7 @@ class Article(models.Model):
     title = models.CharField(max_length=100)
     content = RichTextUploadingField()
     thumbnail = models.ImageField(upload_to="thumbnails/")
+    likes = models.ManyToManyField(User, related_name='liked_articles', blank=True)
     
     slug = models.SlugField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -17,6 +19,9 @@ class Article(models.Model):
         
     def __str__(self):
         return self.title
+    
+    def total_likes(self):
+        return self.likes.count()
     
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -41,3 +46,18 @@ class Article(models.Model):
 
             self.slug = slug
         super(Article, self).save(*args, **kwargs)
+
+# ======================= COMMENT MODEL ======================
+
+class Comment(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f'Comment by {self.user.username} on {self.article.title}'

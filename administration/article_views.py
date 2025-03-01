@@ -25,10 +25,6 @@ def articles(request):
 
 def fetch_all_articles(request):   
     
-    cached_data = cache.get('fetch_all_articles')
-    if cached_data:
-        return JsonResponse({'data': cached_data})
-    
     articles = Article.objects.all().order_by('-id')
 
     data = [
@@ -37,11 +33,12 @@ def fetch_all_articles(request):
             "title": article.title,
             "slug": article.slug,
             "thumbnail": article.thumbnail.url,
+            "likes_count": article.total_likes(),
+            "comments_count": article.comments.count(),
         } for article in articles
     ]
     
-     # Store data in cache
-    cache.set('fetch_all_articles', data, timeout=900)  # Cache for 15 minutes
+    # Store data in cache
 
     return JsonResponse({'data': data})
 
@@ -53,8 +50,12 @@ def fetch_all_articles(request):
 def article(request, slug):
     
     article = get_object_or_404(Article, slug=slug)
+    comments = article.comments.select_related('user').order_by('-created_at')
     
-    return render(request, 'administration/articles/article.html', {'article': article})
+    return render(request, 'administration/articles/article.html', {
+        'article': article,
+        'comments': comments,
+    })
 
 # ============================== ADD ARTICLE ==============================
 
@@ -126,4 +127,3 @@ def edit_article(request, id):
         return redirect('administrator_articles')
     
     return render(request, 'administration/articles/edit_article.html', {'article': article})
-

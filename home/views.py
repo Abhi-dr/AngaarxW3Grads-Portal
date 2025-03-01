@@ -1,6 +1,8 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as message
-from .models import Article
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from .models import Article, Comment
 
 def home(request):
     return render(request, "home/index.html")
@@ -18,7 +20,8 @@ def articles(request):
     articles = Article.objects.all().order_by("-created_at")
     
     parameters = {
-        "articles": articles
+        "articles": articles,
+        "user": request.user
     }
     
     return render(request, "home/articles.html", parameters)
@@ -26,8 +29,8 @@ def articles(request):
 # ==================== ARTICLE ============================
 
 def article(request, slug):
-    
     article = Article.objects.get(slug=slug)
+    comments = Comment.objects.filter(article=article)
     
     # Show only preview (first 5 lines) if user is not logged in
     if not request.user.is_authenticated:
@@ -38,7 +41,55 @@ def article(request, slug):
 
     return render(request, "home/article.html", {
         "article": article,
-        "preview_content": preview_content
+        "preview_content": preview_content,
+        "comments": comments,
+        "user": request.user
     })
-    
 
+# ==================== LIKE ARTICLE ============================
+
+@login_required
+def like_article(request):
+    if request.method == 'POST':
+        article_id = request.POST.get('article_id')
+        article = get_object_or_404(Article, id=article_id)
+        
+        if request.user in article.likes.all():
+            article.likes.remove(request.user)
+            liked = False
+        else:
+            article.likes.add(request.user)
+            liked = True
+            
+        return JsonResponse({
+            'liked': liked,
+            'total_likes': article.total_likes()
+        })
+
+# ==================== POST COMMENT ============================
+
+@login_required
+def post_comment(request, article_id):
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        article = get_object_or_404(Article, id=article_id)
+        content = request.POST.get('content')
+        
+        if content:
+            comment = Comment.objects.create(
+                article=article,
+                user=request.user,
+                content=content
+            )
+            
+            return JsonResponse({
+                'status': 'success',
+                'comment': {
+                    'author': comment.user.username,
+                    'content': comment.content,
+                    'created_at': comment.created_at.strftime("%B %d, %Y"),
+                    'author_initial': comment.user.username[0],
+                },
+                'total_comments': article.comments.count()
+            })
+            
+    return JsonResponse({'status': 'error'}, status=400)
