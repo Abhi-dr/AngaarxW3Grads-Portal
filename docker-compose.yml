@@ -1,0 +1,156 @@
+# version: "3.9"
+
+# services:
+# # 1
+#   # web:
+#   #   build: .
+#   #   container_name: django_app
+#   #   command: >
+#   #     bash -c "python manage.py collectstatic --noinput &&
+#   #              python manage.py migrate &&
+#   #              gunicorn --bind 0.0.0.0:8000 angaar_hai.wsgi:application"
+#   #   volumes:
+#   #     - .:/app
+#   #   ports:
+#   #     - "8000:8000"
+#   #   depends_on:
+#   #     - database
+#   #     - redis
+#   #   environment:
+#   #     - DATABASE_NAME=angaar_hai
+#   #     - DATABASE_USER=root
+#   #     - DATABASE_PASSWORD=root
+#   #     - DATABASE_HOST=database
+#   #     - DATABASE_PORT=3306
+#   #     - REDIS_HOST=redis
+#   #     - REDIS_PORT=6379
+
+
+#   web:
+#     build: .
+#     container_name: django_app
+#     # command: >
+#     #   bash -c "while ! mysqladmin ping -h'database' --silent; do sleep 2; done &&
+#     #            python manage.py collectstatic --noinput &&
+#     #            python manage.py migrate &&
+#     #            gunicorn --bind 0.0.0.0:8000 angaar_hai.wsgi:application"
+# command: >
+#   sh -c "while ! mysqladmin ping -h mysql_db --silent; do sleep 2; done && python manage.py migrate && python manage.py runserver 0.0.0.0:8000" 
+#     depends_on:
+#       database:
+#         condition: service_healthy
+#       redis:
+#         condition: service_started
+#     environment:
+#       - DATABASE_NAME=angaar_hai
+#       - DATABASE_USER=root
+#       - DATABASE_PASSWORD=root
+#       - DATABASE_HOST=database
+#       - DATABASE_PORT=3306
+#       - REDIS_HOST=redis
+#       - REDIS_PORT=6379
+
+
+#   # database:
+#   #   image: mysql:8   1st
+#   #   container_name: mysql_db
+#   #   environment:
+#   #     MYSQL_ROOT_PASSWORD: root
+#   #     MYSQL_DATABASE: angaar_hai
+#   #   ports:
+#   #     - "3307:3306"
+#   #   volumes:
+#   #     - db_data:/var/lib/mysql  # Named volume for persistence
+#   #     - ./data.sql:/docker-entrypoint-initdb.d/data.sql  # Ensures DB initializes correctly
+
+#   database:
+#     image: mysql:8
+#     container_name: mysql_db
+#     environment:
+#       MYSQL_ROOT_PASSWORD: root
+#       MYSQL_DATABASE: angaar_hai
+#     ports:
+#       - "3307:3306"
+#     volumes:
+#       - db_data:/var/lib/mysql
+#       - ./data.sql:/docker-entrypoint-initdb.d/data.sql
+#     healthcheck:
+#       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+#       timeout: 20s
+#       retries: 10
+
+
+#   redis:
+#     image: redis:latest
+#     container_name: redis_cache
+#     ports:
+#       - "6379:6379"
+
+# volumes:
+#   db_data:
+
+
+
+version: '3.8'
+
+services:
+  mysql_db:
+    image: mysql:latest
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: angaar_hai
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    
+
+
+  redis_cache:
+    image: redis:latest
+    container_name: redis_cache
+    restart: always
+    ports:
+      - "6379:6379"
+
+  #   environment:
+  #     - DATABASE_NAME=angaar_hai
+  #     - DATABASE_USER=root
+  #     - DATABASE_PASSWORD=root
+  #     - DATABASE_HOST=database
+  #     - DATABASE_PORT=3306
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  django_app:
+    build: .
+    depends_on:
+      mysql_db:
+        condition: service_healthy  # ✅ Wait for MySQL healthcheck
+      redis_cache: 
+        condition: service_started
+    environment:
+      DATABASE_HOST: mysql_db
+      DATABASE_NAME: angaar_hai
+      DATABASE_USER: root
+      DATABASE_PASSWORD: root
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command: >
+      sh -c "echo 'Waiting for MySQL...' &&
+             while ! mysqladmin ping -h mysql_db --silent; do sleep 2; done &&
+             echo 'MySQL is up! Running migrations...' &&
+             python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  db_data:
+
+
+
