@@ -1,0 +1,104 @@
+{% extends "administration/base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}
+Edit Hackathon
+{% endblock %}
+
+{% block hackathon_active %} 
+active
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Edit Hackathon</h5>
+        </div>
+    
+        <div class="container px-4">
+            <form method="POST" enctype="multipart/form-data" id="edit-hackathon-form">
+                {% csrf_token %}
+                <hr class="mt-0">
+    
+                <div class="row">
+                    <div class="w-100">
+                        <div class="card">
+                            <div class="card-header">Hackathon Details</div>
+    
+                            <div class="card-body h-100">
+                                <div>
+    
+                                    <div class="mb-3">
+                                        <label class="form-label">Hackathon Name <div class="star">*</div></label>
+                                        <input type="text" class="form-control" name="name" value="{{ hackathon.name }}" required>
+                                    </div>
+    
+                                    <div class="mb-3">
+                                        <label class="form-label">Start Date <div class="star">*</div></label>
+                                        <input type="date" class="form-control" name="start_date" value="{{ hackathon.start_date|date:'Y-m-d' }}" required>
+                                    </div>
+    
+                                    <div class="mb-3">
+                                        <label class="form-label">End Date <div class="star">*</div></label>
+                                        <input type="date" class="form-control" name="end_date" value="{{ hackathon.end_date|date:'Y-m-d' }}" required>
+                                    </div>
+    
+                                    <div class="mb-3">
+                                        <label class="form-label">Location <div class="star">*</div></label>
+                                        <select class="form-select form-control" name="location" required>
+                                            <option value="Online" {% if hackathon.location == "Online" %}selected{% endif %}>Online</option>
+                                            <option value="Onsite" {% if hackathon.location == "Onsite" %}selected{% endif %}>Onsite</option>
+                                        </select>
+                                    </div>
+    
+                                    <div class="mb-3">
+                                        <label class="form-label">Registration Deadline <div class="star">*</div></label>
+                                        <input type="date" class="form-control" name="registration_deadline" value="{{ hackathon.registration_deadline|date:'Y-m-d' }}" required>
+                                    </div>
+    
+                                    <div class="mb-3">
+                                        <label class="form-label">Prize Pool <div class="star">*</div></label>
+                                        <input type="text" class="form-control" name="prize_pool" value="{{ hackathon.prize_pool }}" required>
+                                    </div>
+    
+                                    
+                                    <div class="row">
+                                        <div class="mb-3 col-md-8">
+                                            <label class="form-label">Update Thumbnail <div class="star">*</div></label>
+                                            <input type="file" class="form-control" name="thumbnail">
+                                        </div>
+                                        <div class="mb-3 col-md-4">
+                                            <label class="form-label">Current Thumbnail</label><br>
+                                            {% if hackathon.thumbnail %}
+                                                <img src="{{ hackathon.thumbnail.url }}" alt="Hackathon Thumbnail" width="150">
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    
+                                    <div class="mb-3">
+                                        <label class="form-label">Website URL <div class="star">*</div></label>
+                                        <input type="url" class="form-control" name="website" value="{{ hackathon.website }}" required>
+                                    </div>
+    
+                                </div>
+    
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-success w-100 mt-3">Update Hackathon</button>
+                                </div>
+    
+                            </div> 
+                        </div> 
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

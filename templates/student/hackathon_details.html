@@ -1,0 +1,90 @@
+{% extends "student/base.html" %} 
+{% load static %} 
+{% load custom_filters %} 
+
+{% block title %} 
+    Hackathon => {{ hackathon.name }}
+{% endblock %} 
+
+{% block hackathon_active %} 
+    active
+{% endblock %} 
+
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <img src="{{ hackathon.thumbnail.url }}" class="card-img" alt="Hackathon Thumbnail">
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card p-4">
+                <h2 class="card-title">{{ hackathon.name }} 🚀</h2>
+                <p class="lead">Join the ultimate coding competition and showcase your skills!</p>
+
+                {% if hackathon.get_active_status %}
+                <span class="badge bg-success mb-2 p-2 col-md-4 text-center text-dark">🔵 Registration Open</span>
+                {% else %}
+                <span class="badge bg-danger mb-2 p-2 col-md-4 text-center text-dark">🔴 Registration Closed</span>
+                {% endif %}
+
+                <hr>
+                <h4>📅 Event Duration:</h4>
+                <p><strong>{{ hackathon.start_date }}</strong> - <strong>{{ hackathon.end_date }}</strong></p>
+
+                <h4>📍 Mode of Participation:</h4>
+                <p><strong>{{ hackathon.location }}</strong> - Compete from anywhere or join us onsite!</p>
+
+                <h4>🏆 Prize Pool:</h4>
+                <p><strong>${{ hackathon.prize_pool }}</strong> - Amazing rewards await the winners!</p>
+
+                <h4>🕒 Registration Deadline:</h4>
+                <p><strong>{{ hackathon.registration_deadline }}</strong> - Hurry before spots fill up!</p>
+
+                <div class="text-center mt-4">
+                    <a href="{{ hackathon.website }}" target="_blank" class="btn btn-outline-success w-100">Register Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Details Section -->
+    <div class="row mt-4">
+        <div class="col-md-8">
+            <div class="card p-4 shadow-lg">
+                <h3>🔍 About the Hackathon</h3>
+                <p>
+                    Prepare for an exhilarating coding marathon where innovation meets skill. 
+                    Join developers, designers, and problem solvers to tackle real-world challenges and win exciting prizes.
+                </p>
+
+                <h3>💡 What You'll Gain:</h3>
+                <ul>
+                    <li>🌟 Hands-on experience with real-world problems</li>
+                    <li>📜 Certificates for all participants</li>
+                    <li>🏅 Special perks and goodies for winners</li>
+                    <li>🎯 Networking opportunities with industry professionals</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card p-4 shadow-lg">
+                <h3>⚡ Quick Info</h3>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><strong>📍 Location:</strong> {{ hackathon.location }}</li>
+                    <li class="list-group-item"><strong>🏆 Prize Pool:</strong> ₹ {{ hackathon.prize_pool }}</li>
+                    <li class="list-group-item"><strong>🕒 Deadline:</strong> {{ hackathon.registration_deadline }}</li>
+                    <li class="list-group-item"><strong>🌐 Website:</strong> <a href="{{ hackathon.website }}" target="_blank">{{ hackathon.website }}</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

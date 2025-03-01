@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 
 from accounts.models import Student, Instructor
-from student.models import Notification, Anonymous_Message, Feedback
+from student.models import Notification, Anonymous_Message, Feedback, Hackathon
 from practice.models import POD, Submission, Question, Sheet, Streak
 from django.db.models import Max, Sum
 
@@ -418,4 +418,19 @@ def calculate_total_user_score(user):
     # user_scores = get_user_scores_by_question(user)
 
     return total_score['total_score'] or 0
+
+
+# =================================== HACKATHONS =====================================
+
+@login_required(login_url="login")
+def hackathons(request):
+    return render(request, "student/hackathons.html")
+
+
+@login_required(login_url="login")
+def hackathon_details(request, hackathon_id):
+
+    hackathon = get_object_or_404(Hackathon, id=hackathon_id)
+    
+    return render(request, "student/hackathon_details.html", {"hackathon": hackathon})
 

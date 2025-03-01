@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Notification, Anonymous_Message, Feedback, AIQuestion
+from .models import Notification, Anonymous_Message, Feedback, AIQuestion, Hackathon
 
 
 @admin.register(Notification)
@@ -23,3 +23,10 @@ class FeedbackAdmin(admin.ModelAdmin):
 class AIQuestionAdmin(admin.ModelAdmin):
     list_display = ('student', 'instructor', 'question')
     search_fields = ('student', 'question')
+
+@admin.register(Hackathon)
+class HackathonAdmin(admin.ModelAdmin):
+    list_display = ("name", "start_date", "end_date", "location", "registration_deadline", "prize_pool")
+    search_fields = ("name", "location")  
+    list_filter = ("location", "start_date")  
+    ordering = ("start_date",)

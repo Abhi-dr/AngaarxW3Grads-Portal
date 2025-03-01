@@ -10,6 +10,12 @@ urlpatterns = [
     path('restore_streak/', views.restore_streak, name='restore_streak'),
     
     path("leveller", views.leveller, name="leveller"),
+
+    # ========================= HACKATHON WORK =========================
+
+    path("hackathons/", views.hackathons, name="hackathons"),
+    path("hackathon/<int:hackathon_id>/", views.hackathon_details, name="hackathon_details"),
+
     
     # ======================== AI DOUBT SOLVER ========================
     

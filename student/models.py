@@ -83,3 +83,22 @@ class AIQuestion(models.Model):
         verbose_name = "AI Question"
         verbose_name_plural = "AI Questions"
         
+
+# =============================== Hackathons =================================
+
+class Hackathon(models.Model):
+    name = models.CharField(max_length=255) 
+    start_date = models.DateField()
+    end_date = models.DateField() 
+    location = models.CharField(max_length=100, choices=[("Online", "Online"), ("Onsite", "Onsite")], default="Online")
+    registration_deadline = models.DateField()  
+    prize_pool = models.CharField(max_length=50, blank=True, null=True)
+    thumbnail = models.ImageField(upload_to="hackathon_thumbnails/", blank=True, null=True)  
+    website = models.URLField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name    
+    
+    def get_active_status(self):
+        return self.registration_deadline >= timezone.now().date()
+    

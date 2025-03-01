@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis
+from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, hackathon_views
 
 
 urlpatterns = [
@@ -172,3 +172,15 @@ urlpatterns += [
     path('api/submissions/<slug:slug>/', sheet_apis.fetch_question_submissions, name='fetch_question_submissions'),
 
 ]
+
+
+# ========================= HACKATHON WORK ==========================
+
+urlpatterns += [
+    path("hackathons/", hackathon_views.hackathon_list, name="administrator_hackathon_list"),
+    path("fetch_hackathons/", hackathon_views.fetch_hackathons, name="administrator_fetch_hackathons"),
+    path("add_hackathon/", hackathon_views.add_hackathon, name="administrator_add_hackathon"),
+    path("edit_hackathon/<int:hackathon_id>/", hackathon_views.edit_hackathon, name="administrator_edit_hackathon"),
+    path("delete_hackathon/<int:hackathon_id>/", hackathon_views.delete_hackathon, name="administrator_delete_hackathon"),
+
+]    
