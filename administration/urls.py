@@ -1,6 +1,6 @@
 from django.urls import path, include
 from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis
-
+from .image_upload import upload_image
 
 urlpatterns = [
     path("", views.index, name="administration"),
@@ -72,6 +72,8 @@ urlpatterns = [
     
     path('generate-description/', question_generator.generate_description, name='generate_description'),
     
+    path('upload/image', upload_image, name='upload_image'),
+
 ]
 
 # ========================= BATCH WORK ==========================
