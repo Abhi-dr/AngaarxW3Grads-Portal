@@ -4,10 +4,10 @@
 {% block title %}About Us | The Angaar Batch{% endblock %}
 
 {% block css %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
 <script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
-<link rel="stylesheet" href="{% static 'css/home/css/about.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
 
 <style>
     /* Navbar brand size fix */
@@ -35,16 +35,33 @@
         padding: 0 20px;
     }
 
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .about-title {
         font-size: clamp(2.5rem, 5vw, 3.5rem);
         font-weight: bold;
         background: linear-gradient(45deg, #ff6026, #ff8051);
+        background-clip: text;
         -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         -webkit-text-fill-color: transparent;
         margin-bottom: 20px;
         text-transform: uppercase;
         line-height: 1.2;
+        animation: fadeInUp 1s ease-out;
     }
+
+
 
     .about-subtitle {
         font-size: clamp(1rem, 2vw, 1.2rem);
@@ -139,13 +156,14 @@
     }
 
     @keyframes fadeIn {
-        from { 
-            opacity: 0; 
-            transform: translateY(20px); 
+        from {
+            opacity: 0;
+            transform: translateY(20px);
         }
-        to { 
-            opacity: 1; 
-            transform: translateY(0); 
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
@@ -256,7 +274,10 @@
         font-size: clamp(2rem, 4vw, 3rem);
         font-weight: bold;
         background: linear-gradient(45deg, #ff6026, #ff8051);
-        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        /* Ensure the text color is transparent to show the gradient */
         margin-bottom: 10px;
     }
 
@@ -284,7 +305,7 @@
         background: linear-gradient(to right, transparent, #ff6026, transparent);
     }
 
-    .footer-content {
+    .custom-footer-content {
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap;
@@ -292,37 +313,52 @@
         margin-bottom: 30px;
     }
 
-    .footer-section {
+    .custom-footer-section {
         flex: 1;
         min-width: 250px;
+        padding: 0 15px;
     }
 
-    .footer-section h3 {
+    .custom-footer-section h3 {
         color: #ff6026;
         margin-bottom: 20px;
         font-size: 1.2rem;
     }
 
-    .footer-section p, .footer-section a {
+    .custom-footer-section p,
+    .custom-footer-section a {
         color: #e0e0e0;
         text-decoration: none;
         transition: color 0.3s ease;
         line-height: 1.6;
     }
 
-    .footer-section a:hover {
+    .custom-footer-section a:hover {
         color: #ff6026;
     }
 
-    .footer-bottom {
+    .custom-footer-bottom {
         text-align: center;
         padding-top: 20px;
         border-top: 1px solid rgba(255, 96, 38, 0.2);
     }
 
-    .footer-bottom p {
+    .custom-footer-bottom p {
         color: #e0e0e0;
         margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .custom-footer-section {
+            flex: 100%;
+            text-align: center;
+            padding: 0;
+        }
+
+        .custom-footer-content {
+            flex-direction: column;
+            gap: 20px;
+        }
     }
 
     @media (max-width: 768px) {
@@ -346,7 +382,8 @@
             left: 0;
         }
 
-        .left::after, .right::after {
+        .left::after,
+        .right::after {
             left: 15px;
         }
 
@@ -366,15 +403,7 @@
             padding: 0 15px;
         }
 
-        .footer-section {
-            flex: 100%;
-            text-align: center;
-        }
-
-        .footer-content {
-            flex-direction: column;
-            gap: 20px;
-        }
+        
     }
 
     /* Add smooth scrolling */
@@ -402,12 +431,13 @@
 {% endblock %}
 
 {% block body %}
-{{ block.super }}
+
 <div class="about-section">
-    <div class="container">
+    <div class="container mt-4">
         <div class="about-header">
             <h1 class="about-title">We Are Angaar 🔥</h1>
-            <p class="about-subtitle">Transforming passionate learners into industry-ready professionals through hands-on experience and mentorship.</p>
+            <p class="about-subtitle">Transforming passionate learners into industry-ready professionals through
+                hands-on experience and mentorship.</p>
         </div>
 
         <div class="row">
@@ -417,7 +447,8 @@
                         <i class="fas fa-laptop-code"></i>
                     </div>
                     <h3 class="feature-title">Practical Learning</h3>
-                    <p class="feature-description">Real-world projects and hands-on experience to build your portfolio and confidence.</p>
+                    <p class="feature-description">Real-world projects and hands-on experience to build your portfolio
+                        and confidence.</p>
                 </div>
             </div>
             <div class="col-md-4">
@@ -426,7 +457,8 @@
                         <i class="fas fa-users"></i>
                     </div>
                     <h3 class="feature-title">Expert Mentorship</h3>
-                    <p class="feature-description">Learn from industry professionals who guide you through your journey.</p>
+                    <p class="feature-description">Learn from industry professionals who guide you through your journey.
+                    </p>
                 </div>
             </div>
             <div class="col-md-4">
@@ -435,7 +467,8 @@
                         <i class="fas fa-rocket"></i>
                     </div>
                     <h3 class="feature-title">Career Growth</h3>
-                    <p class="feature-description">Accelerate your career with industry-relevant skills and networking opportunities.</p>
+                    <p class="feature-description">Accelerate your career with industry-relevant skills and networking
+                        opportunities.</p>
                 </div>
             </div>
         </div>
@@ -505,25 +538,26 @@
 
 <footer>
     <div class="container">
-        <div class="footer-content">
-            <div class="footer-section">
+        <div class="custom-footer-content">
+            <div class="custom-footer-section">
                 <h3>About Us</h3>
-                <p>The Angaar Batch is dedicated to transforming tech education through practical learning and expert mentorship.</p>
+                <p>The Angaar Batch is dedicated to transforming tech education through practical learning and expert
+                    mentorship.</p>
             </div>
-            <div class="footer-section">
+            <div class="custom-footer-section">
                 <h3>Quick Links</h3>
                 <p><a href="/">Home</a></p>
                 <p><a href="{% url 'about' %}">About</a></p>
                 <p><a href="{% url 'our_team' %}">Our Team</a></p>
                 <p><a href="{% url 'articles' %}">Job Articles</a></p>
             </div>
-            <div class="footer-section">
+            <div class="custom-footer-section">
                 <h3>Contact</h3>
                 <p>Email: info@angaarbatch.com</p>
                 <p>Phone: +91 123 456 7890</p>
             </div>
         </div>
-        <div class="footer-bottom">
+        <div class="custom-footer-bottom">
             <p>&copy; 2025 The Angaar Batch. All rights reserved.</p>
         </div>
     </div>
