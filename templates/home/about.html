@@ -23,11 +23,7 @@
         overflow: hidden;
     }
 
-    @media (max-width: 768px) {
-        .about-section {
-            padding: 40px 0;
-        }
-    }
+  
 
     .about-header {
         text-align: center;
@@ -384,7 +380,7 @@
 
         .left::after,
         .right::after {
-            left: 15px;
+            left:0px;
         }
 
         .timeline-content {
@@ -425,7 +421,7 @@
 
     /* Fix column spacing */
     [class*="col-"] {
-        padding: 0 15px;
+        padding: 10px 15px;
     }
 </style>
 {% endblock %}
@@ -486,20 +482,20 @@
             </div>
             <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
-                    <div class="stat-number" data-count="50">50+</div>
-                    <div class="stat-label">Industry Projects</div>
+                    <div class="stat-number" data-count="10000">10000+</div>
+                    <div class="stat-label">Online Sessions</div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
-                    <div class="stat-number" data-count="95">95%</div>
-                    <div class="stat-label">Placement Rate</div>
+                    <div class="stat-number" data-count="25">25+</div>
+                    <div class="stat-label">Workshops</div>
                 </div>
             </div>
             <div class="col-md-3 col-sm-6">
                 <div class="stat-card">
-                    <div class="stat-number" data-count="20">20+</div>
-                    <div class="stat-label">Expert Mentors</div>
+                    <div class="stat-number" data-count="15">15+</div>
+                    <div class="stat-label">Internships Offered</div>
                 </div>
             </div>
         </div>
@@ -536,32 +532,6 @@
     </div>
 </div>
 
-<footer>
-    <div class="container">
-        <div class="custom-footer-content">
-            <div class="custom-footer-section">
-                <h3>About Us</h3>
-                <p>The Angaar Batch is dedicated to transforming tech education through practical learning and expert
-                    mentorship.</p>
-            </div>
-            <div class="custom-footer-section">
-                <h3>Quick Links</h3>
-                <p><a href="/">Home</a></p>
-                <p><a href="{% url 'about' %}">About</a></p>
-                <p><a href="{% url 'our_team' %}">Our Team</a></p>
-                <p><a href="{% url 'articles' %}">Job Articles</a></p>
-            </div>
-            <div class="custom-footer-section">
-                <h3>Contact</h3>
-                <p>Email: info@angaarbatch.com</p>
-                <p>Phone: +91 123 456 7890</p>
-            </div>
-        </div>
-        <div class="custom-footer-bottom">
-            <p>&copy; 2025 The Angaar Batch. All rights reserved.</p>
-        </div>
-    </div>
-</footer>
 
 <script>
     function animateTimelineItems() {
