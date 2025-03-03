@@ -207,7 +207,10 @@ class Question(models.Model):
     output_format = models.TextField(blank=True, null=True)
         
     cpu_time_limit = models.FloatField(default=1, blank=True, null=True)
-    memory_limit = models.PositiveIntegerField(default=256, blank=True, null=True)    
+    memory_limit = models.PositiveIntegerField(default=256, blank=True, null=True)
+    
+    show_complete_driver_code = models.BooleanField(default=False)  # New field
+    
     
     difficulty_level = models.CharField(max_length=50, choices=[
         ('Easy', 'Easy'),
@@ -350,7 +353,8 @@ class Question(models.Model):
 class DriverCode(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='driver_codes')
     language_id = models.IntegerField(default=0)
-    code = models.TextField()
+    visible_driver_code = models.TextField()  # Code displayed to the user
+    complete_driver_code = models.TextField()
     
     LANGUAGE_CHOICES = {
         71: 'Python',
@@ -370,7 +374,6 @@ class DriverCode(models.Model):
     
     def get_name_through_id(self):
         return dict(self.LANGUAGE_CHOICES).get(self.language_id)
-
 
 # ============================== TEST CASE MODEL =========================
 

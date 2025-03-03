@@ -17,7 +17,9 @@ urlpatterns = [
     path("instructor/", include("instructor.urls")),
     path("administration/", include("administration.urls")), 
     
-    path('ckeditor/', include('ckeditor_uploader.urls')),   
+    path('ckeditor/', include('ckeditor_uploader.urls')),
+    path('', include('django_prometheus.urls')),
+   
     
     path('__debug__/', include(debug_toolbar.urls)),
 

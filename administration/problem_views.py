@@ -7,6 +7,7 @@ from accounts.models import Administrator
 from django.http import JsonResponse
 import requests, time, re, json, base64
 from django.db import transaction
+from django.utils.safestring import mark_safe
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -483,29 +484,49 @@ def driver_code(request, slug):
     administrator = Administrator.objects.get(id=request.user.id)
     question = Question.objects.get(slug=slug)
     
-    driver_codes = {code.language_id: code.code for code in DriverCode.objects.filter(question=question)}
-    
+    driver_codes = {
+    code.language_id: {
+        "visible": code.visible_driver_code,
+        "complete": code.complete_driver_code,
+    }
+    for code in DriverCode.objects.filter(question=question)
+    }
+
         
     if request.method == 'POST':
         
         language_id = request.POST.get('language_id')
-        code = request.POST.get('code')
+        visible_driver_code = request.POST.get('visible_driver_code')
+        complete_driver_code = request.POST.get('complete_driver_code')
+        show_complete_code = request.POST.get('show_complete_code') == "true"  # Convert to boolean
+        
+        question.show_complete_driver_code = show_complete_code
+        question.save()
+
 
         # Check if a driver code already exists for the given language
         existing_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
         if existing_code:
-            existing_code.code = code
+            existing_code.visible_driver_code = visible_driver_code
+            existing_code.complete_driver_code = complete_driver_code
+
             existing_code.save()
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} updated successfully."})
         else:
-            driver_code = DriverCode(question=question, language_id=language_id, code=code)
+            driver_code = DriverCode(
+                question=question,
+                language_id=language_id,
+                visible_driver_code=visible_driver_code,
+                complete_driver_code=complete_driver_code,
+            )
             driver_code.save()
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} added successfully."})
+
 
     parameters = {
         "administrator": administrator,
         'question': question,
-        'driver_codes': driver_codes
+        'driver_codes': mark_safe(json.dumps(driver_codes)),
     }
 
     return render(request, 'administration/practice/driver_code.html', parameters)
@@ -603,6 +624,7 @@ def test_code(request, slug):
     
     if question.scenario:
             question.scenario = convert_backticks_to_code(question.scenario)
+            
     question.description = convert_backticks_to_code(question.description)
     
     parameters = {

@@ -9,6 +9,10 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils import timezone
 
+from django.db import transaction
+from django.db.models import Q
+from django.contrib.auth import login as default_login
+
 from .models import Student, Instructor, Administrator, PasswordResetToken
 
 from django.utils.timezone import now
@@ -20,10 +24,23 @@ from django_ratelimit.decorators import ratelimit
 
 @ratelimit(key='post:username', rate='3/m', method=['POST'], block=False)
 def login(request):
+    if request.user.is_authenticated:
+        # Redirect based on user type
+        if hasattr(request.user, 'student'):
+            return redirect('student')
+        elif hasattr(request.user, 'instructor'):
+            return redirect('instructor')
+        elif hasattr(request.user, 'administrator'):
+            return redirect('administration')
+        else:
+            return redirect('home')  # Default fallback
+
     if getattr(request, 'limited', False):
         messages.error(request, "Too many login attempts for this Username. Please try again after 1 minute.")
-        return redirect('login')  # Replace 'login' with your login view name or URL
-        
+        return redirect('login')
+
+    next_url = request.GET.get('next', '')
+
     if request.method == 'POST':
         username = request.POST.get('username').strip().lower()
         password = request.POST.get('password')
@@ -32,125 +49,97 @@ def login(request):
             user = auth.authenticate(username=username, password=password)
 
             if user is not None:
-                
-                try:
-                    # check if the student is enrolled in any batch and get
-                    if user.student.enrollment_requests.filter(status='Accepted').exists():
-                        batch = user.student.enrollment_requests.filter(status='Accepted')
-                        
-                        if len(batch) == 1:
-                            batch = batch[0].batch
-                            auth.login(request, user)
-                            return redirect('batch', slug=batch.slug)
-                        else:
-                            auth.login(request, user)
-                            return redirect('my_batches')
-                    
-                    auth.login(request, user)
-                    return redirect('student')
+                auth.login(request, user)
+                return redirect(next_url if next_url else 'student')
 
-                except:
-                    
-                    try: 
-                        auth.login(request, user)
-                        return redirect('student')
-                    
-                    except:
-                        messages.error(request, "Something Went Wrong... Try Again!")
-                        return redirect("login")
-            
-            else:                
-                messages.error(request, "Invalid Password")
-                return redirect("login")
-            
+            messages.error(request, "Invalid Password")
+            return redirect("login")
+
         elif Instructor.objects.filter(username=username).exists():
             user = auth.authenticate(username=username, password=password)
 
             if user is not None:
                 auth.login(request, user)
-                return redirect('instructor')
-            
-            else:
-                messages.error(request, "Invalid Password")
-                return redirect("login")
-        
+                return redirect(next_url if next_url else 'instructor')
+
+            messages.error(request, "Invalid Password")
+            return redirect("login")
+
         elif Administrator.objects.filter(username=username).exists():
             user = auth.authenticate(username=username, password=password)
 
             if user is not None:
                 auth.login(request, user)
-                return redirect('administration')
-            
-            else:
-                messages.error(request, "Invalid Password")
-                return redirect("login")
-        
+                return redirect(next_url if next_url else 'administration')
+
+            messages.error(request, "Invalid Password")
+            return redirect("login")
+
         else:
             messages.error(request, "Invalid Username or Password")
             return redirect("login")
 
-    return render(request, 'accounts/login.html')
+    return render(request, 'accounts/login.html', {'next': next_url})
 
 # ===================================== REGISTER ==============================
 
 def register(request):
-    if request.method=="POST":
+    if request.user.is_authenticated:
+        # Redirect logged-in users to the dashboard
+        if hasattr(request.user, 'student'):
+            return redirect('student')
+        elif hasattr(request.user, 'instructor'):
+            return redirect('instructor')
+        elif hasattr(request.user, 'administrator'):
+            return redirect('administration')
+        else:
+            return redirect('home')  # Default fallback
+
+    next_url = request.GET.get('next', '')
+
+    if request.method == "POST":
         username = request.POST.get("username").strip().lower()
-        
         first_name = request.POST.get("first_name").strip().title()
         last_name = request.POST.get("last_name").strip().title()
-        
         email = request.POST.get("email").strip().lower()
-        
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
-        
-        # mobile_number = request.POST.get("mobile_number")
-        # gender = request.POST.get("gender")
-        # college = request.POST.get("college")
-        
+
         if password != confirm_password:
             messages.error(request, "Passwords do not match!")
             return redirect("register")
-        
-        if Student.objects.filter(username=username).exists():
-            messages.error(request, "Username already exists!")
+
+        # Optimized Query for checking existing username or email
+        if Student.objects.filter(Q(username=username) | Q(email=email)).exists():
+            messages.error(request, "Username or Email already exists!")
             return redirect("register")
-        
-        if Student.objects.filter(email=email).exists():
-            messages.error(request, "Email already exists!")
+
+        try:
+            with transaction.atomic():  # Ensures rollback in case of failure
+                new_user = Student.objects.create(
+                    username=username,
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email,
+                )
+                new_user.set_password(password)
+                new_user.save()
+
+                send_welcome_mail(email, first_name)
+
+                messages.success(request, "Account created successfully! Aaja Ab🔥")
+
+                # Auto-login user after registration (optional)
+                default_login(request, new_user)
+
+                return redirect(next_url if next_url else "student")
+
+        except Exception as e:
+            messages.error(request, f"Something went wrong: {e}")
             return redirect("register")
-        
-        # if Student.objects.filter(mobile_number=mobile_number).exists():
-        #     messages.error(request, "Mobile Number already exists!")
-        #     return redirect("register")
-        
-        # if len(mobile_number) != 10 or not mobile_number.isdigit() or mobile_number[0] in '012345':
-        #     messages.error(request, "Invalid Mobile Number!")
-        #     return redirect("register")
 
-        new_user = Student.objects.create(
-            username=username,
-            first_name=first_name,
-            last_name = last_name,
-            email = email,
-            # mobile_number = mobile_number,
-            # gender = gender,
-            # college = college,
-        )
-        
-        new_user.set_password(password)
-        
-        send_welcome_mail(email, first_name)
+    return render(request, "accounts/register.html", {"next": next_url})
 
-        
-        new_user.save() 
-                
-        messages.success(request, "Account created successfully! Aaja Ab🔥")
-
-        return redirect("login")
-    
-    return render(request,"accounts/register.html")
 
 # =================================== logout ============================
 
@@ -159,7 +148,7 @@ def logout(request):
      auth.logout(request)
      return redirect("home")
 
-# ====================== check Email availability ====================
+# ====================== check username availability ====================
 
 def check_username_availability(request):
     username = request.GET.get('username', '')
@@ -170,6 +159,16 @@ def check_username_availability(request):
     
     print(data)
 
+    return JsonResponse(data)
+
+# ====================== check email availability ====================
+def check_email_availability(request):
+    email = request.GET.get('email', '')
+    data = {'is_available': 
+        not (Student.objects.filter(email=email).exists() 
+        or Instructor.objects.filter(email=email).exists() 
+        or Administrator.objects.filter(email=email).exists())}
+    
     return JsonResponse(data)
 
 # ====================== block student ====================

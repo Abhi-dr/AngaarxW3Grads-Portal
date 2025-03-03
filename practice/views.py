@@ -197,10 +197,16 @@ def create_submission(user, question, source_code, language_id):
         raise Exception("Could not create submission.")
 
 
-def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, memory_limit):
+def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_limit, memory_limit):
     """
     Send the code to Judge0 API for execution against multiple test cases.
     """
+            
+    if not question.show_complete_driver_code: # User ko complete code dikh rha h
+        driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
+        source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)        
+                
+
     # Prepare single stdin batch input for Judge0
     stdin = f"{len(test_cases)}~"
     for test_case in test_cases:
@@ -437,7 +443,7 @@ def submit_code(request, slug):
 
             language_id = request.POST.get('language_id')
             source_code = request.POST.get('submission_code')
-
+            
             if not language_id or not source_code:
                 return JsonResponse({"error": "Missing language ID or source code."}, status=400)
 
@@ -458,7 +464,7 @@ def submit_code(request, slug):
 
             # Run the code and process results
             start = time.time()
-            judge0_response = run_code_on_judge0(source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
+            judge0_response = run_code_on_judge0(question, source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
             end = time.time()
             
             print("Time Taken:", end - start)
@@ -522,9 +528,17 @@ def submit_code(request, slug):
 # ============================================== DRIVER CODE FETCHING ===============================================
 
 def get_driver_code(request, question_id, language_id):
-    driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()
+    question = get_object_or_404(Question, id=question_id)
+    driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()    
     if driver_code:
-        return JsonResponse({"success": True, "code": driver_code.code})
+        
+        if question.show_complete_driver_code:
+            code = driver_code.complete_driver_code.replace("#USER_CODE#", driver_code.visible_driver_code)
+            return JsonResponse({"success": True, "code": code})
+        else:
+            return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
+        
+        return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
     return JsonResponse({"success": False, "message": "Driver code not found.", "language id": language_id, "question id": question_id}, status=404)
 
 # ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================
@@ -552,6 +566,7 @@ def run_code(request, slug):
 
             # Execute code against sample test cases
             judge0_response = run_code_on_judge0(
+                question,
                 source_code,
                 language_id,
                 sample_test_cases,
@@ -627,6 +642,7 @@ def custom_input(request, slug):
         
         # Run code on Judge0
         judge0_response = run_code_on_judge0(
+            question,
             source_code,
             language_id,
             test_cases,

@@ -3,10 +3,13 @@
 
 {% block title %} Article | {{ article.title }}
 {% endblock %}
-{%block article_active %} active {% endblock %} {% block extra_css %}
+{%block article_active %} active {% endblock %} 
+
+{% block extra_css %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <style>
+
     h3.article {
         font-family: "Roboto", sans-serif;
         font-size: 24px;
@@ -45,6 +48,54 @@
         width: 100%;
         border-radius: 8px;
         font-size: 20px;
+    }
+
+    .comment-section {
+        margin-top: 30px;
+    }
+
+    .comment-card {
+        background-color: #171A1FFF;
+        border: 1px solid #2a2a2a;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .comment-header {
+        padding: 10px 15px;
+        border-bottom: 1px solid #2a2a2a;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .comment-body {
+        padding: 15px;
+    }
+
+    .comment-footer {
+        padding: 10px 15px;
+        border-top: 1px solid #2a2a2a;
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #2a2a2a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
     }
 
     .output-box {
@@ -152,18 +203,17 @@
     }
 </style>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
 
+{% endblock %} 
 
-
-<link rel="stylearticle" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
-
-{% endblock %} {% block body %}
+{% block body %}
 
 <div class="container-fluid">
 
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Articles</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'administrator_articles' %}">Articles</a></li>
             <li class="breadcrumb-item">
                 {{ article.title }}
             </li>
@@ -171,54 +221,74 @@
     </nav>
 
     {% for message in messages %}
-
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
         <strong>{{ message.tag }}</strong> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-
     {% endfor %}
 
     <div class="card" id="card-title-2">
-        <div class="card-header ">
+        <div class="card-header">
             <div class="row">
                 <div class="col-md-6">
                     <h5 class="card-title fw-semibold">{{ article.title }}</h5>
-
                     {% if article.added_by %}
-
                     <span class="d-inline-flex">
                         <b>Contributed by:</b> <i>{{ article.added_by.first_name }} {{article.added_by.last_name}}</i>
-                    </span> {% endif %}
+                    </span> 
+                    {% endif %}
                 </div>
 
                 <div class="col-md-6">
                     <div class="d-flex justify-content-end">
-                        <a id="view-submission" href="#" class="badge bg-dark fs-5 mx-1">✏️</a>
-                        <a id="view-submission" href="{% url 'administrator_delete_article' article.id %}" onclick="return confirm('Are you sure you want to delete this article?')" class="badge bg-dark fs-4 mx-1">❌</a>
-                        <!-- <a id="view-submission" class="badge bg-dark mx-1 disabled">❤️ 23</a> -->
+                        <span class="badge bg-dark fs-5 mx-1">🔥 {{ article.total_likes }}</span>
+                        <span class="badge bg-dark fs-5 mx-1">💬 {{ comments.count }}</span>
+                        <a href="{% url 'administrator_edit_article' article.id %}" class="badge bg-dark fs-5 mx-1">✏️</a>
+                        <a href="{% url 'administrator_delete_article' article.id %}" onclick="return confirm('Are you sure you want to delete this article?')" class="badge bg-dark fs-4 mx-1">❌</a>
                     </div>
                 </div>
             </div>
         </div>
 
-
-
         {% autoescape off %}
-
-
         <div class="card-body mb-n7">
             <p>{{ article.content|linebreaks }}</p>
         </div>
-
         {% endautoescape %}
 
         <div class="card-footer d-sm-flex justify-content-between align-items-center">
             Created on: {{ article.created_at }}
         </div>
-
     </div>
 
+    <!-- Comments Section -->
+    <div class="comment-section text-white">
+        <h4 class="mb-4">Comments ({{ comments.count }})</h4>
+        {% if comments %}
+            {% for comment in comments %}
+            <div class="comment-card">
+                <div class="comment-header">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            {{ comment.user.username|make_list|first|upper }}
+                        </div>
+                        <div>
+                            <strong>{{ comment.user.first_name }} {{ comment.user.last_name }}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="comment-body">
+                    {{ comment.content }}
+                </div>
+                <div class="comment-footer">
+                    {{ comment.created_at|date:"F j, Y, g:i a" }}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-muted">No comments yet.</p>
+        {% endif %}
+    </div>
 
 </div>
 

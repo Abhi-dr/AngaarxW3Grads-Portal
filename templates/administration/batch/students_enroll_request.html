@@ -17,8 +17,8 @@ Enrollment Requests
                     </span>
                     <a href="{% url 'approve_all_enrollments' %}" class="btn btn-success btn-lg">
                         Approve All
-                    </a>                    
-                    </h3>
+                    </a>
+                </h3>
             </h3>
         </div>
     </div>
@@ -183,21 +183,39 @@ Enrollment Requests
 </div>
 
 <script>
+
     document.addEventListener("DOMContentLoaded", function () {
         fetchPendingEnrollments();
         fetchRejectedEnrollments();
+        setupWebSocket();
     });
+
+    function setupWebSocket() {
+        const socket = new WebSocket("ws://127.0.0.1:8000/ws/enrollment_requests/");
+
+        socket.onmessage = function (event) {
+            const data = JSON.parse(event.data);
+
+            if (data.type === "update_enrollments") {
+                fetchPendingEnrollments();
+                fetchRejectedEnrollments();
+            }
+        };
+
+        socket.onclose = function () {
+            console.error("WebSocket connection closed. Reconnecting in 5 seconds...");
+            setTimeout(setupWebSocket, 5000);
+        };
+    }
 
     function fetchPendingEnrollments() {
         fetch("{% url 'administrator_fetch_pending_enrollments' %}")
             .then(response => response.json())
             .then(data => {
                 display_pending_requests(data.data);
-
             })
-            .catch(error => console.error("Error fetching questions:", error));
+            .catch(error => console.error("Error fetching pending enrollments:", error));
     }
-
 
     function display_pending_requests(enrollments) {
         const dataTableBody = document.getElementById("enrollmentTableBody");
@@ -214,35 +232,31 @@ Enrollment Requests
                 <td style="text-align: center;">
                     <p class="fw-semibold mb-1 text-wrap">${student.batch_name}</p>
                 </td>
-               
                 <td style="text-align: center;">
                     <span class="badge bg-${student.status_color}">${student.status}</span>
                 </td>
-
                 <td style="text-align: center;">
                     <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
                 </td>
                 <td>
-                    <a href="/administration/reject_enrollment/${student.id}" onclick="return confirm('Are you sure you want to REJECT the request?');" class="btn btn-outline-danger">Reject</a>
+                    <a href="/administration/reject_enrollment/${student.id}" onclick="return handleEnrollmentAction(event, 'reject', ${student.id});" class="btn btn-outline-danger">Reject</a>
                 </td>
                 <td>
-                    <a href="/administration/approve_enrollment/${student.id}" onclick="return confirm('Are you sure you want to APPROVE the request?');" class="btn btn-success">Approve</a>
+                    <a href="/administration/approve_enrollment/${student.id}" onclick="return handleEnrollmentAction(event, 'approve', ${student.id});" class="btn btn-success">Approve</a>
                 </td>
-                `;
+            `;
 
             dataTableBody.appendChild(row);
         });
     }
-
 
     function fetchRejectedEnrollments() {
         fetch("{% url 'administrator_fetch_rejected_enrollments' %}")
             .then(response => response.json())
             .then(data => {
                 display_rejected_requests(data.data);
-
             })
-            .catch(error => console.error("Error fetching questions:", error));
+            .catch(error => console.error("Error fetching rejected enrollments:", error));
     }
 
     function display_rejected_requests(enrollments) {
@@ -260,24 +274,55 @@ Enrollment Requests
                 <td style="text-align: center;">
                     <p class="fw-semibold mb-1 text-wrap">${student.batch_name}</p>
                 </td>
-               
                 <td style="text-align: center;">
                     <span class="badge bg-${student.status_color}">${student.status}</span>
                 </td>
-
                 <td style="text-align: center;">
                     <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
                 </td>
                 <td>
-                    <a href="/administration/approve_enrollment/${student.id}" onclick="return confirm('Are you sure you want to APPROVE the request?');" class="btn btn-success">Approve</a>
+                    <a href="/administration/approve_enrollment/${student.id}" onclick="return handleEnrollmentAction(event, 'approve', ${student.id});" class="btn btn-success">Approve</a>
                 </td>
-                `;
+            `;
 
             dataTableBody.appendChild(row);
         });
     }
 
+    function handleEnrollmentAction(event, action, studentId) {
+        event.preventDefault();
+
+        const confirmationMessage =
+            action === "approve"
+                ? "Are you sure you want to APPROVE the request?"
+                : "Are you sure you want to REJECT the request?";
+
+        if (!confirm(confirmationMessage)) return false;
+
+        fetch(`/administration/${action}_enrollment/${studentId}`, {
+            method: "POST",
+            headers: { "X-CSRFToken": getCSRFToken() },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    fetchPendingEnrollments();
+                    fetchRejectedEnrollments();
+                } else {
+                    alert("Action failed. Please try again.");
+                }
+            })
+            .catch(error => console.error("Error processing request:", error));
+
+        return false;
+    }
+
+    function getCSRFToken() {
+        return document.querySelector("[name=csrfmiddlewaretoken]").value;
+    }
+
 </script>
+
 
 
 

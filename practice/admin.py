@@ -25,12 +25,12 @@ class SheetAdmin(admin.ModelAdmin):
 
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ['title', 'difficulty_level', 'position', "is_approved", "cpu_time_limit", "memory_limit"]
+    list_display = ['title', 'difficulty_level', 'position', "is_approved", "show_complete_driver_code"]
     search_fields = ['title', 'sheets__name']  # Use 'sheets__name' since it's now ManyToMany
     list_per_page = 30
     list_filter = ['difficulty_level']  # Use 'sheets' for filtering by associated sheets
     ordering = ['-id']
-    list_editable = ['position']
+    list_editable = ['position', "show_complete_driver_code"]
     
 # ==================================== DRIVER CODE ====================================
 
