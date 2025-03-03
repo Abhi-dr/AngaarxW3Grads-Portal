@@ -120,12 +120,13 @@ WSGI_APPLICATION = 'angaar_hai.wsgi.application'
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.mysql',
-    'ENGINE':   'mysql.connector.django',
+        'ENGINE': 'django.db.backends.mysql',
+    # 'ENGINE':   'mysql.connector.django',
         'NAME': 'angaar_hai',
         'USER': 'root',
         'PASSWORD': 'root',
-        'HOST': 'mysql_db',  # This should match the service name in docker-compose
+        # 'HOST': 'mysql_db',  # This should match the service name in docker-compose
+         'HOST': 'localhost',
         'PORT': '3306',
     }
 }
