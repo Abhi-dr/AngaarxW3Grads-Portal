@@ -189,6 +189,135 @@
             height: 100px;
         }
     }
+
+    /* Top Performers Section Styles */
+    .section-title {
+        font-size: 1.8rem;
+        font-weight: 600;
+        margin: 3rem 0 1.5rem;
+        position: relative;
+        display: inline-block;
+        padding-bottom: 10px;
+    }
+
+    .section-title:after {
+        content: '';
+        position: absolute;
+        width: 50%;
+        height: 2px;
+        background: linear-gradient(90deg, #ff6026, #ffa53e);
+        bottom: 0;
+        left: 25%;
+    }
+
+    .batch-title {
+        font-size: 1.4rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        color: #fff;
+        padding-left: 1rem;
+        border-left: 3px solid #ff6026;
+    }
+
+    .performer-card {
+        background-color: #1a1a1a;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .performer-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.2);
+    }
+
+    .performer-img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #ff7847;
+        margin-right: 1rem;
+    }
+
+    .performer-info {
+        flex-grow: 1;
+    }
+
+    .performer-name {
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 0.2rem;
+    }
+
+    .performer-count {
+        font-size: 0.9rem;
+        color: #aaa;
+    }
+
+    .performer-badge {
+        background: linear-gradient(45deg, #ff6026, #ffa53e);
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.5rem;
+    }
+
+    .batch-container {
+        margin-bottom: 2rem;
+    }
+
+    .batch-tabs {
+        display: flex;
+        overflow-x: auto;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        scrollbar-width: thin;
+        scrollbar-color: #ff6026 #1a1a1a;
+    }
+
+    .batch-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .batch-tabs::-webkit-scrollbar-track {
+        background: #1a1a1a;
+        border-radius: 10px;
+    }
+
+    .batch-tabs::-webkit-scrollbar-thumb {
+        background: #ff6026;
+        border-radius: 10px;
+    }
+
+    .batch-tab {
+        padding: 0.5rem 1rem;
+        background-color: #1a1a1a;
+        color: #fff;
+        border-radius: 20px;
+        margin-right: 0.5rem;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: all 0.3s;
+    }
+
+    .batch-tab.active {
+        background: linear-gradient(45deg, #ff6026, #ffa53e);
+    }
+
+    .performer-rank {
+        display: flex;
+        align-items: center;
+    }
 </style>
 {% endblock %}
 
@@ -199,12 +328,6 @@
         <p class="lead mb-4">Celebrating excellence and outstanding accomplishments</p>
     </div>
 
-    <!-- <div class="filter-container">
-        <button class="filter-btn active" data-filter="all">All</button>
-        <button class="filter-btn" data-filter="courses">Courses</button>
-        <button class="filter-btn" data-filter="professional">Professional</button>
-    </div> -->
-
     <div class="row g-4 justify-content-center" id="achievers-section">
         <div class="col-12">
             <div class="no-data">
@@ -213,6 +336,31 @@
             </div>
         </div>
     </div>
+
+    <!-- Top Performers Section -->
+    <div class="container mt-5">
+        <div class="text-center">
+            <h2 class="section-title">This Week's Top Performers</h2>
+            <p class="lead mb-4">Students who solved the most questions in the past week</p>
+        </div>
+
+        <div id="top-performers-section">
+            <div class="text-center">
+                <div class="spinner-border text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading top performers data...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- <div class="filter-container">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="courses">Courses</button>
+        <button class="filter-btn" data-filter="professional">Professional</button>
+    </div> -->
+
+   
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -251,7 +399,7 @@
                                 <div class="card-body">
                                     <h5 class="card-title">${achiever.name}</h5>
                                     <p class="card-text">${achiever.title}</p>
-                                    <p class="card-text">“${achiever.description}”</p>
+                                    <p class="card-text">"${achiever.description}"</p>
                                     <div class="text-center">
                                         <span class="achievement-badge">${achiever.achievement_type}</span>
                                     </div>
@@ -295,6 +443,90 @@
                         <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
                         <p>Unable to load achievers data. Please try again later.</p>
                     </div>
+                </div>`);
+            }
+        });
+
+        // Load top performers data
+        $.ajax({
+            url: "{% url 'fetch_top_performers' %}",
+            method: "GET",
+            success: function (data) {
+                if (data.batches.length === 0) {
+                    $('#top-performers-section').html(`
+                    <div class="no-data">
+                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                        <p>No batch data available yet.</p>
+                    </div>`);
+                    return;
+                }
+
+                let batchTabsHtml = '<div class="batch-tabs">';
+                data.batches.forEach((batch, index) => {
+                    batchTabsHtml += `
+                    <div class="batch-tab ${index === 0 ? 'active' : ''}" data-batch-id="${batch.id}">
+                        ${batch.name}
+                    </div>`;
+                });
+                batchTabsHtml += '</div>';
+
+                let batchContainersHtml = '';
+                data.batches.forEach((batch, index) => {
+                    const batchPerformers = data.top_performers.filter(performer => performer.batch_id === batch.id);
+                    
+                    batchContainersHtml += `
+                    <div class="batch-container" id="batch-${batch.id}" style="display: ${index === 0 ? 'block' : 'none'}">
+                        <h3 class="batch-title">${batch.name}</h3>`;
+                    
+                    if (batchPerformers.length === 0) {
+                        batchContainersHtml += `
+                        <div class="no-data">
+                            <p>No top performers data available for this batch yet.</p>
+                        </div>`;
+                    } else {
+                        batchPerformers.forEach((performer, perfIndex) => {
+                            batchContainersHtml += `
+                            <div class="performer-card animated-card" style="animation-delay: ${(perfIndex * 0.1).toFixed(1)}s">
+                                <div class="performer-rank">
+                                    <div class="performer-badge">${perfIndex + 1}</div>
+                                </div>
+                                <img src="${performer.profile_pic || '{% static "img/default-profile.png" %}'}" class="performer-img" alt="${performer.name}">
+                                <div class="performer-info">
+                                    <div class="performer-name">${performer.name}</div>
+                                    <div class="performer-count">Solved ${performer.solved_count} question${performer.solved_count !== 1 ? 's' : ''} this week</div>
+                                </div>
+                                <div class="social-icons">
+                                    ${performer.linkedin ? `<a href="${performer.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>` : ''}
+                                    ${performer.github ? `<a href="${performer.github}" target="_blank"><i class="fab fa-github"></i></a>` : ''}
+                                </div>
+                            </div>`;
+                        });
+                    }
+                    
+                    batchContainersHtml += `</div>`;
+                });
+
+                $('#top-performers-section').html(batchTabsHtml + batchContainersHtml);
+
+                // Add event listeners for batch tabs
+                $('.batch-tab').click(function() {
+                    const batchId = $(this).data('batch-id');
+                    
+                    // Update active tab
+                    $('.batch-tab').removeClass('active');
+                    $(this).addClass('active');
+                    
+                    // Show selected batch container, hide others
+                    $('.batch-container').hide();
+                    $(`#batch-${batchId}`).show();
+                });
+            },
+            error: function (error) {
+                console.error("Error fetching top performers data:", error);
+                $('#top-performers-section').html(`
+                <div class="no-data">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <p>Unable to load top performers data. Please try again later.</p>
                 </div>`);
             }
         });

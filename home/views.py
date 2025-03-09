@@ -3,6 +3,12 @@ from django.contrib import messages as message
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .models import Article, Comment
+from django.utils.timezone import now
+from datetime import timedelta
+from django.db.models import Count
+from practice.models import Batch, Submission, Question
+from administration.models import Achievement
+
 
 def home(request):
     return render(request, "home/index.html")
@@ -98,13 +104,12 @@ def post_comment(request, article_id):
 # ==================================== ACHIEVERS ========================================
 # =======================================================================================
 
-from administration.models import Achievement
 
 def our_achievers(request):
     return render(request, 'home/achievers.html')
 
 def fetch_achievers_data(request):
-    achievers = Achievement.objects.all().order_by('-date')
+    achievers = Achievement.objects.all().order_by('-date')[:4]
     data = []
     for achiever in achievers:
         data.append({
@@ -119,5 +124,71 @@ def fetch_achievers_data(request):
         })
     return JsonResponse(data, safe=False)
 
-
-
+def fetch_top_performers(request):
+    """
+    Fetch the top performers for each batch based on the number of questions solved in the past week.
+    """
+    # Get the batch ID from the request, if provided
+    batch_id = request.GET.get('batch_id')
+    
+    # Calculate the date range for the past week
+    end_date = now()
+    start_date = end_date - timedelta(days=7)
+    
+    # Base query to get submissions from the past week with 'Accepted' status
+    base_query = Submission.objects.filter(
+        submitted_at__gte=start_date,
+        submitted_at__lte=end_date,
+        status='Accepted'
+    )
+    
+    # Initialize the data structure for the response
+    data = {
+        'batches': [],
+        'top_performers': []
+    }
+    
+    # If a specific batch is requested, filter by that batch
+    if batch_id:
+        batches = Batch.objects.filter(id=batch_id)
+    else:
+        # Otherwise, get all batches
+        batches = Batch.objects.all()
+    
+    # For each batch, get the top performers
+    for batch in batches:
+        # Add batch info to the response
+        data['batches'].append({
+            'id': batch.id,
+            'name': batch.name,
+            'description': batch.description,
+            'thumbnail': batch.thumbnail.url if batch.thumbnail else None,
+        })
+        
+        # Get students enrolled in this batch
+        enrolled_students = batch.students.filter(enrollment_requests__status='Accepted')
+        
+        # Get the count of accepted submissions for each student in this batch
+        student_submissions = base_query.filter(
+            user__in=enrolled_students,
+            question__sheets__batches=batch
+        ).values('user').annotate(
+            solved_count=Count('question', distinct=True)
+        ).order_by('-solved_count')[:5]  # Get top 5 performers
+        
+        # Add top performers for this batch to the response
+        for submission in student_submissions:
+            if submission['solved_count'] > 0:  # Only include students who solved at least one question
+                student = enrolled_students.get(id=submission['user'])
+                data['top_performers'].append({
+                    'batch_id': batch.id,
+                    'student_id': student.id,
+                    'name': f"{student.first_name} {student.last_name}",
+                    'profile_pic': student.profile_pic.url if student.profile_pic else None,
+                    'linkedin': student.linkedin_id,
+                    'github': student.github_id,
+                    'solved_count': submission['solved_count'],
+                    'batch_name': batch.name,
+                })
+    
+    return JsonResponse(data, safe=False)

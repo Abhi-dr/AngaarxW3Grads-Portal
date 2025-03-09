@@ -12,5 +12,6 @@ urlpatterns = [
     
     path("our_achievers/", views.our_achievers, name="our_achievers"),
     path('fetch_achievers_data/', views.fetch_achievers_data, name='fetch_achievers_data'),
+    path('fetch_top_performers/', views.fetch_top_performers, name='fetch_top_performers'),
     
 ]
