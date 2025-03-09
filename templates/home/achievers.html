@@ -464,9 +464,9 @@
                 let batchTabsHtml = '<div class="batch-tabs">';
                 data.batches.forEach((batch, index) => {
                     batchTabsHtml += `
-                    <div class="batch-tab ${index === 0 ? 'active' : ''}" data-batch-id="${batch.id}">
+                    <button class="batch-tab filter-btn ${index === 0 ? 'active' : ''}" data-batch-id="${batch.id}">
                         ${batch.name}
-                    </div>`;
+                    </button>`;
                 });
                 batchTabsHtml += '</div>';
 
