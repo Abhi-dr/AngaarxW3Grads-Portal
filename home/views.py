@@ -93,3 +93,31 @@ def post_comment(request, article_id):
             })
             
     return JsonResponse({'status': 'error'}, status=400)
+
+# =======================================================================================
+# ==================================== ACHIEVERS ========================================
+# =======================================================================================
+
+from administration.models import Achievement
+
+def our_achievers(request):
+    return render(request, 'home/achievers.html')
+
+def fetch_achievers_data(request):
+    achievers = Achievement.objects.all().order_by('-date')
+    data = []
+    for achiever in achievers:
+        data.append({
+            'name': achiever.student.first_name + ' ' + achiever.student.last_name,
+            'profile_pic': achiever.student.profile_pic.url,
+            "linkedin": achiever.student.linkedin_id,
+            "github": achiever.student.github_id,
+            'title': achiever.title,
+            'description': achiever.description,
+            "achievement_type": achiever.achievement_type,
+            'date': achiever.date.strftime('%Y-%m-%d'),
+        })
+    return JsonResponse(data, safe=False)
+
+
+

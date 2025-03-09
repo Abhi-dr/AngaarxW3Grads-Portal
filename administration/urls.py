@@ -1,6 +1,5 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis
-from .image_upload import upload_image
+from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers
 
 urlpatterns = [
     path("", views.index, name="administration"),
@@ -72,7 +71,15 @@ urlpatterns = [
     
     path('generate-description/', question_generator.generate_description, name='generate_description'),
     
-    path('upload/image', upload_image, name='upload_image'),
+    # path('upload/image', views.upload_image, name='upload_image'),
+
+    # Achievement Management URLs
+    path('achievements/', achievers.achievements_view, name='achievements'),
+    path('achievements/api/get', achievers.get_achievements, name='get_achievements'),
+    path('achievements/api/create', achievers.create_achievement, name='create_achievement'),
+    path('achievements/api/<int:achievement_id>', achievers.get_achievement, name='get_achievement'),
+    path('achievements/api/<int:achievement_id>/update', achievers.update_achievement, name='update_achievement'),
+    path('achievements/api/<int:achievement_id>/delete', achievers.delete_achievement, name='delete_achievement'),
 
 ]
 

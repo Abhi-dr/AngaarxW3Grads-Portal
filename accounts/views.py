@@ -225,7 +225,6 @@ def get_active_sheet_timer(request):
     else:
         return JsonResponse({'start_time': None, 'end_time': None})
 
-
 # ========================================
 
 from django.core.mail import EmailMultiAlternatives
@@ -338,3 +337,20 @@ def reset_password(request, user_id, token):
         return redirect('request_password_reset')
 
     return redirect('request_password_reset')
+
+@staff_member_required
+def get_students_api(request):
+    """API endpoint to get list of students for administrator use."""
+    try:
+        students = Student.objects.filter(is_active=True).values('id', "first_name", "last_name", 'username', 'email')
+        # sort by first_name
+        students = students.order_by('first_name')
+        return JsonResponse({
+            'status': 'success',
+            'students': list(students)
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=400)

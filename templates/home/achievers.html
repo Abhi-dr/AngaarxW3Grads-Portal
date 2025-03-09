@@ -1,0 +1,303 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Our Achievers{% endblock %}
+
+{% block css %}
+
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+
+<style>
+    body {
+        background-color: #090909;
+        color: white;
+    }
+
+    .main-container {
+        padding: 7rem 0 0 0;
+    }
+
+    .page-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        position: relative;
+        display: inline-block;
+        padding-bottom: 10px;
+    }
+
+    .page-title:after {
+        content: '';
+        position: absolute;
+        width: 50%;
+        height: 3px;
+        background: linear-gradient(90deg, #ff6026, #ffa53e);
+        bottom: 0;
+        left: 25%;
+    }
+
+    .achiever-card {
+        background-color: #1a1a1a;
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: transform 0.3s, box-shadow 0.3s;
+        height: 100%;
+        max-width: 100%;
+    }
+
+    .achiever-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(255, 96, 38, 0.2);
+    }
+
+    .profile-img-container {
+        padding: 1.5rem 0;
+        text-align: center;
+        background-color: rgba(0, 0, 0, 0.2);
+    }
+
+    .profile-img {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #ff7847;
+        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
+    }
+
+    .achiever-card .card-body {
+        padding: 1.2rem;
+    }
+
+    .achiever-card .card-title {
+        color: #fff;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .achiever-card .card-text {
+        color: #ddd;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .achiever-card .card-footer {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 0.8rem 1.2rem;
+        text-align: center;
+    }
+
+    .achiever-card .text-muted {
+        color: #aaa !important;
+    }
+
+    .achievement-badge {
+        display: inline-block;
+        background: linear-gradient(45deg, #ff6026, #ffa53e);
+        color: white;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+
+    .social-icons {
+        margin-top: 1rem;
+        text-align: center;
+    }
+
+    .social-icons a {
+        color: #aaa;
+        margin: 0 5px;
+        font-size: 1rem;
+        transition: color 0.3s;
+        display: inline-block;
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .social-icons a:hover {
+        color: white;
+        background-color: #ff6026;
+    }
+
+    /* Add animation for cards */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animated-card {
+        animation: fadeIn 0.6s ease-out forwards;
+        opacity: 0;
+    }
+
+    /* Filter controls */
+    .filter-container {
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        background-color: #1a1a1a;
+        color: #fff;
+        border: 1px solid #333;
+        border-radius: 25px;
+        padding: 6px 15px;
+        margin: 0 5px 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+        background: linear-gradient(45deg, #ff6026, #ffa53e);
+        border-color: transparent;
+    }
+
+    /* No data message */
+    .no-data {
+        text-align: center;
+        padding: 2rem;
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .profile-img {
+            width: 100px;
+            height: 100px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="main-container">
+    <div class="text-center">
+        <h1 class="page-title">Our Achievers</h1>
+        <p class="lead mb-4">Celebrating excellence and outstanding accomplishments</p>
+    </div>
+
+    <!-- <div class="filter-container">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="courses">Courses</button>
+        <button class="filter-btn" data-filter="professional">Professional</button>
+    </div> -->
+
+    <div class="row g-4 justify-content-center" id="achievers-section">
+        <div class="col-12">
+            <div class="no-data">
+                <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                <p>Loading our Angaari Aawam🔥...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Load achievers data
+        $.ajax({
+            url: "{% url 'fetch_achievers_data' %}",
+            method: "GET",
+            success: function (data) {
+                let content = '';
+
+                if (data.length === 0) {
+                    content = `
+                    <div class="col-12">
+                        <div class="no-data">
+                            <i class="fas fa-info-circle fa-2x mb-3"></i>
+                            <p>No achievers data available yet.</p>
+                        </div>
+                    </div>`;
+                } else {
+                    // Add delay for each card for staggered animation
+                    data.forEach((achiever, index) => {
+                        // Assume category is part of your data or determine it some other way
+                        const category = achiever.category || 'academic';
+
+                        // Calculate animation delay
+                        const animationDelay = (index * 0.1).toFixed(1);
+
+                        content += `
+                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4" data-category="${category}">
+                            <div class="achiever-card animated-card" style="animation-delay: ${animationDelay}s">
+                                <div class="profile-img-container">
+                                    <img src="${achiever.profile_pic}" class="profile-img" alt="${achiever.name}">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title">${achiever.name}</h5>
+                                    <p class="card-text">${achiever.title}</p>
+                                    <p class="card-text">“${achiever.description}”</p>
+                                    <div class="text-center">
+                                        <span class="achievement-badge">${achiever.achievement_type}</span>
+                                    </div>
+                                    <div class="social-icons">
+                                        ${achiever.linkedin ? `<a href="${achiever.linkedin}" target="_blank"><i class="fab fa-linkedin"></i></a>` : ''}
+                                        ${achiever.github ? `<a href="${achiever.github}" target="_blank"><i class="fab fa-github"></i></a>` : ''}
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted">On ${achiever.date}</small>
+                                </div>
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                $('#achievers-section').html(content);
+
+                // Filter functionality
+                $('.filter-btn').click(function () {
+                    const filterValue = $(this).data('filter');
+
+                    // Update active button
+                    $('.filter-btn').removeClass('active');
+                    $(this).addClass('active');
+
+                    // Filter items
+                    if (filterValue === 'all') {
+                        $('#achievers-section > div[data-category]').show();
+                    } else {
+                        $('#achievers-section > div[data-category]').hide();
+                        $(`#achievers-section > div[data-category="${filterValue}"]`).show();
+                    }
+                });
+            },
+            error: function (error) {
+                console.error("Error fetching achievers data:", error);
+                $('#achievers-section').html(`
+                <div class="col-12">
+                    <div class="no-data">
+                        <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                        <p>Unable to load achievers data. Please try again later.</p>
+                    </div>
+                </div>`);
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -13,10 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 import json
 from django.utils import timezone
-
-
 import datetime
-
 from django.http import JsonResponse
 import math
 
