@@ -241,7 +241,7 @@ Student -> Team Details
 </div>
 {% endblock %}
 
-{% block extra_js %}
+{% block myjs %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize modals
@@ -297,7 +297,7 @@ Student -> Team Details
         
         // Function to send join request
         function sendJoinRequest(teamId, message) {
-            fetch(`/student/hackathon/send-join-request/${teamId}/`, {
+            fetch(`/dashboard/hackathon/send-join-request/${teamId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -331,7 +331,7 @@ Student -> Team Details
         
         // Function to cancel join request
         function cancelJoinRequest(teamId) {
-            fetch(`/student/hackathon/cancel-join-request/${teamId}/`, {
+            fetch(`/dashboard/hackathon/cancel-join-request/${teamId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -362,7 +362,7 @@ Student -> Team Details
         
         // Function to leave team
         function leaveTeam(teamId) {
-            fetch(`/student/hackathon/leave-team/${teamId}/`, {
+            fetch(`/dashboard/hackathon/leave-team/${teamId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -380,7 +380,7 @@ Student -> Team Details
                     
                     // Redirect to dashboard
                     setTimeout(() => {
-                        window.location.href = data.redirect || '/student/hackathon/dashboard/';
+                        window.location.href = data.redirect || '/dashboard/hackathon/dashboard/';
                     }, 1000);
                 } else {
                     showToast(data.message, 'error');

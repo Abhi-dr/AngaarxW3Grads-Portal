@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Student -> Manage Hackathon Team
+Hackathon |  {{ team.name }}
 {% endblock %}
 
 {% block body %}
@@ -28,7 +28,7 @@ Student -> Manage Hackathon Team
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-body p-4">
                             <h6 class="fw-semibold mb-3">Team Details</h6>
-                            <form id="update-team-form" method="post" action="{% url 'update_team' team.id %}">
+                            <form id="update-team-form" method="post" action="{% url 'update_team' team.slug %}">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label for="team-name" class="form-label">Team Name <span
@@ -92,8 +92,7 @@ Student -> Manage Hackathon Team
 
                     <div class="card border-0 shadow-sm mb-4">
                         <div class="card-body p-4">
-                            <h6 class="fw-semibold mb-3">Team Members ({{ team.current_members_count }}/{{
-                                team.members_limit }})</h6>
+                            <h6 class="fw-semibold mb-3">Team Members ({{ team.current_members_count }}/{{ team.members_limit }})</h6>
 
                             <div class="list-group">
                                 <!-- Team Leader -->
@@ -115,7 +114,7 @@ Student -> Manage Hackathon Team
                                         <small class="text-muted">Joined {{ member.joined_at|timesince }} ago</small>
                                     </div>
                                     <button class="btn btn-sm btn-outline-danger remove-member-btn"
-                                        data-member-id="{{ member.id }}">
+                                        data-request-id="{{ member.id }}">
                                         Remove
                                     </button>
                                 </div>
@@ -126,7 +125,7 @@ Student -> Manage Hackathon Team
                                 {% endfor %}
                             </div>
 
-                            {% if not team.is_full and team.status == 'open' %}
+                            {% if team.status == 'open' %}
                             <div class="mt-3">
                                 <button class="btn btn-primary w-100" data-bs-toggle="modal"
                                     data-bs-target="#inviteModal">
@@ -179,8 +178,7 @@ Student -> Manage Hackathon Team
                                 {% for request in join_requests %}
                                 <div class="list-group-item" id="request-{{ request.id }}">
                                     <div class="d-flex w-100 justify-content-between align-items-start mb-2">
-                                        <h6 class="mb-0">{{ request.student.first_name }} {{ request.student.last_name
-                                            }}</h6>
+                                        <h6 class="mb-0">{{ request.student.first_name }} {{ request.student.last_name }}</h6>
                                         <small class="text-muted">{{ request.created_at|timesince }} ago</small>
                                     </div>
                                     {% if request.message %}
@@ -284,9 +282,149 @@ Student -> Manage Hackathon Team
     </div>
 </div>
 
-{% block extra_js %}
+{% block myjs %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const csrfToken = getCookie('csrftoken');
+        
+        // Initialize DOM elements
+        const studentSearch = document.getElementById('student-search');
+        const searchResults = document.getElementById('search-results');
+        const selectedStudent = document.getElementById('selected-student');
+        const selectedStudentName = document.getElementById('selected-student-name');
+        const selectedStudentEmail = document.getElementById('selected-student-email');
+        const selectedStudentId = document.getElementById('selected-student-id');
+        const inviteMessage = document.getElementById('invite-message');
+        const sendInviteBtn = document.getElementById('send-invite-btn');
+
+        // Add event listeners for remove member buttons
+        document.querySelectorAll('.remove-member-btn').forEach(btn => {
+            btn.addEventListener('click', () => handleJoinRequest(btn.dataset.requestId, 'reject'));
+        });
+
+
+        // Add event listeners for join request buttons
+        document.querySelectorAll('.approve-request-btn').forEach(btn => {
+            btn.addEventListener('click', () => handleJoinRequest(btn.dataset.requestId, 'approve'));
+        });
+        
+        document.querySelectorAll('.reject-request-btn').forEach(btn => {
+            btn.addEventListener('click', () => handleJoinRequest(btn.dataset.requestId, 'reject'));
+        });
+        
+        // Handle join request (approve/reject)
+        function handleJoinRequest(requestId, action) {
+            fetch(`/dashboard/hackathon/handle-join-request/${requestId}/${action}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the request from the list
+                    const requestElement = document.getElementById(`request-${requestId}`);
+                    if (requestElement) {
+                        requestElement.remove();
+                    }
+                    showToast(data.message, 'success');
+                    
+                    // If approved, refresh the page to show new member
+                    if (action === 'approve') {
+                        location.reload();
+                    } else if (action === 'reject') {
+                        // If rejected, show a toast message
+                        showToast('Join request rejected successfully.', 'success');
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred while handling the request.', 'error');
+            });
+        }
+        
+        // Student search functionality
+        
+        studentSearch.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const query = this.value.trim();
+            
+            searchTimeout = setTimeout(() => {
+                if (query.length >= 2) {
+                    fetch(`/dashboard/hackathon/search-students/?query=${encodeURIComponent(query)}&team_id={{ team.id }}`, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': csrfToken
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        searchResults.innerHTML = '';
+                        
+                        if (data.results && data.results.length > 0) {
+                            data.results.forEach(student => {
+                                const item = document.createElement('button');
+                                item.type = 'button';
+                                item.className = 'list-group-item list-group-item-action';
+                                item.innerHTML = `
+                                    <h6 class="mb-1">${student.name}</h6>
+                                    <small class="text-muted">${student.email}</small>
+                                `;
+                                item.addEventListener('click', () => selectStudent(student));
+                                searchResults.appendChild(item);
+                            });
+                        } else {
+                            searchResults.innerHTML = `
+                                <div class="list-group-item text-center py-3">
+                                    <p class="mb-0 text-muted">No students found</p>
+                                </div>
+                            `;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred while searching students.', 'error');
+                    });
+                } else {
+                    searchResults.innerHTML = '';
+                }
+            }, 300);
+        });
+
+        // Handle send invite form submission
+        document.getElementById('send-invite-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message, 'success');
+                    location.reload();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred while sending the invite.', 'error');
+            });
+        });
+
         // Initialize DOM elements
         const updateTeamForm = document.getElementById('update-team-form');
         const skillInput = document.getElementById('skill-input');
@@ -386,7 +524,7 @@ Student -> Manage Hackathon Team
 
         // Function to search students
         function searchStudents(query) {
-            fetch(`/student/hackathon/search-students/?query=${encodeURIComponent(query)}&team_id={{ team.id }}`, {
+            fetch(`/dashboard/hackathon/search-students/?query=${encodeURIComponent(query)}&team_id={{ team.id }}`, {
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }

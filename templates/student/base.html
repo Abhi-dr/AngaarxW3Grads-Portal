@@ -479,6 +479,8 @@
                             </a>
                         </li>
 
+
+
                         {% comment %}
 
                         <!-- <li class="sidebar-item">
@@ -500,6 +502,21 @@
                         </li> -->
 
                         {% endcomment %}
+
+                        <!-- ========================= COLLABORATION ============================= -->
+                        <li class="nav-small-cap">
+                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+                            <span class="hide-menu">Collaboration</span>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link {% block hackathon_active %} {% endblock %}" href="{% url 'hackathon_dashboard' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-users"></i>
+                                </span>
+                                <span class="hide-menu">Hackathon Teams 🚀</span>
+                            </a>
+                        </li>
 
                         <!-- ============================= EXTRA ==================== -->
                         <li class="nav-small-cap">
@@ -540,21 +557,6 @@
                                     <i class="ti ti-user"></i>
                                 </span>
                                 <span class="hide-menu">My Profile</span>
-                            </a>
-                        </li>
-
-                        <!-- ========================= COLLABORATION ============================= -->
-                        <li class="nav-small-cap">
-                            <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
-                            <span class="hide-menu">Collaboration</span>
-                        </li>
-
-                        <li class="sidebar-item">
-                            <a class="sidebar-link {% block hackathon_active %} {% endblock %}" href="{% url 'hackathon_dashboard' %}" aria-expanded="false">
-                                <span>
-                                    <i class="ti ti-users-group"></i>
-                                </span>
-                                <span class="hide-menu">Hackathon Teams 🚀</span>
                             </a>
                         </li>
                     </ul>

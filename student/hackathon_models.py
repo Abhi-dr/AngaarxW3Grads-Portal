@@ -1,15 +1,17 @@
 from django.db import models
 from django.utils import timezone
 from accounts.models import Student
+import re
 
 
 class HackathonTeam(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     leader = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='led_teams')
     members_limit = models.PositiveIntegerField(default=4)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    slug = models.SlugField(unique=True)
     
     STATUS_CHOICES = [
         ('open', 'Open'),
@@ -31,6 +33,13 @@ class HackathonTeam(models.Model):
     
     def can_join(self):
         return self.status == 'open' and not self.is_full()
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            # replace everything except alphabets, numbers, and hyphens with hyphens
+            self.slug = re.sub(r'[^\w-]', '-', self.name).lower()
+        super().save(*args, **kwargs)
+        
 
 
 class TeamMember(models.Model):

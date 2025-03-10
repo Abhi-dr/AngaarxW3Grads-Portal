@@ -42,8 +42,9 @@ def hackathon_dashboard(request):
         'received_invites': received_invites,
     }
     
-    return render(request, 'student/hackathon/dashboard.html', context)
+    return render(request, 'student/hackathon/hackathon.html', context)
 
+# ================================= CREATE TEAM =================================
 
 @login_required(login_url="login")
 def create_team(request):
@@ -90,7 +91,7 @@ def create_team(request):
                 'status': 'success', 
                 'message': 'Team created successfully',
                 'team_id': team.id,
-                'redirect': '/student/hackathon/'
+                'redirect': '/dashboard/hackathon/'
             })
         else:
             # Handle non-AJAX POST request
@@ -125,12 +126,13 @@ def create_team(request):
     
     return render(request, 'student/hackathon/create_team.html')
 
+# ================================= MANAGE TEAM =================================
 
 @login_required(login_url="login")
-def manage_team(request, team_id):
+def manage_team(request, slug):
     """View for managing a hackathon team (for team leaders)"""
     student = request.user.student
-    team = get_object_or_404(HackathonTeam, id=team_id)
+    team = get_object_or_404(HackathonTeam, slug=slug)
     
     # Check if student is the team leader
     if team.leader != student:
@@ -155,12 +157,13 @@ def manage_team(request, team_id):
     
     return render(request, 'student/hackathon/manage_team.html', context)
 
+# ================================= UPDATE TEAM =================================
 
 @login_required(login_url="login")
-def update_team(request, team_id):
+def update_team(request, slug):
     """AJAX view for updating team details"""
     student = request.user.student
-    team = get_object_or_404(HackathonTeam, id=team_id)
+    team = get_object_or_404(HackathonTeam, slug=slug)
     
     # Check if student is the team leader
     if team.leader != student:
@@ -178,7 +181,7 @@ def update_team(request, team_id):
         team.save()
         
         messages.success(request, 'Team updated successfully')
-        return redirect('manage_team', team_id=team.id)
+        return redirect('manage_team', slug=slug)
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
@@ -409,39 +412,52 @@ def cancel_join_request(request, request_id):
 @login_required(login_url="login")
 def handle_join_request(request, request_id, action):
     """AJAX view for handling (approving/rejecting) a join request"""
-    student = request.user.student
+    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+    
     join_request = get_object_or_404(JoinRequest, id=request_id)
     
-    # Check if student is the team leader
-    if join_request.team.leader != student:
-        return JsonResponse({'status': 'error', 'message': 'You are not authorized to handle this request'}, status=403)
+    # Check if user is team leader
+    if request.user.student != join_request.team.leader:
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
     
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+    if join_request.status != 'pending':
+        return JsonResponse({'status': 'error', 'message': 'This request has already been handled'}, status=400)
+    
+    try:
         if action == 'approve':
             # Check if team is full
             if join_request.team.is_full():
-                return JsonResponse({'status': 'error', 'message': 'Your team is already full'}, status=400)
+                join_request.status = 'rejected'
+                join_request.save()
+                return JsonResponse({'status': 'error', 'message': 'Team is full'}, status=400)
             
-            # Approve join request
-            join_request.status = 'approved'
-            join_request.save()
+            # Check if student is already in another team
+            if TeamMember.objects.filter(student=join_request.student).exists():
+                join_request.status = 'rejected'
+                join_request.save()
+                return JsonResponse({'status': 'error', 'message': 'Student is already in another team'}, status=400)
             
-            # Add student to team
+            # Create team membership
             TeamMember.objects.create(
                 team=join_request.team,
                 student=join_request.student
             )
-            
-            return JsonResponse({'status': 'success', 'message': 'Join request approved successfully'})
-        
-        elif action == 'reject':
-            # Reject join request
-            join_request.status = 'rejected'
+            join_request.status = 'approved'
             join_request.save()
             
+            return JsonResponse({'status': 'success', 'message': 'Join request approved successfully'})
+            
+        elif action == 'reject':
+            join_request.status = 'rejected'
+            join_request.save()
             return JsonResponse({'status': 'success', 'message': 'Join request rejected successfully'})
-    
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+        
+        return JsonResponse({'status': 'error', 'message': 'Invalid action'}, status=400)
+            
+    except Exception as e:
+        print(e)
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
 @login_required(login_url="login")
@@ -507,21 +523,26 @@ def get_all_skills(request):
 def search_students(request):
     """AJAX view for searching students to invite"""
     if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
     
     query = request.GET.get('query', '').strip()
     team_id = request.GET.get('team_id')
     
     if not query or not team_id:
-        return JsonResponse({'status': 'error', 'message': 'Missing parameters'})
+        return JsonResponse({'results': []})
     
     team = get_object_or_404(HackathonTeam, id=team_id)
     if request.user.student != team.leader:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized'})
+        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
     
-    # Get current team members and pending invites
-    current_members = TeamMember.objects.filter(team=team).values_list('student_id', flat=True)
-    pending_invites = TeamInvite.objects.filter(team=team, status='pending').values_list('student_id', flat=True)
+    # Get IDs of students who can't be invited
+    excluded_students = []
+    # Add team leader
+    excluded_students.append(team.leader.id)
+    # Add current team members
+    excluded_students.extend(TeamMember.objects.filter(team=team).values_list('student_id', flat=True))
+    # Add students with pending invites
+    excluded_students.extend(TeamInvite.objects.filter(team=team, status='pending').values_list('student_id', flat=True))
     
     # Search for students
     students = Student.objects.filter(
@@ -529,9 +550,7 @@ def search_students(request):
         Q(user__last_name__icontains=query) |
         Q(user__email__icontains=query)
     ).exclude(
-        Q(id__in=current_members) |
-        Q(id__in=pending_invites) |
-        Q(id=team.leader.id)
+        id__in=excluded_students
     )[:10]
     
     results = [{

@@ -30,20 +30,32 @@ urlpatterns = [
     path("new_message", views.new_message, name="new_message"),
     path("feedback", views.feedback, name="feedback"),
     
+]
+
+
+urlpatterns += [
     # ======================== HACKATHON TEAM MAKER ========================
     path("hackathon/", hackathon_views.hackathon_dashboard, name="hackathon_dashboard"),
-    path("hackathon/create-team/", hackathon_views.create_team, name="create_team"),
-    path("hackathon/manage-team/<int:team_id>/", hackathon_views.manage_team, name="manage_team"),
-    path("hackathon/update-team/<int:team_id>/", hackathon_views.update_team, name="update_team"),
-    path("hackathon/delete-team/<int:team_id>/", hackathon_views.delete_team, name="delete_team"),
     path("hackathon/list-teams/", hackathon_views.list_teams, name="list_teams"),
-    path("hackathon/team/<int:team_id>/", hackathon_views.team_detail, name="team_detail"),
-    path("hackathon/send-join-request/<int:team_id>/", hackathon_views.send_join_request, name="send_join_request"),
-    path("hackathon/cancel-join-request/<int:request_id>/", hackathon_views.cancel_join_request, name="cancel_join_request"),
-    path("hackathon/handle-join-request/<int:request_id>/<str:action>/", hackathon_views.handle_join_request, name="handle_join_request"),
-    path("hackathon/remove-team-member/<int:team_id>/<int:member_id>/", hackathon_views.remove_team_member, name="remove_team_member"),
-    path("hackathon/leave-team/<int:team_id>/", hackathon_views.leave_team, name="leave_team"),
+    
+    path("hackathon/create-team/", hackathon_views.create_team, name="create_team"),
     path("hackathon/get-all-skills/", hackathon_views.get_all_skills, name="get_all_skills"),
+    
+    path("hackathon/manage-team/<slug:slug>/", hackathon_views.manage_team, name="manage_team"),
+    
+    path("hackathon/update-team/<slug:slug>/", hackathon_views.update_team, name="update_team"),
+    path("hackathon/delete-team/<int:team_id>/", hackathon_views.delete_team, name="delete_team"),
+    
+    path("hackathon/handle-join-request/<int:request_id>/<str:action>/", hackathon_views.handle_join_request, name="handle_join_request"),
+    path("hackathon/send-join-request/<int:team_id>/", hackathon_views.send_join_request, name="send_join_request"),
+    
+    path("hackathon/cancel-join-request/<int:request_id>/", hackathon_views.cancel_join_request, name="cancel_join_request"),
+    
+    path("hackathon/team/<int:team_id>/", hackathon_views.team_detail, name="team_detail"),
+    path("hackathon/remove-team-member/<int:team_id>/<int:member_id>/", hackathon_views.remove_team_member, name="remove_team_member"),
+    
+    path("hackathon/leave-team/<int:team_id>/", hackathon_views.leave_team, name="leave_team"),
+    
     
     # Team Invitation URLs
     path("hackathon/search-students/", hackathon_views.search_students, name="search_students"),
