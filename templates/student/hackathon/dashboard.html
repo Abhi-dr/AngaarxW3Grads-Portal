@@ -1,0 +1,461 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}
+Student -> Hackathon Team Maker
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-4">Hackathon Team Maker</h5>
+            
+            {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Your Hackathon Team Status</h6>
+                        <div class="d-flex">
+                            {% if not led_team and not team_membership %}
+                            <a href="{% url 'create_team' %}" class="btn btn-primary me-2">Create Team</a>
+                            <a href="{% url 'list_teams' %}" class="btn btn-outline-primary">Join a Team</a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- If user is a team leader -->
+                {% if led_team %}
+                <div class="col-md-12 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">Your Team: {{ led_team.name }}</h5>
+                                <a href="{% url 'manage_team' led_team.id %}" class="btn btn-sm btn-primary">Manage Team</a>
+                            </div>
+                            <p class="card-text">{{ led_team.description }}</p>
+                            <div class="d-flex justify-content-between mt-3">
+                                <div>
+                                    <small class="text-muted">Members: {{ led_team.current_members_count }}/{{ led_team.members_limit }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-{{ led_team.status|yesno:'success,warning,danger' }}">{{ led_team.status|title }}</span>
+                                </div>
+                            </div>
+                            
+                            {% if team_requests %}
+                            <div class="mt-4">
+                                <h6>Pending Join Requests ({{ team_requests.count }})</h6>
+                                <div class="list-group mt-2" id="join-requests-list">
+                                    {% for request in team_requests %}
+                                    <div class="list-group-item list-group-item-action" id="request-{{ request.id }}">
+                                        <div class="d-flex w-100 justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ request.student.first_name }} {{ request.student.last_name }}</h6>
+                                                {% if request.message %}
+                                                <p class="mb-1">{{ request.message }}</p>
+                                                {% endif %}
+                                                <small class="text-muted">Requested {{ request.created_at|timesince }} ago</small>
+                                            </div>
+                                            <div>
+                                                <button class="btn btn-sm btn-success me-2 approve-request-btn" 
+                                                        data-request-id="{{ request.id }}">Approve</button>
+                                                <button class="btn btn-sm btn-danger reject-request-btn" 
+                                                        data-request-id="{{ request.id }}">Reject</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- If user is a team member -->
+                {% if team_membership %}
+                <div class="col-md-12 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title mb-0">Your Team: {{ team_membership.team.name }}</h5>
+                                <a href="{% url 'team_detail' team_membership.team.id %}" class="btn btn-sm btn-primary">View Team</a>
+                            </div>
+                            <p class="card-text">{{ team_membership.team.description }}</p>
+                            <div class="d-flex justify-content-between mt-3">
+                                <div>
+                                    <small class="text-muted">Members: {{ team_membership.team.current_members_count }}/{{ team_membership.team.members_limit }}</small>
+                                </div>
+                                <div>
+                                    <span class="badge bg-{{ team_membership.team.status|yesno:'success,warning,danger' }}">{{ team_membership.team.status|title }}</span>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">Team Leader: {{ team_membership.team.leader.first_name }} {{ team_membership.team.leader.last_name }}</small>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-danger leave-team-btn" 
+                                        data-team-id="{{ team_membership.team.id }}">Leave Team</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- If user has pending join requests -->
+                {% if pending_requests %}
+                <div class="col-md-12 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Your Pending Join Requests</h5>
+                            <div class="list-group" id="pending-requests-list">
+                                {% for request in pending_requests %}
+                                <div class="list-group-item list-group-item-action" id="pending-request-{{ request.id }}">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">{{ request.team.name }}</h6>
+                                            <small class="text-muted">Requested {{ request.created_at|timesince }} ago</small>
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'team_detail' request.team.id %}" class="btn btn-sm btn-outline-primary me-2">View Team</a>
+                                            <button class="btn btn-sm btn-outline-danger cancel-request-btn" 
+                                                    data-request-id="{{ request.id }}">Cancel Request</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Received Team Invites -->
+                {% if received_invites %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-semibold mb-3">Team Invites</h6>
+                        <div class="list-group">
+                            {% for invite in received_invites %}
+                            <div class="list-group-item" id="invite-{{ invite.id }}">
+                                <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <h6 class="mb-0">{{ invite.team.name }}</h6>
+                                        <small class="text-muted">Team Leader: {{ invite.team.leader.first_name }} {{ invite.team.leader.last_name }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ invite.created_at|timesince }} ago</small>
+                                </div>
+                                {% if invite.message %}
+                                <p class="mb-2 text-muted">{{ invite.message }}</p>
+                                {% endif %}
+                                <div class="d-flex gap-2 mt-2">
+                                    <button class="btn btn-sm btn-success handle-invite-btn" data-invite-id="{{ invite.id }}" data-action="accept">
+                                        Accept
+                                    </button>
+                                    <button class="btn btn-sm btn-danger handle-invite-btn" data-invite-id="{{ invite.id }}" data-action="reject">
+                                        Reject
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Pending Requests -->
+                {% if pending_requests %}
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-semibold mb-3">Pending Join Requests</h6>
+                        <div class="list-group">
+                            {% for request in pending_requests %}
+                            <div class="list-group-item" id="request-{{ request.id }}">
+                                <div class="d-flex w-100 justify-content-between align-items-start mb-2">
+                                    <h6 class="mb-0">{{ request.team.name }}</h6>
+                                    <small class="text-muted">{{ request.created_at|timesince }} ago</small>
+                                </div>
+                                {% if request.message %}
+                                <p class="mb-2 text-muted">{{ request.message }}</p>
+                                {% endif %}
+                                <div class="d-flex gap-2 mt-2">
+                                    <button class="btn btn-sm btn-danger cancel-request-btn" data-request-id="{{ request.id }}">
+                                        Cancel Request
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- If user is not in any team and has no pending requests -->
+                {% if not led_team and not team_membership and not pending_requests %}
+                <div class="col-md-12 mb-4">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <h5 class="mb-3">You are not part of any hackathon team yet!</h5>
+                            <p class="text-muted mb-4">Create your own team or join an existing one to participate in hackathons.</p>
+                            <div>
+                                <a href="{% url 'create_team' %}" class="btn btn-primary me-2">Create Team</a>
+                                <a href="{% url 'list_teams' %}" class="btn btn-outline-primary">Join a Team</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle approve join request
+        document.querySelectorAll('.approve-request-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.getAttribute('data-request-id');
+                handleJoinRequest(requestId, 'approve');
+            });
+        });
+        
+        // Handle reject join request
+        document.querySelectorAll('.reject-request-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.getAttribute('data-request-id');
+                handleJoinRequest(requestId, 'reject');
+            });
+        });
+        
+        // Handle cancel join request
+        document.querySelectorAll('.cancel-request-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = this.getAttribute('data-request-id');
+                cancelJoinRequest(requestId);
+            });
+        });
+        
+        // Handle leave team
+        document.querySelectorAll('.leave-team-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const teamId = this.getAttribute('data-team-id');
+                leaveTeam(teamId);
+            });
+        });
+        
+        // Handle team invite responses
+        document.querySelectorAll('.handle-invite-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const inviteId = this.getAttribute('data-invite-id');
+                const action = this.getAttribute('data-action');
+                
+                fetch(`/student/hackathon/handle-team-invite/${inviteId}/${action}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(data.message, 'success');
+                        const inviteElement = document.getElementById(`invite-${inviteId}`);
+                        if (inviteElement) {
+                            inviteElement.remove();
+                            
+                            // Check if there are any remaining invites
+                            const remainingInvites = document.querySelectorAll('.handle-invite-btn').length;
+                            if (remainingInvites === 0) {
+                                // Remove the entire card if no more invites
+                                const cardElement = document.querySelector('.card:has(.handle-invite-btn)');
+                                if (cardElement) {
+                                    cardElement.remove();
+                                }
+                            }
+                        }
+                        
+                        // If accepted and redirect URL provided, redirect
+                        if (action === 'accept' && data.redirect) {
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 1000);
+                        }
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An error occurred. Please try again.', 'error');
+                });
+            });
+        });
+        
+        // Function to handle join request (approve/reject)
+        function handleJoinRequest(requestId, action) {
+            if (!confirm(`Are you sure you want to ${action} this join request?`)) {
+                return;
+            }
+            
+            fetch(`/student/hackathon/handle-join-request/${requestId}/${action}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the request from the list
+                    const requestElement = document.getElementById(`request-${requestId}`);
+                    if (requestElement) {
+                        requestElement.remove();
+                    }
+                    
+                    // Show success message
+                    showToast(data.message, 'success');
+                    
+                    // If no more requests, reload the page
+                    const requestsList = document.getElementById('join-requests-list');
+                    if (requestsList && requestsList.children.length === 0) {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        }
+        
+        // Function to cancel join request
+        function cancelJoinRequest(requestId) {
+            if (!confirm('Are you sure you want to cancel this join request?')) {
+                return;
+            }
+            
+            fetch(`/student/hackathon/cancel-join-request/${requestId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the request from the list
+                    const requestElement = document.getElementById(`pending-request-${requestId}`);
+                    if (requestElement) {
+                        requestElement.remove();
+                    }
+                    
+                    // Show success message
+                    showToast(data.message, 'success');
+                    
+                    // If no more requests, reload the page
+                    const requestsList = document.getElementById('pending-requests-list');
+                    if (requestsList && requestsList.children.length === 0) {
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        }
+        
+        // Function to leave team
+        function leaveTeam(teamId) {
+            if (!confirm('Are you sure you want to leave this team?')) {
+                return;
+            }
+            
+            fetch(`/student/hackathon/leave-team/${teamId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message, 'success');
+                    
+                    // Redirect if specified
+                    if (data.redirect) {
+                        setTimeout(() => {
+                            window.location.href = data.redirect;
+                        }, 1000);
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        }
+        
+        // Function to show toast notification
+        function showToast(message, type) {
+            // Check if toastr is available
+            if (typeof toastr !== 'undefined') {
+                toastr[type](message);
+            } else {
+                alert(message);
+            }
+        }
+        
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}
