@@ -49,10 +49,11 @@ urlpatterns += [
     path("hackathon/handle-join-request/<int:request_id>/<str:action>/", hackathon_views.handle_join_request, name="handle_join_request"),
     path("hackathon/send-join-request/<int:team_id>/", hackathon_views.send_join_request, name="send_join_request"),
     
+    path("hackathon/remove-team-member/<int:team_id>/<int:member_id>/", hackathon_views.remove_team_member, name="remove_team_member"),
+    
     path("hackathon/cancel-join-request/<int:request_id>/", hackathon_views.cancel_join_request, name="cancel_join_request"),
     
     path("hackathon/team/<int:team_id>/", hackathon_views.team_detail, name="team_detail"),
-    path("hackathon/remove-team-member/<int:team_id>/<int:member_id>/", hackathon_views.remove_team_member, name="remove_team_member"),
     
     path("hackathon/leave-team/<int:team_id>/", hackathon_views.leave_team, name="leave_team"),
     

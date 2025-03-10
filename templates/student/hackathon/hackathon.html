@@ -137,8 +137,9 @@ Student | Hackathon Team Maker
                                         <div>
                                             <a href="{% url 'team_detail' request.team.id %}"
                                                 class="btn btn-sm btn-outline-primary me-2">View Team</a>
-                                            <button class="btn btn-sm btn-outline-danger cancel-request-btn"
-                                                data-request-id="{{ request.id }}">Cancel Request</button>
+                                            <a class="btn btn-sm btn-outline-danger "
+                                            href="{% url 'cancel_join_request' request.id %}"
+                                                >Cancel Request</a>
                                         </div>
                                     </div>
                                 </div>
@@ -201,10 +202,10 @@ Student | Hackathon Team Maker
                                 <p class="mb-2 text-muted">{{ request.message }}</p>
                                 {% endif %}
                                 <div class="d-flex gap-2 mt-2">
-                                    <button class="btn btn-sm btn-danger cancel-request-btn"
-                                        data-request-id="{{ request.id }}">
+                                    <a class="btn btn-sm btn-danger"
+                                        href="{% url 'cancel_join_request' request.id %}">
                                         Cancel Request
-                                    </button>
+                                    </a>
                                 </div>
                             </div>
                             {% endfor %}

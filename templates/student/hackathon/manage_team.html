@@ -113,10 +113,10 @@ Hackathon |  {{ team.name }}
                                         </h6>
                                         <small class="text-muted">Joined {{ member.joined_at|timesince }} ago</small>
                                     </div>
-                                    <button class="btn btn-sm btn-outline-danger remove-member-btn"
-                                        data-request-id="{{ member.id }}">
+                                    <a class="btn btn-sm btn-outline-danger remove-member-btn"
+                                        href="{% url 'remove_team_member' team.id member.student.id %}">
                                         Remove
-                                    </button>
+                                    </a>
                                 </div>
                                 {% empty %}
                                 <div class="list-group-item text-center py-3">
@@ -296,11 +296,6 @@ Hackathon |  {{ team.name }}
         const selectedStudentId = document.getElementById('selected-student-id');
         const inviteMessage = document.getElementById('invite-message');
         const sendInviteBtn = document.getElementById('send-invite-btn');
-
-        // Add event listeners for remove member buttons
-        document.querySelectorAll('.remove-member-btn').forEach(btn => {
-            btn.addEventListener('click', () => handleJoinRequest(btn.dataset.requestId, 'reject'));
-        });
 
 
         // Add event listeners for join request buttons

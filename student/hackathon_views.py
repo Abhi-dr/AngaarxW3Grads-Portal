@@ -471,15 +471,12 @@ def remove_team_member(request, team_id, member_id):
         return JsonResponse({'status': 'error', 'message': 'You are not authorized to remove team members'}, status=403)
     
     # Get the team member
-    member = get_object_or_404(TeamMember, team=team, id=member_id)
+    member = get_object_or_404(TeamMember, team=team, student_id=member_id)   
+    member.delete()
     
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # Remove team member
-        member.delete()
+    messages.success(request, "Team member removed successfully!")
         
-        return JsonResponse({'status': 'success', 'message': 'Team member removed successfully'})
-    
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+    return redirect("manage_team", slug=team.slug)
 
 
 @login_required(login_url="login")
