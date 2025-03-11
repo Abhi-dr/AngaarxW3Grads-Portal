@@ -99,11 +99,13 @@ Student -> Available Hackathon Teams
                                     </div>
                                     
                                     <div class="d-flex justify-content-end">
-                                        <a href="{% url 'team_detail' team.id %}" class="btn btn-outline-primary me-2">View Details</a>
+                                        <a href="{% url 'team_detail' team.slug %}" class="btn btn-outline-primary me-2">View Details</a>
                                         
                                         {% if not is_in_team %}
                                             {% if team.id in pending_requests %}
                                                 <button class="btn btn-secondary" disabled>Request Pending</button>
+                                            {% elif team.id in rejected_requests %}
+                                                <button class="btn btn-danger" disabled>Request Rejected</button>
                                             {% else %}
                                                 <button class="btn btn-primary send-request-btn" data-team-id="{{ team.id }}" 
                                                         {% if team.status != 'open' or team.is_full %}disabled{% endif %}>

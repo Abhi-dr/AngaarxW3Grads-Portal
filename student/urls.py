@@ -53,7 +53,7 @@ urlpatterns += [
     
     path("hackathon/cancel-join-request/<int:request_id>/", hackathon_views.cancel_join_request, name="cancel_join_request"),
     
-    path("hackathon/team/<int:team_id>/", hackathon_views.team_detail, name="team_detail"),
+    path("hackathon/team/<slug:slug>/", hackathon_views.team_detail, name="team_detail"),
     
     path("hackathon/leave-team/<int:team_id>/", hackathon_views.leave_team, name="leave_team"),
     

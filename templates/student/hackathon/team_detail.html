@@ -73,7 +73,7 @@ Student -> Team Details
                                     {% if team.id in pending_requests %}
                                         <button class="btn btn-secondary" disabled>Request Pending</button>
                                     {% else %}
-                                        <button class="btn btn-primary" id="join-team-btn" >
+                                        <button class="btn btn-primary join-team-btn">
                                             Join Team
                                         </button>
                                     {% endif %}
@@ -176,12 +176,15 @@ Student -> Team Details
                             {% if has_pending_request %}
                                 <p class="text-muted mb-3">You have already sent a join request to this team.</p>
                                 <button class="btn btn-secondary w-100" id="cancel-request-btn" data-team-id="{{ team.id }}">Cancel Request</button>
+                            {% elif is_rejected %}
+                                <p class="text-muted mb-3">Your previous join request was rejected.</p>
+                                <button class="btn btn-danger w-100" disabled>Request Rejected</button>
                             {% elif team.status == 'open' and not team.is_full %}
                                 <p class="text-muted mb-3">Interested in joining this team? Send a request to the team leader.</p>
-                                <button class="btn btn-primary w-100" id="join-team-btn">Send Join Request</button>
+                                <button class="btn btn-primary w-100 join-team-btn">Send Join Request</button>
                             {% elif team.status != 'open' %}
                                 <p class="text-muted mb-3">This team is not currently accepting new members.</p>
-                                <button class="btn btn-secondary w-100" disabled>Team Not Open</button>
+                                <button class="btn btn-secondary w-100" disabled>Team Closed</button>
                             {% else %}
                                 <p class="text-muted mb-3">This team has reached its maximum capacity.</p>
                                 <button class="btn btn-secondary w-100" disabled>Team Full</button>
@@ -249,18 +252,17 @@ Student -> Team Details
         const leaveTeamModal = new bootstrap.Modal(document.getElementById('leaveTeamModal'));
         
         // Get DOM elements
-        const joinTeamBtn = document.getElementById('join-team-btn');
         const sendRequestBtn = document.getElementById('send-request-btn');
         const leaveTeamBtn = document.getElementById('leave-team-btn');
         const confirmLeaveTeamBtn = document.getElementById('confirm-leave-team-btn');
         const cancelRequestBtn = document.getElementById('cancel-request-btn');
         
-        // open the join team modal on button click
-        if (joinTeamBtn) {
-            joinTeamBtn.addEventListener('click', function() {
+        // Replace direct event listener with event delegation
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('.join-team-btn')) {
                 joinRequestModal.show();
-            });
-        }   
+            }
+        });
         
         // Handle send request form submission
         if (sendRequestBtn) {
@@ -312,9 +314,13 @@ Student -> Team Details
                 
                 if (data.status === 'success') {
                     // Update UI to show request pending
-                    const joinButton = document.querySelector('#join-team-btn');
-                    if (joinButton) {
-                        joinButton.outerHTML = '<button class="btn btn-secondary" disabled>Request Pending</button>';
+                    const joinSection = document.querySelector('.join-team-btn').closest('.card-body');
+                    if (joinSection) {
+                        joinSection.innerHTML = `
+                            <h6 class="fw-semibold mb-3">Join This Team</h6>
+                            <p class="text-muted mb-3">You have already sent a join request to this team.</p>
+                            <button class="btn btn-secondary w-100" id="cancel-request-btn" data-team-id="${teamId}">Cancel Request</button>
+                        `;
                     }
                     
                     showToast(data.message, 'success');
@@ -348,7 +354,7 @@ Student -> Team Details
                     // Update UI to show join button
                     const cancelRequestButton = document.querySelector('#cancel-request-btn');
                     if (cancelRequestButton) {
-                        cancelRequestButton.outerHTML = '<button class="btn btn-primary w-100" id="join-team-btn">Send Join Request</button>';
+                        cancelRequestButton.outerHTML = '<button class="btn btn-primary w-100 join-team-btn">Send Join Request</button>';
                     }
                 } else {
                     showToast(data.message, 'error');

@@ -185,6 +185,7 @@ def update_team(request, slug):
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
+# ================================= DELETE TEAM =================================
 
 @login_required(login_url="login")
 def delete_team(request, team_id):
@@ -246,8 +247,9 @@ def list_teams(request):
     # Check if student is already in a team (as leader or member)
     is_in_team = HackathonTeam.objects.filter(leader=student).exists() or TeamMember.objects.filter(student=student).exists()
     
-    # Get all pending join requests by the student
+    # Get all pending and rejected join requests by the student
     pending_requests = JoinRequest.objects.filter(student=student, status='pending').values_list('team_id', flat=True)
+    rejected_requests = JoinRequest.objects.filter(student=student, status='rejected').values_list('team_id', flat=True)
     
     context = {
         'teams': teams_page,
@@ -256,6 +258,7 @@ def list_teams(request):
         'skill_filter': skill_filter,
         'is_in_team': is_in_team,
         'pending_requests': list(pending_requests),
+        'rejected_requests': list(rejected_requests),
     }
     
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -273,6 +276,7 @@ def list_teams(request):
                 'required_skills': team.required_skills,
                 'created_at': team.created_at.strftime('%Y-%m-%d %H:%M'),
                 'has_pending_request': team.id in pending_requests,
+                'is_rejected': team.id in rejected_requests,
             })
         
         return JsonResponse({
@@ -285,18 +289,19 @@ def list_teams(request):
     
     return render(request, 'student/hackathon/list_teams.html', context)
 
-
 @login_required(login_url="login")
-def team_detail(request, team_id):
+def team_detail(request, slug):
     """View for displaying team details"""
     student = request.user.student
-    team = get_object_or_404(HackathonTeam, id=team_id)
+    team = get_object_or_404(HackathonTeam, slug=slug)
     
     # Get team members
     team_members = TeamMember.objects.filter(team=team)
     
     # Check if student has already sent a join request
-    has_pending_request = JoinRequest.objects.filter(team=team, student=student, status='pending').exists()
+    join_request = JoinRequest.objects.filter(team=team, student=student).first()
+    has_pending_request = join_request and join_request.status == 'pending'
+    is_rejected = join_request and join_request.status == 'rejected'
     
     # Check if student is already in a team (as leader or member)
     is_in_team = HackathonTeam.objects.filter(leader=student).exists() or TeamMember.objects.filter(student=student).exists()
@@ -314,6 +319,7 @@ def team_detail(request, team_id):
         'team': team,
         'team_members': team_members,
         'has_pending_request': has_pending_request,
+        'is_rejected': is_rejected,
         'is_in_team': is_in_team,
         'is_team_leader': is_team_leader,
         'is_team_member': is_team_member,
@@ -337,6 +343,7 @@ def team_detail(request, team_id):
             'required_skills': team.required_skills,
             'created_at': team.created_at.strftime('%Y-%m-%d %H:%M'),
             'has_pending_request': has_pending_request,
+            'is_rejected': is_rejected,
             'is_in_team': is_in_team,
             'members': [],
         }
@@ -374,8 +381,12 @@ def send_join_request(request, team_id):
         return JsonResponse({'status': 'error', 'message': 'You are already in a team'}, status=400)
     
     # Check if student has already sent a join request
-    if JoinRequest.objects.filter(team=team, student=student, status='pending').exists():
-        return JsonResponse({'status': 'error', 'message': 'You have already sent a join request to this team'}, status=400)
+    join_request = JoinRequest.objects.filter(team=team, student=student).first()
+    if join_request:
+        if join_request.status == 'pending':
+            return JsonResponse({'status': 'error', 'message': 'You have already sent a join request to this team'}, status=400)
+        elif join_request.status == 'rejected':
+            return JsonResponse({'status': 'error', 'message': 'Your previous join request was rejected'}, status=400)
     
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         data = json.loads(request.body)
@@ -495,7 +506,7 @@ def leave_team(request, team_id):
         return JsonResponse({
             'status': 'success', 
             'message': 'You have left the team successfully',
-            'redirect': '/student/hackathon/'
+            'redirect': '/dashboard/hackathon/'
         })
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
@@ -542,11 +553,7 @@ def search_students(request):
     excluded_students.extend(TeamInvite.objects.filter(team=team, status='pending').values_list('student_id', flat=True))
     
     # Search for students
-    students = Student.objects.filter(
-        Q(user__first_name__icontains=query) | 
-        Q(user__last_name__icontains=query) |
-        Q(user__email__icontains=query)
-    ).exclude(
+    students = Student.objects.all().exclude(
         id__in=excluded_students
     )[:10]
     
