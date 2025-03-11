@@ -93,7 +93,7 @@ Student | Hackathon Team Maker
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="card-title mb-0">Your Team: {{ team_membership.team.name }}</h5>
-                                <a href="{% url 'team_detail' team_membership.team.id %}"
+                                <a href="{% url 'team_detail' team_membership.team.slug %}"
                                     class="btn btn-sm btn-primary">View Team</a>
                             </div>
                             <p class="card-text">{{ team_membership.team.description }}</p>
@@ -135,7 +135,7 @@ Student | Hackathon Team Maker
                                                 ago</small>
                                         </div>
                                         <div>
-                                            <a href="{% url 'team_detail' request.team.id %}"
+                                            <a href="{% url 'team_detail' request.team.slug %}"
                                                 class="btn btn-sm btn-outline-primary me-2">View Team</a>
                                             <a class="btn btn-sm btn-outline-danger "
                                             href="{% url 'cancel_join_request' request.id %}"
@@ -161,8 +161,7 @@ Student | Hackathon Team Maker
                                 <div class="d-flex w-100 justify-content-between align-items-start mb-2">
                                     <div>
                                         <h6 class="mb-0">{{ invite.team.name }}</h6>
-                                        <small class="text-muted">Team Leader: {{ invite.team.leader.first_name }} {{
-                                            invite.team.leader.last_name }}</small>
+                                        <small class="text-muted">Team Leader: {{ invite.team.leader.first_name }} {{ invite.team.leader.last_name }}</small>
                                     </div>
                                     <small class="text-muted">{{ invite.created_at|timesince }} ago</small>
                                 </div>
@@ -278,7 +277,7 @@ Student | Hackathon Team Maker
                 const inviteId = this.getAttribute('data-invite-id');
                 const action = this.getAttribute('data-action');
 
-                fetch(`/student/hackathon/handle-team-invite/${inviteId}/${action}/`, {
+                fetch(`/dashboard/hackathon/handle-team-invite/${inviteId}/${action}/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -372,7 +371,7 @@ Student | Hackathon Team Maker
                 return;
             }
 
-            fetch(`/student/hackathon/cancel-join-request/${requestId}/`, {
+            fetch(`/dashboard/hackathon/cancel-join-request/${requestId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -416,7 +415,7 @@ Student | Hackathon Team Maker
                 return;
             }
 
-            fetch(`/student/hackathon/leave-team/${teamId}/`, {
+            fetch(`/dashboard/hackathon/leave-team/${teamId}/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

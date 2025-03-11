@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Q
 from django.utils import timezone
+from django.db import IntegrityError
 from django.core.paginator import Paginator
 
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest, TeamInvite
@@ -529,42 +530,28 @@ def get_all_skills(request):
 
 @login_required(login_url="login")
 def search_students(request):
-    """AJAX view for searching students to invite"""
-    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+    query = request.GET.get('query', '')
+    team_id = request.GET.get('team_id', None)
     
-    query = request.GET.get('query', '').strip()
-    team_id = request.GET.get('team_id')
+    if query:
+        students = Student.objects.filter(
+            Q(first_name__icontains=query) | 
+            Q(last_name__icontains=query) | 
+            Q(email__icontains=query)
+        ).exclude(id=request.user.student.id)
+        
+        results = []
+        for student in students:
+            results.append({
+                'id': student.id,
+                'name': f"{student.first_name} {student.last_name}",
+                'username': student.username,
+                'email': student.email,
+            })
+        
+        return JsonResponse({'status': 'success', 'results': results})
     
-    if not query or not team_id:
-        return JsonResponse({'results': []})
-    
-    team = get_object_or_404(HackathonTeam, id=team_id)
-    if request.user.student != team.leader:
-        return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
-    
-    # Get IDs of students who can't be invited
-    excluded_students = []
-    # Add team leader
-    excluded_students.append(team.leader.id)
-    # Add current team members
-    excluded_students.extend(TeamMember.objects.filter(team=team).values_list('student_id', flat=True))
-    # Add students with pending invites
-    excluded_students.extend(TeamInvite.objects.filter(team=team, status='pending').values_list('student_id', flat=True))
-    
-    # Search for students
-    students = Student.objects.all().exclude(
-        id__in=excluded_students
-    )[:10]
-    
-    results = [{
-        'id': student.id,
-        'name': f"{student.user.first_name} {student.user.last_name}",
-        'email': student.user.email
-    } for student in students]
-    
-    return JsonResponse({'status': 'success', 'results': results})
-
+    return JsonResponse({'status': 'error', 'message': 'No query provided'}, status=400)
 
 @login_required(login_url="login")
 def send_team_invite(request, team_id):
@@ -577,35 +564,55 @@ def send_team_invite(request, team_id):
         message = request.POST.get('message', '')
         
         if not student_id:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Student ID is required'}, status=400)
             messages.error(request, 'Student ID is required')
-            return redirect('manage_team', team_id=team.id)
+            return redirect('manage_team', slug=team.slug)
         
-        student = get_object_or_404(Student, id=student_id)
+        invited_student = get_object_or_404(Student, id=student_id)
         
         # Check if student is already in a team
-        if TeamMember.objects.filter(student=student).exists():
+        if TeamMember.objects.filter(student=invited_student).exists():
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Student is already in a team'}, status=400)
             messages.error(request, 'Student is already in a team')
-            return redirect('manage_team', team_id=team.id)
+            return redirect('manage_team', slug=team.slug)
         
         # Check if team is full
         if team.is_full():
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'error', 'message': 'Team is full'}, status=400)
             messages.error(request, 'Team is full')
-            return redirect('manage_team', team_id=team.id)
+            return redirect('manage_team', slug=team.slug)
         
         # Check if invite already exists
-        if TeamInvite.objects.filter(team=team, student=student, status='pending').exists():
-            messages.error(request, 'Invite already sent')
-            return redirect('manage_team', team_id=team.id)
+        if TeamInvite.objects.filter(team=team, student=invited_student, status='pending').exists():
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success', 'message': 'Invite already sent'}, status=200)
+            messages.info(request, 'Invite already sent')
+            return redirect('manage_team', slug=team.slug)
         
-        # Create team invite
-        TeamInvite.objects.create(
-            team=team,
-            student=student,
-            message=message
-        )
-        
-        messages.success(request, f'Invite sent to {student.user.first_name} {student.user.last_name}')
-        return redirect('manage_team', team_id=team.id)
+        try:
+            # Create team invite
+            TeamInvite.objects.create(
+                team=team,
+                student=invited_student,
+                message=message
+            )
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'status': 'success', 
+                    'message': f'Invite sent to {invited_student.first_name} {invited_student.last_name}'
+                })
+            messages.success(request, f'Invite sent to {invited_student.first_name} {invited_student.last_name}')
+            return redirect('manage_team', slug=team.slug)
+        except IntegrityError:
+            # Handle the case where a duplicate invite is attempted
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success', 'message': 'Invite already sent'}, status=200)
+            messages.info(request, 'Invite already sent')
+            return redirect('manage_team', slug=team.slug)
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
@@ -633,14 +640,12 @@ def handle_team_invite(request, invite_id, action):
         if action == 'accept':
             # Check if student is already in a team
             if TeamMember.objects.filter(student=invite.student).exists():
-                invite.status = 'rejected'
-                invite.save()
+                invite.delete()
                 return JsonResponse({'status': 'error', 'message': 'You are already in a team'})
             
             # Check if team is full
-            if invite.team.is_full:
-                invite.status = 'rejected'
-                invite.save()
+            if invite.team.is_full():
+                invite.delete()
                 return JsonResponse({'status': 'error', 'message': 'Team is full'})
             
             # Create team membership
@@ -654,7 +659,7 @@ def handle_team_invite(request, invite_id, action):
             return JsonResponse({
                 'status': 'success',
                 'message': f'You have joined {invite.team.name}',
-                'redirect': f'/student/hackathon/team/{invite.team.id}/'
+                'redirect': f'/dashboard/hackathon/team/{invite.team.slug}/'
             })
         else:
             invite.status = 'rejected'
@@ -667,16 +672,9 @@ def handle_team_invite(request, invite_id, action):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})
 
-
 @login_required(login_url="login")
 def cancel_team_invite(request, invite_id):
-    """AJAX view for canceling a team invite"""
-    if not request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return JsonResponse({'status': 'error', 'message': 'Invalid request'})
-    
-    if request.method != 'POST':
-        return JsonResponse({'status': 'error', 'message': 'Invalid method'})
-    
+   
     invite = get_object_or_404(TeamInvite, id=invite_id)
     if request.user.student != invite.team.leader:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'})
@@ -686,9 +684,7 @@ def cancel_team_invite(request, invite_id):
     
     try:
         invite.delete()
-        return JsonResponse({
-            'status': 'success',
-            'message': f'Invite to {invite.student.user.first_name} {invite.student.user.last_name} canceled'
-        })
+        messages.success(request, 'Invite canceled successfully')
+        return redirect('manage_team', slug=invite.team.slug)
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)})

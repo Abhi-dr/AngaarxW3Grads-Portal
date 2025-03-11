@@ -153,10 +153,11 @@ Hackathon |  {{ team.name }}
                                     <p class="mb-2 text-muted">{{ invite.message }}</p>
                                     {% endif %}
                                     <div class="d-flex gap-2 mt-2">
-                                        <button class="btn btn-sm btn-danger cancel-invite-btn"
-                                            data-invite-id="{{ invite.id }}">
+                                        <a class="btn btn-sm btn-danger"
+                                        href="{% url 'cancel_team_invite' invite.id %}"
+                                            onclick="return confirm('Are you sure you want to cancel this invite?');">
                                             Cancel Invite
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                                 {% empty %}
@@ -259,7 +260,7 @@ Hackathon |  {{ team.name }}
                             <p class="card-text text-muted mb-0" id="selected-student-email"></p>
                         </div>
                     </div>
-                    <input type="hidden" id="selected-student-id">
+                    
                 </div>
 
                 <div class="mb-3">
@@ -273,8 +274,6 @@ Hackathon |  {{ team.name }}
                 <form id="send-invite-form" method="post" action="{% url 'send_team_invite' team.id %}">
                     {% csrf_token %}
                     <input type="hidden" id="selected-student-id" name="student_id">
-                    <textarea class="form-control" id="invite-message" name="message" rows="3"
-                        placeholder="Add a personal message to your invite..."></textarea>
                     <button type="submit" class="btn btn-primary" id="send-invite-btn" disabled>Send Invite</button>
                 </form>
             </div>
@@ -428,7 +427,6 @@ Hackathon |  {{ team.name }}
         const requiredSkillsInput = document.getElementById('required-skills');
         const deleteTeamBtn = document.getElementById('delete-team-btn');
         const deleteTeamForm = document.getElementById('delete-team-form');
-        const sendInviteForm = document.getElementById('send-invite-form');
 
         // Initialize skills array from existing skills
         let skills = [];
@@ -497,11 +495,10 @@ Hackathon |  {{ team.name }}
             deleteTeamModal.show();
         });
 
-        // Handle send invite button click
-        sendInviteForm.addEventListener('submit', function (e) {
-            e.preventDefault();
-            this.submit();
-        });
+        // Remove the duplicate event listener for send invite form
+        // sendInviteForm.addEventListener('submit', function (e) {
+        //     e.preventDefault();
+        // });
 
         // Handle student search
         let searchTimeout;
@@ -521,40 +518,45 @@ Hackathon |  {{ team.name }}
         function searchStudents(query) {
             fetch(`/dashboard/hackathon/search-students/?query=${encodeURIComponent(query)}&team_id={{ team.id }}`, {
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken
                 }
             })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        searchResults.innerHTML = '';
+            .then(response => response.json())
+            .then(data => {
+                searchResults.innerHTML = '';
 
-                        if (data.results.length === 0) {
-                            searchResults.innerHTML = `
+                if (data.status === 'success') {
+                    if (data.results.length === 0) {
+                        searchResults.innerHTML = `
                             <div class="list-group-item text-center py-3">
                                 <p class="mb-0 text-muted">No students found</p>
                             </div>
                         `;
-                            return;
-                        }
-
-                        data.results.forEach(student => {
-                            const item = document.createElement('button');
-                            item.type = 'button';
-                            item.className = 'list-group-item list-group-item-action';
-                            item.innerHTML = `
-                            <h6 class="mb-1">${student.name}</h6>
-                            <small class="text-muted">${student.email}</small>
-                        `;
-                            item.addEventListener('click', () => selectStudent(student));
-                            searchResults.appendChild(item);
-                        });
+                        return;
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showToast('An error occurred while searching students.', 'error');
-                });
+
+                    data.results.forEach(student => {
+                        const item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'list-group-item list-group-item-action';
+                        item.innerHTML = `
+                            <h6 class="mb-1">${student.name}</h6>
+                            <small class="text-muted">Username: ${student.username}</small>
+                            <br>
+                            <small class="text-muted">Email: ${student.email}</small>
+                        `;
+                        item.addEventListener('click', () => selectStudent(student));
+                        searchResults.appendChild(item);
+                    });
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred while searching students.', 'error');
+            });
         }
 
         // Function to select a student

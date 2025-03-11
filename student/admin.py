@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Notification, Anonymous_Message, Feedback, AIQuestion
-from .hackathon_models import HackathonTeam, TeamMember, JoinRequest
+from .hackathon_models import HackathonTeam, TeamMember, JoinRequest, TeamInvite
 
 
 @admin.register(Notification)
@@ -45,4 +45,11 @@ class JoinRequestAdmin(admin.ModelAdmin):
     list_display = ('team', 'student', 'status', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('team__name', 'student__username', 'message')
+    readonly_fields = ('created_at',)
+    
+@admin.register(TeamInvite)
+class TeamInviteAdmin(admin.ModelAdmin):
+    list_display = ('team', 'student', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('team__name', 'student__username')
     readonly_fields = ('created_at',)
