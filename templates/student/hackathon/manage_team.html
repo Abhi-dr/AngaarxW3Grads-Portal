@@ -98,7 +98,7 @@ Hackathon |  {{ team.name }}
                                 <!-- Team Leader -->
                                 <div class="list-group-item d-flex justify-content-between align-items-center">
                                     <div>
-                                        <h6 class="mb-0">{{ team.leader.first_name }} {{ team.leader.last_name }}</h6>
+                                        <h5 class="mb-0">{{ team.leader.first_name }} {{ team.leader.last_name }}</h5>
                                         <small class="text-muted">Team Leader</small>
                                     </div>
                                     <span class="badge bg-primary">You</span>
@@ -109,8 +109,19 @@ Hackathon |  {{ team.name }}
                                 <div class="list-group-item d-flex justify-content-between align-items-center"
                                     id="member-{{ member.id }}">
                                     <div>
-                                        <h6 class="mb-0">{{ member.student.first_name }} {{ member.student.last_name }}
-                                        </h6>
+                                        <h5 class="mb-1">{{ member.student.first_name }} {{ member.student.last_name }}
+                                        </h5>
+
+                                        <div class="d-flex">
+                                        <a href="tel:+91{{ member.student.mobile_number }}" class="badge bg-dark mx-1">
+                                            📞 ({{ member.student.mobile_number }})
+                                        </a>
+
+                                        <a href="mailto:{{ member.student.email }}" class="badge bg-dark mx-1">
+                                            ✉️
+                                        </a>
+                                    </div>
+
                                         <small class="text-muted">Joined {{ member.joined_at|timesince }} ago</small>
                                     </div>
                                     <a class="btn btn-sm btn-outline-danger remove-member-btn"

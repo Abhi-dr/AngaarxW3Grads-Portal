@@ -154,7 +154,7 @@ def manage_team(request, slug):
         'team_members': team_members,
         'join_requests': join_requests,
         'sent_invites': sent_invites,
-    }
+    }   
     
     return render(request, 'student/hackathon/manage_team.html', context)
 
