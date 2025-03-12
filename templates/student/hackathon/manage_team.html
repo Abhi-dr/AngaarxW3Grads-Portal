@@ -47,7 +47,7 @@ Hackathon |  {{ team.name }}
                                 <div class="mb-3">
                                     <label for="members-limit" class="form-label">Team Members Limit</label>
                                     <input type="number" class="form-control" id="members-limit" name="members_limit"
-                                        min="2" max="10" value="{{ team.members_limit }}">
+                                        min="2" max="5" value="{{ team.members_limit }}">
                                     <div class="form-text">Maximum number of team members (including you as the leader).
                                     </div>
                                 </div>
@@ -100,6 +100,16 @@ Hackathon |  {{ team.name }}
                                     <div>
                                         <h5 class="mb-0">{{ team.leader.first_name }} {{ team.leader.last_name }}</h5>
                                         <small class="text-muted">Team Leader</small>
+
+                                        <div class="d-flex">
+                                            <a href="tel:+91{{ team.leader.mobile_number }}" class="badge bg-dark mx-1">
+                                                📞 ({{ team.leader.mobile_number }})
+                                            </a>
+    
+                                            <a href="mailto:{{ team.leader.email }}" class="badge bg-dark mx-1">
+                                                ✉️
+                                            </a>
+                                            </div>
                                     </div>
                                     <span class="badge bg-primary">You</span>
                                 </div>
@@ -120,7 +130,7 @@ Hackathon |  {{ team.name }}
                                         <a href="mailto:{{ member.student.email }}" class="badge bg-dark mx-1">
                                             ✉️
                                         </a>
-                                    </div>
+                                        </div>
 
                                         <small class="text-muted">Joined {{ member.joined_at|timesince }} ago</small>
                                     </div>
