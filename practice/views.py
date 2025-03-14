@@ -542,7 +542,6 @@ def get_driver_code(request, question_id, language_id):
         else:
             return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
         
-        return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
     return JsonResponse({"success": False, "message": "Driver code not found.", "language id": language_id, "question id": question_id}, status=404)
 
 # ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================
