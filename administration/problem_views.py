@@ -144,7 +144,6 @@ def add_question(request):
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def delete_question(request, id):
     
     question = Question.objects.get(id=id)
@@ -477,11 +476,8 @@ def delete_test_case(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def driver_code(request, slug):
-    
-    administrator = Administrator.objects.get(id=request.user.id)
     question = Question.objects.get(slug=slug)
     
     driver_codes = {
@@ -524,7 +520,7 @@ def driver_code(request, slug):
 
 
     parameters = {
-        "administrator": administrator,
+        
         'question': question,
         'driver_codes': mark_safe(json.dumps(driver_codes)),
     }

@@ -8,6 +8,7 @@ from django.utils.timezone import now
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils.safestring import mark_safe
 
 from accounts.models import Student, Instructor
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
@@ -629,33 +630,50 @@ def delete_test_case(request, id):
 @staff_member_required(login_url='login')
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def driver_code(request, slug):
-    
-    instructor = Instructor.objects.get(id=request.user.id)
     question = Question.objects.get(slug=slug)
     
-    driver_codes = {code.language_id: code.code for code in DriverCode.objects.filter(question=question)}
-    
+    driver_codes = {
+    code.language_id: {
+        "visible": code.visible_driver_code,
+        "complete": code.complete_driver_code,
+    }
+    for code in DriverCode.objects.filter(question=question)
+    }
+
         
     if request.method == 'POST':
         
         language_id = request.POST.get('language_id')
-        code = request.POST.get('code')
+        visible_driver_code = request.POST.get('visible_driver_code')
+        complete_driver_code = request.POST.get('complete_driver_code')
+        show_complete_code = request.POST.get('show_complete_code') == "true"  # Convert to boolean
+        
+        question.show_complete_driver_code = show_complete_code
+        question.save()
+
 
         # Check if a driver code already exists for the given language
         existing_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
         if existing_code:
-            existing_code.code = code
+            existing_code.visible_driver_code = visible_driver_code
+            existing_code.complete_driver_code = complete_driver_code
+
             existing_code.save()
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} updated successfully."})
         else:
-            driver_code = DriverCode(question=question, language_id=language_id, code=code)
+            driver_code = DriverCode(
+                question=question,
+                language_id=language_id,
+                visible_driver_code=visible_driver_code,
+                complete_driver_code=complete_driver_code,
+            )
             driver_code.save()
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} added successfully."})
 
+
     parameters = {
-        "instructor": instructor,
         'question': question,
-        'driver_codes': driver_codes
+        'driver_codes': mark_safe(json.dumps(driver_codes)),
     }
 
     return render(request, 'instructor/sheet/driver_code.html', parameters)
