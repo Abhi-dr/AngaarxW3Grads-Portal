@@ -32,8 +32,20 @@ active
         </ol>
     </nav>
 
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <button type="button" class="btn btn-primary w-100" id="manualEntryBtn" onclick="showManualEntry()">
+                Add Question Manually
+            </button>
+        </div>
+        <div class="col-md-6">
+            <button type="button" class="btn btn-warning w-100" id="jsonEntryBtn" onclick="showJsonEntry()">
+                Add Question using JSON
+            </button>
+        </div>
+    </div>
 
-    <div class="card">
+    <div class="card" id="manualEntryForm">
         <div class="card-body">
             <h5 class="card-title fw-semibold mb-0">Add Question to {{ sheet.name }}</i> </h5>
 
@@ -135,7 +147,150 @@ active
 
         </div>
     </div>
+
+    <!-- JSON Entry Form -->
+    <div class="card" id="jsonEntryForm" style="display: none;">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Add Question to {{ sheet.name }} using JSON</i> </h5>
+            <p class="text-muted mt-2">Paste your JSON data below to add a complete question with all details including
+                test cases (optional).</p>
+        </div>
+        <div class="container px-4">
+            <form id="jsonQuestionForm" method="POST" action="{% url 'instructor_add_question_json' sheet.slug %}">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+                    <div class="w-100 mt-n4">
+                        <div class="card-body h-100">
+                            <div class="mb-3">
+                                <textarea class="form-control" id="jsonData" name="json_data" rows="15"
+                                    placeholder="Paste your question JSON here..." required></textarea>
+                            </div>
+                            <div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-warning w-100 mt-3">Add Question from
+                                        JSON</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JSON Format Info Modal -->
+    <div class="modal fade" id="jsonFormatModal" tabindex="-1" aria-labelledby="jsonFormatModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="jsonFormatModalLabel">Question JSON Format</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Use the following JSON format to add a complete question:</p>
+                    <pre><code>{
+                            "title": "Question Title",
+                            "scenario": "Optional scenario description",
+                            "description": "Problem description...",
+                            "input_format": "Input format details...",
+                            "output_format": "Output format details...",
+                            "constraints": "Constraints details...",
+                            "hint": "Optional hint",
+                            "difficulty_level": "Easy|Medium|Hard",
+                            "test_cases": [
+                                {
+                                    "input": "test input 1",
+                                    "output": "expected output 1",
+                                    "is_sample": true
+                                },
+                                {
+                                    "input": "test input 2",
+                                    "output": "expected output 2",
+                                    "is_sample": false
+                                }
+                            ],
+                            "driver_codes": [
+                                {
+                                    "language_id": 71,
+                                    "visible_driver_code": "# Python driver code visible to student",
+                                    "complete_driver_code": "# Complete Python driver code"
+                                }
+                            ]}</code></pre>
+                    
+                            <p class="mt-3">Notes:</p>
+                    <ul>
+                        <li><code>test_cases</code> and <code>driver_codes</code> are optional</li>
+                        <li>For driver codes, common language IDs: Python (71), C (50), C++ (54), Java (62)</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // When page loads, show the info modal
+    $(document).ready(function () {
+        const jsonBtn = document.getElementById('jsonEntryBtn');
+        jsonBtn.addEventListener('click', function () {
+            const jsonFormatModal = new bootstrap.Modal(document.getElementById('jsonFormatModal'));
+            jsonFormatModal.show();
+        });
+    });
+
+    function showManualEntry() {
+        document.getElementById('manualEntryForm').style.display = 'block';
+        document.getElementById('jsonEntryForm').style.display = 'none';
+        document.getElementById('manualEntryBtn').classList.add('btn-primary');
+        document.getElementById('manualEntryBtn').classList.remove('btn-outline-primary');
+        document.getElementById('jsonEntryBtn').classList.add('btn-outline-warning');
+        document.getElementById('jsonEntryBtn').classList.remove('btn-warning');
+    }
+
+    function showJsonEntry() {
+        document.getElementById('manualEntryForm').style.display = 'none';
+        document.getElementById('jsonEntryForm').style.display = 'block';
+        document.getElementById('jsonEntryBtn').classList.add('btn-warning');
+        document.getElementById('jsonEntryBtn').classList.remove('btn-outline-warning');
+        document.getElementById('manualEntryBtn').classList.add('btn-outline-primary');
+        document.getElementById('manualEntryBtn').classList.remove('btn-primary');
+    }
+
+    // Handle JSON form submission
+    document.getElementById('jsonQuestionForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    window.location.href = data.redirect_url;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+    });
+</script>
 
 {% endblock %}

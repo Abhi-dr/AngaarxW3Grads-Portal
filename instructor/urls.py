@@ -41,6 +41,8 @@ urlpatterns = [
     path("make_duplicate/<int:sheet_id>/<int:question_id>/", sheet_views.make_duplicate, name="instructor_make_duplicate"),
     path("add_new_question/<slug:slug>/", sheet_views.add_new_question, name="instructor_add_new_question"),
     
+    path("add_question_json/<slug:slug>/", sheet_views.add_question_json, name="instructor_add_question_json"),
+    
     path("leaderboard/<slug:slug>", sheet_views.leaderboard, name="instructor_leaderboard"),
     path("sheet_leaderboard/<slug:slug>", sheet_views.sheet_leaderboard, name="instructor_sheet_leaderboard"),
     
