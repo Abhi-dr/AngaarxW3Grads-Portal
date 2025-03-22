@@ -74,7 +74,8 @@ MIDDLEWARE = [
     
 ]
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 ROOT_URLCONF = 'angaar_hai.urls'
 
@@ -286,12 +287,14 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = 'noreply@theangaarbatch.in'
 
 
+# Redis Cache Configuration
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',  # Use your Redis server address
+        'LOCATION': 'redis://127.0.0.1:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'IGNORE_EXCEPTIONS': True,
         },
     }
 }
@@ -299,7 +302,6 @@ CACHES = {
 # Celery Configuration
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/2'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/2'
-
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'

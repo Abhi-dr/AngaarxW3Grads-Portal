@@ -28,7 +28,11 @@ import math
 def index(request):
     
     administrator = Administrator.objects.get(id=request.user.id)
-    latest_sheet = Sheet.objects.latest('id')
+    
+    try:
+        latest_sheet = Sheet.objects.latest('id')
+    except Sheet.DoesNotExist:
+        latest_sheet = None
     
     # get the total number of submissions happened today only
     today = datetime.date.today()
@@ -42,60 +46,11 @@ def index(request):
     # Get the count of such users
     total_users_today = users_today.count()
 
-    print(f'Total users who used the portal today: {total_users_today}')
-
-
-    
-    # last_3_questions = Question.objects.order_by('-created_at')[:3]
-
-    
-    # sessions = Session.objects.filter(administrator=administrator, recorded_session_link=None).order_by("-session_time")
-    
-    # total_enrolled_students = Student.objects.filter(courses__administrator=administrator).distinct().count()
-    # total_sessions = Session.objects.filter(administrator=administrator).count()
-    
-    # course = Course.objects.get(administrator=administrator)
-    
-    # if total_sessions == 0:
-    #     total_completed_sessions_percentage = 0
-    # else:
-    #     total_completed_sessions_percentage = int((Session.objects.filter(administrator=administrator, is_completed=True).count() / total_sessions) * 100)
-    
     parameters = {
         "administrator": administrator,
         "latest_sheet": latest_sheet,
-        # "total_enrolled_students": total_enrolled_students,
-        # "total_sessions": total_sessions,
-        # "sessions": sessions,
-        # "total_completed_sessions_percentage": total_completed_sessions_percentage,
-        # "course": course
-    }
-    
-    return render(request, "administration/index.html", parameters)
-    
-    # last_3_questions = Question.objects.order_by('-created_at')[:3]
-
-    
-    # sessions = Session.objects.filter(administrator=administrator, recorded_session_link=None).order_by("-session_time")
-    
-    # total_enrolled_students = Student.objects.filter(courses__administrator=administrator).distinct().count()
-    # total_sessions = Session.objects.filter(administrator=administrator).count()
-    
-    # course = Course.objects.get(administrator=administrator)
-    
-    # if total_sessions == 0:
-    #     total_completed_sessions_percentage = 0
-    # else:
-    #     total_completed_sessions_percentage = int((Session.objects.filter(administrator=administrator, is_completed=True).count() / total_sessions) * 100)
-    
-    parameters = {
-        "administrator": administrator,
-        "latest_sheet": latest_sheet,
-        # "total_enrolled_students": total_enrolled_students,
-        # "total_sessions": total_sessions,
-        # "sessions": sessions,
-        # "total_completed_sessions_percentage": total_completed_sessions_percentage,
-        # "course": course
+        "total_submissions_today": total_submissions_today,
+        "total_users_today": total_users_today
     }
     
     return render(request, "administration/index.html", parameters)

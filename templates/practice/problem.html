@@ -21,6 +21,64 @@
         height: 60vh;
         margin: 20px auto;
         position: relative;
+        transition: all 0.3s ease;
+    }
+
+    /* Fullscreen styles */
+    .editor-container:fullscreen,
+    .editor-container:-webkit-full-screen,
+    .editor-container:-moz-full-screen,
+    .editor-container:-ms-fullscreen {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        background: var(--bs-body-bg);
+    }
+
+    .editor-container:fullscreen #editor,
+    .editor-container:-webkit-full-screen #editor,
+    .editor-container:-moz-full-screen #editor,
+    .editor-container:-ms-fullscreen #editor {
+        height: 100vh;
+        width: 100vw;
+    }
+
+    #fullscreen-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 9999;
+        background: rgba(33, 37, 41, 0.9);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    #fullscreen-btn:hover {
+        background: rgba(33, 37, 41, 1);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-bs-theme="dark"] #fullscreen-btn {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    [data-bs-theme="dark"] #fullscreen-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    [data-bs-theme="dark"] .editor-container:fullscreen,
+    [data-bs-theme="dark"] .editor-container:-webkit-full-screen,
+    [data-bs-theme="dark"] .editor-container:-moz-full-screen,
+    [data-bs-theme="dark"] .editor-container:-ms-fullscreen {
+        background: #1e1e1e;
     }
 
     code {
@@ -500,6 +558,12 @@
                     </div>
                 </div>
                 <div class="editor-container">
+                    <div class="editor-header" style="position: absolute; top: 10px; right: 10px; z-index: 9999; display: flex; gap: 10px;">
+                        <button type="button" class="btn btn-dark btn-sm d-flex align-items-center gap-2" id="fullscreen-btn" title="Toggle Fullscreen (Esc to exit)">
+                            <i class="fas fa-expand"></i>
+                            <span>Fullscreen</span>
+                        </button>
+                    </div>
                     <div id="editor"></div>
                 </div>
 
@@ -589,7 +653,7 @@
                                             d="M368.757,255.406c30.472-5.416,58.07-19.807,80.124-41.852 c28.54-28.54,44.259-66.191,44.259-106.495c0-30.311-24.743-54.708-55.157-54.708h-58.453c0-1.047,0-1.877,0-2.526V9.566 c0-5.783-5.202-9.566-10.983-9.566H143.435c-5.782,0-9.957,3.783-9.957,9.566v41.881c0,0.129-0.498-0.142-0.494,0.905H73.992 c-30.401,0-55.133,24.388-55.133,54.698c0,40.226,15.726,77.966,44.283,106.524c21.807,21.795,50.146,36.46,80.351,41.837 c9.052,20.653,23.513,38.302,42.126,51.346c10.426,7.306,22.196,12.842,33.713,16.576v63.023h-4.865 c-23.292,0-42.252,18.426-42.252,41.718v10.12c-23.035,0.195-41.881,19.061-41.881,42.232v20.581 c0,5.783,4.698,10.994,10.481,10.994h230.348c5.782,0,10.46-5.211,10.46-10.994v-20.581c0-23.171-18.847-42.037-41.881-42.232 v-10.12c0-23.292-18.939-41.718-42.231-41.718h-4.885v-62.974C326.131,313.015,353.777,288.661,368.757,255.406z M82.214,115.174 h51.263v71.538C105.207,173.57,85.054,145.538,82.214,115.174z M379.53,115.174h50.54c-2.835,30.364-22.27,58.376-50.54,71.562 V115.174z M437.983,73.292c18.869,0,34.218,15.004,34.218,33.767c0,34.71-13.54,67.234-38.123,91.817 c-16.244,16.235-35.974,27.586-57.758,33.471c1.671-7.529,2.622-15.211,2.843-22.923c42.885-15.496,72.201-56.357,72.201-102.349 c0-7.217-6.003-12.843-13.381-12.843h-58.453v-20.94H437.983z M154.417,20.941h204.172v20.941H154.417L154.417,20.941 L154.417,20.941z M77.948,198.653c-24.6-24.601-38.149-56.961-38.149-91.594c0-18.763,15.339-33.767,34.193-33.767h59.485v20.941 H74.002c-7.337,0-13.083,5.488-13.083,12.826c0,24.3,7.814,47.135,22.597,66.286c12.701,16.453,30.134,29.018,49.689,36.066 c0.005,0.192,0.216,12.659,2.723,22.863C114.169,226.347,94.005,214.702,77.948,198.653z M160.799,242.405 c-0.076-0.199,0-0.396-0.088-0.589c-2.621-6.945-6.294-24.425-6.294-35.927V62.822h204.172v143.067 c0,11.082-2.356,23.028-6.875,36.515c-15.889,39.843-53.401,65.571-95.538,65.571C214.182,307.975,175.805,281.625,160.799,242.405 z M360.683,480.426v10.634H151.276v-10.634c0-11.746,9.566-20.777,21.311-20.777h166.806 C351.138,459.648,360.683,468.68,360.683,480.426z M318.802,428.074v10.634H193.157v-10.634c0-11.746,9.566-20.777,21.311-20.777 h83.043C309.257,407.297,318.802,416.328,318.802,428.074z M271.685,386.356h-31.411V327.89c5.235,0.668,10.487,1.025,15.813,1.025 c5.27,0,10.363-0.352,15.598-1.002V386.356z">
                                         </path>
                                         <path style="fill:#231F20;"
-                                            d="M265.132,240.953c4.656,1.641,10.016,3.531,15.5,3.531c3.372,0,6.792-0.715,10.123-2.642 c8.961-5.184,10.768-15.102,12.221-23.074c0.589-3.233,1.256-6.898,2.181-8.497c0.823-1.422,3.681-3.814,5.978-5.737 c5.974-5.003,14.157-11.853,14.157-22.54c0-10.686-8.182-17.537-14.157-22.54c-2.296-1.922-5.155-4.316-5.976-5.737 c-0.926-1.6-1.594-5.264-2.183-8.498c-1.453-7.97-3.26-17.889-12.219-23.071c-8.745-5.06-18.103-1.763-25.624,0.888 c-3.215,1.134-6.861,2.419-8.946,2.419c-2.085,0-5.73-1.285-8.946-2.419c-7.517-2.649-16.875-5.95-25.623-0.888 c-8.961,5.184-10.768,15.102-12.22,23.074c-0.589,3.233-1.257,6.897-2.182,8.496c-0.823,1.422-3.681,3.815-5.978,5.738 c-5.974,5.003-14.157,11.853-14.157,22.54c0,10.686,8.182,17.538,14.157,22.54c2.296,1.923,5.155,4.317,5.976,5.737 c0.926,1.6,1.594,5.264,2.183,8.498c1.453,7.97,3.26,17.889,12.22,23.072c8.744,5.059,18.103,1.762,25.623-0.889 c3.215-1.134,6.861-2.419,8.946-2.419S261.916,239.82,265.132,240.953z M240.279,221.204c-2.428,0.855-6.329,2.23-8.146,2.332 c-0.878-1.629-1.653-5.881-2.134-8.521c-0.895-4.912-1.91-10.479-4.658-15.229c-2.672-4.618-6.732-8.018-10.659-11.306 c-2.226-1.864-5.882-4.926-6.603-6.484c0.72-1.558,4.377-4.621,6.603-6.484c3.926-3.288,7.987-6.686,10.66-11.306 c2.747-4.75,3.762-10.317,4.657-15.228c0.481-2.64,1.255-6.893,2.134-8.521c1.816,0.101,5.718,1.476,8.146,2.332 c4.8,1.692,10.24,3.609,15.907,3.609s11.107-1.917,15.907-3.609c2.428-0.855,6.329-2.231,8.146-2.332 c0.877,1.629,1.653,5.881,2.134,8.521c0.895,4.912,1.91,10.479,4.658,15.229c2.672,4.618,6.732,8.018,10.659,11.305 c2.226,1.864,5.882,4.926,6.603,6.484c-0.72,1.558-4.377,4.621-6.603,6.484c-3.926,3.288-7.987,6.686-10.66,11.306 c-2.747,4.75-3.762,10.317-4.657,15.229c-0.481,2.64-1.255,6.893-2.134,8.521c-1.816-0.101-5.718-1.475-8.146-2.332 c-4.8-1.692-10.239-3.609-15.907-3.609S245.079,219.512,240.279,221.204z">
+                                            d="M265.132,240.953c4.656,1.641,10.016,3.531,15.5,3.531c3.372,0,6.792-0.715,10.123-2.642 c8.961-5.184,10.768-15.102,12.221-23.074c0.589-3.233,1.256-6.898,2.181-8.497c0.823-1.422,3.681-3.814,5.978-5.737 c5.974-5.003,14.157-11.853,14.157-22.54c0-10.686-8.182-17.537-14.157-22.54c-2.296-1.922-5.155-4.316-5.976-5.737 c-0.926-1.6-1.594-5.264-2.183-8.498c-1.453-7.97-3.26-17.889-12.219-23.071c-8.745-5.06-18.103-1.763-25.624,0.888 c-3.215,1.134-6.861,2.419-8.946,2.419c-2.085,0-5.73-1.285-8.946-2.419c-7.517-2.649-16.875-5.95-25.623-0.888 c-8.961,5.184-10.768,15.102-12.22,23.074c-0.589,3.233-1.257,6.897-2.182,8.496c-0.823,1.422-3.681,3.815-5.978,5.738 c-5.974,5.003-14.157,11.853-14.157,22.54c0,10.686,8.182,17.538,14.157,22.54c2.296,1.923,5.155,4.317,5.976,5.737 c0.926,1.6,1.594,5.264,2.183,8.498c1.453,7.97,3.26,17.889,12.22,23.072c8.744,5.059,18.103,1.762,25.623-0.889 c3.215-1.134,6.861-2.419,8.946-2.419S261.916,239.82,265.132,240.953z M240.279,221.204c-2.428,0.855-6.329,2.23-8.146,2.332 c-0.878-1.629-1.653-5.881-2.134-8.521c-0.895-4.912-1.91-10.479-4.658-15.229c-2.672-4.618-6.732-8.018-10.659-11.306 c-2.226-1.864-5.882-4.926-6.603-6.484c0.72-1.558,4.377-4.621,6.603-6.484c3.926-3.288,7.987-6.686,10.66-11.306 c2.747-4.75-3.762-10.317-4.657-15.229c-0.481-2.64-1.255-6.893-2.134-8.521c-1.816-0.101-5.718-1.475-8.146-2.332 c-4.8-1.692-10.239-3.609-15.907-3.609S245.079,219.512,240.279,221.204z">
                                         </path>
                                     </g>
                                 </g>
@@ -686,15 +750,75 @@
         $(document).ready(function () {
             const editor = ace.edit("editor");
             const languageSelect = $("#language");
-            const questionId = "{{ question.id }}"; // Django template to dynamically get the question ID
+            const questionId = "{{ question.id }}";
             const DRAFT_STORAGE_KEY = "draft_code_data";
-            const AUTO_SAVE_DELAY = 2000; // Throttle auto-save to every 2 seconds
-            let autoSaveTimeout; // To handle throttling
+            const AUTO_SAVE_DELAY = 2000;
+            let autoSaveTimeout;
 
             const saveButton = $("#save-draft-btn");
             const restoreButton = $("#restore-draft-btn");
             const resetButton = $("#reset-draft-btn");
             const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
+
+            // Fullscreen functionality
+            const editorContainer = document.querySelector('.editor-container');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const fullscreenIcon = fullscreenBtn.querySelector('i');
+
+            function toggleFullscreen(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!document.fullscreenElement &&
+                    !document.mozFullScreenElement &&
+                    !document.webkitFullscreenElement &&
+                    !document.msFullscreenElement) {
+                    // Enter fullscreen
+                    if (editorContainer.requestFullscreen) {
+                        editorContainer.requestFullscreen();
+                    } else if (editorContainer.mozRequestFullScreen) {
+                        editorContainer.mozRequestFullScreen();
+                    } else if (editorContainer.webkitRequestFullscreen) {
+                        editorContainer.webkitRequestFullscreen();
+                    } else if (editorContainer.msRequestFullscreen) {
+                        editorContainer.msRequestFullscreen();
+                    }
+                    fullscreenIcon.classList.remove('fa-expand');
+                    fullscreenIcon.classList.add('fa-compress');
+                } else {
+                    // Exit fullscreen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                    fullscreenIcon.classList.remove('fa-compress');
+                    fullscreenIcon.classList.add('fa-expand');
+                }
+
+                // Ensure editor resizes properly
+                setTimeout(() => {
+                    editor.resize();
+                }, 100);
+            }
+
+            // Add fullscreen event listeners
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', () => editor.resize());
+            document.addEventListener('webkitfullscreenchange', () => editor.resize());
+            document.addEventListener('mozfullscreenchange', () => editor.resize());
+            document.addEventListener('MSFullscreenChange', () => editor.resize());
+
+            // Handle Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.fullscreenElement) {
+                    editor.resize();
+                }
+            });
 
             // Define supported languages
             const topLanguages = [
@@ -1397,3 +1521,75 @@
 
 
     {% endblock %}
+
+    <script>
+        // Fullscreen functionality
+        const initFullscreen = () => {
+            const editorContainer = document.querySelector('.editor-container');
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const fullscreenIcon = fullscreenBtn.querySelector('i');
+
+            function toggleFullscreen(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!document.fullscreenElement &&
+                    !document.mozFullScreenElement &&
+                    !document.webkitFullscreenElement &&
+                    !document.msFullscreenElement) {
+                    // Enter fullscreen
+                    if (editorContainer.requestFullscreen) {
+                        editorContainer.requestFullscreen();
+                    } else if (editorContainer.mozRequestFullScreen) {
+                        editorContainer.mozRequestFullScreen();
+                    } else if (editorContainer.webkitRequestFullscreen) {
+                        editorContainer.webkitRequestFullscreen();
+                    } else if (editorContainer.msRequestFullscreen) {
+                        editorContainer.msRequestFullscreen();
+                    }
+                    fullscreenIcon.classList.remove('fa-expand');
+                    fullscreenIcon.classList.add('fa-compress');
+                } else {
+                    // Exit fullscreen
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    } else if (document.mozCancelFullScreen) {
+                        document.mozCancelFullScreen();
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    } else if (document.msExitFullscreen) {
+                        document.msExitFullscreen();
+                    }
+                    fullscreenIcon.classList.remove('fa-compress');
+                    fullscreenIcon.classList.add('fa-expand');
+                }
+
+                // Ensure editor resizes properly
+                setTimeout(() => {
+                    editor.resize();
+                }, 100);
+            }
+
+            fullscreenBtn.addEventListener('click', toggleFullscreen);
+
+            // Handle fullscreen change events
+            document.addEventListener('fullscreenchange', () => editor.resize());
+            document.addEventListener('webkitfullscreenchange', () => editor.resize());
+            document.addEventListener('mozfullscreenchange', () => editor.resize());
+            document.addEventListener('MSFullscreenChange', () => editor.resize());
+
+            // Handle Escape key (browser handles this automatically for fullscreen)
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.fullscreenElement) {
+                    editor.resize();
+                }
+            });
+        };
+
+        $(document).ready(function() {
+            // Initialize fullscreen after editor is ready
+            initFullscreen();
+            
+            // Rest of your existing document.ready code...
+        });
+    </script>
