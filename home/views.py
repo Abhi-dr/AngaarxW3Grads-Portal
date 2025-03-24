@@ -19,6 +19,9 @@ def about(request):
 def our_team(request):
     return render(request, "home/team.html")
 
+def flames(request):
+    return render(request, "home/flames.html")
+
 # ======================== ARTICLES ========================
 
 def articles(request):
