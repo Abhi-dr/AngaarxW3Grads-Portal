@@ -1,106 +1,456 @@
-{% extends 'home/base.html' %}
-{% load static %}
-
-{% block title %}
-#AngaarHai | Login🔥
-{% endblock %}
-
-{% block css %}
-<link rel="stylesheet" href="{% static 'css/accounts/login.css' %}">
-<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
-
+{% extends 'home/base.html' %} {% load static %} {% block title %} #AngaarHai |
+Login🔥 {% endblock %} {% block css %}
 <style>
-  .a-link {
-    font-weight: 600;
-    color: #5e72e4;
+  * {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
   }
 
-  .a-link:hover {
+  .hero {
+    min-height: 100vh;
+    width: 100%;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+      url("{% static 'img/accounts/background.png' %}");
+    background-position: center;
+    background-size: cover;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    box-sizing: border-box;
+  }
+
+  .form-box {
+    width: 400px;
+    position: relative;
+    background: #fff;
+    padding: 25px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+    margin: auto;
+    z-index: 1;
+  }
+
+  /* Slider Button Styles */
+  .button-box {
+    width: 200px;
+    margin: 0 auto 25px;
+    position: relative;
+    border-radius: 50px;
+    background: #f5f5f5;
+    padding: 3px;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .toggle-btn {
+    padding: 8px 20px;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    outline: none;
+    position: relative;
+    font-weight: 600;
+    font-size: 14px;
+    color: #666;
+    z-index: 1;
+    transition: color 0.3s ease;
+  }
+
+  #btn {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 97px;
+    height: calc(100% - 6px);
+    background: linear-gradient(45deg, #ff4d4d, #ff8533);
+    border-radius: 50px;
+    transition: 0.5s;
+  }
+
+  /* Form Container Styles */
+  .forms-container {
+    width: 100%;
+    position: relative;
+    height: 500px;
+  }
+
+  .form-section {
+    width: 100%;
+    padding: 10px 0;
+    background: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+
+  #register-section {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .logo-container {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .logo-container img {
+    width: 80px;
+    height: auto;
+  }
+
+  .form-title {
+    font-size: 22px;
+    margin-bottom: 12px;
+    color: #333;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .input-field {
+    width: 100%;
+    padding: 10px 15px;
+    margin: 6px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    outline: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  .input-field:focus {
+    border-color: #ff4d4d;
+    box-shadow: 0 0 5px rgba(255, 77, 77, 0.2);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 10px;
+    margin: 12px 0 8px;
+    background: linear-gradient(45deg, #ff4d4d, #ff8533);
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .submit-btn:hover {
+    background: linear-gradient(45deg, #ff3333, #ff751a);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 77, 77, 0.2);
+  }
+
+  .forgot-password {
+    text-align: right;
+    margin: 10px 0;
+  }
+
+  .forgot-password a {
+    color: #ff4d4d;
     text-decoration: none;
-    color: #233dd2;
+    font-size: 14px;
+    transition: all 0.3s ease;
   }
 
-  .btn-primary {
-    background-color: #5e72e4;
-    font-weight: 600;
-    font-size: medium;
+  .forgot-password a:hover {
+    color: #ff3333;
+    text-decoration: underline;
   }
-</style>
 
-{% endblock %}
+  .name-container {
+    display: flex;
+    gap: 10px;
+  }
 
-{% block body %}
+  .half-width {
+    width: calc(50% - 5px);
+  }
 
-<div class="overlay"></div>
-<div class="container d-flex justify-content-center align-items-center vh-100">
-  <div class="login-container border rounded shadow p-4 bg-white" style="max-width: 400px; width: 100%;">
-    {% for message in messages %}
+  .alert {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999;
+    min-width: 300px;
+    text-align: center;
+    border-radius: 5px;
+    padding: 10px 20px;
+    animation: slideDown 0.3s ease-out;
+  }
 
-    <div class="row">
-      <div class="alert {{ message.tags }} fade show" role="alert">
-        <span class="alert-text"><strong>{{ message.tag }}</strong>{{ message }}</span>
-      </div>
-    </div>
-
-    {% endfor %}
-    <form class="login-form" method="post" action="{% url 'login' %}?next={{ request.GET.next|default:'' }}">
-      {% csrf_token %}
-      <div class="text-center mb-4">
-        <img src="{% static 'img/home/angaar_logo.jpg' %}" width="80" alt="Angaar Logo" class="mb-2">
-        <h2 class="h4">Login to Learn🔥!</h2>
-      </div>
-      <div class="mb-3">
-        <input type="text" class="form-control" placeholder="Username" name="username" required>
-      </div>
-      <div class="mb-2 position-relative">
-        <input type="password" class="form-control" placeholder="Password" name="password" required id="password">
-        <span class="position-absolute top-50 end-0 translate-middle-y pe-2 show-password" onclick="togglePassword()"
-          style="cursor: pointer;">👀</span>
-      </div>
-      <!-- add the forget password link -->
-      <div class="text-end mb-3">
-        <a href="{% url 'request_password_reset' %}" class="a-link">Forgot Password?</a>
-      </div>
-
-      <div class="text-center">
-        <button type="submit" id="login-btn" class="btn btn-lg btn-primary w-100 mb-0">Enter The
-          World</button>
-      </div>
-      <div class="text-center mt-3 text-black-50">
-        Want To Become <span class="text-black-50 fw-bold">Angaari Aawam?</span><a href="{% url 'register' %}"
-          class="text-black-50"> <span class="a-link">Join Us</span>
-        </a>
-      </div>
-    </form>
-  </div>
-</div>
-
-
-<script>
-  function togglePassword() {
-    const passwordField = document.getElementById('password');
-    const passwordIcon = document.querySelector('.show-password');  // This will now target the span
-    if (passwordField.type === 'password') {
-      passwordField.type = 'text';
-      passwordIcon.textContent = '🙈';  // Changed to a different icon to indicate the open eye state
-    } else {
-      passwordField.type = 'password';
-      passwordIcon.textContent = '👀';  // Changed to the closed eye state
+  @keyframes slideDown {
+    from {
+      transform: translate(-50%, -100%);
+      opacity: 0;
+    }
+    to {
+      transform: translate(-50%, 0);
+      opacity: 1;
     }
   }
 
+  .terms-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 12px;
+    text-align: center;
+  }
 
-  window.onload = function () {
-    const passwordIcon = document.querySelector('.show-password');
-    passwordIcon.textContent = '👀'; // Ensure it starts as closed
-  };
+  .terms-text a {
+    color: #ff4d4d;
+    text-decoration: none;
+  }
+
+  .terms-text a:hover {
+    text-decoration: underline;
+  }
+
+  .toggle-btn.active {
+    color: #fff;
+  }
+
+  /* Navbar Styles */
+  .navbar {
+    background-color: transparent;
+    padding: 15px 40px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .navbar-brand {
+    color: #fff;
+    text-decoration: none;
+    font-size: 22px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+  }
+
+  .navbar-brand span {
+    margin-left: 5px;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+  }
+
+  .nav-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+  }
+
+  .nav-link:hover {
+    color: #ff8533;
+  }
+
+  .nav-link.active {
+    color: #ff8533;
+    font-weight: 600;
+  }
+
+  .job-articles {
+    color: #ff8533;
+    font-weight: 600;
+  }
+</style>
+{% endblock %} {% block body %}
+<div class="hero">
+  <div class="form-box">
+    {% for message in messages %}
+    <div
+      class="alert {{ message.tags }} alert-dismissible fade show"
+      role="alert"
+    >
+      {{ message }}
+      <button
+        type="button"
+        class="btn-close"
+        data-bs-dismiss="alert"
+        aria-label="Close"
+      ></button>
+    </div>
+    {% endfor %}
+
+    <div class="button-box">
+      <div id="btn"></div>
+      <button
+        type="button"
+        class="toggle-btn active"
+        onclick="switchForm('login')"
+      >
+        Login
+      </button>
+      <button type="button" class="toggle-btn" onclick="switchForm('register')">
+        Register
+      </button>
+    </div>
+
+    <div class="forms-container">
+      <div class="form-section" id="login-section">
+        <div class="logo-container">
+          <img
+            src="{% static 'img/home/angaar_logo.jpg' %}"
+            alt="Angaar Logo"
+          />
+        </div>
+        <h2 class="form-title">Login to Learn 🔥!</h2>
+        <form
+          id="login"
+          method="post"
+          action="{% url 'login' %}?next={{ request.GET.next|default:'' }}"
+        >
+          {% csrf_token %}
+          <input
+            type="text"
+            class="input-field"
+            placeholder="Username"
+            name="username"
+            required
+          />
+          <input
+            type="password"
+            class="input-field"
+            placeholder="Password"
+            name="password"
+            id="password"
+            required
+          />
+          <div class="forgot-password">
+            <a href="{% url 'request_password_reset' %}">Forgot Password?</a>
+          </div>
+          <button type="submit" class="submit-btn" id="login-btn">
+            Enter The World
+          </button>
+        </form>
+      </div>
+
+      <div class="form-section" id="register-section">
+        <div class="logo-container">
+          <img
+            src="{% static 'img/home/angaar_logo.jpg' %}"
+            alt="Angaar Logo"
+          />
+        </div>
+        <h2 class="form-title">Join The Angaar Batch 🔥!</h2>
+        <form id="register" method="post" action="{% url 'register' %}">
+          {% csrf_token %}
+          <input
+            type="text"
+            class="input-field"
+            placeholder="Enter your username"
+            name="username"
+            required
+          />
+          <div class="name-container">
+            <input
+              type="text"
+              class="input-field half-width"
+              placeholder="First name"
+              name="first_name"
+              required
+            />
+            <input
+              type="text"
+              class="input-field half-width"
+              placeholder="Last name"
+              name="last_name"
+              required
+            />
+          </div>
+          <input
+            type="email"
+            class="input-field"
+            placeholder="Enter your Email"
+            name="email"
+            required
+          />
+          <input
+            type="password"
+            class="input-field"
+            placeholder="Enter Password"
+            name="password"
+            required
+          />
+          <input
+            type="password"
+            class="input-field"
+            placeholder="Confirm Password"
+            name="confirm_password"
+            required
+          />
+          <button type="submit" class="submit-btn">Register</button>
+          <p class="terms-text">
+            By registering, you agree to our <a href="#">Terms & Conditions</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function switchForm(form) {
+    const loginSection = document.getElementById("login-section");
+    const registerSection = document.getElementById("register-section");
+    const btn = document.getElementById("btn");
+    const toggleBtns = document.querySelectorAll(".toggle-btn");
+
+    if (form === "register") {
+      loginSection.style.opacity = "0";
+      loginSection.style.pointerEvents = "none";
+      registerSection.style.opacity = "1";
+      registerSection.style.pointerEvents = "auto";
+      btn.style.left = "calc(50% - 3px)";
+      toggleBtns[0].classList.remove("active");
+      toggleBtns[1].classList.add("active");
+    } else {
+      registerSection.style.opacity = "0";
+      registerSection.style.pointerEvents = "none";
+      loginSection.style.opacity = "1";
+      loginSection.style.pointerEvents = "auto";
+      btn.style.left = "3px";
+      toggleBtns[1].classList.remove("active");
+      toggleBtns[0].classList.add("active");
+    }
+  }
 
   const loginBtn = document.getElementById("login-btn");
   loginBtn.addEventListener("click", function () {
     loginBtn.innerHTML = "Logging In...";
-    loginBtn.style.backgroundColor = "grey";
-
+    loginBtn.style.opacity = "0.8";
   });
 
+  // Auto-hide alerts after 5 seconds
+  document.querySelectorAll(".alert").forEach((alert) => {
+    setTimeout(() => {
+      alert.classList.remove("show");
+      setTimeout(() => alert.remove(), 300);
+    }, 5000);
+  });
 </script>
 {% endblock %}

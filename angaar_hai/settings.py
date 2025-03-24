@@ -71,7 +71,8 @@ MIDDLEWARE = [
     
 ]
 
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 ROOT_URLCONF = 'angaar_hai.urls'
 
@@ -112,19 +113,37 @@ CHANNEL_LAYERS = {
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': os.getenv("DB_NAME"),
+#         'USER': os.getenv("DB_USER"),
+#         'PASSWORD': os.getenv("DB_PASSWORD"),
+#         # 'HOST': 'localhost', 1st
+#         # 'HOST': '127.0.0.1', 2nd
+#         'HOST': 'mysql_db',
+#         # 'PORT': '3306',
+#         'PORT': '3307',
+#         'OPTIONS': {
+#             'charset': 'utf8mb4',
+#         },
+#     }
+# }
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv("DB_NAME"),
-        'USER': os.getenv("DB_USER"),
-        'PASSWORD': os.getenv("DB_PASSWORD"),
-        'HOST': 'localhost',
+    # 'ENGINE':   'mysql.connector.django',
+        'NAME': 'angaar_hai',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        # 'HOST': 'mysql_db',  # This should match the service name in docker-compose
+         'HOST': 'localhost',
         'PORT': '3306',
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-        },
     }
 }
+
 
 
 
@@ -265,12 +284,14 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = 'noreply@theangaarbatch.in'
 
 
+# Redis Cache Configuration
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',  # Use your Redis server address
+        'LOCATION': 'redis://127.0.0.1:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'IGNORE_EXCEPTIONS': True,
         },
     }
 }
@@ -278,7 +299,6 @@ CACHES = {
 # Celery Configuration
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/2'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/2'
-
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
