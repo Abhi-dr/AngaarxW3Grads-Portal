@@ -4,6 +4,9 @@ from . import problem_views, views, question_generator, batch_views, sheet_views
 urlpatterns = [
     path("", views.index, name="administration"),
     
+    path("view_student_profile/<int:id>", views.view_student_profile, name="administration_view_student_profile"),
+    path("fetch_view_student_profile/<int:id>", views.fetch_view_student_profile, name="fetch_view_student_profile"),
+    
     # ========================= DATA WORK ============================
     
     path("all_students/", views.all_students, name="all_students"),

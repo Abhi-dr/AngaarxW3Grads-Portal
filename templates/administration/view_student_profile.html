@@ -99,7 +99,8 @@ active
       <div class="col-lg-4" id="left-panel">
         <div class="card mb-2" id="profile-card">
           <div class="card-body text-center">
-            <img src="/static/img/default-avatar.jpg" id="profile-pic" alt="avatar" class="rounded-circle img-fluid" style="width: 150px;" />
+            <img src="" id="profile-pic" alt="avatar" class="rounded-circle img-fluid"
+              style="width: 150px;" />
             <h5 class="my-3" id="full-name">Loading...</h5>
             <p class="mb-1" id="profile-info">Loading...</p>
             <p class="mb-4" id="college">Loading...</p>
@@ -229,6 +230,7 @@ active
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
 
+
 <script>
   document.addEventListener("DOMContentLoaded", async () => {
     try {
@@ -240,34 +242,40 @@ active
 
       const student = data.student;
 
+      console.log(student.first_name);
+
       // Update DOM with the fetched data
-      document.querySelector("#profile-title").textContent = `${students.first_name}'s Profile 🔥`;
-      document.querySelector("#current-streak").textContent = `${students.streak?.current_streak || 0}🔥`;
-      document.querySelector("#total-sparks").textContent = `${students.sparks || 0}`;
-      document.querySelector("#profile-pic").src = students.profile_pic || "/static/img/default-avatar.jpg";
-      document.querySelector("#full-name").textContent = `${students.first_name} ${students.last_name}`;
-      document.querySelector("#profile-info").innerHTML = `<b>${students.username}</b> | <b>${students.profile_score || 0}%</b> Profile Completed`;
-      document.querySelector("#college").textContent = students.college || "Not Available";
+      document.querySelector("#profile-title").textContent = `${student.first_name}'s Profile 🔥`;
+      document.querySelector("#current-streak").textContent = `${student.streak?.current_streak || 0}🔥`;
+      document.querySelector("#total-sparks").textContent = `${student.sparks || 0}`;
+      document.querySelector("#profile-pic").src = student.profile_pic || "/static/img/default-avatar.jpg";
+      document.querySelector("#full-name").textContent = `${student.first_name} ${student.last_name}`;
+      document.querySelector("#name").textContent = `${student.first_name} ${student.last_name}`;
+      document.querySelector("#profile-info").innerHTML = `<b>${student.username}</b> | <b>${student.profile_score || 0}%</b> Profile Completed`;
+      document.querySelector("#college").textContent = student.college || "Not Available";
+
+      document.querySelector("#email").textContent = student.email || "Not Available";
+      document.querySelector("#phone").textContent = student.mobile_number || "Not Available";
 
       // Populate LinkedIn
       const linkedin = document.querySelector("#linkedin");
-      linkedin.textContent = students.linkedin_id || "Not Available";
-      if (students.linkedin_id) linkedin.href = students.linkedin_id;
+      linkedin.textContent = student.linkedin_id || "Not Available";
+      if (student.linkedin_id) linkedin.href = student.linkedin_id;
 
       // Populate GitHub
       const github = document.querySelector("#github");
-      github.textContent = students.github_id || "Not Available";
-      if (students.github_id) github.href = students.github_id;
+      github.textContent = student.github_id || "Not Available";
+      if (student.github_id) github.href = student.github_id;
 
       // DOB
-      document.querySelector("#dob").textContent = students.dob || "Not Available";
+      document.querySelector("#dob").textContent = student.dob || "Not Available";
 
       // Enrolled Batches
       const batches = document.querySelector("#batches");
       batches.innerHTML = "";
 
-      if (Array.isArray(students.enrolled_batches) && students.enrolled_batches.length > 0) {
-        students.enrolled_batches.forEach((batch) => {
+      if (Array.isArray(student.enrolled_batches) && student.enrolled_batches.length > 0) {
+        student.enrolled_batches.forEach((batch) => {
           const li = document.createElement("li");
           li.textContent = batch.slug;
           batches.appendChild(li);
@@ -280,8 +288,8 @@ active
       const submissionsTable = document.querySelector("#submissions-table");
       submissionsTable.innerHTML = "";
 
-      if (students.recent_submissions && Array.isArray(students.recent_submissions)) {
-        students.recent_submissions.forEach((submission, index) => {
+      if (student.recent_submissions && Array.isArray(student.recent_submissions)) {
+        student.recent_submissions.forEach((submission, index) => {
           const row = document.createElement("tr");
           row.innerHTML = `
             <td>${index + 1}</td>
@@ -297,8 +305,6 @@ active
         // Handle case where recent_submissions is undefined or empty
         submissionsTable.innerHTML = `<tr><td colspan="6" class="text-center">No submissions available.</td></tr>`;
       }
-
-      
     } catch (error) {
       console.error("Error fetching data:", error);
       document.querySelector("#profile-title").textContent = "Error loading profile.";
@@ -310,4 +316,5 @@ active
     editor.setValue(code, 1);
   }
 </script>
+
 {% endblock %}

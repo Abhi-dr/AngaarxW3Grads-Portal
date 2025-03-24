@@ -17,6 +17,8 @@ import datetime
 from django.http import JsonResponse
 import math
 
+from practice.models import Streak
+
 # ======================================== ADMINISTRATION ======================================
 
 @login_required(login_url='login')
@@ -582,3 +584,68 @@ def edit_notification(request, id):
     return render(request, "administration/edit_notification.html", parameters)
 
 
+# ========================================= VIEW STUDENT PROFILE =====================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def view_student_profile(request, id):
+    parameters = {
+        "student": Student.objects.get(id=id)
+    }
+    return render(request, "administration/view_student_profile.html", parameters)
+
+@login_required(login_url='login')
+def fetch_view_student_profile(request,id):
+
+    student = Student.objects.get(id=id)
+    streak = Streak.objects.filter(user=student).first()
+    submissions = Submission.objects.filter(user=student).order_by("-id")[:10]
+    enrolled_batches = student.batches.all().order_by("-id")
+
+    # parameters = {
+    #     "student": student,
+    #     "streak": streak,
+    #     "submissions": submissions,
+    #     "enrolled_batches": enrolled_batches
+    # }
+
+    data = {
+            "id": student.id,
+            "first_name": student.first_name,
+            "last_name": student.last_name,
+            "username": student.username,
+            "email": student.email,
+            "college": student.college,
+            "linkedin_id": student.linkedin_id,
+            "github_id": student.github_id,
+            "mobile_number": student.mobile_number,
+            "sparks": student.coins,
+            "is_active": student.is_active,
+            "profile_pic": student.profile_pic.url if student.profile_pic else None,
+            "dob": student.dob.strftime('%d-%m-%Y') if student.dob else None,
+            "streak": {
+                "current_streak": streak.current_streak if streak else 0,
+                "last_submission_date": streak.last_submission_date.strftime('%d-%m-%Y') if streak and streak.last_submission_date else None,
+            },
+            "recent_submissions": [
+                {
+                    "id": submission.id,
+                    "question": submission.question.title,
+                    "score": submission.score,
+                    "submitted_at": submission.submitted_at.strftime('%d-%m-%Y %H:%M:%S'),
+                    "status": submission.status,
+                    "code": submission.code
+                }
+                for submission in submissions
+            ],
+            "enrolled_batches": [
+                {
+                    "id": batch.id,
+                    "slug": batch.slug
+                }
+                for batch in enrolled_batches
+            ] if enrolled_batches else {},
+    }
+    
+    return JsonResponse({"student": data})
