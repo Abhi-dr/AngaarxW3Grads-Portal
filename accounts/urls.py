@@ -17,4 +17,6 @@ urlpatterns = [
     path('request-password-reset/', views.request_password_reset, name='request_password_reset'),
     path('reset-password/<int:user_id>/<str:token>/', views.reset_password, name='reset_password'),
     
-]   
+    # API Endpoints
+    path('api/students', views.get_students_api, name='get_students_api'),
+]

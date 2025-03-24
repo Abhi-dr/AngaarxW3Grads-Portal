@@ -49,9 +49,6 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_celery_beat',
     
-    'ckeditor',
-    'ckeditor_uploader',
-    
     "channels",
 
 

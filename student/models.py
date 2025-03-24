@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from accounts.models import Student, Instructor
+from .hackathon_models import HackathonTeam, TeamMember, JoinRequest
 
 
 # ========================================== NOTIFICATIONS =========================================
@@ -82,4 +83,3 @@ class AIQuestion(models.Model):
     class Meta:
         verbose_name = "AI Question"
         verbose_name_plural = "AI Questions"
-        

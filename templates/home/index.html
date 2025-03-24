@@ -8,10 +8,752 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<style>
+    /* WhatsApp Button Styles */
+    .whatsapp-container {
+        position: fixed;
+        right: 20px;
+        top: 15%;
+        z-index: 1000;
+    }
+
+    .whatsapp-main-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #25D366;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .whatsapp-main-btn:hover {
+        transform: scale(1.1);
+        background-color: #128C7E;
+    }
+
+    .whatsapp-main-btn i {
+        font-size: 32px;
+        color: white;
+    }
+
+    .whatsapp-dialog {
+        position: absolute;
+        right: 75px;
+        top: 0;
+        width: 320px;
+        background-color: rgba(18, 18, 20, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        padding: 25px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .whatsapp-dialog.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .whatsapp-dialog-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 15px;
+    }
+
+    .whatsapp-dialog-header img {
+        width: 48px;
+        height: 48px;
+        margin-right: 15px;
+        border-radius: 50%;
+        border: 2px solid #ff6026;
+        padding: 2px;
+    }
+
+    .whatsapp-dialog-header h3 {
+        color: #ff6026;
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .whatsapp-dialog-content p {
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 20px;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .whatsapp-group-btn {
+        display: flex;
+        align-items: center;
+        background: rgba(37, 211, 102, 0.1);
+        border: 1px solid rgba(37, 211, 102, 0.3);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 15px;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .whatsapp-group-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(37, 211, 102, 0.2) 0%, rgba(37, 211, 102, 0) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .whatsapp-group-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
+        border-color: rgba(37, 211, 102, 0.5);
+    }
+
+    .whatsapp-group-btn:hover::before {
+        opacity: 1;
+    }
+
+    .whatsapp-group-btn i {
+        font-size: 28px;
+        margin-right: 15px;
+        color: #25D366;
+    }
+
+    .whatsapp-group-btn span {
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .whatsapp-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: color 0.2s ease, transform 0.2s ease;
+        height: 24px;
+        width: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .whatsapp-close:hover {
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    .whatsapp-pulse {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: #25D366;
+        opacity: 0.6;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+
+        70% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+    }
+
+    /* New Professional Flame Button */
+    .flame-container {
+        position: fixed;
+        right: 25px;
+        top: 15%;
+        z-index: 1000;
+        filter: drop-shadow(0 10px 15px rgba(255, 87, 34, 0.3));
+    }
+
+    .flame-wrapper {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-style: preserve-3d;
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .flame-wrapper:hover {
+        transform: scale(1.1) translateY(-8px);
+    }
+
+    .flame-wrapper:active {
+        transform: scale(0.95);
+    }
+
+    .flame-outer-ring {
+        position: absolute;
+        width: 75px;
+        height: 75px;
+        border-radius: 50%;
+        background: rgba(255, 87, 34, 0.1);
+        animation: pulse-ring 2s infinite;
+    }
+
+    .flame-ring {
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.8), rgba(255, 61, 0, 0.8));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+            0 6px 20px rgba(255, 87, 34, 0.4),
+            inset 0 2px 10px rgba(255, 255, 255, 0.3),
+            inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .flame-inner {
+        position: relative;
+        width: 70px;
+        height: 70px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #ff5722, #ff9800);
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: inset 0 -2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .flame-icon {
+        position: relative;
+        z-index: 2;
+        margin-bottom: 2px;
+    }
+
+    .flame-icon i {
+        font-size: 30px;
+        color: white;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .flame-text {
+        position: relative;
+        z-index: 2;
+        color: white;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .flame-particle {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 152, 0, 0) 70%);
+        transform: translateX(-50%);
+        border-radius: 50%;
+        filter: blur(5px);
+        animation: flame-particle 3s infinite;
+    }
+
+    .flame-particle:nth-child(2) {
+        width: 35px;
+        height: 35px;
+        animation-delay: 0.3s;
+        animation-duration: 2.7s;
+    }
+
+    .flame-particle:nth-child(3) {
+        width: 30px;
+        height: 30px;
+        animation-delay: 0.5s;
+        animation-duration: 2.5s;
+    }
+
+    .flame-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        color: white;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 3px 6px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        animation: pulse-badge 2s infinite;
+        z-index: 3;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes flame-particle {
+        0% {
+            opacity: 0.8;
+            transform: translateX(-50%) translateY(0) scale(1);
+        }
+
+        100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-40px) scale(1.5);
+        }
+    }
+
+    @keyframes pulse-ring {
+        0% {
+            transform: scale(0.95);
+            opacity: 0.5;
+        }
+
+        50% {
+            opacity: 0.2;
+        }
+
+        100% {
+            transform: scale(1.1);
+            opacity: 0;
+        }
+    }
+
+    @keyframes pulse-badge {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    /* Notification dot animation */
+    .notification-dot {
+        position: absolute;
+        top: 8px;
+        right: 5px;
+        width: 8px;
+        height: 8px;
+        background-color: #ff3d00;
+        border-radius: 50%;
+        animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+        0% {
+            opacity: 0;
+        }
+
+        50% {
+            opacity: 1;
+        }
+
+        100% {
+            opacity: 0;
+        }
+    }
+
+    /* Free Class Pass Styles */
+    .free-pass-container {
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto;
+        padding: 20px;
+        position: relative;
+        cursor: pointer;
+        perspective: 1000px;
+    }
+
+    .free-pass {
+        width: 100%;
+        height: 160px;
+        background: linear-gradient(135deg, #222, #444);
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        position: relative;
+        transform-style: preserve-3d;
+        transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        overflow: hidden;
+        border: 2px solid rgba(255, 96, 38, 0.3);
+    }
+
+    .free-pass::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 30% 40%, rgba(255, 96, 38, 0.4) 0%, rgba(255, 96, 38, 0) 50%);
+        animation: shimmer 3s infinite;
+    }
+
+    @keyframes shimmer {
+        0% {
+            opacity: 0.5;
+            transform: translateX(-50%) translateY(-50%) scale(1);
+        }
+
+        50% {
+            opacity: 0.8;
+            transform: translateX(-30%) translateY(-30%) scale(1.5);
+        }
+
+        100% {
+            opacity: 0.5;
+            transform: translateX(-50%) translateY(-50%) scale(1);
+        }
+    }
+
+    .free-pass-front,
+    .free-pass-back {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        backface-visibility: hidden;
+    }
+
+    .free-pass-back {
+        transform: rotateY(180deg);
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+    }
+
+    .free-pass.flipped {
+        transform: rotateY(180deg);
+    }
+
+    .free-pass-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .free-pass-title span {
+        display: block;
+        font-size: 14px;
+        margin-top: 4px;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .free-pass-icon {
+        font-size: 32px;
+        color: #ff6026;
+        margin-bottom: 10px;
+    }
+
+    .free-pass-action {
+        margin-top: 15px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Success Story Carousel */
+    .success-carousel {
+        background: rgba(20, 20, 20, 0.7);
+        border-radius: 12px;
+        max-width: 95%;
+        margin: 30px auto;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        position: relative;
+        border: 1px solid rgba(255, 96, 38, 0.3);
+    }
+
+    .success-header {
+        padding: 15px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        color: white;
+        font-weight: 700;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    .success-items {
+        position: relative;
+        height: 380px;
+        padding: 20px 30px 20px 20px;
+    }
+
+    .success-item {
+        position: absolute;
+        width: 100%;
+        padding: 20px;
+        opacity: 0;
+        transition: all 0.5s ease;
+        transform: translateX(50px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+
+    .success-item.active {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .success-quote {
+        font-size: 15px;
+        color: white;
+        text-align: center;
+        line-height: 1.5;
+        margin-bottom: 10px;
+    }
+
+    .success-name {
+        font-weight: 600;
+        color: #ff6026;
+        font-size: 14px;
+    }
+
+    .success-join {
+        margin-top: 10px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 30px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .success-join:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.4);
+    }
+
+    /* Skills Progress Meter */
+    .skills-meter-container {
+        max-width: 280px;
+        margin: 0 auto;
+        padding: 20px;
+        background: rgba(20, 20, 20, 0.7);
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+        border: 1px solid rgba(255, 96, 38, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .skills-meter-container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+        border-color: rgba(255, 96, 38, 0.4);
+    }
+
+    .skills-title {
+        text-align: center;
+        color: white;
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .skills-wrapper {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .skill-progress {
+        position: relative;
+        height: 40px;
+    }
+
+    .skill-circle {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #222;
+        position: relative;
+        overflow: hidden;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    .skill-mask {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: conic-gradient(#ff6026 0% var(--progress, 0%), transparent var(--progress, 0%) 100%);
+        opacity: 0;
+        transition: opacity 0.5s ease, --progress 1.5s ease;
+    }
+
+    .skills-meter-container:hover .skill-mask {
+        opacity: 1;
+        --progress: 80%;
+    }
+
+    .skill-inner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80%;
+        height: 80%;
+        background: #333;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+    }
+
+    .skill-icon {
+        font-size: 20px;
+        color: #ff6026;
+        margin-bottom: 5px;
+    }
+
+    .skill-name {
+        font-size: 12px;
+        color: white;
+        text-align: center;
+        font-weight: 600;
+    }
+
+    .skill-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.5s ease;
+    }
+
+    .skill-value-after {
+        opacity: 0;
+    }
+
+    .skills-meter-container:hover .skill-value-before {
+        opacity: 0;
+    }
+
+    .skills-meter-container:hover .skill-value-after {
+        opacity: 1;
+    }
+
+    .skills-cta {
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    .skills-cta button {
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    .skills-meter-container:hover .skills-cta button {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+        .whatsapp-container {
+            top: 12%;
+        }
+
+        .whatsapp-dialog {
+            right: 0;
+            width: 280px;
+        }
+
+        .flame-container {
+            top: 12%;
+        }
+
+        .free-pass-container {
+            max-width: 280px;
+        }
+
+        .success-carousel {
+            max-width: 300px;
+        }
+
+        .skills-meter-container {
+            max-width: 260px;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block body %}
-
 
 <section class="section top-section">
     <div class="content-container content-theme-dark">
@@ -26,8 +768,7 @@
 
         <div class="powered-by" style="background-color: rgba(0, 0, 0, 0.6);">
             <h5 class="text-white">Powered By</h5>
-            <img src="{% static 'img/home/w3logo.png' %}"
-                class="logo-img" alt="W3Grads Logo">
+            <img src="{% static 'img/home/w3logo.png' %}" class="logo-img" alt="W3Grads Logo">
         </div>
     </div>
 </section>
@@ -103,6 +844,66 @@
     </div>
 </section>
 
+<!-- Free Class Pass Section -->
+<section class="free-class-pass-section"
+    style="padding: 50px 20px; background-color: #0d0d0d; position: relative; overflow: hidden;">
+    <!-- Background particles -->
+    <div class="pass-bg-particles"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.5;"></div>
+
+    <h2
+        style="text-align: center; color: white; font-size: 32px; font-weight: 800; margin-bottom: 30px; position: relative; z-index: 1;">
+        Unlock <span style="color: #ff6026;">Free Learning</span> Today
+    </h2>
+
+    <div class="free-pass-container" id="freePassContainer">
+        <div class="free-pass" id="freePass">
+            <div class="free-pass-front">
+                <div class="free-pass-icon">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <h3 class="free-pass-title">
+                    PREMIUM PASS
+                    <span>Yours at absolutely no cost</span>
+                </h3>
+                <div class="free-pass-features">
+                    <div class="pass-feature text-white">
+                        <i class="fas fa-check-circle" style="color: #ff6026"></i>
+                        <span>Live Coding Sessions</span>
+                    </div>
+                    <div class="pass-feature text-white">
+                        <i class="fas fa-check-circle" style="color: #ff6026"></i>
+                        <span>Project-Based Learning</span>
+                    </div>
+                </div>
+                <button class="free-pass-action">
+                    <span>Claim Now</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+            <div class="free-pass-back">
+                <div class="confetti-effect"></div>
+                <h3 class="free-pass-title">
+                    CONGRATULATIONS!
+                    <span>Join our free classes now</span>
+                </h3>
+                <div class="pass-groups">
+                    <a href="https://chat.whatsapp.com/LYXfJijDa9ZCqj2jrqTMT7" target="_blank" class="pass-group-btn">
+                        <i class="fab fa-python"></i>
+                        <span>Python Masterclass</span>
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                    <a href="https://chat.whatsapp.com/H4wkThEdqK1Dde9XkqbOKD" target="_blank" class="pass-group-btn">
+                        <i class="fas fa-code"></i>
+                        <span>C Programming Pro</span>
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="community-section">
     <div class="community-container">
         <img loading="lazy"
@@ -115,22 +916,320 @@
     </div>
 </section>
 
-<!-- <section class="glimpse-section">
-    <h2 class="glimpse-title">A Glimpse into the AngaarBatch Experience</h2>
+<!-- Success Stories from Free Classes -->
+<section class="free-class-pass-section" style="padding: 30px 20px; background-color: #0d0d0d;">
 
-    <div class="macbook-container">
-        <img loading="lazy"
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/e8772070c5f61122c254a7e904075e3598471e57512f31a4109731dd5c75b0e0?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-            class="glimpse-image" alt="Angaar Batch Experience MacBook" />
 
-        <div class="video-mask">
-            <video controls class="vid">
-                <source src="vid.mp4" type="video/mp4">
-            </video>
+
+    <div class="container">
+        <div class="success-header rounded rounded-4"
+            style="position: relative; margin-bottom: 50px; text-align: center;">
+            <span class="success-badge"
+                style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; font-size: 14px; padding: 5px 15px; border-radius: 20px; font-weight: 600;">STUDENT
+                STORIES</span>
+            <h2
+                style="font-size: 36px; font-weight: 800; margin-top: 15px; background: linear-gradient(135deg, #333, #000); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">
+                FREE Classes, <span style="color: #ff6026;">REAL</span> Results</h2>
+            <p style="font-size: 18px; max-width: 700px; margin: 20px auto 0; line-height: 1.6;">See
+                how our free classes transformed careers and opened new opportunities</p>
+        </div>
+
+
+        <div class="success-carousel"
+            style="background: #1a1a1a; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);">
+            <div class="success-items-container" style="position: relative; overflow: hidden; padding: 20px 0;">
+                <div class="success-items" id="successItems"
+                    style="display: flex; gap: 20px; transition: transform 0.5s ease;">
+                    <!-- Card 1 -->
+                    <div class="success-item"
+                        style="flex: 0 0 calc(33.333% - 14px); background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                        <div class="quotes"
+                            style="position: absolute; top: 15px; left: 15px; font-size: 50px; color: rgba(255, 96, 38, 0.1); font-family: serif;">
+                            "
+                        </div>
+                        <div class="success-avatar"
+                            style="width: 70px; height: 70px; border-radius: 50%; background-color: #f0f0f0; overflow: hidden; border: 3px solid #ff6026; margin: 0 auto 15px;">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Student"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <p class="success-quote"
+                            style="font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; font-style: italic; text-align: center;">
+                            "I landed my first dev job after just 3 months of Angaar's free Python classes. The
+                            project-based learning approach made all the difference."</p>
+                        <div class="student-info" style="text-align: center;">
+                            <p class="student-name" style="font-weight: 700; margin: 0; color: white; font-size: 18px;">
+                                Rahul Sharma</p>
+                            <p class="student-position"
+                                style="margin: 5px 0 15px; color: rgba(255, 255, 255, 0.6); font-size: 14px;">Junior
+                                Python Developer</p>
+                            <a href="#join-free-class" class="join-btn"
+                                style="display: inline-block; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease;">Join
+                                Free Classes</a>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="success-item"
+                        style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                        <div class="quotes"
+                            style="position: absolute; top: 15px; left: 15px; font-size: 50px; color: rgba(255, 96, 38, 0.1); font-family: serif;">
+                            "
+                        </div>
+                        <div class="success-avatar"
+                            style="width: 70px; height: 70px; border-radius: 50%; background-color: #f0f0f0; overflow: hidden; border: 3px solid #ff6026; margin: 0 auto 15px;">
+                            <img src="https://randomuser.me/api/portraits/women/65.jpg" alt="Student"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <p class="success-quote"
+                            style="font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; font-style: italic; text-align: center;">
+                            "The free C programming classes helped me ace my college exams. The instructors explained
+                            complex concepts in such a simple way!"</p>
+                        <div class="student-info" style="text-align: center;">
+                            <p class="student-name" style="font-weight: 700; margin: 0; color: white; font-size: 18px;">
+                                Priya Patel</p>
+                            <p class="student-position"
+                                style="margin: 5px 0 15px; color: rgba(255, 255, 255, 0.6); font-size: 14px;">
+                                Computer Science Student</p>
+                            <a href="#join-free-class" class="join-btn"
+                                style="display: inline-block; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease;">Join
+                                Free Classes</a>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="success-item"
+                        style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                        <div class="quotes"
+                            style="position: absolute; top: 15px; left: 15px; font-size: 50px; color: rgba(255, 96, 38, 0.1); font-family: serif;">
+                            "
+                        </div>
+                        <div class="success-avatar"
+                            style="width: 70px; height: 70px; border-radius: 50%; background-color: #f0f0f0; overflow: hidden; border: 3px solid #ff6026; margin: 0 auto 15px;">
+                            <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Student"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <p class="success-quote"
+                            style="font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; font-style: italic; text-align: center;">
+                            "I went from zero coding knowledge to building full web applications in just 2 months with
+                            Angaar's free Python classes!"</p>
+                        <div class="student-info" style="text-align: center;">
+                            <p class="student-name" style="font-weight: 700; margin: 0; color: white; font-size: 18px;">
+                                Vikram Singh</p>
+                            <p class="student-position"
+                                style="margin: 5px 0 15px; color: rgba(255, 255, 255, 0.6); font-size: 14px;">Web
+                                Developer</p>
+                            <a href="#join-free-class" class="join-btn"
+                                style="display: inline-block; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease;">Join
+                                Free Classes</a>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="success-item"
+                        style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                        <div class="quotes"
+                            style="position: absolute; top: 15px; left: 15px; font-size: 50px; color: rgba(255, 96, 38, 0.1); font-family: serif;">
+                            "
+                        </div>
+                        <div class="success-avatar"
+                            style="width: 70px; height: 70px; border-radius: 50%; background-color: #f0f0f0; overflow: hidden; border: 3px solid #ff6026; margin: 0 auto 15px;">
+                            <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Student"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <p class="success-quote"
+                            style="font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; font-style: italic; text-align: center;">
+                            "The community support in Angaar's free classes is incredible. I never felt alone in my
+                            coding journey and got help whenever I needed it."</p>
+                        <div class="student-info" style="text-align: center;">
+                            <p class="student-name" style="font-weight: 700; margin: 0; color: white; font-size: 18px;">
+                                Neha Gupta</p>
+                            <p class="student-position"
+                                style="margin: 5px 0 15px; color: rgba(255, 255, 255, 0.6); font-size: 14px;">Data
+                                Analyst</p>
+                            <a href="#join-free-class" class="join-btn"
+                                style="display: inline-block; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease;">Join
+                                Free Classes</a>
+                        </div>
+                    </div>
+
+                    <!-- Card 5 -->
+                    <div class="success-item"
+                        style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                        <div class="quotes"
+                            style="position: absolute; top: 15px; left: 15px; font-size: 50px; color: rgba(255, 96, 38, 0.1); font-family: serif;">
+                            "
+                        </div>
+                        <div class="success-avatar"
+                            style="width: 70px; height: 70px; border-radius: 50%; background-color: #f0f0f0; overflow: hidden; border: 3px solid #ff6026; margin: 0 auto 15px;">
+                            <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Student"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <p class="success-quote"
+                            style="font-size: 16px; line-height: 1.6; color: rgba(255, 255, 255, 0.9); margin-bottom: 15px; font-style: italic; text-align: center;">
+                            "After completing the free C programming course, I was able to contribute to open source
+                            projects and build my portfolio. Best decision ever!"</p>
+                        <div class="student-info" style="text-align: center;">
+                            <p class="student-name" style="font-weight: 700; margin: 0; color: white; font-size: 18px;">
+                                Arjun Reddy</p>
+                            <p class="student-position"
+                                style="margin: 5px 0 15px; color: rgba(255, 255, 255, 0.6); font-size: 14px;">
+                                Software Engineer</p>
+                            <a href="#join-free-class" class="join-btn"
+                                style="display: inline-block; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; padding: 10px 20px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 14px; transition: all 0.3s ease;">Join
+                                Free Classes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-navigation"
+                    style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;">
+                    <button class="carousel-nav-btn" data-index="0"
+                        style="width: 10px; height: 10px; border-radius: 10%; background-color: #ff6026; border: none; cursor: pointer; transition: all 0.3s ease;"></button>
+                    <!-- <button class="carousel-nav-btn" data-index="1"
+                        style="width: 10px; height: 10px; border-radius: 10%; background-color: rgba(255, 96, 38, 0.3); border: none; cursor: pointer; transition: all 0.3s ease;"></button> -->
+
+                </div>
+
+                <button class="carousel-arrow prev"
+                    style="position: absolute; top: 50%; left: 10px; transform: translateY(-50%); background: rgba(255, 255, 255, 0.1); border: none; width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 3px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; backdrop-filter: blur(5px);">
+                    <i class="fas fa-chevron-left" style="color: white;"></i>
+                </button>
+                <button class="carousel-arrow next"
+                    style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); background: rgba(255, 255, 255, 0.1); border: none; width: 40px; height: 40px; border-radius: 50%; box-shadow: 0 3px 10px rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; backdrop-filter: blur(5px);">
+                    <i class="fas fa-chevron-right" style="color: white;"></i>
+                </button>
+            </div>
         </div>
     </div>
-</section> -->
+</section>
 
+<section class="skills-section"
+    style="background-color: #1a1a1a; padding: 70px 20px; position: relative; overflow: hidden;">
+    <div class="container">
+        <div class="skills-header" style="position: relative; margin-bottom: 50px; text-align: center;">
+            <span class="skills-badge"
+                style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; font-size: 14px; padding: 5px 15px; border-radius: 20px; font-weight: 600;">SKILL
+                DEVELOPMENT</span>
+            <br>
+            <h2 style="font-size: 36px; font-weight: 800; margin-top: 5px; color: white;">Track Your <span
+                    style="color: #ff6026;">Progress</span></h2>
+            <p style="color: #aaa; font-size: 18px; max-width: 700px; margin: 20px auto 0; line-height: 1.6;">See how
+                our free classes help you build in-demand programming skills</p>
+        </div>
+
+        <div class="skills-cards"
+            style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin-bottom: 40px;">
+            <!-- Python Skill Card -->
+            <div class="skills-card"
+                style="flex: 0 0 calc(50% - 15px); min-width: 300px; background-color: rgba(255, 255, 255, 0.03); border-radius: 15px; padding: 30px; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden;">
+                <div class="skill-glow"
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,96,38,0.1) 0%, rgba(255,96,38,0) 70%); z-index: 0;">
+                </div>
+
+                <div style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
+                    <div class="skill-icon"
+                        style="width: 60px; height: 60px; border-radius: 12px; background-color: rgba(255,96,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+                        <i class="fab fa-python" style="font-size: 36px; color: #ff6026;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0 0 5px; color: white; font-size: 24px; font-weight: 700;">Python</h3>
+                        <p style="margin: 0; color: #aaa; font-size: 16px;">Ultimate Beginner Level 🔥</p>
+                    </div>
+                </div>
+
+                <div class="skill-progress" style="position: relative; z-index: 1;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #aaa; font-size: 14px;">Current Level:</span>
+                        <span style="color: white; font-weight: 600; font-size: 14px;">Humesha se Ultimate Beginners ke liye🔥</span>
+                    </div>
+                    <!-- <div class="progress-container"
+                        style="height: 10px; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden;">
+                        <div class="progress-bar c-prog"
+                            style="height: 100%; width: 0%; background: linear-gradient(to right, #ff6026, #ff9d45); border-radius: 10px; transition: width 1.5s ease-in-out;">
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                        <span style="color: #aaa; font-size: 14px;">Beginner</span>
+                        <span style="color: #aaa; font-size: 14px;">Advanced</span>
+                    </div> -->
+                </div>
+
+                <div class="skills-outcomes"
+                    style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 20px; margin-bottom: 25px; position: relative; z-index: 1;">
+                    <h4 style="color: white; font-size: 16px; margin: 0 0 15px; font-weight: 600;">What You'll Learn:
+                    </h4>
+                    <ul style="margin: 0; padding: 0 0 0 20px; color: #aaa; font-size: 14px; line-height: 1.6;">
+                        <li style="margin-bottom: 8px;">Hnji!!... Sabse Pehle... HOW TO SPEAK!</li>
+                        <li style="margin-bottom: 8px;">Uske baad, HOW TO PRESENT YOU SKILLS!</li>
+                        <li style="margin-bottom: 8px;">Fir, Ha wahi, PYTHON PROGRAMMIN FROM ULTIMATE BEGINNING!</li>
+                        <li style="margin-bottom: 0;">Or aakhir me, You're An Angaari After This🔥</li>
+                    </ul>
+                </div>
+
+                <a href="https://chat.whatsapp.com/LYXfJijDa9ZCqj2jrqTMT7">
+                <button class="skills-join-btn"
+                    style="width: 100%; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">Join
+                    Free Python Classes</button>
+                </a>
+            </div>
+
+            <!-- C Programming Skill Card -->
+            <div class="skills-card"
+                style="flex: 0 0 calc(50% - 15px); min-width: 300px; background-color: rgba(255, 255, 255, 0.03); border-radius: 15px; padding: 30px; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden;">
+                <div class="skill-glow"
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,96,38,0.1) 0%, rgba(255,96,38,0) 70%); z-index: 0;">
+                </div>
+
+                <div style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
+                    <div class="skill-icon"
+                        style="width: 60px; height: 60px; border-radius: 12px; background-color: rgba(255,96,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 20px;">
+                        <i class="fas fa-code" style="font-size: 30px; color: #ff6026;"></i>
+                    </div>
+                    <div>
+                        <h3 style="margin: 0 0 5px; color: white; font-size: 24px; font-weight: 700;">C Programming</h3>
+                        <p style="margin: 0; color: #aaa; font-size: 16px;">Ultimate Beginner Level🔥</p>
+                    </div>
+                </div>
+
+                <div class="skill-progress" style="position: relative; z-index: 1;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #aaa; font-size: 14px;">Current Level</span>
+                        <span style="color: white; font-weight: 600; font-size: 14px;">Humesha se Ultimate Beginners ke liye🔥</span>
+                    </div>
+                    <!-- <div class="progress-container"
+                        style="height: 10px; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden;">
+                        <div class="progress-bar c-prog"
+                            style="height: 100%; width: 0%; background: linear-gradient(to right, #ff6026, #ff9d45); border-radius: 10px; transition: width 1.5s ease-in-out;">
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+                        <span style="color: #aaa; font-size: 14px;">Beginner</span>
+                        <span style="color: #aaa; font-size: 14px;">Advanced</span>
+                    </div> -->
+                </div>
+
+                <div class="skills-outcomes"
+                    style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 20px; margin-bottom: 25px; position: relative; z-index: 1;">
+                    <h4 style="color: white; font-size: 16px; margin: 0 0 15px; font-weight: 600;">What You'll Learn:
+                    </h4>
+                    <ul style="margin: 0; padding: 0 0 0 20px; color: #aaa; font-size: 14px; line-height: 1.6;">
+                        <li style="margin-bottom: 8px;">First, C Programming ke bhayankar bhayankar deep secrets!</li>
+                        <li style="margin-bottom: 8px;">Fir, ULTIMATE REAL LIFE EXAMPLES WHERE C IS BEING USED!</li>
+                        <li style="margin-bottom: 8px;">Then, 100+ Questions per week!</li>
+                        <li style="margin-bottom: 0;">Or aakhir me, THERE'S NO 'AAKHIR' HERE🔥</li>
+                    </ul>
+                </div>
+
+
+                <a  href="https://chat.whatsapp.com/H4wkThEdqK1Dde9XkqbOKD">
+                <button class="skills-join-btn"
+                    style="width: 100%; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">Join
+                    Free C Classes</button>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
 
 <section class="learn-code-connect-section">
     <h2 class="section-title">Learn, Code, and Connect!</h2>
@@ -160,8 +1259,563 @@
     </div>
 </section>
 
+<!-- WhatsApp Floating Button with Dialog -->
+<div class="flame-container" id="whatsappMainBtn">
+    <div class="flame-wrapper">
+        <div class="flame-outer-ring"></div>
+        <div class="flame-ring">
+            <div class="flame-inner">
+                <div class="flame-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="flame-text text-center">Free Classes</div>
+            </div>
+            <div class="flame-particle"></div>
+            <div class="flame-particle"></div>
+            <div class="flame-particle"></div>
+            <div class="flame-badge">New</div>
+        </div>
+    </div>
+</div>
 
+<!-- WhatsApp Dialog -->
+<div id="whatsappDialog"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.75); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center;">
+    <div class="whatsapp-modal"
+        style="width: 90%; max-width: 500px; background-color: #1a1a1a; border-radius: 16px; padding: 30px; position: relative; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 96, 38, 0.2); overflow: hidden;">
+        <div class="modal-glow"
+            style="position: absolute; top: -100px; right: -100px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, rgba(255,96,38,0.1) 0%, rgba(255,96,38,0) 70%); z-index: 0;">
+        </div>
 
+        <button id="closeDialog"
+            style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #aaa; font-size: 22px; cursor: pointer; z-index: 2; transition: all 0.3s ease;">
+            <i class="fas fa-times"></i>
+        </button>
 
+        <div style="text-align: center; margin-bottom: 25px; position: relative; z-index: 1;">
+            <div style="font-size: 32px; margin-bottom: 10px; color: #ff6026;">
+                <i class="fas fa-fire"></i>
+            </div>
+            <h3 style="font-size: 24px; font-weight: 700; color: white; margin: 0 0 10px;">Join Free Programming Classes
+            </h3>
+            <p style="color: #aaa; font-size: 16px; margin: 0; line-height: 1.5;">Select a WhatsApp group to start your
+                coding journey today!</p>
+        </div>
 
+        <div class="whatsapp-groups" style="display: flex; flex-direction: column; gap: 15px;">
+            <a href="https://chat.whatsapp.com/LYXfJijDa9ZCqj2jrqTMT7" target="_blank" class="whatsapp-group"
+                style="display: flex; align-items: center; padding: 16px 20px; background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; text-decoration: none; transition: all 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="group-icon"
+                    style="width: 50px; height: 50px; border-radius: 12px; background-color: rgba(255,96,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <i class="fab fa-python" style="font-size: 28px; color: #ff6026;"></i>
+                </div>
+                <div style="flex-grow: 1;">
+                    <h4 style="margin: 0 0 5px; color: white; font-size: 18px; font-weight: 600;">Python Masterclass
+                    </h4>
+                    <p style="margin: 0; color: #aaa; font-size: 14px;">Unke liye jinhe nahi aata🔥</p>
+                </div>
+                <div class="group-arrow" style="color: #ff6026;">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+
+            <a href="https://chat.whatsapp.com/H4wkThEdqK1Dde9XkqbOKD" target="_blank" class="whatsapp-group"
+                style="display: flex; align-items: center; padding: 16px 20px; background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; text-decoration: none; transition: all 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.1);">
+                <div class="group-icon"
+                    style="width: 50px; height: 50px; border-radius: 12px; background-color: rgba(255,96,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
+                    <i class="fas fa-code" style="font-size: 24px; color: #ff6026;"></i>
+                </div>
+                <div style="flex-grow: 1;">
+                    <h4 style="margin: 0 0 5px; color: white; font-size: 18px; font-weight: 600;">C Programming Pro</h4>
+                    <p style="margin: 0; color: #aaa; font-size: 14px;">Unke liye jinhe bilkul bhi nahi aata</p>
+                </div>
+                <div class="group-arrow" style="color: #ff6026;">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+        </div>
+
+        <div class="whatsapp-features"
+            style="margin-top: 25px; padding-top: 20px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+            <h4 style="color: white; font-size: 16px; margin: 0 0 15px; font-weight: 600;">What You'll Get:</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <div class="feature-tag"
+                    style="background-color: rgba(255, 96, 38, 0.1); color: white; padding: 8px 14px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-laptop-code" style="color: #ff6026; font-size: 14px;"></i>
+                    <span>Live Coding Sessions</span>
+                </div>
+                <div class="feature-tag"
+                    style="background-color: rgba(255, 96, 38, 0.1); color: white; padding: 8px 14px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-project-diagram" style="color: #ff6026; font-size: 14px;"></i>
+                    <span>Real Projects</span>
+                </div>
+                <div class="feature-tag"
+                    style="background-color: rgba(255, 96, 38, 0.1); color: white; padding: 8px 14px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-users" style="color: #ff6026; font-size: 14px;"></i>
+                    <span>Community Support</span>
+                </div>
+                <div class="feature-tag"
+                    style="background-color: rgba(255, 96, 38, 0.1); color: white; padding: 8px 14px; border-radius: 20px; font-size: 14px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-certificate" style="color: #ff6026; font-size: 14px;"></i>
+                    <span>Zero Cost</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<!-- WhatsApp Button Script -->
+<script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get references to the elements
+        const mainBtn = document.getElementById('whatsappMainBtn');
+        const dialog = document.getElementById('whatsappDialog');
+        const closeBtn = document.getElementById('closeDialog');
+
+        if (mainBtn && dialog && closeBtn) {
+            // Toggle dialog when main button is clicked
+            mainBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                dialog.style.display = 'flex';
+            });
+
+            // Close dialog when close button is clicked
+            closeBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dialog.style.display = 'none';
+            });
+
+            // Close dialog when clicking outside
+            document.addEventListener('click', function (e) {
+                if (!mainBtn.contains(e.target) && !dialog.contains(e.target)) {
+                    dialog.style.display = 'none';
+                }
+            });
+        }
+
+        // Success Stories Carousel
+        const carousel = document.getElementById('successItems');
+        const prevBtn = document.querySelector('.carousel-arrow.prev');
+        const nextBtn = document.querySelector('.carousel-arrow.next');
+        const navBtns = document.querySelectorAll('.carousel-nav-btn');
+
+        if (carousel && prevBtn && nextBtn) {
+            let currentIndex = 0;
+            let totalSlides = 3; // We have 5 cards but show 3 at a time, so we have 3 "pages"
+            let cardsPerView = 3; // Default for desktop
+            let slideWidth = 0;
+
+            // Function to update cards per view based on screen width
+            function updateCardsPerView() {
+                if (window.innerWidth < 768) {
+                    cardsPerView = 1;
+                } else if (window.innerWidth < 992) {
+                    cardsPerView = 2;
+                } else {
+                    cardsPerView = 3;
+                }
+
+                // Update total slides based on cards per view
+                totalSlides = Math.ceil(document.querySelectorAll('.success-item').length / cardsPerView);
+
+                // Reset to first slide if current index is now invalid
+                if (currentIndex >= totalSlides) {
+                    currentIndex = 0;
+                }
+
+                // Update nav buttons
+                updateNavButtons();
+
+                // Calculate slide width based on cards per view
+                const containerWidth = carousel.parentElement.offsetWidth;
+                const gapSize = 20; // Gap between cards in pixels
+                slideWidth = (containerWidth - (gapSize * (cardsPerView - 1))) / cardsPerView;
+
+                // Apply width to each card
+                document.querySelectorAll('.success-item').forEach(item => {
+                    item.style.flex = `0 0 ${slideWidth}px`;
+                    item.style.minWidth = `${slideWidth}px`;
+                });
+
+                // Move to current slide
+                moveToSlide(currentIndex);
+            }
+
+            // Function to move to a specific slide
+            function moveToSlide(index) {
+                if (index < 0) index = 0;
+                if (index >= totalSlides) index = totalSlides - 1;
+
+                currentIndex = index;
+
+                // Calculate the translation distance
+                const translateX = -index * (slideWidth * cardsPerView + 20 * cardsPerView);
+                carousel.style.transform = `translateX(${translateX}px)`;
+
+                // Update active nav button
+                updateNavButtons();
+            }
+
+            // Function to update nav buttons
+            function updateNavButtons() {
+                navBtns.forEach((btn, i) => {
+                    if (i === currentIndex) {
+                        btn.style.backgroundColor = '#ff6026';
+                        btn.style.transform = 'scale(1.2)';
+                    } else {
+                        btn.style.backgroundColor = 'rgba(255, 96, 38, 0.3)';
+                        btn.style.transform = 'scale(1)';
+                    }
+                });
+            }
+
+            // Initialize carousel
+            updateCardsPerView();
+
+            // Add event listeners for buttons
+            prevBtn.addEventListener('click', () => moveToSlide(currentIndex - 1));
+            nextBtn.addEventListener('click', () => moveToSlide(currentIndex + 1));
+
+            // Add event listeners for nav buttons
+            navBtns.forEach((btn, index) => {
+                btn.addEventListener('click', () => moveToSlide(index));
+            });
+
+            // Auto-advance carousel every 5 seconds
+            let autoPlayInterval = setInterval(() => {
+                moveToSlide((currentIndex + 1) % totalSlides);
+            }, 5000);
+
+            // Pause auto-advance when hovering over carousel
+            carousel.parentElement.addEventListener('mouseenter', () => {
+                clearInterval(autoPlayInterval);
+            });
+
+            // Resume auto-advance when mouse leaves carousel
+            carousel.parentElement.addEventListener('mouseleave', () => {
+                autoPlayInterval = setInterval(() => {
+                    moveToSlide((currentIndex + 1) % totalSlides);
+                }, 5000);
+            });
+
+            // Update carousel on window resize
+            window.addEventListener('resize', updateCardsPerView);
+        }
+
+        // Join Free Class buttons in success stories
+        const joinBtns = document.querySelectorAll('.join-btn');
+        joinBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                const dialog = document.getElementById('whatsappDialog');
+                if (dialog) {
+                    dialog.style.display = 'flex';
+                }
+            });
+        });
+
+        // Join Free Class button in skills section
+        const skillsJoinBtn = document.querySelector('.skills-join-btn');
+        if (skillsJoinBtn) {
+            skillsJoinBtn.addEventListener('click', function () {
+                const dialog = document.getElementById('whatsappDialog');
+                if (dialog) {
+                    dialog.style.display = 'flex';
+                }
+            });
+        }
+
+        // Free Class Pass Flip Animation
+        const freePass = document.getElementById('freePass');
+        const freePassContainer = document.getElementById('freePassContainer');
+
+        if (freePass && freePassContainer) {
+            const freePassAction = freePass.querySelector('.free-pass-action');
+
+            if (freePassAction) {
+                freePassAction.addEventListener('click', function () {
+                    freePass.classList.add('flipped');
+                });
+            }
+
+            // Initialize particles for the free class pass background
+            createPassParticles();
+        }
+
+        // Particles for Free Class Pass
+        function createPassParticles() {
+            const particlesContainer = document.querySelector('.pass-bg-particles');
+            if (!particlesContainer) return;
+
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+
+                // Random styling
+                const size = Math.random() * 5 + 2;
+                const posX = Math.random() * 100;
+                const posY = Math.random() * 100;
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 5;
+
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${posX}%`;
+                particle.style.top = `${posY}%`;
+                particle.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                particle.style.borderRadius = '50%';
+                particle.style.position = 'absolute';
+                particle.style.animation = `float ${duration}s linear ${delay}s infinite`;
+
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Add keyframe animation for particles
+        const styleSheet = document.createElement('style');
+        styleSheet.type = 'text/css';
+        styleSheet.innerHTML = `
+            @keyframes float {
+                0%, 100% {
+                    transform: translateY(0) translateX(0);
+                }
+                25% {
+                    transform: translateY(-10px) translateX(5px);
+                }
+                50% {
+                    transform: translateY(5px) translateX(-5px);
+                }
+                75% {
+                    transform: translateY(10px) translateX(10px);
+                }
+            }
+        
+            @media (max-width: 992px) {
+                .success-item {
+                    flex: 0 0 calc(50% - 10px) !important;
+                    min-width: 250px !important;
+                }
+                
+                .skills-card {
+                    flex: 0 0 100% !important;
+                    margin-bottom: 20px !important;
+                }
+                
+                .free-pass-container {
+                    width: 90% !important;
+                    max-width: 400px !important;
+                }
+            }
+            
+            @media (max-width: 768px) {
+                .success-item {
+                    flex: 0 0 100% !important;
+                    min-width: 280px !important;
+                }
+                
+                .success-header h2 {
+                    font-size: 28px !important;
+                }
+                
+                .success-header p {
+                    font-size: 16px !important;
+                }
+                
+                .success-section {
+                    padding: 50px 15px !important;
+                }
+                
+                .skills-section {
+                    padding: 50px 15px !important;
+                }
+                
+                .skills-header h2 {
+                    font-size: 28px !important;
+                }
+                
+                .skills-outcomes {
+                    padding: 15px !important;
+                }
+                
+                .carousel-arrow {
+                    width: 30px !important;
+                    height: 30px !important;
+                }
+            }
+            
+            .carousel-arrow.prev {
+                left: 10px;
+            }
+            
+            .carousel-arrow.next {
+                right: 10px;
+            }
+            
+            /* Hover effects for better interactivity */
+            .success-item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            }
+            
+            .join-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
+            }
+            
+            .whatsapp-group:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                transform: translateY(-2px);
+            }
+            
+            .carousel-arrow:hover {
+                background-color: #ff6026;
+            }
+            
+            .carousel-arrow:hover i {
+                color: white;
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Success Stories Carousel
+        const carouselItems = document.querySelectorAll('.success-item');
+        const carouselContainer = document.getElementById('successItems');
+        const totalItems = carouselItems.length;
+        let currentIndex = 0;
+        let autoplayInterval;
+        let isHovering = false;
+
+        document.head.appendChild(styleSheet);
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Success Stories Carousel
+        const carouselItems = document.querySelectorAll('.success-item');
+        const carouselContainer = document.getElementById('successItems');
+        const totalItems = carouselItems.length;
+        let currentIndex = 0;
+        let autoplayInterval;
+        let isHovering = false;
+
+        function updateCarousel() {
+            // Calculate how many cards to show based on screen width
+            let cardsToShow = 3; // Default for larger screens
+            if (window.innerWidth < 768) {
+                cardsToShow = 1; // Mobile view
+            } else if (window.innerWidth < 992) {
+                cardsToShow = 2; // Tablet view
+            }
+
+            // Hide all items first
+            carouselItems.forEach(item => {
+                item.classList.remove('active');
+                item.style.display = 'none';
+            });
+
+            // Show the current items
+            for (let i = 0; i < cardsToShow; i++) {
+                const index = (currentIndex + i) % totalItems;
+                carouselItems[index].classList.add('active');
+                carouselItems[index].style.display = 'block';
+            }
+        }
+
+        function nextSlide() {
+            if (!isHovering) {
+                currentIndex = (currentIndex + 1) % totalItems;
+                updateCarousel();
+            }
+        }
+
+        // Initialize carousel
+        updateCarousel();
+        autoplayInterval = setInterval(nextSlide, 4000);
+
+        // Pause on hover
+        carouselContainer.addEventListener('mouseenter', function () {
+            isHovering = true;
+        });
+
+        carouselContainer.addEventListener('mouseleave', function () {
+            isHovering = false;
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', updateCarousel);
+
+        // Next/Prev buttons
+        document.querySelector('.success-nav-prev').addEventListener('click', function () {
+            currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+            updateCarousel();
+        });
+
+        document.querySelector('.success-nav-next').addEventListener('click', function () {
+            currentIndex = (currentIndex + 1) % totalItems;
+            updateCarousel();
+        });
+
+        // Skills Progress Animation
+        function animateSkills() {
+            const progressBars = document.querySelectorAll('.progress-bar');
+            progressBars.forEach(bar => {
+                if (bar.classList.contains('python')) {
+                    bar.style.width = '75%';
+                } else if (bar.classList.contains('c-prog')) {
+                    bar.style.width = '65%';
+                }
+            });
+        }
+
+        // Check if element is in viewport
+        function isInViewport(element) {
+            const rect = element.getBoundingClientRect();
+            return (
+                rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.bottom >= 0
+            );
+        }
+
+        // Animate skills when scrolled into view
+        function checkSkillsAnimation() {
+            const skillsSection = document.querySelector('.skills-section');
+            if (skillsSection && isInViewport(skillsSection)) {
+                animateSkills();
+                window.removeEventListener('scroll', checkSkillsAnimation);
+            }
+        }
+
+        window.addEventListener('scroll', checkSkillsAnimation);
+        checkSkillsAnimation(); // Check on initial load
+
+        // Add hover effects for skill cards
+        const skillCards = document.querySelectorAll('.skills-card');
+        skillCards.forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.3)';
+            });
+
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.2)';
+            });
+        });
+    });
+</script>
+
+</body>
+
+</html>
 {% endblock %}

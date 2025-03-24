@@ -7,8 +7,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
+    <link rel="icon" type="image/png" href="{% static 'img/home/angaar_logo-circle.png' %}">
+
+    <meta property="og:title" content="The Angaar Batch🔥">
+    <meta property="og:description" content="Agr Angaar Hai Tere Houslo Me, To Bas Dekhke Mat Ja... Seekh... Or Lga de... ANGAAR🔥">
+    <meta property="og:image" content="https://theangaarbatch.in/static/img/home/angaari_logo.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://theangaarbatch.in">
 
     <title>
         {% block title %}
@@ -103,6 +108,7 @@
 
 <body>
 
+    <!-- mt-0 w-100 m-0 rounded-0 -->
 
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
@@ -135,6 +141,10 @@
 
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'our_team' %}">Our Team</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'our_achievers' %}">Our Achievers</a>
                     </li>
 
                     <li class="nav-item">
@@ -233,7 +243,7 @@
                 <div class="custom-footer-section">
                     <h3>Contact</h3>
                     <p>Email: theangaarbatch@gmail.com</p>
-                    
+
                     <p>Phone: +918273619318</p>
                 </div>
             </div>

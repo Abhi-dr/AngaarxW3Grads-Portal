@@ -535,10 +535,13 @@ def get_driver_code(request, question_id, language_id):
         if question.show_complete_driver_code:
             code = driver_code.complete_driver_code.replace("#USER_CODE#", driver_code.visible_driver_code)
             return JsonResponse({"success": True, "code": code})
+        
+        elif driver_code.visible_driver_code == "1":
+            return JsonResponse({"success": True, "code": driver_code.complete_driver_code})
+        
         else:
             return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
         
-        return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
     return JsonResponse({"success": False, "message": "Driver code not found.", "language id": language_id, "question id": question_id}, status=404)
 
 # ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================

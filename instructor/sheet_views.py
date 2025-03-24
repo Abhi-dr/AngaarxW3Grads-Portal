@@ -8,6 +8,9 @@ from django.utils.timezone import now
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.utils.safestring import mark_safe
+from django.db import transaction
+from django.urls import reverse
 
 from accounts.models import Student, Instructor
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
@@ -629,33 +632,50 @@ def delete_test_case(request, id):
 @staff_member_required(login_url='login')
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def driver_code(request, slug):
-    
-    instructor = Instructor.objects.get(id=request.user.id)
     question = Question.objects.get(slug=slug)
     
-    driver_codes = {code.language_id: code.code for code in DriverCode.objects.filter(question=question)}
-    
+    driver_codes = {
+    code.language_id: {
+        "visible": code.visible_driver_code,
+        "complete": code.complete_driver_code,
+    }
+    for code in DriverCode.objects.filter(question=question)
+    }
+
         
     if request.method == 'POST':
         
         language_id = request.POST.get('language_id')
-        code = request.POST.get('code')
+        visible_driver_code = request.POST.get('visible_driver_code')
+        complete_driver_code = request.POST.get('complete_driver_code')
+        show_complete_code = request.POST.get('show_complete_code') == "true"  # Convert to boolean
+        
+        question.show_complete_driver_code = show_complete_code
+        question.save()
+
 
         # Check if a driver code already exists for the given language
         existing_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
         if existing_code:
-            existing_code.code = code
+            existing_code.visible_driver_code = visible_driver_code
+            existing_code.complete_driver_code = complete_driver_code
+
             existing_code.save()
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} updated successfully."})
         else:
-            driver_code = DriverCode(question=question, language_id=language_id, code=code)
+            driver_code = DriverCode(
+                question=question,
+                language_id=language_id,
+                visible_driver_code=visible_driver_code,
+                complete_driver_code=complete_driver_code,
+            )
             driver_code.save()
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} added successfully."})
 
+
     parameters = {
-        "instructor": instructor,
         'question': question,
-        'driver_codes': driver_codes
+        'driver_codes': mark_safe(json.dumps(driver_codes)),
     }
 
     return render(request, 'instructor/sheet/driver_code.html', parameters)
@@ -768,3 +788,101 @@ def test_code(request, slug):
     }
     
     return render(request, 'instructor/sheet/test_code.html', parameters)
+
+# ========================= ADD NEW QUESTION TO SHEET USING JSON ==========================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@csrf_exempt
+def add_question_json(request, slug):
+    sheet = get_object_or_404(Sheet, slug=slug)
+    
+    if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            json_data = request.POST.get("json_data")
+            data = json.loads(json_data)
+            
+            # Validate required fields
+            required_fields = ['title', 'description', 'input_format', 'output_format', 'constraints', 'difficulty_level']
+            for field in required_fields:
+                if field not in data or not data[field]:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'Required field "{field}" is missing or empty.'
+                    })
+            
+            # Validate difficulty_level
+            valid_difficulty_levels = ['Easy', 'Medium', 'Hard']
+            if data['difficulty_level'] not in valid_difficulty_levels:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Invalid difficulty level. Must be one of: {", ".join(valid_difficulty_levels)}'
+                })
+                
+            # Create the question
+            with transaction.atomic():
+                question = Question(
+                    title=data['title'],
+                    scenario=data.get('scenario', ''),
+                    description=data['description'],
+                    input_format=data['input_format'],
+                    output_format=data['output_format'],
+                    constraints=data['constraints'],
+                    hint=data.get('hint', ''),
+                    difficulty_level=data['difficulty_level'],
+                    is_approved=True
+                )
+                question.save()
+                
+                # Add question to sheet
+                sheet.questions.add(question)
+                
+                # Process test cases if included
+                if 'test_cases' in data and isinstance(data['test_cases'], list):
+                    test_cases = []
+                    for tc in data['test_cases']:
+                        if 'input' in tc and 'output' in tc:
+                            test_cases.append(TestCase(
+                                question=question,
+                                input_data=tc['input'],
+                                expected_output=tc['output'],
+                                is_sample=tc.get('is_sample', False)
+                            ))
+                    
+                    if test_cases:
+                        TestCase.objects.bulk_create(test_cases)
+                
+                # Process driver codes if included
+                if 'driver_codes' in data and isinstance(data['driver_codes'], list):
+                    driver_codes = []
+                    for dc in data['driver_codes']:
+                        if all(key in dc for key in ['language_id', 'visible_driver_code', 'complete_driver_code']):
+                            driver_codes.append(DriverCode(
+                                question=question,
+                                language_id=dc['language_id'],
+                                visible_driver_code=dc['visible_driver_code'],
+                                complete_driver_code=dc['complete_driver_code']
+                            ))
+                    
+                    if driver_codes:
+                        DriverCode.objects.bulk_create(driver_codes)
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Question added successfully!',
+                'redirect_url': reverse('instructor_sheet', args=[sheet.slug])
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON format. Please check your JSON data.'
+            })
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'An error occurred: {str(e)}'
+            })
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})

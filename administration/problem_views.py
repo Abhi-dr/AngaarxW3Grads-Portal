@@ -144,7 +144,6 @@ def add_question(request):
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def delete_question(request, id):
     
     question = Question.objects.get(id=id)
@@ -477,11 +476,8 @@ def delete_test_case(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def driver_code(request, slug):
-    
-    administrator = Administrator.objects.get(id=request.user.id)
     question = Question.objects.get(slug=slug)
     
     driver_codes = {
@@ -524,7 +520,7 @@ def driver_code(request, slug):
 
 
     parameters = {
-        "administrator": administrator,
+        
         'question': question,
         'driver_codes': mark_safe(json.dumps(driver_codes)),
     }
@@ -658,10 +654,16 @@ def get_test_cases(question):
         return []
 
 
-def run_code_on_judge0(source_code, language_id, test_cases, cpu_time_limit, memory_limit):
+def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_limit, memory_limit):
     """
     Send the code to Judge0 API for execution against multiple test cases.
     """
+
+    if not question.show_complete_driver_code: # User ko complete code dikh rha h
+        driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
+        source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)        
+                
+    
     # Prepare single stdin batch input for Judge0
     stdin = f"{len(test_cases)}~"
     for test_case in test_cases:
@@ -789,7 +791,7 @@ def submit_code(request, slug):
 
             # Run the code and process results
             start = time.time()
-            judge0_response = run_code_on_judge0(source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
+            judge0_response = run_code_on_judge0(question, source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
             end = time.time()
             
             print("Time Taken:", end - start)
