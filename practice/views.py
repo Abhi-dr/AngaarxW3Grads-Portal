@@ -8,8 +8,6 @@ from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
-from django.views.decorators.cache import cache_page, cache_control
-from functools import wraps
 
 import base64
 import re
@@ -33,59 +31,7 @@ HEADERS = {
 
 from .models import Sheet, Question, TestCase, Submission, DriverCode, Streak
 
-# Cache decorators for key functions
-def cache_per_user(timeout=3600):
-    """
-    Cache a view's response per user for the specified amount of time.
-    """
-    def decorator(view_func):
-        @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
-            if not request.user.is_authenticated:
-                return view_func(request, *args, **kwargs)
-            
-            cache_key = f"view_cache_{request.user.id}_{request.path}"
-            response = cache.get(cache_key)
-            if response is None:
-                response = view_func(request, *args, **kwargs)
-                cache.set(cache_key, response, timeout)
-            return response
-        return _wrapped_view
-    return decorator
-
-# Cache test cases data
-def get_cached_test_cases(question):
-    """
-    Get cached test cases for a question or fetch from database and cache them.
-    """
-    cache_key = f"test_cases_{question.id}"
-    test_cases = cache.get(cache_key)
-    
-    if test_cases is None:
-        test_cases = list(question.test_cases.all())
-        # Cache for 24 hours (or until question/test cases are updated)
-        cache.set(cache_key, test_cases, 86400)
-    
-    return test_cases
-
-# Cache driver code lookup
-def get_cached_driver_code(question_id, language_id):
-    """
-    Get cached driver code or fetch from database and cache it.
-    """
-    cache_key = f"driver_code_{question_id}_{language_id}"
-    driver_code = cache.get(cache_key)
-    
-    if driver_code is None:
-        driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()
-        if driver_code:
-            # Cache for 24 hours (or until driver code is updated)
-            cache.set(cache_key, driver_code, 86400)
-    
-    return driver_code
-
 @login_required(login_url="login")
-@cache_per_user(timeout=300)  # Cache per user for 5 minutes
 def practice(request):
     
     sheets = Sheet.objects.filter(is_approved=True)
@@ -102,14 +48,7 @@ def practice(request):
 # ============================== SHEET VIEW =========================
 
 @login_required(login_url="login")
-@cache_per_user(timeout=300)  # Cache per user for 5 minutes
 def sheet(request, slug):
-    # Try to get from cache first
-    cache_key = f"sheet_view_{request.user.id}_{slug}"
-    cached_response = cache.get(cache_key)
-    
-    if cached_response:
-        return cached_response
         
     sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
     
@@ -129,11 +68,7 @@ def sheet(request, slug):
         "user_submissions": user_submissions,  # Pass the submissions to the template
     }   
     
-    response = render(request, "practice/sheet.html", parameters)
-    # Cache the response for 5 minutes
-    cache.set(cache_key, response, 300)
-    
-    return response
+    return render(request, "practice/sheet.html", parameters)
 
 
 # ========================================== PLAYGROUND ===============================================
@@ -237,9 +172,12 @@ def normalize_output(output):
 def get_test_cases(question):
     """
     Get all test cases associated with the question.
-    Uses cached results if available.
     """
-    return get_cached_test_cases(question)
+    try:
+        return question.test_cases.all()
+    except Exception as e:
+        print(f"Error fetching test cases: {e}")
+        return []
 
 
 def create_submission(user, question, source_code, language_id):
@@ -265,15 +203,8 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
     """
             
     if not question.show_complete_driver_code: # User ko complete code dikh rha h
-        driver_code = get_cached_driver_code(question.id, language_id)
-        if not driver_code:
-            driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
-            if driver_code:
-                # Cache driver code for future use
-                cache.set(f"driver_code_{question.id}_{language_id}", driver_code, 86400)
-                
-        if driver_code:
-            source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)        
+        driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
+        source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)        
                 
 
     # Prepare single stdin batch input for Judge0
@@ -297,12 +228,6 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
         "enable_per_process_and_thread_time_limit": True,
         "base64_encoded": True  # Critical flag to let Judge0 know the code is Base64-encoded
     }
-
-    # Check if we've recently sent the same request and have a cached response
-    cache_key = f"judge0_response_{hash(encoded_code)}_{language_id}_{hash(encoded_stdin)}"
-    cached_response = cache.get(cache_key)
-    if cached_response:
-        return cached_response
 
     try:
         # 📝 Submit Code to Judge0
@@ -348,17 +273,12 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
         if outputs:
             outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
             
-            outputs = [output.rstrip() for output in outputs.split("~") if output.rstrip()]
+            outputs = [output.strip() for output in outputs.split("~") if output.strip()]
             
         else:
             outputs = ["No output generated."]
 
-        response_data = {"outputs": outputs, "token": token}
-        
-        # Cache the response for similar future requests (60 seconds)
-        cache.set(cache_key, response_data, 60)
-        
-        return response_data
+        return {"outputs": outputs, "token": token}
 
     except requests.exceptions.RequestException as e:
         return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
@@ -622,6 +542,7 @@ def get_driver_code(request, question_id, language_id):
         else:
             return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
         
+        return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
     return JsonResponse({"success": False, "message": "Driver code not found.", "language id": language_id, "question id": question_id}, status=404)
 
 # ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================
