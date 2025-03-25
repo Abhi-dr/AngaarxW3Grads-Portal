@@ -113,6 +113,22 @@ class FlamesRegistration(models.Model):
     college = models.CharField(max_length=200)
     year = models.CharField(max_length=20)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=20, default="Pending", 
+                             choices=[("Pending", "Pending"), 
+                                     ("Approved", "Approved"), 
+                                     ("Rejected", "Rejected"),
+                                     ("Completed", "Completed")])
+    admin_notes = models.TextField(blank=True, null=True)
+    payment_id = models.CharField(max_length=100, blank=True, null=True)
+    message = models.TextField(blank=True, null=True)
     
     def __str__(self):
         return f"{self.full_name} - {self.course.title}"
+    
+    # Create method to update existing records with default values (for migration)
+    @classmethod
+    def set_default_status(cls):
+        for registration in cls.objects.filter(status__isnull=True):
+            registration.status = "Pending"
+            registration.save(update_fields=['status'])

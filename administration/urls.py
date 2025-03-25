@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers
+from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views
 
 urlpatterns = [
     path("", views.index, name="administration"),
@@ -183,4 +183,21 @@ urlpatterns += [
     path("fetch_all_sheets/", sheet_apis.fetch_all_sheets, name="staff_fetch_all_sheets"),
     path('api/submissions/<slug:slug>/', sheet_apis.fetch_question_submissions, name='fetch_question_submissions'),
 
+]
+
+# Flames Management 
+urlpatterns += [
+    path("flames/courses/", flames_views.flames_courses, name="admin_flames_courses"),
+    path("flames/registrations/", flames_views.flames_registrations, name="admin_flames_registrations"),
+    
+    path("flames/registrations/ajax/", flames_views.admin_registrations_ajax, name="admin_registrations_ajax"),
+    
+    path("flames/course/<int:course_id>/", flames_views.admin_course_detail, name="admin_course_detail"),
+    path("flames/course/add/", flames_views.admin_add_course, name="admin_add_course"),
+    path("flames/course/edit/<int:course_id>/", flames_views.admin_edit_course, name="admin_edit_course"),
+    path("flames/toggle-course-status/", flames_views.admin_toggle_course_status, name="admin_toggle_course_status"),
+    path("flames/registration-details/", flames_views.admin_registration_details, name="admin_registration_details"),
+    path("flames/update-registration-status/", flames_views.admin_update_registration_status, name="admin_update_registration_status"),
+    path("flames/update-registration-notes/", flames_views.admin_update_registration_notes, name="admin_update_registration_notes"),
+    path("flames/add-testimonial/", flames_views.admin_add_testimonial, name="admin_add_testimonial"),
 ]
