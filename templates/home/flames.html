@@ -266,6 +266,120 @@ F.L.A.M.E.S🔥 | Angaar
         box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
     }
 
+    /* Registration Modal */
+    .registration-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        overflow-y: auto;
+        backdrop-filter: blur(5px);
+    }
+
+    .registration-modal-content {
+        position: relative;
+        background-color: rgba(25, 25, 25, 0.95);
+        margin: 5% auto;
+        padding: 30px;
+        width: 90%;
+        max-width: 600px;
+        border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        animation: modalFade 0.3s ease;
+    }
+
+    @keyframes modalFade {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .registration-modal-header {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .registration-modal-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+    }
+
+    .registration-form-group {
+        margin-bottom: 20px;
+    }
+
+    .registration-form-control {
+        width: 100%;
+        padding: 12px 15px;
+        background-color: rgba(50, 50, 50, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .registration-form-control:focus {
+        border-color: #ff6026;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(255, 96, 38, 0.2);
+    }
+
+    .registration-form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #aaa;
+    }
+
+    .registration-form-submit {
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .registration-form-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
+    }
+
+    .registration-modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 24px;
+        color: #aaa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .registration-modal-close:hover {
+        color: #ff6026;
+    }
+
     /* Responsive Styles */
     @media (max-width: 1200px) {
         .team-grid {
@@ -340,84 +454,32 @@ F.L.A.M.E.S🔥 | Angaar
 
         <div class="skills-cards"
             style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin-bottom: 40px;">
-            <!-- Python Skill Card -->
+
+            {% for course in courses %}
+
             <div class="skills-card"
                 style="flex: 0 0 calc(50% - 15px); min-width: 300px; background-color: rgba(255, 255, 255, 0.03); border-radius: 15px; padding: 30px; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden;">
                 <div class="skill-glow"
                     style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,96,38,0.1) 0%, rgba(255,96,38,0) 70%); z-index: 0;">
                 </div>
 
+
                 <div style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
                     <div class="skill-icon"
                         style="width: 60px; height: 60px; border-radius: 12px; background-color: rgba(255,96,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                        <i class="fab fa-js" style="font-size: 36px; color: #ff6026;"></i>
+                        <i class="{{ course.icon_class }}" style="font-size: 36px; color: {{ course.icon_color }};"></i>
                     </div>
                     <div>
-                        <h3 style="margin: 0 0 5px; color: white; font-size: 24px; font-weight: 700;">MERN Stack with
-                            GEN AI</h3>
-                        <p style="margin: 0; color: #aaa; font-size: 16px;">Production Level Learning 🔥</p>
+                        <h3 style="margin: 0 0 5px; color: white; font-size: 24px; font-weight: 700;">{{ course.title }}
+                        </h3>
+                        <p style="margin: 0; color: #aaa; font-size: 16px;">{{ course.subtitle }}</p>
                     </div>
                 </div>
 
                 <div class="skill-progress" style="position: relative; z-index: 1;">
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: #aaa; font-size: 14px;">By:</span>
-                        <span style="color: white; font-weight: 600; font-size: 14px;">Aman Raj Singh🔥</span>
-                    </div>
-                    <!-- <div class="progress-container"
-                        style="height: 10px; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden;">
-                        <div class="progress-bar c-prog"
-                            style="height: 100%; width: 0%; background: linear-gradient(to right, #ff6026, #ff9d45); border-radius: 10px; transition: width 1.5s ease-in-out;">
-                        </div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-                        <span style="color: #aaa; font-size: 14px;">Beginner</span>
-                        <span style="color: #aaa; font-size: 14px;">Advanced</span>
-                    </div> -->
-                </div>
-
-                <div class="skills-outcomes"
-                    style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 20px; margin-bottom: 25px; position: relative; z-index: 1;">
-                    <h4 style="color: white; font-size: 16px; margin: 0 0 15px; font-weight: 600;">What You'll Learn:
-                    </h4>
-                    <ul style="margin: 0; padding: 0 0 0 20px; color: #aaa; font-size: 14px; line-height: 1.6;">
-                        <li style="margin-bottom: 8px;">Basic concepts from scratch</li>
-                        <li style="margin-bottom: 8px;">Daily scrum meetings</li>
-                        <li style="margin-bottom: 8px;">Project reviews by industy experts!</li>
-                        <li style="margin-bottom: 0;">On the spot porblem solutions</li>
-                    </ul>
-                </div>
-
-
-                <button class="skills-join-btn disabled"
-                    style="width: 100%; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">Coming
-                    soon!</button>
-
-            </div>
-
-
-
-            <div class="skills-card"
-                style="flex: 0 0 calc(50% - 15px); min-width: 300px; background-color: rgba(255, 255, 255, 0.03); border-radius: 15px; padding: 30px; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden;">
-                <div class="skill-glow"
-                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(38,150,255,0.1) 0%, rgba(38,150,255,0) 70%); z-index: 0;">
-                </div>
-
-                <div style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
-                    <div class="skill-icon"
-                        style="width: 60px; height: 60px; border-radius: 12px; background-color: rgba(38,150,255,0.1); display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                        <i class="fas fa-cogs" style="font-size: 36px; color: #2696FF;"></i>
-                    </div>
-                    <div>
-                        <h3 style="margin: 0 0 5px; color: white; font-size: 24px; font-weight: 700;">DSA</h3>
-                        <p style="margin: 0; color: #aaa; font-size: 16px;">Master Algorithms and Data Structures</p>
-                    </div>
-                </div>
-
-                <div class="skill-progress" style="position: relative; z-index: 1;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #aaa; font-size: 14px;">By:</span>
-                        <span style="color: white; font-weight: 600; font-size: 14px;">Naman Sharma🔥</span>
+                        <span style="color: white; font-weight: 600; font-size: 14px;">{{ course.instructor }}🔥</span>
                     </div>
                 </div>
 
@@ -426,115 +488,97 @@ F.L.A.M.E.S🔥 | Angaar
                     <h4 style="color: white; font-size: 16px; margin: 0 0 15px; font-weight: 600;">What You'll Learn:
                     </h4>
                     <ul style="margin: 0; padding: 0 0 0 20px; color: #aaa; font-size: 14px; line-height: 1.6;">
-                        <li style="margin-bottom: 8px;">In-depth problem-solving techniques</li>
-                        <li style="margin-bottom: 8px;">Optimized coding for real-world applications</li>
-                        <li style="margin-bottom: 8px;">Crack technical interviews with confidence</li>
-                        <li style="margin-bottom: 0;">Data Structure concepts from scratch</li>
+                        {% for point in course.get_learning_points %}
+
+                        <li style="margin-bottom: 7px;">{{ point }}</li>
+
+                        {% endfor %}
                     </ul>
+
+                    <!-- Price Section -->
+                <div style="text-align: right; position: relative; z-index: 1;">
+
+                    {% comment %}
+                    <!-- {% if course.discount_price %}
+                    <div style="display: flex; justify-content: flex-end; align-items: baseline;">
+                        <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹{{ course.price }}</span>
+                        <span style="color: #ff6026; font-size: 18px; font-weight: 700;">₹{{ course.discount_price }}</span>
+                    </div>
+                    <div style="color: #2ecc71; font-size: 12px; font-weight: 600; margin-top: 3px;">
+                        {% widthratio course.discount_price course.price 100 as discount_percent %}
+                        {{ discount_percent|add:"-100"|cut:"-" }}% OFF
+                    </div>
+                    {% else %} -->
+                    <!-- yftguhjik -->
+                    <!-- {% endif %} -->
+
+                    {% endcomment %}
+                    <div style="display: flex; justify-content: flex-end; align-items: baseline;">
+                        <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
+                        <span style="color: #ff6026; font-size: 16px; font-weight: 600;">₹ Less than you expect... (coming soon)</span>
+                    </div>
+                </div>
                 </div>
 
-                <button class="skills-join-btn disabled"
-                    style="width: 100%; background: linear-gradient(135deg, #2696FF, #5EBAFF); color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">Coming
-                    soon!</button>
-
+                <div style="display: flex; justify-content: space-between; gap: 10px;">
+                    <a href="{% url 'course_detail' course.slug %}" class="skills-details-btn" 
+                        style="flex: 1; background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; text-align: center; text-decoration: none;">
+                        Details
+                    </a>
+                    <button class="skills-join-btn" data-course-id="{{ course.id }}" data-course-title="{{ course.title }}"
+                        style="flex: 1; background: {{ course.button_color }}; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">
+                        Register Now
+                    </button>
+                </div>
             </div>
 
-
-            <div class="skills-card"
-                style="flex: 0 0 calc(50% - 15px); min-width: 300px; background-color: rgba(255, 255, 255, 0.03); border-radius: 15px; padding: 30px; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden;">
-                <div class="skill-glow"
-                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,196,38,0.1) 0%, rgba(255,196,38,0) 70%); z-index: 0;">
-                </div>
-
-                <div style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
-                    <div class="skill-icon"
-                        style="width: 60px; height: 60px; border-radius: 12px; background-color: rgba(255,196,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                        <i class="fab fa-python" style="font-size: 36px; color: #FFC426;"></i>
-                    </div>
-                    <div>
-                        <h3 style="margin: 0 0 5px; color: white; font-size: 24px; font-weight: 700;">Full Stack with
-                            Django & Generative AI</h3>
-                        <p style="margin: 0; color: #aaa; font-size: 16px;">From Backend Basics to Intelligent
-                            Applications</p>
-                    </div>
-                </div>
-
-                <div class="skill-progress" style="position: relative; z-index: 1;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #aaa; font-size: 14px;">By:</span>
-                        <span style="color: white; font-weight: 600; font-size: 14px;">Divyanshu Khandelwal🔥</span>
-                    </div>
-                </div>
-
-                <div class="skills-outcomes"
-                    style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 20px; margin-bottom: 25px; position: relative; z-index: 1;">
-                    <h4 style="color: white; font-size: 16px; margin: 0 0 15px; font-weight: 600;">What You'll Learn:
-                    </h4>
-                    <ul style="margin: 0; padding: 0 0 0 20px; color: #aaa; font-size: 14px; line-height: 1.6;">
-                        <li style="margin-bottom: 8px;">Django framework from scratch</li>
-                        <li style="margin-bottom: 8px;">Integrating AI into applications</li>
-                        <li style="margin-bottom: 8px;">Full-stack project development</li>
-                        <li style="margin-bottom: 0;">Best practices for scalability and security</li>
-                    </ul>
-                </div>
-
-                <button class="skills-join-btn disabled"
-                    style="width: 100%; background: linear-gradient(135deg, #FFC426, #FFD754); color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">Coming
-                    soon!</button>
-
-            </div>
-
-            <div class="skills-card"
-                style="flex: 0 0 calc(50% - 15px); min-width: 300px; background-color: rgba(255, 255, 255, 0.03); border-radius: 15px; padding: 30px; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden;">
-                <div class="skill-glow"
-                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(96,255,38,0.1) 0%, rgba(96,255,38,0) 70%); z-index: 0;">
-                </div>
-
-                <div style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
-                    <div class="skill-icon"
-                        style="width: 60px; height: 60px; border-radius: 12px; background-color: rgba(96,255,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                        <i class="fas fa-chart-line" style="font-size: 36px; color: #60FF26;"></i>
-                    </div>
-                    <div>
-                        <h3 style="margin: 0 0 5px; color: white; font-size: 24px; font-weight: 700;">Data Analytics</h3>
-                        <p style="margin: 0; color: #aaa; font-size: 16px;">Discover Insights and Empower Decisions</p>
-                    </div>
-                </div>
-
-                <div class="skill-progress" style="position: relative; z-index: 1;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #aaa; font-size: 14px;">By:</span>
-                        <span style="color: white; font-weight: 600; font-size: 14px;">Sharad Singh Chauhan🔥</span>
-                    </div>
-                </div>
-
-                <div class="skills-outcomes"
-                    style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 20px; margin-bottom: 25px; position: relative; z-index: 1;">
-                    <h4 style="color: white; font-size: 16px; margin: 0 0 15px; font-weight: 600;">What You'll Learn:
-                    </h4>
-                    <ul style="margin: 0; padding: 0 0 0 20px; color: #aaa; font-size: 14px; line-height: 1.6;">
-                        <li style="margin-bottom: 8px;">Fundamentals of data analysis</li>
-                        <li style="margin-bottom: 8px;">Visualizing data effectively</li>
-                        <li style="margin-bottom: 8px;">Insights with machine learning</li>
-                        <li style="margin-bottom: 0;">Real-world project case studies</li>
-                    </ul>
-                </div>
-
-                <button class="skills-join-btn disabled"
-                    style="width: 100%; background: linear-gradient(135deg, #60FF26, #9DFF45); color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">Coming
-                    soon!</button>
-
-            </div>
-
-
+            {% endfor %}
         </div>
-
-
     </div>
 </div>
+
+<!-- Registration Modal -->
+<div id="registrationModal" class="registration-modal">
+    <div class="registration-modal-content">
+        <div class="registration-modal-close" onclick="closeModal()">&times;</div>
+        <div class="registration-modal-header">
+            <h2 class="registration-modal-title">Register for <span id="modalCourseName"></span></h2>
+            <p style="color: #aaa;">Fill out the form below to register for this program</p>
+        </div>
+        <form id="registrationForm">
+            <input type="hidden" id="course_id" name="course_id">
+            <div class="registration-form-group">
+                <label for="full_name" class="registration-form-label">Full Name *</label>
+                <input type="text" id="full_name" name="full_name" class="registration-form-control" required>
+            </div>
+            <div class="registration-form-group">
+                <label for="email" class="registration-form-label">Email Address *</label>
+                <input type="email" id="email" name="email" class="registration-form-control" required>
+            </div>
+            <div class="registration-form-group">
+                <label for="contact_number" class="registration-form-label">Contact Number *</label>
+                <input type="tel" id="contact_number" name="contact_number" class="registration-form-control" required>
+            </div>
+            <div class="registration-form-group">
+                <label for="college" class="registration-form-label">College/University *</label>
+                <input type="text" id="college" name="college" class="registration-form-control" required>
+            </div>
+            <div class="registration-form-group">
+                <label for="year" class="registration-form-label">Year of Study *</label>
+                <select id="year" name="year" class="registration-form-control" required>
+                    <option value="">Select Year</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                    <option value="5th Year">5th Year</option>
+                    <option value="Graduate">Graduate</option>
+                </select>
+            </div>
+            <button type="submit" id="submitRegistration" class="registration-form-submit">Register Now</button>
+        </form>
+    </div>
 </div>
-
-
 
 <!-- Particle.js for background effects -->
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
@@ -657,46 +701,70 @@ F.L.A.M.E.S🔥 | Angaar
             "retina_detect": true
         });
 
-        // Team filtering functionality
-        const categoryBtns = document.querySelectorAll('.category-btn');
-        const teamCards = document.querySelectorAll('.team-card');
-
-        categoryBtns.forEach(btn => {
-            btn.addEventListener('click', function () {
-                // Remove active class from all buttons
-                categoryBtns.forEach(b => b.classList.remove('active'));
-                // Add active class to clicked button
-                this.classList.add('active');
-
-                const filter = this.getAttribute('data-filter');
-
-                // Filter team cards
-                teamCards.forEach(card => {
-                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
-                        card.style.display = 'block';
-                        setTimeout(() => {
-                            card.style.opacity = '1';
-                            card.style.transform = 'translateY(0)';
-                        }, 100);
-                    } else {
-                        card.style.opacity = '0';
-                        card.style.transform = 'translateY(20px)';
-                        setTimeout(() => {
-                            card.style.display = 'none';
-                        }, 300);
-                    }
-                });
+        // Registration Modal functionality
+        const registerButtons = document.querySelectorAll('.skills-join-btn');
+        registerButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const courseId = this.getAttribute('data-course-id');
+                const courseTitle = this.getAttribute('data-course-title');
+                document.getElementById('modalCourseName').textContent = courseTitle;
+                document.getElementById('course_id').value = courseId;
+                document.getElementById('registrationModal').style.display = 'block';
             });
         });
 
-        // Add parallax effect to team section
-        window.addEventListener('scroll', function () {
-            const scrollPosition = window.pageYOffset;
-            const teamSection = document.querySelector('.team-page-container');
-            if (teamSection) {
-                teamSection.style.backgroundPosition = `center ${scrollPosition * 0.05}px`;
-            }
+        // Form submission
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitRegistration');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Processing...';
+            submitBtn.disabled = true;
+            
+            fetch('{% url "register_course" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    closeModal();
+                    document.getElementById('registrationForm').reset();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                alert('An error occurred. Please try again.');
+                console.error('Error:', error);
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
         });
     });
+
+    // Close modal function
+    function closeModal() {
+        document.getElementById('registrationModal').style.display = 'none';
+    }
+
+    // Close modal if clicked outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('registrationModal');
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    }
 </script>
 {% endblock %}
