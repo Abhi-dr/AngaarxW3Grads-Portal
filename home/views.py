@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as message
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Article, Comment
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration
 from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models import Count
@@ -18,9 +18,6 @@ def about(request):
 
 def our_team(request):
     return render(request, "home/team.html")
-
-def flames(request):
-    return render(request, "home/flames.html")
 
 # ======================== ARTICLES ========================
 

@@ -1,13 +1,14 @@
 from django.urls import path
-from . import views
+from . import views, flames
 
 urlpatterns = [
     path("", views.home, name="home"),
     path("about/", views.about, name="about"),
     path("our-team/", views.our_team, name="our_team"),
     
-    path("flames/", views.flames, name="flames"),
-    
+    path("flames/", flames.flames, name="flames"),
+    path("flames/course/<slug:slug>/", flames.course_detail, name="course_detail"),
+    path("flames/register/", flames.register_course, name="register_course"),
     
     path("articles/", views.articles, name="articles"),
     path("article/<slug:slug>/", views.article, name="article"),
