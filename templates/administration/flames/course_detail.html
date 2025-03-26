@@ -6,7 +6,8 @@
 {% block flames_active %}active{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/administration/css/dataTables.bootstrap5.min.css' %}">
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
     .course-header {
         background-color: #363636;
@@ -25,7 +26,7 @@
         left: 0;
         width: 5px;
         height: 100%;
-        background-color: {{ course.icon_color }};
+        background-color: "{{ course.icon_color }}";
     }
 
     .course-title {
@@ -45,9 +46,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background-color: {{ course.icon_color }};
-        color: white;
         font-size: 24px;
+        color: white;
+        background-color: {{ course.icon_color }};
     }
 
     .course-subtitle {
@@ -552,7 +553,7 @@
 </div>
 {% endblock %}
 
-{% block mujs %}
+{% block myjs %}
 <script>
     $(document).ready(function() {
         // Toggle course status

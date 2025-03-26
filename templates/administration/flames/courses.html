@@ -6,7 +6,7 @@
 {% block flames_active %}active{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/administration/css/dataTables.bootstrap5.min.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
     .course-card {
         border-radius: 10px;
@@ -244,7 +244,8 @@
         min-width: 200px;
     }
 
-    .filter-item select, .filter-item input {
+    .filter-item select,
+    .filter-item input {
         width: 100%;
         padding: 10px 15px;
         border: 1px solid #ddd;
@@ -267,21 +268,25 @@
     }
 
     .course-card .course-icon {
-        background-color: {{ course.icon_color }};
-    }
+        background-color: {{course.icon_color}}
+        }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="container-fluid px-4 py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fs-2 m-0">FLAMES Courses</h2>
-            <p class="text-muted">Manage all your summer training program courses</p>
+<div class="container-fluid px-4">
+    <div class="card">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h3 class="heading">FLAMES Courses</h3>
+            <div class="export-buttons float-end">
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                    <i class="fas fa-plus me-2"></i>Add New Course
+                </button>
+                <a href="{% url 'admin_flames_registrations' %}" class="btn btn-primary mx-1">
+                    Total Registrations
+                </a>
+            </div>
         </div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal">
-            <i class="fas fa-plus me-2"></i>Add New Course
-        </button>
     </div>
 
     <!-- Stats Cards -->
@@ -335,9 +340,8 @@
     <!-- Courses Grid -->
     <div class="row" id="coursesContainer">
         {% for course in courses %}
-        <div class="col-md-6 col-lg-4 col-xl-3 course-item" 
-             data-active="{{ course.is_active|lower }}" 
-             data-title="{{ course.title|lower }}">
+        <div class="col-md-6 col-lg-4 col-xl-3 course-item" data-active="{{ course.is_active|lower }}"
+            data-title="{{ course.title|lower }}">
             <div class="course-card">
                 <div class="course-header">
                     <h5 class="course-title">
@@ -346,18 +350,19 @@
                         </div>
                         {{ course.title }}
                     </h5>
-                    <span class="course-status {% if course.is_active %}status-active{% else %}status-inactive{% endif %}">
+                    <span
+                        class="course-status {% if course.is_active %}status-active{% else %}status-inactive{% endif %}">
                         {% if course.is_active %}Active{% else %}Inactive{% endif %}
                     </span>
                 </div>
                 <div class="course-body">
                     <p class="mb-3">{{ course.subtitle }}</p>
-                    
+
                     <div class="course-info">
                         <span class="course-info-label">Instructor</span>
                         <span class="course-info-value">{{ course.instructor }}</span>
                     </div>
-                    
+
                     <div class="course-info">
                         <span class="course-info-label">Price</span>
                         <div class="price-container">
@@ -369,12 +374,12 @@
                             {% endif %}
                         </div>
                     </div>
-                    
+
                     <div class="course-info">
                         <span class="course-info-label">Registrations</span>
                         <span class="course-info-value">{{ course.registrations.count }}</span>
                     </div>
-                    
+
                     <div class="course-actions">
                         <a href="{% url 'admin_course_detail' course.id %}" class="btn btn-sm btn-outline-primary">
                             <i class="fas fa-eye me-1"></i> View
@@ -383,11 +388,13 @@
                             <i class="fas fa-edit me-1"></i> Edit
                         </button>
                         {% if course.is_active %}
-                        <button class="btn btn-sm btn-outline-danger toggle-status" data-course-id="{{ course.id }}" data-status="active">
+                        <button class="btn btn-sm btn-outline-danger toggle-status" data-course-id="{{ course.id }}"
+                            data-status="active">
                             <i class="fas fa-times-circle me-1"></i> Deactivate
                         </button>
                         {% else %}
-                        <button class="btn btn-sm btn-outline-success toggle-status" data-course-id="{{ course.id }}" data-status="inactive">
+                        <button class="btn btn-sm btn-outline-success toggle-status" data-course-id="{{ course.id }}"
+                            data-status="inactive">
                             <i class="fas fa-check-circle me-1"></i> Activate
                         </button>
                         {% endif %}
@@ -435,7 +442,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -456,12 +463,13 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="icon_class" class="form-label">Icon Class</label>
-                                <input type="text" class="form-control" id="icon_class" name="icon_class" placeholder="fa-python">
+                                <input type="text" class="form-control" id="icon_class" name="icon_class"
+                                    placeholder="fa-python">
                                 <small class="text-muted">Font Awesome icon class</small>
                             </div>
                         </div>
@@ -474,11 +482,12 @@
                         <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="button_color" class="form-label">Button Color</label>
-                                <input type="text" class="form-control" id="button_color" name="button_color" placeholder="linear-gradient(135deg, #ff6026, #ff9a56)">
+                                <input type="text" class="form-control" id="button_color" name="button_color"
+                                    placeholder="linear-gradient(135deg, #ff6026, #ff9a56)">
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -494,22 +503,24 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="what_you_will_learn" class="form-label">What You'll Learn</label>
-                        <textarea class="form-control" id="what_you_will_learn" name="what_you_will_learn" rows="4" placeholder="Enter points separated by new lines" required></textarea>
+                        <textarea class="form-control" id="what_you_will_learn" name="what_you_will_learn" rows="4"
+                            placeholder="Enter points separated by new lines" required></textarea>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="roadmap" class="form-label">Course Roadmap</label>
-                        <textarea class="form-control" id="roadmap" name="roadmap" rows="4" placeholder="Enter roadmap points separated by new lines" required></textarea>
+                        <textarea class="form-control" id="roadmap" name="roadmap" rows="4"
+                            placeholder="Enter roadmap points separated by new lines" required></textarea>
                     </div>
-                    
+
                     <div class="form-check mb-3">
                         <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
                         <label class="form-check-label" for="is_active">
@@ -520,7 +531,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="document.getElementById('courseForm').submit();">Save Course</button>
+                <button type="button" class="btn btn-primary"
+                    onclick="document.getElementById('courseForm').submit();">Save Course</button>
             </div>
         </div>
     </div>
@@ -529,13 +541,15 @@
 {% endblock %}
 
 {% block myjs %}
-<script src="{% static 'js/administration/js/jquery.dataTables.min.js' %}"></script>
-<script src="{% static 'js/administration/js/dataTables.bootstrap5.min.js' %}"></script>
+
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Auto-generate slug from title
-        $('#title').on('keyup', function() {
+        $('#title').on('keyup', function () {
             var title = $(this).val();
             var slug = title.toLowerCase()
                 .replace(/[^\w ]+/g, '')
@@ -548,13 +562,13 @@
             var statusFilter = $('#statusFilter').val();
             var searchFilter = $('#searchFilter').val().toLowerCase();
 
-            $('.course-item').each(function() {
+            $('.course-item').each(function () {
                 var status = $(this).data('active').toString();
                 var title = $(this).data('title');
-                
+
                 var statusMatch = statusFilter === '' || status === statusFilter;
                 var searchMatch = title.includes(searchFilter);
-                
+
                 if (statusMatch && searchMatch) {
                     $(this).show();
                 } else {
@@ -566,11 +580,11 @@
         $('#statusFilter, #searchFilter').on('change keyup', filterCourses);
 
         // Toggle course status
-        $('.toggle-status').on('click', function() {
+        $('.toggle-status').on('click', function () {
             var courseId = $(this).data('course-id');
             var currentStatus = $(this).data('status');
             var newStatus = currentStatus === 'active' ? false : true;
-            
+
             $.ajax({
                 url: '{% url "admin_toggle_course_status" %}',
                 type: 'POST',
@@ -579,21 +593,21 @@
                     'is_active': newStatus,
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 'success') {
                         location.reload();
                     } else {
                         alert('Error: ' + response.message);
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('An error occurred. Please try again.');
                 }
             });
         });
 
         // Edit course
-        $('.edit-course').on('click', function() {
+        $('.edit-course').on('click', function () {
             var courseId = $(this).data('course-id');
             window.location.href = '{% url "admin_edit_course" 0 %}'.replace('0', courseId);
         });

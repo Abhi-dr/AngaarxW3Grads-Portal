@@ -5,7 +5,7 @@
 
 {% block flames_active %}active{% endblock %}
 
-{% block head %}
+{% block extra_css %}
 <style>
     .card {
         border: none;
@@ -57,8 +57,8 @@
 </style>
 {% endblock %}
 
-{% block content %}
-<div class="container-fluid px-4 py-4">
+{% block body %}
+<div class="container-fluid px-4">
     <!-- Back Button -->
     <div class="mb-3">
         <a href="{% url 'admin_course_detail' course.id %}" class="btn btn-outline-secondary">
@@ -95,14 +95,7 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="instructor" class="form-label">Instructor</label>
-                            <select class="form-select" id="instructor" name="instructor" required>
-                                <option value="">Select Instructor</option>
-                                {% for instructor in instructors %}
-                                <option value="{{ instructor.id }}" {% if course.instructor.id == instructor.id %}selected{% endif %}>
-                                    {{ instructor.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
+                            <input type="text" class="form-control" id="instructor" name="instructor" value="{{ course.instructor }}" required>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -185,7 +178,7 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block myjs %}
 <script>
     $(document).ready(function() {
         // Update color preview when color input changes
