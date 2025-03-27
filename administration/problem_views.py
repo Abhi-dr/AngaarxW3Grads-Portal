@@ -640,7 +640,7 @@ def normalize_output(output):
         
     if not output:
         return ""
-    return output.replace("\r\n", "\n").strip()
+    return output.replace("\r\n", "\n").rstrip()
 
 
 def get_test_cases(question):
