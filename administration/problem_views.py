@@ -640,7 +640,7 @@ def normalize_output(output):
         
     if not output:
         return ""
-    return output.replace("\r\n", "\n").rstrip()
+    return output.replace("\r\n", "\n")
 
 
 def get_test_cases(question):
@@ -730,7 +730,7 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
         if outputs:
             outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
             
-            outputs = [output.rstrip() for output in outputs.split("~") if output.rstrip()]
+            outputs = [output for output in outputs.split("~") if output]
             
         else:
             outputs = ["No output generated."]
