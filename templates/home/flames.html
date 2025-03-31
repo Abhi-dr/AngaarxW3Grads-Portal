@@ -498,8 +498,8 @@ F.L.A.M.E.S🔥 | Angaar
                     <!-- Price Section -->
                 <div style="text-align: right; position: relative; z-index: 1;">
 
-                    {% comment %}
-                    <!-- {% if course.discount_price %}
+                    
+                    {% if course.discount_price %}
                     <div style="display: flex; justify-content: flex-end; align-items: baseline;">
                         <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹{{ course.price }}</span>
                         <span style="color: #ff6026; font-size: 18px; font-weight: 700;">₹{{ course.discount_price }}</span>
@@ -508,15 +508,15 @@ F.L.A.M.E.S🔥 | Angaar
                         {% widthratio course.discount_price course.price 100 as discount_percent %}
                         {{ discount_percent|add:"-100"|cut:"-" }}% OFF
                     </div>
-                    {% else %} -->
-                    <!-- yftguhjik -->
-                    <!-- {% endif %} -->
+                    {% else %}
+                    <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
+                    {% endif %}
 
-                    {% endcomment %}
-                    <div style="display: flex; justify-content: flex-end; align-items: baseline;">
+                    
+                    <!-- <div style="display: flex; justify-content: flex-end; align-items: baseline;">
                         <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
                         <span style="color: #ff6026; font-size: 16px; font-weight: 600;">₹ Less than you expect... (coming soon)</span>
-                    </div>
+                    </div> -->
                 </div>
                 </div>
 
