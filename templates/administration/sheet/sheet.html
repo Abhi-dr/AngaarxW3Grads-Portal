@@ -33,12 +33,14 @@ active
                     data-bs-target="#setTimerModal">⏰</button>
 
 
-                <a href="{% url 'administrator_add_new_question' sheet.slug %}" class="btn btn-outline-primary">Add New Question</a>
+                <a href="{% url 'administrator_add_new_question' sheet.slug %}" class="btn btn-outline-primary">Add New
+                    Question</a>
 
                 <button class="btn btn-outline-success" type="button" data-bs-toggle="modal"
                     data-bs-target="#importJsonModal">Import JSON</button>
 
-                <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                
+                    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
                     data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
@@ -51,13 +53,15 @@ active
                     </li>
 
                     <li>
-                        <a href="{% url 'administrator_delete_sheet' sheet.id %}" class="btn btn-danger button w-100 mt-1"
+                        <a href="{% url 'administrator_delete_sheet' sheet.id %}"
+                            class="btn btn-danger button w-100 mt-1"
                             onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete Sheet
                         </a>
                     </li>
 
                     <li>
-                        <a href="{% url 'administrator_edit_sheet' sheet.slug %}" class="btn btn-primary button w-100 mt-1">Edit Sheet
+                        <a href="{% url 'administrator_edit_sheet' sheet.slug %}"
+                            class="btn btn-primary button w-100 mt-1">Edit Sheet
                         </a>
                     </li>
 
@@ -226,8 +230,7 @@ active
                                 <div class="d-flex align-items-center gap-2">
 
                                     <!-- <a href="{% url 'administrator_remove_from_sheet' sheet.id question.id %}" -->
-                                    <a href="{% url 'delete_question' question.id %}"
-                                        class="float-end"
+                                    <a href="{% url 'delete_question' question.id %}" class="float-end"
                                         onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">❌</a>
 
                                     <a href="{% url 'edit_question' question.id %}" class="float-end">✏️</a>
@@ -371,7 +374,8 @@ active
     </div>
 
     <!-- Import JSON Modal -->
-    <div class="modal fade" id="importJsonModal" tabindex="-1" aria-labelledby="importJsonModalLabel" aria-hidden="true">
+    <div class="modal fade" id="importJsonModal" tabindex="-1" aria-labelledby="importJsonModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -381,7 +385,8 @@ active
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="jsonData" class="form-label">JSON Data</label>
-                        <textarea class="form-control" id="jsonData" rows="15" placeholder="Paste your JSON data here..."></textarea>
+                        <textarea class="form-control" id="jsonData" rows="15"
+                            placeholder="Paste your JSON data here..."></textarea>
                     </div>
                     <div id="jsonValidationFeedback" class="invalid-feedback d-none">
                         Please provide valid JSON data.
@@ -431,6 +436,9 @@ active
     </div>
 
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
     document.getElementById('saveTimerBtn').addEventListener('click', function () {
@@ -649,26 +657,26 @@ active
 
 <script>
     // JSON Import functionality
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const jsonImportBtn = document.getElementById('importJsonBtn');
         const jsonData = document.getElementById('jsonData');
         const jsonValidationFeedback = document.getElementById('jsonValidationFeedback');
         const jsonImportStatus = document.getElementById('jsonImportStatus');
-        
-        jsonImportBtn.addEventListener('click', function() {
+
+        jsonImportBtn.addEventListener('click', function () {
             // Reset status elements
             jsonValidationFeedback.classList.add('d-none');
             jsonImportStatus.classList.add('d-none');
-            
+
             // Validate JSON
             try {
                 JSON.parse(jsonData.value);
-            } catch(e) {
+            } catch (e) {
                 jsonValidationFeedback.textContent = 'Invalid JSON format: ' + e.message;
                 jsonValidationFeedback.classList.remove('d-none');
                 return;
             }
-            
+
             // Send AJAX request
             fetch('{% url "administrator_add_question_json" sheet.slug %}', {
                 method: 'POST',
@@ -680,31 +688,31 @@ active
                     'json_data': jsonData.value
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                jsonImportStatus.classList.remove('d-none', 'alert-success', 'alert-danger');
-                
-                if (data.status === 'success') {
-                    jsonImportStatus.classList.add('alert-success');
-                    jsonImportStatus.textContent = data.message;
-                    
-                    // Redirect to sheet page after 2 seconds
-                    setTimeout(function() {
-                        window.location.href = data.redirect_url;
-                    }, 2000);
-                } else {
+                .then(response => response.json())
+                .then(data => {
+                    jsonImportStatus.classList.remove('d-none', 'alert-success', 'alert-danger');
+
+                    if (data.status === 'success') {
+                        jsonImportStatus.classList.add('alert-success');
+                        jsonImportStatus.textContent = data.message;
+
+                        // Redirect to sheet page after 2 seconds
+                        setTimeout(function () {
+                            window.location.href = data.redirect_url;
+                        }, 2000);
+                    } else {
+                        jsonImportStatus.classList.add('alert-danger');
+                        jsonImportStatus.textContent = data.message;
+                    }
+                })
+                .catch(error => {
+                    jsonImportStatus.classList.remove('d-none');
                     jsonImportStatus.classList.add('alert-danger');
-                    jsonImportStatus.textContent = data.message;
-                }
-            })
-            .catch(error => {
-                jsonImportStatus.classList.remove('d-none');
-                jsonImportStatus.classList.add('alert-danger');
-                jsonImportStatus.textContent = 'Error: ' + error.message;
-            });
+                    jsonImportStatus.textContent = 'Error: ' + error.message;
+                });
         });
     });
-    
+
     // CSRF token function
     function getCookie(name) {
         let cookieValue = null;
@@ -721,4 +729,5 @@ active
         return cookieValue;
     }
 </script>
+
 {% endblock %}

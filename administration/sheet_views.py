@@ -206,6 +206,67 @@ def get_excluded_questions(request, sheet_id):
     
     return JsonResponse(data, safe=False)
 
+# ========================= ADD NEW QUESTION TO SHEET ==========================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def add_new_question(request, slug):
+    sheet = get_object_or_404(Sheet, slug=slug)
+    administrator = Administrator.objects.get(id=request.user.id)
+
+    if request.method == "POST":
+        title = request.POST.get('title')
+        scenario = request.POST.get('scenario')
+        description = request.POST.get('description')
+        input_format = request.POST.get('input_format')
+        output_format = request.POST.get('output_format')
+        constraints = request.POST.get('constraints')
+        hint = request.POST.get('hint')
+        difficulty_level = request.POST.get('difficulty_level')
+
+        # Save new question
+        question = Question.objects.create(
+            title=title,
+            scenario=scenario,
+            description=description,
+            input_format=input_format,
+            output_format=output_format,
+            constraints=constraints,
+            hint=hint,
+            difficulty_level=difficulty_level,
+            is_approved=True
+        )
+
+        # Link question to sheet
+        sheet.questions.add(question)
+
+        # Handle Recommended Questions
+        try:
+            recommended_questions_data = json.loads(request.POST.get("recommended_questions", "[]"))
+
+            for rq in recommended_questions_data:
+                if rq["title"] and rq["platform"] and rq["link"]:  # Ensure valid input
+                    RecommendedQuestions.objects.create(
+                        question=question,
+                        title=rq["title"],
+                        platform=rq["platform"],
+                        link=rq["link"]
+                    )
+
+        except json.JSONDecodeError:
+            return JsonResponse({"success": False, "message": "Invalid JSON data"}, status=400)
+
+        messages.success(request, "Question added successfully!")
+        return redirect('administrator_sheet', slug=sheet.slug)
+
+    parameters = {
+        "administrator": administrator,
+        "sheet": sheet,
+    }
+
+    return render(request, 'administration/sheet/add_new_question.html', parameters)
+
 # ========================= ADD NEW QUESTION TO SHEET USING JSON ==========================
 
 @login_required(login_url='login')
@@ -216,6 +277,7 @@ def add_question_json(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
     
     if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        print("trying...")
         try:
             json_data = request.POST.get("json_data")
             data = json.loads(json_data)
