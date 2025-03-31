@@ -7,6 +7,7 @@ from django.db.models import Q
 from accounts.models import Administrator, Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
 from practice.models import Sheet, Submission, Question
+from home.models import FlamesRegistration
 from angaar_hai.custom_decorators import admin_required
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -16,6 +17,9 @@ from django.utils import timezone
 import datetime
 from django.http import JsonResponse
 import math
+
+from django.utils.timezone import now
+from datetime import timedelta
 
 from practice.models import Streak
 
@@ -649,3 +653,40 @@ def fetch_view_student_profile(request,id):
     }
     
     return JsonResponse({"student": data})
+
+
+def get_user_stats(request):
+    if request.method == "GET":
+        # Get the start and end of today
+        today_start = now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+
+        # Query for users registered today
+        users_registered_today = Student.objects.filter(date_joined__gte=today_start, date_joined__lt=today_end).count()
+
+        # Query for users who logged in today
+        users_logged_in_today = Student.objects.filter(last_login__gte=today_start, last_login__lt=today_end).count()
+        
+        # Query for students who has their birthday today
+        students_birthday_today = Student.objects.filter(dob__day=today_start.day, dob__month=today_start.month)
+        
+        # Query for total flames registrations
+        total_flames_registrations = FlamesRegistration.objects.all().count()
+        flames_registered_today = FlamesRegistration.objects.filter(created_at__gte=today_start, created_at__lt=today_end).count()
+
+        # Return the data as JSON
+        return JsonResponse({
+            'users_registered_today': users_registered_today,
+            'users_logged_in_today': users_logged_in_today,
+            "total_flames_registrations": total_flames_registrations,
+            "flames_registered_today": flames_registered_today,
+            'students_birthday_today': [
+                {
+                    'first_name': student.first_name,
+                    'last_name': student.last_name,
+                }
+                for student in students_birthday_today
+            ]
+        })
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)

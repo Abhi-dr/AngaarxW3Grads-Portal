@@ -147,6 +147,9 @@ urlpatterns += [
     path("make_duplicate/<int:sheet_id>/<int:question_id>/", sheet_views.make_duplicate, name="administrator_make_duplicate"),
     path("add_new_question/<slug:slug>/", sheet_views.add_new_question, name="administrator_add_new_question"),
     
+    path("add_question_json/<slug:slug>/", sheet_views.add_question_json, name="administrator_add_question_json"),
+    path("reorder/<slug:slug>/", sheet_views.reorder, name="administrator_reorder"),
+    
     path("sheet_leaderboard/<slug:slug>", sheet_views.leaderboard, name="administrator_leaderboard"),
     path("sheet_leaderboard_api/<slug:slug>", sheet_views.sheet_leaderboard, name="administrator_sheet_leaderboard"),
     
@@ -200,4 +203,9 @@ urlpatterns += [
     path("flames/update-registration-status/", flames_views.admin_update_registration_status, name="admin_update_registration_status"),
     path("flames/update-registration-notes/", flames_views.admin_update_registration_notes, name="admin_update_registration_notes"),
     path("flames/add-testimonial/", flames_views.admin_add_testimonial, name="admin_add_testimonial"),
+]
+
+urlpatterns += [
+    path('get-user-stats/', views.get_user_stats, name='get_user_stats'),
+
 ]
