@@ -204,3 +204,8 @@ urlpatterns += [
     path("flames/update-registration-notes/", flames_views.admin_update_registration_notes, name="admin_update_registration_notes"),
     path("flames/add-testimonial/", flames_views.admin_add_testimonial, name="admin_add_testimonial"),
 ]
+
+urlpatterns += [
+    path('get-user-stats/', views.get_user_stats, name='get_user_stats'),
+
+]

@@ -234,9 +234,10 @@ Administration -> Home
                     <div class="card overflow-hidden p-1">
                         <div class="card-body p-3">
 
-                            <h5 class="fw-semibold mb-2">Total Users Active: 
-                                <span class="fs-3">-</span>
-                            </h5>
+                            <div id="stats-result">
+                                <!-- Results will be displayed here -->
+                            </div>
+
                             <!-- <h5 class="fw-semibold mb-2">Total Users Active: 
                                 <span class="fs-3">43%</span>
                             </h5>
@@ -270,7 +271,7 @@ Administration -> Home
                                     <span class="fs-2">Left</span>
                                 </div>
                             </div> -->
-                            
+
                         </div>
                     </div>
                 </div>
@@ -647,5 +648,50 @@ Administration -> Home
 
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "{% url 'get_user_stats' %}", // URL defined in Django URLs
+            method: "GET",
+            success: function (data) {
+                // Display the results in the stats-result div
+                console.log(data);
+                $('#stats-result').html(`
+                        <h5 class="fw-semibold mb-2">
+                            New Registrations Today: <span class="fs-4 text-success">${data.users_registered_today}</span>
+                        </h5>
+
+                        <h5 class="fw-semibold mb-2">
+                            Active Students Today: <span class="fs-4 text-success">${data.users_logged_in_today}</span>
+                        </h5>
+                        
+                        <hr>
+                        <h5 class="fw-semibold mb-2">
+                            FLAMES Today🔥: <span class="fs-4 text-success">${data.flames_registered_today}</span>
+                        </h5>
+
+                        <h5 class="fw-semibold mb-2">
+                            FLAMES Total🔥: <span class="fs-4 text-success">${data.total_flames_registrations}</span>
+                        </h5>
+                        
+                        <!-- <hr>
+
+                        <h5 class="fw-semibold mb-2">
+                            Birthday: <span class="fs-3 text-success">${data.students_birthday_today.map(student => student.first_name + student.last_name).join(', ')} 🎉</span>
+                        </h5> -->
+
+                    `);
+
+                console.log(data); // Log the data to the console for debugging
+            },
+            error: function (xhr, status, error) {
+                $('#stats-result').html(`<p class="text-danger">Error: ${error}</p>`);
+            }
+        });
+    });
+
+</script>
 
 {% endblock %}
