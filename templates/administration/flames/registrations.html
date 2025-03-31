@@ -337,12 +337,12 @@
     /* Fix table stripes in dark mode */
     table.dataTable.stripe tbody tr.odd,
     table.dataTable.display tbody tr.odd {
-        background-color: #2d2d2d;
+        background-color: #050505;
     }
 
     table.dataTable.stripe tbody tr.even,
     table.dataTable.display tbody tr.even {
-        background-color: #363636;
+        background-color: #000000;
     }
 
     /* Fix checkbox and radio button colors */
@@ -464,13 +464,13 @@
     <!-- Registrations Data Table -->
     <div class="data-card">
         <div class="card-body p-4">
-            <table id="registrationsTable" class="table table-striped table-hover">
+            <table id="registrationsTable" class="table table-hover">
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Course</th>
-                        <th>Email</th>
+                        
                         <th>Phone</th>
                         <th>College</th>
                         <th>Year</th>
@@ -614,7 +614,6 @@
                             id: 1,
                             full_name: "Test Student",
                             course: { title: "Python Basics", color: "#4273FA" },
-                            email: "test@example.com",
                             contact_number: "9876543210",
                             college: "Test College",
                             year: "3",
@@ -640,7 +639,6 @@
                         return '<span class="course-badge" style="background-color: ' + data.color + '20; color: ' + data.color + ';">' + data.title + '</span>';
                     }
                 },
-                { data: "email" },
                 { data: "contact_number" },
                 { data: "college" },
                 { data: "year" },
