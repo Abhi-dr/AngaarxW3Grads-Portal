@@ -27,7 +27,8 @@ Driver Code | {{ question.title }}
         position: relative;
     }
 
-    #editor {
+    #editor-visible,
+    #editor-complete {
         position: absolute;
         left: 0;
         right: 0;
@@ -61,7 +62,6 @@ Driver Code | {{ question.title }}
 
 {% endblock %}
 
-
 {% block body %}
 
 <div class="container-fluid">
@@ -92,26 +92,11 @@ Driver Code | {{ question.title }}
     <div class="card w-100">
 
         <div class="mb-3 mt-2 mx-3">
-
             <span>Already Set For </span>
-
-            {% for driver_code in driver_codes %}
-
-            {% if driver_code == 71 %}
-            <button class="btn btn-sm btn-outline-primary">Python</button>
-            {% elif driver_code == 50 %}
-            <button class="btn btn-sm btn-outline-warning">C</button>
-            {% elif driver_code == 54 %}
-            <button class="btn btn-sm btn-outline-info">C++</button>
-            {% elif driver_code == 62 %}
-            <button class="btn btn-sm btn-outline-success">Java</button>
-            {% endif %}
-
-            {% endfor %}
+            <span id="language-buttons"></span>
 
             <a href="{% url 'test_code' question.slug %}" class="btn btn-info float-end mx-3">TEST CODE NOW</a>
         </div>
-
 
         <div class="card-body p-4">
             <form method="post">
@@ -126,13 +111,29 @@ Driver Code | {{ question.title }}
                     <option value="54">C++</option>
                 </select>
 
-                <label for="code" class="mt-3 mb-n2">Driver Code:</label><br>
-
-                <div class="editor-container">
-                    <div id="editor"></div>
+                <!-- Toggle Switch for Admin -->
+                <div class="badge bg-dark d-inline-flex float-end m-2">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input " type="checkbox" id="toggleCompleteCode">
+                        <label class="form-check-label text-success mt-1" for="toggleCompleteCode">Show Complete Driver
+                            Code</label>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn btn-dark w-100">Submit Driver Code</button>
+
+
+                <label for="visible_code" class="mt-3 mb-n2">Visible Driver Code:</label><br>
+                <div class="editor-container">
+                    <div id="editor-visible"></div>
+                </div>
+
+                <label for="complete_code" class="mt-3 mb-n2">Complete Driver Code:</label><br>
+                <div class="editor-container">
+                    <div id="editor-complete"></div>
+                </div>
+
+                <button type="submit" class="btn btn-dark w-100" id="driver-code-submit-btn">Submit Driver Code</button>
+
             </form>
 
         </div>
@@ -145,34 +146,93 @@ Driver Code | {{ question.title }}
 <script>
     $(document).ready(function () {
 
+        const submitBtn = document.getElementById("driver-code-submit-btn");
 
-        const editor = ace.edit("editor");
+        // =================== SHOW COMPLETE DRIVER CODE SWITCH ===================
+
+        const toggleCompleteCode = document.getElementById("toggleCompleteCode");
+        const showCompleteCode = "{{ question.show_complete_driver_code }}";
+        if (showCompleteCode == "True") {
+            toggleCompleteCode.checked = true;
+        } else {
+            toggleCompleteCode.checked = false;
+        }
+
+        // ========================== ACE EDITOR =================================
+
+        const editorVisible = ace.edit("editor-visible");
+        const editorComplete = ace.edit("editor-complete");
 
         // Set default code for each language
-        const driverCodes = {
-            71: "{% if driver_codes.71 %}{{ driver_codes.71|escapejs }}{% else %}def solution(n):\n\t# Write your code here...\n\n\n# DO NOT MAKE CHANGES IN THIS\nif __name__ == '__main__':\n\tt = int(input())\n\t\n\twhile t > 0:\n\t\t# Modify according to the inputs\n\t\tn = int(input())\n\t\tresult = solution(n)\n\t\tprint(result)\n\t\tt -= 1{% endif %}",
-            50: "{% if driver_codes.50 %}{{ driver_codes.50|escapejs }}{% else %}#include <stdio.h>\n\n// Write the function here...\nvoid solution(int n) {\n\t// Your code here...\n}\n\n// Driver code starts here... DO NOT CHANGE THIS\nint main() {\n\tint t;\n\tscanf(\"%d\", &t);\n\t\n\twhile (t-- > 0) {\n\t\tint n;\n\t\tscanf(\"%d\", &n);\n\t\t\n\t\t// Make changes accordingly\n\t\tsolution(n);\n\t}\n\t\n\treturn 0;\n}{% endif %}",
-            54: "{% if driver_codes.54 %}{{ driver_codes.54|escapejs }}{% else %}// Set the driver code now{% endif %}",
-            62: "{% if driver_codes.62 %}{{ driver_codes.62|escapejs }}{% else %}import java.io.*;\nimport java.util.*;\n\nclass Solution {\n\t// Write the function here...\n}\n\n\n// Driver code starts here... DO NOT CHANGE THIS\nclass Main {\n\tpublic static void main(String args[]) throws IOException {\n\t\tBufferedReader read = new BufferedReader(new InputStreamReader(System.in));\n\t\tint t = Integer.parseInt(read.readLine());\n\t\twhile (t-- > 0) {\n\t\t\tint n = Integer.parseInt(read.readLine().trim());\n\n\t\t\tSolution ob = new Solution();\n\t\t\t\n\t\t\t// Make changes accordingly\n\t\t\tSystem.out.println();\n\t\t}\n\t}\n}{% endif %}"
+        var driverCodes = JSON.parse('{{ driver_codes|escapejs }}');
+
+        // Language Mapping
+        const languageMap = {
+            71: { name: "Python", class: "btn-outline-primary" },
+            50: { name: "C", class: "btn-outline-warning" },
+            54: { name: "C++", class: "btn-outline-info" },
+            62: { name: "Java", class: "btn-outline-success" }
         };
+
+        const languageButtonsContainer = $("#language-buttons");
+
+        // Clear existing content
+        languageButtonsContainer.html("");
+
+        // Loop through driver codes and create buttons dynamically
+        Object.keys(driverCodes).forEach(driver_code => {
+            if (languageMap[driver_code]) {
+                const { name, class: btnClass } = languageMap[driver_code];
+                const button = `<button class="btn btn-sm mx-1 ${btnClass}">${name}</button>`;
+                languageButtonsContainer.append(button);
+            }
+        });
+
 
         // Set initial code based on selected language
         function setEditorContent(languageId) {
-            const code = driverCodes[languageId];
-            editor.setValue(code, -1); // Set the code in the editor
+            const defaultCodes = {
+                71: `# DEFULT CODE... THIS CODE IS NOT SET YET\n\n\ndef solution(n):\n\t# Write your code here...\n\n\n# DO NOT MAKE CHANGES IN THIS\nif __name__ == '__main__':\n\tt = int(input())\n\t\n\twhile t > 0:\n\t\t# Modify according to the inputs\n\t\tn = int(input())\n\t\tresult = solution(n)\n\t\tprint(result)\n\t\tt -= 1`,
+
+                50: `// DEFULT CODE... THIS CODE IS NOT SET YET\n\n\n#include <stdio.h>\n\n// Write the function here...\nvoid solution(int n) {\n\t// Your code here...\n}\n\n// Driver code starts here... DO NOT CHANGE THIS\nint main() {\n\tint t;\n\tscanf("%d", &t);\n\t\n\twhile (t-- > 0) {\n\t\tint n;\n\tscanf("%d", &n);\n\t\t\n\t\t// Make changes accordingly\n\t\tsolution(n);\n\t}\n\t\n\treturn 0;\n}`,
+
+                54: `// Set the driver code now`,
+
+                62: `// DEFULT CODE... THIS CODE IS NOT SET YET\n\n\nimport java.io.*;\nimport java.util.*;\n\nclass Solution {\n\t// Write the function here...\n}\n\n\n// Driver code starts here... DO NOT CHANGE THIS\nclass Main {\n\tpublic static void main(String args[]) throws IOException {\n\t\tBufferedReader read = new BufferedReader(new InputStreamReader(System.in));\n\t\tint t = Integer.parseInt(read.readLine());\n\t\twhile (t-- > 0) {\n\t\t\tint n = Integer.parseInt(read.readLine().trim());\n\n\t\t\tSolution ob = new Solution();\n\t\t\t\n\t\t\t// Make changes accordingly\n\t\t\tSystem.out.println();\n\t\t}\n\t}\n}`
+            };
+
+            // Get the driver code if available, else fallback to default
+            const visibleCode = driverCodes[languageId]?.visible || defaultCodes[languageId] || "// Default Code";
+            const completeCode = driverCodes[languageId]?.complete || defaultCodes[languageId] || "// Default Code";
+
+            // Set the editor content
+            editorVisible.setValue(visibleCode, -1);
+            editorComplete.setValue(completeCode, -1);
         }
+
+
 
         let theme = localStorage.getItem("theme");
         if (theme == "dark") {
-            editor.setTheme("ace/theme/twilight");
+            editorVisible.setTheme("ace/theme/twilight");
+            editorComplete.setTheme("ace/theme/twilight");
         } else {
-            editor.setTheme("ace/theme/chrome");
+            editorVisible.setTheme("ace/theme/chrome");
+            editorComplete.setTheme("ace/theme/chrome");
         }
 
         let selectedLanguage = $("#language").val();
 
-        editor.session.setMode("ace/mode/java");
-        editor.setOptions({
+        editorVisible.session.setMode("ace/mode/java");
+        editorComplete.session.setMode("ace/mode/java");
+        editorVisible.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            cursorStyle: "smooth",
+            enableEmmet: true,
+        });
+        editorComplete.setOptions({
             enableBasicAutocompletion: true,
             enableSnippets: true,
             enableLiveAutocompletion: true,
@@ -184,11 +244,14 @@ Driver Code | {{ question.title }}
         $("#language").change(function () {
             let selectedLanguage = $(this).val();
             if (selectedLanguage == 71) {
-                editor.session.setMode("ace/mode/python");
+                editorVisible.session.setMode("ace/mode/python");
+                editorComplete.session.setMode("ace/mode/python");
             } else if (selectedLanguage == 50 || selectedLanguage == 54) {
-                editor.session.setMode("ace/mode/c_cpp");
+                editorVisible.session.setMode("ace/mode/c_cpp");
+                editorComplete.session.setMode("ace/mode/c_cpp");
             } else if (selectedLanguage == 62) {
-                editor.session.setMode("ace/mode/java");
+                editorVisible.session.setMode("ace/mode/java");
+                editorComplete.session.setMode("ace/mode/java");
             }
         });
 
@@ -208,7 +271,8 @@ Driver Code | {{ question.title }}
         // Form submission logic
         $("form").submit(function (event) {
 
-            console.log("Entered in the form submission");
+            submitBtn.disabled = true; // Disable the submit button
+            submitBtn.innerHTML = "Submitting..."; // Change the submit button text
 
             if (isSubmitting) {
                 return false;  // If already submitting, exit and prevent further submissions
@@ -219,7 +283,10 @@ Driver Code | {{ question.title }}
             isSubmitting = true;  // Set the flag to true, indicating form is being submitted
 
             const languageId = $("#language").val();
-            const driverCode = editor.getValue();
+            const visibleDriverCode = editorVisible.getValue();
+            const completeDriverCode = editorComplete.getValue();
+            const showCompleteCode = $("#toggleCompleteCode").is(":checked");  // Get checkbox value
+
 
             $.ajax({
                 url: "{% url 'driver_code' slug=question.slug %}",
@@ -227,7 +294,10 @@ Driver Code | {{ question.title }}
                 data: {
                     csrfmiddlewaretoken: "{{ csrf_token }}",
                     language_id: languageId,
-                    code: driverCode
+                    visible_driver_code: visibleDriverCode,
+                    complete_driver_code: completeDriverCode,
+                    show_complete_code: showCompleteCode
+
                 },
                 success: function (response) {
                     if (response.success) {
@@ -236,13 +306,16 @@ Driver Code | {{ question.title }}
                         alert(response.message); // Or you can display it in a dedicated message div
 
                         // Optionally update the editor with the new driver code
-                        editor.setValue(driverCode, -1);  // This will set the editor content to the new driver code
+                        editorVisible.setValue(visibleDriverCode, -1);  // This will set the editor content to the new visible driver code
+                        editorComplete.setValue(completeDriverCode, -1);  // This will set the editor content to the new complete driver code
                     } else {
                         // Show the error message
                         console.log("Error: ", response.message);
                         alert(response.message); // Or you can display it in a dedicated message div
                     }
                     isSubmitting = false; // Reset the flag after completion
+                    submitBtn.disabled = false; // Enable the submit button
+                    submitBtn.innerHTML = "Submit Driver Code"; // Reset the submit button text
                 },
                 error: function (xhr, status, error) {
                     console.log("Error: ", error);

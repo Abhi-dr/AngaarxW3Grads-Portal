@@ -5,122 +5,534 @@
 Article | {{ article.title }}
 {% endblock %}
 
-
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
     body {
         background-color: #090909;
         color: white;
     }
-
-    .responsive-container-block {
-        min-height: 75px;
-        height: fit-content;
-        width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        margin-top: 0px;
-        margin-right: auto;
-        margin-bottom: 0px;
-        margin-left: auto;
-        justify-content: flex-start;
-    }
-
-    .container-block {
-        min-height: 75px;
-        height: fit-content;
-        width: 100%;
-        padding-top: 8%;
-        padding-right: 10px;
-        padding-bottom: 10px;
-        padding-left: 10px;
-        display: block;
-    }
-
-    .responsive-cell-block {
-        min-height: 75px;
-    }
-
-    .container {
+    
+    
+    /* Main content styles */
+    .main-container {
         max-width: 1380px;
-        margin-right: auto;
-        margin-left: auto;
-        padding-right: 30px;
-        padding-left: 30px;
+        padding: 0 30px;
+        padding-top: 8%;
     }
-
-
-
-    .card {
-        background-color: #171A1FFF;
-        color: white;
-        border: none;
+    
+    .article-header {
         display: flex;
-        flex-direction: row;
+        justify-content: space-between;
         align-items: center;
-        padding: 10px;
-        width: 95%;
-        min-height: 30vh;
-        max-height: 30vh;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
-
-    .card img {
-        width: 50%;
-        max-width: 50%;
-        height: 25vh;
-        max-height: 25vh;
-        object-fit: cover;
-        border-radius: 5px;
-        margin-left: 15px;
+    
+    .article-title-section { flex: 1; }
+    
+    .article-meta {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
     }
-
-    .card-body {
-        padding: 5px;
-        flex: 1;
-    }
-
-    .btn-custom {
-        background-color: transparent;
-        border: 1px solid rgb(44, 212, 18);
-        color: rgb(53, 165, 35);
-        padding: 5px 12px;
-        border-radius: 6px;
-        font-size: 14px;
-        transition: 0.3s;
-    }
-
-    .btn-custom:hover {
-        background-color: rgb(44, 212, 18);
-        color: white;
-    }
+    
     .date {
         color: #999;
-        font-size: 0.9em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .date i { color: #666; }
+    
+    /* Like button styles */
+    .like-button {
+        background: transparent;
+        border: 1px solid rgba(255, 96, 38, 0.2);
+        background: rgba(255, 96, 38, 0.1);
+        color: #ff6026;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 1.1rem;
+        padding: 8px 16px;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .like-button:hover:not(:disabled) {
+        transform: scale(1.05);
+        background: rgba(255, 96, 38, 0.2);
+    }
+    
+    .like-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    
+    .like-button.liked {
+        background: rgba(255, 96, 38, 0.3);
+        border-color: rgba(255, 96, 38, 0.4);
+    }
+    
+    .like-button i {
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+    }
+    
+    .like-button:hover:not(:disabled) i { transform: scale(1.2); }
+    
+    .like-button.liked i {
+        color: #ff6026;
+        text-shadow: 0 0 10px rgba(255, 96, 38, 0.5);
+    }
+    
+    .like-count {
+        color: #e0e0e0;
+        font-weight: 500;
+    }
+    
+    /* Login prompt */
+    .blur-overlay {
+        background-color: #1f1f1f;
+        padding: 1%;
+        margin-bottom: 2%;
+        border-radius: 13px;
+        width: fit-content;
+    }
+    
+    .interesting-txt { font-size: 20px; }
+    
+    /* Comments section */
+    .comments-section {
+        margin-top: 50px;
+        padding: 30px;
+        background-color: #171A1FFF;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 96, 38, 0.1);
+    }
+    
+    .comments-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid rgba(255, 96, 38, 0.2);
+        padding-bottom: 15px;
+    }
+    
+    .comments-header h3 {
+        font-size: 1.8rem;
+        color: #fff;
+        margin: 0;
+    }
+    
+    .comments-count {
+        background: rgba(255, 96, 38, 0.1);
+        color: rgb(44, 212, 18);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+    }
+    
+    .comment-form {
+        background: rgba(9, 9, 9, 0.5);
+        padding: 25px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .comment-form textarea {
+        background-color: #0d0d0d;
+        border: 1px solid #333;
+        color: white;
+        border-radius: 8px;
+        padding: 15px;
+        font-size: 1rem;
+        resize: vertical;
+        min-height: 100px;
+    }
+    
+    .comment-form textarea:focus {
+        background-color: #111;
+        border-color: rgb(44, 212, 18);
+        box-shadow: 0 0 0 2px rgba(44, 212, 18, 0.2);
+        outline: none;
+    }
+    
+    .comment-form-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 15px;
+    }
+    
+    .comment-guidelines {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    /* Comment list */
+    .comment-list {
+        margin-top: 20px;
+        max-height: 600px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .comment-list.expanded {
+        max-height: none;
+        overflow: visible;
+    }
+    
+    .comment-list-overlay {
+        display: none;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 150px;
+        background: linear-gradient(to bottom, rgba(23, 26, 31, 0), rgba(23, 26, 31, 1));
+        pointer-events: none;
+    }
+    
+    .comment {
+        background: rgba(23, 26, 31, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .comment-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgb(44, 212, 18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 1.2rem;
+        text-transform: uppercase;
+    }
+    
+    .comment-info {
+        margin-left: 15px;
+    }
+    
+    .comment-author {
+        font-weight: bold;
+        color: rgb(44, 212, 18);
+    }
+    
+    .comment-date {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    
+    .comment-content {
+        color: #e0e0e0;
+        line-height: 1.6;
+    }
+    
+    .load-more-comments {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+    }
+    
+    .load-more-btn {
+        background: rgba(44, 212, 18, 0.1);
+        color: rgb(44, 212, 18);
+        border: 1px solid rgba(44, 212, 18, 0.3);
+        padding: 10px 25px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .load-more-btn:hover {
+        background: rgba(44, 212, 18, 0.2);
+    }
+    
+    /* Media queries */
+    @media (max-width: 768px) {
+        .main-container {
+            padding-top: 15%;
+        }
+        
+        .article-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .article-meta {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .blur-overlay { font-size: small; }
+        .interesting-txt { font-size: 12px; }
     }
 </style>
-
 {% endblock %}
 
 {% block body %}
-
-<div class="container-block container">
-    <div class="container mt-2">
-        <div class="row g-4 mt-3 mb-4">
-
-            <div class="article-header">
-                <h1 class="fw-bold">{{ article.title }}</h1>
-                <p class="date">{{ article.created_at }}</p>
+<div class="container-block main-container">
+    <div class="article-header">
+        <div class="article-title-section">
+            <h1 class="fw-bold">{{ article.title }}</h1>
+        </div>
+        <div class="article-meta">
+            <div class="date">
+                <i class="far fa-calendar-alt"></i>
+                {{ article.created_at|date:"F j, Y" }}
             </div>
-    
-            <div class="article-content">
-                {{ article.content|safe }}
-            </div>
-            
+            <button class="like-button {% if user.is_authenticated and user in article.likes.all %}liked{% endif %}" 
+                    data-article-id="{{ article.id }}" 
+                    {% if not user.is_authenticated %}disabled title="Please login to like articles"{% endif %}>
+                <i class="fas fa-fire"></i>
+                <span class="like-count">{{ article.total_likes }}</span>
+            </button>
         </div>
     </div>
 
+    {% if not user.is_authenticated %}
+    <div class="blur-overlay">
+        <p class="interesting-txt">Want to read the full article? <a href="{% url 'login' %}?next={{ request.path }}" class="text-success">Login</a> to continue reading.</p>
+    </div>
+    {% endif %}
+
+    <div class="article-content">
+        {{ preview_content|safe }}
+    </div>
+
+    <div class="comments-section mb-4">
+        <div class="comments-header">
+            <h3>Comments</h3>
+            <span class="comments-count" id="comments-count">{{ comments.count }} Comments</span>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div class="comment-form">
+            <form id="comment-form">
+                {% csrf_token %}
+                <textarea name="content" id="comment-content" placeholder="Write your comment here..." class="form-control text-white"></textarea>
+                <div class="comment-form-footer">
+                    <span class="comment-guidelines">Be respectful and constructive!</span>
+                    <button type="submit" class="btn btn-outline-warning" id="submit-comment">Post Comment</button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="comment-form">
+            <p class="text-center mb-0">
+                Please <a href="{% url 'login' %}?next={{ request.path }}" class="text-success">login</a> to post comments.
+            </p>
+        </div>
+        {% endif %}
+
+        <div class="comment-list" id="comment-list">
+
+            {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-header">
+                    <div class="user-avatar">
+                        {{ comment.user.username.0 }}
+                    </div>
+                    <div class="comment-info">
+                        <div class="comment-author">{{ comment.user.username }}</div>
+                        <div class="comment-date">{{ comment.created_at|date:"F j, Y" }}</div>
+                    </div>
+                </div>
+                <div class="comment-content">
+                    {{ comment.content }}
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div class="comment-list-overlay" id="comment-list-overlay"></div>
+        </div>
+        
+        <div class="load-more-comments" id="load-more-comments">
+            <button class="load-more-btn" id="load-more-btn">Show More Comments</button>
+        </div>
+    </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Like button functionality
+    const likeButton = document.querySelector('.like-button');
+    if (likeButton && !likeButton.disabled) {
+        likeButton.addEventListener('click', function() {
+            const articleId = this.dataset.articleId;
+            const likeCount = this.querySelector('.like-count');
+            
+            fetch('{% url "like_article" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `article_id=${articleId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    this.classList.add('liked');
+                } else {
+                    this.classList.remove('liked');
+                }
+                likeCount.textContent = data.total_likes;
+            });
+        });
+    }
+    
+    // Comment form AJAX submission
+    const commentForm = document.getElementById('comment-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const content = document.getElementById('comment-content').value;
+            if (!content.trim()) return;
+            
+            const submitButton = document.getElementById('submit-comment');
+            submitButton.disabled = true;
+            submitButton.innerHTML = 'Posting...';
+            
+            fetch('{% url "post_comment" article.id %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: `content=${encodeURIComponent(content)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Clear textarea
+                    document.getElementById('comment-content').value = '';
+                    
+                    // Add new comment to list
+                    addNewComment(data.comment);
+                    
+                    // Update comment count
+                    document.getElementById('comments-count').textContent = 
+                        `${data.total_comments} Comments`;
+                        
+                    // Check if we need to show "read more" button
+                    checkCommentListHeight();
+                }
+                
+                // Reset button
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Post Comment';
+            })
+            .catch(error => {
+                console.error('Error posting comment:', error);
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Post Comment';
+            });
+        });
+    }
+    
+    // Helper function to add a new comment to the DOM
+    function addNewComment(comment) {
+        const commentList = document.getElementById('comment-list');
+        
+        const commentDiv = document.createElement('div');
+        commentDiv.className = 'comment';
+        commentDiv.innerHTML = `
+            <div class="comment-header">
+                <div class="user-avatar">
+                    ${comment.author_initial}
+                </div>
+                <div class="comment-info">
+                    <div class="comment-author">${comment.author}</div>
+                    <div class="comment-date">${comment.created_at}</div>
+                </div>
+            </div>
+            <div class="comment-content">
+                ${comment.content}
+            </div>
+        `;
+        
+        // Add with animation
+        commentDiv.style.opacity = '0';
+        commentList.insertBefore(commentDiv, commentList.firstChild);
+        
+        // Trigger reflow
+        void commentDiv.offsetWidth;
+        
+        // Fade in
+        commentDiv.style.transition = 'opacity 0.5s ease';
+        commentDiv.style.opacity = '1';
+    }
+    
+    // Read More for comments functionality
+    function checkCommentListHeight() {
+        const commentList = document.getElementById('comment-list');
+        const loadMoreSection = document.getElementById('load-more-comments');
+        const overlay = document.getElementById('comment-list-overlay');
+        
+        if (commentList.scrollHeight > 400) {
+            loadMoreSection.style.display = 'block';
+            overlay.style.display = 'block';
+        } else {
+            loadMoreSection.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+    }
+    
+    // Load more comments button
+    document.getElementById('load-more-btn')?.addEventListener('click', function() {
+        const commentList = document.getElementById('comment-list');
+        const overlay = document.getElementById('comment-list-overlay');
+        const loadMoreSection = document.getElementById('load-more-comments');
+        
+        commentList.classList.add('expanded');
+        overlay.style.display = 'none';
+        loadMoreSection.style.display = 'none';
+    });
+    
+    // Check on page load if we need the "read more" button
+    checkCommentListHeight();
+    
+    // Function to get CSRF token from cookies
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+});
+</script>
 {% endblock %}

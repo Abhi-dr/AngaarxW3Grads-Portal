@@ -7,18 +7,21 @@ from django.db.models import Q
 from accounts.models import Administrator, Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback
 from practice.models import Sheet, Submission, Question
+from home.models import FlamesRegistration
 from angaar_hai.custom_decorators import admin_required
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 import json
 from django.utils import timezone
-
-
 import datetime
-
 from django.http import JsonResponse
 import math
+
+from django.utils.timezone import now
+from datetime import timedelta
+
+from practice.models import Streak
 
 # ======================================== ADMINISTRATION ======================================
 
@@ -585,3 +588,105 @@ def edit_notification(request, id):
     return render(request, "administration/edit_notification.html", parameters)
 
 
+# ========================================= VIEW STUDENT PROFILE =====================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def view_student_profile(request, id):
+    parameters = {
+        "student": Student.objects.get(id=id)
+    }
+    return render(request, "administration/view_student_profile.html", parameters)
+
+@login_required(login_url='login')
+def fetch_view_student_profile(request,id):
+
+    student = Student.objects.get(id=id)
+    streak = Streak.objects.filter(user=student).first()
+    submissions = Submission.objects.filter(user=student).order_by("-id")[:10]
+    enrolled_batches = student.batches.all().order_by("-id")
+
+    # parameters = {
+    #     "student": student,
+    #     "streak": streak,
+    #     "submissions": submissions,
+    #     "enrolled_batches": enrolled_batches
+    # }
+
+    data = {
+            "id": student.id,
+            "first_name": student.first_name,
+            "last_name": student.last_name,
+            "username": student.username,
+            "email": student.email,
+            "college": student.college,
+            "linkedin_id": student.linkedin_id,
+            "github_id": student.github_id,
+            "mobile_number": student.mobile_number,
+            "sparks": student.coins,
+            "is_active": student.is_active,
+            "profile_pic": student.profile_pic.url if student.profile_pic else None,
+            "dob": student.dob.strftime('%d-%m-%Y') if student.dob else None,
+            "streak": {
+                "current_streak": streak.current_streak if streak else 0,
+                "last_submission_date": streak.last_submission_date.strftime('%d-%m-%Y') if streak and streak.last_submission_date else None,
+            },
+            "recent_submissions": [
+                {
+                    "id": submission.id,
+                    "question": submission.question.title,
+                    "score": submission.score,
+                    "submitted_at": submission.submitted_at.strftime('%d-%m-%Y %H:%M:%S'),
+                    "status": submission.status,
+                    "code": submission.code
+                }
+                for submission in submissions
+            ],
+            "enrolled_batches": [
+                {
+                    "id": batch.id,
+                    "slug": batch.slug
+                }
+                for batch in enrolled_batches
+            ] if enrolled_batches else {},
+    }
+    
+    return JsonResponse({"student": data})
+
+
+def get_user_stats(request):
+    if request.method == "GET":
+        # Get the start and end of today
+        today_start = now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timedelta(days=1)
+
+        # Query for users registered today
+        users_registered_today = Student.objects.filter(date_joined__gte=today_start, date_joined__lt=today_end).count()
+
+        # Query for users who logged in today
+        users_logged_in_today = Student.objects.filter(last_login__gte=today_start, last_login__lt=today_end).count()
+        
+        # Query for students who has their birthday today
+        students_birthday_today = Student.objects.filter(dob__day=today_start.day, dob__month=today_start.month)
+        
+        # Query for total flames registrations
+        total_flames_registrations = FlamesRegistration.objects.all().count()
+        flames_registered_today = FlamesRegistration.objects.filter(created_at__gte=today_start, created_at__lt=today_end).count()
+
+        # Return the data as JSON
+        return JsonResponse({
+            'users_registered_today': users_registered_today,
+            'users_logged_in_today': users_logged_in_today,
+            "total_flames_registrations": total_flames_registrations,
+            "flames_registered_today": flames_registered_today,
+            'students_birthday_today': [
+                {
+                    'first_name': student.first_name,
+                    'last_name': student.last_name,
+                }
+                for student in students_birthday_today
+            ]
+        })
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=400)

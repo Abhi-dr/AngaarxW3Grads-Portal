@@ -1,9 +1,11 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis
-
+from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views
 
 urlpatterns = [
     path("", views.index, name="administration"),
+    
+    path("view_student_profile/<int:id>", views.view_student_profile, name="administration_view_student_profile"),
+    path("fetch_view_student_profile/<int:id>", views.fetch_view_student_profile, name="fetch_view_student_profile"),
     
     # ========================= DATA WORK ============================
     
@@ -72,6 +74,16 @@ urlpatterns = [
     
     path('generate-description/', question_generator.generate_description, name='generate_description'),
     
+    # path('upload/image', views.upload_image, name='upload_image'),
+
+    # Achievement Management URLs
+    path('achievements/', achievers.achievements_view, name='achievements'),
+    path('achievements/api/get', achievers.get_achievements, name='get_achievements'),
+    path('achievements/api/create', achievers.create_achievement, name='create_achievement'),
+    path('achievements/api/<int:achievement_id>', achievers.get_achievement, name='get_achievement'),
+    path('achievements/api/<int:achievement_id>/update', achievers.update_achievement, name='update_achievement'),
+    path('achievements/api/<int:achievement_id>/delete', achievers.delete_achievement, name='delete_achievement'),
+
 ]
 
 # ========================= BATCH WORK ==========================
@@ -135,6 +147,9 @@ urlpatterns += [
     path("make_duplicate/<int:sheet_id>/<int:question_id>/", sheet_views.make_duplicate, name="administrator_make_duplicate"),
     path("add_new_question/<slug:slug>/", sheet_views.add_new_question, name="administrator_add_new_question"),
     
+    path("add_question_json/<slug:slug>/", sheet_views.add_question_json, name="administrator_add_question_json"),
+    path("reorder/<slug:slug>/", sheet_views.reorder, name="administrator_reorder"),
+    
     path("sheet_leaderboard/<slug:slug>", sheet_views.leaderboard, name="administrator_leaderboard"),
     path("sheet_leaderboard_api/<slug:slug>", sheet_views.sheet_leaderboard, name="administrator_sheet_leaderboard"),
     
@@ -163,11 +178,34 @@ urlpatterns += [
     path("fetch_all_articles/", article_views.fetch_all_articles, name="administrator_fetch_all_articles"),
     
     path("delete_article/<int:id>/", article_views.delete_article, name="administrator_delete_article"),
+    path("edit_article/<int:id>/", article_views.edit_article, name="administrator_edit_article"),
     
 ]
 
 urlpatterns += [
     path("fetch_all_sheets/", sheet_apis.fetch_all_sheets, name="staff_fetch_all_sheets"),
     path('api/submissions/<slug:slug>/', sheet_apis.fetch_question_submissions, name='fetch_question_submissions'),
+
+]
+
+# Flames Management 
+urlpatterns += [
+    path("flames/courses/", flames_views.flames_courses, name="admin_flames_courses"),
+    path("flames/registrations/", flames_views.flames_registrations, name="admin_flames_registrations"),
+    
+    path("flames/registrations/ajax/", flames_views.admin_registrations_ajax, name="admin_registrations_ajax"),
+    
+    path("flames/course/<int:course_id>/", flames_views.admin_course_detail, name="admin_course_detail"),
+    path("flames/course/add/", flames_views.admin_add_course, name="admin_add_course"),
+    path("flames/course/edit/<int:course_id>/", flames_views.admin_edit_course, name="admin_edit_course"),
+    path("flames/toggle-course-status/", flames_views.admin_toggle_course_status, name="admin_toggle_course_status"),
+    path("flames/registration-details/", flames_views.admin_registration_details, name="admin_registration_details"),
+    path("flames/update-registration-status/", flames_views.admin_update_registration_status, name="admin_update_registration_status"),
+    path("flames/update-registration-notes/", flames_views.admin_update_registration_notes, name="admin_update_registration_notes"),
+    path("flames/add-testimonial/", flames_views.admin_add_testimonial, name="admin_add_testimonial"),
+]
+
+urlpatterns += [
+    path('get-user-stats/', views.get_user_stats, name='get_user_stats'),
 
 ]

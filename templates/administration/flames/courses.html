@@ -1,0 +1,616 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}Manage FLAMES Courses | Angaar{% endblock %}
+
+{% block flames_active %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .course-card {
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: #363636;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .course-header {
+        padding: 15px;
+        border-bottom: 1px solid #6e6e6e;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .course-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+        color: #f0f0f0;
+        display: flex;
+        align-items: center;
+    }
+
+    .course-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        margin-right: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 20px;
+    }
+
+    .course-body {
+        padding: 15px;
+    }
+
+    .course-info {
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .course-info-label {
+        font-size: 12px;
+        color: #b0b0b0;
+        margin-bottom: 3px;
+    }
+
+    .course-info-value {
+        font-size: 14px;
+        color: #f0f0f0;
+        font-weight: 500;
+    }
+
+    .course-status {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 30px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background-color: rgba(56, 203, 137, 0.1);
+        color: #38cb89;
+    }
+
+    .status-inactive {
+        background-color: rgba(242, 78, 30, 0.1);
+        color: #f24e1e;
+    }
+
+    .course-actions {
+        display: flex;
+        margin-top: 15px;
+        gap: 8px;
+    }
+
+    .price-container {
+        display: flex;
+        align-items: center;
+        margin-top: 8px;
+    }
+
+    .price-original {
+        text-decoration: line-through;
+        color: #a0a0a0;
+        margin-right: 10px;
+        font-size: 13px;
+    }
+
+    .price-discount {
+        font-weight: 600;
+        color: #38cb89;
+        font-size: 16px;
+    }
+
+    .price-regular {
+        font-weight: 600;
+        color: #4273FA;
+        font-size: 16px;
+    }
+
+    .btn-add-course {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #4273FA;
+        color: rgb(109, 109, 109);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        box-shadow: 0 4px 15px rgba(66, 115, 250, 0.3);
+        transition: all 0.3s ease;
+        z-index: 999;
+    }
+
+    .btn-add-course:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(66, 115, 250, 0.4);
+    }
+
+    .course-stats {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .stat-card {
+        background-color: rgb(73, 72, 72);
+        border-radius: 10px;
+        padding: 20px;
+        flex: 1;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: rgb(71, 71, 71);
+        margin-right: 15px;
+    }
+
+    .stat-total {
+        background-color: rgba(66, 115, 250, 0.1);
+        color: #4273FA;
+    }
+
+    .stat-active {
+        background-color: rgba(56, 203, 137, 0.1);
+        color: #38cb89;
+    }
+
+    .stat-reg {
+        background-color: rgba(252, 190, 45, 0.1);
+        color: #fcbe2d;
+    }
+
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #f0f0f0;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #b0b0b0;
+    }
+
+    .add-course-form .form-control {
+        border-radius: 8px;
+        padding: 12px 15px;
+        background-color: #3a3a3a;
+        color: #f0f0f0;
+        border: 1px solid #505050;
+    }
+
+    .add-course-form label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        color: #e0e0e0;
+    }
+
+    .filter-section {
+        background: rgb(55, 55, 55);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .filter-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #e0e0e0;
+    }
+
+    .filter-row {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .filter-item {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .filter-item select,
+    .filter-item input {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #626262;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .course-stats {
+            flex-direction: column;
+            gap: 10px;
+        }
+    }
+
+    .course-card .course-icon {
+        background-color: {{course.icon_color}}
+        }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4">
+    <div class="card">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h3 class="heading">FLAMES Courses</h3>
+            <div class="export-buttons float-end">
+                <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                    <i class="fas fa-plus me-2"></i>Add New Course
+                </button>
+                <a href="{% url 'admin_flames_registrations' %}" class="btn btn-primary mx-1">
+                    Total Registrations
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="course-stats">
+        <div class="stat-card">
+            <div class="stat-icon stat-total">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total_courses }}</div>
+                <div class="stat-label">Total Courses</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-active">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ active_courses }}</div>
+                <div class="stat-label">Active Courses</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-reg">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total_registrations }}</div>
+                <div class="stat-label">Total Registrations</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <!-- <div class="filter-section">
+        <h4 class="filter-title">Filter Courses</h4>
+        <div class="filter-row">
+            <div class="filter-item">
+                <select id="statusFilter" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <input type="text" id="searchFilter" class="form-control" placeholder="Search by name...">
+            </div>
+        </div>
+    </div> -->
+
+    <!-- Courses Grid -->
+    <div class="row" id="coursesContainer">
+        {% for course in courses %}
+        <div class="col-md-6 col-lg-4 col-xl-3 course-item" data-active="{{ course.is_active|lower }}"
+            data-title="{{ course.title|lower }}">
+            <div class="course-card">
+                <div class="course-header">
+                    <h5 class="course-title">
+                        <div class="course-icon" style="background-color: {{ course.icon_color }};">
+                            <i class="{{ course.icon_class }}"></i>
+                        </div>
+                        {{ course.title }}
+                    </h5>
+                    <span
+                        class="course-status {% if course.is_active %}status-active{% else %}status-inactive{% endif %}">
+                        {% if course.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                <div class="course-body">
+                    <p class="mb-3">{{ course.subtitle }}</p>
+
+                    <div class="course-info">
+                        <span class="course-info-label">Instructor</span>
+                        <span class="course-info-value">{{ course.instructor }}</span>
+                    </div>
+
+                    <div class="course-info">
+                        <span class="course-info-label">Price</span>
+                        <div class="price-container">
+                            {% if course.discount_price %}
+                            <span class="price-original">₹{{ course.price }}</span>
+                            <span class="price-discount">₹{{ course.discount_price }}</span>
+                            {% else %}
+                            <span class="price-regular">₹{{ course.price }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="course-info">
+                        <span class="course-info-label">Registrations</span>
+                        <span class="course-info-value">{{ course.registrations.count }}</span>
+                    </div>
+
+                    <div class="course-actions">
+                        <a href="{% url 'admin_course_detail' course.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i> View
+                        </a>
+                        <button class="btn btn-sm btn-outline-success edit-course" data-course-id="{{ course.id }}">
+                            <i class="fas fa-edit me-1"></i> Edit
+                        </button>
+                        {% if course.is_active %}
+                        <button class="btn btn-sm btn-outline-danger toggle-status" data-course-id="{{ course.id }}"
+                            data-status="active">
+                            <i class="fas fa-times-circle me-1"></i> Deactivate
+                        </button>
+                        {% else %}
+                        <button class="btn btn-sm btn-outline-success toggle-status" data-course-id="{{ course.id }}"
+                            data-status="inactive">
+                            <i class="fas fa-check-circle me-1"></i> Activate
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center py-5">
+            <div class="empty-state">
+                <i class="fas fa-book-open fa-4x text-muted mb-3"></i>
+                <h5>No Courses Found</h5>
+                <p class="text-muted">You haven't added any FLAMES courses yet.</p>
+                <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                    <i class="fas fa-plus me-2"></i>Add Your First Course
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Course Modal -->
+<div class="modal fade" id="addCourseModal" tabindex="-1" aria-labelledby="addCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCourseModalLabel">Add New Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form class="add-course-form" id="courseForm" method="post" action="{% url 'admin_add_course' %}">
+                    {% csrf_token %}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Course Title</label>
+                                <input type="text" class="form-control" id="title" name="title" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="subtitle" class="form-label">Subtitle</label>
+                                <input type="text" class="form-control" id="subtitle" name="subtitle" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="instructor" class="form-label">Instructor</label>
+                                <select class="form-select" id="instructor" name="instructor" required>
+                                    <option value="">Select Instructor</option>
+                                    {% for instructor in instructors %}
+                                    <option value="{{ instructor.id }}">{{ instructor.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="slug" class="form-label">Slug</label>
+                                <input type="text" class="form-control" id="slug" name="slug" required>
+                                <small class="text-muted">Used in URL, e.g., flames/course/your-slug</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="icon_class" class="form-label">Icon Class</label>
+                                <input type="text" class="form-control" id="icon_class" name="icon_class"
+                                    placeholder="fa-python">
+                                <small class="text-muted">Font Awesome icon class</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="color" class="form-label">Color</label>
+                                <input type="color" class="form-control" id="color" name="color" value="#ff6026">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="button_color" class="form-label">Button Color</label>
+                                <input type="text" class="form-control" id="button_color" name="button_color"
+                                    placeholder="linear-gradient(135deg, #ff6026, #ff9a56)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="price" class="form-label">Regular Price (₹)</label>
+                                <input type="number" class="form-control" id="price" name="price" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="discount_price" class="form-label">Discount Price (₹)</label>
+                                <input type="number" class="form-control" id="discount_price" name="discount_price">
+                                <small class="text-muted">Leave empty if no discount</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="what_you_will_learn" class="form-label">What You'll Learn</label>
+                        <textarea class="form-control" id="what_you_will_learn" name="what_you_will_learn" rows="4"
+                            placeholder="Enter points separated by new lines" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="roadmap" class="form-label">Course Roadmap</label>
+                        <textarea class="form-control" id="roadmap" name="roadmap" rows="4"
+                            placeholder="Enter roadmap points separated by new lines" required></textarea>
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="is_active" name="is_active" checked>
+                        <label class="form-check-label" for="is_active">
+                            Active Course
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary"
+                    onclick="document.getElementById('courseForm').submit();">Save Course</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block myjs %}
+
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        // Auto-generate slug from title
+        $('#title').on('keyup', function () {
+            var title = $(this).val();
+            var slug = title.toLowerCase()
+                .replace(/[^\w ]+/g, '')
+                .replace(/ +/g, '-');
+            $('#slug').val(slug);
+        });
+
+        // Filter functionality
+        function filterCourses() {
+            var statusFilter = $('#statusFilter').val();
+            var searchFilter = $('#searchFilter').val().toLowerCase();
+
+            $('.course-item').each(function () {
+                var status = $(this).data('active').toString();
+                var title = $(this).data('title');
+
+                var statusMatch = statusFilter === '' || status === statusFilter;
+                var searchMatch = title.includes(searchFilter);
+
+                if (statusMatch && searchMatch) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+
+        $('#statusFilter, #searchFilter').on('change keyup', filterCourses);
+
+        // Toggle course status
+        $('.toggle-status').on('click', function () {
+            var courseId = $(this).data('course-id');
+            var currentStatus = $(this).data('status');
+            var newStatus = currentStatus === 'active' ? false : true;
+
+            $.ajax({
+                url: '{% url "admin_toggle_course_status" %}',
+                type: 'POST',
+                data: {
+                    'course_id': courseId,
+                    'is_active': newStatus,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    if (response.status === 'success') {
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function () {
+                    alert('An error occurred. Please try again.');
+                }
+            });
+        });
+
+        // Edit course
+        $('.edit-course').on('click', function () {
+            var courseId = $(this).data('course-id');
+            window.location.href = '{% url "admin_edit_course" 0 %}'.replace('0', courseId);
+        });
+    });
+</script>
+{% endblock %}

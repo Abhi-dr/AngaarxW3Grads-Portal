@@ -1,780 +1,1077 @@
+{% extends "home/base.html" %}
 {% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
+{% block title %}About Us | The Angaar Batch{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>#iAmAngaari</title>
-
-    <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
-    <script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
-
-    <link rel="stylesheet" href="{% static 'css/home/css/about.css' %}">
-
-
-    <style>
-        .navbar-custom {
-            background: rgba(255, 255, 255, 0.073);
-            /* Transparent glassy effect */
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            left: 0;
-            right: 0;
-            position: fixed;
-            z-index: 999;
-            
-        }
-
-
-        /* Positioning and styling adjustments */
-
-        .navbar {
-            margin: 20px;
-            padding: 1.5%;
-        }
-
-
-        /* Styling for nav links */
-
-        .nav-link {
-            color: white;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: #f8c146;
-            /* Hover effect color */
-        }
-
-
-        button {
-            padding: 10px 25px;
-            border: 0;
-            border-radius: 15px;
-            color: #212121;
-            z-index: 1;
-            background: #e8e8e8;
-            position: relative;
-            font-weight: 1000;
-            font-size: 17px;
-            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-            transition: all 250ms;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            height: 0;
-            width: 0;
-            border-radius: 14px;
-            background-color: #212121;
-            z-index: -1;
-            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-            transition: all 250ms;
-        }
-
-        button:hover {
-            color: #ff4f0f;
-        }
-
-        button:hover::before {
-            width: 100%;
-            top: 0;
-            left: 0;
-            height: 100%;
-        }
-
-        button:active {
-            transform: scale(80%);
-        }
-
-        #register-btn {
-            padding: 10px 25px;
-            border: 0;
-            border-radius: 15px;
-            color: #212121;
-            z-index: 1;
-            background: #ff6026;
-            position: relative;
-            font-weight: 1000;
-            font-size: 17px;
-            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-            transition: all 250ms;
-            overflow: hidden;
-        }
-
-        #register-btn::before {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            height: 0;
-            width: 0;
-            border-radius: 14px;
-            background-color: #212121;
-            z-index: -1;
-            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
-            transition: all 250ms;
-        }
-
-        #register-btn:hover {
-            color: #ff4f0f;
-        }
-
-        #register-btn:hover::before {
-            width: 100%;
-            top: 0;
-            left: 0;
-            height: 100%;
-        }
-
-        #register-btn:active {
-            transform: scale(80%);
-        }
-
-
-        .navbar-toggler {
-            border-color: rgba(255, 255, 255, 0.5);
-            /* Makes the outline border white */
-        }
-
-        .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
-            /* Sets icon color to white */
-        }
-
-        .menu {
-            background-color: transparent;
-            border: 1px solid white;
-            cursor: pointer;
-            display: flex;
-            padding: 0;
-        }
-
-        .line {
-            fill: none;
-            stroke: rgb(232, 232, 232);
-            stroke-width: 6;
-            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
-                stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .line1 {
-            stroke-dasharray: 60 207;
-            stroke-width: 6;
-        }
-
-        .line2 {
-            stroke-dasharray: 60 60;
-            stroke-width: 6;
-        }
-
-        .line3 {
-            stroke-dasharray: 60 207;
-            stroke-width: 6;
-        }
-
-        .opened .line1 {
-            stroke-dasharray: 90 207;
-            stroke-dashoffset: -134;
-            stroke-width: 6;
-        }
-
-        .opened .line2 {
-            stroke-dasharray: 1 60;
-            stroke-dashoffset: -30;
-            stroke-width: 6;
-        }
-
-        .opened .line3 {
-            stroke-dasharray: 90 207;
-            stroke-dashoffset: -134;
-            stroke-width: 6;
-        }
-    </style>
+{% block css %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" />
+<script src="https://unpkg.com/unlazy@0.11.3/dist/unlazy.with-hashing.iife.js" defer init></script>
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
 
 <style>
+    /* Navbar brand size fix */
+    .navbar-brand img {
+        width: 40px;
+        height: 32px;
+    }
+
+    /* Global styles */
+    body {
+        overflow-x: hidden;
+        max-width: 100%;
+    }
+
+    /* About Section */
+    .about-section {
+        position: relative;
+        padding: 100px 0;
+        color: #fff;
+        overflow: hidden;
+        z-index: 1;
+        background-color: #0d0d0d;
+    }
+
+    .about-bg-gradient {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
+            radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
+        z-index: 0;
+    }
     
-.footer-section {
-    background: #151414;
-    position: relative;
-}
+    /* Add particle background container */
+    .about-bg-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+    }
 
-.footer-cta {
-    border-bottom: 1px solid #373636;
-}
+    .about-header {
+        text-align: center;
+        margin-bottom: 60px;
+        padding: 0 20px;
+        position: relative;
+        z-index: 1;
+    }
 
-.single-cta i {
-    color: #ff5e14;
-    font-size: 30px;
-    float: left;
-    margin-top: 8px;
-}
+    @keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+        50% {
+            background-position: 100% 50%;
+        }
+        100% {
+            background-position: 0% 50%;
+        }
+    }
 
-.cta-text {
-    padding-left: 15px;
-    display: inline-block;
-}
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
 
-.cta-text h4 {
-    color: #fff;
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 2px;
-}
+    @keyframes float {
+        0% {
+            transform: translateY(0px);
+        }
+        50% {
+            transform: translateY(-15px);
+        }
+        100% {
+            transform: translateY(0px);
+        }
+    }
 
-.cta-text span {
-    color: #757575;
-    font-size: 15px;
-}
+    .about-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        display: inline-block;
+    }
 
-.footer-content {
-    position: relative;
-    z-index: 2;
-}
+    .about-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        border-radius: 2px;
+    }
 
-.footer-pattern img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 330px;
-    background-size: cover;
-    background-position: 100% 100%;
-}
+    .about-subtitle {
+        font-size: clamp(1.1rem, 2vw, 1.3rem);
+        color: #e0e0e0;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.8;
+        animation: fadeInUp 1.2s 0.3s both;
+    }
 
-.footer-logo {
-    margin-bottom: 30px;
-}
+    /* Feature cards */
+    .feature-card {
+        background: rgba(20, 20, 20, 0.5);
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
 
-.footer-logo img {
-    max-width: 200px;
-}
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255, 96, 38, 0.1) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 
-.footer-text p {
-    margin-bottom: 14px;
-    font-size: 14px;
-    color: #7e7e7e;
-    line-height: 28px;
-}
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 96, 38, 0.3);
+    }
 
-.footer-social-icon span {
-    color: #fff;
-    display: block;
-    font-size: 20px;
-    font-weight: 700;
-    font-family: 'Poppins', sans-serif;
-    margin-bottom: 20px;
-}
+    .feature-card:hover::before {
+        opacity: 1;
+    }
 
-.footer-social-icon a {
-    color: #fff;
-    font-size: 16px;
-    margin-right: 15px;
-}
+    .feature-icon {
+        font-size: 3rem;
+        margin-bottom: 25px;
+        position: relative;
+        display: inline-block;
+    }
 
-.footer-social-icon i {
-    height: 40px;
-    width: 40px;
-    text-align: center;
-    line-height: 38px;
-    border-radius: 50%;
-}
+    .feature-icon i {
+        background: linear-gradient(45deg, #ff6026, #ff8051);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transition: all 0.5s ease;
+    }
 
-.facebook-bg {
-    background: #3B5998;
-}
+    .feature-icon::after {
+        content: '';
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 96, 38, 0.1);
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: -1;
+        transition: all 0.5s ease;
+    }
 
-.twitter-bg {
-    background: #55ACEE;
-}
+    .feature-card:hover .feature-icon::after {
+        width: 70px;
+        height: 70px;
+        background: rgba(255, 96, 38, 0.2);
+    }
 
-.google-bg {
-    background: #DD4B39;
-}
+    .feature-card:hover .feature-icon i {
+        transform: scale(1.1);
+    }
 
-.footer-widget-heading h3 {
-    color: #fff;
-    font-size: 20px;
-    font-weight: 600;
-    margin-bottom: 40px;
-    position: relative;
-}
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ff6026;
+        margin-bottom: 15px;
+        position: relative;
+        display: inline-block;
+    }
 
-.footer-widget-heading h3::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    bottom: -15px;
-    height: 2px;
-    width: 50px;
-    background: #ff5e14;
-}
+    .feature-title::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -5px;
+        left: 0;
+        background: linear-gradient(to right, #ff6026, transparent);
+        transition: width 0.5s ease;
+    }
 
-.footer-widget ul li {
-    display: inline-block;
-    float: left;
-    width: 50%;
-    margin-bottom: 12px;
-}
+    .feature-card:hover .feature-title::after {
+        width: 100%;
+    }
 
-.footer-widget ul li a:hover {
-    color: #ff5e14;
-}
+    .feature-description {
+        color: #e0e0e0;
+        line-height: 1.8;
+        font-size: 1.05rem;
+    }
 
-.footer-widget ul li a {
-    color: #878787;
-    text-transform: capitalize;
-}
+    /* Stats section */
+    .stats-section {
+        padding: 80px 0;
+        position: relative;
+        background-color: #0d0d0d;
+    }
 
-.subscribe-form {
-    position: relative;
-    overflow: hidden;
-}
+    .stats-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at center, rgba(255, 96, 38, 0.1) 0%, transparent 70%),
+            linear-gradient(135deg, rgba(255, 96, 38, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
 
-.subscribe-form input {
-    width: 100%;
-    padding: 14px 28px;
-    background: #2E2E2E;
-    border: 1px solid #2E2E2E;
-    color: #fff;
-    margin: 1%;
-}
+    .stat-card {
+        background: rgba(20, 20, 20, 0.5);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
 
-.subscribe-form button {
-    width: 99%;
-    margin-top: 1%;
-    background: #ff5e14;
-    border: 1px solid #ff5e14;
-    float: inline-end;
-}
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border-color: rgba(255, 96, 38, 0.3);
+    }
 
-.subscribe-form button i {
-    color: #fff;
-    font-size: 22px;
-    transform: rotate(-6deg);
-}
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255, 96, 38, 0.1) 0%, transparent 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
 
-.copyright-area {
-    background: #202020;
-    padding: 25px 0;
-}
+    .stat-card:hover::before {
+        opacity: 1;
+    }
 
-.copyright-text p {
-    margin: 0;
-    font-size: 14px;
-    color: #878787;
-}
+    .stat-number {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-.copyright-text p a {
-    color: #ff5e14;
-}
+    .stat-label {
+        color: #e0e0e0;
+        font-size: clamp(1rem, 2vw, 1.2rem);
+        position: relative;
+        z-index: 1;
+        font-weight: 500;
+    }
 
-.footer-menu li {
-    display: inline-block;
-    margin-left: 20px;
-}
+    /* Timeline section */
+    .timeline-section {
+        padding: 80px 0;
+        position: relative;
+        background-color: #0d0d0d;
+    }
 
-.footer-menu li:hover a {
-    color: #ff5e14;
-}
+    .timeline-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at center, rgba(255, 96, 38, 0.1) 0%, transparent 70%),
+            linear-gradient(135deg, rgba(255, 96, 38, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
 
-.footer-menu li a {
-    font-size: 14px;
-    color: #878787;
-}
+    .timeline-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 50px;
+        position: relative;
+    }
 
-.powered-by {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    bottom: 15px;
-    right: 15px;
-    background-color: rgba(0, 0, 0, 0.6);
-    padding: 5px 10px;
-    border-radius: 8px;
-    color: #ffffff;
-}
+    .timeline-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        border-radius: 2px;
+    }
 
-.powered-by h5 {
-    margin-top: 5%;
-    font-size: 1rem;
-    /* Responsive font size */
-}
+    .stat-title, .team-title, .timeline-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 50px;
+        position: relative;
+    }
 
-.logo-img {
-    width: 100px;
-    /* Adjust width for logo */
-    height: auto;
-    margin-left: 8px;
-}
+    .stat-title::after, .team-title::after, .timeline-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        border-radius: 2px;
+    }
+    
+    .timeline-title span, .team-title span, .stat-title span {
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
+    .timeline {
+        position: relative;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .timeline::after {
+        content: '';
+        position: absolute;
+        width: 6px;
+        background: linear-gradient(to bottom, #ff6026, #ff8051);
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -3px;
+        border-radius: 3px;
+        box-shadow: 0 0 15px rgba(255, 96, 38, 0.3);
+    }
+
+    .timeline-item {
+        padding: 10px 40px;
+        position: relative;
+        width: 50%;
+        opacity: 0;
+        margin-bottom: 50px;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-color: #0d0d0d;
+        border: 4px solid #ff6026;
+        border-radius: 50%;
+        z-index: 1;
+        box-shadow: 0 0 15px rgba(255, 96, 38, 0.5);
+        transition: all 0.5s ease;
+    }
+
+    .left::after {
+        right: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .right::after {
+        left: -15px;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+
+    .timeline-item:hover::after {
+        transform: translateY(-50%) scale(1.2);
+        box-shadow: 0 0 25px rgba(255, 96, 38, 0.8);
+        background-color: #ff6026;
+    }
+
+    .left {
+        left: 0;
+        padding-right: 50px;
+    }
+
+    .right {
+        left: 50%;
+        padding-left: 50px;
+    }
+
+    .timeline-content {
+        padding: 30px;
+        background: rgba(20, 20, 20, 0.8);
+        border: 1px solid rgba(255, 96, 38, 0.2);
+        border-radius: 15px;
+        position: relative;
+        transition: all 0.5s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .timeline-content::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-style: solid;
+    }
+
+    .left .timeline-content::after {
+        top: 50%;
+        right: -15px;
+        transform: translateY(-50%);
+        border-width: 15px 0 15px 15px;
+        border-color: transparent transparent transparent rgba(255, 96, 38, 0.2);
+    }
+
+    .right .timeline-content::after {
+        top: 50%;
+        left: -15px;
+        transform: translateY(-50%);
+        border-width: 15px 15px 15px 0;
+        border-color: transparent rgba(255, 96, 38, 0.2) transparent transparent;
+    }
+
+    .timeline-content:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 30px rgba(255, 96, 38, 0.2);
+        border-color: rgba(255, 96, 38, 0.4);
+    }
+
+    .timeline-date {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #ff6026;
+        margin-bottom: 15px;
+    }
+
+    .timeline-content p {
+        color: #e0e0e0;
+        line-height: 1.6;
+        font-size: 1.05rem;
+    }
+
+    /* Team section */
+    .team-section {
+        padding: 80px 0;
+        position: relative;
+        background-color: #0d0d0d;
+    }
+
+    .team-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at center, rgba(255, 96, 38, 0.1) 0%, transparent 70%),
+            linear-gradient(135deg, rgba(255, 96, 38, 0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    .team-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        text-align: center;
+        margin-bottom: 50px;
+        position: relative;
+    }
+
+    .team-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 4px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        border-radius: 2px;
+    }
+
+    /* Media queries */
+    @media (max-width: 992px) {
+        .about-title {
+            font-size: 3rem;
+        }
+
+        .feature-card, .stat-card {
+            padding: 25px 20px;
+        }
+        
+        .timeline::after {
+            left: 31px;
+        }
+        
+        .timeline-item {
+            width: 100%;
+            padding-left: 70px;
+            padding-right: 25px;
+        }
+        
+        .timeline-item.right {
+            left: 0;
+        }
+        
+        .timeline-item.left {
+            left: 0;
+        }
+        
+        .timeline-item::after {
+            left: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .about-section,
+        .stats-section,
+        .timeline-section,
+        .team-section {
+            padding: 60px 0;
+        }
+
+        .about-title {
+            font-size: 2.5rem;
+        }
+
+        .about-subtitle {
+            font-size: 1rem;
+        }
+        
+        .stat-title, .team-title, .timeline-title {
+            font-size: 2rem;
+        }
+        
+        .stat-number {
+            font-size: 2.8rem;
+        }
+        
+        .feature-title {
+            font-size: 1.3rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .about-title {
+            font-size: 2rem;
+        }
+        
+        .about-subtitle {
+            font-size: 0.9rem;
+        }
+        
+        .stat-title, .team-title, .timeline-title {
+            font-size: 1.8rem;
+        }
+        
+        .timeline-content h3 {
+            font-size: 1.2rem;
+        }
+        
+        .timeline-content p {
+            font-size: 0.9rem;
+        }
+        
+        .feature-card, .stat-card {
+            padding: 20px 15px;
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+        }
+        
+        .feature-icon i {
+            font-size: 1.8rem;
+        }
+        
+        .timeline-item {
+            padding-left: 60px;
+            padding-right: 15px;
+        }
+    }
+
+    /* Add smooth scrolling */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Improve container responsiveness */
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    /* Add spacing between rows */
+    .row {
+        margin-bottom: 30px;
+    }
+
+    /* Fix column spacing */
+    [class*="col-"] {
+        padding: 10px 15px;
+    }
+
+    /* Scroll down indicator */
+    .scroll-down {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        z-index: 2;
+    }
+
+    .scroll-down span {
+        color: #e0e0e0;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .scroll-down .mouse {
+        width: 30px;
+        height: 50px;
+        border: 2px solid #ff6026;
+        border-radius: 20px;
+        position: relative;
+    }
+
+    .scroll-down .mouse::before {
+        content: '';
+        position: absolute;
+        width: 6px;
+        height: 10px;
+        background: #ff6026;
+        border-radius: 3px;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        animation: scrollAnim 2s infinite;
+    }
+
+    @keyframes scrollAnim {
+        0% {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+    }
 </style>
+{% endblock %}
 
-    <script type="text/javascript">
-        window.tailwind.config = {
-            darkMode: ['class'],
-            theme: {
-                extend: {
-                    colors: {
-                        border: 'hsl(var(--border))',
-                        input: 'hsl(var(--input))',
-                        ring: 'hsl(var(--ring))',
-                        background: 'hsl(var(--background))',
-                        foreground: 'hsl(var(--foreground))',
-                        primary: {
-                            DEFAULT: 'hsl(var(--primary))',
-                            foreground: 'hsl(var(--primary-foreground))'
-                        },
-                        secondary: {
-                            DEFAULT: 'hsl(var(--secondary))',
-                            foreground: 'hsl(var(--secondary-foreground))'
-                        },
-                        destructive: {
-                            DEFAULT: 'hsl(var(--destructive))',
-                            foreground: 'hsl(var(--destructive-foreground))'
-                        },
-                        muted: {
-                            DEFAULT: 'hsl(var(--muted))',
-                            foreground: 'hsl(var(--muted-foreground))'
-                        },
-                        accent: {
-                            DEFAULT: 'hsl(var(--accent))',
-                            foreground: 'hsl(var(--accent-foreground))'
-                        },
-                        popover: {
-                            DEFAULT: 'hsl(var(--popover))',
-                            foreground: 'hsl(var(--popover-foreground))'
-                        },
-                        card: {
-                            DEFAULT: 'hsl(var(--card))',
-                            foreground: 'hsl(var(--card-foreground))'
-                        },
-                    },
-                }
-            }
-        }
-    </script>
+{% block body %}
 
-
-    <style type="text/tailwindcss">
-        @layer base {
-            :root {
-                --background: 0 0% 100%;
---foreground: 240 10% 3.9%;
---card: 0 0% 100%;
---card-foreground: 240 10% 3.9%;
---popover: 0 0% 100%;
---popover-foreground: 240 10% 3.9%;
---primary: 240 5.9% 10%;
---primary-foreground: 0 0% 98%;
---secondary: 240 4.8% 95.9%;
---secondary-foreground: 240 5.9% 10%;
---muted: 240 4.8% 95.9%;
---muted-foreground: 240 3.8% 46.1%;
---accent: 240 4.8% 95.9%;
---accent-foreground: 240 5.9% 10%;
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 0 0% 98%;
---border: 240 5.9% 90%;
---input: 240 5.9% 90%;
---ring: 240 5.9% 10%;
---radius: 0.5rem;
-            }
-            .dark {
-                --background: 240 10% 3.9%;
---foreground: 0 0% 98%;
---card: 240 10% 3.9%;
---card-foreground: 0 0% 98%;
---popover: 240 10% 3.9%;
---popover-foreground: 0 0% 98%;
---primary: 0 0% 98%;
---primary-foreground: 240 5.9% 10%;
---secondary: 240 3.7% 15.9%;
---secondary-foreground: 0 0% 98%;
---muted: 240 3.7% 15.9%;
---muted-foreground: 240 5% 64.9%;
---accent: 240 3.7% 15.9%;
---accent-foreground: 0 0% 98%;
---destructive: 0 62.8% 30.6%;
---destructive-foreground: 0 0% 98%;
---border: 240 3.7% 15.9%;
---input: 240 3.7% 15.9%;
---ring: 240 4.9% 83.9%;
-            }
-        }
-    </style>
-
-    <style>
-        #about-id {
-            background-image: url("{% static 'img/home/about-bg.jpeg' %}");
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            padding-top: 8%;
-
-        }
-
-
-        .myFont {
-            font-family: 'Dancing Script', cursive;
-        }
-
-
-        @keyframes float-up {
-            0% {
-                transform: translateY(0);
-            }
-
-            100% {
-                transform: translateY(-15px);
-            }
-        }
-
-        @keyframes float-down {
-            0% {
-                transform: translateY(0);
-            }
-
-            100% {
-                transform: translateY(15px);
-            }
-        }
-
-        .float-1 {
-            animation: float-up 3s infinite alternate;
-        }
-
-        .float-2 {
-            animation: float-down 3s infinite alternate;
-        }
-    </style>
-
-</head>
-
-<body>
-
-    <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container-fluid">
-            <a class="navbar-brand text-white" href="/">
-                <!-- <img src="demo_static/img/home/angaar_logo-2.png" alt="The Angaar Batch" width="50" height="40" class="d-inline-block align-text-top"> -->
-                The Angaar Batch🔥
-            </a>
-
-            <!-- <button class="navbar-toggler menu" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-expanded="false" aria-label="Toggle navigation"
-                onclick="this.classList.toggle('opened');this.setAttribute('aria-expanded', this.classList.contains('opened'))"
-                aria-label="Main Menu">
-                <svg width="60" height="40" viewBox="0 0 100 100">
-                    <path class="line line1"
-                        d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
-                    <path class="line line2" d="M 20,50 H 80" />
-                    <path class="line line3"
-                        d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
-                </svg>
-            </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'about' %}">About</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item mx-1">
-                        <a href="{% url 'login' %}">
-                            <button style="width: 100%;">Login</button>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mx-1">
-                        <a href="{% url 'register' %}">
-                            <button id="register-btn" style="width: 100%;">Register</button>
-                        </a>
-                    </li>
-                </ul>
-            </div> -->
-        </div>
-    </nav>
-
+<div class="about-section">
+    <div class="about-bg-gradient"></div>
+    <!-- Add particle.js container -->
+    <div class="about-bg-particles" id="about-particles-js"></div>
     
-    <!--Header-->
-    <div class="bg-black text-orange-500 flex flex-col items-center p-10" id="about-id">
-        <h1 class="text-6xl font-bold mb-5 text-orange-500">WE ARE 🔥</h1>
-        <div class="flex flex-col items-center">
-            <div class="flex space-x-4">
-                <div
-                    class="text-9xl font-extrabold text-white transform rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
-                    A</div>
-                <div
-                    class="text-9xl font-extrabold text-white transform -rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
-                    N</div>
-                <div
-                    class="text-9xl font-extrabold text-white transform rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
-                    G</div>
-                <div
-                    class="text-9xl font-extrabold text-white transform -rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
-                    A</div>
-                <span></span>
-                <div
-                    class="text-9xl font-extrabold text-white transform rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
-                    A</div>
-                <div
-                    class="text-9xl font-extrabold text-white transform -rotate-12 transition duration-500 hover:rotate-0 hover:text-orange-500">
-                    R</div>
-            </div>
-            <div class="flex space-x-4 mt-2">
-                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-1">
-                    Adventurous</div>
-                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-2">Noble
-                </div>
-                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-1">
-                    Energetic</div>
-                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-2">
-                    Authentic</div>
-                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-1">
-                    Amazing</div>
-                <div class="text-3xl text-white transform hover:scale-110 transition duration-500 myFont float-2">
-                    Resilient
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!--Timeline-->
-    <div class="timeline-container" id="timeline">
-        <h1 class="timeline-title">ANGAAR KI <span class="text-orange-500">SHRUAAT</span></h1>
-        <p class="timeline-subtitle">Agar aaya hai, toh sikh ke ja!</p>
-
-        <div class="timeline">
-            <!-- Timeline SVG -->
-            <img src="https://cb3img.s3.ap-south-1.amazonaws.com/img/ourjourney.svg" alt="Curvy Timeline"
-                class="timeline-svg" />
-
-            <!-- Timeline Events -->
-            <div class="timeline-event" style="top: 10%; left: 78%;" data-scroll>
-                <div class="timeline-content">
-                    <h3>2024</h3>
-                    <p>10K+ Seekhne wale</p>
-                    <p class="details">Aaj humare saath 10K se zyada learners hain jo humare classroom, interactive
-                        live, aur online guided learning programs ka hissa bane hain. Safalta ki shuruat ki hai!</p>
-                </div>
-            </div>
-
-            <div class="timeline-event" style="top: 30%; left: 55%;" data-scroll>
-                <div class="timeline-content">
-                    <h3>2023</h3>
-                    <p>Online Expansion</p>
-                    <p class="details">Noida branch ke saath humne apna business online bhi expand kiya, aur naye safar
-                        ki shuruat ki.</p>
-                </div>
-            </div>
-
-            <div class="timeline-event" style="top: 40%; left: 14%;" data-scroll>
-                <div class="timeline-content">
-                    <h3>2022</h3>
-                    <p>Partnership</p>
-                    <p class="details">Humne developers ke liye naye raste apnaye aur naye mauke diye.</p>
-                </div>
-            </div>
-
-            <!-- Additional Events -->
-            <div class="timeline-event" style="top: 60%; left: 80%;" data-scroll>
-                <div class="timeline-content">
-                    <h3>2021</h3>
-                    <p>Pehla Bada Milestone</p>
-                    <p class="details">10K se zyada learners ke saath apne pehle bade milestone ko chhuna tha, aur humne
-                        kar dikhaya!</p>
-                </div>
-            </div>
-
-            <div class="timeline-event" style="top: 89%; left: 25%;" data-scroll>
-                <div class="timeline-content">
-                    <h3>2020</h3>
-                    <p>Shuruat hui ANGAAR ki</p>
-                    <p class="details">Humne duniya bhar ke learners ko empower karne ke liye apne safar ki shuruat ki
-                        thi.</p>
-                </div>
-            </div>
+    <div class="container mt-4">
+        <div class="about-header" data-aos="fade-up" data-aos-duration="1000">
+            <h1 class="about-title">We Are Angaar 🔥</h1>
+            <p class="about-subtitle">Transforming passionate learners into industry-ready professionals through
+                hands-on experience and mentorship.</p>
         </div>
 
-
-    </div>
-
-
-    <!--Team-->
-    <section class="bg-black text-white py-20 px-5 md:px-10 lg:px-20 xl:px-32" id="team-id">
-        <div class="max-w-4xl mx-auto text-center">
-            <h2 class="text-8xl font-bold mb-5">Our Team</h2>
-            <div class="relative">
-                <img src="{% static 'assets/aboutLogo.svg' %}" alt="team" class="mx-auto mb-5" />
-                <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center">
-                    <!-- <h3 class="text-3xl font-bold mb-3">Meet the Angaari Team</h3> -->
-                    <!-- <p class="text-lg">A team of passionate individuals dedicated to creating amazing experiences.</p> -->
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    
-    <footer class="footer-section">
-       
-        <div class="copyright-area">
-            <div class="container">
-                <div class="row">
-                    <div class="text-center text-lg-left">
-                        <div class="copyright-text">
-                            <p>Copyright &copy; 2024, All Right Reserved <a href="#" style="pointer-events: none;">The
-                                    Angaar Batch 🔥</a></p>
-                        </div>
+        <div class="row">
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="100" data-aos-duration="800">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-laptop-code"></i>
                     </div>
-
+                    <h3 class="feature-title">Practical Learning</h3>
+                    <p class="feature-description">Real-world projects and hands-on experience to build your portfolio
+                        and confidence.</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="200" data-aos-duration="800">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="feature-title">Expert Mentorship</h3>
+                    <p class="feature-description">Learn from industry professionals who guide you through your journey.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4" data-aos="fade-up" data-aos-delay="300" data-aos-duration="800">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3 class="feature-title">Career Growth</h3>
+                    <p class="feature-description">Accelerate your career with industry-relevant skills and networking
+                        opportunities.</p>
                 </div>
             </div>
         </div>
-        <div class="powered-by" style="position: absolute">
-            <h5 class="text-white">Powered By</h5>
-            <img src="https://w3grads.com/assets/logo-44ca63025513c8116a3bb05e69891fb438ace2b576cce1e05ade3e20270fff19.png"
-                class="logo-img" alt="W3Grads Logo">
+        
+        <div class="scroll-down" data-aos="fade-up" data-aos-delay="400">
+            <span>Scroll Down</span>
+            <div class="mouse"></div>
         </div>
-    </footer>
+    </div>
+</div>
 
+<div class="stats-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="100">
+                <div class="stat-card">
+                    <div class="stat-number" data-count="13000">0</div>
+                    <div class="stat-label">Students Trained</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="stat-card">
+                    <div class="stat-number" data-count="10000">0</div>
+                    <div class="stat-label">Online Sessions</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="300">
+                <div class="stat-card">
+                    <div class="stat-number" data-count="25">0</div>
+                    <div class="stat-label">Workshops</div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6" data-aos="zoom-in" data-aos-delay="400">
+                <div class="stat-card">
+                    <div class="stat-number" data-count="15">0</div>
+                    <div class="stat-label">Internships Offered</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const timelineEvents = document.querySelectorAll(".timeline-event");
+<div class="timeline-section">
+    <h2 class="timeline-title" data-aos="fade-up"><span>Our Journey So Far</span></h2>
+    <div class="timeline">
+        <div class="timeline-item left" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3 class="timeline-date">2023</h3>
+                <p>Founded with a vision to transform tech education</p>
+            </div>
+        </div>
+        <div class="timeline-item right" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3 class="timeline-date">Early 2024</h3>
+                <p>Launched our first batch with 100 students</p>
+            </div>
+        </div>
+        <div class="timeline-item left" data-aos="fade-right">
+            <div class="timeline-content">
+                <h3 class="timeline-date">Mid 2024</h3>
+                <p>Expanded to multiple technologies and domains</p>
+            </div>
+        </div>
+        <div class="timeline-item right" data-aos="fade-left">
+            <div class="timeline-content">
+                <h3 class="timeline-date">2025</h3>
+                <p>Growing strong with 13000+ successful students</p>
+            </div>
+        </div>
+    </div>
+</div>
 
+<div class="team-section">
+    <div class="container">
+        <h2 class="team-title" data-aos="fade-up"><span>Our Mission</span></h2>
+        
+        <div class="row">
+            <div class="col-md-6" data-aos="fade-right" data-aos-delay="100">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="feature-title">Accessible Education</h3>
+                    <p class="feature-description">We believe in making quality tech education accessible to everyone, regardless of their background or previous experience. Our goal is to break down barriers and create pathways for all passionate learners.</p>
+                </div>
+            </div>
+            <div class="col-md-6" data-aos="fade-left" data-aos-delay="200">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3 class="feature-title">Industry Connection</h3>
+                    <p class="feature-description">We bridge the gap between academia and industry by providing real-world projects, industry mentors, and networking opportunities that prepare our students for successful careers in technology.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-6" data-aos="fade-right" data-aos-delay="300">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3 class="feature-title">Innovation Focus</h3>
+                    <p class="feature-description">We encourage creative thinking and innovation in all our programs. Our students don't just learn existing technologies—they learn how to adapt, create, and lead in a rapidly evolving tech landscape.</p>
+                </div>
+            </div>
+            <div class="col-md-6" data-aos="fade-left" data-aos-delay="400">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <h3 class="feature-title">Community Building</h3>
+                    <p class="feature-description">We foster a supportive community where students collaborate, share knowledge, and grow together. The Angaar Batch is more than just a learning platform—it's a thriving ecosystem of tech enthusiasts.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<!-- AOS Library for scroll animations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            mirror: false
+        });
+        
+        // Initialize particle.js for background effects
+        particlesJS('about-particles-js', {
+            "particles": {
+                "number": {
+                    "value": 100,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ff6026"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 0.5,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 2,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ff6026",
+                    "opacity": 0.2,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 0.5
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+        
+        function animateTimelineItems() {
+            const items = document.querySelectorAll('.timeline-item');
             const observer = new IntersectionObserver((entries) => {
-                entries.forEach((entry) => {
+                entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        entry.target.classList.add("active");
-                    } else {
-                        entry.target.classList.remove("active");
+                        entry.target.style.animation = 'fadeIn 0.5s ease-out forwards';
+                        observer.unobserve(entry.target);
                     }
                 });
-            }, { threshold: 0.3 });
+            }, {
+                threshold: 0.1
+            });
 
-            timelineEvents.forEach((event) => observer.observe(event));
+            items.forEach(item => {
+                observer.observe(item);
+                item.style.opacity = '0';
+            });
+        }
+
+        function animateStats() {
+            const stats = document.querySelectorAll('.stat-number');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const target = entry.target;
+                        const count = parseInt(target.getAttribute('data-count'));
+                        let current = 0;
+                        const increment = count / 50;
+                        const timer = setInterval(() => {
+                            current += increment;
+                            if (current >= count) {
+                                target.textContent = count + '+';
+                                clearInterval(timer);
+                            } else {
+                                target.textContent = Math.floor(current) + '+';
+                            }
+                        }, 20);
+                        observer.unobserve(target);
+                    }
+                });
+            }, {
+                threshold: 0.5
+            });
+
+            stats.forEach(stat => observer.observe(stat));
+        }
+
+        animateTimelineItems();
+        animateStats();
+        
+        // Add parallax effect to about section
+        window.addEventListener('scroll', function() {
+            const scrollPosition = window.pageYOffset;
+            const aboutSection = document.querySelector('.about-section');
+            if (aboutSection) {
+                aboutSection.style.backgroundPositionY = scrollPosition * 0.1 + 'px';
+            }
         });
-
-    </script>
-
-
-</body>
-
-</html>
+    });
+</script>
+{% endblock %}

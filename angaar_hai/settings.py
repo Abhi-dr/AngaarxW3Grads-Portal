@@ -49,8 +49,7 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_celery_beat',
     
-    'ckeditor',
-    'ckeditor_uploader',
+    "channels",
 
 
 ]
@@ -95,6 +94,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'angaar_hai.wsgi.application'
+
+# ASGI application
+ASGI_APPLICATION = 'angaar_hai.asgi.application'
+
+# Use Redis for Channels layer (Highly Recommended for Production)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379)],
+        },
+    },
+}
 
 
 # Database
@@ -265,7 +277,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = "82930f001@smtp-brevo.com"
+EMAIL_HOST_USER = "82930f002@smtp-brevo.com"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = 'noreply@theangaarbatch.in'
 

@@ -1,0 +1,429 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}
+Student -> Team Details
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title fw-semibold">Team Details: {{ team.name }}</h5>
+                <a href="{% url 'list_teams' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="ti ti-arrow-left"></i> Back to Teams List
+                </a>
+            </div>
+            
+            {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">{{ team.name }}</h5>
+                                    <p class="text-muted mb-0">Led by {{ team.leader.first_name }} {{ team.leader.last_name }}</p>
+                                </div>
+                                <span class="badge bg-{{ team.status|yesno:'success,warning,danger' }}">{{ team.status|title }}</span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-semibold mb-2">Description</h6>
+                                <p>{{ team.description }}</p>
+                            </div>
+                            
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <h6 class="fw-semibold mb-2">Team Size</h6>
+                                    <p>{{ team.current_members_count }}/{{ team.members_limit }} members</p>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <h6 class="fw-semibold mb-2">Created</h6>
+                                    <p>{{ team.created_at|date:"F j, Y" }}</p>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <h6 class="fw-semibold mb-2">Last Updated</h6>
+                                    <p>{{ team.updated_at|date:"F j, Y" }}</p>
+                                </div>
+                            </div>
+                            
+                            {% if team.required_skills %}
+                            <div class="mb-4">
+                                <h6 class="fw-semibold mb-2">Required Skills</h6>
+                                <div>
+                                    {% for skill in team.required_skills %}
+                                    <span class="badge bg-secondary me-1 mb-1">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="d-flex justify-content-end">
+                                {% if not is_in_team %}
+                                    {% if team.id in pending_requests %}
+                                        <button class="btn btn-secondary" disabled>Request Pending</button>
+                                    {% else %}
+                                        <button class="btn btn-primary join-team-btn">
+                                            Join Team
+                                        </button>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h6 class="fw-semibold mb-3">Team Members ({{ team.current_members_count }})</h6>
+                            
+                            <div class="list-group">
+                                <!-- Team Leader -->
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">{{ team.leader.first_name }} {{ team.leader.last_name }}</h6>
+                                        <small class="text-muted">Team Leader</small>
+                                    </div>
+                                    {% if team.leader == request.user.student %}
+                                    <span class="badge bg-primary">You</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Team Members -->
+                                {% for member in team_members %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-0">{{ member.student.first_name }} {{ member.student.last_name }}</h6>
+                                        <small class="text-muted">Joined {{ member.joined_at|timesince }} ago</small>
+                                    </div>
+                                    {% if member.student == request.user.student %}
+                                    <span class="badge bg-primary">You</span>
+                                    {% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-body p-4">
+                            <h6 class="fw-semibold mb-3">Team Status</h6>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Members</span>
+                                    <span class="fw-semibold">{{ team.current_members_count }}/{{ team.members_limit }}</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar bg-primary" role="progressbar" 
+                                         style="width: {% widthratio team.current_members_count team.members_limit 100 %}%" 
+                                         aria-valuenow="{{ team.current_members_count }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="{{ team.members_limit }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Status</span>
+                                    <span class="fw-semibold text-{{ team.status|yesno:'success,warning,danger' }}">{{ team.status|title }}</span>
+                                </div>
+                                <p class="text-muted mb-0 small">
+                                    {% if team.status == 'open' %}
+                                    This team is actively looking for new members
+                                    {% elif team.status == 'in_progress' %}
+                                    This team is currently working on their project
+                                    {% else %}
+                                    This team is not accepting new members
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if is_team_leader %}
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h6 class="fw-semibold mb-3">Team Management</h6>
+                            <p class="text-muted mb-3">As the team leader, you can manage your team's details, members, and join requests.</p>
+                            <a href="{% url 'manage_team' team.id %}" class="btn btn-primary w-100">Manage Team</a>
+                        </div>
+                    </div>
+                    {% elif is_team_member %}
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h6 class="fw-semibold mb-3">Team Membership</h6>
+                            <p class="text-muted mb-3">You are currently a member of this team.</p>
+                            <button class="btn btn-danger w-100" id="leave-team-btn" data-team-id="{{ team.id }}">Leave Team</button>
+                        </div>
+                    </div>
+                    {% elif not is_in_team %}
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h6 class="fw-semibold mb-3">Join This Team</h6>
+                            {% if has_pending_request %}
+                                <p class="text-muted mb-3">You have already sent a join request to this team.</p>
+                                <button class="btn btn-secondary w-100" id="cancel-request-btn" data-team-id="{{ team.id }}">Cancel Request</button>
+                            {% elif is_rejected %}
+                                <p class="text-muted mb-3">Your previous join request was rejected.</p>
+                                <button class="btn btn-danger w-100" disabled>Request Rejected</button>
+                            {% elif team.status == 'open' and not team.is_full %}
+                                <p class="text-muted mb-3">Interested in joining this team? Send a request to the team leader.</p>
+                                <button class="btn btn-primary w-100 join-team-btn">Send Join Request</button>
+                            {% elif team.status != 'open' %}
+                                <p class="text-muted mb-3">This team is not currently accepting new members.</p>
+                                <button class="btn btn-secondary w-100" disabled>Team Closed</button>
+                            {% else %}
+                                <p class="text-muted mb-3">This team has reached its maximum capacity.</p>
+                                <button class="btn btn-secondary w-100" disabled>Team Full</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Join Request Modal -->
+<div class="modal fade" id="joinRequestModal" tabindex="-1" aria-labelledby="joinRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="joinRequestModalLabel">Send Join Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="join-request-form">
+                    <input type="hidden" id="team-id-input" value="{{ team.id }}">
+                    <div class="mb-3">
+                        <label for="request-message" class="form-label">Message (Optional)</label>
+                        <textarea class="form-control" id="request-message" rows="4" placeholder="Introduce yourself and explain why you want to join this team..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="send-request-btn">Send Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Leave Team Confirmation Modal -->
+<div class="modal fade" id="leaveTeamModal" tabindex="-1" aria-labelledby="leaveTeamModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leaveTeamModalLabel">Confirm Leave Team</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to leave this team?</p>
+                <p class="text-danger">You will need to send a new join request if you want to rejoin later.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-leave-team-btn">Leave Team</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize modals
+        const joinRequestModal = new bootstrap.Modal(document.getElementById('joinRequestModal'));
+        const leaveTeamModal = new bootstrap.Modal(document.getElementById('leaveTeamModal'));
+        
+        // Get DOM elements
+        const sendRequestBtn = document.getElementById('send-request-btn');
+        const leaveTeamBtn = document.getElementById('leave-team-btn');
+        const confirmLeaveTeamBtn = document.getElementById('confirm-leave-team-btn');
+        const cancelRequestBtn = document.getElementById('cancel-request-btn');
+        
+        // Replace direct event listener with event delegation
+        document.addEventListener('click', function(e) {
+            if (e.target.matches('.join-team-btn')) {
+                joinRequestModal.show();
+            }
+        });
+        
+        // Handle send request form submission
+        if (sendRequestBtn) {
+            sendRequestBtn.addEventListener('click', function() {
+                const teamId = document.getElementById('team-id-input').value;
+                const message = document.getElementById('request-message').value;
+                
+                sendJoinRequest(teamId, message);
+            });
+        }
+        
+        // Handle cancel request button click
+        if (cancelRequestBtn) {
+            cancelRequestBtn.addEventListener('click', function() {
+                const teamId = cancelRequestBtn.getAttribute('data-team-id');
+                cancelJoinRequest(teamId);
+            });
+        }
+        
+        // Handle leave team button click
+        if (leaveTeamBtn) {
+            leaveTeamBtn.addEventListener('click', function() {
+                leaveTeamModal.show();
+            });
+        }
+        
+        // Handle confirm leave team button click
+        if (confirmLeaveTeamBtn) {
+            confirmLeaveTeamBtn.addEventListener('click', function() {
+                const teamId = leaveTeamBtn.getAttribute('data-team-id');
+                leaveTeam(teamId);
+            });
+        }
+        
+        // Function to send join request
+        function sendJoinRequest(teamId, message) {
+            fetch(`/dashboard/hackathon/send-join-request/${teamId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                joinRequestModal.hide();
+                
+                if (data.status === 'success') {
+                    // Update UI to show request pending
+                    const joinSection = document.querySelector('.join-team-btn').closest('.card-body');
+                    if (joinSection) {
+                        joinSection.innerHTML = `
+                            <h6 class="fw-semibold mb-3">Join This Team</h6>
+                            <p class="text-muted mb-3">You have already sent a join request to this team.</p>
+                            <button class="btn btn-secondary w-100" id="cancel-request-btn" data-team-id="${teamId}">Cancel Request</button>
+                        `;
+                    }
+                    
+                    showToast(data.message, 'success');
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                joinRequestModal.hide();
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        }
+        
+        // Function to cancel join request
+        function cancelJoinRequest(teamId) {
+            fetch(`/dashboard/hackathon/cancel-join-request/${teamId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message, 'success');
+                    
+                    // Update UI to show join button
+                    const cancelRequestButton = document.querySelector('#cancel-request-btn');
+                    if (cancelRequestButton) {
+                        cancelRequestButton.outerHTML = '<button class="btn btn-primary w-100 join-team-btn">Send Join Request</button>';
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        }
+        
+        // Function to leave team
+        function leaveTeam(teamId) {
+            fetch(`/dashboard/hackathon/leave-team/${teamId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+            .then(response => response.json())
+            .then(data => {
+                leaveTeamModal.hide();
+                
+                if (data.status === 'success') {
+                    showToast(data.message, 'success');
+                    
+                    // Redirect to dashboard
+                    setTimeout(() => {
+                        window.location.href = data.redirect || '/dashboard/hackathon/dashboard/';
+                    }, 1000);
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                leaveTeamModal.hide();
+                showToast('An error occurred. Please try again.', 'error');
+            });
+        }
+        
+        // Function to show toast notification
+        function showToast(message, type) {
+            // Check if toastr is available
+            if (typeof toastr !== 'undefined') {
+                toastr[type](message);
+            } else {
+                alert(message);
+            }
+        }
+        
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

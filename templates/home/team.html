@@ -2,497 +2,634 @@
 {% load static %}
 
 {% block title %}
-#Our Team
+Our Team | Angaar
 {% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-    body {
-        background-color: rgb(26, 26, 26);
+
+    body{
+        background-color: #0d0d0d;
+
     }
 
-    img {
-        border-radius: 5%;
+    /* Team Page Container */
+    .team-page-container {
+        position: relative;
+        padding: 80px 0;
+        overflow: hidden;
     }
 
-    .text-blk {
-        margin-top: 0px;
-        margin-right: 0px;
-        margin-bottom: 0px;
-        margin-left: 0px;
-        line-height: 25px;
-        color: white;
+    /* Background Elements */
+    .team-bg-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
+            radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
+        z-index: 0;
+        pointer-events: none;
     }
 
-    .responsive-container-block {
-        min-height: 75px;
-        height: fit-content;
+    .team-bg-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
-        display: flex;
-        flex-wrap: wrap;
-        margin-top: 0px;
-        margin-right: auto;
-        margin-bottom: 0px;
-        margin-left: auto;
-        justify-content: flex-start;
+        height: 100%;
+        z-index: 0;
+        pointer-events: none;
     }
 
-    .container-block {
-        min-height: 75px;
-        height: fit-content;
-        width: 100%;
-        padding-top: 8%;
-        padding-right: 10px;
-        padding-bottom: 10px;
-        padding-left: 10px;
-        display: block;
-    }
-
-    .responsive-cell-block {
-        min-height: 75px;
-    }
-
-    .container {
-        max-width: 1380px;
-        margin-right: auto;
-        margin-left: auto;
-        padding-right: 30px;
-        padding-left: 30px;
-    }
-
-    .team-head-text {
-        font-size: 48px;
-        line-height: 50px;
-        font-weight: 900;
+    /* Team Header */
+    .team-header {
+        position: relative;
         text-align: center;
-        margin-top: 0px;
-        margin-right: 0px;
-        margin-bottom: 70px;
-        margin-left: 0px;
+        margin-bottom: 60px;
+        z-index: 1;
     }
 
-    .name {
-        font-size: 18px;
-        margin-top: 11px;
-        margin-right: 0px;
-        margin-bottom: 0px;
-        margin-left: 0px;
-        font-weight: 700;
+    .team-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: 20px;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+        display: inline-block;
     }
 
-    .position {
-        margin-top: 5px;
-        margin-right: 0px;
-        margin-bottom: 0px;
-        margin-left: 0px;
+    .team-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        border-radius: 2px;
     }
 
-    .team-card-container {
-        width: 263px;
-        margin-top: 0px;
-        margin-right: 15px;
-        margin-bottom: 30px;
-        margin-left: 15px;
+    .team-subtitle {
+        font-size: 1.2rem;
+        max-width: 700px;
+        margin: 0 auto;
+        color: #aaa;
+        line-height: 1.6;
     }
 
-    .teamcard-container {
-        justify-content: space-evenly;
+    /* Team Grid */
+    .team-grid {
+        display: grid;
+        justify-content: center;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Founders Row */
+    .founders-row {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 30px;
+        margin-bottom: 50px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .founders-row .team-card {
+        width: 280px;
+        flex-grow: 0;
+        flex-shrink: 0;
+    }
+
+    /* Team Card */
+    .team-card {
+        position: relative;
+        background: rgba(30, 30, 30, 0.5);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        transition: all 0.4s ease;
+        transform-style: preserve-3d;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .team-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 35px rgba(255, 96, 38, 0.2);
+    }
+
+    .team-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255, 96, 38, 0.1) 0%, transparent 100%);
+        z-index: 1;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+    .team-card:hover::before {
+        opacity: 1;
     }
 
     .team-img-wrapper {
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
-        border-bottom-right-radius: 6px;
-        border-bottom-left-radius: 6px;
+        position: relative;
+        padding-top: 20px;
+        text-align: center;
+        z-index: 2;
     }
 
     .team-img {
-        max-width: 100%;
+        width: 85%;
+        border-radius: 12px;
+        transition: all 0.4s ease;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
     }
 
-    @media (max-width: 500px) {
-
-        .container-block {
-            padding-top: 25%;
-        }
-
-        .team-card-container {
-            margin-top: 0px;
-            margin-right: 0px;
-            margin-bottom: 30px;
-            margin-left: 0px;
-            width: 100%;
-        }
-
-        .team-img {
-            width: 100%;
-        }
+    .team-card:hover .team-img {
+        transform: scale(1.05);
+        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
     }
 
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;600;700;800&amp;display=swap');
-
-    *,
-    *:before,
-    *:after {
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
+    .team-card-content {
+        padding: 20px;
+        position: relative;
+        z-index: 2;
+        text-align: center;
     }
 
-    body {
-        margin: 0;
+    .team-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #fff;
+        position: relative;
+        display: inline-block;
     }
 
-    .wk-desk-1 {
-        width: 8.333333%;
+    .team-name::after {
+        content: '';
+        position: absolute;
+        bottom: -5px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        transition: width 0.3s ease;
     }
 
-    .wk-desk-2 {
-        width: 16.666667%;
-    }
-
-    .wk-desk-3 {
-        width: 25%;
-    }
-
-    .wk-desk-4 {
-        width: 33.333333%;
-    }
-
-    .wk-desk-5 {
-        width: 41.666667%;
-    }
-
-    .wk-desk-6 {
-        width: 50%;
-    }
-
-    .wk-desk-7 {
-        width: 58.333333%;
-    }
-
-    .wk-desk-8 {
-        width: 66.666667%;
-    }
-
-    .wk-desk-9 {
-        width: 75%;
-    }
-
-    .wk-desk-10 {
-        width: 83.333333%;
-    }
-
-    .wk-desk-11 {
-        width: 91.666667%;
-    }
-
-    .wk-desk-12 {
+    .team-card:hover .team-name::after {
         width: 100%;
     }
 
-    @media (max-width: 1024px) {
-        .container-block {
-            padding-top: 25%;
-        }
+    .team-position {
+        font-size: 1rem;
+        color: #ff6026;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
 
-        .wk-ipadp-1 {
-            width: 8.333333%;
-        }
+    .team-social {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 15px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
+    }
 
-        .wk-ipadp-2 {
-            width: 16.666667%;
-        }
+    .team-card:hover .team-social {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
-        .wk-ipadp-3 {
-            width: 25%;
-        }
+    .social-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
 
-        .wk-ipadp-4 {
-            width: 33.333333%;
-        }
+    .social-icon:hover {
+        background: #ff6026;
+        transform: translateY(-5px);
+    }
 
-        .wk-ipadp-5 {
-            width: 41.666667%;
-        }
+    /* Team Categories */
+    .team-categories {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
 
-        .wk-ipadp-6 {
-            width: 50%;
-        }
+    .category-btn {
+        padding: 8px 20px;
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 30px;
+        color: #aaa;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(5px);
+    }
 
-        .wk-ipadp-7 {
-            width: 58.333333%;
-        }
+    .category-btn.active,
+    .category-btn:hover {
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        color: #fff;
+        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
+    }
 
-        .wk-ipadp-8 {
-            width: 66.666667%;
+    /* Responsive Styles */
+    @media (max-width: 1200px) {
+        .team-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         }
-
-        .wk-ipadp-9 {
-            width: 75%;
-        }
-
-        .wk-ipadp-10 {
-            width: 83.333333%;
-        }
-
-        .wk-ipadp-11 {
-            width: 91.666667%;
-        }
-
-        .wk-ipadp-12 {
-            width: 100%;
+        
+        .founders-row .team-card {
+            width: 250px;
         }
     }
 
     @media (max-width: 768px) {
-
-        .container-block {
-            padding-top: 25%;
+        .team-title {
+            font-size: 2.5rem;
         }
 
-        .wk-tab-1 {
-            width: 8.333333%;
+        .team-grid {
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
         }
-
-        .wk-tab-2 {
-            width: 16.666667%;
+        
+        .founders-row {
+            gap: 20px;
         }
-
-        .wk-tab-3 {
-            width: 25%;
-        }
-
-        .wk-tab-4 {
-            width: 33.333333%;
-        }
-
-        .wk-tab-5 {
-            width: 41.666667%;
-        }
-
-        .wk-tab-6 {
-            width: 50%;
-        }
-
-        .wk-tab-7 {
-            width: 58.333333%;
-        }
-
-        .wk-tab-8 {
-            width: 66.666667%;
-        }
-
-        .wk-tab-9 {
-            width: 75%;
-        }
-
-        .wk-tab-10 {
-            width: 83.333333%;
-        }
-
-        .wk-tab-11 {
-            width: 91.666667%;
-        }
-
-        .wk-tab-12 {
-            width: 100%;
+        
+        .founders-row .team-card {
+            width: 220px;
         }
     }
 
-    @media (max-width: 500px) {
-
-        .container-block {
-            padding-top: 25%;
+    @media (max-width: 576px) {
+        .team-page-container {
+            padding: 60px 0;
         }
 
-        .wk-mobile-1 {
-            width: 8.333333%;
+        .team-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        
+        .founders-row {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .founders-row .team-card {
+            width: 280px;
         }
 
-        .wk-mobile-2 {
-            width: 16.666667%;
-        }
-
-        .wk-mobile-3 {
-            width: 25%;
-        }
-
-        .wk-mobile-4 {
-            width: 33.333333%;
-        }
-
-        .wk-mobile-5 {
-            width: 41.666667%;
-        }
-
-        .wk-mobile-6 {
-            width: 50%;
-        }
-
-        .wk-mobile-7 {
-            width: 58.333333%;
-        }
-
-        .wk-mobile-8 {
-            width: 66.666667%;
-        }
-
-        .wk-mobile-9 {
-            width: 75%;
-        }
-
-        .wk-mobile-10 {
-            width: 83.333333%;
-        }
-
-        .wk-mobile-11 {
-            width: 91.666667%;
-        }
-
-        .wk-mobile-12 {
-            width: 100%;
+        .team-title {
+            font-size: 2rem;
         }
     }
 </style>
-
 {% endblock %}
 
 {% block body %}
+<div class="team-page-container">
+    <div class="team-bg-gradient"></div>
+    <div class="team-bg-particles" id="particles-js"></div>
 
-<div class="container-block container">
-    <p class="text-blk team-head-text">
-        Our Team
-    </p>
-    <div class="responsive-container-block teamcard-container">
-        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
-            <div class="team-card">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5635AQG6NVmir9pgtg/profile-framedphoto-shrink_400_400/profile-framedphoto-shrink_400_400/0/1707228328063?e=1739080800&v=beta&t=B4QKu2Ewc2oUAFDt9HADk42KZWvfN7gcwrrDjFXh_t4"
-                        width="85%">
-                </div>
-                <div class="team-card-content">
-                    <p class="text-blk name">
-                        Naman Sharma
-                    </p>
-                    <p class="text-blk position">
-                        Founder and Educator
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
-            <div class="team-card">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQEjjDCNI0SpwQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1702920234862?e=1741824000&v=beta&t=CEis53FB9uE2RqBhACb8nayRieQuXuHAzUL_eLfNP8A"
-                        width="85%">
-
-                </div>
-                <div class="team-card-content">
-                    <p class="text-blk name">
-                        Divyanshu Khandelwal
-                    </p>
-                    <p class="text-blk position">
-                        Co-Founder and Educator
-                    </p>
-                </div>
-            </div>
-        </div>
-        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
-            <div class="team-card">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQFV4cu2rVHHZw/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1709533963885?e=1741824000&v=beta&t=svuFBlvM0i-t7xVD4DWzM8osX6pCDhchE9V3-_28Dfo"
-                        width="85%">
-
-                </div>
-                <div class="team-card-content">
-                    <p class="text-blk name">
-                        Piyush Khandelwal
-                    </p>
-                    <p class="text-blk position">
-                        Advisor and Director @W3Grads
-                    </p>
-                </div>
-            </div>
+    <div class="container mt-4">
+        <div class="team-header" data-aos="fade-up" data-aos-duration="1000">
+            <h1 class="team-title">Meet Our Team</h1>
+            <p class="team-subtitle">The passionate individuals behind Angaar who are dedicated to transforming
+                education and empowering the next generation of tech professionals.</p>
         </div>
 
-        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
-            <div class="team-card">
+        <!-- <div class="team-categories" data-aos="fade-up" data-aos-delay="200">
+            <div class="category-btn active" data-filter="all">All</div>
+            <div class="category-btn" data-filter="founder">Founders</div>
+            <div class="category-btn" data-filter="technical">Technical</div>
+            <div class="category-btn" data-filter="design">Design</div>
+        </div> -->
+
+        <!-- Founders Row -->
+        <div class="founders-row" data-aos="fade-up">
+            <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="100">
                 <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQFA3Q0axXNkxQ/profile-displayphoto-shrink_400_400/B56ZQYuQ7jH0Ak-/0/1735581569302?e=1741824000&v=beta&t=4555Clrg5ZVyIgHfLFxLUpnBOr3XCg8PLsZejHwj-b0"
-                        width="85%">
+                    <img class="team-img" src="{% static 'img/home/ns.png' %}" alt="Naman Sharma">
                 </div>
                 <div class="team-card-content">
-                    <p class="text-blk name">
-                        Nandini
-                    </p>
-                    <p class="text-blk position">
-                        Video Editing Team
-                    </p>
+                    <h3 class="team-name">Naman Sharma</h3>
+                    <p class="team-position">Founder and Educator</p>
+                    <div class="team-social">
+                        <a href="https://www.linkedin.com/in/namansharma1412" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="200">
+                <div class="team-img-wrapper">
+                    <img class="team-img"
+                        src="https://media.licdn.com/dms/image/v2/D5603AQEjjDCNI0SpwQ/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1702920234862?e=1747267200&v=beta&t=WAky6VqAcOLUxX4mYfD1koIMHcN9VUSZNF--pP8Qlbs"
+                        alt="Divyanshu Khandelwal">
+                </div>
+                <div class="team-card-content">
+                    <h3 class="team-name">Divyanshu Khandelwal</h3>
+                    <p class="team-position">Co-Founder and Educator</p>
+                    <div class="team-social">
+                        <a href="https://www.linkedin.com/in/divyanshu-khandelwal-dkoder" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="300">
+                <div class="team-img-wrapper">
+                    <img class="team-img"
+                        src="https://th.bing.com/th/id/OIP._kIPlIMql8MzNRzIE5fV5gAAAA?rs=1&pid=ImgDetMain"
+                        alt="Piyush Khandelwal">
+                </div>
+                <div class="team-card-content">
+                    <h3 class="team-name">Piyush Khandelwal</h3>
+                    <p class="team-position">Advisor and Director @W3Grads</p>
+                    <div class="team-social">
+                        <a href="https://www.linkedin.com/in/piyush-khandelwal-5a9b9718" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
-            <div class="team-card">
+        <!-- Rest of Team in Grid -->
+        <div class="team-grid">
+            <div class="team-card" data-category="design" data-aos="fade-up" data-aos-delay="100">
                 <div class="team-img-wrapper">
                     <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQHNkZy8pXwVJA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1718273999260?e=1741824000&v=beta&t=Z2mhWLRGPg3urON920ZakO-0-sLEwiiOL47quYkqt80"
-                        width="85%">
+                        src="https://media.licdn.com/dms/image/v2/D5603AQFA3Q0axXNkxQ/profile-displayphoto-shrink_400_400/B56ZQYuQ7jH0Ak-/0/1735581569302?e=1747267200&v=beta&t=nU-jjZFN8JWjszDRSb-DS4xlI51kdyR1UgfYSxV8R-g"
+                        alt="Nandini">
                 </div>
                 <div class="team-card-content">
-                    <p class="text-blk name">
-                        Ishaan Khan
-                    </p>
-                    <p class="text-blk position">
-                        Design Team
-                    </p>
+                    <h3 class="team-name">Nandini</h3>
+                    <p class="team-position">Video Editing Team</p>
+                    <div class="team-social">
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <!-- <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
-            <div class="team-card">
+            <div class="team-card" data-category="design" data-aos="fade-up" data-aos-delay="200">
                 <div class="team-img-wrapper">
                     <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQGzRz0uCzlJWQ/profile-displayphoto-shrink_400_400/B56ZRAdNPXHIAk-/0/1736248187102?e=1741824000&v=beta&t=saHL28RgTL-KZ3o5hcffJMbP7h7MLcGXSiD2on1iRmE"
-                        width="85%">
+                        src="https://media.licdn.com/dms/image/v2/D5603AQHNkZy8pXwVJA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1718273999260?e=1747267200&v=beta&t=kTRp7uu_umxDgyzg5zqkaY6vglPEVEPrzQTlssnTG-I"
+                        alt="Ishaan Khan">
                 </div>
                 <div class="team-card-content">
-                    <p class="text-blk name">
-                        Adwait Patel
-                    </p>
-                    <p class="text-blk position">
-                        Core Technical Team
-                    </p>
+                    <h3 class="team-name">Ishaan Khan</h3>
+                    <p class="team-position">Design Team</p>
+                    <div class="team-social">
+                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <!-- <a href="#" class="social-icon"><i class="fab fa-behance"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="responsive-cell-block wk-desk-3 wk-mobile-12 wk-tab-4 wk-ipadp-4 team-card-container">
-            <div class="team-card">
+            <div class="team-card" data-category="technical" data-aos="fade-up" data-aos-delay="300">
                 <div class="team-img-wrapper">
                     <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D4E03AQHECQIZzTZdCg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1713275914043?e=1741824000&v=beta&t=ZpYQUr8m7HHmn0CaL7sfXuXekbrg4clQMDwxzwRYPWs"
-                        width="85%">
+                        src="https://media.licdn.com/dms/image/v2/D5603AQGzRz0uCzlJWQ/profile-displayphoto-shrink_400_400/B56ZRAdNPXHIAk-/0/1736248187102?e=1747267200&v=beta&t=gxla4LY0jzX2_7YUtsfAe9WYEPoppSQw8FJAQmqSW9s"
+                        alt="Adwait Patel">
                 </div>
                 <div class="team-card-content">
-                    <p class="text-blk name">
-                        Shashank Upadhyay
-                    </p>
-                    <p class="text-blk position">
-                        Core Technical Team
-                    </p>
+                    <h3 class="team-name">Adwait Patel</h3>
+                    <p class="team-position">Core Technical Team</p>
+                    <div class="team-social">
+                        <a href="https://www.linkedin.com/in/adp-pythondev" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <!-- <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="team-card" data-category="technical" data-aos="fade-up" data-aos-delay="400">
+                <div class="team-img-wrapper">
+                    <img class="team-img"
+                        src="https://media.licdn.com/dms/image/v2/D4E03AQHECQIZzTZdCg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1713275914043?e=1747267200&v=beta&t=L-ge91Qwk0xEBOlnTuyaYdPl0pKTs_b4xL7FdVAf0TQ"
+                        alt="Shashank Upadhyay">
+                </div>
+                <div class="team-card-content">
+                    <h3 class="team-name">Shashank Upadhyay</h3>
+                    <p class="team-position">Core Technical Team</p>
+                    <div class="team-social">
+                        <a href="https://www.linkedin.com/in/shubhcoder0269" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                        <!-- <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Particle.js for background effects -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<!-- AOS Library for scroll animations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+<script>
+    // Initialize AOS animations
+    document.addEventListener('DOMContentLoaded', function () {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: false
+        });
+
+        // Initialize particles.js
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 100,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ff6026"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 2,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ff6026",
+                    "opacity": 0.2,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 0.5
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+        // Team filtering functionality
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const teamCards = document.querySelectorAll('.team-card');
+
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', function () {
+                // Remove active class from all buttons
+                categoryBtns.forEach(b => b.classList.remove('active'));
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                const filter = this.getAttribute('data-filter');
+
+                // Filter team cards
+                teamCards.forEach(card => {
+                    if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                        card.style.display = 'block';
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 100);
+                    } else {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        setTimeout(() => {
+                            card.style.display = 'none';
+                        }, 300);
+                    }
+                });
+            });
+        });
+
+        // Add parallax effect to team section
+        window.addEventListener('scroll', function () {
+            const scrollPosition = window.pageYOffset;
+            const teamSection = document.querySelector('.team-page-container');
+            if (teamSection) {
+                teamSection.style.backgroundPosition = `center ${scrollPosition * 0.05}px`;
+            }
+        });
+    });
+</script>
 {% endblock %}

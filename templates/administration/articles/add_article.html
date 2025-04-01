@@ -58,17 +58,24 @@ active
     </div>
 </div>
 
-<script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+<!-- TinyMCE -->
+<script src="{% static 'tinymce/js/tinymce/tinymce.min.js' %}"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-
-        CKEDITOR.replace('content', {
-            uiColor: '#F29941',
-            extraPlugins: 'autogrow',
-            autoGrow_onStartup : true,
-            autoGrow_minHeight: 250,
-            autoGrow_maxHeight: 600,
-        });
+    tinymce.init({
+        selector: '#content',
+        plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount checklist mediaembed casechange export formatpainter pageembed permanentpen footnotes advtemplate advtable advcode editimage tableofcontents mergetags powerpaste tinymcespellchecker autocorrect typography inlinecss',
+        toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table mergetags | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
+        height: 500,
+        menubar: true,
+        automatic_uploads: true,
+        images_upload_url: '/administration/upload/image',
+        images_upload_base_path: '/media/articles/',
+        content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }',
+        setup: function (editor) {
+            editor.on('change', function () {
+                editor.save();
+            });
+        }
     });
 </script>
 

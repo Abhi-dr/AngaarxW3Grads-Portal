@@ -9,9 +9,12 @@ from django.http import JsonResponse
 
 from django.core.paginator import Paginator
 
-from accounts.models import Student, Instructor
-from student.models import Notification, Anonymous_Message, Feedback
-from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
+from accounts.models import Student
+from student.models import Notification
+from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 
 # ========================================= DASHBOARD =========================================
 
@@ -66,27 +69,37 @@ def my_batches(request):
 #     return redirect('my_batches')
 
 
+
 @login_required(login_url="login")
 def enroll_batch(request, id):
     student = request.user.student
     batch = get_object_or_404(Batch, id=id)
 
-    # Check if the student is already enrolled or has a pending request
     if EnrollmentRequest.objects.filter(student=student, batch=batch).exists():
         messages.warning(request, "You have already requested to join this batch.")
         return redirect('my_batches')
 
-    # Handle extra fields if required
     extra_data = {}
     if batch.required_fields:
         for field in batch.required_fields:
             extra_data[field] = request.POST.get(field, "")
 
-    # Create Enrollment Request
     EnrollmentRequest.objects.create(student=student, batch=batch, additional_data=extra_data)
-    messages.success(request, "Your enrollment request has been submitted!")
 
+    # Send WebSocket update using Redis Channel Layer
+    channel_layer = get_channel_layer()
+    
+    async_to_sync(channel_layer.group_send)(
+        "enrollment_requests",
+        {
+            "type": "send_enrollment_update",
+            "message": "A new enrollment request has been submitted!"
+        }
+    )
+
+    messages.success(request, "Your enrollment request has been submitted!")
     return redirect('my_batches')
+
 
 
     

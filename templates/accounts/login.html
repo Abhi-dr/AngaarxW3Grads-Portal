@@ -43,7 +43,7 @@
     </div>
 
     {% endfor %}
-    <form class="login-form" method="post">
+    <form class="login-form" method="post" action="{% url 'login' %}?next={{ request.GET.next|default:'' }}">
       {% csrf_token %}
       <div class="text-center mb-4">
         <img src="{% static 'img/home/angaar_logo.jpg' %}" width="80" alt="Angaar Logo" class="mb-2">

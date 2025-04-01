@@ -144,6 +144,10 @@
 
     {% endblock %}
 
+    <!-- Add jQuery before other scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </head>
 
 <body style="background-attachment: fixed;">
@@ -262,6 +266,17 @@
                         </li>
 
                         <li class="sidebar-item">
+                            <a class="sidebar-link {% block flames_active %} {% endblock %}"
+                                href="{% url 'admin_flames_courses' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-flame"></i>
+                                </span>
+                                <span class="hide-menu">FLAMES</span>
+
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
                             <a class="sidebar-link {% block enrollment_request_active %} {% endblock %}"
                                 href="{% url 'administrator_enrollment_requests' %}" aria-expanded="false">
                                 <span>
@@ -295,6 +310,15 @@
                                     <i class="ti ti-user-plus"></i>
                                 </span>
                                 <span class="hide-menu">Instructors</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'achievements' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-trophy"></i>
+                                </span>
+                                <span class="hide-menu">Achievements</span>
                             </a>
                         </li>
 
@@ -514,8 +538,8 @@
     {% block myjs %}
     {% endblock %}
 
-
-    <script src="{% static 'js/dashboard/libs/jquery/dist/jquery.min.js' %}"></script>
+    <!-- Remove duplicate jQuery -->
+    <!-- <script src="{% static 'js/dashboard/libs/jquery/dist/jquery.min.js' %}"></script> -->
     <script src="{% static 'js/dashboard/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'js/dashboard/js/sidebarmenu.js' %}"></script>
     <script src="{% static 'js/dashboard/js/app.min.js' %}"></script>
