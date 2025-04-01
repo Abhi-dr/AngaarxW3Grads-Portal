@@ -396,8 +396,7 @@
 
     /* Free Class Pass Styles */
     .free-pass-container {
-        width: 100%;
-        max-width: 320px;
+        width: 25%;
         margin: 0 auto;
         padding: 20px;
         position: relative;
@@ -1219,6 +1218,136 @@
         -webkit-text-fill-color: transparent;
     }
 </style>
+
+<style>
+    /* Feature Card Hover Effects */
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 96, 38, 0.3);
+    }
+
+    .feature-card:hover .feature-hover-effect {
+        transform: scaleX(1);
+    }
+
+    .feature-card:hover .flame-glow {
+        animation: pulse 2s infinite;
+    }
+
+    /* CTA Button Hover Effect */
+    .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(255, 96, 38, 0.3);
+    }
+
+    .cta-button:hover .button-glow {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: scale(1.2);
+            opacity: 0.2;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 991.98px) {
+        .section-title {
+            font-size: 2.5rem !important;
+        }
+
+        .features-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+            gap: 20px !important;
+        }
+
+        .feature-card {
+            padding: 25px !important;
+        }
+
+        .feature-icon {
+            width: 60px !important;
+            height: 60px !important;
+        }
+
+        .feature-title {
+            font-size: 20px !important;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .section-title {
+            font-size: 2rem !important;
+        }
+
+        .section-subtitle {
+            font-size: 1rem !important;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .feature-card {
+            margin-bottom: 20px !important;
+        }
+
+        .cta-button {
+            padding: 12px 30px !important;
+            font-size: 1rem !important;
+        }
+    }
+
+    /* Flame Particles Animation */
+    .flame-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .flame-particles::before,
+    .flame-particles::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at center, rgba(255, 96, 38, 0.1) 0%, transparent 50%);
+        animation: flameFloat 8s infinite;
+    }
+
+    .flame-particles::after {
+        animation-delay: -4s;
+    }
+
+    @keyframes flameFloat {
+
+        0%,
+        100% {
+            transform: translateY(0) scale(1);
+        }
+
+        50% {
+            transform: translateY(-20px) scale(1.1);
+        }
+    }
+</style>
 {% endblock %}
 
 {% block body %}
@@ -1276,7 +1405,11 @@
         class="full-width-image" alt="Full width image content" />
 </section>
 
-<!-- A Journey to Master Coding with AngaarBatch -->
+<!-- ========================================================================== -->
+<!-- ================================ JOURNEY SECTION ========================= -->
+<!-- ========================================================================== -->
+
+
 <section class="journey-section position-relative py-5 overflow-hidden">
     <!-- Particle Background -->
     <div id="particles-js" class="position-absolute w-100 h-100"></div>
@@ -1349,7 +1482,7 @@
         <div class="justify-content-center mt-5">
             <div class="text-center">
                 <div class="d-flex justify-content-center">
-                    <a href="https://chat.whatsapp.com/LYXfJijDa9ZCqj2jrqTMT7">
+                    <a href="{% url 'register' %}">
                         <button class="skills-join-btn"
                             style="width: 100%; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; border: none; padding: 12px 10px; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">
                             I Want To Do It🔥 <i class="fas fa-arrow-right ms-2"></i>
@@ -1383,7 +1516,11 @@
     </div>
 </section>
 
-<!-- Free Class Pass Section -->
+
+<!-- ========================================================================== -->
+<!-- ================================ FREE PASS SECTION ========================= -->
+<!-- ========================================================================== -->
+
 <section class="free-class-pass-section"
     style="padding: 50px 20px; background-color: #0d0d0d; position: relative; overflow: hidden;">
     <!-- Background particles -->
@@ -1443,6 +1580,8 @@
     </div>
 </section>
 
+
+
 <section class="community-section">
     <div class="community-container">
         <img loading="lazy"
@@ -1458,8 +1597,6 @@
 <!-- Success Stories from Free Classes -->
 <section class="free-class-pass-section" style="padding: 30px 20px; background-color: #0d0d0d;">
 
-
-
     <div class="container">
         <div class="success-header rounded rounded-4"
             style="position: relative; margin-bottom: 50px; text-align: center;">
@@ -1474,12 +1611,11 @@
         </div>
 
 
-        <div class="success-carousel"
+        <!-- <div class="success-carousel"
             style="background: #1a1a1a; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);">
             <div class="success-items-container" style="position: relative; overflow: hidden; padding: 20px 0;">
                 <div class="success-items" id="successItems"
                     style="display: flex; gap: 20px; transition: transform 0.5s ease;">
-                    <!-- Card 1 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1507,7 +1643,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 2 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1535,7 +1670,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 3 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1563,7 +1697,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 4 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1591,7 +1724,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 5 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1624,8 +1756,7 @@
                     style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;">
                     <button class="carousel-nav-btn" data-index="0"
                         style="width: 10px; height: 10px; border-radius: 10%; background-color: #ff6026; border: none; cursor: pointer; transition: all 0.3s ease;"></button>
-                    <!-- <button class="carousel-nav-btn" data-index="1"
-                        style="width: 10px; height: 10px; border-radius: 10%; background-color: rgba(255, 96, 38, 0.3); border: none; cursor: pointer; transition: all 0.3s ease;"></button> -->
+                    
 
                 </div>
 
@@ -1638,7 +1769,7 @@
                     <i class="fas fa-chevron-right" style="color: white;"></i>
                 </button>
             </div>
-        </div>
+        </div> -->
     </div>
 </section>
 
@@ -1771,33 +1902,115 @@
     </div>
 </section>
 
-<section class="learn-code-connect-section">
-    <h2 class="section-title">Learn, Code, and Connect!</h2>
-    <div class="features-container" style="padding: 3%;">
-        <article class="feature-column">
-            <img loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/0864f318cb28859dccbd1c3562859e25361aa14c14906195993a782ad5d063b4?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                class="feature-icon" alt="Project-Based Learning icon" />
-            <h3 class="feature-title">Project-Based<br />Learning</h3>
-            <!-- <p class="feature-description">Apply your skills to real-world scenarios with project-driven learning.</p> -->
-        </article>
-        <article class="feature-column">
-            <img loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/709ed65bf819f0eb421873547f0959cf360a31a1bcc32e9f77b608a3b97d213e?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                class="feature-icon" alt="Community Growth icon" />
-            <h3 class="feature-title">A Community<br />for Growth</h3>
-            <!-- <p class="feature-description">AngaarBatch isn't just about learning—it's about growing together.
-                </p> -->
-        </article>
-        <article class="feature-column">
-            <img loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/d75168f9d8a182519df72aae6ddd5bd9f5e61ce6b29d2dbb847985acf6e13e9c?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                class="feature-icon" alt="Skill-Building Workshops icon" />
-            <h3 class="feature-title">Skill-Building Workshops</h3>
-            <!-- <p class="feature-description">Master coding skills through our dynamic workshops. </p> -->
-        </article>
+
+<section class="learn-code-connect-section"
+    style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 80px 20px; position: relative; overflow: hidden;">
+    <!-- Background Elements -->
+    <div class="flame-particles" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;">
+    </div>
+
+    <div class="container position-relative">
+        <!-- Section Title -->
+        <div class="text-center mb-5">
+            <h2 class="section-title"
+                style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem; background: linear-gradient(45deg, #ff6b6b, #ffd93d); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; position: relative; display: inline-block;">
+                Learn, Code, and Connect!
+                <div class="flame-decoration"
+                    style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 100px; height: 4px; background: linear-gradient(90deg, transparent, #ff6026, transparent);">
+                </div>
+            </h2>
+            <p class="section-subtitle"
+                style="color: rgba(255, 255, 255, 0.8); font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
+                Join our community of passionate learners and developers
+            </p>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px;">
+            <!-- Project-Based Learning Card -->
+            <div class="feature-card"
+                style="background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 30px; position: relative; overflow: hidden; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                <div class="flame-glow"
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,96,38,0.2) 0%, rgba(255,96,38,0) 70%); border-radius: 50%; z-index: 0;">
+                </div>
+                <div class="feature-icon"
+                    style="width: 70px; height: 70px; background: rgba(255, 96, 38, 0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; z-index: 1;">
+                    <i class="fas fa-project-diagram" style="font-size: 32px; color: #ff6026;"></i>
+                </div>
+                <h3 class="feature-title"
+                    style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 15px; position: relative; z-index: 1;">
+                    Project-Based Learning</h3>
+                <p class="feature-description"
+                    style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; position: relative; z-index: 1;">
+                    Build real-world projects and gain hands-on experience with industry-standard practices.
+                </p>
+                <div class="feature-hover-effect"
+                    style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #ff6026, #ff9d45); transform: scaleX(0); transition: transform 0.3s ease;">
+                </div>
+            </div>
+
+            <!-- Community Growth Card -->
+            <div class="feature-card"
+                style="background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 30px; position: relative; overflow: hidden; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                <div class="flame-glow"
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,96,38,0.2) 0%, rgba(255,96,38,0) 70%); border-radius: 50%; z-index: 0;">
+                </div>
+                <div class="feature-icon"
+                    style="width: 70px; height: 70px; background: rgba(255, 96, 38, 0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; z-index: 1;">
+                    <i class="fas fa-users" style="font-size: 32px; color: #ff6026;"></i>
+                </div>
+                <h3 class="feature-title"
+                    style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 15px; position: relative; z-index: 1;">
+                    Community Growth</h3>
+                <p class="feature-description"
+                    style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; position: relative; z-index: 1;">
+                    Connect with fellow developers, share knowledge, and grow together in our supportive community.
+                </p>
+                <div class="feature-hover-effect"
+                    style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #ff6026, #ff9d45); transform: scaleX(0); transition: transform 0.3s ease;">
+                </div>
+            </div>
+
+            <!-- Skill-Building Workshops Card -->
+            <div class="feature-card"
+                style="background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 30px; position: relative; overflow: hidden; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                <div class="flame-glow"
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,96,38,0.2) 0%, rgba(255,96,38,0) 70%); border-radius: 50%; z-index: 0;">
+                </div>
+                <div class="feature-icon"
+                    style="width: 70px; height: 70px; background: rgba(255, 96, 38, 0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; z-index: 1;">
+                    <i class="fas fa-laptop-code" style="font-size: 32px; color: #ff6026;"></i>
+                </div>
+                <h3 class="feature-title"
+                    style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 15px; position: relative; z-index: 1;">
+                    Skill-Building Workshops</h3>
+                <p class="feature-description"
+                    style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; position: relative; z-index: 1;">
+                    Participate in interactive workshops designed to enhance your coding skills and problem-solving
+                    abilities.
+                </p>
+                <div class="feature-hover-effect"
+                    style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #ff6026, #ff9d45); transform: scaleX(0); transition: transform 0.3s ease;">
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="text-center mt-3">
+            <a href="{% url 'register' %}" class="cta-button"
+                style="display: inline-block; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.3s ease; position: relative; overflow: hidden; margin-top: 30px;">
+                Join Our Community
+                <i class="fas fa-arrow-right ms-2"></i>
+                <div class="button-glow"
+                    style="position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%); transition: width 0.6s ease, height 0.6s ease;">
+                </div>
+            </a>
+        </div>
     </div>
 </section>
+
+
 
 <!-- WhatsApp Floating Button with Dialog -->
 <div class="flame-container" id="whatsappMainBtn">
@@ -1906,6 +2119,26 @@
 
 <!-- Add Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<script>
+    // Add flame particles dynamically
+    document.addEventListener('DOMContentLoaded', function () {
+        const flameParticles = document.querySelector('.flame-particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = '4px';
+            particle.style.height = '4px';
+            particle.style.background = 'rgba(255, 96, 38, 0.3)';
+            particle.style.borderRadius = '50%';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animation = `float ${Math.random() * 10 + 5}s infinite`;
+            particle.style.animationDelay = Math.random() * 1 + 's';
+            flameParticles.appendChild(particle);
+        }
+    });
+</script>
 
 <!-- WhatsApp Button Script -->
 <script>
@@ -2069,23 +2302,6 @@
             });
         }
 
-        // Free Class Pass Flip Animation
-        const freePass = document.getElementById('freePass');
-        const freePassContainer = document.getElementById('freePassContainer');
-
-        if (freePass && freePassContainer) {
-            const freePassAction = freePass.querySelector('.free-pass-action');
-
-            if (freePassAction) {
-                freePassAction.addEventListener('click', function () {
-                    freePass.classList.add('flipped');
-                });
-            }
-
-            // Initialize particles for the free class pass background
-            createPassParticles();
-        }
-
         // Particles for Free Class Pass
         function createPassParticles() {
             const particlesContainer = document.querySelector('.pass-bg-particles');
@@ -2116,6 +2332,26 @@
                 particlesContainer.appendChild(particle);
             }
         }
+
+        // Free Class Pass Flip Animation
+        const freePass = document.getElementById('freePass');
+        const freePassContainer = document.getElementById('freePassContainer');
+
+        if (freePass && freePassContainer) {
+            const freePassAction = freePass.querySelector('.free-pass-action');
+
+            console.log(freePassAction);
+            if (freePassAction) {
+                freePassAction.addEventListener('click', function () {
+                    freePass.classList.add('flipped');
+                });
+            }
+
+            // Initialize particles for the free class pass background
+            createPassParticles();
+        }
+
+
 
         // Add keyframe animation for particles
         const styleSheet = document.createElement('style');
