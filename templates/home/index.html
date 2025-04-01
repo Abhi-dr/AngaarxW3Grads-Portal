@@ -1217,9 +1217,7 @@
         background-clip: text;
         -webkit-text-fill-color: transparent;
     }
-</style>
 
-<style>
     /* Feature Card Hover Effects */
     .feature-card:hover {
         transform: translateY(-10px);
@@ -1347,6 +1345,899 @@
             transform: translateY(-20px) scale(1.1);
         }
     }
+
+    /* Enhanced FLAMES 25 Button */
+    .flames-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 18rem;
+        overflow: hidden;
+        height: 4.5rem;
+        top: -10%;
+        background-size: 300% 300%;
+        cursor: pointer;
+        backdrop-filter: blur(1rem);
+        border-radius: 5rem;
+        transition: 0.5s;
+        animation: gradient_301 5s ease infinite, pulse-shadow 2s infinite;
+        border: double 2.5px transparent;
+        background-image: linear-gradient(#212121, #212121),
+            linear-gradient(137.48deg,
+                #ffffff 10%,
+                #00197f 45%,
+                #ff5b03 67%,
+                #000000 87%);
+        background-origin: border-box;
+        background-clip: content-box, border-box;
+        box-shadow: 0 10px 30px rgba(255, 91, 3, 0.4);
+        position: relative;
+        z-index: 100;
+    }
+
+    @keyframes pulse-shadow {
+        0% {
+            box-shadow: 0 0 8px rgba(255, 91, 3, 0.6);
+        }
+
+        50% {
+            box-shadow: 0 0 25px rgba(255, 91, 3, 0.8);
+        }
+
+        100% {
+            box-shadow: 0 0 8px rgba(255, 91, 3, 0.6);
+        }
+    }
+
+    .flames-btn-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
+    .flames-btn-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 3;
+    }
+
+    .flames-btn-icon {
+        font-size: 24px;
+        color: #ff4f0f;
+        margin-bottom: 2px;
+        animation: flame-flicker 2s ease-in-out infinite;
+    }
+
+    .flames-btn-text {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #ff4f0f;
+        margin-bottom: 2px;
+        text-shadow: 0 0 8px rgba(255, 79, 15, 0.5);
+    }
+
+    .flames-btn-subtext {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+        letter-spacing: 0.5px;
+    }
+
+    .flames-btn-badge {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        background: linear-gradient(45deg, #ff4f0f, #ff9966);
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        animation: badge-pulse 1.5s infinite;
+        transform-origin: center;
+        z-index: 4;
+    }
+
+    @keyframes badge-pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .flames-btn-bg-animation {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 60%;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .flames-btn-fire {
+        position: absolute;
+        bottom: -10px;
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 79, 15, 0.7);
+        border-radius: 50% 50% 20% 20%;
+        box-shadow: 0 0 10px rgba(255, 79, 15, 0.5), 0 0 20px rgba(255, 79, 15, 0.3);
+        animation: flame-rise 3s infinite;
+        filter: blur(2px);
+    }
+
+    .flames-btn-fire:nth-child(1) {
+        left: 25%;
+        animation-delay: 0.2s;
+        animation-duration: 3s;
+    }
+
+    .flames-btn-fire:nth-child(2) {
+        left: 50%;
+        animation-delay: 0.5s;
+        animation-duration: 2.5s;
+    }
+
+    .flames-btn-fire:nth-child(3) {
+        left: 75%;
+        animation-delay: 0.8s;
+        animation-duration: 2.7s;
+    }
+
+    @keyframes flame-rise {
+        0% {
+            transform: translateY(0) scale(1);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: translateY(-15px) scale(1.5);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: translateY(-30px) scale(0.8);
+            opacity: 0;
+        }
+    }
+
+    @keyframes flame-flicker {
+
+        0%,
+        100% {
+            opacity: 1;
+            text-shadow: 0 0 10px rgba(255, 79, 15, 0.8);
+        }
+
+        50% {
+            opacity: 0.8;
+            text-shadow: 0 0 15px rgba(255, 79, 15, 1);
+        }
+    }
+
+    .flames-btn:hover {
+        transform: scale(1.1) translateY(-5px);
+        box-shadow: 0 15px 35px rgba(255, 91, 3, 0.6);
+    }
+
+    .flames-btn:hover .flames-btn-fire {
+        animation-duration: 1.5s;
+    }
+
+    /* Enhanced animation for the container stars */
+    .flames-btn:hover #container-stars {
+        z-index: 1;
+        background-color: #212121;
+        animation: twinkle 2s infinite;
+    }
+
+    @keyframes twinkle {
+
+        0%,
+        100% {
+            opacity: 0.8;
+        }
+
+        50% {
+            opacity: 1;
+        }
+    }
+
+    .flames-btn:hover #stars::after,
+    .flames-btn:hover #stars::before {
+        animation-duration: 40s;
+    }
+
+    /* Enhanced pulse animation for the circles */
+    .flames-btn:hover .circle {
+        animation: enhanced-pulse 2s infinite;
+    }
+
+    @keyframes enhanced-pulse {
+        0% {
+            transform: scale(0.8);
+            opacity: 0.8;
+        }
+
+        50% {
+            transform: scale(1.5);
+            opacity: 0.2;
+        }
+
+        100% {
+            transform: scale(0.8);
+            opacity: 0.8;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .flames-btn {
+            width: 16rem;
+            height: 4rem;
+            top: 20%;
+        }
+
+        .flames-btn-text {
+            font-size: 20px;
+        }
+
+        .flames-btn-icon {
+            font-size: 20px;
+        }
+    }
+
+    /* Floating animation to make the button hover slightly */
+    @keyframes float-button {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* Add a light beam effect when the button is hovered */
+    .flames-btn::after {
+        content: '';
+        position: absolute;
+        top: -150%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(rgba(255, 255, 255, 0),
+                rgba(255, 255, 255, 0.05),
+                rgba(255, 255, 255, 0));
+        transform: rotate(45deg);
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+
+    .flames-btn:hover::after {
+        animation: light-beam 2s infinite;
+        opacity: 1;
+    }
+
+    @keyframes light-beam {
+        0% {
+            transform: rotate(45deg) translateX(-100%);
+        }
+
+        100% {
+            transform: rotate(45deg) translateX(100%);
+        }
+    }
+
+    /* Summer Training Showcase Styles */
+    .summer-showcase {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        margin: 30px auto;
+        background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+        border-radius: 20px;
+        overflow: hidden;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 79, 15, 0.3);
+        z-index: 10;
+        transform: translateY(0);
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    .summer-showcase:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(255, 79, 15, 0.4);
+    }
+
+    .summer-showcase-heat-wave {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 30% 40%, rgba(255, 79, 15, 0.1) 0%, rgba(255, 79, 15, 0) 70%);
+        opacity: 0.7;
+        animation: heat-pulse 4s infinite;
+        pointer-events: none;
+    }
+
+    @keyframes heat-pulse {
+
+        0%,
+        100% {
+            opacity: 0.3;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.7;
+            transform: scale(1.2);
+        }
+    }
+
+    .summer-showcase-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .summer-showcase-badge {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        background: linear-gradient(45deg, #ff4f0f, #ff9966);
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        animation: badge-pulse 1.5s infinite;
+        transform-origin: center;
+    }
+
+    @keyframes badge-pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .summer-showcase-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin-bottom: 0;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 2px 10px rgba(255, 79, 15, 0.5);
+        background: linear-gradient(to right, #ffffff, #ff4f0f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        display: inline-block;
+    }
+
+    .year-highlight {
+        font-size: 3.5rem;
+        color: #ff4f0f;
+        background: linear-gradient(to right, #ff4f0f, #ff9966);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        display: inline-block;
+    }
+
+    .summer-tagline {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 25px;
+        font-weight: 300;
+    }
+
+    .summer-features {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .summer-feature {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .feature-icon {
+        background: rgba(255, 79, 15, 0.1);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #ff4f0f;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .summer-feature:hover .feature-icon {
+        transform: translateY(-5px);
+        background: rgba(255, 79, 15, 0.2);
+        color: #ff9966;
+    }
+
+    .feature-text {
+        font-size: 0.9rem;
+        color: white;
+        font-weight: 500;
+    }
+
+    .countdown-container {
+        margin: 25px 0;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .countdown-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+
+    .countdown-timer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .countdown-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .countdown-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(135deg, #333 0%, #222 100%);
+        padding: 5px 10px;
+        border-radius: 8px;
+        min-width: 60px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .countdown-value::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%);
+        animation: shine 2s infinite;
+    }
+
+    @keyframes shine {
+        to {
+            left: 100%;
+        }
+    }
+
+    .countdown-unit {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 5px;
+    }
+
+    .countdown-separator {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ff4f0f;
+        margin: 0 5px;
+        align-self: flex-start;
+        margin-top: 5px;
+    }
+
+    .enrollment-status {
+        margin: 25px 0;
+    }
+
+    .enrollment-progress {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 87%;
+        background: linear-gradient(to right, #ff4f0f, #ff9966);
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%);
+        animation: shine 1.5s infinite;
+    }
+
+    .enrollment-text {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-align: right;
+    }
+
+    .enrollment-text span {
+        color: #ff4f0f;
+        font-weight: 700;
+    }
+
+    .learn-more-btn {
+        background: linear-gradient(45deg, #ff4f0f, #ff9966);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(255, 79, 15, 0.3);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .btn-text {
+        position: relative;
+        z-index: 2;
+        margin-right: 10px;
+    }
+
+    .btn-icon {
+        position: relative;
+        z-index: 2;
+        font-size: 1.2rem;
+        animation: flame-flicker 2s infinite;
+    }
+
+    @keyframes flame-flicker {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.8;
+            transform: scale(1.2);
+        }
+    }
+
+    .btn-spark {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        width: 8px;
+        height: 8px;
+        filter: blur(2px);
+        opacity: 0;
+        z-index: 1;
+    }
+
+    .spark1 {
+        top: 20%;
+        right: 20%;
+        animation: spark-animate 3s infinite 0.2s;
+    }
+
+    .spark2 {
+        top: 60%;
+        right: 35%;
+        animation: spark-animate 2.5s infinite 0.5s;
+    }
+
+    .spark3 {
+        top: 30%;
+        right: 50%;
+        animation: spark-animate 2.8s infinite 0.7s;
+    }
+
+    @keyframes spark-animate {
+        0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0;
+        }
+
+        20% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: translate(20px, -20px) scale(0);
+            opacity: 0;
+        }
+    }
+
+    .learn-more-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(255, 79, 15, 0.5);
+    }
+
+    .learn-more-btn:hover .btn-spark {
+        animation-duration: 1.5s;
+    }
+
+    .learn-more-btn::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(rgba(255, 255, 255, 0),
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 255, 255, 0));
+        transform: rotate(45deg);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .learn-more-btn:hover::after {
+        opacity: 1;
+        animation: sweep 1s forwards;
+    }
+
+    @keyframes sweep {
+        0% {
+            transform: rotate(45deg) translateX(-100%);
+        }
+
+        100% {
+            transform: rotate(45deg) translateX(100%);
+        }
+    }
+
+    .showcase-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .floating-icon {
+        position: absolute;
+        font-size: 18px;
+        color: rgba(255, 79, 15, 0.3);
+        animation: float 5s ease-in-out infinite;
+    }
+
+    .icon1 {
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .icon2 {
+        top: 70%;
+        left: 15%;
+        animation-delay: 1s;
+    }
+
+    .icon3 {
+        top: 30%;
+        right: 10%;
+        animation-delay: 2s;
+    }
+
+    .icon4 {
+        top: 60%;
+        right: 15%;
+        animation-delay: 0.5s;
+    }
+
+    .icon5 {
+        top: 40%;
+        right: 30%;
+        animation-delay: 1.5s;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-15px) rotate(5deg);
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .summer-showcase {
+            margin: 20px 15px;
+            padding: 20px;
+        }
+
+        .summer-showcase-title,
+        .year-highlight {
+            font-size: 2.5rem;
+        }
+
+        .summer-tagline {
+            font-size: 1rem;
+        }
+
+        .summer-features {
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .countdown-value {
+            font-size: 1.5rem;
+            min-width: 40px;
+        }
+
+        .countdown-unit {
+            font-size: 0.7rem;
+        }
+
+        .countdown-separator {
+            font-size: 1.5rem;
+        }
+
+        .learn-more-btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+        }
+    }
+
+    /* Popup Styles */
+    .flames-popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .flames-popup-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .flames-popup-container {
+        position: relative;
+        width: 90%;
+        max-width: 800px;
+        animation: popup-appear 0.7s forwards;
+    }
+
+    @keyframes popup-appear {
+        0% {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .flames-popup-close {
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff4f0f, #ff9966);
+        border: none;
+        color: white;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .flames-popup-close:hover {
+        transform: rotate(90deg);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .summer-showcase.popup-mode {
+        margin: 0;
+        transform: translateY(0);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .flames-popup-container {
+            width: 95%;
+        }
+        
+        .flames-popup-close {
+            top: -15px;
+            right: -15px;
+            width: 35px;
+            height: 35px;
+            font-size: 16px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -1356,23 +2247,6 @@
     <div class="content-container content-theme-dark">
         <div class="content-inner">
             <div class="content-center">
-
-
-                <button type="button" class="flames-btn" onclick="window.location.href='{% url 'flames' %}';">
-                    <strong>
-                        FLAMES '25
-                    </strong>
-                    <div id="container-stars">
-                        <div id="stars"></div>
-                    </div>
-
-                    <div id="glow">
-                        <div class="circle"></div>
-                        <div class="circle"></div>
-                    </div>
-                </button>
-
-
                 <h1>IGNITE</h1>
                 <!-- <p>THE ANGAAR BATCH -->
                 <!-- </p> -->
@@ -1395,8 +2269,82 @@
             </div>
         </div>
     </div>
+</section>
 
+<section class="journey-section position-relative py-5 overflow-hidden">
 
+    <!-- Add interactive summer showcase -->
+    <div class="summer-showcase" id="summerShowcase">
+        <div class="summer-showcase-heat-wave"></div>
+        <div class="summer-showcase-content">
+            <div class="summer-showcase-badge">LIMITED SPOTS</div>
+            <h2 class="summer-showcase-title">FLAMES <span class="year-highlight">'25</span></h2>
+            <div class="summer-tagline">Summer Training Program</div>
+
+            <div class="summer-features">
+                <div class="summer-feature">
+                    <div class="feature-icon"><i class="fas fa-laptop-code"></i></div>
+                    <div class="feature-text">Intensive Coding</div>
+                </div>
+                <div class="summer-feature">
+                    <div class="feature-icon"><i class="fas fa-certificate"></i></div>
+                    <div class="feature-text">Industry Certificate</div>
+                </div>
+                <div class="summer-feature">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <div class="feature-text">Networking</div>
+                </div>
+            </div>
+
+            <div class="countdown-container">
+                <div class="countdown-label">Registration Closes In:</div>
+                <div class="countdown-timer" id="flamesCountdown">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-days">00</div>
+                        <div class="countdown-unit">Days</div>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-hours">00</div>
+                        <div class="countdown-unit">Hours</div>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-minutes">00</div>
+                        <div class="countdown-unit">Mins</div>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-seconds">00</div>
+                        <div class="countdown-unit">Secs</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="enrollment-status">
+                <div class="enrollment-progress">
+                    <div class="progress-bar" id="enrollmentProgress"></div>
+                </div>
+                <div class="enrollment-text"><span id="enrollmentCount">87</span>% seats filled</div>
+            </div>
+
+            <button class="learn-more-btn" onclick="window.location.href='{% url 'flames' %}';">
+                <span class="btn-text">Secure Your Spot</span>
+                <span class="btn-icon"><i class="fas fa-fire"></i></span>
+                <div class="btn-spark spark1"></div>
+                <div class="btn-spark spark2"></div>
+                <div class="btn-spark spark3"></div>
+            </button>
+        </div>
+
+        <div class="showcase-decoration">
+            <div class="floating-icon icon1"><i class="fas fa-code"></i></div>
+            <div class="floating-icon icon2"><i class="fas fa-database"></i></div>
+            <div class="floating-icon icon3"><i class="fas fa-mobile-alt"></i></div>
+            <div class="floating-icon icon4"><i class="fas fa-server"></i></div>
+            <div class="floating-icon icon5"><i class="fas fa-bezier-curve"></i></div>
+        </div>
+    </div>
 </section>
 
 <section class="image-container">
@@ -2651,6 +3599,335 @@
         retina_detect: true
     });
 </script>
+
+<script>
+    // Countdown Timer Logic
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set the date 30 days from now
+        const countDownDate = new Date();
+        countDownDate.setDate(countDownDate.getDate() + 30);
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = countDownDate - now;
+
+            // Time calculations
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the result
+            document.getElementById("countdown-days").innerHTML = days < 10 ? "0" + days : days;
+            document.getElementById("countdown-hours").innerHTML = hours < 10 ? "0" + hours : hours;
+            document.getElementById("countdown-minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+            document.getElementById("countdown-seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+        }
+
+        // Update every second
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Random enrollment fluctuation to create urgency
+        let enrollmentValue = 87;
+        const enrollmentDisplay = document.getElementById('enrollmentCount');
+        const enrollmentProgress = document.getElementById('enrollmentProgress');
+
+        setInterval(function () {
+            const change = Math.random() > 0.7 ? 1 : 0;
+            if (enrollmentValue < 95 && change === 1) {
+                enrollmentValue += 1;
+                enrollmentDisplay.textContent = enrollmentValue;
+                enrollmentProgress.style.width = enrollmentValue + '%';
+            }
+        }, 30000); // Check every 30 seconds
+
+        // Add intersection observer for entrance animation
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('showcase-visible');
+                }
+            });
+        }, { threshold: 0.3 });
+
+        observer.observe(document.getElementById('summerShowcase'));
+    });
+</script>
+
+<!-- Add popup version of the summer showcase -->
+<div class="flames-popup-overlay" id="flamesPopup">
+    <div class="flames-popup-container">
+        <button class="flames-popup-close" id="closeFlamesPopup">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <!-- Same content as the summer showcase card -->
+        <div class="summer-showcase popup-mode">
+            <div class="summer-showcase-heat-wave"></div>
+            <div class="summer-showcase-content">
+                <div class="summer-showcase-badge">LIMITED SPOTS</div>
+                <h2 class="summer-showcase-title">FLAMES <span class="year-highlight">'25</span></h2>
+                <div class="summer-tagline">Summer Training Program</div>
+                
+                <div class="summer-features">
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-laptop-code"></i></div>
+                        <div class="feature-text">Intensive Coding</div>
+                    </div>
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-certificate"></i></div>
+                        <div class="feature-text">Industry Certificate</div>
+                    </div>
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-users"></i></div>
+                        <div class="feature-text">Networking</div>
+                    </div>
+                </div>
+                
+                <div class="countdown-container">
+                    <div class="countdown-label">Registration Closes In:</div>
+                    <div class="countdown-timer" id="popupFlamesCountdown">
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-days">00</div>
+                            <div class="countdown-unit">Days</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-hours">00</div>
+                            <div class="countdown-unit">Hours</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-minutes">00</div>
+                            <div class="countdown-unit">Mins</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-seconds">00</div>
+                            <div class="countdown-unit">Secs</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="enrollment-status">
+                    <div class="enrollment-progress">
+                        <div class="progress-bar" id="popupEnrollmentProgress"></div>
+                    </div>
+                    <div class="enrollment-text"><span id="popupEnrollmentCount">87</span>% seats filled</div>
+                </div>
+                
+                <button class="learn-more-btn" onclick="window.location.href='{% url 'flames' %}';">
+                    <span class="btn-text">Secure Your Spot</span>
+                    <span class="btn-icon"><i class="fas fa-fire"></i></span>
+                    <div class="btn-spark spark1"></div>
+                    <div class="btn-spark spark2"></div>
+                    <div class="btn-spark spark3"></div>
+                </button>
+            </div>
+            
+            <div class="showcase-decoration">
+                <div class="floating-icon icon1"><i class="fas fa-code"></i></div>
+                <div class="floating-icon icon2"><i class="fas fa-database"></i></div>
+                <div class="floating-icon icon3"><i class="fas fa-mobile-alt"></i></div>
+                <div class="floating-icon icon4"><i class="fas fa-server"></i></div>
+                <div class="floating-icon icon5"><i class="fas fa-bezier-curve"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Popup Styles */
+.flames-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.flames-popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.flames-popup-container {
+    position: relative;
+    width: 90%;
+    max-width: 800px;
+    animation: popup-appear 0.7s forwards;
+}
+
+@keyframes popup-appear {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.flames-popup-close {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff4f0f, #ff9966);
+    border: none;
+    color: white;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.flames-popup-close:hover {
+    transform: rotate(90deg);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+}
+
+.summer-showcase.popup-mode {
+    margin: 0;
+    transform: translateY(0);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
+    .flames-popup-container {
+        width: 95%;
+    }
+    
+    .flames-popup-close {
+        top: -15px;
+        right: -15px;
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+}
+</style>
+
+<script>
+// Popup Logic
+document.addEventListener('DOMContentLoaded', function() {
+    // Sound effect for popup
+    const flameSound = document.getElementById('flameSound');
+    
+    // Function to play flame sound with fallback
+    function playFlameSound() {
+        // Check if browser supports audio
+        if (flameSound) {
+            // Reset sound to beginning (in case it was played before)
+            flameSound.currentTime = 0;
+            
+            // Set volume (0.0 to 1.0)
+            flameSound.volume = 0.7;
+            
+            // Play with error handling
+            const playPromise = flameSound.play();
+            
+            // Handle autoplay restrictions in modern browsers
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log("Audio autoplay was prevented. User interaction needed.");
+                    // We could add a small "🔊" button here if needed for browsers that block autoplay
+                });
+            }
+        }
+    }
+    
+    // Show popup after a short delay when page loads
+    setTimeout(function() {
+        const flamesPopup = document.getElementById('flamesPopup');
+        flamesPopup.classList.add('active');
+        
+        // Play flame sound
+        playFlameSound();
+        
+        // Check if popup has been shown already in this session
+        if (!sessionStorage.getItem('flamesPopupShown')) {
+            sessionStorage.setItem('flamesPopupShown', 'true');
+        }
+    }, 1500); // Show after 1.5 seconds
+    
+    // Close popup when close button is clicked
+    document.getElementById('closeFlamesPopup').addEventListener('click', function() {
+        const flamesPopup = document.getElementById('flamesPopup');
+        flamesPopup.classList.remove('active');
+    });
+    
+    // Also close popup when clicking outside the content
+    document.getElementById('flamesPopup').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+        }
+    });
+    
+    // Update countdown for popup timer
+    function updatePopupCountdown() {
+        const countDownDate = new Date();
+        countDownDate.setDate(countDownDate.getDate() + 30);
+        
+        const now = new Date().getTime();
+        const distance = countDownDate - now;
+        
+        // Time calculations
+        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+        
+        // Display the result in popup countdown
+        document.getElementById("popup-countdown-days").innerHTML = days < 10 ? "0" + days : days;
+        document.getElementById("popup-countdown-hours").innerHTML = hours < 10 ? "0" + hours : hours;
+        document.getElementById("popup-countdown-minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
+        document.getElementById("popup-countdown-seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+    }
+    
+    // Initialize and update popup countdown
+    updatePopupCountdown();
+    setInterval(updatePopupCountdown, 1000);
+    
+    // Sync enrollment progress between main card and popup
+    function syncEnrollment() {
+        const mainValue = document.getElementById('enrollmentCount').textContent;
+        document.getElementById('popupEnrollmentCount').textContent = mainValue;
+        document.getElementById('popupEnrollmentProgress').style.width = mainValue + '%';
+    }
+    
+    // Initial sync
+    syncEnrollment();
+    
+    // Sync regularly
+    setInterval(syncEnrollment, 30000);
+});
+</script>
+
+<!-- Add audio element for flame sound effect -->
+<audio id="flameSound" preload="auto">
+    <source src="{% static 'sounds/flame-whoosh.mp3' %}" type="audio/mpeg">
+    <!-- Fallback sources in different formats for browser compatibility -->
+    <source src="{% static 'sounds/flame-whoosh.ogg' %}" type="audio/ogg">
+    <source src="{% static 'sounds/flame-whoosh.wav' %}" type="audio/wav">
+</audio>
 
 </body>
 
