@@ -752,11 +752,11 @@
     }
 
     /* From Uiverse.io by StealthWorm */
-    .btn {
+    .flames-btn {
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 12rem;
+        width: 15rem;
         overflow: hidden;
         height: 3rem;
         top: -10%;
@@ -770,15 +770,15 @@
         background-image: linear-gradient(#212121, #212121),
             linear-gradient(137.48deg,
                 #ffffff 10%,
-                #553bff 45%,
+                #00197f 45%,
                 #ff5b03 67%,
-                #ff1818 87%);
+                #000000 87%);
         background-origin: border-box;
         background-clip: content-box, border-box;
     }
 
     @media (max-width: 768px) {
-        .btn {
+        .flames-btn {
             top: 20%
         }
     }
@@ -823,23 +823,23 @@
         background: rgba(142, 81, 234, 0.704);
     }
 
-    .btn:hover #container-stars {
+    .flames-btn:hover #container-stars {
         z-index: 1;
         background-color: #212121;
     }
 
-    .btn:hover {
+    .flames-btn:hover {
         transform: scale(1.1);
     }
 
-    .btn:active {
+    .flames-btn:active {
         border: double 4px #fe53bb;
         background-origin: border-box;
         background-clip: content-box, border-box;
         animation: none;
     }
 
-    .btn:active .circle {
+    .flames-btn:active .circle {
         background: #fe53bb;
     }
 
@@ -931,6 +931,293 @@
             box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
         }
     }
+
+    .journey-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        text-align: center;
+    }
+
+    .text-gradient {
+        background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientFlow 8s ease infinite;
+    }
+
+    @keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+        margin: 0 auto;
+        max-width: 70%;
+    }
+
+    .feature-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        font-size: 1.4rem;
+    }
+
+    .feature-content {
+        text-align: left;
+        flex: 1;
+    }
+
+    .pulse-button {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        min-width: 200px;
+    }
+
+    .pulse-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    .pulse-button::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .pulse-button:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+
+    .floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .floating-element {
+        position: absolute;
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.1);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .element-1 {
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .element-2 {
+        top: 20%;
+        right: 15%;
+        animation-delay: 1s;
+    }
+
+    .element-3 {
+        bottom: 30%;
+        left: 20%;
+        animation-delay: 2s;
+    }
+
+    .element-4 {
+        bottom: 20%;
+        right: 25%;
+        animation-delay: 3s;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    .journey-image-wrapper {
+        position: relative;
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .journey-image {
+        filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.3));
+        animation: imageFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes imageFloat {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    /* Shooting Stars Animation */
+    .shooting-stars {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: #fff;
+        border-radius: 50%;
+        animation: shoot 3s linear infinite;
+    }
+
+    .star:nth-child(1) {
+        top: 20%;
+        left: 0;
+        animation-delay: 0s;
+    }
+
+    .star:nth-child(2) {
+        top: 40%;
+        left: 0;
+        animation-delay: 1s;
+    }
+
+    .star:nth-child(3) {
+        top: 60%;
+        left: 0;
+        animation-delay: 2s;
+    }
+
+    .star:nth-child(4) {
+        top: 80%;
+        left: 0;
+        animation-delay: 3s;
+    }
+
+    .star:nth-child(5) {
+        top: 90%;
+        left: 0;
+        animation-delay: 4s;
+    }
+
+    @keyframes shoot {
+        0% {
+            transform: translateX(0) translateY(0);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(100vw) translateY(100vh);
+            opacity: 0;
+        }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 991.98px) {
+        .journey-section {
+            min-height: auto;
+            padding: 4rem 0;
+        }
+
+        .feature-item {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .feature-content {
+            text-align: center;
+        }
+
+        .journey-visual {
+            margin-top: 2rem;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .display-4 {
+            font-size: 2.5rem;
+        }
+
+        .lead {
+            font-size: 1.1rem;
+        }
+
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+
+        .feature-item {
+            padding: 1rem;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+    }
+
+    .the-angaar-batch-text {
+        background: linear-gradient(45deg, #ff4040 11%, #ff7300 53%, #ffcc00 100%);
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 </style>
 {% endblock %}
 
@@ -942,7 +1229,7 @@
             <div class="content-center">
 
 
-                <button type="button" class="btn" onclick="window.location.href='{% url 'flames' %}';">
+                <button type="button" class="flames-btn" onclick="window.location.href='{% url 'flames' %}';">
                     <strong>
                         FLAMES '25
                     </strong>
@@ -989,53 +1276,107 @@
         class="full-width-image" alt="Full width image content" />
 </section>
 
-<section class="journey-container">
-    <h1 class="journey-title">A Journey to Master Coding with AngaarBatch</h1>
-    <div class="journey-content">
-        <div class="journey-columns">
-            <div class="journey-column">
-                <div class="journey-text-container">
-                    <h2 class="journey-heading">Explore</h2>
-                    <p class="journey-paragraph">Our platform provides engaging lessons, with clear explanations of
-                        coding fundamentals and advanced concepts. Short, focused videos help you dive into the
-                        "why" and "how" behind coding practices. Global success stories and project demonstrations
-                        bring coding to life, showing how learning can create real-world impact.</p>
-                    <h2 class="journey-heading journey-heading-collaborate">Collaborate</h2>
-                    <p class="journey-paragraph">Coding is best learned with others. Our platform connects you with
-                        a passionate community of learners, mentors, and industry professionals. Through
-                        discussions, group projects, and peer feedback, you'll sharpen your skills and gain insights
-                        from a global network of coders.</p>
-                </div>
-            </div>
-            <div class="journey-column">
-                <div class="journey-images-container">
-                    <div class="journey-image-row">
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/e6e198d1c63fb42f0e4858202864f8c96b7f26acf99ae09eb1b50727cc194c15?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                            alt="Coding concept illustration 1" class="journey-image" />
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/672eaffc9cd28a3e7b927bbee6a56ebf54940891c41db593e3fb097e9bc2cf4e?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                            alt="Coding concept illustration 2" class="journey-image" />
-                    </div>
-                    <div class="journey-image-group">
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/75c65f11c307b6e23047d14235f3eb955a7e36ea14eb01a27cf591f258be459f?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                            alt="Coding concept illustration 3" class="journey-image journey-image-offset" />
+<!-- A Journey to Master Coding with AngaarBatch -->
+<section class="journey-section position-relative py-5 overflow-hidden">
+    <!-- Particle Background -->
+    <div id="particles-js" class="position-absolute w-100 h-100"></div>
 
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/455c398beb892b2a6618ccbeb2d66dd234ffb9c762d4f2fd3ed98bc0d23f0923?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                            alt="Coding concept illustration 4" class="journey-image journey-image-offset" />
+    <!-- Shooting Stars -->
+    <div class="shooting-stars">
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+    </div>
+
+
+
+    <div class="container position-relative">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center mb-5">
+                <h2 class="display-4 fw-bold mb-4 text-gradient">
+                    A Journey to Master Coding
+                    <span class="the-angaar-batch-text">
+                        @The Angaar Batch
+                    </span>
+                </h2>
+                <p class="lead mb-5 text-light">
+                    Want to learn from your own seniors like `Bade Bhiaya`,
+                    <span class="the-angaar-batch-text fw-semibold">The Angaar Batch🔥</span>
+                    is not just a learning
+                    platform; it's a community of dreamers, builders, and innovators, by someone like you!
+                </p>
+            </div>
+        </div>
+
+        <div class="justify-content-center">
+            <div class="w-100">
+                <div class="journey-features">
+                    <div class="feature-item mb-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-rocket text-primary"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="h5 mb-2">Accelerated Learning</h4>
+                            <p class="mb-0 text-light">Structured curriculum designed to fast-track your coding journey
+                            </p>
+                        </div>
+                    </div>
+                    <div class="feature-item mb-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-users text-primary"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="h5 mb-2">Expert Mentorship</h4>
+                            <p class="mb-0 text-light">Learn from industry professionals who've walked the path</p>
+                        </div>
+                    </div>
+                    <div class="feature-item mb-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-code text-primary"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="h5 mb-2">Hands-on Practice</h4>
+                            <p class="mb-0 text-light">Real-world projects and coding challenges to build your portfolio
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="journey-column">
-                <div class="journey-text-container journey-text-right">
-                    <h2 class="journey-heading journey-heading-right">Practice</h2>
-                    <p class="journey-paragraph">Learning to code requires hands-on experience. Our courses offer
-                        opportunities to apply what you've learned through live coding challenges and projects.
-                        Whether it's building your first web page or completing a hackathon, you'll get repeated
-                        practice to master new skills.</p>
-                    <h2 class="journey-heading journey-heading-right journey-heading-reflect">Reflect</h2>
-                    <p class="journey-paragraph journey-paragraph-reflect">We believe reflection deepens
-                        understanding. Each course includes activities that encourage you to connect the dots
-                        between what you've learned and your coding goals. By reviewing your progress and tackling
-                        real-world scenarios, you'll build a stronger foundation for professional success.</p>
+        </div>
+
+        <div class="justify-content-center mt-5">
+            <div class="text-center">
+                <div class="d-flex justify-content-center">
+                    <a href="https://chat.whatsapp.com/LYXfJijDa9ZCqj2jrqTMT7">
+                        <button class="skills-join-btn"
+                            style="width: 100%; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; border: none; padding: 12px 10px; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">
+                            I Want To Do It🔥 <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-8">
+                <div class="journey-visual position-relative text-center">
+                    <div class="floating-elements">
+                        <div class="floating-element element-1">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="floating-element element-2">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <div class="floating-element element-3">
+                            <i class="fas fa-terminal"></i>
+                        </div>
+                        <div class="floating-element element-4">
+                            <i class="fas fa-server"></i>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -2011,6 +2352,67 @@
                 this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.2)';
             });
         });
+    });
+</script>
+
+<!-- Add these scripts before the closing body tag -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    particlesJS('particles-js', {
+        particles: {
+            number: {
+                value: 80,
+                density: {
+                    enable: true,
+                    value_area: 800
+                }
+            },
+            color: {
+                value: '#ffffff'
+            },
+            shape: {
+                type: 'circle'
+            },
+            opacity: {
+                value: 0.5,
+                random: false
+            },
+            size: {
+                value: 3,
+                random: true
+            },
+            line_linked: {
+                enable: true,
+                distance: 150,
+                color: '#ffffff',
+                opacity: 0.4,
+                width: 1
+            },
+            move: {
+                enable: true,
+                speed: 3,
+                direction: 'none',
+                random: false,
+                straight: false,
+                out_mode: 'out',
+                bounce: false
+            }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: {
+                onhover: {
+                    enable: true,
+                    mode: 'repulse'
+                },
+                onclick: {
+                    enable: true,
+                    mode: 'push'
+                },
+                resize: true
+            }
+        },
+        retina_detect: true
     });
 </script>
 
