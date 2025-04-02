@@ -34,20 +34,16 @@ def index(request):
     latest_sheet = Sheet.objects.latest('id')
     
     # get the total number of submissions happened today only
-    today = datetime.date.today()
-    total_submissions_today = Submission.objects.filter(submitted_at__date=today).count()
+    # today = datetime.date.today()
+    # total_submissions_today = Submission.objects.filter(submitted_at__date=today).count()
     
-    today = timezone.now().date()
+    # today = timezone.now().date()
 
-    # Filter users who logged in today
-    users_today = Student.objects.filter(last_login__date=today)
+    # # Filter users who logged in today
+    # users_today = Student.objects.filter(last_login__date=today)
 
-    # Get the count of such users
-    total_users_today = users_today.count()
-
-    print(f'Total users who used the portal today: {total_users_today}')
-
-
+    # # Get the count of such users
+    # total_users_today = users_today.count()
     
     # last_3_questions = Question.objects.order_by('-created_at')[:3]
 

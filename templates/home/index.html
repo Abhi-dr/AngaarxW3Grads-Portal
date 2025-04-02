@@ -8,6 +8,9 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
     /* WhatsApp Button Styles */
     .whatsapp-container {
@@ -396,8 +399,7 @@
 
     /* Free Class Pass Styles */
     .free-pass-container {
-        width: 100%;
-        max-width: 320px;
+        width: 25%;
         margin: 0 auto;
         padding: 20px;
         position: relative;
@@ -752,11 +754,11 @@
     }
 
     /* From Uiverse.io by StealthWorm */
-    .btn {
+    .flames-btn {
         display: flex;
         justify-content: center;
         align-items: center;
-        width: 12rem;
+        width: 15rem;
         overflow: hidden;
         height: 3rem;
         top: -10%;
@@ -770,15 +772,15 @@
         background-image: linear-gradient(#212121, #212121),
             linear-gradient(137.48deg,
                 #ffffff 10%,
-                #553bff 45%,
+                #00197f 45%,
                 #ff5b03 67%,
-                #ff1818 87%);
+                #000000 87%);
         background-origin: border-box;
         background-clip: content-box, border-box;
     }
 
     @media (max-width: 768px) {
-        .btn {
+        .flames-btn {
             top: 20%
         }
     }
@@ -823,23 +825,23 @@
         background: rgba(142, 81, 234, 0.704);
     }
 
-    .btn:hover #container-stars {
+    .flames-btn:hover #container-stars {
         z-index: 1;
         background-color: #212121;
     }
 
-    .btn:hover {
+    .flames-btn:hover {
         transform: scale(1.1);
     }
 
-    .btn:active {
+    .flames-btn:active {
         border: double 4px #fe53bb;
         background-origin: border-box;
         background-clip: content-box, border-box;
         animation: none;
     }
 
-    .btn:active .circle {
+    .flames-btn:active .circle {
         background: #fe53bb;
     }
 
@@ -931,6 +933,1316 @@
             box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
         }
     }
+
+    .journey-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        text-align: center;
+    }
+
+    .text-gradient {
+        background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientFlow 8s ease infinite;
+    }
+
+    @keyframes gradientFlow {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        transition: transform 0.3s ease;
+        margin: 0 auto;
+        max-width: 70%;
+    }
+
+    .feature-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        font-size: 1.4rem;
+    }
+
+    .feature-content {
+        text-align: left;
+        flex: 1;
+    }
+
+    .pulse-button {
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        min-width: 200px;
+    }
+
+    .pulse-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    .pulse-button::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .pulse-button:hover::after {
+        width: 300px;
+        height: 300px;
+    }
+
+    .floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+    }
+
+    .floating-element {
+        position: absolute;
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.1);
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .element-1 {
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .element-2 {
+        top: 20%;
+        right: 15%;
+        animation-delay: 1s;
+    }
+
+    .element-3 {
+        bottom: 30%;
+        left: 20%;
+        animation-delay: 2s;
+    }
+
+    .element-4 {
+        bottom: 20%;
+        right: 25%;
+        animation-delay: 3s;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    .journey-image-wrapper {
+        position: relative;
+        padding: 2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .journey-image {
+        filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.3));
+        animation: imageFloat 8s ease-in-out infinite;
+    }
+
+    @keyframes imageFloat {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-20px);
+        }
+    }
+
+    /* Shooting Stars Animation */
+    .shooting-stars {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: #fff;
+        border-radius: 50%;
+        animation: shoot 3s linear infinite;
+    }
+
+    .star:nth-child(1) {
+        top: 20%;
+        left: 0;
+        animation-delay: 0s;
+    }
+
+    .star:nth-child(2) {
+        top: 40%;
+        left: 0;
+        animation-delay: 1s;
+    }
+
+    .star:nth-child(3) {
+        top: 60%;
+        left: 0;
+        animation-delay: 2s;
+    }
+
+    .star:nth-child(4) {
+        top: 80%;
+        left: 0;
+        animation-delay: 3s;
+    }
+
+    .star:nth-child(5) {
+        top: 90%;
+        left: 0;
+        animation-delay: 4s;
+    }
+
+    @keyframes shoot {
+        0% {
+            transform: translateX(0) translateY(0);
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: translateX(100vw) translateY(100vh);
+            opacity: 0;
+        }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 991.98px) {
+        .journey-section {
+            min-height: auto;
+            padding: 4rem 0;
+        }
+
+        .feature-item {
+            flex-direction: column;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .feature-content {
+            text-align: center;
+        }
+
+        .journey-visual {
+            margin-top: 2rem;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .display-4 {
+            font-size: 2.5rem;
+        }
+
+        .lead {
+            font-size: 1.1rem;
+        }
+
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+        }
+
+        .feature-item {
+            padding: 1rem;
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+    }
+
+    .the-angaar-batch-text {
+        background: linear-gradient(45deg, #ff4040 11%, #ff7300 53%, #ffcc00 100%);
+        color: transparent;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    /* Feature Card Hover Effects */
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        border-color: rgba(255, 96, 38, 0.3);
+    }
+
+    .feature-card:hover .feature-hover-effect {
+        transform: scaleX(1);
+    }
+
+    .feature-card:hover .flame-glow {
+        animation: pulse 2s infinite;
+    }
+
+    /* CTA Button Hover Effect */
+    .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(255, 96, 38, 0.3);
+    }
+
+    .cta-button:hover .button-glow {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* Animations */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: scale(1.2);
+            opacity: 0.2;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 991.98px) {
+        .section-title {
+            font-size: 2.5rem !important;
+        }
+
+        .features-grid {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important;
+            gap: 20px !important;
+        }
+
+        .feature-card {
+            padding: 25px !important;
+        }
+
+        .feature-icon {
+            width: 60px !important;
+            height: 60px !important;
+        }
+
+        .feature-title {
+            font-size: 20px !important;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .section-title {
+            font-size: 2rem !important;
+        }
+
+        .section-subtitle {
+            font-size: 1rem !important;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .feature-card {
+            margin-bottom: 20px !important;
+        }
+
+        .cta-button {
+            padding: 12px 30px !important;
+            font-size: 1rem !important;
+        }
+    }
+
+    /* Flame Particles Animation */
+    .flame-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+    .flame-particles::before,
+    .flame-particles::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: radial-gradient(circle at center, rgba(255, 96, 38, 0.1) 0%, transparent 50%);
+        animation: flameFloat 8s infinite;
+    }
+
+    .flame-particles::after {
+        animation-delay: -4s;
+    }
+
+    @keyframes flameFloat {
+
+        0%,
+        100% {
+            transform: translateY(0) scale(1);
+        }
+
+        50% {
+            transform: translateY(-20px) scale(1.1);
+        }
+    }
+
+    /* Enhanced FLAMES 25 Button */
+    .flames-btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 18rem;
+        overflow: hidden;
+        height: 4.5rem;
+        top: -10%;
+        background-size: 300% 300%;
+        cursor: pointer;
+        backdrop-filter: blur(1rem);
+        border-radius: 5rem;
+        transition: 0.5s;
+        animation: gradient_301 5s ease infinite, pulse-shadow 2s infinite;
+        border: double 2.5px transparent;
+        background-image: linear-gradient(#212121, #212121),
+            linear-gradient(137.48deg,
+                #ffffff 10%,
+                #00197f 45%,
+                #ff5b03 67%,
+                #000000 87%);
+        background-origin: border-box;
+        background-clip: content-box, border-box;
+        box-shadow: 0 10px 30px rgba(255, 91, 3, 0.4);
+        position: relative;
+        z-index: 100;
+    }
+
+    @keyframes pulse-shadow {
+        0% {
+            box-shadow: 0 0 8px rgba(255, 91, 3, 0.6);
+        }
+
+        50% {
+            box-shadow: 0 0 25px rgba(255, 91, 3, 0.8);
+        }
+
+        100% {
+            box-shadow: 0 0 8px rgba(255, 91, 3, 0.6);
+        }
+    }
+
+    .flames-btn-wrapper {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        z-index: 2;
+    }
+
+    .flames-btn-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        z-index: 3;
+    }
+
+    .flames-btn-icon {
+        font-size: 24px;
+        color: #ff4f0f;
+        margin-bottom: 2px;
+        animation: flame-flicker 2s ease-in-out infinite;
+    }
+
+    .flames-btn-text {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #ff4f0f;
+        margin-bottom: 2px;
+        text-shadow: 0 0 8px rgba(255, 79, 15, 0.5);
+    }
+
+    .flames-btn-subtext {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.8);
+        letter-spacing: 0.5px;
+    }
+
+    .flames-btn-badge {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        background: linear-gradient(45deg, #ff4f0f, #ff9966);
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        animation: badge-pulse 1.5s infinite;
+        transform-origin: center;
+        z-index: 4;
+    }
+
+    @keyframes badge-pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
+    .flames-btn-bg-animation {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 60%;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .flames-btn-fire {
+        position: absolute;
+        bottom: -10px;
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 79, 15, 0.7);
+        border-radius: 50% 50% 20% 20%;
+        box-shadow: 0 0 10px rgba(255, 79, 15, 0.5), 0 0 20px rgba(255, 79, 15, 0.3);
+        animation: flame-rise 3s infinite;
+        filter: blur(2px);
+    }
+
+    .flames-btn-fire:nth-child(1) {
+        left: 25%;
+        animation-delay: 0.2s;
+        animation-duration: 3s;
+    }
+
+    .flames-btn-fire:nth-child(2) {
+        left: 50%;
+        animation-delay: 0.5s;
+        animation-duration: 2.5s;
+    }
+
+    .flames-btn-fire:nth-child(3) {
+        left: 75%;
+        animation-delay: 0.8s;
+        animation-duration: 2.7s;
+    }
+
+    @keyframes flame-rise {
+        0% {
+            transform: translateY(0) scale(1);
+            opacity: 0.5;
+        }
+
+        50% {
+            transform: translateY(-15px) scale(1.5);
+            opacity: 0.8;
+        }
+
+        100% {
+            transform: translateY(-30px) scale(0.8);
+            opacity: 0;
+        }
+    }
+
+    @keyframes flame-flicker {
+
+        0%,
+        100% {
+            opacity: 1;
+            text-shadow: 0 0 10px rgba(255, 79, 15, 0.8);
+        }
+
+        50% {
+            opacity: 0.8;
+            text-shadow: 0 0 15px rgba(255, 79, 15, 1);
+        }
+    }
+
+    .flames-btn:hover {
+        transform: scale(1.1) translateY(-5px);
+        box-shadow: 0 15px 35px rgba(255, 91, 3, 0.6);
+    }
+
+    .flames-btn:hover .flames-btn-fire {
+        animation-duration: 1.5s;
+    }
+
+    /* Enhanced animation for the container stars */
+    .flames-btn:hover #container-stars {
+        z-index: 1;
+        background-color: #212121;
+        animation: twinkle 2s infinite;
+    }
+
+    @keyframes twinkle {
+
+        0%,
+        100% {
+            opacity: 0.8;
+        }
+
+        50% {
+            opacity: 1;
+        }
+    }
+
+    .flames-btn:hover #stars::after,
+    .flames-btn:hover #stars::before {
+        animation-duration: 40s;
+    }
+
+    /* Enhanced pulse animation for the circles */
+    .flames-btn:hover .circle {
+        animation: enhanced-pulse 2s infinite;
+    }
+
+    @keyframes enhanced-pulse {
+        0% {
+            transform: scale(0.8);
+            opacity: 0.8;
+        }
+
+        50% {
+            transform: scale(1.5);
+            opacity: 0.2;
+        }
+
+        100% {
+            transform: scale(0.8);
+            opacity: 0.8;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .flames-btn {
+            width: 16rem;
+            height: 4rem;
+            top: 20%;
+        }
+
+        .flames-btn-text {
+            font-size: 20px;
+        }
+
+        .flames-btn-icon {
+            font-size: 20px;
+        }
+    }
+
+    /* Floating animation to make the button hover slightly */
+    @keyframes float-button {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* Add a light beam effect when the button is hovered */
+    .flames-btn::after {
+        content: '';
+        position: absolute;
+        top: -150%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(rgba(255, 255, 255, 0),
+                rgba(255, 255, 255, 0.05),
+                rgba(255, 255, 255, 0));
+        transform: rotate(45deg);
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+
+    .flames-btn:hover::after {
+        animation: light-beam 2s infinite;
+        opacity: 1;
+    }
+
+    @keyframes light-beam {
+        0% {
+            transform: rotate(45deg) translateX(-100%);
+        }
+
+        100% {
+            transform: rotate(45deg) translateX(100%);
+        }
+    }
+
+    /* Summer Training Showcase Styles */
+    .summer-showcase {
+        position: relative;
+        width: 100%;
+        max-width: 800px;
+        margin: 30px auto;
+        background: linear-gradient(135deg, #1f1f1f 0%, #2a2a2a 100%);
+        border-radius: 20px;
+        overflow: hidden;
+        padding: 30px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border: 2px solid rgba(255, 79, 15, 0.3);
+        z-index: 10;
+        transform: translateY(0);
+        transition: transform 0.5s ease, box-shadow 0.5s ease;
+    }
+
+    .summer-showcase:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(255, 79, 15, 0.4);
+    }
+
+    .summer-showcase-heat-wave {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 30% 40%, rgba(255, 79, 15, 0.1) 0%, rgba(255, 79, 15, 0) 70%);
+        opacity: 0.7;
+        animation: heat-pulse 4s infinite;
+        pointer-events: none;
+    }
+
+    @keyframes heat-pulse {
+
+        0%,
+        100% {
+            opacity: 0.3;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.7;
+            transform: scale(1.2);
+        }
+    }
+
+    .summer-showcase-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+    }
+
+    .summer-showcase-badge {
+        position: absolute;
+        top: -15px;
+        right: -15px;
+        background: linear-gradient(45deg, #ff4f0f, #ff9966);
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        animation: badge-pulse 1.5s infinite;
+        transform-origin: center;
+    }
+
+    @keyframes badge-pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .summer-showcase-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        margin-bottom: 0;
+        color: white;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 2px 10px rgba(255, 79, 15, 0.5);
+        background: linear-gradient(to right, #ffffff, #ff4f0f);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        display: inline-block;
+    }
+
+    .year-highlight {
+        font-size: 3.5rem;
+        color: #ff4f0f;
+        background: linear-gradient(to right, #ff4f0f, #ff9966);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        display: inline-block;
+    }
+
+    .summer-tagline {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 25px;
+        font-weight: 300;
+    }
+
+    .summer-features {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 25px;
+    }
+
+    .summer-feature {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .feature-icon {
+        background: rgba(255, 79, 15, 0.1);
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #ff4f0f;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .summer-feature:hover .feature-icon {
+        transform: translateY(-5px);
+        background: rgba(255, 79, 15, 0.2);
+        color: #ff9966;
+    }
+
+    .feature-text {
+        font-size: 0.9rem;
+        color: white;
+        font-weight: 500;
+    }
+
+    .countdown-container {
+        margin: 25px 0;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .countdown-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+        margin-bottom: 10px;
+        font-weight: 500;
+    }
+
+    .countdown-timer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .countdown-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .countdown-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: white;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(135deg, #333 0%, #222 100%);
+        padding: 5px 10px;
+        border-radius: 8px;
+        min-width: 60px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .countdown-value::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0) 100%);
+        animation: shine 2s infinite;
+    }
+
+    @keyframes shine {
+        to {
+            left: 100%;
+        }
+    }
+
+    .countdown-unit {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.6);
+        margin-top: 5px;
+    }
+
+    .countdown-separator {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ff4f0f;
+        margin: 0 5px;
+        align-self: flex-start;
+        margin-top: 5px;
+    }
+
+    .enrollment-status {
+        margin: 25px 0;
+    }
+
+    .enrollment-progress {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 87%;
+        background: linear-gradient(to right, #ff4f0f, #ff9966);
+        border-radius: 10px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%);
+        animation: shine 1.5s infinite;
+    }
+
+    .enrollment-text {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+        text-align: right;
+    }
+
+    .enrollment-text span {
+        color: #ff4f0f;
+        font-weight: 700;
+    }
+
+    .learn-more-btn {
+        background: linear-gradient(45deg, #ff4f0f, #ff9966);
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 50px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 20px rgba(255, 79, 15, 0.3);
+        position: relative;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .btn-text {
+        position: relative;
+        z-index: 2;
+        margin-right: 10px;
+    }
+
+    .btn-icon {
+        position: relative;
+        z-index: 2;
+        font-size: 1.2rem;
+        animation: flame-flicker 2s infinite;
+    }
+
+    @keyframes flame-flicker {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.8;
+            transform: scale(1.2);
+        }
+    }
+
+    .btn-spark {
+        position: absolute;
+        background: rgba(255, 255, 255, 0.7);
+        border-radius: 50%;
+        width: 8px;
+        height: 8px;
+        filter: blur(2px);
+        opacity: 0;
+        z-index: 1;
+    }
+
+    .spark1 {
+        top: 20%;
+        right: 20%;
+        animation: spark-animate 3s infinite 0.2s;
+    }
+
+    .spark2 {
+        top: 60%;
+        right: 35%;
+        animation: spark-animate 2.5s infinite 0.5s;
+    }
+
+    .spark3 {
+        top: 30%;
+        right: 50%;
+        animation: spark-animate 2.8s infinite 0.7s;
+    }
+
+    @keyframes spark-animate {
+        0% {
+            transform: translate(0, 0) scale(1);
+            opacity: 0;
+        }
+
+        20% {
+            opacity: 1;
+        }
+
+        100% {
+            transform: translate(20px, -20px) scale(0);
+            opacity: 0;
+        }
+    }
+
+    .learn-more-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 25px rgba(255, 79, 15, 0.5);
+    }
+
+    .learn-more-btn:hover .btn-spark {
+        animation-duration: 1.5s;
+    }
+
+    .learn-more-btn::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(rgba(255, 255, 255, 0),
+                rgba(255, 255, 255, 0.1),
+                rgba(255, 255, 255, 0));
+        transform: rotate(45deg);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .learn-more-btn:hover::after {
+        opacity: 1;
+        animation: sweep 1s forwards;
+    }
+
+    @keyframes sweep {
+        0% {
+            transform: rotate(45deg) translateX(-100%);
+        }
+
+        100% {
+            transform: rotate(45deg) translateX(100%);
+        }
+    }
+
+    .showcase-decoration {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .floating-icon {
+        position: absolute;
+        font-size: 18px;
+        color: rgba(255, 79, 15, 0.3);
+        animation: float 5s ease-in-out infinite;
+    }
+
+    .icon1 {
+        top: 20%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+
+    .icon2 {
+        top: 70%;
+        left: 15%;
+        animation-delay: 1s;
+    }
+
+    .icon3 {
+        top: 30%;
+        right: 10%;
+        animation-delay: 2s;
+    }
+
+    .icon4 {
+        top: 60%;
+        right: 15%;
+        animation-delay: 0.5s;
+    }
+
+    .icon5 {
+        top: 40%;
+        right: 30%;
+        animation-delay: 1.5s;
+    }
+
+    @keyframes float {
+
+        0%,
+        100% {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-15px) rotate(5deg);
+        }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .summer-showcase {
+            margin: 20px 15px;
+            padding: 20px;
+        }
+
+        .summer-showcase-title,
+        .year-highlight {
+            font-size: 2.5rem;
+        }
+
+        .summer-tagline {
+            font-size: 1rem;
+        }
+
+        .summer-features {
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .countdown-value {
+            font-size: 1.5rem;
+            min-width: 40px;
+        }
+
+        .countdown-unit {
+            font-size: 0.7rem;
+        }
+
+        .countdown-separator {
+            font-size: 1.5rem;
+        }
+
+        .learn-more-btn {
+            padding: 12px 25px;
+            font-size: 1rem;
+        }
+    }
+
+
+    /* Popup Styles */
+    .flames-popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .flames-popup-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .flames-popup-container {
+        position: relative;
+        width: 90%;
+        max-width: 800px;
+        animation: popup-appear 0.7s forwards;
+    }
+
+    @keyframes popup-appear {
+        0% {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .flames-popup-close {
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff4f0f, #ff9966);
+        border: none;
+        color: white;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .flames-popup-close:hover {
+        transform: rotate(90deg);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+    }
+
+    .summer-showcase.popup-mode {
+        margin: 0;
+        transform: translateY(0);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .flames-popup-container {
+            width: 95%;
+        }
+
+        .flames-popup-close {
+            top: -15px;
+            right: -15px;
+            width: 35px;
+            height: 35px;
+            font-size: 16px;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -940,23 +2252,6 @@
     <div class="content-container content-theme-dark">
         <div class="content-inner">
             <div class="content-center">
-
-
-                <button type="button" class="btn" onclick="window.location.href='{% url 'flames' %}';">
-                    <strong>
-                        FLAMES '25
-                    </strong>
-                    <div id="container-stars">
-                        <div id="stars"></div>
-                    </div>
-
-                    <div id="glow">
-                        <div class="circle"></div>
-                        <div class="circle"></div>
-                    </div>
-                </button>
-
-
                 <h1>IGNITE</h1>
                 <!-- <p>THE ANGAAR BATCH -->
                 <!-- </p> -->
@@ -979,8 +2274,82 @@
             </div>
         </div>
     </div>
+</section>
 
+<section class="journey-section position-relative py-5 overflow-hidden">
 
+    <!-- Add interactive summer showcase -->
+    <div class="summer-showcase" id="summerShowcase">
+        <div class="summer-showcase-heat-wave"></div>
+        <div class="summer-showcase-content">
+            <div class="summer-showcase-badge">LIMITED SPOTS</div>
+            <h2 class="summer-showcase-title">FLAMES <span class="year-highlight">'25</span></h2>
+            <div class="summer-tagline">Summer Training Program</div>
+
+            <div class="summer-features">
+                <div class="summer-feature">
+                    <div class="feature-icon"><i class="fas fa-laptop-code"></i></div>
+                    <div class="feature-text">Intensive Coding</div>
+                </div>
+                <div class="summer-feature">
+                    <div class="feature-icon"><i class="fas fa-certificate"></i></div>
+                    <div class="feature-text">Industry Certificate</div>
+                </div>
+                <div class="summer-feature">
+                    <div class="feature-icon"><i class="fas fa-users"></i></div>
+                    <div class="feature-text">Networking</div>
+                </div>
+            </div>
+
+            <div class="countdown-container">
+                <div class="countdown-label">EARLY BIRD OFFER ENDS IN:</div>
+                <div class="countdown-timer" id="flamesCountdown">
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-days">00</div>
+                        <div class="countdown-unit">Days</div>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-hours">00</div>
+                        <div class="countdown-unit">Hours</div>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-minutes">00</div>
+                        <div class="countdown-unit">Mins</div>
+                    </div>
+                    <div class="countdown-separator">:</div>
+                    <div class="countdown-item">
+                        <div class="countdown-value" id="countdown-seconds">00</div>
+                        <div class="countdown-unit">Secs</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="enrollment-status">
+                <div class="enrollment-progress">
+                    <div class="progress-bar" id="popupEnrollmentProgress-2" ></div>
+                </div>
+                <div class="enrollment-text"><span id="enrollmentCount">40</span>% seats filled</div>
+            </div>
+
+            <button class="learn-more-btn" onclick="window.location.href='{% url 'flames' %}';">
+                <span class="btn-text">Secure Your Spot</span>
+                <span class="btn-icon"><i class="fas fa-fire"></i></span>
+                <div class="btn-spark spark1"></div>
+                <div class="btn-spark spark2"></div>
+                <div class="btn-spark spark3"></div>
+            </button>
+        </div>
+
+        <div class="showcase-decoration">
+            <div class="floating-icon icon1"><i class="fas fa-code"></i></div>
+            <div class="floating-icon icon2"><i class="fas fa-database"></i></div>
+            <div class="floating-icon icon3"><i class="fas fa-mobile-alt"></i></div>
+            <div class="floating-icon icon4"><i class="fas fa-server"></i></div>
+            <div class="floating-icon icon5"><i class="fas fa-bezier-curve"></i></div>
+        </div>
+    </div>
 </section>
 
 <section class="image-container">
@@ -989,60 +2358,120 @@
         class="full-width-image" alt="Full width image content" />
 </section>
 
-<section class="journey-container">
-    <h1 class="journey-title">A Journey to Master Coding with AngaarBatch</h1>
-    <div class="journey-content">
-        <div class="journey-columns">
-            <div class="journey-column">
-                <div class="journey-text-container">
-                    <h2 class="journey-heading">Explore</h2>
-                    <p class="journey-paragraph">Our platform provides engaging lessons, with clear explanations of
-                        coding fundamentals and advanced concepts. Short, focused videos help you dive into the
-                        "why" and "how" behind coding practices. Global success stories and project demonstrations
-                        bring coding to life, showing how learning can create real-world impact.</p>
-                    <h2 class="journey-heading journey-heading-collaborate">Collaborate</h2>
-                    <p class="journey-paragraph">Coding is best learned with others. Our platform connects you with
-                        a passionate community of learners, mentors, and industry professionals. Through
-                        discussions, group projects, and peer feedback, you'll sharpen your skills and gain insights
-                        from a global network of coders.</p>
-                </div>
-            </div>
-            <div class="journey-column">
-                <div class="journey-images-container">
-                    <div class="journey-image-row">
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/e6e198d1c63fb42f0e4858202864f8c96b7f26acf99ae09eb1b50727cc194c15?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                            alt="Coding concept illustration 1" class="journey-image" />
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/672eaffc9cd28a3e7b927bbee6a56ebf54940891c41db593e3fb097e9bc2cf4e?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                            alt="Coding concept illustration 2" class="journey-image" />
-                    </div>
-                    <div class="journey-image-group">
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/75c65f11c307b6e23047d14235f3eb955a7e36ea14eb01a27cf591f258be459f?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                            alt="Coding concept illustration 3" class="journey-image journey-image-offset" />
+<!-- ========================================================================== -->
+<!-- ================================ JOURNEY SECTION ========================= -->
+<!-- ========================================================================== -->
 
-                        <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/455c398beb892b2a6618ccbeb2d66dd234ffb9c762d4f2fd3ed98bc0d23f0923?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                            alt="Coding concept illustration 4" class="journey-image journey-image-offset" />
+
+<section class="journey-section position-relative py-5 overflow-hidden">
+    <!-- Particle Background -->
+    <div id="particles-js" class="position-absolute w-100 h-100"></div>
+
+    <!-- Shooting Stars -->
+    <div class="shooting-stars">
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+        <div class="star"></div>
+    </div>
+
+    <div class="container position-relative">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center mb-5">
+                <h2 class="display-4 fw-bold mb-4 text-gradient">
+                    A Journey to Master Coding
+                    <span class="the-angaar-batch-text">
+                        @The Angaar Batch
+                    </span>
+                </h2>
+                <p class="lead mb-5 text-light">
+                    Want to learn from your own seniors like `Bade Bhiaya`,
+                    <span class="the-angaar-batch-text fw-semibold">The Angaar Batch🔥</span>
+                    is not just a learning
+                    platform; it's a community of dreamers, builders, and innovators, by someone like you!
+                </p>
+            </div>
+        </div>
+
+        <div class="justify-content-center">
+            <div class="w-100">
+                <div class="journey-features">
+                    <div class="feature-item mb-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-rocket text-primary"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="h5 mb-2">Accelerated Learning</h4>
+                            <p class="mb-0 text-light">Structured curriculum designed to fast-track your coding journey
+                            </p>
+                        </div>
+                    </div>
+                    <div class="feature-item mb-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-users text-primary"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="h5 mb-2">Expert Mentorship</h4>
+                            <p class="mb-0 text-light">Learn from industry professionals who've walked the path</p>
+                        </div>
+                    </div>
+                    <div class="feature-item mb-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-code text-primary"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h4 class="h5 mb-2">Hands-on Practice</h4>
+                            <p class="mb-0 text-light">Real-world projects and coding challenges to build your portfolio
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="journey-column">
-                <div class="journey-text-container journey-text-right">
-                    <h2 class="journey-heading journey-heading-right">Practice</h2>
-                    <p class="journey-paragraph">Learning to code requires hands-on experience. Our courses offer
-                        opportunities to apply what you've learned through live coding challenges and projects.
-                        Whether it's building your first web page or completing a hackathon, you'll get repeated
-                        practice to master new skills.</p>
-                    <h2 class="journey-heading journey-heading-right journey-heading-reflect">Reflect</h2>
-                    <p class="journey-paragraph journey-paragraph-reflect">We believe reflection deepens
-                        understanding. Each course includes activities that encourage you to connect the dots
-                        between what you've learned and your coding goals. By reviewing your progress and tackling
-                        real-world scenarios, you'll build a stronger foundation for professional success.</p>
+        </div>
+
+        <div class="justify-content-center mt-5">
+            <div class="text-center">
+                <div class="d-flex justify-content-center">
+                    <a href="{% url 'register' %}">
+                        <button class="skills-join-btn"
+                            style="width: 100%; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; border: none; padding: 12px 10px; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">
+                            I Want To Do It🔥 <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-8">
+                <div class="journey-visual position-relative text-center">
+                    <div class="floating-elements">
+                        <div class="floating-element element-1">
+                            <i class="fas fa-code"></i>
+                        </div>
+                        <div class="floating-element element-2">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <div class="floating-element element-3">
+                            <i class="fas fa-terminal"></i>
+                        </div>
+                        <div class="floating-element element-4">
+                            <i class="fas fa-server"></i>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Free Class Pass Section -->
+
+<!-- ========================================================================== -->
+<!-- ================================ FREE PASS SECTION ========================= -->
+<!-- ========================================================================== -->
+
 <section class="free-class-pass-section"
     style="padding: 50px 20px; background-color: #0d0d0d; position: relative; overflow: hidden;">
     <!-- Background particles -->
@@ -1102,6 +2531,8 @@
     </div>
 </section>
 
+
+
 <section class="community-section">
     <div class="community-container">
         <img loading="lazy"
@@ -1117,8 +2548,6 @@
 <!-- Success Stories from Free Classes -->
 <section class="free-class-pass-section" style="padding: 30px 20px; background-color: #0d0d0d;">
 
-
-
     <div class="container">
         <div class="success-header rounded rounded-4"
             style="position: relative; margin-bottom: 50px; text-align: center;">
@@ -1133,12 +2562,11 @@
         </div>
 
 
-        <div class="success-carousel"
+        <!-- <div class="success-carousel"
             style="background: #1a1a1a; border-radius: 12px; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);">
             <div class="success-items-container" style="position: relative; overflow: hidden; padding: 20px 0;">
                 <div class="success-items" id="successItems"
                     style="display: flex; gap: 20px; transition: transform 0.5s ease;">
-                    <!-- Card 1 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1166,7 +2594,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 2 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1194,7 +2621,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 3 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1222,7 +2648,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 4 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1250,7 +2675,6 @@
                         </div>
                     </div>
 
-                    <!-- Card 5 -->
                     <div class="success-item"
                         style="flex: 0 0 calc(33.333% - 14px); min-width: 280px; background: rgba(255, 255, 255, 0.05); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); padding: 25px; position: relative; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
                         <div class="quotes"
@@ -1283,8 +2707,7 @@
                     style="display: flex; justify-content: center; margin-top: 30px; gap: 10px;">
                     <button class="carousel-nav-btn" data-index="0"
                         style="width: 10px; height: 10px; border-radius: 10%; background-color: #ff6026; border: none; cursor: pointer; transition: all 0.3s ease;"></button>
-                    <!-- <button class="carousel-nav-btn" data-index="1"
-                        style="width: 10px; height: 10px; border-radius: 10%; background-color: rgba(255, 96, 38, 0.3); border: none; cursor: pointer; transition: all 0.3s ease;"></button> -->
+                    
 
                 </div>
 
@@ -1297,7 +2720,7 @@
                     <i class="fas fa-chevron-right" style="color: white;"></i>
                 </button>
             </div>
-        </div>
+        </div> -->
     </div>
 </section>
 
@@ -1430,33 +2853,115 @@
     </div>
 </section>
 
-<section class="learn-code-connect-section">
-    <h2 class="section-title">Learn, Code, and Connect!</h2>
-    <div class="features-container" style="padding: 3%;">
-        <article class="feature-column">
-            <img loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/0864f318cb28859dccbd1c3562859e25361aa14c14906195993a782ad5d063b4?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                class="feature-icon" alt="Project-Based Learning icon" />
-            <h3 class="feature-title">Project-Based<br />Learning</h3>
-            <!-- <p class="feature-description">Apply your skills to real-world scenarios with project-driven learning.</p> -->
-        </article>
-        <article class="feature-column">
-            <img loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/709ed65bf819f0eb421873547f0959cf360a31a1bcc32e9f77b608a3b97d213e?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                class="feature-icon" alt="Community Growth icon" />
-            <h3 class="feature-title">A Community<br />for Growth</h3>
-            <!-- <p class="feature-description">AngaarBatch isn't just about learning—it's about growing together.
-                </p> -->
-        </article>
-        <article class="feature-column">
-            <img loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/d75168f9d8a182519df72aae6ddd5bd9f5e61ce6b29d2dbb847985acf6e13e9c?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-                class="feature-icon" alt="Skill-Building Workshops icon" />
-            <h3 class="feature-title">Skill-Building Workshops</h3>
-            <!-- <p class="feature-description">Master coding skills through our dynamic workshops. </p> -->
-        </article>
+
+<section class="learn-code-connect-section"
+    style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); padding: 80px 20px; position: relative; overflow: hidden;">
+    <!-- Background Elements -->
+    <div class="flame-particles" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0;">
+    </div>
+
+    <div class="container position-relative">
+        <!-- Section Title -->
+        <div class="text-center mb-5">
+            <h2 class="section-title"
+                style="font-size: 3rem; font-weight: 800; margin-bottom: 1rem; background: linear-gradient(45deg, #ff6b6b, #ffd93d); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; position: relative; display: inline-block;">
+                Learn, Code, and Connect!
+                <div class="flame-decoration"
+                    style="position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%); width: 100px; height: 4px; background: linear-gradient(90deg, transparent, #ff6026, transparent);">
+                </div>
+            </h2>
+            <p class="section-subtitle"
+                style="color: rgba(255, 255, 255, 0.8); font-size: 1.2rem; max-width: 600px; margin: 0 auto;">
+                Join our community of passionate learners and developers
+            </p>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px;">
+            <!-- Project-Based Learning Card -->
+            <div class="feature-card"
+                style="background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 30px; position: relative; overflow: hidden; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                <div class="flame-glow"
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,96,38,0.2) 0%, rgba(255,96,38,0) 70%); border-radius: 50%; z-index: 0;">
+                </div>
+                <div class="feature-icon"
+                    style="width: 70px; height: 70px; background: rgba(255, 96, 38, 0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; z-index: 1;">
+                    <i class="fas fa-project-diagram" style="font-size: 32px; color: #ff6026;"></i>
+                </div>
+                <h3 class="feature-title"
+                    style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 15px; position: relative; z-index: 1;">
+                    Project-Based Learning</h3>
+                <p class="feature-description"
+                    style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; position: relative; z-index: 1;">
+                    Build real-world projects and gain hands-on experience with industry-standard practices.
+                </p>
+                <div class="feature-hover-effect"
+                    style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #ff6026, #ff9d45); transform: scaleX(0); transition: transform 0.3s ease;">
+                </div>
+            </div>
+
+            <!-- Community Growth Card -->
+            <div class="feature-card"
+                style="background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 30px; position: relative; overflow: hidden; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                <div class="flame-glow"
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,96,38,0.2) 0%, rgba(255,96,38,0) 70%); border-radius: 50%; z-index: 0;">
+                </div>
+                <div class="feature-icon"
+                    style="width: 70px; height: 70px; background: rgba(255, 96, 38, 0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; z-index: 1;">
+                    <i class="fas fa-users" style="font-size: 32px; color: #ff6026;"></i>
+                </div>
+                <h3 class="feature-title"
+                    style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 15px; position: relative; z-index: 1;">
+                    Community Growth</h3>
+                <p class="feature-description"
+                    style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; position: relative; z-index: 1;">
+                    Connect with fellow developers, share knowledge, and grow together in our supportive community.
+                </p>
+                <div class="feature-hover-effect"
+                    style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #ff6026, #ff9d45); transform: scaleX(0); transition: transform 0.3s ease;">
+                </div>
+            </div>
+
+            <!-- Skill-Building Workshops Card -->
+            <div class="feature-card"
+                style="background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 30px; position: relative; overflow: hidden; transition: all 0.3s ease; border: 1px solid rgba(255, 96, 38, 0.1);">
+                <div class="flame-glow"
+                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: radial-gradient(circle, rgba(255,96,38,0.2) 0%, rgba(255,96,38,0) 70%); border-radius: 50%; z-index: 0;">
+                </div>
+                <div class="feature-icon"
+                    style="width: 70px; height: 70px; background: rgba(255, 96, 38, 0.1); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative; z-index: 1;">
+                    <i class="fas fa-laptop-code" style="font-size: 32px; color: #ff6026;"></i>
+                </div>
+                <h3 class="feature-title"
+                    style="font-size: 24px; font-weight: 700; color: white; margin-bottom: 15px; position: relative; z-index: 1;">
+                    Skill-Building Workshops</h3>
+                <p class="feature-description"
+                    style="color: rgba(255, 255, 255, 0.7); line-height: 1.6; position: relative; z-index: 1;">
+                    Participate in interactive workshops designed to enhance your coding skills and problem-solving
+                    abilities.
+                </p>
+                <div class="feature-hover-effect"
+                    style="position: absolute; bottom: 0; left: 0; width: 100%; height: 3px; background: linear-gradient(90deg, #ff6026, #ff9d45); transform: scaleX(0); transition: transform 0.3s ease;">
+                </div>
+            </div>
+        </div>
+
+        <!-- CTA Button -->
+        <div class="text-center mt-3">
+            <a href="{% url 'register' %}" class="cta-button"
+                style="display: inline-block; background: linear-gradient(135deg, #ff6026, #ff9d45); color: white; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.3s ease; position: relative; overflow: hidden; margin-top: 30px;">
+                Join Our Community
+                <i class="fas fa-arrow-right ms-2"></i>
+                <div class="button-glow"
+                    style="position: absolute; top: 50%; left: 50%; width: 0; height: 0; background: rgba(255, 255, 255, 0.2); border-radius: 50%; transform: translate(-50%, -50%); transition: width 0.6s ease, height 0.6s ease;">
+                </div>
+            </a>
+        </div>
     </div>
 </section>
+
+
 
 <!-- WhatsApp Floating Button with Dialog -->
 <div class="flame-container" id="whatsappMainBtn">
@@ -1563,8 +3068,108 @@
     </div>
 </div>
 
-<!-- Add Font Awesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Add popup version of the summer showcase -->
+<div class="flames-popup-overlay" id="flamesPopup">
+    <div class="flames-popup-container">
+        <button class="flames-popup-close" id="closeFlamesPopup">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Same content as the summer showcase card -->
+        <div class="summer-showcase popup-mode">
+            <div class="summer-showcase-heat-wave"></div>
+            <div class="summer-showcase-content">
+                <div class="summer-showcase-badge">LIMITED SPOTS</div>
+                <h2 class="summer-showcase-title">FLAMES <span class="year-highlight">'25</span></h2>
+                <div class="summer-tagline">Summer Training Program</div>
+
+                <div class="summer-features">
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-laptop-code"></i></div>
+                        <div class="feature-text">Intensive Coding</div>
+                    </div>
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-certificate"></i></div>
+                        <div class="feature-text">Industry Certificate</div>
+                    </div>
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-users"></i></div>
+                        <div class="feature-text">Networking</div>
+                    </div>
+                </div>
+
+                <div class="countdown-container">
+                    <div class="countdown-label">EARLY BIRD OFFER ENDS IN:</div>
+                    <div class="countdown-timer" id="popupFlamesCountdown">
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-days">00</div>
+                            <div class="countdown-unit">Days</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-hours">00</div>
+                            <div class="countdown-unit">Hours</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-minutes">00</div>
+                            <div class="countdown-unit">Mins</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-seconds">00</div>
+                            <div class="countdown-unit">Secs</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="enrollment-status">
+                    <div class="enrollment-progress">
+                        <div class="progress-bar" id="popupEnrollmentProgress"></div>
+                    </div>
+                    <div class="enrollment-text"><span id="popupEnrollmentCount">40</span>% seats filled</div>
+                </div>
+
+                <button class="learn-more-btn" onclick="window.location.href='{% url 'flames' %}';">
+                    <span class="btn-text">Secure Your Spot</span>
+                    <span class="btn-icon"><i class="fas fa-fire"></i></span>
+                    <div class="btn-spark spark1"></div>
+                    <div class="btn-spark spark2"></div>
+                    <div class="btn-spark spark3"></div>
+                </button>
+            </div>
+
+            <div class="showcase-decoration">
+                <div class="floating-icon icon1"><i class="fas fa-code"></i></div>
+                <div class="floating-icon icon2"><i class="fas fa-database"></i></div>
+                <div class="floating-icon icon3"><i class="fas fa-mobile-alt"></i></div>
+                <div class="floating-icon icon4"><i class="fas fa-server"></i></div>
+                <div class="floating-icon icon5"><i class="fas fa-bezier-curve"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    // Add flame particles dynamically
+    document.addEventListener('DOMContentLoaded', function () {
+        const flameParticles = document.querySelector('.flame-particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = '4px';
+            particle.style.height = '4px';
+            particle.style.background = 'rgba(255, 96, 38, 0.3)';
+            particle.style.borderRadius = '50%';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animation = `float ${Math.random() * 10 + 5}s infinite`;
+            particle.style.animationDelay = Math.random() * 1 + 's';
+            flameParticles.appendChild(particle);
+        }
+    });
+</script>
 
 <!-- WhatsApp Button Script -->
 <script>
@@ -1728,23 +3333,6 @@
             });
         }
 
-        // Free Class Pass Flip Animation
-        const freePass = document.getElementById('freePass');
-        const freePassContainer = document.getElementById('freePassContainer');
-
-        if (freePass && freePassContainer) {
-            const freePassAction = freePass.querySelector('.free-pass-action');
-
-            if (freePassAction) {
-                freePassAction.addEventListener('click', function () {
-                    freePass.classList.add('flipped');
-                });
-            }
-
-            // Initialize particles for the free class pass background
-            createPassParticles();
-        }
-
         // Particles for Free Class Pass
         function createPassParticles() {
             const particlesContainer = document.querySelector('.pass-bg-particles');
@@ -1775,6 +3363,26 @@
                 particlesContainer.appendChild(particle);
             }
         }
+
+        // Free Class Pass Flip Animation
+        const freePass = document.getElementById('freePass');
+        const freePassContainer = document.getElementById('freePassContainer');
+
+        if (freePass && freePassContainer) {
+            const freePassAction = freePass.querySelector('.free-pass-action');
+
+            console.log(freePassAction);
+            if (freePassAction) {
+                freePassAction.addEventListener('click', function () {
+                    freePass.classList.add('flipped');
+                });
+            }
+
+            // Initialize particles for the free class pass background
+            createPassParticles();
+        }
+
+
 
         // Add keyframe animation for particles
         const styleSheet = document.createElement('style');
@@ -2011,6 +3619,176 @@
                 this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.2)';
             });
         });
+    });
+</script>
+
+<!-- Add these scripts before the closing body tag -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    particlesJS('particles-js', {
+        particles: {
+            number: {
+                value: 80,
+                density: {
+                    enable: true,
+                    value_area: 800
+                }
+            },
+            color: {
+                value: '#ffffff'
+            },
+            shape: {
+                type: 'circle'
+            },
+            opacity: {
+                value: 0.5,
+                random: false
+            },
+            size: {
+                value: 3,
+                random: true
+            },
+            line_linked: {
+                enable: true,
+                distance: 150,
+                color: '#ffffff',
+                opacity: 0.4,
+                width: 1
+            },
+            move: {
+                enable: true,
+                speed: 3,
+                direction: 'none',
+                random: false,
+                straight: false,
+                out_mode: 'out',
+                bounce: false
+            }
+        },
+        interactivity: {
+            detect_on: 'canvas',
+            events: {
+                onhover: {
+                    enable: true,
+                    mode: 'repulse'
+                },
+                onclick: {
+                    enable: true,
+                    mode: 'push'
+                },
+                resize: true
+            }
+        },
+        retina_detect: true
+    });
+</script>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Set target date to April 1st
+        const targetDate = new Date("April 15, 2025 00:00:00").getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                document.getElementById("countdown").innerHTML = "Countdown expired!";
+                return;
+            }
+
+            // Time calculations
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Display the result
+            document.getElementById("countdown-days").innerHTML = days.toString().padStart(2, '0');
+            document.getElementById("countdown-hours").innerHTML = hours.toString().padStart(2, '0');
+            document.getElementById("countdown-minutes").innerHTML = minutes.toString().padStart(2, '0');
+            document.getElementById("countdown-seconds").innerHTML = seconds.toString().padStart(2, '0');
+        }
+
+        // Update every second
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    });
+</script>
+
+<script>
+    // Popup Logic
+    document.addEventListener('DOMContentLoaded', function () {
+        // Show popup after a short delay when page loads
+        setTimeout(function () {
+            const flamesPopup = document.getElementById('flamesPopup');
+            flamesPopup.classList.add('active');
+
+            // Play flame sound
+            playFlameSound();
+
+            // Check if popup has been shown already in this session
+            if (!sessionStorage.getItem('flamesPopupShown')) {
+                sessionStorage.setItem('flamesPopupShown', 'true');
+            }
+        }, 1500); // Show after 1.5 seconds
+
+        // Close popup when close button is clicked
+        document.getElementById('closeFlamesPopup').addEventListener('click', function () {
+            const flamesPopup = document.getElementById('flamesPopup');
+            flamesPopup.classList.remove('active');
+        });
+
+        // Also close popup when clicking outside the content
+        document.getElementById('flamesPopup').addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+
+        // Set target date to April 15th
+        const targetDate = new Date("April 15, 2025 00:00:00").getTime();
+
+        function updatePopupCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                document.getElementById("popup-countdown").innerHTML = "Countdown expired!";
+                return;
+            }
+
+            // Time calculations
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Update the countdown display
+            document.getElementById("popup-countdown-days").innerHTML = days.toString().padStart(2, '0');
+            document.getElementById("popup-countdown-hours").innerHTML = hours.toString().padStart(2, '0');
+            document.getElementById("popup-countdown-minutes").innerHTML = minutes.toString().padStart(2, '0');
+            document.getElementById("popup-countdown-seconds").innerHTML = seconds.toString().padStart(2, '0');
+        }
+
+        // Initialize and update popup countdown
+        updatePopupCountdown();
+        setInterval(updatePopupCountdown, 1000);
+
+        // Sync enrollment progress between main card and popup
+        function syncEnrollment() {
+            const mainValue = document.getElementById('enrollmentCount').textContent;
+            document.getElementById('popupEnrollmentCount').textContent = mainValue;
+            document.getElementById('popupEnrollmentProgress').style.width = mainValue + '%';
+            document.getElementById('popupEnrollmentProgress-2').style.width = mainValue + '%';
+        }
+
+        // Initial sync
+        syncEnrollment();
+
+        // Sync regularly
+        setInterval(syncEnrollment, 30000);
     });
 </script>
 
