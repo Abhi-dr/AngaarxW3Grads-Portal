@@ -8,6 +8,9 @@
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
     /* WhatsApp Button Styles */
     .whatsapp-container {
@@ -2153,6 +2156,7 @@
         }
     }
 
+
     /* Popup Styles */
     .flames-popup-overlay {
         position: fixed;
@@ -2188,6 +2192,7 @@
             transform: scale(0.8);
             opacity: 0;
         }
+
         100% {
             transform: scale(1);
             opacity: 1;
@@ -2229,7 +2234,7 @@
         .flames-popup-container {
             width: 95%;
         }
-        
+
         .flames-popup-close {
             top: -15px;
             right: -15px;
@@ -2297,7 +2302,7 @@
             </div>
 
             <div class="countdown-container">
-                <div class="countdown-label">Registration Closes In:</div>
+                <div class="countdown-label">EARLY BIRD OFFER ENDS IN:</div>
                 <div class="countdown-timer" id="flamesCountdown">
                     <div class="countdown-item">
                         <div class="countdown-value" id="countdown-days">00</div>
@@ -2323,9 +2328,9 @@
 
             <div class="enrollment-status">
                 <div class="enrollment-progress">
-                    <div class="progress-bar" id="enrollmentProgress"></div>
+                    <div class="progress-bar" id="popupEnrollmentProgress-2" ></div>
                 </div>
-                <div class="enrollment-text"><span id="enrollmentCount">87</span>% seats filled</div>
+                <div class="enrollment-text"><span id="enrollmentCount">40</span>% seats filled</div>
             </div>
 
             <button class="learn-more-btn" onclick="window.location.href='{% url 'flames' %}';">
@@ -2370,8 +2375,6 @@
         <div class="star"></div>
         <div class="star"></div>
     </div>
-
-
 
     <div class="container position-relative">
         <div class="row justify-content-center">
@@ -3065,8 +3068,88 @@
     </div>
 </div>
 
-<!-- Add Font Awesome for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Add popup version of the summer showcase -->
+<div class="flames-popup-overlay" id="flamesPopup">
+    <div class="flames-popup-container">
+        <button class="flames-popup-close" id="closeFlamesPopup">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <!-- Same content as the summer showcase card -->
+        <div class="summer-showcase popup-mode">
+            <div class="summer-showcase-heat-wave"></div>
+            <div class="summer-showcase-content">
+                <div class="summer-showcase-badge">LIMITED SPOTS</div>
+                <h2 class="summer-showcase-title">FLAMES <span class="year-highlight">'25</span></h2>
+                <div class="summer-tagline">Summer Training Program</div>
+
+                <div class="summer-features">
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-laptop-code"></i></div>
+                        <div class="feature-text">Intensive Coding</div>
+                    </div>
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-certificate"></i></div>
+                        <div class="feature-text">Industry Certificate</div>
+                    </div>
+                    <div class="summer-feature">
+                        <div class="feature-icon"><i class="fas fa-users"></i></div>
+                        <div class="feature-text">Networking</div>
+                    </div>
+                </div>
+
+                <div class="countdown-container">
+                    <div class="countdown-label">EARLY BIRD OFFER ENDS IN:</div>
+                    <div class="countdown-timer" id="popupFlamesCountdown">
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-days">00</div>
+                            <div class="countdown-unit">Days</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-hours">00</div>
+                            <div class="countdown-unit">Hours</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-minutes">00</div>
+                            <div class="countdown-unit">Mins</div>
+                        </div>
+                        <div class="countdown-separator">:</div>
+                        <div class="countdown-item">
+                            <div class="countdown-value" id="popup-countdown-seconds">00</div>
+                            <div class="countdown-unit">Secs</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="enrollment-status">
+                    <div class="enrollment-progress">
+                        <div class="progress-bar" id="popupEnrollmentProgress"></div>
+                    </div>
+                    <div class="enrollment-text"><span id="popupEnrollmentCount">40</span>% seats filled</div>
+                </div>
+
+                <button class="learn-more-btn" onclick="window.location.href='{% url 'flames' %}';">
+                    <span class="btn-text">Secure Your Spot</span>
+                    <span class="btn-icon"><i class="fas fa-fire"></i></span>
+                    <div class="btn-spark spark1"></div>
+                    <div class="btn-spark spark2"></div>
+                    <div class="btn-spark spark3"></div>
+                </button>
+            </div>
+
+            <div class="showcase-decoration">
+                <div class="floating-icon icon1"><i class="fas fa-code"></i></div>
+                <div class="floating-icon icon2"><i class="fas fa-database"></i></div>
+                <div class="floating-icon icon3"><i class="fas fa-mobile-alt"></i></div>
+                <div class="floating-icon icon4"><i class="fas fa-server"></i></div>
+                <div class="floating-icon icon5"><i class="fas fa-bezier-curve"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     // Add flame particles dynamically
@@ -3601,15 +3684,19 @@
 </script>
 
 <script>
-    // Countdown Timer Logic
+
     document.addEventListener('DOMContentLoaded', function () {
-        // Set the date 30 days from now
-        const countDownDate = new Date();
-        countDownDate.setDate(countDownDate.getDate() + 30);
+        // Set target date to April 1st
+        const targetDate = new Date("April 15, 2025 00:00:00").getTime();
 
         function updateCountdown() {
             const now = new Date().getTime();
-            const distance = countDownDate - now;
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                document.getElementById("countdown").innerHTML = "Countdown expired!";
+                return;
+            }
 
             // Time calculations
             const days = Math.floor(distance / (1000 * 60 * 60 * 24));
@@ -3618,316 +3705,92 @@
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
             // Display the result
-            document.getElementById("countdown-days").innerHTML = days < 10 ? "0" + days : days;
-            document.getElementById("countdown-hours").innerHTML = hours < 10 ? "0" + hours : hours;
-            document.getElementById("countdown-minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
-            document.getElementById("countdown-seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
+            document.getElementById("countdown-days").innerHTML = days.toString().padStart(2, '0');
+            document.getElementById("countdown-hours").innerHTML = hours.toString().padStart(2, '0');
+            document.getElementById("countdown-minutes").innerHTML = minutes.toString().padStart(2, '0');
+            document.getElementById("countdown-seconds").innerHTML = seconds.toString().padStart(2, '0');
         }
 
         // Update every second
         updateCountdown();
         setInterval(updateCountdown, 1000);
-
-        // Random enrollment fluctuation to create urgency
-        let enrollmentValue = 87;
-        const enrollmentDisplay = document.getElementById('enrollmentCount');
-        const enrollmentProgress = document.getElementById('enrollmentProgress');
-
-        setInterval(function () {
-            const change = Math.random() > 0.7 ? 1 : 0;
-            if (enrollmentValue < 95 && change === 1) {
-                enrollmentValue += 1;
-                enrollmentDisplay.textContent = enrollmentValue;
-                enrollmentProgress.style.width = enrollmentValue + '%';
-            }
-        }, 30000); // Check every 30 seconds
-
-        // Add intersection observer for entrance animation
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('showcase-visible');
-                }
-            });
-        }, { threshold: 0.3 });
-
-        observer.observe(document.getElementById('summerShowcase'));
     });
 </script>
-
-<!-- Add popup version of the summer showcase -->
-<div class="flames-popup-overlay" id="flamesPopup">
-    <div class="flames-popup-container">
-        <button class="flames-popup-close" id="closeFlamesPopup">
-            <i class="fas fa-times"></i>
-        </button>
-        
-        <!-- Same content as the summer showcase card -->
-        <div class="summer-showcase popup-mode">
-            <div class="summer-showcase-heat-wave"></div>
-            <div class="summer-showcase-content">
-                <div class="summer-showcase-badge">LIMITED SPOTS</div>
-                <h2 class="summer-showcase-title">FLAMES <span class="year-highlight">'25</span></h2>
-                <div class="summer-tagline">Summer Training Program</div>
-                
-                <div class="summer-features">
-                    <div class="summer-feature">
-                        <div class="feature-icon"><i class="fas fa-laptop-code"></i></div>
-                        <div class="feature-text">Intensive Coding</div>
-                    </div>
-                    <div class="summer-feature">
-                        <div class="feature-icon"><i class="fas fa-certificate"></i></div>
-                        <div class="feature-text">Industry Certificate</div>
-                    </div>
-                    <div class="summer-feature">
-                        <div class="feature-icon"><i class="fas fa-users"></i></div>
-                        <div class="feature-text">Networking</div>
-                    </div>
-                </div>
-                
-                <div class="countdown-container">
-                    <div class="countdown-label">Registration Closes In:</div>
-                    <div class="countdown-timer" id="popupFlamesCountdown">
-                        <div class="countdown-item">
-                            <div class="countdown-value" id="popup-countdown-days">00</div>
-                            <div class="countdown-unit">Days</div>
-                        </div>
-                        <div class="countdown-separator">:</div>
-                        <div class="countdown-item">
-                            <div class="countdown-value" id="popup-countdown-hours">00</div>
-                            <div class="countdown-unit">Hours</div>
-                        </div>
-                        <div class="countdown-separator">:</div>
-                        <div class="countdown-item">
-                            <div class="countdown-value" id="popup-countdown-minutes">00</div>
-                            <div class="countdown-unit">Mins</div>
-                        </div>
-                        <div class="countdown-separator">:</div>
-                        <div class="countdown-item">
-                            <div class="countdown-value" id="popup-countdown-seconds">00</div>
-                            <div class="countdown-unit">Secs</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="enrollment-status">
-                    <div class="enrollment-progress">
-                        <div class="progress-bar" id="popupEnrollmentProgress"></div>
-                    </div>
-                    <div class="enrollment-text"><span id="popupEnrollmentCount">87</span>% seats filled</div>
-                </div>
-                
-                <button class="learn-more-btn" onclick="window.location.href='{% url 'flames' %}';">
-                    <span class="btn-text">Secure Your Spot</span>
-                    <span class="btn-icon"><i class="fas fa-fire"></i></span>
-                    <div class="btn-spark spark1"></div>
-                    <div class="btn-spark spark2"></div>
-                    <div class="btn-spark spark3"></div>
-                </button>
-            </div>
-            
-            <div class="showcase-decoration">
-                <div class="floating-icon icon1"><i class="fas fa-code"></i></div>
-                <div class="floating-icon icon2"><i class="fas fa-database"></i></div>
-                <div class="floating-icon icon3"><i class="fas fa-mobile-alt"></i></div>
-                <div class="floating-icon icon4"><i class="fas fa-server"></i></div>
-                <div class="floating-icon icon5"><i class="fas fa-bezier-curve"></i></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<style>
-/* Popup Styles */
-.flames-popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(5px);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease, visibility 0.5s ease;
-}
-
-.flames-popup-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.flames-popup-container {
-    position: relative;
-    width: 90%;
-    max-width: 800px;
-    animation: popup-appear 0.7s forwards;
-}
-
-@keyframes popup-appear {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-.flames-popup-close {
-    position: absolute;
-    top: -20px;
-    right: -20px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff4f0f, #ff9966);
-    border: none;
-    color: white;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 10;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s ease;
-}
-
-.flames-popup-close:hover {
-    transform: rotate(90deg);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-}
-
-.summer-showcase.popup-mode {
-    margin: 0;
-    transform: translateY(0);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-}
-
-@media (max-width: 768px) {
-    .flames-popup-container {
-        width: 95%;
-    }
-    
-    .flames-popup-close {
-        top: -15px;
-        right: -15px;
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
-    }
-}
-</style>
 
 <script>
-// Popup Logic
-document.addEventListener('DOMContentLoaded', function() {
-    // Sound effect for popup
-    const flameSound = document.getElementById('flameSound');
-    
-    // Function to play flame sound with fallback
-    function playFlameSound() {
-        // Check if browser supports audio
-        if (flameSound) {
-            // Reset sound to beginning (in case it was played before)
-            flameSound.currentTime = 0;
-            
-            // Set volume (0.0 to 1.0)
-            flameSound.volume = 0.7;
-            
-            // Play with error handling
-            const playPromise = flameSound.play();
-            
-            // Handle autoplay restrictions in modern browsers
-            if (playPromise !== undefined) {
-                playPromise.catch(error => {
-                    console.log("Audio autoplay was prevented. User interaction needed.");
-                    // We could add a small "🔊" button here if needed for browsers that block autoplay
-                });
-            }
-        }
-    }
-    
-    // Show popup after a short delay when page loads
-    setTimeout(function() {
-        const flamesPopup = document.getElementById('flamesPopup');
-        flamesPopup.classList.add('active');
-        
-        // Play flame sound
-        playFlameSound();
-        
-        // Check if popup has been shown already in this session
-        if (!sessionStorage.getItem('flamesPopupShown')) {
-            sessionStorage.setItem('flamesPopupShown', 'true');
-        }
-    }, 1500); // Show after 1.5 seconds
-    
-    // Close popup when close button is clicked
-    document.getElementById('closeFlamesPopup').addEventListener('click', function() {
-        const flamesPopup = document.getElementById('flamesPopup');
-        flamesPopup.classList.remove('active');
-    });
-    
-    // Also close popup when clicking outside the content
-    document.getElementById('flamesPopup').addEventListener('click', function(e) {
-        if (e.target === this) {
-            this.classList.remove('active');
-        }
-    });
-    
-    // Update countdown for popup timer
-    function updatePopupCountdown() {
-        const countDownDate = new Date();
-        countDownDate.setDate(countDownDate.getDate() + 30);
-        
-        const now = new Date().getTime();
-        const distance = countDownDate - now;
-        
-        // Time calculations
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        
-        // Display the result in popup countdown
-        document.getElementById("popup-countdown-days").innerHTML = days < 10 ? "0" + days : days;
-        document.getElementById("popup-countdown-hours").innerHTML = hours < 10 ? "0" + hours : hours;
-        document.getElementById("popup-countdown-minutes").innerHTML = minutes < 10 ? "0" + minutes : minutes;
-        document.getElementById("popup-countdown-seconds").innerHTML = seconds < 10 ? "0" + seconds : seconds;
-    }
-    
-    // Initialize and update popup countdown
-    updatePopupCountdown();
-    setInterval(updatePopupCountdown, 1000);
-    
-    // Sync enrollment progress between main card and popup
-    function syncEnrollment() {
-        const mainValue = document.getElementById('enrollmentCount').textContent;
-        document.getElementById('popupEnrollmentCount').textContent = mainValue;
-        document.getElementById('popupEnrollmentProgress').style.width = mainValue + '%';
-    }
-    
-    // Initial sync
-    syncEnrollment();
-    
-    // Sync regularly
-    setInterval(syncEnrollment, 30000);
-});
-</script>
+    // Popup Logic
+    document.addEventListener('DOMContentLoaded', function () {
+        // Show popup after a short delay when page loads
+        setTimeout(function () {
+            const flamesPopup = document.getElementById('flamesPopup');
+            flamesPopup.classList.add('active');
 
-<!-- Add audio element for flame sound effect -->
-<audio id="flameSound" preload="auto">
-    <source src="{% static 'sounds/flame-whoosh.mp3' %}" type="audio/mpeg">
-    <!-- Fallback sources in different formats for browser compatibility -->
-    <source src="{% static 'sounds/flame-whoosh.ogg' %}" type="audio/ogg">
-    <source src="{% static 'sounds/flame-whoosh.wav' %}" type="audio/wav">
-</audio>
+            // Play flame sound
+            playFlameSound();
+
+            // Check if popup has been shown already in this session
+            if (!sessionStorage.getItem('flamesPopupShown')) {
+                sessionStorage.setItem('flamesPopupShown', 'true');
+            }
+        }, 1500); // Show after 1.5 seconds
+
+        // Close popup when close button is clicked
+        document.getElementById('closeFlamesPopup').addEventListener('click', function () {
+            const flamesPopup = document.getElementById('flamesPopup');
+            flamesPopup.classList.remove('active');
+        });
+
+        // Also close popup when clicking outside the content
+        document.getElementById('flamesPopup').addEventListener('click', function (e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+
+        // Set target date to April 15th
+        const targetDate = new Date("April 15, 2025 00:00:00").getTime();
+
+        function updatePopupCountdown() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            if (distance < 0) {
+                document.getElementById("popup-countdown").innerHTML = "Countdown expired!";
+                return;
+            }
+
+            // Time calculations
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Update the countdown display
+            document.getElementById("popup-countdown-days").innerHTML = days.toString().padStart(2, '0');
+            document.getElementById("popup-countdown-hours").innerHTML = hours.toString().padStart(2, '0');
+            document.getElementById("popup-countdown-minutes").innerHTML = minutes.toString().padStart(2, '0');
+            document.getElementById("popup-countdown-seconds").innerHTML = seconds.toString().padStart(2, '0');
+        }
+
+        // Initialize and update popup countdown
+        updatePopupCountdown();
+        setInterval(updatePopupCountdown, 1000);
+
+        // Sync enrollment progress between main card and popup
+        function syncEnrollment() {
+            const mainValue = document.getElementById('enrollmentCount').textContent;
+            document.getElementById('popupEnrollmentCount').textContent = mainValue;
+            document.getElementById('popupEnrollmentProgress').style.width = mainValue + '%';
+            document.getElementById('popupEnrollmentProgress-2').style.width = mainValue + '%';
+        }
+
+        // Initial sync
+        syncEnrollment();
+
+        // Sync regularly
+        setInterval(syncEnrollment, 30000);
+    });
+</script>
 
 </body>
 
