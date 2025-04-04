@@ -335,26 +335,28 @@ def register_flames(request, slug):
                 # Add the user as the first team member (team leader)
                 FlamesTeamMember.objects.create(
                     team=team,
-                    full_name=full_name,
-                    email=email,
-                    contact_number=contact_number,
-                    user=student,
+                    member=student,
                     is_leader=True
                 )
                 
-                # Process additional team members
+                # Process additional team members based on usernames
                 for i in range(1, 5):  # Process 4 more members to make a total of 5
-                    member_name = request.POST.get(f'team_member_name_{i}')
-                    member_email = request.POST.get(f'team_member_email_{i}')
-                    member_contact = request.POST.get(f'team_member_contact_{i}')
+                    member_username = request.POST.get(f'team_member_username_{i}')
                     
-                    if member_name and member_email and member_contact:
-                        FlamesTeamMember.objects.create(
-                            team=team,
-                            full_name=member_name,
-                            email=member_email,
-                            contact_number=member_contact
-                        )
+                    if member_username:
+                        try:
+                            # Get the user by username
+                            member_student = Student.objects.get(username=member_username)
+                            
+                            # Create team member record with actual student account
+                            FlamesTeamMember.objects.create(
+                                team=team,
+                                member=member_student,
+                                is_leader=False
+                            )
+                        except Student.DoesNotExist:
+                            # This shouldn't happen if front-end validation works correctly
+                            messages.warning(request, f"User with username '{member_username}' was not found. They will not be added to the team.")
                 
                 messages.success(request, f"Team '{team_name}' has been registered for {course.title} successfully!")
             else:

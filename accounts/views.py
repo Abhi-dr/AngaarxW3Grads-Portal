@@ -161,6 +161,12 @@ def check_username_availability(request):
 
     return JsonResponse(data)
 
+def check_username_exists(request):
+    """Check if a username exists in the system"""
+    username = request.GET.get('username')
+    exists = Student.objects.filter(username=username).exists()
+    return JsonResponse({'exists': exists})
+
 # ====================== check email availability ====================
 def check_email_availability(request):
     email = request.GET.get('email', '')

@@ -229,11 +229,10 @@ class FlamesTeam(models.Model):
 # ================= FLAMES TEAM MEMBERS ======================
 
 class FlamesTeamMember(models.Model):
+    member = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True, related_name='flames_team_memberships')
+    
     team = models.ForeignKey(FlamesTeam, on_delete=models.CASCADE, related_name='members')
-    full_name = models.CharField(max_length=100)
-    email = models.EmailField()
-    contact_number = models.CharField(max_length=15)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='flames_team_memberships')
+    
     is_leader = models.BooleanField(default=False)
     
     def __str__(self):

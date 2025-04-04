@@ -324,6 +324,16 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
 <div class="registration-bg-gradient" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></div>
 
 <div class="registration-container">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
     <div class="registration-header mt-4">
         <h1 class="registration-title">Register for F.L.A.M.E.S</h1>
         <p class="registration-subtitle">Complete the form below to secure your spot in the program</p>
@@ -398,7 +408,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
             
                 <div class="col-md-6 form-group">
                     <label for="contact_number" class="form-label">Contact Number *</label>
-                    <input type="tel" id="contact_number" name="contact_number" class="form-control" required {% if user.is_authenticated and user.profile.contact_number %}value="{{ user.profile.contact_number }}"{% endif %}>
+                    <input type="tel" id="contact_number" minlength="10" maxlength="10" name="contact_number" class="form-control" required {% if user.is_authenticated and user.profile.contact_number %}value="{{ user.profile.contact_number }}"{% endif %}>
                 </div>
             </div>
             
@@ -483,16 +493,13 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                         Team Member 2
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Full Name *</label>
-                        <input type="text" name="team_member_name_1" class="form-control team-required">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email Address *</label>
-                        <input type="email" name="team_member_email_1" class="form-control team-required">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Contact Number *</label>
-                        <input type="tel" name="team_member_contact_1" class="form-control team-required">
+                        <label class="form-label">Username *</label>
+                        <div class="input-container">
+                            <input type="text" id="team_member_username_1" name="team_member_username_1" class="form-control team-required" placeholder="Enter teammate's username">
+                            <i class="fas fa-check validation-icon" id="team1-valid-icon" style="display: none;"></i>
+                            <i class="fas fa-times validation-icon" id="team1-invalid-icon" style="display: none;"></i>
+                        </div>
+                        <div id="team1-feedback" class="form-feedback"></div>
                     </div>
                 </div>
                 
@@ -503,16 +510,13 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                         Team Member 3
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Full Name *</label>
-                        <input type="text" name="team_member_name_2" class="form-control team-required">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email Address *</label>
-                        <input type="email" name="team_member_email_2" class="form-control team-required">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Contact Number *</label>
-                        <input type="tel" name="team_member_contact_2" class="form-control team-required">
+                        <label class="form-label">Username *</label>
+                        <div class="input-container">
+                            <input type="text" id="team_member_username_2" name="team_member_username_2" class="form-control team-required" placeholder="Enter teammate's username">
+                            <i class="fas fa-check validation-icon" id="team2-valid-icon" style="display: none;"></i>
+                            <i class="fas fa-times validation-icon" id="team2-invalid-icon" style="display: none;"></i>
+                        </div>
+                        <div id="team2-feedback" class="form-feedback"></div>
                     </div>
                 </div>
                 
@@ -523,16 +527,13 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                         Team Member 4
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Full Name *</label>
-                        <input type="text" name="team_member_name_3" class="form-control team-required">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email Address *</label>
-                        <input type="email" name="team_member_email_3" class="form-control team-required">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Contact Number *</label>
-                        <input type="tel" name="team_member_contact_3" class="form-control team-required">
+                        <label class="form-label">Username *</label>
+                        <div class="input-container">
+                            <input type="text" id="team_member_username_3" name="team_member_username_3" class="form-control team-required" placeholder="Enter teammate's username">
+                            <i class="fas fa-check validation-icon" id="team3-valid-icon" style="display: none;"></i>
+                            <i class="fas fa-times validation-icon" id="team3-invalid-icon" style="display: none;"></i>
+                        </div>
+                        <div id="team3-feedback" class="form-feedback"></div>
                     </div>
                 </div>
                 
@@ -543,16 +544,13 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                         Team Member 5
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Full Name *</label>
-                        <input type="text" name="team_member_name_4" class="form-control team-required">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Email Address *</label>
-                        <input type="email" name="team_member_email_4" class="form-control team-required">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Contact Number *</label>
-                        <input type="tel" name="team_member_contact_4" class="form-control team-required">
+                        <label class="form-label">Username *</label>
+                        <div class="input-container">
+                            <input type="text" id="team_member_username_4" name="team_member_username_4" class="form-control team-required" placeholder="Enter teammate's username">
+                            <i class="fas fa-check validation-icon" id="team4-valid-icon" style="display: none;"></i>
+                            <i class="fas fa-times validation-icon" id="team4-invalid-icon" style="display: none;"></i>
+                        </div>
+                        <div id="team4-feedback" class="form-feedback"></div>
                     </div>
                 </div>
             </div>
@@ -739,52 +737,49 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
     // Function to check username availability
     function checkUsernameAvailability() {
         const username = document.getElementById('username').value;
-        const usernameFeedback = document.getElementById('username-feedback');
-        const usernameValidIcon = document.getElementById('username-valid-icon');
-        const usernameInvalidIcon = document.getElementById('username-invalid-icon');
+        const feedbackElement = document.getElementById('username-feedback');
+        
+        // Don't check if username is empty
+        if (!username) {
+            feedbackElement.innerHTML = '';
+            disableSubmit("Username is required");
+            return;
+        }
         
         if (username.length >= 4) {
             fetch(`/accounts/check_username_availability/?username=${username}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.is_available) {
-                        usernameFeedback.innerHTML = '<span class="valid">Username is available</span>';
-                        usernameFeedback.className = 'form-feedback valid';
+                        feedbackElement.innerHTML = '<span class="valid">Username is available</span>';
+                        feedbackElement.className = 'form-feedback valid';
                         document.getElementById('username').classList.add('is-valid');
                         document.getElementById('username').classList.remove('is-invalid');
-                        usernameValidIcon.style.display = 'block';
-                        usernameInvalidIcon.style.display = 'none';
                         enableSubmitIfValid();
                     } else {
-                        usernameFeedback.innerHTML = '<span class="invalid">Username is already taken</span>';
-                        usernameFeedback.className = 'form-feedback invalid';
+                        feedbackElement.innerHTML = '<span class="invalid">Username is already taken</span>';
+                        feedbackElement.className = 'form-feedback invalid';
                         document.getElementById('username').classList.add('is-invalid');
                         document.getElementById('username').classList.remove('is-valid');
-                        usernameValidIcon.style.display = 'none';
-                        usernameInvalidIcon.style.display = 'block';
-                        disableSubmit();
+                        disableSubmit("Username is already taken");
                     }
                 })
                 .catch(error => {
-                    usernameFeedback.innerHTML = '<span class="invalid">Error checking username</span>';
-                    usernameFeedback.className = 'form-feedback invalid';
+                    feedbackElement.innerHTML = '<span class="invalid">Error checking username</span>';
+                    feedbackElement.className = 'form-feedback invalid';
                 });
         } else {
-            usernameFeedback.innerHTML = '<span class="invalid">Username must be at least 4 characters</span>';
-            usernameFeedback.className = 'form-feedback invalid';
+            feedbackElement.innerHTML = '<span class="invalid">Username must be at least 4 characters</span>';
+            feedbackElement.className = 'form-feedback invalid';
             document.getElementById('username').classList.add('is-invalid');
             document.getElementById('username').classList.remove('is-valid');
-            usernameValidIcon.style.display = 'none';
-            usernameInvalidIcon.style.display = 'block';
-            disableSubmit();
+            disableSubmit("Username must be at least 4 characters");
         }
     }
 
     // Function to validate password
     function validatePassword() {
         const password = document.getElementById('password').value;
-        const passwordValidIcon = document.getElementById('password-valid-icon');
-        const passwordInvalidIcon = document.getElementById('password-invalid-icon');
         
         // Check password requirements
         const lengthCheck = document.getElementById('length-check');
@@ -799,6 +794,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         });
         
         let isValid = true;
+        let reason = '';
         
         // Check length
         if (password.length >= 8) {
@@ -806,6 +802,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         } else {
             lengthCheck.style.color = '#e74c3c';
             isValid = false;
+            if (!reason) reason = 'Password must be at least 8 characters';
         }
         
         // Check uppercase
@@ -814,6 +811,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         } else {
             uppercaseCheck.style.color = '#e74c3c';
             isValid = false;
+            if (!reason) reason = 'Password needs an uppercase letter';
         }
         
         // Check lowercase
@@ -822,6 +820,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         } else {
             lowercaseCheck.style.color = '#e74c3c';
             isValid = false;
+            if (!reason) reason = 'Password needs a lowercase letter';
         }
         
         // Check number
@@ -830,6 +829,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         } else {
             numberCheck.style.color = '#e74c3c';
             isValid = false;
+            if (!reason) reason = 'Password needs a number';
         }
         
         // Check special character
@@ -838,23 +838,29 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         } else {
             specialCheck.style.color = '#e74c3c';
             isValid = false;
+            if (!reason) reason = 'Password needs a special character';
         }
         
         // Update password field validation
         if (isValid) {
             document.getElementById('password').classList.add('is-valid');
             document.getElementById('password').classList.remove('is-invalid');
-            passwordValidIcon.style.display = 'block';
-            passwordInvalidIcon.style.display = 'none';
+            document.getElementById('password-valid-icon').style.display = 'block';
+            document.getElementById('password-invalid-icon').style.display = 'none';
+            validateFormAndUpdateButton();
         } else {
             document.getElementById('password').classList.add('is-invalid');
             document.getElementById('password').classList.remove('is-valid');
-            passwordValidIcon.style.display = 'none';
-            passwordInvalidIcon.style.display = 'block';
+            document.getElementById('password-valid-icon').style.display = 'none';
+            document.getElementById('password-invalid-icon').style.display = 'block';
+            disableSubmit(reason);
         }
         
         // Check password confirmation
-        checkPasswordMatch();
+        const confirmPassword = document.getElementById('confirm_password');
+        if (confirmPassword && confirmPassword.value) {
+            checkPasswordMatch();
+        }
         
         return isValid;
     }
@@ -864,73 +870,82 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
         const passwordMatch = document.getElementById('password-match');
-        const confirmValidIcon = document.getElementById('confirm-valid-icon');
-        const confirmInvalidIcon = document.getElementById('confirm-invalid-icon');
         
-        if (confirmPassword) {
-            if (password === confirmPassword) {
-                passwordMatch.style.display = 'none';
-                document.getElementById('confirm_password').classList.add('is-valid');
-                document.getElementById('confirm_password').classList.remove('is-invalid');
-                confirmValidIcon.style.display = 'block';
-                confirmInvalidIcon.style.display = 'none';
-                enableSubmitIfValid();
-                return true;
-            } else {
-                passwordMatch.style.display = 'block';
-                document.getElementById('confirm_password').classList.add('is-invalid');
-                document.getElementById('confirm_password').classList.remove('is-valid');
-                confirmValidIcon.style.display = 'none';
-                confirmInvalidIcon.style.display = 'block';
-                disableSubmit();
-                return false;
-            }
+        if (password === confirmPassword) {
+            passwordMatch.style.display = 'none';
+            document.getElementById('confirm_password').classList.add('is-valid');
+            document.getElementById('confirm_password').classList.remove('is-invalid');
+            document.getElementById('confirm-valid-icon').style.display = 'block';
+            document.getElementById('confirm-invalid-icon').style.display = 'none';
+            validateFormAndUpdateButton();
+            return true;
+        } else {
+            passwordMatch.style.display = 'block';
+            document.getElementById('confirm_password').classList.add('is-invalid');
+            document.getElementById('confirm_password').classList.remove('is-valid');
+            document.getElementById('confirm-valid-icon').style.display = 'none';
+            document.getElementById('confirm-invalid-icon').style.display = 'block';
+            disableSubmit("Passwords do not match");
+            return false;
         }
-        return false;
     }
 
     // Function to enable submit button if all validations pass
     function enableSubmitIfValid() {
-        if (isFormValid()) {
-            document.getElementById('register-button').disabled = false;
-        }
+        const button = document.getElementById('register-button');
+        button.disabled = false;
+        button.innerHTML = 'Register Now';
+        console.log('Submit button enabled');
     }
 
     // Function to disable submit button
-    function disableSubmit() {
-        document.getElementById('register-button').disabled = false;
+    function disableSubmit(reason) {
+        const button = document.getElementById('register-button');
+        button.disabled = true;
+        button.innerHTML = `Cannot Register: ${reason}`;
     }
 
     // Function to check if the entire form is valid
     function isFormValid() {
-        // Check username
-        const usernameField = document.getElementById('username');
-        const usernameValid = usernameField ? document.getElementById('username-feedback').innerHTML.includes('available') : true;
-        
-        // Check email
-        const emailField = document.getElementById('email');
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const emailValid = emailField ? emailRegex.test(emailField.value) : true;
-        
-        // Check password
-        const passwordField = document.getElementById('password');
-        const passwordValid = passwordField ? validatePassword() : true;
-        
-        // Check password match
-        const confirmPasswordField = document.getElementById('confirm_password');
-        const passwordsMatch = confirmPasswordField ? checkPasswordMatch() : true;
-        
-        // Check required fields
+        // Simple validation - just check required fields are filled
         const requiredFields = document.querySelectorAll('#flamesRegistrationForm input[required], #flamesRegistrationForm select[required]');
         let allRequiredFilled = true;
+        let missingField = '';
         
         requiredFields.forEach(field => {
             if (!field.value) {
                 allRequiredFilled = false;
+                if (!missingField) {
+                    missingField = field.name || field.id || 'required field';
+                }
             }
         });
         
-        return usernameValid && emailValid && passwordValid && passwordsMatch && allRequiredFilled;
+        // Check team member usernames if team registration is selected
+        const registrationMode = document.getElementById('registration_mode');
+        let teamMembersValid = true;
+        
+        if (registrationMode && registrationMode.value === 'TEAM') {
+            // Need at least one team member
+            let anyTeamMemberAdded = false;
+            
+            for (let i = 1; i <= 4; i++) {
+                const teamMemberField = document.getElementById(`team_member_username_${i}`);
+                if (teamMemberField && teamMemberField.value) {
+                    anyTeamMemberAdded = true;
+                    // Don't check validation status for now
+                }
+            }
+            
+            if (!anyTeamMemberAdded) {
+                teamMembersValid = false;
+                console.log('Team registration requires at least one team member');
+            }
+        }
+        
+        const isValid = allRequiredFilled && teamMembersValid;
+        console.log('Form validation result:', isValid ? 'VALID' : 'INVALID');
+        return isValid;
     }
 
     // Function to validate email format
@@ -941,27 +956,115 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
 
 
     // Add event listeners when the DOM is loaded
+    // Function to check team member username exists
+    function checkTeamMemberUsername(inputId) {
+        const username = document.getElementById(inputId).value;
+        const memberNumber = inputId.split('_').pop();
+        const feedbackId = 'team' + memberNumber + '-feedback';
+        const validIconId = 'team' + memberNumber + '-valid-icon';
+        const invalidIconId = 'team' + memberNumber + '-invalid-icon';
+        
+        const feedbackElement = document.getElementById(feedbackId);
+        const validIcon = document.getElementById(validIconId);
+        const invalidIcon = document.getElementById(invalidIconId);
+        
+        if (!username) {
+            feedbackElement.innerHTML = '';
+            validIcon.style.display = 'none';
+            invalidIcon.style.display = 'none';
+            return;
+        }
+        
+        // Show loading state
+        feedbackElement.innerHTML = '<span class="text-info">Checking username...</span>';
+        
+        // Make API call to check if username exists
+        fetch(`/accounts/check_username_exists/?username=${username}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    // Username exists, valid team member
+                    feedbackElement.innerHTML = `<span class="valid">Username verified</span>`;
+                    document.getElementById(inputId).classList.add('is-valid');
+                    document.getElementById(inputId).classList.remove('is-invalid');
+                    validIcon.style.display = 'block';
+                    invalidIcon.style.display = 'none';
+                    enableSubmitIfValid();
+                } else {
+                    // Username doesn't exist
+                    feedbackElement.innerHTML = `<span class="invalid text-danger">Username not found</span>`;
+                    document.getElementById(inputId).classList.add('is-invalid');
+                    document.getElementById(inputId).classList.remove('is-valid');
+                    validIcon.style.display = 'none';
+                    invalidIcon.style.display = 'block';
+                    disableSubmit("Student with this username not found");
+                }
+            })
+            .catch(error => {
+                feedbackElement.innerHTML = `<span class="invalid">Error checking username</span>`;
+                disableSubmit("Error verifying username");
+            });
+    }
+
+    // Function to validate the form and update button state
+    function validateFormAndUpdateButton() {
+        // Check if all required fields are filled
+        const requiredFields = document.querySelectorAll('#flamesRegistrationForm input[required], #flamesRegistrationForm select[required]');
+        let allRequiredFilled = true;
+        let missingField = '';
+        
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                allRequiredFilled = false;
+                if (!missingField) {
+                    missingField = field.name || field.id || 'required field';
+                }
+            }
+        });
+        
+        if (allRequiredFilled) {
+            enableSubmitIfValid();
+        } else {
+            disableSubmit(`Missing ${missingField}`);
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize team fields
         toggleTeamFields();
+        
+        // Initial validation on page load
+        console.log('Checking form validity on load');
+        validateFormAndUpdateButton();
         
         // Username validation
         const usernameField = document.getElementById('username');
         if (usernameField) {
             usernameField.addEventListener('input', function() {
+                // Check if username is at least 4 characters long
                 if (this.value.length >= 4) {
                     checkUsernameAvailability();
-                } else {
+                } else if (this.value.length > 0) {
                     document.getElementById('username-feedback').innerHTML = '<span class="invalid">Username must be at least 4 characters</span>';
                     document.getElementById('username-feedback').className = 'form-feedback invalid';
                     document.getElementById('username-valid-icon').style.display = 'none';
                     document.getElementById('username-invalid-icon').style.display = 'block';
-                    disableSubmit();
+                    disableSubmit("Username must be at least 4 characters");
                 }
             });
         }
+
+        // Team member username validation
+        for (let i = 1; i <= 4; i++) {
+            const teamMemberField = document.getElementById(`team_member_username_${i}`);
+            if (teamMemberField) {
+                teamMemberField.addEventListener('blur', function() {
+                    checkTeamMemberUsername(`team_member_username_${i}`);
+                });
+            }
+        }
         
-        // Email validation
+        // Email validation - simplified
         const emailField = document.getElementById('email');
         if (emailField) {
             // Add email feedback element if it doesn't exist
@@ -972,15 +1075,23 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                 emailField.parentNode.appendChild(feedbackDiv);
             }
             
+            // Just do basic format validation
             emailField.addEventListener('input', function() {
-                if (validateEmail(this.value)) {
-                    checkEmailAvailability();
-                } else {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (emailRegex.test(this.value)) {
+                    document.getElementById('email-feedback').innerHTML = '<span class="valid">Email format is valid</span>';
+                    document.getElementById('email-feedback').className = 'form-feedback valid';
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
+                    validateFormAndUpdateButton();
+                } else if (this.value) {
                     document.getElementById('email-feedback').innerHTML = '<span class="invalid">Please enter a valid email address</span>';
                     document.getElementById('email-feedback').className = 'form-feedback invalid';
                     this.classList.add('is-invalid');
                     this.classList.remove('is-valid');
-                    disableSubmit();
+                    disableSubmit("Invalid email format");
+                } else {
+                    disableSubmit("Email is required");
                 }
             });
         }
@@ -1009,14 +1120,37 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
             referralCodeField.addEventListener('blur', validateReferralCode);
         }
         
-        // Form submission
+        // Add validation for all required fields
+        const allFields = document.querySelectorAll('#flamesRegistrationForm input, #flamesRegistrationForm select');
+        allFields.forEach(field => {
+            field.addEventListener('change', validateFormAndUpdateButton);
+            field.addEventListener('input', validateFormAndUpdateButton);
+            field.addEventListener('blur', validateFormAndUpdateButton);
+        });
+
+        // Form submission - simplified validation
         const registrationForm = document.getElementById('flamesRegistrationForm');
         if (registrationForm) {
             registrationForm.addEventListener('submit', function(e) {
-                // Final validation before submission
-                if (!isFormValid()) {
+                // Basic validation - just check required fields
+                const requiredFields = document.querySelectorAll('#flamesRegistrationForm input[required], #flamesRegistrationForm select[required]');
+                let allRequiredFilled = true;
+                let missingField = '';
+                
+                requiredFields.forEach(field => {
+                    if (!field.value) {
+                        allRequiredFilled = false;
+                        field.classList.add('is-invalid');
+                        if (!missingField) {
+                            missingField = field.name || field.id || 'required field';
+                        }
+                    }
+                });
+                
+                if (!allRequiredFilled) {
                     e.preventDefault();
-                    alert('Please fix the errors in the form before submitting.');
+                    disableSubmit(`Missing ${missingField}`);
+                    alert('Please fill in all required fields before submitting.');
                 }
             });
         }
