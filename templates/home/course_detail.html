@@ -603,53 +603,26 @@
                         </div>
                     </div>
 
-                    <!-- Registration Button -->
-                    <button class="join-course-btn" id="registerButton">Book My Slot for FREE!</button>
+                    <!-- Registration Buttons -->
+                    <div style="display: flex; gap: 15px; margin-top: 20px;">
+
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'portal_register_course' course.id %}" class="join-course-btn" style="flex: 1; text-align: center; text-decoration: none; background: rgba(255, 96, 38, 0.2); border: 1px solid #ff6026; display: flex; align-items: center; justify-content: center;">
+                            Enroll Now
+                        </a>
+                        
+                        {% else %}
+                        
+                        <a href="{% url 'flames_register' course.slug %}" class="join-course-btn" style="flex: 1; text-align: center; text-decoration: none; background: rgba(255, 96, 38, 0.2); border: 1px solid #ff6026; display: flex; align-items: center; justify-content: center;">
+                            Register & Enroll
+                        </a>
+
+                        {% endif %}
+
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Registration Modal -->
-<div id="registrationModal" class="registration-modal">
-    <div class="registration-modal-content">
-        <div class="registration-modal-close" onclick="closeModal()">&times;</div>
-        <div class="registration-modal-header">
-            <h2 class="registration-modal-title">Register for {{ course.title }}</h2>
-            <p style="color: #aaa;">Fill out the form below to register for this program</p>
-        </div>
-        <form id="registrationForm">
-            <input type="hidden" id="course_id" name="course_id" value="{{ course.id }}">
-            <div class="registration-form-group">
-                <label for="full_name" class="registration-form-label">Full Name *</label>
-                <input type="text" id="full_name" name="full_name" class="registration-form-control" required>
-            </div>
-            <div class="registration-form-group">
-                <label for="email" class="registration-form-label">Email Address *</label>
-                <input type="email" id="email" name="email" class="registration-form-control" required>
-            </div>
-            <div class="registration-form-group">
-                <label for="contact_number" class="registration-form-label">Contact Number *</label>
-                <input type="tel" id="contact_number" name="contact_number" class="registration-form-control" required>
-            </div>
-            <div class="registration-form-group">
-                <label for="college" class="registration-form-label">College/University *</label>
-                <input type="text" id="college" name="college" class="registration-form-control" required>
-            </div>
-            <div class="registration-form-group">
-                <label for="year" class="registration-form-label">Year of Study *</label>
-                <select id="year" name="year" class="registration-form-control" required>
-                    <option value="">Select Year</option>
-                    <option value="1st Year">1st Year</option>
-                    <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year">4th Year</option>
-                    <option value="Graduate">Graduate</option>
-                </select>
-            </div>
-            <button type="submit" id="submitRegistration" class="registration-form-submit">All Set!</button>
-        </form>
     </div>
 </div>
 
@@ -791,7 +764,7 @@
             submitBtn.textContent = 'Processing...';
             submitBtn.disabled = true;
 
-            fetch('{% url "register_course" %}', {
+            /* fetch('', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -817,20 +790,86 @@
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;
                 });
+                */
         });
-    });
 
-    // Close modal function
-    function closeModal() {
-        document.getElementById('registrationModal').style.display = 'none';
-    }
-
-    // Close modal if clicked outside
-    window.onclick = function (event) {
-        const modal = document.getElementById('registrationModal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
+        // Handle referral code validation and price display
+        document.getElementById('referral_code').addEventListener('blur', function() {
+            const referralCode = this.value.trim();
+            const courseId = document.getElementById('course_id').value;
+            const registrationMode = document.getElementById('registration_mode').value;
+            
+            if (referralCode) {
+                // Fetch to validate referral code
+                fetch(`{% url "validate_referral" %}?code=${referralCode}&course_id=${courseId}&registration_mode=${registrationMode}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const messageElement = document.getElementById('referral_message');
+                    const priceDisplay = document.getElementById('price_display');
+                    const originalPriceElement = document.querySelector('.original-price');
+                    const discountedPriceElement = document.querySelector('.discounted-price');
+                    
+                    if (data.status === 'success') {
+                        messageElement.textContent = 'Valid referral code! Discount applied.';
+                        messageElement.style.color = '#38cb89';
+                        
+                        // Display price information
+                        priceDisplay.style.display = 'block';
+                        originalPriceElement.textContent = `Original Price: ₹${data.original_price}`;
+                        discountedPriceElement.textContent = `Discounted Price: ₹${data.discounted_price}`;
+                    } else {
+                        messageElement.textContent = data.message || 'Invalid referral code.';
+                        messageElement.style.color = '#f24e1e';
+                        priceDisplay.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error validating referral code:', error);
+                    document.getElementById('referral_message').textContent = 'Error validating code. Please try again.';
+                    document.getElementById('referral_message').style.color = '#f24e1e';
+                });
+            } else {
+                document.getElementById('referral_message').textContent = '';
+                document.getElementById('price_display').style.display = 'none';
+            }
+        });
+        
+        // Toggle referral field based on registration mode
+        function toggleReferralFields() {
+            const registrationMode = document.getElementById('registration_mode').value;
+            const referralGroup = document.getElementById('referral_code_group');
+            const referralInput = document.getElementById('referral_code');
+            const referralMessage = document.getElementById('referral_message');
+            
+            // Reset values
+            referralInput.value = '';
+            referralMessage.textContent = '';
+            document.getElementById('price_display').style.display = 'none';
+            
+            if (registrationMode === 'TEAM') {
+                referralGroup.querySelector('label').textContent = 'Team Referral Code';
+            } else {
+                referralGroup.querySelector('label').textContent = 'Alumni Referral Code (Optional)';
+            }
         }
-    }
+
+        // Close modal function
+        function closeModal() {
+            document.getElementById('registrationModal').style.display = 'none';
+        }
+
+        // Close modal if clicked outside
+        window.onclick = function (event) {
+            const modal = document.getElementById('registrationModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    });
 </script>
 {% endblock %}

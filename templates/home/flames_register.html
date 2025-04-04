@@ -1,0 +1,964 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}
+Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    body {
+        background-color: #0d0d0d;
+    }
+
+    .registration-container {
+        position: relative;
+        padding: 80px 0;
+        max-width: 900px;
+        margin: 0 auto;
+        z-index: 1;
+    }
+
+    .registration-bg-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
+            radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .registration-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .registration-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+    }
+
+    .registration-subtitle {
+        font-size: 1.2rem;
+        color: #aaa;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .course-details-card {
+        background-color: rgba(30, 30, 30, 0.5);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        margin-bottom: 30px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .course-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .course-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+    }
+
+    .course-name {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+    }
+
+    .course-subtitle {
+        font-size: 1rem;
+        color: #aaa;
+        margin: 5px 0 0;
+    }
+
+    .course-price {
+        text-align: right;
+        margin-top: 10px;
+    }
+
+    .price-section {
+        text-align: right;
+        position: relative;
+        z-index: 1;
+    }
+
+    .registration-form {
+        background-color: rgba(30, 30, 30, 0.5);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 30px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: #aaa;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        background-color: rgba(50, 50, 50, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: #fff;
+        font-size: 16px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #ff6026;
+        box-shadow: 0 0 0 3px rgba(255, 96, 38, 0.2);
+    }
+
+    .form-control.is-invalid {
+        border-color: #e74c3c;
+        box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+    }
+
+    .form-control.is-valid {
+        border-color: #2ecc71;
+        box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.2);
+    }
+
+    .form-feedback {
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .form-feedback.valid {
+        color: #2ecc71;
+    }
+
+    .form-feedback.invalid {
+        color: #e74c3c;
+    }
+
+    .btn-register {
+        display: block;
+        width: 100%;
+        padding: 15px;
+        background-color: #ff6026;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 30px;
+    }
+
+    .btn-register:hover {
+        background-color: #e55522;
+    }
+
+    .btn-register:disabled {
+        background-color: #666;
+        cursor: not-allowed;
+    }
+
+    .team-members-section {
+        margin-top: 30px;
+    }
+
+    .team-member-card {
+        background-color: rgba(40, 40, 40, 0.5);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .team-member-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .team-member-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #ff6026;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .price-summary {
+        background-color: rgba(40, 40, 40, 0.5);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        margin-top: 30px;
+        display: none;
+    }
+
+    .price-summary-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 15px;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .price-label {
+        color: #aaa;
+    }
+
+    .price-value {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .discount-badge {
+        display: inline-block;
+        padding: 3px 8px;
+        background-color: #2ecc71;
+        color: #fff;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-left: 10px;
+    }
+
+    /* Validation styles */
+    .input-container {
+        position: relative;
+    }
+
+    .validation-icon {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        display: none;
+    }
+
+    .validation-icon.valid {
+        color: #2ecc71;
+        display: block;
+    }
+
+    .validation-icon.invalid {
+        color: #e74c3c;
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .registration-title {
+            font-size: 2rem;
+        }
+
+        .course-header {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .course-icon {
+            margin-right: 0;
+            margin-bottom: 15px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="particles-js" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></div>
+<div class="registration-bg-gradient" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;"></div>
+
+<div class="registration-container">
+    <div class="registration-header mt-4">
+        <h1 class="registration-title">Register for F.L.A.M.E.S</h1>
+        <p class="registration-subtitle">Complete the form below to secure your spot in the program</p>
+    </div>
+
+    <div class="course-details-card">
+        <div class="course-header">
+            <div class="course-icon">
+                <i class="{{ course.icon_class }}" style="font-size: 36px; color: #ff6026;"></i>
+            </div>
+            <div>
+                <h2 class="course-name">{{ course.title }}</h2>
+                <p class="course-subtitle">{{ course.subtitle }}</p>
+                <p style="color: #aaa; margin-top: 5px;">By: <span style="color: white; font-weight: 600;">{{ course.instructor }}🔥</span></p>
+            </div>
+        </div>
+
+        <div style="color: #aaa; font-size: 14px; margin-bottom: 20px;">
+            <p>{{ course.description|truncatewords:50 }}</p>
+            <a href="{% url 'course_detail' course.slug %}" style="color: #ff6026;">View full course details →</a>
+        </div>
+
+        <div class="price-section">
+            {% if course.discount_price %}
+            <div style="display: flex; justify-content: flex-end; align-items: baseline;">
+                <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹{{ course.price }}</span>
+                <span style="color: #ff6026; font-size: 18px; font-weight: 700;">₹{{ course.discount_price }}</span>
+            </div>
+            <div style="color: #2ecc71; font-size: 12px; font-weight: 600; margin-top: 3px;">
+                {% widthratio course.discount_price course.price 100 as discount_percent %}
+                {{ discount_percent|add:"-100"|cut:"-" }}% OFF
+            </div>
+            {% else %}
+            <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="registration-form">
+        <form id="flamesRegistrationForm" method="post" action="{% url 'flames_register' course.slug %}">
+            
+            {% csrf_token %}
+            <input type="hidden" name="course_id" value="{{ course.id }}">
+
+            <div class="form-section-title">Personal Information</div>
+            
+            <div class="form-group">
+                <label for="username" class="form-label">Username *</label>
+                <div class="input-container">
+                    <input type="text" id="username" name="username" class="form-control" required 
+                           pattern="^(?!.*\s).{4,10}$" maxlength="20" minlength="4"
+                           title="Must NOT contain spaces, must be between 4-10 characters">
+                    <i class="fas fa-check validation-icon" id="username-valid-icon"></i>
+                    <i class="fas fa-times validation-icon" id="username-invalid-icon"></i>
+                </div>
+                <div id="username-feedback" class="form-feedback"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="full_name" class="form-label">Full Name *</label>
+                <input type="text" id="full_name" name="full_name" class="form-control" required value="{{ user.first_name }} {{ user.last_name }}" {% if user.is_authenticated %}readonly{% endif %}>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="email" class="form-label">Email Address *</label>
+                    <div class="input-container">
+                        <input type="email" id="email" name="email" class="form-control" required value="{{ user.email }}">
+                    </div>
+                </div>
+            
+                <div class="col-md-6 form-group">
+                    <label for="contact_number" class="form-label">Contact Number *</label>
+                    <input type="tel" id="contact_number" name="contact_number" class="form-control" required {% if user.is_authenticated and user.profile.contact_number %}value="{{ user.profile.contact_number }}"{% endif %}>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="college" class="form-label">College/University *</label>
+                    <input type="text" id="college" name="college" class="form-control" required {% if user.is_authenticated and user.profile.college %}value="{{ user.profile.college }}"{% endif %}>
+                </div>
+                
+                <div class="col-md-6 form-group">
+                    <label for="year" class="form-label">Year of Study *</label>
+                    <select id="year" name="year" class="form-control" required>
+                        <option value="">Select Year</option>
+                        <option value="1st Year">1st Year</option>
+                        <option value="2nd Year">2nd Year</option>
+                        <option value="3rd Year">3rd Year</option>
+                        <option value="4th Year">4th Year</option>
+                        <option value="5th Year">5th Year</option>
+                        <option value="Graduate">Graduate</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="password" class="form-label">Password *</label>
+                    <div class="input-container">
+                        <input type="password" id="password" name="password" class="form-control" required 
+                               pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$" minlength="8"
+                               title="Must contain at least one number, one uppercase, one lowercase, one special character, and at least 8 characters">
+                        <i class="fas fa-check validation-icon" id="password-valid-icon"></i>
+                        <i class="fas fa-times validation-icon" id="password-invalid-icon"></i>
+                    </div>
+                    <div id="password-requirements" class="form-feedback text-white-50">
+                        Password must contain:
+                        <ul class="mt-1 mb-0">
+                            <li id="length-check">At least 8 characters</li>
+                            <li id="uppercase-check">One uppercase letter</li>
+                            <li id="lowercase-check">One lowercase letter</li>
+                            <li id="number-check">One number</li>
+                            <li id="special-check">One special character</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 form-group">
+                    <label for="confirm_password" class="form-label">Confirm Password *</label>
+                    <div class="input-container">
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                        <i class="fas fa-check validation-icon" id="confirm-valid-icon"></i>
+                        <i class="fas fa-times validation-icon" id="confirm-invalid-icon"></i>
+                    </div>
+                    <div id="password-match" class="form-feedback invalid" style="display: none;">Passwords do not match!</div>
+                </div>
+            </div>
+
+            <div class="form-section-title">Registration Details</div>
+            
+            <div class="form-group">
+                <label for="registration_mode" class="form-label">Registration Mode *</label>
+                <select id="registration_mode" name="registration_mode" class="form-control" required onchange="toggleTeamFields()">
+                    <option value="">Select Registration Mode</option>
+                    <option value="SOLO">Solo Registration</option>
+                    <option value="TEAM">Team Registration (5 members)</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="referral_code" class="form-label">Referral Code (Optional)</label>
+                <input type="text" id="referral_code" name="referral_code" class="form-control">
+                <div id="referral_message" style="font-size: 14px; margin-top: 5px; color: #aaa;"></div>
+            </div>
+
+            <div id="team-members-section" class="team-members-section" style="display: none;">
+                <div class="form-section-title">Team Members</div>
+                <p style="color: #aaa; margin-bottom: 20px;">Please provide details for all 4 additional team members</p>
+                
+                <!-- Team Member 2 -->
+                <div class="team-member-card">
+                    <div class="team-member-header">
+                        <div class="team-member-number">2</div>
+                        Team Member 2
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="team_member_name_1" class="form-control team-required">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" name="team_member_email_1" class="form-control team-required">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Number *</label>
+                        <input type="tel" name="team_member_contact_1" class="form-control team-required">
+                    </div>
+                </div>
+                
+                <!-- Team Member 3 -->
+                <div class="team-member-card">
+                    <div class="team-member-header">
+                        <div class="team-member-number">3</div>
+                        Team Member 3
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="team_member_name_2" class="form-control team-required">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" name="team_member_email_2" class="form-control team-required">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Number *</label>
+                        <input type="tel" name="team_member_contact_2" class="form-control team-required">
+                    </div>
+                </div>
+                
+                <!-- Team Member 4 -->
+                <div class="team-member-card">
+                    <div class="team-member-header">
+                        <div class="team-member-number">4</div>
+                        Team Member 4
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="team_member_name_3" class="form-control team-required">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" name="team_member_email_3" class="form-control team-required">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Number *</label>
+                        <input type="tel" name="team_member_contact_3" class="form-control team-required">
+                    </div>
+                </div>
+                
+                <!-- Team Member 5 -->
+                <div class="team-member-card">
+                    <div class="team-member-header">
+                        <div class="team-member-number">5</div>
+                        Team Member 5
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" name="team_member_name_4" class="form-control team-required">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" name="team_member_email_4" class="form-control team-required">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Number *</label>
+                        <input type="tel" name="team_member_contact_4" class="form-control team-required">
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" id="register-button" class="btn-register" disabled>Complete Registration</button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    // Initialize particles.js
+    document.addEventListener('DOMContentLoaded', function() {
+        particlesJS("particles-js", {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ff6026"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    },
+                    "polygon": {
+                        "nb_sides": 5
+                    }
+                },
+                "opacity": {
+                    "value": 0.3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 1,
+                        "opacity_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 2,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ff6026",
+                    "opacity": 0.2,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false,
+                    "attract": {
+                        "enable": false,
+                        "rotateX": 600,
+                        "rotateY": 1200
+                    }
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 0.5
+                        }
+                    },
+                    "bubble": {
+                        "distance": 400,
+                        "size": 40,
+                        "duration": 2,
+                        "opacity": 8,
+                        "speed": 3
+                    },
+                    "repulse": {
+                        "distance": 200,
+                        "duration": 0.4
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    },
+                    "remove": {
+                        "particles_nb": 2
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+    });
+
+    // Function to toggle team fields visibility
+    function toggleTeamFields() {
+        const registrationMode = document.getElementById('registration_mode').value;
+        const teamMembersSection = document.getElementById('team-members-section');
+        
+        if (registrationMode === 'TEAM') {
+            teamMembersSection.style.display = 'block';
+            document.querySelectorAll('.team-required').forEach(field => {
+                field.setAttribute('required', '');
+            });
+        } else {
+            teamMembersSection.style.display = 'none';
+            document.querySelectorAll('.team-required').forEach(field => {
+                field.removeAttribute('required');
+            });
+        }
+    }
+    
+    // Function to validate referral code
+    function validateReferralCode() {
+        const referralCode = document.getElementById('referral_code').value;
+        const registrationMode = document.getElementById('registration_mode').value;
+        const courseId = "{{ course.id }}";
+        const referralMessage = document.getElementById('referral_message');
+        
+        if (!referralCode || !registrationMode) {
+            return;
+        }
+        
+        // If there's a referral code, validate it
+        if (referralCode) {
+            referralMessage.innerHTML = 'Validating referral code...';
+
+            const url = `{% url 'validate_referral' %}?code=${referralCode}&course_id=${courseId}&registration_mode=${registrationMode}`
+            
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        referralMessage.innerHTML = `<span style="color: #2ecc71;">✓ ${data.message}</span>`;
+                    } else {
+                        referralMessage.innerHTML = `<span style="color: #e74c3c;">✗ ${data.message}</span>`;
+                    }
+                })
+                .catch(error => {
+                    referralMessage.innerHTML = '<span style="color: #e74c3c;">✗ Error validating referral code</span>';
+                });
+        }
+    }
+
+    // Function to check username availability
+    function checkUsernameAvailability() {
+        const username = document.getElementById('username').value;
+        const usernameFeedback = document.getElementById('username-feedback');
+        const usernameValidIcon = document.getElementById('username-valid-icon');
+        const usernameInvalidIcon = document.getElementById('username-invalid-icon');
+        
+        if (username.length >= 4) {
+            fetch(`/accounts/check_username_availability/?username=${username}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_available) {
+                        usernameFeedback.innerHTML = '<span class="valid">Username is available</span>';
+                        usernameFeedback.className = 'form-feedback valid';
+                        document.getElementById('username').classList.add('is-valid');
+                        document.getElementById('username').classList.remove('is-invalid');
+                        usernameValidIcon.style.display = 'block';
+                        usernameInvalidIcon.style.display = 'none';
+                        enableSubmitIfValid();
+                    } else {
+                        usernameFeedback.innerHTML = '<span class="invalid">Username is already taken</span>';
+                        usernameFeedback.className = 'form-feedback invalid';
+                        document.getElementById('username').classList.add('is-invalid');
+                        document.getElementById('username').classList.remove('is-valid');
+                        usernameValidIcon.style.display = 'none';
+                        usernameInvalidIcon.style.display = 'block';
+                        disableSubmit();
+                    }
+                })
+                .catch(error => {
+                    usernameFeedback.innerHTML = '<span class="invalid">Error checking username</span>';
+                    usernameFeedback.className = 'form-feedback invalid';
+                });
+        } else {
+            usernameFeedback.innerHTML = '<span class="invalid">Username must be at least 4 characters</span>';
+            usernameFeedback.className = 'form-feedback invalid';
+            document.getElementById('username').classList.add('is-invalid');
+            document.getElementById('username').classList.remove('is-valid');
+            usernameValidIcon.style.display = 'none';
+            usernameInvalidIcon.style.display = 'block';
+            disableSubmit();
+        }
+    }
+
+    // Function to validate password
+    function validatePassword() {
+        const password = document.getElementById('password').value;
+        const passwordValidIcon = document.getElementById('password-valid-icon');
+        const passwordInvalidIcon = document.getElementById('password-invalid-icon');
+        
+        // Check password requirements
+        const lengthCheck = document.getElementById('length-check');
+        const uppercaseCheck = document.getElementById('uppercase-check');
+        const lowercaseCheck = document.getElementById('lowercase-check');
+        const numberCheck = document.getElementById('number-check');
+        const specialCheck = document.getElementById('special-check');
+        
+        // Reset all checks
+        [lengthCheck, uppercaseCheck, lowercaseCheck, numberCheck, specialCheck].forEach(check => {
+            check.style.color = '#aaa';
+        });
+        
+        let isValid = true;
+        
+        // Check length
+        if (password.length >= 8) {
+            lengthCheck.style.color = '#2ecc71';
+        } else {
+            lengthCheck.style.color = '#e74c3c';
+            isValid = false;
+        }
+        
+        // Check uppercase
+        if (/[A-Z]/.test(password)) {
+            uppercaseCheck.style.color = '#2ecc71';
+        } else {
+            uppercaseCheck.style.color = '#e74c3c';
+            isValid = false;
+        }
+        
+        // Check lowercase
+        if (/[a-z]/.test(password)) {
+            lowercaseCheck.style.color = '#2ecc71';
+        } else {
+            lowercaseCheck.style.color = '#e74c3c';
+            isValid = false;
+        }
+        
+        // Check number
+        if (/[0-9]/.test(password)) {
+            numberCheck.style.color = '#2ecc71';
+        } else {
+            numberCheck.style.color = '#e74c3c';
+            isValid = false;
+        }
+        
+        // Check special character
+        if (/[!@#$%^&*]/.test(password)) {
+            specialCheck.style.color = '#2ecc71';
+        } else {
+            specialCheck.style.color = '#e74c3c';
+            isValid = false;
+        }
+        
+        // Update password field validation
+        if (isValid) {
+            document.getElementById('password').classList.add('is-valid');
+            document.getElementById('password').classList.remove('is-invalid');
+            passwordValidIcon.style.display = 'block';
+            passwordInvalidIcon.style.display = 'none';
+        } else {
+            document.getElementById('password').classList.add('is-invalid');
+            document.getElementById('password').classList.remove('is-valid');
+            passwordValidIcon.style.display = 'none';
+            passwordInvalidIcon.style.display = 'block';
+        }
+        
+        // Check password confirmation
+        checkPasswordMatch();
+        
+        return isValid;
+    }
+
+    // Function to check if passwords match
+    function checkPasswordMatch() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const passwordMatch = document.getElementById('password-match');
+        const confirmValidIcon = document.getElementById('confirm-valid-icon');
+        const confirmInvalidIcon = document.getElementById('confirm-invalid-icon');
+        
+        if (confirmPassword) {
+            if (password === confirmPassword) {
+                passwordMatch.style.display = 'none';
+                document.getElementById('confirm_password').classList.add('is-valid');
+                document.getElementById('confirm_password').classList.remove('is-invalid');
+                confirmValidIcon.style.display = 'block';
+                confirmInvalidIcon.style.display = 'none';
+                enableSubmitIfValid();
+                return true;
+            } else {
+                passwordMatch.style.display = 'block';
+                document.getElementById('confirm_password').classList.add('is-invalid');
+                document.getElementById('confirm_password').classList.remove('is-valid');
+                confirmValidIcon.style.display = 'none';
+                confirmInvalidIcon.style.display = 'block';
+                disableSubmit();
+                return false;
+            }
+        }
+        return false;
+    }
+
+    // Function to enable submit button if all validations pass
+    function enableSubmitIfValid() {
+        if (isFormValid()) {
+            document.getElementById('register-button').disabled = false;
+        }
+    }
+
+    // Function to disable submit button
+    function disableSubmit() {
+        document.getElementById('register-button').disabled = true;
+    }
+
+    // Function to check if the entire form is valid
+    function isFormValid() {
+        // Check username
+        const usernameValid = document.getElementById('username-feedback').innerHTML.includes('available');
+        
+        // Check email
+        const emailValid = document.getElementById('email-feedback').innerHTML.includes('available');
+        
+        // Check password
+        const passwordValid = validatePassword();
+        
+        // Check password match
+        const passwordsMatch = checkPasswordMatch();
+        
+        // Check required fields
+        const requiredFields = document.querySelectorAll('#flamesRegistrationForm input[required], #flamesRegistrationForm select[required]');
+        let allRequiredFilled = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value) {
+                allRequiredFilled = false;
+            }
+        });
+        
+        return usernameValid && emailValid && passwordValid && passwordsMatch && allRequiredFilled;
+    }
+
+    // Add event listeners when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize team fields
+        toggleTeamFields();
+        
+        // Username validation
+        document.getElementById('username').addEventListener('input', function() {
+            if (this.value.length >= 4) {
+                checkUsernameAvailability();
+            } else {
+                document.getElementById('username-feedback').innerHTML = '<span class="invalid">Username must be at least 4 characters</span>';
+                document.getElementById('username-feedback').className = 'form-feedback invalid';
+                document.getElementById('username-valid-icon').style.display = 'none';
+                document.getElementById('username-invalid-icon').style.display = 'block';
+                disableSubmit();
+            }
+        });
+        
+
+        
+        // Password validation
+        document.getElementById('password').addEventListener('input', validatePassword);
+        
+        // Confirm password validation
+        document.getElementById('confirm_password').addEventListener('input', checkPasswordMatch);
+        
+        // Registration mode change
+        document.getElementById('registration_mode').addEventListener('change', toggleTeamFields);
+        
+        // Referral code validation
+        document.getElementById('referral_code').addEventListener('blur', validateReferralCode);
+        
+        // Form submission
+        document.getElementById('flamesRegistrationForm').addEventListener('submit', function(e) {
+            // Final validation before submission
+            if (!isFormValid()) {
+                e.preventDefault();
+                alert('Please fix the errors in the form before submitting.');
+            }
+        });
+    });
+</script>
+{% endblock %}

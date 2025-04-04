@@ -1,0 +1,190 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}Create Team | F.L.A.M.E.S Team Formation{% endblock %}
+
+{% block css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    .course-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #ff6026;
+    }
+
+    .course-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .course-title i {
+        margin-right: 0.75rem;
+        color: #ff6026;
+    }
+
+    .course-subtitle {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .form-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+
+    .form-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .form-help {
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 1rem;
+        background-color: #e9f7fe;
+        border-left: 4px solid #3498db;
+        border-radius: 4px;
+        color: #1a5276;
+    }
+
+    .btn-submit {
+        background-color: #ff6026;
+        border-color: #ff6026;
+        color: #fff;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .btn-submit:hover {
+        background-color: #e55522;
+        border-color: #e55522;
+    }
+
+    .btn-cancel {
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-color: #f8f9fa;
+        margin-right: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+        background-color: #e9ecef;
+        border-color: #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'student_flames' %}">F.L.A.M.E.S</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'student_team_formation' %}">Team Formation</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Create Team</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h2 class="page-title">Create a New Team</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="course-info">
+                <h3 class="course-title">
+                    <i class="{{ registration.course.icon_class }}"></i>
+                    {{ registration.course.title }}
+                </h3>
+                <p class="course-subtitle">{{ registration.course.subtitle }}</p>
+            </div>
+
+            <div class="form-container">
+                <h4 class="form-title">Team Details</h4>
+
+                <div class="form-help">
+                    <p><strong>Note:</strong> As the creator of the team, you will automatically be assigned as the team leader. You can add up to 4 more members to complete your team of 5.</p>
+                </div>
+
+                <form method="post" action="{% url 'student_create_team' registration.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="form-group mb-3">
+                        <label for="team_name" class="form-label">Team Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="team_name" name="team_name" placeholder="Enter a name for your team" required>
+                        <small class="form-text text-muted">Choose a unique and creative name for your team.</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form-label">Team Leader (You)</label>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-0">{{ registration.full_name }}</h5>
+                                        <p class="mb-0 text-muted">{{ registration.email }}</p>
+                                    </div>
+                                    <span class="badge bg-primary ms-auto">Team Leader</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{% url 'student_team_formation' %}" class="btn btn-cancel">Cancel</a>
+                        <button type="submit" class="btn btn-submit">Create Team</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">What's Next?</h5>
+                </div>
+                <div class="card-body">
+                    <p>After creating your team:</p>
+                    <ol>
+                        <li>You can add up to 4 more members to your team</li>
+                        <li>Each member will be part of the F.L.A.M.E.S program</li>
+                        <li>Your team will participate in activities together</li>
+                        <li>You'll receive team-specific communications and updates</li>
+                    </ol>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Teams must have 5 members to be considered complete.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
