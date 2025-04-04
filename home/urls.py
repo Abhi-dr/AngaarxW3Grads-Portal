@@ -14,18 +14,16 @@ urlpatterns = [
     path("our_achievers/", views.our_achievers, name="our_achievers"),
     path('fetch_achievers_data/', views.fetch_achievers_data, name='fetch_achievers_data'),
     path('fetch_top_performers/', views.fetch_top_performers, name='fetch_top_performers'),
-    
 ]
 
+# ====================================== FLAMES ========================================
+
+
 urlpatterns += [
-    
-    # ======================== FLAMES ============================
     path("flames/", flames.flames, name="flames"),
     
-    path("flames/course/<slug:slug>/", flames.course_detail, name="course_detail"),
+    path("flames/course/<slug:slug>/", flames.course_detail, name="home_course_detail"),
     
-    path("flames/register/<slug:slug>/", flames.register_flames, name="flames_register"),
+    path("flames/<slug:slug>/register/", flames.register_flames, name="flames_register"),
     path("flames/validate-referral/", flames.validate_referral, name="validate_referral"),
-    
-
 ]

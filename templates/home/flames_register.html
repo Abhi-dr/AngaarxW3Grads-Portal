@@ -393,6 +393,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                     <div class="input-container">
                         <input type="email" id="email" name="email" class="form-control" required value="{{ user.email }}">
                     </div>
+                    <div id="email-feedback" class="form-feedback"></div>
                 </div>
             
                 <div class="col-md-6 form-group">
@@ -556,7 +557,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                 </div>
             </div>
 
-            <button type="submit" id="register-button" class="btn-register" disabled>Complete Registration</button>
+            <button type="submit" id="register-button" class="btn-register">Complete Registration</button>
         </form>
     </div>
 </div>
@@ -698,7 +699,15 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         const courseId = "{{ course.id }}";
         const referralMessage = document.getElementById('referral_message');
         
-        if (!referralCode || !registrationMode) {
+        // Clear previous message if referral code is empty
+        if (!referralCode) {
+            referralMessage.innerHTML = '';
+            return;
+        }
+        
+        // Don't proceed if registration mode is not selected
+        if (!registrationMode) {
+            referralMessage.innerHTML = '<span style="color: #e74c3c;">Please select a registration mode first</span>';
             return;
         }
         
@@ -889,22 +898,27 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
 
     // Function to disable submit button
     function disableSubmit() {
-        document.getElementById('register-button').disabled = true;
+        document.getElementById('register-button').disabled = false;
     }
 
     // Function to check if the entire form is valid
     function isFormValid() {
         // Check username
-        const usernameValid = document.getElementById('username-feedback').innerHTML.includes('available');
+        const usernameField = document.getElementById('username');
+        const usernameValid = usernameField ? document.getElementById('username-feedback').innerHTML.includes('available') : true;
         
         // Check email
-        const emailValid = document.getElementById('email-feedback').innerHTML.includes('available');
+        const emailField = document.getElementById('email');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailValid = emailField ? emailRegex.test(emailField.value) : true;
         
         // Check password
-        const passwordValid = validatePassword();
+        const passwordField = document.getElementById('password');
+        const passwordValid = passwordField ? validatePassword() : true;
         
         // Check password match
-        const passwordsMatch = checkPasswordMatch();
+        const confirmPasswordField = document.getElementById('confirm_password');
+        const passwordsMatch = confirmPasswordField ? checkPasswordMatch() : true;
         
         // Check required fields
         const requiredFields = document.querySelectorAll('#flamesRegistrationForm input[required], #flamesRegistrationForm select[required]');
@@ -919,46 +933,93 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         return usernameValid && emailValid && passwordValid && passwordsMatch && allRequiredFilled;
     }
 
+    // Function to validate email format
+    function validateEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    }
+
+
     // Add event listeners when the DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize team fields
         toggleTeamFields();
         
         // Username validation
-        document.getElementById('username').addEventListener('input', function() {
-            if (this.value.length >= 4) {
-                checkUsernameAvailability();
-            } else {
-                document.getElementById('username-feedback').innerHTML = '<span class="invalid">Username must be at least 4 characters</span>';
-                document.getElementById('username-feedback').className = 'form-feedback invalid';
-                document.getElementById('username-valid-icon').style.display = 'none';
-                document.getElementById('username-invalid-icon').style.display = 'block';
-                disableSubmit();
-            }
-        });
+        const usernameField = document.getElementById('username');
+        if (usernameField) {
+            usernameField.addEventListener('input', function() {
+                if (this.value.length >= 4) {
+                    checkUsernameAvailability();
+                } else {
+                    document.getElementById('username-feedback').innerHTML = '<span class="invalid">Username must be at least 4 characters</span>';
+                    document.getElementById('username-feedback').className = 'form-feedback invalid';
+                    document.getElementById('username-valid-icon').style.display = 'none';
+                    document.getElementById('username-invalid-icon').style.display = 'block';
+                    disableSubmit();
+                }
+            });
+        }
         
-
+        // Email validation
+        const emailField = document.getElementById('email');
+        if (emailField) {
+            // Add email feedback element if it doesn't exist
+            if (!document.getElementById('email-feedback')) {
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.id = 'email-feedback';
+                feedbackDiv.className = 'form-feedback';
+                emailField.parentNode.appendChild(feedbackDiv);
+            }
+            
+            emailField.addEventListener('input', function() {
+                if (validateEmail(this.value)) {
+                    checkEmailAvailability();
+                } else {
+                    document.getElementById('email-feedback').innerHTML = '<span class="invalid">Please enter a valid email address</span>';
+                    document.getElementById('email-feedback').className = 'form-feedback invalid';
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
+                    disableSubmit();
+                }
+            });
+        }
         
         // Password validation
-        document.getElementById('password').addEventListener('input', validatePassword);
+        const passwordField = document.getElementById('password');
+        if (passwordField) {
+            passwordField.addEventListener('input', validatePassword);
+        }
         
         // Confirm password validation
-        document.getElementById('confirm_password').addEventListener('input', checkPasswordMatch);
+        const confirmPasswordField = document.getElementById('confirm_password');
+        if (confirmPasswordField) {
+            confirmPasswordField.addEventListener('input', checkPasswordMatch);
+        }
         
         // Registration mode change
-        document.getElementById('registration_mode').addEventListener('change', toggleTeamFields);
+        const registrationModeField = document.getElementById('registration_mode');
+        if (registrationModeField) {
+            registrationModeField.addEventListener('change', toggleTeamFields);
+        }
         
         // Referral code validation
-        document.getElementById('referral_code').addEventListener('blur', validateReferralCode);
+        const referralCodeField = document.getElementById('referral_code');
+        if (referralCodeField) {
+            referralCodeField.addEventListener('blur', validateReferralCode);
+        }
         
         // Form submission
-        document.getElementById('flamesRegistrationForm').addEventListener('submit', function(e) {
-            // Final validation before submission
-            if (!isFormValid()) {
-                e.preventDefault();
-                alert('Please fix the errors in the form before submitting.');
-            }
-        });
+        const registrationForm = document.getElementById('flamesRegistrationForm');
+        if (registrationForm) {
+            registrationForm.addEventListener('submit', function(e) {
+                // Final validation before submission
+                if (!isFormValid()) {
+                    e.preventDefault();
+                    alert('Please fix the errors in the form before submitting.');
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
