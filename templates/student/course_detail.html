@@ -1,0 +1,365 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block summer_active %}
+active
+{% endblock %}
+
+{% block title %}{{ course.title }} | F.L.A.M.E.S Program{% endblock %}
+
+{% block extra_css %}
+<style>
+    .course-header {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .course-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .course-subtitle {
+        font-size: 1.25rem;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+    .instructor-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .instructor-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+
+    .instructor-name {
+        font-weight: 600;
+    }
+
+    .course-price-info {
+        display: flex;
+        align-items: baseline;
+        margin-top: 1rem;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #6c757d;
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+    }
+
+    .final-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #212529;
+    }
+
+    .course-section {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .learning-points {
+        list-style-type: none;
+        padding-left: 0;
+    }
+
+    .learning-points li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .learning-points li:before {
+        content: "\f00c";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: #28a745;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+
+    .roadmap-item {
+        padding: 1.5rem;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        margin-bottom: 1rem;
+    }
+
+    .roadmap-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .testimonial-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .testimonial-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .testimonial-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        overflow: hidden;
+    }
+
+    .testimonial-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .testimonial-name {
+        font-weight: 600;
+    }
+
+    .testimonial-rating {
+        color: #ffc107;
+        margin-top: 0.25rem;
+    }
+
+    .testimonial-content {
+        font-style: italic;
+        color: #6c757d;
+    }
+
+    .cta-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .cta-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .cta-subtitle {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-register {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+    }
+
+    /* Dark mode styles */
+    [data-bs-theme="dark"] .course-header {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .course-subtitle {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .original-price {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .final-price {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .course-section {
+        background-color: var(--card-bg);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-bs-theme="dark"] .section-title {
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .roadmap-item {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .testimonial-card {
+        background-color: var(--card-bg);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-bs-theme="dark"] .testimonial-content {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .cta-section {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .cta-subtitle {
+        color: var(--text-secondary);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="course-header">
+        <div class="course-header-content">
+            <h1 class="course-title">{{ course.title }}</h1>
+            <p class="course-subtitle">{{ course.subtitle }}</p>
+
+            <div class="instructor-info">
+                <div class="instructor-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div class="instructor-name">{{ course.instructor }}</div>
+                    <div class="instructor-role">Lead Instructor</div>
+                </div>
+            </div>
+
+            <div class="course-price-info">
+                {% if course.discount_price %}
+                <span class="original-price">₹{{ course.price }}</span>
+                <span class="final-price">₹{{ course.discount_price }}</span>
+                {% else %}
+                <span class="final-price">₹{{ course.price }}</span>
+                {% endif %}
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'flames_register' course.id %}" class="btn btn-primary btn-lg">Register Now</a>
+                <a href="#course-details" class="btn btn-outline-secondary btn-lg ms-2">Learn More</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="course-details" class="course-section">
+        <h2 class="section-title">About This Program</h2>
+        <div class="course-description">
+            {{ course.description|safe }}
+        </div>
+    </div>
+
+    <div class="course-section">
+        <h2 class="section-title">What You'll Learn</h2>
+        <ul class="learning-points">
+            {% for point in course.get_learning_points %}
+            <li>{{ point }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="course-section">
+        <h2 class="section-title">Program Roadmap</h2>
+        <div class="roadmap-content">
+            {{ course.roadmap|safe|linebreaks }}
+        </div>
+    </div>
+
+    {% if course.testimonials.exists %}
+    <div class="course-section">
+        <h2 class="section-title">What Our Students Say</h2>
+        <div class="testimonials-container">
+            {% for testimonial in course.testimonials.all %}
+            <div class="testimonial-card">
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar">
+                        {% if testimonial.student_image %}
+                        <img src="{{ testimonial.student_image.url }}" alt="{{ testimonial.student_name }}">
+                        {% else %}
+                        <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="testimonial-name">{{ testimonial.student_name }}</div>
+                        <div class="testimonial-rating">
+                            {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= testimonial.rating %} <i class="fas fa-star"></i>
+                                {% else %}
+                                <i class="far fa-star"></i>
+                                {% endif %}
+                                {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-content">
+                    {{ testimonial.content }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="cta-section">
+        <h2 class="cta-title">Ready to Enhance Your Skills?</h2>
+        <p class="cta-subtitle">Join this F.L.A.M.E.S program and take your career to the next level</p>
+        <a href="{% url 'flames_register' course.id %}" class="btn btn-primary btn-register">Register Now</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}

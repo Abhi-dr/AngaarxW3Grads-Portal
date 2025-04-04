@@ -471,8 +471,8 @@ active
     }
 
     [data-bs-theme="dark"] .team-leader-badge {
-        background-color: var(--secondary-bg);
-        color: var(--text-secondary);
+        background-color: var(--highlight);
+        color: #fff;
     }
 
     [data-bs-theme="dark"] .flames-footer {
@@ -566,10 +566,10 @@ active
         {% for registration in registrations %}
         <div class="flames-card">
             <div class="flames-header">
-                <div class="flames-icon" style="background-color: rgba({{ registration.course.icon_color }}, 0.1);">
+                <!-- <div class="flames-icon" style="background-color: rgba({{ registration.course.icon_color }}, 0.1);">
                     <i class="{{ registration.course.icon_class }}"
                         style="color: {{ registration.course.icon_color }};"></i>
-                </div>
+                </div> -->
                 <div>
                     <h4 class="flames-title">{{ registration.course.title }}</h4>
                     <p class="flames-subtitle">{{ registration.course.subtitle }}</p>
@@ -605,7 +605,8 @@ active
                     {% for member in registration.team.members.all %}
                     <div class="team-member">
                         <div class="member-icon">
-                            <i class="fas fa-user"></i>
+                            <img src="{{ member.user.student.profile_pic.url }}" alt="{{ member.full_name }}"
+                                class="rounded-circle" width="30" height="30">
                         </div>
                         <div>
                             <div>{{ member.full_name }}</div>
@@ -666,16 +667,15 @@ active
             {% for course in available_courses %}
             <div class="course-card">
                 <div class="course-header">
-                    <div class="course-icon" style="background-color: rgba({{ course.icon_color }}, 0.1);">
+                    <!-- <div class="course-icon" style="background-color: rgba({{ course.icon_color }}, 0.1);">
                         <i class="{{ course.icon_class }}" style="color: {{ course.icon_color }};"></i>
-                    </div>
+                    </div> -->
                     <div>
                         <h4 class="flames-title">{{ course.title }}</h4>
                         <p class="flames-subtitle">{{ course.subtitle }}</p>
                     </div>
                 </div>
                 <div class="course-body">
-                    <p>{{ course.description|truncatewords:20 }}</p>
 
                     <div class="course-learning-points">
                         <strong>What You'll Learn:</strong>
@@ -699,8 +699,8 @@ active
                         {% endif %}
                     </div>
                     <div>
-                        <a href="{% url 'course_detail' course.slug %}" class="btn-course btn-outline">Details</a>
-                        <a href="{% url 'flames_register' course.id %}" class="btn-course btn-primary">Register</a>
+                        <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline">Details</a>
+                        <a href="{% url 'student_flames_register' course.slug %}" class="btn btn-sm btn-primary">Register</a>
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 from django.urls import path
-from . import batch_views, views, doubt_solver, hackathon_views, flames_views
+from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views
 from home import flames
 
 urlpatterns = [
@@ -23,9 +23,6 @@ urlpatterns = [
     path('upload_profile', views.upload_profile, name='upload_profile'),
     path("change_password", views.change_password, name="change_password"),
     path("delete_account", views.delete_account, name="delete_account"),
-    
-    # ======================== FLAMES COURSES ========================
-    path("enroll/<int:course_id>/", flames.student_enroll_course, name="student_enroll_course"),
     
     # ======================== HELP DESK WORK ========================
     
@@ -72,10 +69,19 @@ urlpatterns += [
 # Flames URLs
 urlpatterns += [
     path('summer-training/', flames_views.student_flames, name='student_flames'),
+       
+    # ======================== FLAMES COURSES ========================
+    path("enroll/<int:course_id>/", flames.student_enroll_course, name="student_enroll_course"),
+    
     path('flames/teams/', flames.student_teams, name='student_teams'),
     path('flames/teams/create/<int:registration_id>/', flames.student_create_team, name='student_create_team'),
     path('flames/teams/add-member/<int:team_id>/', flames.student_add_team_member, name='student_add_team_member'),
     path('flames/teams/remove-member/<int:member_id>/', flames.student_remove_team_member, name='student_remove_team_member'),
+    
+    # New course detail and registration views
+    path('course/<slug:slug>/', course_views.course_detail, name='course_detail'),
+    path('course/<slug:slug>/register/', course_views.student_flames_register, name='student_flames_register'),
+    path('api/verify-referral-code/<str:code>/', course_views.verify_referral_code, name='verify_referral_code'),
 ]
 
 # ========================================= BATCH WORK =========================================
