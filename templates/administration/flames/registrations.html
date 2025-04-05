@@ -404,6 +404,15 @@
                 <div class="stat-label">Approved</div>
             </div>
         </div>
+        <div class="stat-card">
+            <div class="stat-icon stat-completed" style="background-color: rgba(66, 115, 250, 0.1); color: #4273FA;">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ completed_registrations }}</div>
+                <div class="stat-label">Completed</div>
+            </div>
+        </div>
     </div>
 
     <!-- Filter Section -->
@@ -423,11 +432,19 @@
                 <div class="filter-item">
                     <label for="statusFilter" class="form-label">Status</label>
                     <select id="statusFilter" name="status" class="form-select">
-                        <option value="">All Status</option>
+                        <option value="all">All Statuses</option>
                         <option value="pending">Pending</option>
                         <option value="approved">Approved</option>
                         <option value="rejected">Rejected</option>
                         <option value="completed">Completed</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label for="modeFilter" class="form-label">Registration Mode</label>
+                    <select id="modeFilter" name="mode" class="form-select">
+                        <option value="all">All Modes</option>
+                        <option value="solo">Solo</option>
+                        <option value="team">Team</option>
                     </select>
                 </div>
                 <div class="filter-item">
@@ -470,11 +487,13 @@
                         <th>ID</th>
                         <th>Name</th>
                         <th>Course</th>
-                        
+                        <!-- <th>Email</th> -->
                         <th>Phone</th>
                         <th>College</th>
                         <th>Year</th>
-                        <th>Registration Date</th>
+                        <th>Mode</th>
+                        <th>Team</th>
+                        <th>Date</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -485,89 +504,150 @@
 </div>
 
 <!-- Registration Details Modal -->
-<div class="modal fade" id="registrationDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal fade" id="registrationDetailsModal" tabindex="-1" aria-labelledby="registrationDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Registration Details</h5>
+                <h5 class="modal-title" id="registrationDetailsModalLabel">Registration Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div class="modal-details" id="registrationDetails">
-                    <div class="row">
-                        <div class="col-md-6 detail-row">
-                            <div class="detail-label">Registration ID</div>
+                <div class="modal-details">
+                    <!-- Student Information -->
+                    <h6 class="mb-3">Student Information</h6>
+                    <div class="row detail-row">
+                        <div class="col-md-4">
+                            <div class="detail-label">ID</div>
                             <div class="detail-value" id="reg-id"></div>
                         </div>
-                        <div class="col-md-6 detail-row">
-                            <div class="detail-label">Status</div>
-                            <div class="detail-value" id="reg-status"></div>
-                        </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 detail-row">
+                        <div class="col-md-4">
                             <div class="detail-label">Name</div>
                             <div class="detail-value" id="reg-name"></div>
                         </div>
-                        <div class="col-md-6 detail-row">
+                        <div class="col-md-4">
                             <div class="detail-label">Course</div>
                             <div class="detail-value" id="reg-course"></div>
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-6 detail-row">
+                    
+                    <div class="row detail-row">
+                        <div class="col-md-4">
                             <div class="detail-label">Email</div>
                             <div class="detail-value" id="reg-email"></div>
                         </div>
-                        <div class="col-md-6 detail-row">
+                        <div class="col-md-4">
                             <div class="detail-label">Phone</div>
                             <div class="detail-value" id="reg-phone"></div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 detail-row">
+                        <div class="col-md-4">
                             <div class="detail-label">College</div>
                             <div class="detail-value" id="reg-college"></div>
                         </div>
-                        <div class="col-md-6 detail-row">
+                    </div>
+                    
+                    <div class="row detail-row">
+                        <div class="col-md-4">
                             <div class="detail-label">Year</div>
                             <div class="detail-value" id="reg-year"></div>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 detail-row">
+                        <div class="col-md-4">
                             <div class="detail-label">Registration Date</div>
                             <div class="detail-value" id="reg-date"></div>
                         </div>
-                        <div class="col-md-6 detail-row">
+                        <div class="col-md-4">
                             <div class="detail-label">Last Updated</div>
                             <div class="detail-value" id="reg-updated"></div>
                         </div>
                     </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Payment ID</div>
-                        <div class="detail-value" id="reg-payment"></div>
+                    
+                    <!-- Team Information (shown only for team registrations) -->
+                    <div id="team-info-section" style="display: none;">
+                        <h6 class="mt-4 mb-3">Team Information</h6>
+                        <div class="row detail-row">
+                            <div class="col-md-4">
+                                <div class="detail-label">Team Name</div>
+                                <div class="detail-value" id="modal-team-name"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-label">Team Leader</div>
+                                <div class="detail-value" id="modal-team-leader"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-label">Team Status</div>
+                                <div class="detail-value" id="modal-team-status"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="row detail-row">
+                            <div class="col-12">
+                                <div class="detail-label">Team Members</div>
+                                <div class="detail-value">
+                                    <ul id="modal-team-members" class="list-group"></ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="detail-row">
-                        <div class="detail-label">Message</div>
-                        <div class="detail-value" id="reg-message"></div>
+                    
+                    <!-- Payment Information -->
+                    <h6 class="mt-4 mb-3">Payment Information</h6>
+                    <div class="row detail-row">
+                        <div class="col-md-6">
+                            <div class="detail-label">Payment ID</div>
+                            <div class="detail-value" id="reg-payment"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">
+                                <select id="reg-status" class="form-select">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Approved">Approved</option>
+                                    <option value="Rejected">Rejected</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-
-                    <div class="detail-row" id="reg-notes-container">
-                        <div class="detail-label">Admin Notes</div>
-                        <textarea id="reg-notes" class="form-control" rows="3"></textarea>
-                        <button id="save-notes" class="btn btn-primary btn-sm mt-2">Save Notes</button>
+                    
+                    <!-- Referral Information (shown only if referral code was used) -->
+                    <div id="referral-info-section" style="display: none;">
+                        <h6 class="mt-4 mb-3">Referral Information</h6>
+                        <div class="row detail-row">
+                            <div class="col-md-4">
+                                <div class="detail-label">Referral Code</div>
+                                <div class="detail-value" id="modal-referral-code"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-label">Referral Type</div>
+                                <div class="detail-value" id="modal-referral-type"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-label">Discount Amount</div>
+                                <div class="detail-value" id="modal-discount-amount"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notes and Message -->
+                    <h6 class="mt-4 mb-3">Notes and Message</h6>
+                    <div class="row detail-row">
+                        <div class="col-md-12">
+                            <div class="detail-label">Message from Student</div>
+                            <div class="detail-value" id="reg-message"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row detail-row">
+                        <div class="col-12">
+                            <div class="detail-label">Admin Notes</div>
+                            <textarea id="reg-notes" class="form-control" rows="3"></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer" id="modal-actions">
-                <!-- Dynamically populated based on registration status -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveStatusBtn">Update Status</button>
+                <button type="button" class="btn btn-success" id="saveNotesBtn">Save Notes</button>
             </div>
         </div>
     </div>
@@ -614,62 +694,73 @@
                             id: 1,
                             full_name: "Test Student",
                             course: { title: "Python Basics", color: "#4273FA" },
+                            email: "test@example.com",
                             contact_number: "9876543210",
                             college: "Test College",
                             year: "3",
+                            registration_mode: "SOLO",
+                            team: "N/A",
                             created_at: "01 Jan 2023, 10:00 AM",
                             status: "Pending"
                         }
                     ];
-
-                    // Replace the data source
-                    table.clear().rows.add(fallbackData).draw();
+                    table.clear();
+                    table.rows.add(fallbackData);
+                    table.draw();
                 },
-                dataSrc: function (json) {
-                    console.log("Received data:", json);
-                    return json.data;
+                dataSrc: function(json) {
+                    return json.data || [];
                 }
             },
             columns: [
                 { data: "id" },
                 { data: "full_name" },
-                {
+                { 
                     data: "course",
-                    render: function (data) {
-                        return '<span class="course-badge" style="background-color: ' + data.color + '20; color: ' + data.color + ';">' + data.title + '</span>';
+                    render: function(data) {
+                        return `<span class="course-badge" style="background-color: ${data.color}20; color: ${data.color};">${data.title}</span>`;
                     }
                 },
+                /* { data: "email" }, */
                 { data: "contact_number" },
                 { data: "college" },
                 { data: "year" },
-                { data: "created_at" },
-                {
-                    data: "status",
-                    render: function (data) {
-                        let statusClass = "";
-                        if (data === "Pending") statusClass = "status-pending";
-                        else if (data === "Approved") statusClass = "status-approved";
-                        else if (data === "Rejected") statusClass = "status-rejected";
-                        else if (data === "Completed") statusClass = "status-completed";
-
-                        return '<span class="status-badge ' + statusClass + '">' + data + '</span>';
+                { 
+                    data: "registration_mode",
+                    render: function(data) {
+                        let modeClass = data === 'TEAM' ? 'status-approved' : 'status-pending';
+                        return `<span class="status-badge ${modeClass}">${data}</span>`;
                     }
                 },
-                {
-                    data: null,
-                    orderable: false,
-                    render: function (data) {
-                        let html = '<div class="btn-group" role="group">';
-                        html += '<button type="button" class="btn btn-sm btn-outline-primary view-details" data-id="' + data.id + '"><i class="fas fa-eye"></i></button>';
-
-                        if (data.status === "Pending") {
-                            html += '<button type="button" class="btn btn-sm btn-outline-success approve-reg" data-id="' + data.id + '"><i class="fas fa-check"></i></button>';
-                            html += '<button type="button" class="btn btn-sm btn-outline-danger reject-reg" data-id="' + data.id + '"><i class="fas fa-times"></i></button>';
+                { data: "team" },
+                { data: "created_at" },
+                { 
+                    data: "status",
+                    render: function(data) {
+                        let statusClass = '';
+                        switch(data) {
+                            case 'Pending':
+                                statusClass = 'status-pending';
+                                break;
+                            case 'Approved':
+                                statusClass = 'status-approved';
+                                break;
+                            case 'Rejected':
+                                statusClass = 'status-rejected';
+                                break;
+                            case 'Completed':
+                                statusClass = 'status-completed';
+                                break;
                         }
-
-                        html += '</div>';
-                        return html;
+                        return `<span class="status-badge ${statusClass}">${data}</span>`;
                     }
+                },
+                { 
+                    data: "id",
+                    render: function(data) {
+                        return `<button class="btn btn-sm btn-primary view-details" data-id="${data}"><i class="fas fa-eye"></i></button>`;
+                    },
+                    orderable: false
                 }
             ],
             createdRow: function (row, data, dataIndex) {
@@ -711,11 +802,84 @@
         // Attach event handlers for dynamic elements
         function attachEventHandlers() {
             console.log("Attaching event handlers");
-            // View registration details
-            $('#registrationsTable').on('click', '.view-details', function () {
-                var regId = $(this).data('id');
-                console.log("View details clicked for ID:", regId);
-                loadRegistrationDetails(regId);
+            // Handle row click to show registration details
+            $('#registrationsTable tbody').on('click', 'tr', function() {
+                const data = table.row(this).data();
+                const id = data.id;
+                
+                $.ajax({
+                    url: "{% url 'admin_registration_details' %}",
+                    method: 'GET',
+                    data: { 'id': id },
+                    success: function(response) {
+                        if (response.status === 'success') {
+                            const reg = response.data;
+                            
+                            // Populate modal with registration details
+                            $('#reg-id').text(reg.id);
+                            $('#reg-name').text(reg.name);
+                            $('#reg-course').text(reg.course_title);
+                            $('#reg-email').text(reg.email);
+                            $('#reg-phone').text(reg.phone);
+                            $('#reg-college').text(reg.college);
+                            $('#reg-year').text(reg.year);
+                            $('#reg-date').text(reg.created_at);
+                            $('#reg-updated').text(reg.updated_at);
+                            $('#reg-status').val(reg.status); // Use val() for select element
+                            $('#reg-payment').text(reg.payment_id || 'N/A');
+                            $('#reg-message').text(reg.message || 'No message');
+                            $('#reg-notes').val(reg.admin_notes || '');
+                            
+                            // Handle team information
+                            if (reg.registration_mode === 'TEAM' && reg.team) {
+                                $('#team-info-section').show();
+                                $('#modal-team-name').text(reg.team.name || 'N/A');
+                                $('#modal-team-leader').text(reg.team.leader_name || 'N/A');
+                                $('#modal-team-status').text(reg.team.status || 'N/A');
+                                
+                                // Clear previous team members
+                                $('#modal-team-members').empty();
+                                
+                                // Add team members to the list
+                                if (reg.team.members && reg.team.members.length > 0) {
+                                    reg.team.members.forEach(function(member) {
+                                        const memberItem = $('<li class="list-group-item"></li>');
+                                        const leaderBadge = member.is_leader ? 
+                                            ' <span class="badge bg-primary ms-2">Leader</span>' : '';
+                                        memberItem.html(member.name + ' (' + member.email + ')' + leaderBadge);
+                                        $('#modal-team-members').append(memberItem);
+                                    });
+                                } else {
+                                    $('#modal-team-members').append('<li class="list-group-item">No team members found</li>');
+                                }
+                            } else {
+                                $('#team-info-section').hide();
+                            }
+                            
+                            // Referral Information (if applicable)
+                            if (reg.referral_code) {
+                                $('#referral-info-section').show();
+                                $('#modal-referral-code').text(reg.referral_code || 'N/A');
+                                $('#modal-referral-type').text(reg.referral_type || 'N/A');
+                                $('#modal-discount-amount').text(reg.discount_amount ? '₹' + reg.discount_amount : 'N/A');
+                            } else {
+                                $('#referral-info-section').hide();
+                            }
+                            
+                            // Store the registration ID for update actions
+                            $('#saveStatusBtn').data('id', reg.id);
+                            $('#saveNotesBtn').data('id', reg.id);
+                            
+                            // Show the modal
+                            $('#registrationDetailsModal').modal('show');
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred while fetching registration details.');
+                    }
+                });
             });
 
             // Quick approve/reject handlers for table buttons
@@ -732,115 +896,11 @@
             });
         }
 
-        // Load registration details into modal
-        function loadRegistrationDetails(regId) {
-            $.ajax({
-                url: '{% url "admin_registration_details" %}',
-                type: 'GET',
-                data: { 'id': regId },
-                dataType: 'json',
-                success: function (response) {
-                    if (response.status === 'success') {
-                        populateModal(response.data);
-                        $('#registrationDetailsModal').modal('show');
-                    } else {
-                        alert('Error: ' + response.message);
-                    }
-                },
-                error: function () {
-                    alert('An error occurred while fetching registration details.');
-                }
-            });
-        }
-
-        // Populate modal with registration details
-        function populateModal(data) {
-            $('#reg-id').text(data.id);
-            $('#reg-name').text(data.name);
-            $('#reg-course').text(data.course);
-            $('#reg-email').text(data.email);
-            $('#reg-phone').text(data.phone);
-            $('#reg-college').text(data.college);
-            $('#reg-year').text(data.year + getOrdinalSuffix(data.year) + ' Year');
-            $('#reg-date').text(data.created_at);
-            $('#reg-updated').text(data.updated_at || 'Not updated');
-            $('#reg-payment').text(data.payment_id || 'Not Available');
-            $('#reg-message').text(data.message || 'No message provided');
-            $('#reg-notes').val(data.admin_notes || '');
-
-            // Status with appropriate styling
-            var statusHtml = '<span class="status-badge status-' + data.status.toLowerCase() + '">' +
-                data.status + '</span>';
-            $('#reg-status').html(statusHtml);
-
-            // Set up modal actions based on status
-            var $actions = $('#modal-actions');
-            $actions.empty();
-
-            // Add close button for all statuses
-            $actions.append('<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>');
-
-            // Add action buttons based on status
-            if (data.status === 'Pending') {
-                $actions.append(
-                    '<button type="button" class="btn btn-success approve-modal" data-id="' + data.id + '">' +
-                    '<i class="fas fa-check me-2"></i>Approve</button>' +
-                    '<button type="button" class="btn btn-danger reject-modal" data-id="' + data.id + '">' +
-                    '<i class="fas fa-times me-2"></i>Reject</button>'
-                );
-            } else if (data.status === 'Approved') {
-                $actions.append(
-                    '<button type="button" class="btn btn-info complete-modal" data-id="' + data.id + '">' +
-                    '<i class="fas fa-check-double me-2"></i>Mark as Completed</button>'
-                );
-            }
-
-            // Set up modal action handlers
-            setupModalActionHandlers();
-        }
-
-        // Set up handlers for modal action buttons
-        function setupModalActionHandlers() {
-            // Approve registration
-            $('.approve-modal').on('click', function () {
-                updateRegistrationStatus($(this).data('id'), 'approved');
-            });
-
-            // Reject registration
-            $('.reject-modal').on('click', function () {
-                updateRegistrationStatus($(this).data('id'), 'rejected');
-            });
-
-            // Mark as completed
-            $('.complete-modal').on('click', function () {
-                updateRegistrationStatus($(this).data('id'), 'completed');
-            });
-
-            // Save admin notes
-            $('#save-notes').on('click', function () {
-                var regId = $('#reg-id').text();
-                var notes = $('#reg-notes').val();
-
-                $.ajax({
-                    url: '{% url "admin_update_registration_notes" %}',
-                    type: 'POST',
-                    data: {
-                        'id': regId,
-                        'notes': notes,
-                        'csrfmiddlewaretoken': '{{ csrf_token }}'
-                    },
-                    success: function (response) {
-                        if (response.status === 'success') {
-                            alert('Notes updated successfully');
-                        } else {
-                            alert('Error: ' + response.message);
-                        }
-                    },
-                    error: function () {
-                        alert('An error occurred while updating notes.');
-                    }
-                });
-            });
+        // Helper function to get ordinal suffix
+        function getOrdinalSuffix(n) {
+            var s = ["th", "st", "nd", "rd"];
+            var v = n % 100;
+            return (s[(v - 20) % 10] || s[v] || s[0]);
         }
 
         // Handle registration status update
@@ -867,11 +927,80 @@
             });
         }
 
-        // Helper function to get ordinal suffix
-        function getOrdinalSuffix(n) {
-            var s = ["th", "st", "nd", "rd"];
-            var v = n % 100;
-            return (s[(v - 20) % 10] || s[v] || s[0]);
+        // Save status button click handler
+        $('#saveStatusBtn').on('click', function() {
+            const id = $(this).data('id');
+            const status = $('#reg-status').val();
+            
+            $.ajax({
+                url: "{% url 'admin_update_registration_status' %}",
+                method: 'POST',
+                data: {
+                    'id': id,
+                    'status': status,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        $('#registrationDetailsModal').modal('hide');
+                        table.ajax.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while updating the status.');
+                }
+            });
+        });
+        
+        // Save notes button click handler
+        $('#saveNotesBtn').on('click', function() {
+            const id = $(this).data('id');
+            const notes = $('#reg-notes').val();
+            
+            $.ajax({
+                url: "{% url 'admin_update_registration_notes' %}",
+                method: 'POST',
+                data: {
+                    'id': id,
+                    'notes': notes,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Notes updated successfully!');
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while updating the notes.');
+                }
+            });
+        });
+
+        // Function to update admin notes
+        function updateAdminNotes(regId, notes) {
+            $.ajax({
+                url: '{% url "admin_update_registration_notes" %}',
+                type: 'POST',
+                data: {
+                    'id': regId,
+                    'notes': notes,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    if (response.status === 'success') {
+                        alert('Notes updated successfully');
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('An error occurred while updating notes.');
+                }
+            });
         }
 
         // Export buttons functionality
