@@ -23,7 +23,7 @@ def course_detail(request, slug):
         'active_tab': 'flames'
     }
     
-    return render(request, 'student/course_detail.html', context)
+    return render(request, 'student/flames/course_detail.html', context)
 
 @login_required
 def student_flames_register(request, slug):
@@ -118,7 +118,7 @@ def student_flames_register(request, slug):
         'active_tab': 'flames'
     }
     
-    return render(request, 'student/flames_register.html', context)
+    return render(request, 'student/flames/flames_register.html', context)
 
 def verify_referral_code(request, code):
     """

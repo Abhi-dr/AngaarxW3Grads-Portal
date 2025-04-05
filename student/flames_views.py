@@ -25,7 +25,7 @@ def student_flames(request):
         'active_tab': 'flames'
     }
     
-    return render(request, 'student/flames.html', parameters)
+    return render(request, 'student/flames/flames.html', parameters)
 
 @login_required
 def team_formation(request):
@@ -50,7 +50,7 @@ def team_formation(request):
         'active_tab': 'flames_teams'
     }
     
-    return render(request, 'student/team_formation.html', context)
+    return render(request, 'student/flames/team_formation.html', context)
 
 @login_required
 def create_team(request, registration_id):
@@ -97,7 +97,7 @@ def create_team(request, registration_id):
         return redirect('student_team_formation')
     
     # GET request
-    return render(request, 'student/create_team.html', {
+    return render(request, 'student/flames/create_team.html', {
         'registration': registration,
         'active_tab': 'flames_teams'
     })
@@ -140,7 +140,7 @@ def add_team_member(request, team_id):
         return redirect('student_team_formation')
     
     # GET request
-    return render(request, 'student/add_team_member.html', {
+    return render(request, 'student/flames/add_team_member.html', {
         'team': team,
         'active_tab': 'flames_teams'
     })
