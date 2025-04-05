@@ -13,19 +13,24 @@
     .card {
         transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
     .card:hover {
         transform: translateY(-5px);
         box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     }
+
     .btn-group .btn {
         margin-right: 2px;
     }
+
     .table-hover tbody tr:hover {
         background-color: rgba(0, 123, 255, 0.05);
     }
+
     .badge-active {
         background-color: #28a745;
     }
+
     .badge-inactive {
         background-color: #dc3545;
     }
@@ -73,7 +78,8 @@
                         <h6 class="font-weight-bold">Education</h6>
                         <p>
                             <i class="fas fa-university me-2"></i> {{ alumni.college|default:"Not provided" }}<br>
-                            <i class="fas fa-graduation-cap me-2"></i> Batch: {{ alumni.batch_year|default:"Not provided" }}
+                            <i class="fas fa-graduation-cap me-2"></i> Batch:
+                            {{ alumni.batch_year|default:"Not provided" }}
                         </p>
                     </div>
                     <div class="mb-3">
@@ -145,7 +151,8 @@
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                                         Total Discount Amount</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">₹{{ total_discount|floatformat:2 }}</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        ₹{{ total_discount|floatformat:2 }}</div>
                                 </div>
                                 <div class="col-auto">
                                     <i class="fas fa-rupee-sign fa-2x text-gray-300"></i>
@@ -199,7 +206,8 @@
                             <td>{{ code.registrations.count }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-primary toggle-status" data-id="{{ code.id }}" data-status="{{ code.is_active }}">
+                                    <button class="btn btn-sm btn-primary toggle-status" data-id="{{ code.id }}"
+                                        data-status="{{ code.is_active }}">
                                         {% if code.is_active %}
                                         <i class="fas fa-ban"></i> Deactivate
                                         {% else %}
@@ -293,23 +301,28 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="edit_name" class="form-label">Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="edit_name" name="name" value="{{ alumni.name }}" required>
+                        <input type="text" class="form-control" id="edit_name" name="name" value="{{ alumni.name }}"
+                            required>
                     </div>
                     <div class="mb-3">
                         <label for="edit_email" class="form-label">Email <span class="text-danger">*</span></label>
-                        <input type="email" class="form-control" id="edit_email" name="email" value="{{ alumni.email }}" required>
+                        <input type="email" class="form-control" id="edit_email" name="email" value="{{ alumni.email }}"
+                            required>
                     </div>
                     <div class="mb-3">
                         <label for="edit_contact_number" class="form-label">Contact Number</label>
-                        <input type="text" class="form-control" id="edit_contact_number" name="contact_number" value="{{ alumni.contact_number|default:'' }}">
+                        <input type="text" class="form-control" id="edit_contact_number" name="contact_number"
+                            value="{{ alumni.contact_number|default:'' }}">
                     </div>
                     <div class="mb-3">
                         <label for="edit_college" class="form-label">College</label>
-                        <input type="text" class="form-control" id="edit_college" name="college" value="{{ alumni.college|default:'' }}">
+                        <input type="text" class="form-control" id="edit_college" name="college"
+                            value="{{ alumni.college|default:'' }}">
                     </div>
                     <div class="mb-3">
                         <label for="edit_batch_year" class="form-label">Batch Year</label>
-                        <input type="text" class="form-control" id="edit_batch_year" name="batch_year" value="{{ alumni.batch_year|default:'' }}">
+                        <input type="text" class="form-control" id="edit_batch_year" name="batch_year"
+                            value="{{ alumni.batch_year|default:'' }}">
                     </div>
                 </form>
             </div>
@@ -322,7 +335,8 @@
 </div>
 
 <!-- Generate Referral Code Modal -->
-<div class="modal fade" id="generateReferralModal" tabindex="-1" aria-labelledby="generateReferralModalLabel" aria-hidden="true">
+<div class="modal fade" id="generateReferralModal" tabindex="-1" aria-labelledby="generateReferralModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -334,11 +348,13 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="alumni_name_display" class="form-label">Alumni</label>
-                        <input type="text" class="form-control" id="alumni_name_display" value="{{ alumni.name }}" readonly>
+                        <input type="text" class="form-control" id="alumni_name_display" value="{{ alumni.name }}"
+                            readonly>
                     </div>
                     <div class="mb-3">
                         <label for="discount_amount" class="form-label">Discount Amount (₹)</label>
-                        <input type="number" class="form-control" id="discount_amount" name="discount_amount" value="500" min="0" step="100">
+                        <input type="number" class="form-control" id="discount_amount" name="discount_amount"
+                            value="500" min="0" step="100">
                     </div>
                 </form>
             </div>
@@ -356,34 +372,34 @@
 
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Initialize DataTables
         $('#referralCodesTable').DataTable({
             order: [[0, 'desc']]
         });
-        
+
         $('#registrationsTable').DataTable({
             order: [[0, 'desc']]
         });
 
         // Edit Alumni Button Click
-        $('.edit-alumni').on('click', function() {
+        $('.edit-alumni').on('click', function () {
             $('#editAlumniModal').modal('show');
         });
 
         // Update Alumni Form Submission
-        $('#updateAlumniBtn').on('click', function() {
+        $('#updateAlumniBtn').on('click', function () {
             const form = $('#editAlumniForm');
-            
+
             $.ajax({
                 url: "{% url 'update_alumni' alumni.id %}",
                 method: 'POST',
                 data: form.serialize(),
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 'success') {
                         // Show success message
                         alert('Alumni updated successfully!');
-                        
+
                         // Close modal and reload page
                         $('#editAlumniModal').modal('hide');
                         location.reload();
@@ -391,25 +407,25 @@
                         alert('Error: ' + response.message);
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('An error occurred while updating the alumni.');
                 }
             });
         });
 
         // Generate Referral Form Submission
-        $('#generateReferralBtn').on('click', function() {
+        $('#generateReferralBtn').on('click', function () {
             const form = $('#generateReferralForm');
-            
+
             $.ajax({
                 url: "{% url 'generate_referral_code' alumni.id %}",
                 method: 'POST',
                 data: form.serialize(),
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 'success') {
                         // Show success message
                         alert('Referral code generated successfully: ' + response.referral_code.code);
-                        
+
                         // Close modal and reload page
                         $('#generateReferralModal').modal('hide');
                         location.reload();
@@ -417,18 +433,18 @@
                         alert('Error: ' + response.message);
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('An error occurred while generating the referral code.');
                 }
             });
         });
 
         // Toggle Referral Code Status
-        $('.toggle-status').on('click', function() {
+        $('.toggle-status').on('click', function () {
             const id = $(this).data('id');
             const currentStatus = $(this).data('status');
             const statusText = currentStatus ? 'deactivate' : 'activate';
-            
+
             if (confirm(`Are you sure you want to ${statusText} this referral code?`)) {
                 $.ajax({
                     url: "{% url 'toggle_referral_code_status' 0 %}".replace('0', id),
@@ -436,18 +452,18 @@
                     data: {
                         'csrfmiddlewaretoken': '{{ csrf_token }}'
                     },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.status === 'success') {
                             // Show success message
                             alert('Referral code ' + (response.is_active ? 'activated' : 'deactivated') + ' successfully!');
-                            
+
                             // Reload page
                             location.reload();
                         } else {
                             alert('Error: ' + response.message);
                         }
                     },
-                    error: function() {
+                    error: function () {
                         alert('An error occurred while updating the referral code status.');
                     }
                 });
