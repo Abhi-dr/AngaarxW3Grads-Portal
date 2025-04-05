@@ -504,7 +504,8 @@
 </div>
 
 <!-- Registration Details Modal -->
-<div class="modal fade" id="registrationDetailsModal" tabindex="-1" aria-labelledby="registrationDetailsModalLabel" aria-hidden="true">
+<div class="modal fade" id="registrationDetailsModal" tabindex="-1" aria-labelledby="registrationDetailsModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -529,7 +530,7 @@
                             <div class="detail-value" id="reg-course"></div>
                         </div>
                     </div>
-                    
+
                     <div class="row detail-row">
                         <div class="col-md-4">
                             <div class="detail-label">Email</div>
@@ -544,7 +545,7 @@
                             <div class="detail-value" id="reg-college"></div>
                         </div>
                     </div>
-                    
+
                     <div class="row detail-row">
                         <div class="col-md-4">
                             <div class="detail-label">Year</div>
@@ -559,7 +560,7 @@
                             <div class="detail-value" id="reg-updated"></div>
                         </div>
                     </div>
-                    
+
                     <!-- Team Information (shown only for team registrations) -->
                     <div id="team-info-section" style="display: none;">
                         <h6 class="mt-4 mb-3">Team Information</h6>
@@ -577,7 +578,7 @@
                                 <div class="detail-value" id="modal-team-status"></div>
                             </div>
                         </div>
-                        
+
                         <div class="row detail-row">
                             <div class="col-12">
                                 <div class="detail-label">Team Members</div>
@@ -587,7 +588,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Payment Information -->
                     <h6 class="mt-4 mb-3">Payment Information</h6>
                     <div class="row detail-row">
@@ -607,7 +608,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Referral Information (shown only if referral code was used) -->
                     <div id="referral-info-section" style="display: none;">
                         <h6 class="mt-4 mb-3">Referral Information</h6>
@@ -626,7 +627,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Notes and Message -->
                     <h6 class="mt-4 mb-3">Notes and Message</h6>
                     <div class="row detail-row">
@@ -635,7 +636,7 @@
                             <div class="detail-value" id="reg-message"></div>
                         </div>
                     </div>
-                    
+
                     <div class="row detail-row">
                         <div class="col-12">
                             <div class="detail-label">Admin Notes</div>
@@ -657,9 +658,9 @@
 {% block myjs %}
 
 <!-- Load DataTables scripts in head -->
-<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
@@ -708,16 +709,16 @@
                     table.rows.add(fallbackData);
                     table.draw();
                 },
-                dataSrc: function(json) {
+                dataSrc: function (json) {
                     return json.data || [];
                 }
             },
             columns: [
                 { data: "id" },
                 { data: "full_name" },
-                { 
+                {
                     data: "course",
-                    render: function(data) {
+                    render: function (data) {
                         return `<span class="course-badge" style="background-color: ${data.color}20; color: ${data.color};">${data.title}</span>`;
                     }
                 },
@@ -725,20 +726,20 @@
                 { data: "contact_number" },
                 { data: "college" },
                 { data: "year" },
-                { 
+                {
                     data: "registration_mode",
-                    render: function(data) {
+                    render: function (data) {
                         let modeClass = data === 'TEAM' ? 'status-approved' : 'status-pending';
                         return `<span class="status-badge ${modeClass}">${data}</span>`;
                     }
                 },
                 { data: "team" },
                 { data: "created_at" },
-                { 
+                {
                     data: "status",
-                    render: function(data) {
+                    render: function (data) {
                         let statusClass = '';
-                        switch(data) {
+                        switch (data) {
                             case 'Pending':
                                 statusClass = 'status-pending';
                                 break;
@@ -755,9 +756,9 @@
                         return `<span class="status-badge ${statusClass}">${data}</span>`;
                     }
                 },
-                { 
+                {
                     data: "id",
-                    render: function(data) {
+                    render: function (data) {
                         return `<button class="btn btn-sm btn-primary view-details" data-id="${data}"><i class="fas fa-eye"></i></button>`;
                     },
                     orderable: false
@@ -803,18 +804,18 @@
         function attachEventHandlers() {
             console.log("Attaching event handlers");
             // Handle row click to show registration details
-            $('#registrationsTable tbody').on('click', 'tr', function() {
+            $('#registrationsTable tbody').on('click', 'tr', function () {
                 const data = table.row(this).data();
                 const id = data.id;
-                
+
                 $.ajax({
                     url: "{% url 'admin_registration_details' %}",
                     method: 'GET',
                     data: { 'id': id },
-                    success: function(response) {
+                    success: function (response) {
                         if (response.status === 'success') {
                             const reg = response.data;
-                            
+
                             // Populate modal with registration details
                             $('#reg-id').text(reg.id);
                             $('#reg-name').text(reg.name);
@@ -829,22 +830,22 @@
                             $('#reg-payment').text(reg.payment_id || 'N/A');
                             $('#reg-message').text(reg.message || 'No message');
                             $('#reg-notes').val(reg.admin_notes || '');
-                            
+
                             // Handle team information
                             if (reg.registration_mode === 'TEAM' && reg.team) {
                                 $('#team-info-section').show();
                                 $('#modal-team-name').text(reg.team.name || 'N/A');
                                 $('#modal-team-leader').text(reg.team.leader_name || 'N/A');
                                 $('#modal-team-status').text(reg.team.status || 'N/A');
-                                
+
                                 // Clear previous team members
                                 $('#modal-team-members').empty();
-                                
+
                                 // Add team members to the list
                                 if (reg.team.members && reg.team.members.length > 0) {
-                                    reg.team.members.forEach(function(member) {
+                                    reg.team.members.forEach(function (member) {
                                         const memberItem = $('<li class="list-group-item"></li>');
-                                        const leaderBadge = member.is_leader ? 
+                                        const leaderBadge = member.is_leader ?
                                             ' <span class="badge bg-primary ms-2">Leader</span>' : '';
                                         memberItem.html(member.name + ' (' + member.email + ')' + leaderBadge);
                                         $('#modal-team-members').append(memberItem);
@@ -855,7 +856,7 @@
                             } else {
                                 $('#team-info-section').hide();
                             }
-                            
+
                             // Referral Information (if applicable)
                             if (reg.referral_code) {
                                 $('#referral-info-section').show();
@@ -865,18 +866,18 @@
                             } else {
                                 $('#referral-info-section').hide();
                             }
-                            
+
                             // Store the registration ID for update actions
                             $('#saveStatusBtn').data('id', reg.id);
                             $('#saveNotesBtn').data('id', reg.id);
-                            
+
                             // Show the modal
                             $('#registrationDetailsModal').modal('show');
                         } else {
                             alert('Error: ' + response.message);
                         }
                     },
-                    error: function() {
+                    error: function () {
                         alert('An error occurred while fetching registration details.');
                     }
                 });
@@ -928,10 +929,10 @@
         }
 
         // Save status button click handler
-        $('#saveStatusBtn').on('click', function() {
+        $('#saveStatusBtn').on('click', function () {
             const id = $(this).data('id');
             const status = $('#reg-status').val();
-            
+
             $.ajax({
                 url: "{% url 'admin_update_registration_status' %}",
                 method: 'POST',
@@ -940,7 +941,7 @@
                     'status': status,
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 'success') {
                         $('#registrationDetailsModal').modal('hide');
                         table.ajax.reload();
@@ -948,17 +949,17 @@
                         alert('Error: ' + response.message);
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('An error occurred while updating the status.');
                 }
             });
         });
-        
+
         // Save notes button click handler
-        $('#saveNotesBtn').on('click', function() {
+        $('#saveNotesBtn').on('click', function () {
             const id = $(this).data('id');
             const notes = $('#reg-notes').val();
-            
+
             $.ajax({
                 url: "{% url 'admin_update_registration_notes' %}",
                 method: 'POST',
@@ -967,14 +968,14 @@
                     'notes': notes,
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 'success') {
                         alert('Notes updated successfully!');
                     } else {
                         alert('Error: ' + response.message);
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('An error occurred while updating the notes.');
                 }
             });
@@ -990,14 +991,14 @@
                     'notes': notes,
                     'csrfmiddlewaretoken': '{{ csrf_token }}'
                 },
-                success: function(response) {
+                success: function (response) {
                     if (response.status === 'success') {
                         alert('Notes updated successfully');
                     } else {
                         alert('Error: ' + response.message);
                     }
                 },
-                error: function() {
+                error: function () {
                     alert('An error occurred while updating notes.');
                 }
             });

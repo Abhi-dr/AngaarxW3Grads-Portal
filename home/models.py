@@ -139,7 +139,7 @@ class ReferralCode(models.Model):
         return f"Team Referral: {self.code}"
     
     @classmethod
-    def generate_unique_code(cls, prefix='REF', length=8):
+    def generate_unique_code(cls, prefix='FLAME', length=8):
         """Generate a unique referral code"""
         import random
         import string
