@@ -236,5 +236,5 @@ class FlamesTeamMember(models.Model):
     is_leader = models.BooleanField(default=False)
     
     def __str__(self):
-        return f"{self.full_name} - {self.team.name}"
+        return f"{self.team.name} - {self.member.first_name}"
 

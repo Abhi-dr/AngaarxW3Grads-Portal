@@ -45,9 +45,6 @@ def student_flames_register(request, slug):
     if request.method == 'POST':
         # Get form data
         registration_mode = request.POST.get('registration_mode')
-        full_name = request.POST.get('full_name')
-        email = request.POST.get('email')
-        contact_number = request.POST.get('contact_number')
         year = request.POST.get('year')
         message = request.POST.get('message')
         referral_code_text = request.POST.get('referral_code')
@@ -89,26 +86,25 @@ def student_flames_register(request, slug):
             # Add the user as the first team member (team leader)
             FlamesTeamMember.objects.create(
                 team=team,
-                full_name=full_name,
-                email=email,
-                contact_number=contact_number,
-                user=request.user,
+                member=request.user.student,
                 is_leader=True
             )
             
             # Add additional team members
-            for i in range(2, team_member_count + 1):
-                member_name = request.POST.get(f'member_name_{i}')
-                member_email = request.POST.get(f'member_email_{i}')
-                member_contact = request.POST.get(f'member_contact_{i}')
+            for i in range(1, team_member_count):
+                member_username = request.POST.get(f'team_member_username_{i}')
                 
-                if member_name and member_email and member_contact:
-                    FlamesTeamMember.objects.create(
-                        team=team,
-                        full_name=member_name,
-                        email=member_email,
-                        contact_number=member_contact
-                    )
+                if member_username:
+                    # Get the student account for this username
+                    from accounts.models import Student
+                    member_student = Student.objects.filter(username=member_username).first()
+                    
+                    if member_student:
+                        # Create team member with the student's information
+                        FlamesTeamMember.objects.create(
+                            team=team,
+                            member=member_student
+                        )
             
             messages.success(request, f"Team '{team_name}' has been registered for {course.title} successfully!")
         else:

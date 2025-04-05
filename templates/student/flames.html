@@ -549,7 +549,7 @@ active
 {% endblock %}
 
 {% block body %}
-<div class="container py-4">
+<div class="container-fluid">
 
     {% for message in messages %}
 
@@ -559,13 +559,7 @@ active
     </div>
 
     {% endfor %}
-    
-    <div class="tab-container">
-        <div class="tab-buttons">
-            <button class="tab-button active" data-tab="registrations">My Registrations</button>
-            <button class="tab-button" data-tab="available">Available Programs</button>
-        </div>
-    </div>
+
 
     <div id="registrations-tab" class="tab-content active">
         <div class="section-header">
@@ -610,25 +604,33 @@ active
                 </div>
 
                 {% if registration.team %}
+
                 <div class="flames-team">
                     <h5 class="team-title"><i class="fas fa-users"></i> Team Members</h5>
+
                     {% for member in registration.team.members.all %}
+
                     <div class="team-member">
+
                         <div class="member-icon">
-                            <img src="{{ member.user.student.profile_pic.url }}" alt="{{ member.full_name }}"
+                            <img src="{{ member.member.profile_pic.url }}" alt="{{ member.full_name }}"
                                 class="rounded-circle" width="30" height="30">
                         </div>
                         <div>
-                            <div>{{ member.full_name }}</div>
-                            <small>{{ member.email }}</small>
+                            <div>{{ member.member.first_name }} {{ member.member.last_name }}</div>
+                            <small>{{ member.member.email }}</small>
                         </div>
+
                         {% if member.is_leader %}
                         <span class="team-leader-badge">Team Leader</span>
                         {% endif %}
+
                     </div>
+
                     {% empty %}
                     <p>No team members found. Please contact support.</p>
                     {% endfor %}
+
                 </div>
                 {% endif %}
             </div>
@@ -643,9 +645,20 @@ active
                     <span class="final-price">₹{{ registration.original_price }}</span>
                     {% endif %}
                 </div>
+
+                {% if registration.team %}
+
                 <span class="discount-badge fs-2">
-                    Referred By: {{ registration.referral_code.alumni.name }}
+                    Team Registration &nbsp; -₹500🔥
                 </span>
+                
+                {% else %}
+
+                <span class="discount-badge fs-2">
+                    Referred By: {{ registration.referral_code.alumni.name }}🔥
+                </span>
+
+                {% endif %}
             </div>
 
         </div>
@@ -710,7 +723,8 @@ active
                     </div>
                     <div>
                         <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline">Details</a>
-                        <a href="{% url 'student_flames_register' course.slug %}" class="btn btn-sm btn-primary">Register</a>
+                        <a href="{% url 'student_flames_register' course.slug %}"
+                            class="btn btn-sm btn-primary">Register</a>
                     </div>
                 </div>
             </div>
