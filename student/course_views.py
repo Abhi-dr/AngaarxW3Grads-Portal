@@ -115,7 +115,6 @@ def student_flames_register(request, slug):
     
     context = {
         'course': course,
-        'user': request.user,
         'active_tab': 'flames'
     }
     

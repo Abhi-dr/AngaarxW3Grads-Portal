@@ -150,8 +150,15 @@ active
     }
 
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .section-title {
@@ -334,20 +341,20 @@ active
     }
 
     /* Buttons */
-    .btn {
+    .custom-btn {
         padding: 0.5rem 1.5rem;
         font-weight: 600;
         border-radius: 6px;
         transition: all 0.3s ease;
     }
 
-    .btn-primary {
+    .custom-btn-primary {
         background: linear-gradient(45deg, #007bff, #0056b3);
         border: none;
         box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3);
     }
 
-    .btn-primary:hover {
+    .custom-btn-primary:hover {
         background: linear-gradient(45deg, #0069d9, #004494);
         transform: translateY(-2px);
         box-shadow: 0 6px 15px rgba(0, 123, 255, 0.4);
@@ -558,13 +565,13 @@ active
             <h1 class="registration-title">Register for SUMMER TRAINING Program</h1>
             <p class="registration-subtitle">{{ course.title }} - {{ course.subtitle }}</p>
         </div>
-        
+
         <div class="registration-card">
             <h2 class="card-title">Registration Details</h2>
-            
+
             <form id="registration-form" method="POST" action="{% url 'student_flames_register' course.slug %}">
                 {% csrf_token %}
-                
+
                 <div class="registration-mode-selector">
                     <div class="mode-option active" data-mode="SOLO">
                         <div class="mode-icon">
@@ -573,7 +580,7 @@ active
                         <div class="mode-title">Solo Registration</div>
                         <div class="mode-description">Register as an individual participant</div>
                     </div>
-                    
+
                     <div class="mode-option" data-mode="TEAM">
                         <div class="mode-icon">
                             <i class="fas fa-users"></i>
@@ -582,36 +589,39 @@ active
                         <div class="mode-description">Register as a team (up to 5 members)</div>
                     </div>
                 </div>
-                
+
                 <input type="hidden" name="registration_mode" id="registration_mode" value="SOLO">
-                
+
                 <div class="form-section">
                     <h3 class="section-title">Personal Information</h3>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Full Name" value="{{ user.get_full_name }}" required>
+                                <input type="text" class="form-control" id="full_name" name="full_name"
+                                    placeholder="Full Name" value="{{ user.get_full_name }}" required>
                                 <label for="full_name">Full Name</label>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" value="{{ user.email }}" required>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="Email Address" value="{{ user.email }}" required>
                                 <label for="email">Email Address</label>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <input type="tel" class="form-control" id="contact_number" name="contact_number" placeholder="Contact Number" value="{{ user.student.mobile_number }}" required>
+                                <input type="tel" class="form-control" id="contact_number" name="contact_number"
+                                    placeholder="Contact Number" value="{{ user.student.mobile_number }}" required>
                                 <label for="contact_number">Contact Number</label>
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
                                 <select class="form-select" id="year" name="year" required>
@@ -628,16 +638,16 @@ active
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Team Members Section (Only visible for team registration) -->
                 <div id="team-section" class="form-section" style="display: none;">
                     <h3 class="section-title">Team Information</h3>
-                    
+
                     <div class="form-floating mb-3">
                         <input type="text" class="form-control" id="team_name" name="team_name" placeholder="Team Name">
                         <label for="team_name">Team Name</label>
                     </div>
-                    
+
                     <div class="team-members-container">
                         <div class="team-member">
                             <div class="team-member-header">
@@ -646,7 +656,8 @@ active
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-floating mb-3">
-                                        <input type="text" class="form-control" value="{{ user.get_full_name }}" disabled>
+                                        <input type="text" class="form-control" value="{{ user.get_full_name }}"
+                                            disabled>
                                         <label class="text-white-50">Full Name</label>
                                     </div>
                                 </div>
@@ -658,80 +669,84 @@ active
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-floating mb-3">
-                                        <input type="tel" class="form-control" value="{{ user.student.mobile_number }}" disabled>
+                                        <input type="tel" class="form-control" value="{{ user.student.mobile_number }}"
+                                            disabled>
                                         <label class="text-white-50">Contact Number</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Template for additional team members -->
                         <div id="team-members">
                             <!-- Additional team members will be added here dynamically -->
                         </div>
-                        
+
                         <div id="add-member-btn" class="add-member-btn">
                             <span class="add-member-icon"><i class="fas fa-plus-circle"></i></span>
                             <span>Add Team Member</span>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Referral Code Section -->
                 <div class="form-section" id="referral-code-section">
                     <h3 class="section-title">Referral Code (Optional)</h3>
-                    
+
                     <div class="referral-section">
                         <div class="referral-input">
                             <div class="form-floating flex-grow-1">
-                                <input type="text" class="form-control" id="referral_code" name="referral_code" placeholder="Referral Code">
+                                <input type="text" class="form-control" id="referral_code" name="referral_code"
+                                    placeholder="Referral Code">
                                 <label for="referral_code">Referral Code</label>
                             </div>
-                            <button type="button" id="verify-referral" class="btn btn-outline-primary">Verify</button>
+                            <button type="button" id="verify-referral"
+                                class="custom-btn btn-outline-primary">Verify</button>
                         </div>
-                        
+
                         <div id="referral-message" class="referral-message" style="display: none;"></div>
                     </div>
                 </div>
-                
+
                 <!-- Price Summary -->
                 <div class="form-section">
                     <h3 class="section-title">Price Summary</h3>
-                    
+
                     <div class="price-summary">
                         <div class="price-row">
                             <span class="price-label">Program Fee</span>
                             <span class="price-value">₹{{ course.price }}</span>
                         </div>
-                        
+
                         <div id="discount-row" class="price-row" style="display: none;">
                             <span class="price-label">Discount</span>
                             <span class="price-value" id="discount-value">-₹0</span>
                         </div>
-                        
+
                         <div id="team-discount-row" class="price-row" style="display: none;">
                             <span class="price-label">Team Registration Discount</span>
                             <span class="price-value" id="team-discount-value">-₹500</span>
                         </div>
-                        
+
                         <div class="price-row price-total">
                             <span>Total</span>
                             <span id="total-price">₹{{ course.price }}</span>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-section">
                     <h3 class="section-title">Additional Information</h3>
-                    
+
                     <div class="form-floating mb-3">
-                        <textarea class="form-control" id="message" name="message" placeholder="Message (Optional)" style="height: 100px;"></textarea>
+                        <textarea class="form-control" id="message" name="message" placeholder="Message (Optional)"
+                            style="height: 100px;"></textarea>
                         <label for="message">Message (Optional)</label>
                     </div>
                 </div>
-                
+
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary btn-lg">Complete Registration</button>
+                    <button type="submit" class="custom-btn custom-btn-primary btn-lg">Complete Registration</button>
                 </div>
             </form>
         </div>
@@ -739,7 +754,7 @@ active
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Registration mode selection
         const modeOptions = document.querySelectorAll('.mode-option');
         const registrationModeInput = document.getElementById('registration_mode');
@@ -749,48 +764,48 @@ active
         const discountRow = document.getElementById('discount-row');
         const totalPrice = document.getElementById('total-price');
         const originalPrice = parseFloat("{{ course.price }}");
-        
+
         modeOptions.forEach(option => {
-            option.addEventListener('click', function() {
+            option.addEventListener('click', function () {
                 // Remove active class from all options
                 modeOptions.forEach(opt => opt.classList.remove('active'));
-                
+
                 // Add active class to clicked option
                 this.classList.add('active');
-                
+
                 // Update hidden input value
                 const mode = this.getAttribute('data-mode');
                 registrationModeInput.value = mode;
-                
+
                 // Show/hide team section based on selected mode
                 if (mode === 'TEAM') {
                     teamSection.style.display = 'block';
                     referralCodeSection.style.display = 'none';
                     teamDiscountRow.style.display = 'flex';
-                    
+
                     // Make team_name required
                     document.getElementById('team_name').setAttribute('required', 'required');
-                    
+
                     // Apply team discount
                     const teamDiscountAmount = 500;
                     const newTotal = originalPrice - teamDiscountAmount;
                     totalPrice.textContent = `₹${newTotal}`;
-                    
+
                     // Clear any referral code
                     document.getElementById('referral_code').value = '';
                     document.getElementById('referral-message').style.display = 'none';
                     discountRow.style.display = 'none';
-                    
+
                     // Add the 4 team members automatically
                     addInitialTeamMembers();
                 } else {
                     teamSection.style.display = 'none';
                     referralCodeSection.style.display = 'block';
                     teamDiscountRow.style.display = 'none';
-                    
+
                     // Remove required attribute from team_name
                     document.getElementById('team_name').removeAttribute('required');
-                    
+
                     // Reset price to original if no referral discount
                     if (discountRow.style.display === 'none') {
                         totalPrice.textContent = `₹${originalPrice}`;
@@ -798,29 +813,29 @@ active
                 }
             });
         });
-        
+
         // Add team member functionality
         const addMemberBtn = document.getElementById('add-member-btn');
         const teamMembersContainer = document.getElementById('team-members');
         let memberCount = 1; // Start with 1 because the team leader is already counted
-        
+
         // Function to add initial team members when team registration is selected
         function addInitialTeamMembers() {
             // Clear existing team members first
             teamMembersContainer.innerHTML = '';
             memberCount = 1; // Reset counter (leader is member 1)
-            
+
             // Add 4 team members (for a total of 5 including the leader)
             for (let i = 0; i < 4; i++) {
                 addTeamMember();
             }
         }
-        
+
         // Function to add a team member
         function addTeamMember() {
             if (memberCount < 5) { // Maximum 5 members including the leader
                 memberCount++;
-                
+
                 const memberHtml = `
                     <div class="team-member" id="member-${memberCount}">
                         <div class="team-member-header">
@@ -830,27 +845,27 @@ active
                         <div class="col-md-12 mb-3">
                             <div class="position-relative">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="team_member_username_${memberCount-1}" name="team_member_username_${memberCount-1}" placeholder="Username" required>
-                                    <label for="team_member_username_${memberCount-1}">Username</label>
+                                    <input type="text" class="form-control" id="team_member_username_${memberCount - 1}" name="team_member_username_${memberCount - 1}" placeholder="Username" required>
+                                    <label for="team_member_username_${memberCount - 1}">Username</label>
                                 </div>
-                                <i class="fas fa-check text-success" id="team${memberCount-1}-valid-icon" style="display: none; position: absolute; right: 10px; top: 15px;"></i>
-                                <i class="fas fa-times text-danger" id="team${memberCount-1}-invalid-icon" style="display: none; position: absolute; right: 10px; top: 15px;"></i>
+                                <i class="fas fa-check text-success" id="team${memberCount - 1}-valid-icon" style="display: none; position: absolute; right: 10px; top: 15px;"></i>
+                                <i class="fas fa-times text-danger" id="team${memberCount - 1}-invalid-icon" style="display: none; position: absolute; right: 10px; top: 15px;"></i>
                             </div>
-                            <div id="team${memberCount-1}-feedback" class="form-text mt-1"></div>
+                            <div id="team${memberCount - 1}-feedback" class="form-text mt-1"></div>
                             <div class="form-text mt-1">Enter the username of the team member (must be a registered student)</div>
-                            <div id="team${memberCount-1}-name-display" class="mt-2"></div>
+                            <div id="team${memberCount - 1}-name-display" class="mt-2"></div>
                         </div>
                         </div>
                     </div>
                 `;
-                
+
                 teamMembersContainer.insertAdjacentHTML('beforeend', memberHtml);
-                
+
                 // Hide add button if maximum reached
                 if (memberCount >= 5) {
                     addMemberBtn.style.display = 'none';
                 }
-                
+
                 // Add event listener for remove button
                 const removeButtons = document.querySelectorAll('.remove-member');
                 removeButtons.forEach(button => {
@@ -858,64 +873,64 @@ active
                 });
             }
         }
-        
+
         // Function to remove a team member
         function removeMember() {
             const memberNumber = this.getAttribute('data-member');
             const memberElement = document.getElementById(`member-${memberNumber}`);
-            
+
             if (memberElement) {
                 memberElement.remove();
                 memberCount--;
-                
+
                 // Show add button if it was hidden
                 addMemberBtn.style.display = 'flex';
-                
+
                 // Renumber remaining members
                 const memberElements = document.querySelectorAll('.team-member:not(:first-child)');
                 memberElements.forEach((element, index) => {
                     const memberHeader = element.querySelector('.member-number');
                     memberHeader.textContent = `Team Member ${index + 2}`;
-                    
+
                     const removeButton = element.querySelector('.remove-member');
                     removeButton.setAttribute('data-member', index + 2);
-                    
+
                     element.id = `member-${index + 2}`;
-                    
+
                     // Update input names
                     const nameInput = element.querySelector('.col-md-4:nth-child(1) input');
                     const emailInput = element.querySelector('.col-md-4:nth-child(2) input');
                     const contactInput = element.querySelector('.col-md-4:nth-child(3) input');
-                    
+
                     nameInput.name = `member_name_${index + 2}`;
                     emailInput.name = `member_email_${index + 2}`;
                     contactInput.name = `member_contact_${index + 2}`;
                 });
             }
         }
-        
+
         // Referral code verification
         const verifyReferralBtn = document.getElementById('verify-referral');
         const referralCodeInput = document.getElementById('referral_code');
         const referralMessage = document.getElementById('referral-message');
         const discountValue = document.getElementById('discount-value');
-        
-        verifyReferralBtn.addEventListener('click', function() {
+
+        verifyReferralBtn.addEventListener('click', function () {
             const referralCode = referralCodeInput.value.trim();
             const registrationMode = registrationModeInput.value;
-            
+
             // Don't process referral codes for team registration
             if (registrationMode === 'TEAM') {
                 return;
             }
-            
+
             if (referralCode === '') {
                 referralMessage.textContent = 'Please enter a referral code.';
                 referralMessage.className = 'referral-message referral-invalid';
                 referralMessage.style.display = 'block';
                 return;
             }
-            
+
             // Send AJAX request to verify referral code
             fetch(`/dashboard/api/verify-referral-code/${referralCode}/`)
                 .then(response => response.json())
@@ -923,11 +938,11 @@ active
                     if (data.valid) {
                         referralMessage.textContent = `Valid referral code! ${data.discount_amount} discount applied.`;
                         referralMessage.className = 'referral-message referral-valid';
-                        
+
                         // Update price summary
                         discountRow.style.display = 'flex';
                         discountValue.textContent = `-₹${data.discount_amount}`;
-                        
+
                         // Calculate new total
                         const originalPrice = parseFloat("{{ course.price }}");
                         const newTotal = Math.max(0, originalPrice - data.discount_amount);
@@ -935,12 +950,12 @@ active
                     } else {
                         referralMessage.textContent = 'Invalid referral code. Please check and try again.';
                         referralMessage.className = 'referral-message referral-invalid';
-                        
+
                         // Reset price summary
                         discountRow.style.display = 'none';
                         totalPrice.textContent = `₹${parseFloat("{{ course.price }}")}`;
                     }
-                    
+
                     referralMessage.style.display = 'block';
                 })
                 .catch(error => {
@@ -950,7 +965,7 @@ active
                     console.error('Error:', error);
                 });
         });
-        
+
         // Check team member username exists
         function checkTeamMemberUsername(inputId) {
             const input = document.getElementById(inputId);
@@ -982,7 +997,7 @@ active
 
             // Make API call to check if username exists
 
-            
+
 
             fetch(`/accounts/check_username_exists/?username=${encodeURIComponent(username)}&course_id=${courseId}`)
                 .then(response => response.json())
@@ -1003,7 +1018,7 @@ active
                             input.classList.remove('is-invalid');
                             validIcon.style.display = 'block';
                             invalidIcon.style.display = 'none';
-                            
+
                             // Display student name
                             if (nameDisplay) {
                                 nameDisplay.innerHTML = `<div class="alert alert-info mt-2 mb-0 py-2">
@@ -1029,7 +1044,7 @@ active
         }
 
         // Add event listeners for team member username validation
-        document.addEventListener('input', function(e) {
+        document.addEventListener('input', function (e) {
             if (e.target && e.target.id && e.target.id.startsWith('team_member_username_')) {
                 checkTeamMemberUsername(e.target.id);
             }
@@ -1037,38 +1052,38 @@ active
 
         // Form validation before submission
         const registrationForm = document.getElementById('registration-form');
-        
-        registrationForm.addEventListener('submit', function(event) {
+
+        registrationForm.addEventListener('submit', function (event) {
             const mode = registrationModeInput.value;
-            
+
             if (mode === 'TEAM') {
                 const teamName = document.getElementById('team_name').value.trim();
-                
+
                 if (teamName === '') {
                     event.preventDefault();
                     alert('Please enter a team name.');
                     return;
                 }
-                
+
                 // Make team_name required for team registration
                 document.getElementById('team_name').setAttribute('required', 'required');
-                
+
                 // Check if all team member usernames are filled and valid
                 let allValid = true;
                 let invalidMember = null;
                 let emptyMember = null;
-                
+
                 // Check if we have exactly 4 team members (plus the leader)
                 if (memberCount !== 5) {
                     event.preventDefault();
                     alert('A team must have exactly 5 members (including you as the leader). Please add all team members.');
                     return;
                 }
-                
+
                 // Check for duplicate usernames
                 const usernameValues = [];
                 const duplicateUsernames = [];
-                
+
                 for (let i = 1; i < memberCount; i++) {
                     const memberInput = document.getElementById(`team_member_username_${i}`);
                     if (!memberInput || !memberInput.value.trim()) {
@@ -1080,7 +1095,7 @@ active
                         invalidMember = i + 1; // +1 because we're showing member numbers starting from 2
                         break;
                     }
-                    
+
                     // Check for duplicate usernames
                     const username = memberInput.value.trim().toLowerCase();
                     if (usernameValues.includes(username)) {
@@ -1089,13 +1104,13 @@ active
                         usernameValues.push(username);
                     }
                 }
-                
+
                 if (duplicateUsernames.length > 0) {
                     event.preventDefault();
                     alert(`Team member ${duplicateUsernames[0]} has a duplicate username. Each team member must have a unique username.`);
                     return;
                 }
-                
+
                 if (emptyMember) {
                     event.preventDefault();
                     alert(`Team member ${emptyMember} username is required. Please enter a valid username.`);
@@ -1105,7 +1120,7 @@ active
                     alert(`Team member ${invalidMember} has an invalid username. Please verify all team members.`);
                     return;
                 }
-                
+
                 // Add hidden input with team member count
                 const hiddenInput = document.createElement('input');
                 hiddenInput.type = 'hidden';
@@ -1115,13 +1130,10 @@ active
             }
         });
     });
-    
+
     // Function to validate referral code - moved inside the DOMContentLoaded event
     // to avoid syntax errors with template variables
 </script>
 
 
 {% endblock %}
-
-
-

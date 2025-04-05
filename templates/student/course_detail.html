@@ -9,13 +9,15 @@ active
 
 {% block extra_css %}
 <style>
+    /* Course Header Styles */
     .course-header {
-        background-color: #f8f9fa;
-        border-radius: 8px;
+        background-color: var(--bs-light);
+        border-radius: var(--bs-border-radius-lg);
         padding: 2rem;
         margin-bottom: 2rem;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
 
     .course-header-content {
@@ -24,14 +26,21 @@ active
     }
 
     .course-title {
-        font-size: 2.5rem;
+        font-size: calc(1.375rem + 1.5vw);
         font-weight: 700;
         margin-bottom: 0.5rem;
+        color: var(--bs-heading-color);
+    }
+    
+    @media (min-width: 1200px) {
+        .course-title {
+            font-size: 2.5rem;
+        }
     }
 
     .course-subtitle {
         font-size: 1.25rem;
-        color: #6c757d;
+        color: var(--bs-secondary-color);
         margin-bottom: 1.5rem;
     }
 
@@ -45,15 +54,22 @@ active
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background-color: #e9ecef;
+        background-color: var(--bs-tertiary-bg);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-right: 1rem;
+        color: var(--bs-secondary-color);
     }
 
     .instructor-name {
         font-weight: 600;
+        color: var(--bs-body-color);
+    }
+    
+    .instructor-role {
+        color: var(--bs-secondary-color);
+        font-size: 0.875rem;
     }
 
     .course-price-info {
@@ -64,7 +80,7 @@ active
 
     .original-price {
         text-decoration: line-through;
-        color: #6c757d;
+        color: var(--bs-secondary-color);
         font-size: 1.25rem;
         margin-right: 0.75rem;
     }
@@ -72,13 +88,14 @@ active
     .final-price {
         font-size: 2rem;
         font-weight: 700;
-        color: #212529;
+        color: var(--bs-heading-color);
     }
 
+    /* Course Sections */
     .course-section {
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--bs-body-bg);
+        border-radius: var(--bs-border-radius-lg);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         padding: 2rem;
         margin-bottom: 2rem;
     }
@@ -88,12 +105,15 @@ active
         font-weight: 600;
         margin-bottom: 1.5rem;
         padding-bottom: 0.75rem;
-        border-bottom: 1px solid #e9ecef;
+        border-bottom: 1px solid var(--bs-border-color);
+        color: var(--bs-heading-color);
     }
 
+    /* Learning Points */
     .learning-points {
         list-style-type: none;
         padding-left: 0;
+        margin-bottom: 0;
     }
 
     .learning-points li {
@@ -102,38 +122,52 @@ active
         margin-bottom: 1rem;
         display: flex;
         align-items: flex-start;
+        color: var(--bs-body-color);
     }
 
     .learning-points li:before {
         content: "\f00c";
         font-family: "Font Awesome 5 Free";
         font-weight: 900;
-        color: #28a745;
+        color: var(--bs-success);
         position: absolute;
         left: 0;
         top: 0;
     }
 
+    /* Roadmap */
     .roadmap-item {
         padding: 1.5rem;
-        border-radius: 8px;
-        background-color: #f8f9fa;
+        border-radius: var(--bs-border-radius);
+        background-color: var(--bs-tertiary-bg);
         margin-bottom: 1rem;
     }
 
     .roadmap-title {
         font-weight: 600;
         margin-bottom: 0.5rem;
+        color: var(--bs-heading-color);
+    }
+    
+    .roadmap-content {
+        color: var(--bs-body-color);
     }
 
+    /* Testimonials */
     .testimonial-card {
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        background-color: var(--bs-body-bg);
+        border-radius: var(--bs-border-radius);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
         padding: 1.5rem;
         margin-bottom: 1.5rem;
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .testimonial-card:hover {
+        transform: translateY(-5px);
     }
 
+    /* Testimonial Components */
     .testimonial-header {
         display: flex;
         align-items: center;
@@ -144,12 +178,13 @@ active
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        background-color: #e9ecef;
+        background-color: var(--bs-tertiary-bg);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-right: 1rem;
         overflow: hidden;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
 
     .testimonial-avatar img {
@@ -160,36 +195,44 @@ active
 
     .testimonial-name {
         font-weight: 600;
+        color: var(--bs-heading-color);
     }
 
     .testimonial-rating {
-        color: #ffc107;
+        color: var(--bs-warning);
         margin-top: 0.25rem;
     }
 
     .testimonial-content {
         font-style: italic;
-        color: #6c757d;
+        color: var(--bs-secondary-color);
+        line-height: 1.6;
     }
 
+    /* Call to Action Section */
     .cta-section {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 2rem;
+        background-color: var(--bs-tertiary-bg);
+        border-radius: var(--bs-border-radius-lg);
+        padding: 3rem 2rem;
         text-align: center;
         margin-top: 3rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
 
     .cta-title {
         font-size: 1.75rem;
         font-weight: 700;
         margin-bottom: 1rem;
+        color: var(--bs-heading-color);
     }
 
     .cta-subtitle {
         font-size: 1.1rem;
-        color: #6c757d;
+        color: var(--bs-secondary-color);
         margin-bottom: 1.5rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
     }
 
     .btn-register {
@@ -197,59 +240,110 @@ active
         font-size: 1.1rem;
         font-weight: 600;
         border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
     }
 
     /* Dark mode styles */
     [data-bs-theme="dark"] .course-header {
-        background-color: var(--secondary-bg);
+        background-color: var(--bs-dark-bg-subtle);
     }
-
-    [data-bs-theme="dark"] .course-subtitle {
-        color: var(--text-secondary);
-    }
-
-    [data-bs-theme="dark"] .original-price {
-        color: var(--text-secondary);
-    }
-
-    [data-bs-theme="dark"] .final-price {
-        color: var(--bs-body-color);
-    }
-
+    
     [data-bs-theme="dark"] .course-section {
-        background-color: var(--card-bg);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        background-color: var(--bs-dark-bg-subtle);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
     }
-
-    [data-bs-theme="dark"] .section-title {
-        border-bottom: 1px solid var(--bs-border-color);
-    }
-
-    [data-bs-theme="dark"] .roadmap-item {
-        background-color: var(--secondary-bg);
-    }
-
+    
     [data-bs-theme="dark"] .testimonial-card {
-        background-color: var(--card-bg);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        background-color: var(--bs-dark-bg-subtle);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
     }
-
-    [data-bs-theme="dark"] .testimonial-content {
-        color: var(--text-secondary);
-    }
-
+    
     [data-bs-theme="dark"] .cta-section {
-        background-color: var(--secondary-bg);
+        background-color: var(--bs-dark-bg-subtle);
     }
-
-    [data-bs-theme="dark"] .cta-subtitle {
-        color: var(--text-secondary);
+    
+    [data-bs-theme="dark"] .instructor-avatar,
+    [data-bs-theme="dark"] .testimonial-avatar {
+        background-color: var(--bs-dark);
+        color: var(--bs-light);
+    }
+    
+    [data-bs-theme="dark"] .roadmap-item {
+        background-color: var(--bs-dark);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .course-title {
+            font-size: 2rem;
+        }
+        
+        .course-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .final-price {
+            font-size: 1.75rem;
+        }
+        
+        .course-section {
+            padding: 1.5rem;
+        }
+        
+        .cta-section {
+            padding: 2rem 1.5rem;
+        }
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .course-section {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .testimonial-card {
+        animation: fadeIn 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .testimonial-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+    
+    .testimonial-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+    
+    /* Course description formatting */
+    .course-description p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .course-description ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .course-description h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
     }
 </style>
 {% endblock %}
 
 {% block body %}
-<div class="container py-4">
+<div class="container-fluid ">
     <div class="course-header">
         <div class="course-header-content">
             <h1 class="course-title">{{ course.title }}</h1>
@@ -275,7 +369,7 @@ active
             </div>
 
             <div class="mt-4">
-                <a href="{% url 'flames_register' course.id %}" class="btn btn-primary btn-lg">Register Now</a>
+                <a href="{% url 'student_flames_register' course.slug %}" class="btn btn-primary btn-lg">Register Now</a>
                 <a href="#course-details" class="btn btn-outline-secondary btn-lg ms-2">Learn More</a>
             </div>
         </div>
@@ -307,31 +401,33 @@ active
     {% if course.testimonials.exists %}
     <div class="course-section">
         <h2 class="section-title">What Our Students Say</h2>
-        <div class="testimonials-container">
+        <div class="testimonials-container row">
             {% for testimonial in course.testimonials.all %}
-            <div class="testimonial-card">
-                <div class="testimonial-header">
-                    <div class="testimonial-avatar">
-                        {% if testimonial.student_image %}
-                        <img src="{{ testimonial.student_image.url }}" alt="{{ testimonial.student_name }}">
-                        {% else %}
-                        <i class="fas fa-user"></i>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <div class="testimonial-name">{{ testimonial.student_name }}</div>
-                        <div class="testimonial-rating">
-                            {% for i in "12345"|make_list %}
-                            {% if forloop.counter <= testimonial.rating %} <i class="fas fa-star"></i>
-                                {% else %}
-                                <i class="far fa-star"></i>
-                                {% endif %}
-                                {% endfor %}
+            <div class="col-md-6 mb-4">
+                <div class="testimonial-card h-100">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            {% if testimonial.student_image %}
+                            <img src="{{ testimonial.student_image.url }}" alt="{{ testimonial.student_name }}">
+                            {% else %}
+                            <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="testimonial-name">{{ testimonial.student_name }}</div>
+                            <div class="testimonial-rating">
+                                {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= testimonial.rating %} <i class="fas fa-star"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="testimonial-content">
-                    {{ testimonial.content }}
+                    <div class="testimonial-content mt-3">
+                        {{ testimonial.content }}
+                    </div>
                 </div>
             </div>
             {% endfor %}
@@ -342,7 +438,7 @@ active
     <div class="cta-section">
         <h2 class="cta-title">Ready to Enhance Your Skills?</h2>
         <p class="cta-subtitle">Join this F.L.A.M.E.S program and take your career to the next level</p>
-        <a href="{% url 'flames_register' course.id %}" class="btn btn-primary btn-register">Register Now</a>
+        <a href="{% url 'student_flames_register' course.slug %}" class="btn btn-primary btn-register">Register Now</a>
     </div>
 </div>
 
