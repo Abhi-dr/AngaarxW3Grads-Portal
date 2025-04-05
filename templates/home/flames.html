@@ -382,24 +382,28 @@ F.L.A.M.E.S🔥 | Angaar
                     </ul>
 
                     <!-- Price Section -->
-                <div style="text-align: right; position: relative; z-index: 1;">
+                    <div style="text-align: right; position: relative; z-index: 1;">
 
-                    
-                    {% if course.discount_price %}
-                    <div style="display: flex; justify-content: flex-end; align-items: baseline;">
-                        <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹{{ course.price }}</span>
-                        <span style="color: #ff6026; font-size: 18px; font-weight: 700;">₹{{ course.discount_price }}</span>
-                    </div>
-                    <div style="color: #2ecc71; font-size: 12px; font-weight: 600; margin-top: 3px;">
-                        {% widthratio course.discount_price course.price 100 as discount_percent %}
-                        {{ discount_percent|add:"-100"|cut:"-" }}% OFF
-                    </div>
-                    {% else %}
-                    <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
-                    {% endif %}
 
-                    
-                    <!-- <div style="display: flex; justify-content: flex-end; align-items: baseline;">
+                        {% if course.discount_price %}
+                        <div style="display: flex; justify-content: flex-end; align-items: baseline;">
+                            <span
+                                style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">
+                                ₹{{ course.price }}</span>
+                            <span style="color: #ff6026; font-size: 18px; font-weight: 700;">
+                                ₹{{ course.discount_price }}</span>
+                        </div>
+                        <div style="color: #2ecc71; font-size: 12px; font-weight: 600; margin-top: 3px;">
+                            {% widthratio course.discount_price course.price 100 as discount_percent %}
+                            {{ discount_percent|add:"-100"|cut:"-" }}% OFF
+                        </div>
+                        {% else %}
+                        <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹
+                            UNAFFORDABLE</span>
+                        {% endif %}
+
+
+                        <!-- <div style="display: flex; justify-content: flex-end; align-items: baseline;">
                         <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
                         <span style="color: #ff6026; font-size: 16px; font-weight: 600;">₹ Less than you expect... (coming soon)</span>
                     </div> -->
@@ -407,21 +411,32 @@ F.L.A.M.E.S🔥 | Angaar
                 </div>
 
                 <div style="display: flex; justify-content: space-between; gap: 10px;">
-                    <a href="{% url 'home_course_detail' course.slug %}" class="skills-details-btn" 
+                    <a href="{% url 'home_course_detail' course.slug %}" class="skills-details-btn"
                         style="flex: 1; background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; text-align: center; text-decoration: none;">
                         Details
                     </a>
+
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'student_flames_register' course.slug %}" class="skills-join-btn"
+                        style="flex: 1; background: {{ course.button_color }}; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                        Enroll Now
+                    </a>
+
+                    {% else %}
+
                     <a href="{% url 'flames_register' course.slug %}" class="skills-join-btn"
                         style="flex: 1; background: {{ course.button_color }}; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; text-decoration: none;">
                         Register Now
                     </a>
+
+                    {% endif %}
                 </div>
             </div>
 
             {% endfor %}
-                    </div>
-                    </div>
-                </div>
+        </div>
+    </div>
+</div>
 
 <!-- Particle.js for background effects -->
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
@@ -547,7 +562,7 @@ F.L.A.M.E.S🔥 | Angaar
         // Registration Modal functionality
         const registerButtons = document.querySelectorAll('.skills-join-btn');
         registerButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const courseId = this.getAttribute('data-course-id');
                 const courseTitle = this.getAttribute('data-course-title');
                 document.getElementById('modalCourseName').textContent = courseTitle;
@@ -603,19 +618,19 @@ F.L.A.M.E.S🔥 | Angaar
     }
 
     // Close modal if clicked outside
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const modal = document.getElementById('registrationModal');
         if (event.target === modal) {
             modal.style.display = 'none';
         }
     }
-    
+
     // Handle referral code validation and price display
-    document.getElementById('referral_code').addEventListener('blur', function() {
+    document.getElementById('referral_code').addEventListener('blur', function () {
         const referralCode = this.value.trim();
         const courseId = document.getElementById('course_id').value;
         const registrationMode = document.getElementById('registration_mode').value;
-        
+
         if (referralCode) {
             // Fetch to validate referral code
             fetch(`{% url "validate_referral" %}?code=${referralCode}&course_id=${courseId}&registration_mode=${registrationMode}`, {
@@ -624,50 +639,50 @@ F.L.A.M.E.S🔥 | Angaar
                     'X-CSRFToken': '{{ csrf_token }}'
                 }
             })
-            .then(response => response.json())
-            .then(data => {
-                const messageElement = document.getElementById('referral_message');
-                const priceDisplay = document.getElementById('price_display');
-                const originalPriceElement = document.querySelector('.original-price');
-                const discountedPriceElement = document.querySelector('.discounted-price');
-                
-                if (data.status === 'success') {
-                    messageElement.textContent = 'Valid referral code! Discount applied.';
-                    messageElement.style.color = '#38cb89';
-                    
-                    // Display price information
-                    priceDisplay.style.display = 'block';
-                    originalPriceElement.textContent = `Original Price: ₹${data.original_price}`;
-                    discountedPriceElement.textContent = `Discounted Price: ₹${data.discounted_price}`;
-                } else {
-                    messageElement.textContent = data.message || 'Invalid referral code.';
-                    messageElement.style.color = '#f24e1e';
-                    priceDisplay.style.display = 'none';
-                }
-            })
-            .catch(error => {
-                console.error('Error validating referral code:', error);
-                document.getElementById('referral_message').textContent = 'Error validating code. Please try again.';
-                document.getElementById('referral_message').style.color = '#f24e1e';
-            });
+                .then(response => response.json())
+                .then(data => {
+                    const messageElement = document.getElementById('referral_message');
+                    const priceDisplay = document.getElementById('price_display');
+                    const originalPriceElement = document.querySelector('.original-price');
+                    const discountedPriceElement = document.querySelector('.discounted-price');
+
+                    if (data.status === 'success') {
+                        messageElement.textContent = 'Valid referral code! Discount applied.';
+                        messageElement.style.color = '#38cb89';
+
+                        // Display price information
+                        priceDisplay.style.display = 'block';
+                        originalPriceElement.textContent = `Original Price: ₹${data.original_price}`;
+                        discountedPriceElement.textContent = `Discounted Price: ₹${data.discounted_price}`;
+                    } else {
+                        messageElement.textContent = data.message || 'Invalid referral code.';
+                        messageElement.style.color = '#f24e1e';
+                        priceDisplay.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error validating referral code:', error);
+                    document.getElementById('referral_message').textContent = 'Error validating code. Please try again.';
+                    document.getElementById('referral_message').style.color = '#f24e1e';
+                });
         } else {
             document.getElementById('referral_message').textContent = '';
             document.getElementById('price_display').style.display = 'none';
         }
     });
-    
+
     // Toggle referral field based on registration mode
     function toggleReferralFields() {
         const registrationMode = document.getElementById('registration_mode').value;
         const referralGroup = document.getElementById('referral_code_group');
         const referralInput = document.getElementById('referral_code');
         const referralMessage = document.getElementById('referral_message');
-        
+
         // Reset values
         referralInput.value = '';
         referralMessage.textContent = '';
         document.getElementById('price_display').style.display = 'none';
-        
+
         if (registrationMode === 'TEAM') {
             referralGroup.querySelector('label').textContent = 'Team Referral Code';
         } else {
