@@ -32,6 +32,23 @@ urlpatterns = [
     
 ]
 
+# ========================================= FLAMES WORK =========================================
+
+urlpatterns += [
+    path('summer-training/', flames_views.student_flames, name='student_flames'),
+    
+    path("course/<slug:slug>/registration", flames_views.view_registration, name="student_view_registration"),
+    
+    
+    # ---- REGISTRATION URLS ----
+    path('course/<slug:slug>/', course_views.course_detail, name='course_detail'),
+    path('course/<slug:slug>/register/', course_views.student_flames_register, name='student_flames_register'),
+    path('api/verify-referral-code/<str:code>/', course_views.verify_referral_code, name='verify_referral_code'),
+    
+    # path('flames/teams/create/<int:registration_id>/', flames.student_create_team, name='student_create_team'),
+    # path('flames/teams/add-member/<int:team_id>/', flames.student_add_team_member, name='student_add_team_member'),
+    # path('flames/teams/remove-member/<int:member_id>/', flames.student_remove_team_member, name='student_remove_team_member'),
+]
 
 urlpatterns += [
     # ======================== HACKATHON TEAM MAKER ========================
@@ -64,21 +81,6 @@ urlpatterns += [
     path("hackathon/handle-team-invite/<int:invite_id>/<str:action>/", hackathon_views.handle_team_invite, name="handle_team_invite"),
     path("hackathon/cancel-team-invite/<int:invite_id>/", hackathon_views.cancel_team_invite, name="cancel_team_invite"),
 ]
-
-# Flames URLs
-urlpatterns += [
-    path('summer-training/', flames_views.student_flames, name='student_flames'),
-        
-    # New course detail and registration views
-    path('course/<slug:slug>/', course_views.course_detail, name='course_detail'),
-    path('course/<slug:slug>/register/', course_views.student_flames_register, name='student_flames_register'),
-    path('api/verify-referral-code/<str:code>/', course_views.verify_referral_code, name='verify_referral_code'),
-    
-    # path('flames/teams/create/<int:registration_id>/', flames.student_create_team, name='student_create_team'),
-    # path('flames/teams/add-member/<int:team_id>/', flames.student_add_team_member, name='student_add_team_member'),
-    # path('flames/teams/remove-member/<int:member_id>/', flames.student_remove_team_member, name='student_remove_team_member'),
-]
-
 # ========================================= BATCH WORK =========================================
 
 urlpatterns += [
@@ -94,3 +96,7 @@ urlpatterns += [
     path("<slug:slug>/leaderboard", batch_views.student_batch_leaderboard, name="student_batch_leaderboard"),
     path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
 ]
+
+
+
+
