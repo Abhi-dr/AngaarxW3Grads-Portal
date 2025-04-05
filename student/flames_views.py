@@ -36,14 +36,32 @@ def student_flames(request):
 def view_registration(request, slug):
     course = get_object_or_404(FlamesCourse, slug=slug)
     
+    # Get the registration with related course data
     registration = FlamesRegistration.objects.filter(
         user=request.user,
         course=course
-    ).first()
+    ).select_related('course', 'team', 'referral_code').first()
+    
+    if not registration:
+        messages.error(request, "You are not registered for this course.")
+        return redirect('student_flames')
+    
+    # If this is a team registration, prefetch team members
+    if registration.registration_mode == 'TEAM' and registration.team:
+        from django.db.models import Prefetch
+        from home.models import FlamesTeamMember
+        
+        # Prefetch team members with their student information
+        team_members = FlamesTeamMember.objects.filter(
+            team=registration.team
+        ).select_related('member')
+        
+        # Attach the members to the team object
+        registration.team.members_list = team_members
     
     parameters = {
         'registration': registration,
-        'active_tab': 'flames'
+        'course': course,
     }
     
     return render(request, 'student/flames/view_registration.html', parameters)

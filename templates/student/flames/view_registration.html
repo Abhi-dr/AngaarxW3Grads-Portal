@@ -1,0 +1,221 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block summer_active %}
+active
+{% endblock %}
+
+{% block title %}
+{{ registration.course.title }} | Registration
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <!-- Registration Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h2 class="mb-1">{{ registration.course.title }}</h2>
+                            <p class="text-muted mb-0">{{ registration.course.subtitle }}</p>
+                        </div>
+                        <span
+                            class="badge {% if registration.status == 'Approved' %}bg-success{% elif registration.status == 'Pending' %}bg-warning{% elif registration.status == 'Rejected' %}bg-danger{% else %}bg-info{% endif %} p-2">
+                            {{ registration.status }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Registration Details -->
+        <div class="col-md-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Registration Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <p class="mb-1 fw-bold">Registration Type</p>
+                            <p>{{ registration.get_registration_mode_display }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 fw-bold">Registration Date</p>
+                            <p>{{ registration.created_at|date:"F d, Y" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 fw-bold">Year</p>
+                            <p>{{ registration.year }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 fw-bold">Payment ID</p>
+                            <p>{% if registration.payment_id %}{{ registration.payment_id }}{% else %}<span
+                                    class="text-muted">Not available</span>{% endif %}</p>
+                        </div>
+
+                        {% if registration.message %}
+                        <div class="col-12">
+                            <p class="mb-1 fw-bold">Your Message</p>
+                            <p>{{ registration.message }}</p>
+                        </div>
+                        {% endif %}
+
+                        {% if registration.admin_notes %}
+                        <div class="col-12">
+                            <div class="alert alert-info mb-0">
+                                <p class="mb-1 fw-bold">Admin Notes</p>
+                                <p class="mb-0">{{ registration.admin_notes }}</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Details -->
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Payment Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Original Price</span>
+                        <span>₹{{ registration.original_price }}</span>
+                    </div>
+
+                    {% if registration.referral_code %}
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Referral Discount</span>
+                        <span>- ₹{{ registration.referral_code.discount_amount }}</span>
+                    </div>
+                    <hr>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between fw-bold">
+                        <span>Final Price</span>
+                        <span>₹{{ registration.discounted_price }}</span>
+                    </div>
+
+                    {% if registration.referral_code %}
+                    <div class="mt-3 small">
+                        <span class="badge bg-success">Referral Applied</span>
+                        <span class="ms-2">{{ registration.referral_code.code }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if registration.registration_mode == 'TEAM' and registration.team %}
+    <!-- Team Details -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Team Details</h5>
+                    <span
+                        class="badge {% if registration.team.status == 'Active' %}bg-success{% elif registration.team.status == 'Pending' %}bg-warning{% else %}bg-info{% endif %} p-2">
+                        {{ registration.team.status }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-1 fw-bold">Team Name</p>
+                            <p>{{ registration.team.name }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-1 fw-bold">Created On</p>
+                            <p>{{ registration.team.created_at|date:"F d, Y" }}</p>
+                        </div>
+                    </div>
+
+                    <h6 class="mb-3">Team Members</h6>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for member in registration.team.members_list %}
+                                <tr>
+                                    <th scope="row">{{ forloop.counter }}</th>
+                                    <td>{{ member.member.first_name }} {{ member.member.last_name }}</td>
+                                    <td>{% if member.is_leader %}<span class="badge bg-primary">Team Leader</span>
+                                        {% else %}Member{% endif %}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">No team members found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Course Information -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">Course Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h6>Description</h6>
+                            <p>{{ registration.course.description }}</p>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h6>What You Will Learn</h6>
+                            <ul class="list-group list-group-flush">
+                                {% for point in registration.course.get_learning_points %}
+                                <li class="list-group-item bg-transparent">{{ point }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <h6>Course Roadmap</h6>
+                            <p>{{ registration.course.roadmap }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <a href="{% url 'student_flames' %}" class="btn btn-outline-secondary me-2">
+                <i class="ti ti-arrow-left me-1"></i> Back to Courses
+            </a>
+            {% if registration.status == 'Approved' %}
+            <a href="#" class="btn btn-primary">
+                <i class="ti ti-book me-1"></i> Access Course Material
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
