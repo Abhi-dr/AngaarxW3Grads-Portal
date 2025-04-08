@@ -168,16 +168,76 @@ def normalize_output(output):
     return output.replace("\r\n", "\n").strip()
 
 # ==========================================
+# Cache timeout settings (in seconds)
+TEST_CASE_CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
+DRIVER_CODE_CACHE_TIMEOUT = 1  # 24 hours
+QUESTION_CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
 
 def get_test_cases(question):
     """
-    Get all test cases associated with the question.
+    Get all test cases associated with the question, with Redis caching.
     """
+    # Create a cache key based on the question ID
+    cache_key = f"test_cases:{question.id}"
+    
+    # Try to get test cases from cache
+    cached_test_cases = cache.get(cache_key)
+    
+    if cached_test_cases:
+        # Convert cached data back to TestCase instances
+        from practice.models import TestCase
+        test_cases = []
+        for tc_data in cached_test_cases:
+            test_case = TestCase(
+                id=tc_data['id'],
+                question_id=tc_data['question_id'],
+                input_data=tc_data['input_data'],
+                expected_output=tc_data['expected_output'],
+                is_sample=tc_data['is_sample']
+            )
+            test_cases.append(test_case)
+        return test_cases
+    
     try:
-        return question.test_cases.all()
+        # If not in cache, fetch from database
+        test_cases = list(question.test_cases.all())
+        
+        # Cache the test cases data
+        test_cases_data = [
+            {
+                'id': tc.id,
+                'question_id': tc.question_id,
+                'input_data': tc.input_data,
+                'expected_output': tc.expected_output,
+                'is_sample': tc.is_sample
+            }
+            for tc in test_cases
+        ]
+        
+        cache.set(cache_key, test_cases_data, timeout=TEST_CASE_CACHE_TIMEOUT)
+        
+        return test_cases
     except Exception as e:
         print(f"Error fetching test cases: {e}")
         return []
+
+
+def get_driver_code(request, question_id, language_id):
+    question = get_object_or_404(Question, id=question_id)
+    driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()    
+    if driver_code:
+        
+        if question.show_complete_driver_code:
+            code = driver_code.complete_driver_code.replace("#USER_CODE#", driver_code.visible_driver_code)
+            return JsonResponse({"success": True, "code": code})
+        
+        elif driver_code.visible_driver_code == "1":
+            return JsonResponse({"success": True, "code": driver_code.complete_driver_code})
+        
+        else:
+            return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
+        
+    return JsonResponse({"success": False, "message": "Driver code not found.", "language id": language_id, "question id": question_id}, status=404)
 
 
 def create_submission(user, question, source_code, language_id):
@@ -197,15 +257,108 @@ def create_submission(user, question, source_code, language_id):
         raise Exception("Could not create submission.")
 
 
+
+@login_required(login_url="login")
+def problem(request, slug):
+    """
+    Render the problem page with question details and sample test cases, with Redis caching.
+    """
+    # Create a cache key for the question
+    cache_key = f"question:{slug}"
+    
+    # Try to get from cache first
+    cached_question_data = cache.get(cache_key)
+    
+    if cached_question_data:
+        # Since we can't serialize the entire Question object, we'll cache components
+        # and reassemble on retrieval
+        question = get_object_or_404(Question, slug=slug)
+        sample_test_cases = cached_question_data.get('sample_test_cases')
+        sheet = cached_question_data.get('sheet')
+        
+        # Apply cached properties to question object
+        if cached_question_data.get('scenario'):
+            question.scenario = cached_question_data.get('scenario')
+            
+        question.description = cached_question_data.get('description')
+        
+        return render(request, 'practice/problem.html', {
+            'question': question,
+            'sample_test_cases': sample_test_cases,
+            'sheet': sheet
+        })
+    
+    try:
+        question = get_object_or_404(Question, slug=slug)
+        
+        sheet = Sheet.objects.filter(questions=question, is_approved=True).first()
+
+        if sheet and not sheet.is_enabled:
+            messages.info(request, "This question is in the sheet which is disabled now. Try Later.")
+            return redirect('problem_set')
+        
+        if sheet and sheet.is_sequential:
+            # Get all enabled questions for the user
+            enabled_questions = sheet.get_enabled_questions_for_user(request.user)
+            
+            # Check if the question is enabled for the user
+            if question not in enabled_questions:
+                messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
+                return redirect('sheet', slug=sheet.slug)
+                
+        if question.scenario:
+            question.scenario = convert_backticks_to_code(question.scenario)
+        question.description = convert_backticks_to_code(question.description)
+        
+        sample_test_cases = list(TestCase.objects.filter(question=question, is_sample=True))
+        
+        # Cache the question data
+        cache_data = {
+            'scenario': question.scenario,
+            'description': question.description,
+            'sample_test_cases': sample_test_cases,
+            'sheet': sheet
+        }
+        
+        cache.set(cache_key, cache_data, timeout=QUESTION_CACHE_TIMEOUT)
+        
+        return render(request, 'practice/problem.html', {
+            'question': question,
+            'sample_test_cases': sample_test_cases,
+            'sheet': sheet
+        })
+    except Exception as e:
+        print(f"Error loading problem page: {e}")
+        return JsonResponse({"error": "Error from backend: {e}" + str(e)}, status=500)
+
+
 def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_limit, memory_limit):
     """
     Send the code to Judge0 API for execution against multiple test cases.
+    Use caching for driver code.
     """
-            
-    if not question.show_complete_driver_code: # User ko complete code dikh rha h
-        driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
-        source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)        
+    # Create a cache key for the driver code
+    cache_key = f"driver_code:{question.id}:{language_id}"
+    
+    # Initialize complete code variable
+    complete_source_code = source_code
+    
+    if not question.show_complete_driver_code:  # User ko complete code dikh rha h
+        # Try to get driver code from cache
+        cached_driver_code = cache.get(cache_key)
+        
+        if cached_driver_code and 'code' in cached_driver_code:
+            driver_code_complete = cached_driver_code['code']
+            complete_source_code = driver_code_complete.replace("#USER_CODE#", source_code)
+        else:
+            # If not in cache, fetch from database
+            driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
+            if driver_code:
+                complete_source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)
                 
+                # Cache the driver code
+                cache.set(cache_key, {"success": True, "code": driver_code.complete_driver_code}, 
+                          timeout=DRIVER_CODE_CACHE_TIMEOUT)
 
     # Prepare single stdin batch input for Judge0
     stdin = f"{len(test_cases)}~"
@@ -215,7 +368,7 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
     # ✅ Convert "~" to newline "\n" before encoding
     stdin = stdin.replace("~", "\n")  
     
-    encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
+    encoded_code = base64.b64encode(complete_source_code.encode('utf-8')).decode('utf-8')
     encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
 
     submission_data = {
@@ -286,6 +439,21 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
         return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
 
 
+def invalidate_question_cache(question):
+    """
+    Utility function to invalidate all caches related to a question when it's updated.
+    """
+    # Clear question cache
+    cache.delete(f"question:{question.slug}")
+    
+    # Clear test cases cache
+    cache.delete(f"test_cases:{question.id}")
+    
+    # Clear driver code caches for all languages
+    language_ids = [50, 54, 62, 71]  # C, C++, Java, Python
+    for lang_id in language_ids:
+        cache.delete(f"driver_code:{question.id}:{lang_id}")
+
 
 def process_test_case_result(inputs, outputs, expected_outputs):
     """
@@ -341,43 +509,6 @@ def update_submission_status(submission, passed, total, total_submission_count, 
         raise Exception("Could not update submission status.")
 
 
-@login_required(login_url="login")
-def problem(request, slug):
-    """
-    Render the problem page with question details and sample test cases.
-    """
-    try:
-        question = get_object_or_404(Question, slug=slug)
-        
-        sheet = Sheet.objects.filter(questions=question, is_approved=True).first()
-
-        if sheet and not sheet.is_enabled:
-            messages.info(request, "This question is in the sheet which is disabled now. Try Later.")
-            return redirect('problem_set')
-        
-        if sheet and sheet.is_sequential:
-            # Get all enabled questions for the user
-            enabled_questions = sheet.get_enabled_questions_for_user(request.user)
-            
-            # Check if the question is enabled for the user
-            if question not in enabled_questions:
-                messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
-                return redirect('sheet', slug=sheet.slug)
-                
-        if question.scenario:
-            question.scenario = convert_backticks_to_code(question.scenario)
-        question.description = convert_backticks_to_code(question.description)
-        
-        sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
-        return render(request, 'practice/problem.html', {
-            'question': question,
-            'sample_test_cases': sample_test_cases,
-            'sheet': sheet
-        })
-    except Exception as e:
-        print(f"Error loading problem page: {e}")
-        return JsonResponse({"error": "Error from backend: {e}" + str(e)}, status=500)
-    
 # ========================================= RECOMMENDED QUESTIONS =========================================
 
 @login_required(login_url="login")
@@ -429,14 +560,16 @@ def update_user_streak(user):
 
 # ============================================ SUBMIT CODE ===============================================
 
+
 @csrf_exempt
 def submit_code(request, slug):
     """
-    Handle user code submission for a problem.
+    Handle user code submission for a problem, with improved caching.
     """
     
     if request.method == 'POST':      
         try:
+            start = time.time()
             # Validate inputs
             question = get_object_or_404(Question, slug=slug)
             user = request.user.student            
@@ -448,8 +581,6 @@ def submit_code(request, slug):
                 return JsonResponse({"error": "Missing language ID or source code."}, status=400)
 
             test_cases = get_test_cases(question)
-            
-            # print("\nTest Cases in SUBMIT FUNCTION:", test_cases)
             
             if not test_cases:
                 return JsonResponse({"error": "No test cases available for this question."}, status=400)
@@ -463,12 +594,8 @@ def submit_code(request, slug):
             submission = create_submission(user, question, source_code, language_id)
 
             # Run the code and process results
-            start = time.time()
             judge0_response = run_code_on_judge0(question, source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
-            end = time.time()
             
-            print("Time Taken:", end - start)
-                        
             if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
                                 
                 result = {
@@ -479,8 +606,6 @@ def submit_code(request, slug):
                 update_submission_status(submission, 0, len(test_cases), 0, status="Compilation Error")
                 
                 if judge0_response.get("compile_output"):
-                    
-                                        
                     result["compile_output"] = judge0_response.get("compile_output")
                 
                 return JsonResponse(result, status=400)
@@ -493,12 +618,26 @@ def submit_code(request, slug):
             test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
             passed_test_cases = sum(1 for result in test_case_results if result['passed'])
             
-            total_submission_count = Submission.objects.filter(user=user, question=question).count()            
+            # Use a cached query to get submission count
+            submission_count_key = f"submission_count:{user.id}:{question.id}"
+            total_submission_count = cache.get(submission_count_key)
+            
+            if total_submission_count is None:
+                total_submission_count = Submission.objects.filter(user=user, question=question).count()
+                cache.set(submission_count_key, total_submission_count, timeout=60*5)  # 5 minutes cache
+            
             # Update submission
             score = update_submission_status(submission, passed_test_cases, len(test_cases), total_submission_count)
             
+            # Increment cached submission count
+            cache.set(submission_count_key, total_submission_count + 1, timeout=60*5)
+            
             # Update user coins
-            update_coin(user, score, question)            
+            update_coin(user, score, question)       
+            
+            end = time.time()
+            
+            print(f"\n\n TIME TAKEN: {end-start} \n\n")
 
             return JsonResponse({
                 "test_case_results": test_case_results,
@@ -513,37 +652,17 @@ def submit_code(request, slug):
         except Question.DoesNotExist:
             return JsonResponse({
                 "error": "Question not found.",
-                "token": judge0_response.get("token")
+                "token": judge0_response.get("token") if 'judge0_response' in locals() else None
                 }, status=404)
         except Exception as e:
             print(f"Error in submit code views: {e}")
             return JsonResponse({
                 "error": "Error in submit code backend: " + str(e),
-                "token": judge0_response.get("token")
+                "token": judge0_response.get("token") if 'judge0_response' in locals() else None
                 }, status=400)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
-
-# ============================================== DRIVER CODE FETCHING ===============================================
-
-def get_driver_code(request, question_id, language_id):
-    question = get_object_or_404(Question, id=question_id)
-    driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()    
-    if driver_code:
-        
-        if question.show_complete_driver_code:
-            code = driver_code.complete_driver_code.replace("#USER_CODE#", driver_code.visible_driver_code)
-            return JsonResponse({"success": True, "code": code})
-        
-        elif driver_code.visible_driver_code == "1":
-            return JsonResponse({"success": True, "code": driver_code.complete_driver_code})
-        
-        else:
-            return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
-        
-        return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
-    return JsonResponse({"success": False, "message": "Driver code not found.", "language id": language_id, "question id": question_id}, status=404)
 
 # ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================
 
