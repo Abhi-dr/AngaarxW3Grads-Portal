@@ -20,6 +20,8 @@ from practice.models import Sheet
 
 from django_ratelimit.decorators import ratelimit
 
+from django.contrib.auth.models import User
+
 # ===================================== LOGIN ==============================
 
 @ratelimit(key='post:username', rate='3/m', method=['POST'], block=False)
@@ -354,3 +356,17 @@ def get_students_api(request):
             'status': 'error',
             'message': str(e)
         }, status=400)
+
+def check_username(request):
+    username = request.GET.get('username', None)
+    if username:
+        exists = User.objects.filter(username=username).exists()
+        return JsonResponse({'available': not exists})
+    return JsonResponse({'available': False})
+
+def check_email(request):
+    email = request.GET.get('email', None)
+    if email:
+        exists = User.objects.filter(email=email).exists()
+        return JsonResponse({'available': not exists})
+    return JsonResponse({'available': False})

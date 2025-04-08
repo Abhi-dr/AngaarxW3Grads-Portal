@@ -19,4 +19,7 @@ urlpatterns = [
     
     # API Endpoints
     path('api/students', views.get_students_api, name='get_students_api'),
+    
+    path('check-username/', views.check_username, name='check_username'),
+    path('check-email/', views.check_email, name='check_email'),
 ]

@@ -130,19 +130,31 @@ CHANNEL_LAYERS = {
 # }
 
 
+# DATABASES = {
+#     'default': {
+#         # 'ENGINE': 'django.db.backends.mysql',
+#     'ENGINE':   'mysql.connector.django',
+#         'NAME': 'angaar_hai',
+#         'USER': 'root',
+#         'PASSWORD': 'root',
+#         'HOST': 'mysql_db',  # This should match the service name in docker-compose
+#         'PORT': '3306',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.mysql',
-    'ENGINE':   'mysql.connector.django',
-        'NAME': 'angaar_hai',
-        'USER': 'root',
-        'PASSWORD': 'root',
-        'HOST': 'mysql_db',  # This should match the service name in docker-compose
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv("DB_NAME"),
+        'USER': os.getenv("DB_USER"),
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': 'localhost',
         'PORT': '3306',
+        'OPTIONS': {
+            'charset': 'utf8mb4',
+        },
     }
 }
-
-
 
 
 # Password validation

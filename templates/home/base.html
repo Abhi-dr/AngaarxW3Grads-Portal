@@ -2,271 +2,297 @@
 
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+      rel="icon"
+      type="image/png"
+      href="{% static 'img/home/angaar_logo-circle.png' %}"
+    />
 
-    <link rel="icon" type="image/png" href="{% static 'img/home/angaar_logo-circle.png' %}">
+    <meta property="og:title" content="The Angaar Batch🔥" />
+    <meta
+      property="og:description"
+      content="Agr Angaar Hai Tere Houslo Me, To Bas Dekhke Mat Ja... Seekh... Or Lga de... ANGAAR🔥"
+    />
+    <meta
+      property="og:image"
+      content="https://theangaarbatch.in/static/img/home/angaari_logo.png"
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://theangaarbatch.in" />
 
-    <meta property="og:title" content="The Angaar Batch🔥">
-    <meta property="og:description" content="Agr Angaar Hai Tere Houslo Me, To Bas Dekhke Mat Ja... Seekh... Or Lga de... ANGAAR🔥">
-    <meta property="og:image" content="https://theangaarbatch.in/static/img/home/angaari_logo.png">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://theangaarbatch.in">
+    <title>{% block title %} {% endblock %}</title>
 
-    <title>
-        {% block title %}
-        {% endblock %}
-    </title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
-
-    {% block css %}
-    {% endblock %}
+    {% block css %} {% endblock %}
 
     <style>
-        /* Footer Styles */
-        footer {
-            background-color: #090909;
-            color: white;
-            padding: 40px 0 20px;
-            position: relative;
-            overflow: hidden;
-        }
+      /* Footer Styles */
+      footer {
+        background-color: #090909;
+        color: white;
+        padding: 40px 0 20px;
+        position: relative;
+        overflow: hidden;
+      }
 
-        footer::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(to right, transparent, #ff6026, transparent);
+      footer::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          #ff6026,
+          transparent
+        );
+      }
+
+      .custom-footer-content {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 30px;
+        margin-bottom: 30px;
+      }
+
+      .custom-footer-section {
+        flex: 1;
+        min-width: 250px;
+        padding: 0 15px;
+      }
+
+      .custom-footer-section h3 {
+        color: #ff6026;
+        margin-bottom: 20px;
+        font-size: 1.2rem;
+      }
+
+      .custom-footer-section p,
+      .custom-footer-section a {
+        color: #e0e0e0;
+        text-decoration: none;
+        transition: color 0.3s ease;
+        line-height: 1.6;
+      }
+
+      .custom-footer-section a:hover {
+        color: #ff6026;
+      }
+
+      .custom-footer-bottom {
+        text-align: center;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255, 96, 38, 0.2);
+      }
+
+      .custom-footer-bottom p {
+        color: #e0e0e0;
+        margin: 0;
+      }
+
+      @media (max-width: 768px) {
+        .custom-footer-section {
+          flex: 100%;
+          text-align: center;
+          padding: 0;
         }
 
         .custom-footer-content {
-            display: flex;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 30px;
+          flex-direction: column;
+          gap: 20px;
         }
-
-        .custom-footer-section {
-            flex: 1;
-            min-width: 250px;
-            padding: 0 15px;
-        }
-
-        .custom-footer-section h3 {
-            color: #ff6026;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-        }
-
-        .custom-footer-section p,
-        .custom-footer-section a {
-            color: #e0e0e0;
-            text-decoration: none;
-            transition: color 0.3s ease;
-            line-height: 1.6;
-        }
-
-        .custom-footer-section a:hover {
-            color: #ff6026;
-        }
-
-        .custom-footer-bottom {
-            text-align: center;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 96, 38, 0.2);
-        }
-
-        .custom-footer-bottom p {
-            color: #e0e0e0;
-            margin: 0;
-        }
-
-        @media (max-width: 768px) {
-            .custom-footer-section {
-                flex: 100%;
-                text-align: center;
-                padding: 0;
-            }
-
-            .custom-footer-content {
-                flex-direction: column;
-                gap: 20px;
-            }
-        }
+      }
     </style>
+  </head>
 
-</head>
-
-<body>
-
+  <body>
     <!-- mt-0 w-100 m-0 rounded-0 -->
 
     <nav class="navbar navbar-expand-lg navbar-custom">
-        <div class="container-fluid">
-            <a class="navbar-brand text-white" href="/">
-                <!-- <img src="demo_static/img/home/angaar_logo-2.png" alt="The Angaar Batch" width="50" height="40" class="d-inline-block align-text-top"> -->
-                The Angaar Batch🔥
-            </a>
+      <div class="container-fluid">
+        <a class="navbar-brand text-white" href="/">
+          <!-- <img src="demo_static/img/home/angaar_logo-2.png" alt="The Angaar Batch" width="50" height="40" class="d-inline-block align-text-top"> -->
+          The Angaar Batch🔥
+        </a>
 
-            <button class="navbar-toggler menu" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-expanded="false" aria-label="Toggle navigation"
-                onclick="this.classList.toggle('opened');this.setAttribute('aria-expanded', this.classList.contains('opened'))"
-                aria-label="Main Menu">
-                <svg width="60" height="40" viewBox="0 0 100 100">
-                    <path class="line line1"
-                        d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
-                    <path class="line line2" d="M 20,50 H 80" />
-                    <path class="line line3"
-                        d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
-                </svg>
-            </button>
+        <button
+          class="navbar-toggler menu"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+          onclick="this.classList.toggle('opened');this.setAttribute('aria-expanded', this.classList.contains('opened'))"
+          aria-label="Main Menu"
+        >
+          <svg width="60" height="40" viewBox="0 0 100 100">
+            <path
+              class="line line1"
+              d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058"
+            />
+            <path class="line line2" d="M 20,50 H 80" />
+            <path
+              class="line line3"
+              d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942"
+            />
+          </svg>
+        </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'about' %}">About</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'our_team' %}">Our Team</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'our_achievers' %}">Our Achievers</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link article-link" style="text-decoration: underline;
-                        color: rgb(255, 165, 62);" href="{% url 'articles' %}">Job Articles</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" style="color: rgb(253, 135, 0);" href="{% url 'flames' %}">Summer Training🔥</a>
-                    </li>
-                    <!--  <li class="nav-item">
-                        <a class="nav-link" href="#">Contact</a>
-                    </li> -->
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    {% if user.is_authenticated %}
-
-                    <li class="nav-item mx-1">
-
-                        {% if user_type == 'student' %}
-
-                        <a href="{% url 'student' %}">
-                            <button style="width: 100%;">Dashboard</button>
-                        </a>
-
-                        {% elif user_type == 'administrator' %}
-
-                        <a href="{% url 'administration' %}">
-                            <button style="width: 100%;">Dashboard</button>
-                        </a>
-
-                        {% endif %}
-                    </li>
-
-                    <li class="nav-item mx-1">
-                        <a href="{% url 'logout' %}">
-                            <button id="register-btn" style="width: 100%;">Logout</button>
-                        </a>
-                    </li>
-
-                    {% else %}
-
-                    <li class="nav-item mx-1">
-                        <a href="{% url 'login' %}">
-                            <button style="width: 100%;">Login</button>
-                        </a>
-                    </li>
-
-                    <li class="nav-item mx-1">
-                        <a href="{% url 'register' %}">
-                            <button id="register-btn" style="width: 100%;">Register</button>
-                        </a>
-                    </li>
-
-                    {% endif %}
-                </ul>
-            </div>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'about' %}">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'our_team' %}">Our Team</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'our_achievers' %}"
+                >Our Achievers</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link article-link"
+                style="text-decoration: underline; color: rgb(255, 165, 62)"
+                href="{% url 'articles' %}"
+                >Job Articles</a
+              >
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                style="color: rgb(253, 135, 0)"
+                href="{% url 'flames' %}"
+                >Summer Training🔥</a
+              >
+            </li>
+          </ul>
+          <ul class="navbar-nav ms-auto">
+            {% if user.is_authenticated %} {% if user_type == 'student' %}
+            <li class="nav-item mx-1">
+              <a href="{% url 'student' %}">
+                <button style="width: 100%">Dashboard</button>
+              </a>
+            </li>
+            {% elif user_type == 'administrator' %}
+            <li class="nav-item mx-1">
+              <a href="{% url 'administration' %}">
+                <button style="width: 100%">Dashboard</button>
+              </a>
+            </li>
+            {% endif %}
+            <li class="nav-item mx-1">
+              <a href="{% url 'logout' %}">
+                <button id="register-btn" style="width: 100%">Logout</button>
+              </a>
+            </li>
+            {% else %}
+            <li class="nav-item mx-1">
+              <a href="{% url 'login' %}">
+                <button style="width: 100%">Login</button>
+              </a>
+            </li>
+            <li class="nav-item mx-1">
+              <a href="{% url 'register' %}">
+                <button id="register-btn" style="width: 100%">Register</button>
+              </a>
+            </li>
+            {% endif %}
+          </ul>
         </div>
+      </div>
     </nav>
 
-
-    {% block body %}
-
-
-    {% endblock %}
-
-
+    {% block body %} {% endblock %} {% block footer %}
     <footer class="footer-section">
-        <div class="container">
-            <div class="custom-footer-content">
-                <div class="custom-footer-section">
-                    <div class="footer-logo">
-                        <a href="https://theangaarbatch.in/"><img src="{% static 'img/home/angaari_logo.png' %}"
-                                class="img-fluid" alt="logo"></a>
-                    </div>
-                    <div class="footer-text">
-                        <p>Agr Angaar Hai Tere Houslo Me, To Bas Dekhke Mat Ja... Seekh... Or Lga de... ANGAAR🔥
-                        </p>
-                    </div>
-                </div>
-
-                <div class="footer-social-icon">
-                    <span>Socials</span>
-                    <a target="_blank" href="https://www.linkedin.com/company/the-angaar-batch"><i
-                            class="fab fa-linkedin twitter-bg"></i></a>
-                    <a target="_blank" href="https://www.instagram.com/the_angaar_batch/"><i
-                            class="fab fa-instagram google-bg"></i></a>
-                    <!-- <a href="#"><i class="fab fa-facebook-f facebook-bg"></i></a>
-                    <a href="#"><i class="fab fa-twitter twitter-bg"></i></a>
-                    <a href="#"><i class="fab fa-google-plus-g google-bg"></i></a> -->
-                </div>
-
-                <div class="custom-footer-section">
-                    <h3>Quick Links</h3>
-                    <p><a href="/">Home</a></p>
-                    <p><a href="{% url 'about' %}">About</a></p>
-                    <p><a href="{% url 'our_team' %}">Our Team</a></p>
-                    <p><a href="{% url 'articles' %}">Job Articles</a></p>
-                </div>
-                <div class="custom-footer-section">
-                    <h3>Contact</h3>
-                    <p>Email: theangaarbatch@gmail.com</p>
-
-                    <p>Phone: +918273619318</p>
-                </div>
+      <div class="container">
+        <div class="custom-footer-content">
+          <div class="custom-footer-section">
+            <div class="footer-logo">
+              <a href="https://theangaarbatch.in/"
+                ><img
+                  src="{% static 'img/home/angaari_logo.png' %}"
+                  class="img-fluid"
+                  alt="logo"
+              /></a>
             </div>
-
-            <div class="custom-footer-bottom">
-                <p>&copy; 2025 <a href="#" style="pointer-events: none; color: #ff6026;">The
-                        Angaar Batch 🔥</a>. All rights reserved.</p>
+            <div class="footer-text">
+              <p>
+                Agr Angaar Hai Tere Houslo Me, To Bas Dekhke Mat Ja... Seekh...
+                Or Lga de... ANGAAR🔥
+              </p>
             </div>
+          </div>
 
+          <div class="footer-social-icon">
+            <span>Socials</span>
+            <a
+              target="_blank"
+              href="https://www.linkedin.com/company/the-angaar-batch"
+              ><i class="fab fa-linkedin twitter-bg"></i
+            ></a>
+            <a
+              target="_blank"
+              href="https://www.instagram.com/the_angaar_batch/"
+              ><i class="fab fa-instagram google-bg"></i
+            ></a>
+          </div>
+
+          <div class="custom-footer-section">
+            <h3>Quick Links</h3>
+            <p><a href="/">Home</a></p>
+            <p><a href="{% url 'about' %}">About</a></p>
+            <p><a href="{% url 'our_team' %}">Our Team</a></p>
+            <p><a href="{% url 'articles' %}">Job Articles</a></p>
+          </div>
+          <div class="custom-footer-section">
+            <h3>Contact</h3>
+            <p>Email: theangaarbatch@gmail.com</p>
+            <p>Phone: +918273619318</p>
+          </div>
         </div>
-        <a target="_blank" href="https://www.w3grads.com/">
-            <div class="powered-by" style="position: absolute">
-                <h5 class="text-white">Powered By</h5>
-                <img src="{% static 'img/home/w3logo.png' %}" class="logo-img" alt="W3Grads Logo">
-            </div>
-        </a>
+
+        <div class="custom-footer-bottom">
+          <p>
+            &copy; 2025
+            <a href="#" style="pointer-events: none; color: #ff6026"
+              >The Angaar Batch 🔥</a
+            >. All rights reserved.
+          </p>
+        </div>
+      </div>
+      <a target="_blank" href="https://www.w3grads.com/">
+        <div class="powered-by" style="position: absolute">
+          <h5 class="text-white">Powered By</h5>
+          <img
+            src="{% static 'img/home/w3logo.png' %}"
+            class="logo-img"
+            alt="W3Grads Logo"
+          />
+        </div>
+      </a>
     </footer>
+    {% endblock footer %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-
-</body>
-
+  </body>
 </html>
