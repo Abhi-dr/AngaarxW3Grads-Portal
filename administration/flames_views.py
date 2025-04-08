@@ -248,6 +248,25 @@ def admin_registrations_ajax(request):
         registration_mode = reg.registration_mode
         team_info = reg.team.name if reg.team else "N/A"
         
+        # Referral information
+        is_referral = False
+        referral_type = "None"
+        referral_code = "N/A"
+        actual_discount = 0
+        
+        if reg.referral_code:
+            is_referral = True
+            referral_type = reg.referral_code.referral_type
+            referral_code = reg.referral_code.code
+            actual_discount = float(reg.referral_code.discount_amount)
+            
+            # For team registrations, multiply discount by 5
+            if reg.registration_mode == 'TEAM':
+                actual_discount *= 5
+        
+        # Actual amount to pay
+        actual_amount_to_pay = float(reg.discounted_price) if reg.discounted_price else float(reg.original_price)
+        
         data.append({
             'id': reg.id,
             'full_name': full_name,
@@ -265,7 +284,12 @@ def admin_registrations_ajax(request):
             'team': team_info,
             'payment_id': reg.payment_id or "N/A",
             'original_price': float(reg.original_price) if reg.original_price else 0,
-            'discounted_price': float(reg.discounted_price) if reg.discounted_price else 0
+            'discounted_price': float(reg.discounted_price) if reg.discounted_price else 0,
+            'actual_amount_to_pay': actual_amount_to_pay,
+            'is_referral': is_referral,
+            'referral_type': referral_type,
+            'referral_code': referral_code,
+            'actual_discount': actual_discount
         })
     
     # Make sure to return in the format DataTables expects
@@ -329,16 +353,28 @@ def admin_registration_details(request):
             'payment_id': registration.payment_id or 'Not available',
             'original_price': float(registration.original_price) if registration.original_price else 0,
             'discounted_price': float(registration.discounted_price) if registration.discounted_price else 0,
+            'actual_amount_to_pay': float(registration.discounted_price) if registration.discounted_price else float(registration.original_price),
         }
         
         # Referral information
         referral_info = {}
         if registration.referral_code:
+            # Calculate actual discount amount (5x for team registrations)
+            actual_discount = float(registration.referral_code.discount_amount)
+            if registration.registration_mode == 'TEAM':
+                actual_discount *= 5
+                
             referral_info = {
                 'code': registration.referral_code.code,
                 'type': registration.referral_code.referral_type,
                 'discount_amount': float(registration.referral_code.discount_amount) if registration.referral_code.discount_amount else 0,
-                'is_active': registration.referral_code.is_active
+                'actual_discount_amount': actual_discount,
+                'is_active': registration.referral_code.is_active,
+                'is_referral': True
+            }
+        else:
+            referral_info = {
+                'is_referral': False
             }
         
         data = {

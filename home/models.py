@@ -203,7 +203,13 @@ class FlamesRegistration(models.Model):
             
         # Apply discount if referral code is provided
         if self.referral_code and self.referral_code.is_active:
-            self.discounted_price = max(0, self.original_price - self.referral_code.discount_amount)
+            # For team registrations, multiply discount by 5 (for 5 team members)
+            if self.registration_mode == 'TEAM':
+                discount = self.referral_code.discount_amount * 5
+            else:
+                discount = self.referral_code.discount_amount
+                
+            self.discounted_price = max(0, self.original_price - discount)
         else:
             self.discounted_price = self.original_price
             
