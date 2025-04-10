@@ -3,17 +3,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import time, json
 import requests
-from django.core.paginator import Paginator
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Q
 import base64
 import re
 from accounts.models import Student
 from .models import RecommendedQuestions
 from .models import Sheet, Question, TestCase, Submission, DriverCode, Streak
-from django.views.decorators.cache import cache_control
 
 
 # Judge0 API endpoint and key
@@ -23,6 +20,85 @@ HEADERS = {
     "X-RapidAPI-Host": "98.83.136.105:2358",
     "Content-Type": "application/json"
 }
+
+# Cache timeout settings (in seconds)
+TEST_CASE_CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
+DRIVER_CODE_CACHE_TIMEOUT = 1  # 24 hours
+QUESTION_CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
+
+
+@login_required(login_url="login")
+def problem(request, slug):
+    """
+    Render the problem page with question details and sample test cases, with Redis caching.
+    """
+    # Create a cache key for the question
+    cache_key = f"question:{slug}"
+    
+    # Try to get from cache first
+    cached_question_data = cache.get(cache_key)
+    
+    if cached_question_data:
+        # Since we can't serialize the entire Question object, we'll cache components
+        # and reassemble on retrieval
+        question = get_object_or_404(Question, slug=slug)
+        sample_test_cases = cached_question_data.get('sample_test_cases')
+        sheet = cached_question_data.get('sheet')
+        
+        # Apply cached properties to question object
+        if cached_question_data.get('scenario'):
+            question.scenario = cached_question_data.get('scenario')
+            
+        question.description = cached_question_data.get('description')
+        
+        return render(request, 'practice/problem.html', {
+            'question': question,
+            'sample_test_cases': sample_test_cases,
+            'sheet': sheet
+        })
+    
+    try:
+        question = get_object_or_404(Question, slug=slug)
+        
+        sheet = Sheet.objects.filter(questions=question, is_approved=True).first()
+
+        if sheet and not sheet.is_enabled:
+            messages.info(request, "This question is in the sheet which is disabled now. Try Later.")
+            return redirect('problem_set')
+        
+        if sheet and sheet.is_sequential:
+            # Get all enabled questions for the user
+            enabled_questions = sheet.get_enabled_questions_for_user(request.user)
+            
+            # Check if the question is enabled for the user
+            if question not in enabled_questions:
+                messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
+                return redirect('sheet', slug=sheet.slug)
+                
+        if question.scenario:
+            question.scenario = convert_backticks_to_code(question.scenario)
+        question.description = convert_backticks_to_code(question.description)
+        
+        sample_test_cases = list(TestCase.objects.filter(question=question, is_sample=True))
+        
+        # Cache the question data
+        cache_data = {
+            'scenario': question.scenario,
+            'description': question.description,
+            'sample_test_cases': sample_test_cases,
+            'sheet': sheet
+        }
+        
+        cache.set(cache_key, cache_data, timeout=QUESTION_CACHE_TIMEOUT)
+        
+        return render(request, 'practice/problem.html', {
+            'question': question,
+            'sample_test_cases': sample_test_cases,
+            'sheet': sheet
+        })
+    except Exception as e:
+        print(f"Error loading problem page: {e}")
+        return JsonResponse({"error": "Error from backend: {e}" + str(e)}, status=500)
 
 
 @login_required(login_url="login")
@@ -103,6 +179,7 @@ def execute_code(request):
 # =====================================================================================================
 # ========================================= HELPER FUNCTIONS ==========================================
 # =====================================================================================================
+
 def normalize_output(output):
     """
     Normalize output for consistent comparison by stripping extra spaces
@@ -115,24 +192,16 @@ def normalize_output(output):
         return ""
     return output.replace("\r\n", "\n").strip()
 
-# ==========================================
-# Cache timeout settings (in seconds)
-TEST_CASE_CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
-DRIVER_CODE_CACHE_TIMEOUT = 1  # 24 hours
-QUESTION_CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
 
 def get_test_cases(question):
     """
     Get all test cases associated with the question, with Redis caching.
     """
-    # Create a cache key based on the question ID
     cache_key = f"test_cases:{question.id}"
     
-    # Try to get test cases from cache
     cached_test_cases = cache.get(cache_key)
     
     if cached_test_cases:
-        # Convert cached data back to TestCase instances
         from practice.models import TestCase
         test_cases = []
         for tc_data in cached_test_cases:
@@ -147,10 +216,8 @@ def get_test_cases(question):
         return test_cases
     
     try:
-        # If not in cache, fetch from database
         test_cases = list(question.test_cases.all())
         
-        # Cache the test cases data
         test_cases_data = [
             {
                 'id': tc.id,
@@ -203,204 +270,6 @@ def create_submission(user, question, source_code, language_id):
     except Exception as e:
         print(f"Error creating submission: {e}")
         raise Exception("Could not create submission.")
-
-
-
-@login_required(login_url="login")
-def problem(request, slug):
-    """
-    Render the problem page with question details and sample test cases, with Redis caching.
-    """
-    # Create a cache key for the question
-    cache_key = f"question:{slug}"
-    
-    # Try to get from cache first
-    cached_question_data = cache.get(cache_key)
-    
-    if cached_question_data:
-        # Since we can't serialize the entire Question object, we'll cache components
-        # and reassemble on retrieval
-        question = get_object_or_404(Question, slug=slug)
-        sample_test_cases = cached_question_data.get('sample_test_cases')
-        sheet = cached_question_data.get('sheet')
-        
-        # Apply cached properties to question object
-        if cached_question_data.get('scenario'):
-            question.scenario = cached_question_data.get('scenario')
-            
-        question.description = cached_question_data.get('description')
-        
-        return render(request, 'practice/problem.html', {
-            'question': question,
-            'sample_test_cases': sample_test_cases,
-            'sheet': sheet
-        })
-    
-    try:
-        question = get_object_or_404(Question, slug=slug)
-        
-        sheet = Sheet.objects.filter(questions=question, is_approved=True).first()
-
-        if sheet and not sheet.is_enabled:
-            messages.info(request, "This question is in the sheet which is disabled now. Try Later.")
-            return redirect('problem_set')
-        
-        if sheet and sheet.is_sequential:
-            # Get all enabled questions for the user
-            enabled_questions = sheet.get_enabled_questions_for_user(request.user)
-            
-            # Check if the question is enabled for the user
-            if question not in enabled_questions:
-                messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
-                return redirect('sheet', slug=sheet.slug)
-                
-        if question.scenario:
-            question.scenario = convert_backticks_to_code(question.scenario)
-        question.description = convert_backticks_to_code(question.description)
-        
-        sample_test_cases = list(TestCase.objects.filter(question=question, is_sample=True))
-        
-        # Cache the question data
-        cache_data = {
-            'scenario': question.scenario,
-            'description': question.description,
-            'sample_test_cases': sample_test_cases,
-            'sheet': sheet
-        }
-        
-        cache.set(cache_key, cache_data, timeout=QUESTION_CACHE_TIMEOUT)
-        
-        return render(request, 'practice/problem.html', {
-            'question': question,
-            'sample_test_cases': sample_test_cases,
-            'sheet': sheet
-        })
-    except Exception as e:
-        print(f"Error loading problem page: {e}")
-        return JsonResponse({"error": "Error from backend: {e}" + str(e)}, status=500)
-
-
-def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_limit, memory_limit):
-    """
-    Send the code to Judge0 API for execution against multiple test cases.
-    Use caching for driver code.
-    """
-    # Create a cache key for the driver code
-    cache_key = f"driver_code:{question.id}:{language_id}"
-    
-    # Initialize complete code variable
-    complete_source_code = source_code
-    
-    if not question.show_complete_driver_code:  # User ko complete code dikh rha h
-        # Try to get driver code from cache
-        cached_driver_code = cache.get(cache_key)
-        
-        if cached_driver_code and 'code' in cached_driver_code:
-            driver_code_complete = cached_driver_code['code']
-            complete_source_code = driver_code_complete.replace("#USER_CODE#", source_code)
-        else:
-            # If not in cache, fetch from database
-            driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
-            if driver_code:
-                complete_source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)
-                
-                # Cache the driver code
-                cache.set(cache_key, {"success": True, "code": driver_code.complete_driver_code}, 
-                          timeout=DRIVER_CODE_CACHE_TIMEOUT)
-
-    # Prepare single stdin batch input for Judge0
-    stdin = f"{len(test_cases)}~"
-    for test_case in test_cases:
-        stdin += f"{test_case.input_data}~"
-
-    # ✅ Convert "~" to newline "\n" before encoding
-    stdin = stdin.replace("~", "\n")  
-    
-    encoded_code = base64.b64encode(complete_source_code.encode('utf-8')).decode('utf-8')
-    encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
-
-    submission_data = {
-        "source_code": encoded_code,
-        "language_id": language_id,
-        "stdin": encoded_stdin,
-        "cpu_time_limit": cpu_time_limit,
-        "wall_time_limit": cpu_time_limit,
-        "memory_limit": memory_limit * 1000,
-        "enable_per_process_and_thread_time_limit": True,
-        "base64_encoded": True  # Critical flag to let Judge0 know the code is Base64-encoded
-    }
-
-    try:
-        # 📝 Submit Code to Judge0
-        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS, timeout=10)
-        response.raise_for_status()
-        
-        token = response.json().get("token")
-        if not token:
-            return {"error": "No token received from Judge0.", "outputs": None, "token": None}
-
-        print("✅ TOKEN:", token)
-        
-        # ⏳ Poll Until Completion
-        while True:
-            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
-            result = result_response.json()
-            status_id = result.get("status", {}).get("id")
-
-            if status_id not in [1, 2]:  # Finished Processing
-                break
-            time.sleep(1)
-            
-        # ❗ Handle Errors
-        if result.get("stderr"):
-            stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
-            print("❌ STDERR:", stderr)
-            return {"error": f"Runtime Error: {stderr}", "token": token}
-
-        if result.get("compile_output"):
-            compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
-            print("❌ COMPILE OUTPUT:", compile_output)
-            return {"error": f"Compile Error: {compile_output}", "token": token}
-
-        if result.get("status", {}).get("id") == 5:
-            return {"error": "Time Limit Exceeded (TLE)", "token": token}
-
-        if result.get("status", {}).get("id") == 6:
-            return {"error": "Compilation Error", "token": token}
-
-        # ✅ Decode Outputs
-        outputs = result.get("stdout", "")
-        
-        if outputs:
-            outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
-            
-            outputs = [output.strip() for output in outputs.split("~") if output.strip()]
-            
-        else:
-            outputs = ["No output generated."]
-
-        return {"outputs": outputs, "token": token}
-
-    except requests.exceptions.RequestException as e:
-        return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
-    except Exception as e:
-        return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
-
-
-def invalidate_question_cache(question):
-    """
-    Utility function to invalidate all caches related to a question when it's updated.
-    """
-    # Clear question cache
-    cache.delete(f"question:{question.slug}")
-    
-    # Clear test cases cache
-    cache.delete(f"test_cases:{question.id}")
-    
-    # Clear driver code caches for all languages
-    language_ids = [50, 54, 62, 71]  # C, C++, Java, Python
-    for lang_id in language_ids:
-        cache.delete(f"driver_code:{question.id}:{lang_id}")
 
 
 def process_test_case_result(inputs, outputs, expected_outputs):
@@ -456,26 +325,7 @@ def update_submission_status(submission, passed, total, total_submission_count, 
         print(f"Error updating submission: {e}")
         raise Exception("Could not update submission status.")
 
-
-# ========================================= RECOMMENDED QUESTIONS =========================================
-
-@login_required(login_url="login")
-def fetch_recommended_questions(request, slug):
-    question = get_object_or_404(Question, slug=slug)
-    recommended_questions = RecommendedQuestions.objects.filter(question=question)
-
-    data = [
-        {
-            "id": rq.id,
-            "title": rq.title,
-            "link": rq.link,
-            "platform": rq.platform
-        } for rq in recommended_questions
-    ]
-    
-    return JsonResponse({"status": "success", "questions": data})
-
-# ============================================ UPDATE COINS ===============================================
+# =========================================== UPDATE COINS =========================================
 
 def update_coin(user, score, question):
     
@@ -495,8 +345,7 @@ def update_coin(user, score, question):
         user.coins += 1
     user.save()
 
-
-# ============================================ UPDATE STREAKS =============================================
+# =========================================== UPDATE STREAKS =======================================
 
 def update_user_streak(user):
     # Fetch or create the user's streak record
@@ -505,8 +354,115 @@ def update_user_streak(user):
     # Update the streak
     streak.update_streak()
 
+# ============================================ SUBMIT CODE =========================================
 
-# ============================================ SUBMIT CODE ===============================================
+
+def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_limit, memory_limit):
+    """
+    Send the code to Judge0 API for execution against multiple test cases.
+    Use caching for driver code.
+    """
+    cache_key = f"driver_code:{question.id}:{language_id}"
+    
+    complete_source_code = source_code
+    
+    if not question.show_complete_driver_code:  # User ko complete code dikh rha h
+        # Try to get driver code from cache
+        cached_driver_code = cache.get(cache_key)
+        
+        if cached_driver_code and 'code' in cached_driver_code:
+            driver_code_complete = cached_driver_code['code']
+            complete_source_code = driver_code_complete.replace("#USER_CODE#", source_code)
+        else:
+            # If not in cache, fetch from database
+            driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
+            if driver_code:
+                complete_source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)
+                
+                # Cache the driver code
+                cache.set(cache_key, {"success": True, "code": driver_code.complete_driver_code}, 
+                          timeout=DRIVER_CODE_CACHE_TIMEOUT)
+
+    # Prepare single stdin batch input for Judge0 (~ s hi separate kr rhe hn result ko)
+    stdin = f"{len(test_cases)}~"
+    for test_case in test_cases:
+        stdin += f"{test_case.input_data}~"
+
+    # ✅ Convert "~" to newline "\n" before encoding
+    stdin = stdin.replace("~", "\n")  
+    
+    encoded_code = base64.b64encode(complete_source_code.encode('utf-8')).decode('utf-8')
+    encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
+
+    submission_data = {
+        "source_code": encoded_code,
+        "language_id": language_id,
+        "stdin": encoded_stdin,
+        "cpu_time_limit": cpu_time_limit,
+        "wall_time_limit": cpu_time_limit,
+        "memory_limit": memory_limit * 1000,
+        "enable_per_process_and_thread_time_limit": True,
+        "base64_encoded": True  # Flag to let Judge0 know the code is Base64-encoded
+    }
+
+    try:
+        # 📝 Submit Code to Judge0
+        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS, timeout=10)
+        response.raise_for_status()
+        
+        token = response.json().get("token")
+        if not token:
+            return {"error": "No token received from Judge0.", "outputs": None, "token": None}
+
+        print("✅ TOKEN:", token)
+        
+        # ⏳ Poll Until Completion
+        while True:
+            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
+            result = result_response.json()
+            status_id = result.get("status", {}).get("id")
+
+            if status_id not in [1, 2]:  # Finished Processing
+                break
+            time.sleep(1)
+            
+        
+        # ❗ ------------------------------- Handle Errors ---------------------------
+        if result.get("stderr"):
+            stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
+            print("❌ STDERR:", stderr)
+            return {"error": f"Runtime Error: {stderr}", "token": token}
+
+        if result.get("compile_output"):
+            compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
+            print("❌ COMPILE OUTPUT:", compile_output)
+            return {"error": f"Compile Error: {compile_output}", "token": token}
+
+        if result.get("status", {}).get("id") == 5:
+            return {"error": "Time Limit Exceeded (TLE)", "token": token}
+
+        if result.get("status", {}).get("id") == 6:
+            return {"error": "Compilation Error", "token": token}
+
+        # ✅ Decode Outputs
+        outputs = result.get("stdout", "")
+        
+        if outputs:
+            # decode the output from base64
+            outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
+            
+            # getting the list of output (separated by ~)
+            outputs = [output.strip() for output in outputs.split("~") if output.strip()]
+            
+        else:
+            outputs = ["No output generated."]
+
+        return {"outputs": outputs, "token": token}
+
+    except requests.exceptions.RequestException as e:
+        return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
+    except Exception as e:
+        return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
 
 
 @csrf_exempt
@@ -612,7 +568,7 @@ def submit_code(request, slug):
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
 
-# ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================
+# =================================== RUN CODE AGAINST SAMPLE TEST CASES ===========================
 
 @csrf_exempt
 def run_code(request, slug):
@@ -625,7 +581,6 @@ def run_code(request, slug):
             language_id = data.get('language_id')
             source_code = data.get('code')   
             
-            print("Source Code in Run Function:", source_code)
 
             if not language_id or not source_code:
                 return JsonResponse({"error": "Missing language ID or source code."}, status=400)
@@ -678,7 +633,7 @@ def run_code(request, slug):
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
-# ========================================== CUSTOM INPUT ==========================================
+# ============================================= CUSTOM INPUT =======================================
 
 def custom_input(request, slug):
     if request.method == 'POST':
@@ -752,7 +707,7 @@ def custom_input(request, slug):
         
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
-# ================================== UNLOCK HINT ==================================================
+# ============================================= UNLOCK HINT ========================================
 
 def unlock_hint(request, question_id):
     if request.method == 'POST' and request.user.is_authenticated:
@@ -771,8 +726,29 @@ def unlock_hint(request, question_id):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
-# =================================================
+# ========================================= RECOMMENDED QUESTIONS ==================================
+
+@login_required(login_url="login")
+def fetch_recommended_questions(request, slug):
+    question = get_object_or_404(Question, slug=slug)
+    recommended_questions = RecommendedQuestions.objects.filter(question=question)
+
+    data = [
+        {
+            "id": rq.id,
+            "title": rq.title,
+            "link": rq.link,
+            "platform": rq.platform
+        } for rq in recommended_questions
+    ]
+    
+    return JsonResponse({"status": "success", "questions": data})
+
+
+# ==================================================================================================
+
 def convert_backticks_to_code(text):
     pattern = r"`(.*?)`"
     result = re.sub(pattern, r"<code style='font-size: 110%'>\1</code>", text)
     return result
+

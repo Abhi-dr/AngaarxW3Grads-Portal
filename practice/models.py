@@ -4,7 +4,8 @@ from django.utils.timezone import now
 
 from accounts.models import Student, Instructor
 
-# ============================== BATCH MODEL =========================
+# ============================== BATCH ======================================
+
 
 class Batch(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -47,8 +48,10 @@ class Batch(models.Model):
         
     def get_today_pod_for_batch(self):
         return self.pods.filter(date=datetime.now().date()).first()
-    
-# ============================== ENROLLMENT REQUEST MODEL =========================
+
+
+# ============================== ENROLLMENT REQUEST =========================
+
 
 class EnrollmentRequest(models.Model):
     STATUS_CHOICES = [
@@ -72,7 +75,8 @@ class EnrollmentRequest(models.Model):
         return f"{self.student.first_name} - {self.batch.name} ({self.status})"
 
 
-# ============================== SHEET MODEL =========================
+# ============================== SHEET ======================================
+
 
 class Sheet(models.Model):
     name = models.CharField(max_length=255)
@@ -193,7 +197,8 @@ class Sheet(models.Model):
         super(Sheet, self).save(*args, **kwargs)
         
 
-# ============================== QUESTION MODEL =========================
+# ============================== QUESTION MODEL =============================
+
 
 class Question(models.Model):
     sheets = models.ManyToManyField(Sheet, related_name="questions", blank=True)
@@ -348,7 +353,8 @@ class Question(models.Model):
         super().save(*args, **kwargs)
         
     
-# ============================== DRIVER CODE MODEL =========================
+# ============================== DRIVER CODE ================================
+
 
 class DriverCode(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='driver_codes')
@@ -375,7 +381,9 @@ class DriverCode(models.Model):
     def get_name_through_id(self):
         return dict(self.LANGUAGE_CHOICES).get(self.language_id)
 
-# ============================== TEST CASE MODEL =========================
+
+# ============================== TEST CASE ==================================
+
 
 class TestCase(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='test_cases')
@@ -392,7 +400,9 @@ class TestCase(models.Model):
         models.Index(fields=['question']),
     ]      
 
-# ============================== SUBMISSION MODEL =========================
+
+# ============================== SUBMISSION =================================
+
 
 class Submission(models.Model):
     STATUS_CHOICES = [
@@ -420,9 +430,10 @@ class Submission(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.question.title} - {self.status}"
+    
 
+# ================================= POD =====================================
 
-# ================================= POD ================================
 
 class POD(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="pods")
@@ -437,7 +448,8 @@ class POD(models.Model):
         return self.question.submissions.filter(user=user, status='Accepted').exists()
 
 
-# ============================== STREAK MODEL =========================
+# ============================== STREAK =====================================
+
 
 class Streak(models.Model):
     user = models.ForeignKey(Student, on_delete=models.CASCADE)
@@ -475,7 +487,8 @@ class Streak(models.Model):
         return f"{self.user.username} - {self.current_streak} day streak"
     
 
-# ============================== SOLUTION MODEL =========================
+# ============================== SOLUTION ===================================
+
 
 class Solution(models.Model):
     
@@ -498,7 +511,8 @@ class Solution(models.Model):
         return f"{self.user.username} - {self.question.title}"
 
 
-# ============================== Recommended Question MODEL =========================
+# ============================== Recommended Question =======================
+
 
 class RecommendedQuestions(models.Model):
 
