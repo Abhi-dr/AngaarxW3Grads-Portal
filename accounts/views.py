@@ -179,11 +179,21 @@ def check_username_exists(request):
             
             # Check if student is already registered for this course
             if course_id:
-                from home.models import FlamesRegistration
-                already_registered = FlamesRegistration.objects.filter(
+                from home.models import FlamesRegistration, FlamesTeamMember
+                
+                # Check if directly registered as lead
+                direct_registration = FlamesRegistration.objects.filter(
                     user=student,
                     course_id=course_id
                 ).exists()
+                
+                # Check if registered as team member
+                team_membership = FlamesTeamMember.objects.filter(
+                    member=student,
+                    team__course_id=course_id
+                ).exists()
+                
+                already_registered = direct_registration or team_membership
                 response_data['already_registered'] = already_registered
     
     return JsonResponse(response_data)

@@ -739,6 +739,19 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
     function toggleTeamFields() {
         const isTeam = elements.registrationMode.value === 'TEAM';
         elements.teamMembersSection.style.display = isTeam ? 'block' : 'none';
+        
+        // Hide referral code field for team registration
+        const referralGroup = elements.referralCode.closest('.form-group');
+        if (referralGroup) {
+            referralGroup.style.display = isTeam ? 'none' : 'block';
+            // Clear referral code when switching to team registration
+            if (isTeam) {
+                elements.referralCode.value = '';
+                if (elements.feedbackElements.referral) {
+                    elements.feedbackElements.referral.innerHTML = '';
+                }
+            }
+        }
 
         // Set required attribute on team member fields
         document.querySelectorAll('.team-required').forEach(field => {
@@ -958,7 +971,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         }
     }
 
-    // Check team member username exists
+    // Check team member username exists and not already registered
     function checkTeamMemberUsername(inputId) {
         const input = document.getElementById(inputId);
         const username = input.value;
@@ -978,21 +991,74 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
             return;
         }
 
+        // Clear existing validation classes
+        input.classList.remove('is-valid', 'is-invalid');
+
         // Show loading state
         feedbackElement.innerHTML = '<span class="text-info">Checking username...</span>';
+        validIcon.style.display = 'none';
+        invalidIcon.style.display = 'none';
 
-        // Make API call to check if username exists
-        fetch(`/accounts/check_username_exists/?username=${encodeURIComponent(username)}`)
-            .then(response => response.json())
+        // Get the course ID
+        const courseId = document.querySelector('input[name="course_id"]').value;
+        if (!courseId) {
+            console.error('Course ID not found');
+            feedbackElement.innerHTML = '<span class="invalid text-danger">Error: Course ID not found</span>';
+            input.classList.add('is-invalid');
+            invalidIcon.style.display = 'block';
+            return;
+        }
+
+        // Check if username is same as the current user
+        const currentUsername = document.getElementById('username').value;
+        if (username.toLowerCase() === currentUsername.toLowerCase()) {
+            feedbackElement.innerHTML = '<span class="invalid text-danger">You cannot add yourself as a team member</span>';
+            input.classList.add('is-invalid');
+            invalidIcon.style.display = 'block';
+            validIcon.style.display = 'none';
+            disableSubmit("You cannot add yourself as a team member");
+            return;
+        }
+
+        // Make API call to check if username exists and not already registered for this course
+        fetch(`/accounts/check_username_exists/?username=${encodeURIComponent(username)}&course_id=${courseId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Network response was not ok: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Username check response:', data); // Debug log
+
                 if (data.exists) {
-                    // Username exists, valid team member
-                    feedbackElement.innerHTML = '<span class="valid text-success">Username verified</span>';
-                    input.classList.add('is-valid');
-                    input.classList.remove('is-invalid');
-                    validIcon.style.display = 'block';
-                    invalidIcon.style.display = 'none';
-                    validateFormAndUpdateButton();
+                    if (data.already_registered) {
+                        // Student already registered for this course
+                        feedbackElement.innerHTML = '<span class="invalid text-danger">This student is already registered for this course</span>';
+                        input.classList.add('is-invalid');
+                        input.classList.remove('is-valid');
+                        validIcon.style.display = 'none';
+                        invalidIcon.style.display = 'block';
+                        disableSubmit("Team member already registered for this course");
+                    } else {
+                        // Username exists and not registered, valid team member
+                        let studentInfo = '<span class="valid text-success">Username verified</span>';
+                        
+                        // Add student details if available
+                        if (data.full_name) {
+                            studentInfo += `<div class="mt-2 p-2" style="background-color: rgba(46, 204, 113, 0.1); border-radius: 4px; border-left: 3px solid #2ecc71;">`;
+                            studentInfo += `<strong>${data.full_name}</strong><br>`;
+                            if (data.email) studentInfo += `<small>${data.email}</small>`;
+                            studentInfo += '</div>';
+                        }
+                        
+                        feedbackElement.innerHTML = studentInfo;
+                        input.classList.add('is-valid');
+                        input.classList.remove('is-invalid');
+                        validIcon.style.display = 'block';
+                        invalidIcon.style.display = 'none';
+                        validateFormAndUpdateButton();
+                    }
                 } else {
                     // Username doesn't exist
                     feedbackElement.innerHTML = '<span class="invalid text-danger">Username not found</span>';
@@ -1004,9 +1070,12 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                 }
             })
             .catch(error => {
-                feedbackElement.innerHTML = '<span class="invalid">Error checking username</span>';
-                disableSubmit("Error verifying username");
                 console.error('Team member validation error:', error);
+                feedbackElement.innerHTML = `<span class="invalid text-danger">Error checking username: ${error.message}</span>`;
+                input.classList.add('is-invalid');
+                validIcon.style.display = 'none';
+                invalidIcon.style.display = 'block';
+                disableSubmit("Error verifying username");
             });
     }
 
@@ -1102,9 +1171,10 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         let valid = true;
         let reason = '';
 
+        // Check if all team members are filled and valid
         for (let i = 1; i <= 4; i++) {
             const field = document.getElementById(`team_member_username_${i}`);
-            if (field && field.required && !field.value) {
+            if (!field || !field.value) {
                 valid = false;
                 reason = `Team member ${i + 1} username required`;
                 break;
@@ -1113,6 +1183,40 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                 valid = false;
                 reason = `Team member ${i + 1} username invalid`;
                 break;
+            }
+        }
+
+        // Check for duplicate usernames
+        if (valid) {
+            const usernames = [];
+            // Add the team leader's username
+            if (elements.username && elements.username.value) {
+                usernames.push(elements.username.value.toLowerCase());
+            }
+            
+            // Check all team members
+            for (let i = 1; i <= 4; i++) {
+                const field = document.getElementById(`team_member_username_${i}`);
+                if (field && field.value) {
+                    const username = field.value.toLowerCase();
+                    
+                    // Check if this username is already in our array
+                    if (usernames.includes(username)) {
+                        valid = false;
+                        reason = `Duplicate username: ${username} - Each team member must have a unique username`;
+                        // Mark the field as invalid
+                        field.classList.add('is-invalid');
+                        field.classList.remove('is-valid');
+                        const feedbackId = 'team' + i + '-feedback';
+                        const feedbackElement = document.getElementById(feedbackId);
+                        if (feedbackElement) {
+                            feedbackElement.innerHTML = '<span class="invalid text-danger">Duplicate username - Each member must be unique</span>';
+                        }
+                        break;
+                    }
+                    
+                    usernames.push(username);
+                }
             }
         }
 
@@ -1142,10 +1246,26 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         // Team validation if team registration
         let teamValid = true;
         if (elements.registrationMode.value === 'TEAM') {
+            // Perform a final check for duplicate usernames and already registered users
+            // This ensures that any manual edits after initial validation are caught
+            
+            // First verify all team members are valid
             const teamValidation = validateTeamMembers();
             teamValid = teamValidation.valid;
             if (!teamValid) {
                 missingFields.push(teamValidation.reason);
+            }
+            
+            // Additional check for already registered users
+            if (teamValid) {
+                for (let i = 1; i <= 4; i++) {
+                    const field = document.getElementById(`team_member_username_${i}`);
+                    if (field && field.value && !field.classList.contains('is-valid')) {
+                        teamValid = false;
+                        missingFields.push(`Team member ${i + 1} username must be verified`);                        
+                        break;
+                    }
+                }
             }
         }
 

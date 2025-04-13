@@ -107,7 +107,7 @@ class FlamesTeamAdmin(admin.ModelAdmin):
     
     
 class FlamesTeamMemberAdmin(admin.ModelAdmin):
-    list_display = ('team',)
+    list_display = ('team', 'member')
     list_filter = ('team',)
     search_fields = ('team__name', 'student__username')
 

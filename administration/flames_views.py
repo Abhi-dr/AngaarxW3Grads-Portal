@@ -394,7 +394,10 @@ def admin_registration_details(request):
             'team': team_info,
             'payment': payment_info,
             'referral': referral_info,
-            'payment_id': registration.payment_id or 'N/A'
+            'payment_id': registration.payment_id or 'N/A',
+            'payable_amount': float(registration.payable_amount) if registration.payable_amount else 
+                              float(registration.discounted_price) if registration.discounted_price else 
+                              float(registration.original_price)
         }
         
         return JsonResponse({

@@ -592,11 +592,15 @@
                     <!-- Payment Information -->
                     <h6 class="mt-4 mb-3">Payment Information</h6>
                     <div class="row detail-row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="detail-label">Payment ID</div>
                             <div class="detail-value" id="reg-payment"></div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <div class="detail-label">Registration Mode</div>
+                            <div class="detail-value" id="reg-mode"></div>
+                        </div>
+                        <div class="col-md-4">
                             <div class="detail-label">Status</div>
                             <div class="detail-value">
                                 <select id="reg-status" class="form-select">
@@ -605,6 +609,60 @@
                                     <option value="Rejected">Rejected</option>
                                     <option value="Completed">Completed</option>
                                 </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pricing Details -->
+                    <div class="row detail-row">
+                        <div class="col-md-12">
+                            <div class="detail-label">Pricing Details</div>
+                            <!-- For Solo Registration -->
+                            <div id="solo-pricing-details" style="display: none;">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tr>
+                                        <td width="60%">Original Price:</td>
+                                        <td><span id="solo-original-price"></span></td>
+                                    </tr>
+                                    <tr id="solo-discount-row" style="display: none;">
+                                        <td>Discount (Referral):</td>
+                                        <td><span id="solo-discount-amount"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Payable Amount:</strong></td>
+                                        <td><strong><span id="solo-payable-amount"></span></strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            
+                            <!-- For Team Registration -->
+                            <div id="team-pricing-details" style="display: none;">
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tr>
+                                        <td width="60%">Original Price (per member):</td>
+                                        <td><span id="team-price-per-member"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Team Size:</td>
+                                        <td><span id="team-size">5</span> members</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Subtotal (Original Price × Team Size):</td>
+                                        <td><span id="team-subtotal"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Team Discount:</td>
+                                        <td><span id="team-discount"></span></td>
+                                    </tr>
+                                    <tr id="team-referral-row" style="display: none;">
+                                        <td>Additional Discount (Referral):</td>
+                                        <td><span id="team-referral-discount"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Final Payable Amount:</strong></td>
+                                        <td><strong><span id="team-payable-amount"></span></strong></td>
+                                    </tr>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -830,9 +888,46 @@
                             $('#reg-payment').text(reg.payment_id || 'N/A');
                             $('#reg-message').text(reg.message || 'No message');
                             $('#reg-notes').val(reg.admin_notes || '');
+                            
+                            // Display registration mode
+                            $('#reg-mode').text(reg.registration_mode === 'TEAM' ? 'Team Registration' : 'Solo Registration');
 
-                            // Handle team information
-                            if (reg.registration_mode === 'TEAM' && reg.team) {
+                            // Handle team information and pricing display
+                            const isTeam = reg.registration_mode === 'TEAM';
+                            
+                            // Format currency function
+                            const formatCurrency = (amount) => {
+                                return '₹' + parseFloat(amount).toLocaleString('en-IN');
+                            };
+                            
+                            // Show/hide pricing details based on registration mode
+                            if (isTeam) {
+                                $('#solo-pricing-details').hide();
+                                $('#team-pricing-details').show();
+                                
+                                // Calculate team pricing details
+                                const originalPrice = parseFloat(reg.payment.original_price);
+                                const payableAmount = parseFloat(reg.payable_amount || reg.payment.actual_amount_to_pay);
+                                const teamSize = 5; // Fixed team size
+                                const subtotal = originalPrice * teamSize;
+                                const teamDiscount = 499 * teamSize; // Fixed discount of 499 per member
+                                
+                                // Display team pricing breakdown
+                                $('#team-price-per-member').text(formatCurrency(originalPrice));
+                                $('#team-subtotal').text(formatCurrency(subtotal));
+                                $('#team-discount').text(formatCurrency(teamDiscount));
+                                $('#team-payable-amount').text(formatCurrency(payableAmount));
+                                
+                                // Handle referral discount if applicable
+                                if (reg.referral && reg.referral.is_referral) {
+                                    const referralDiscount = parseFloat(reg.referral.actual_discount_amount);
+                                    $('#team-referral-discount').text(formatCurrency(referralDiscount));
+                                    $('#team-referral-row').show();
+                                } else {
+                                    $('#team-referral-row').hide();
+                                }
+                                
+                                // Show team member information
                                 $('#team-info-section').show();
                                 $('#modal-team-name').text(reg.team.name || 'N/A');
                                 $('#modal-team-leader').text(reg.team.leader_name || 'N/A');
@@ -854,7 +949,25 @@
                                     $('#modal-team-members').append('<li class="list-group-item">No team members found</li>');
                                 }
                             } else {
+                                // Solo registration pricing
+                                $('#team-pricing-details').hide();
+                                $('#solo-pricing-details').show();
                                 $('#team-info-section').hide();
+                                
+                                const originalPrice = parseFloat(reg.payment.original_price);
+                                const payableAmount = parseFloat(reg.payable_amount || reg.payment.actual_amount_to_pay);
+                                
+                                $('#solo-original-price').text(formatCurrency(originalPrice));
+                                $('#solo-payable-amount').text(formatCurrency(payableAmount));
+                                
+                                // Handle referral discount for solo registration
+                                if (reg.referral && reg.referral.is_referral) {
+                                    const referralDiscount = parseFloat(reg.referral.discount_amount);
+                                    $('#solo-discount-amount').text(formatCurrency(referralDiscount));
+                                    $('#solo-discount-row').show();
+                                } else {
+                                    $('#solo-discount-row').hide();
+                                }
                             }
 
                             // Referral Information (if applicable)
