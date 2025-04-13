@@ -198,25 +198,31 @@ class FlamesRegistration(models.Model):
             registration.save(update_fields=['status'])
             
     def save(self, *args, **kwargs):
-        # Set the original price from the course
-        if not self.original_price:
-            # For both solo and team registrations, use the same course price
-            self.original_price = self.course.discount_price
-            self.discounted_price = self.course.discount_price  # Initialize discounted price
-            
-        # Apply discount if referral code is provided
-        if self.referral_code and self.referral_code.is_active:
-            discount = self.referral_code.discount_amount
-            # Apply discount to the discounted_price instead of original_price
-            self.discounted_price -= discount
+        # Check if this is a new registration (no ID yet) or price fields haven't been set
+        is_new = not self.pk or not self.original_price
         
-        # Calculate payable amount based on registration mode
-        if self.registration_mode == 'TEAM':
-            # Team payable amount is total amount (discount_price * 5) minus the team discount (499 * 5)
-            self.payable_amount = (self.discounted_price * 5) - (499 * 5)
-        else:
-            self.payable_amount = self.discounted_price
+        # Only calculate pricing when object is new or price-related fields have changed
+        # Get the previous instance if it exists to check for changes
+        if is_new:
+            # Set the original price from the course
+            if not self.original_price:
+                # For both solo and team registrations, use the same course price
+                self.original_price = self.course.discount_price
+                self.discounted_price = self.course.discount_price  # Initialize discounted price
+                
+            # Apply discount if referral code is provided
+            if self.referral_code and self.referral_code.is_active:
+                discount = self.referral_code.discount_amount
+                # Apply discount to the discounted_price instead of original_price
+                self.discounted_price -= discount
             
+            # Calculate payable amount based on registration mode
+            if self.registration_mode == 'TEAM':
+                # Team payable amount is total amount (discount_price * 5) minus the team discount (499 * 5)
+                self.payable_amount = (self.discounted_price * 5) - (499 * 5)
+            else:
+                self.payable_amount = self.discounted_price
+        
         super().save(*args, **kwargs)
 
 

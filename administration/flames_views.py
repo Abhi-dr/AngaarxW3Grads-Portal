@@ -27,6 +27,7 @@ def flames_courses(request):
     
     return render(request, 'administration/flames/courses.html', context)
 
+
 @login_required
 def flames_registrations(request):
     """
@@ -56,6 +57,7 @@ def flames_registrations(request):
     
     return render(request, 'administration/flames/registrations.html', context)
 
+
 @login_required
 def admin_course_detail(request, course_id):
     """
@@ -73,6 +75,7 @@ def admin_course_detail(request, course_id):
     }
     
     return render(request, 'administration/flames/course_detail.html', context)
+
 
 @login_required
 def admin_add_course(request):
@@ -123,6 +126,7 @@ def admin_add_course(request):
     
     return render(request, 'administration/flames/courses.html', context)
 
+
 @login_required
 def admin_edit_course(request, course_id):
     """
@@ -159,6 +163,7 @@ def admin_edit_course(request, course_id):
     
     return render(request, 'administration/flames/edit_course.html', context)
 
+
 @login_required
 @require_POST
 def admin_toggle_course_status(request):
@@ -182,6 +187,7 @@ def admin_toggle_course_status(request):
             'status': 'error',
             'message': str(e)
         })
+
 
 @login_required
 def admin_registrations_ajax(request):
@@ -300,6 +306,7 @@ def admin_registrations_ajax(request):
         'recordsFiltered': total_count
     })
 
+
 @login_required
 def admin_registration_details(request):
     """
@@ -410,6 +417,7 @@ def admin_registration_details(request):
             'message': str(e)
         })
 
+
 @login_required
 @require_POST
 def admin_update_registration_status(request):
@@ -434,6 +442,7 @@ def admin_update_registration_status(request):
             'message': str(e)
         })
 
+
 @login_required
 @require_POST
 def admin_update_registration_notes(request):
@@ -457,6 +466,7 @@ def admin_update_registration_notes(request):
             'status': 'error',
             'message': str(e)
         })
+
 
 @login_required
 @require_POST

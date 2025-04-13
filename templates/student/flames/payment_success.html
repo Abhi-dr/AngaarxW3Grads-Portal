@@ -1,0 +1,241 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}Payment Successful | FLAMES{% endblock %}
+
+{% block extra_css %}
+<style>
+    .success-container {
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .success-card {
+        background: rgba(15, 15, 15, 0.85);
+        border-radius: 15px;
+        padding: 3rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        border: 1px solid rgba(255, 87, 34, 0.3);
+    }
+    
+    .success-icon {
+        font-size: 5rem;
+        color: #4caf50;
+        margin-bottom: 1.5rem;
+        animation: pulse 2s infinite;
+    }
+    
+    .success-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #FF5722, #FFC107);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent; /* Fallback for browsers that don't support -webkit-text-fill-color */
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .success-message {
+        font-size: 1.2rem;
+        color: #e0e0e0;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .payment-details {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #4caf50;
+    }
+    
+    .payment-details p {
+        margin-bottom: 0.5rem;
+        color: #bdbdbd;
+    }
+    
+    .payment-details strong {
+        color: #ffffff;
+    }
+    
+    .action-btn {
+        background: linear-gradient(45deg, #FF5722, #F44336);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 1rem;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 20px rgba(255, 87, 34, 0.6);
+        color: white;
+    }
+    
+    .redirect-message {
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: #9e9e9e;
+    }
+    
+    .countdown {
+        font-weight: bold;
+        color: #FF5722;
+    }
+    
+    .flames-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        opacity: 0.2;
+        background-image: url("{% static 'img/flames-bg.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        filter: blur(5px);
+    }
+    
+    .fire-particle {
+        position: absolute;
+        background: radial-gradient(circle, rgba(255,87,34,0.8) 0%, rgba(255,87,34,0) 70%);
+        border-radius: 50%;
+        opacity: 0;
+        z-index: 1;
+        animation: rise 4s ease-out infinite;
+    }
+    
+    @keyframes rise {
+        0% {
+            transform: translateY(100px) scale(0);
+            opacity: 0;
+        }
+        50% {
+            opacity: 0.7;
+        }
+        100% {
+            transform: translateY(-300px) scale(1);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid success-container">
+    <div class="flames-bg"></div>
+    
+    <!-- Fire particles -->
+    <div id="particles-container"></div>
+    
+    <div class="success-card">
+        <i class="fas fa-check-circle success-icon"></i>
+        <h1 class="success-title">Payment Successful!</h1>
+        <p class="success-message">Your payment for {{ registration.course.title }} has been successfully processed. You're now officially registered for the course!</p>
+        
+        <div class="payment-details">
+            <p><strong>Course:</strong> {{ registration.course.title }}</p>
+            <p><strong>Amount Paid:</strong> ₹{{ registration.payable_amount }}</p>
+            <p><strong>Payment ID:</strong> {{ payment_id }}</p>
+            <p><strong>Registration Mode:</strong> {{ registration.registration_mode }}</p>
+            <p><strong>Status:</strong> <span class="badge bg-success">Completed</span></p>
+        </div>
+        
+        <a href="{% url 'student_view_registration' registration.course.slug %}" class="action-btn">
+            <i class="fas fa-arrow-right me-2"></i>View Registration
+        </a>
+        
+        <p class="redirect-message">You will be redirected in <span id="countdown" class="countdown">5</span> seconds...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Create fire particles
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('particles-container');
+        
+        // Create 15 fire particles
+        for (let i = 0; i < 15; i++) {
+            createFireParticle(container);
+        }
+        
+        // Countdown for redirect
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        
+        const countdownInterval = setInterval(function() {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = "{% url 'student_view_registration' registration.course.slug %}";
+            }
+        }, 1000);
+    });
+    
+    function createFireParticle(container) {
+        const particle = document.createElement('div');
+        particle.classList.add('fire-particle');
+        
+        // Random position, size and delay
+        const size = Math.random() * 50 + 20;
+        const left = Math.random() * 100;
+        const delay = Math.random() * 3;
+        
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${left}%`;
+        particle.style.bottom = '0';
+        particle.style.animationDelay = `${delay}s`;
+        
+        container.appendChild(particle);
+        
+        // Remove and recreate particle after animation ends
+        setTimeout(() => {
+            particle.remove();
+            createFireParticle(container);
+        }, 4000 + (delay * 1000));
+    }
+</script>
+{% endblock %}

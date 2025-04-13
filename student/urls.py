@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views
 
 urlpatterns = [
@@ -44,6 +44,9 @@ urlpatterns += [
     path('course/<slug:slug>/', course_views.course_detail, name='course_detail'),
     path('course/<slug:slug>/register/', course_views.student_flames_register, name='student_flames_register'),
     path('api/verify-referral-code/<str:code>/', course_views.verify_referral_code, name='verify_referral_code'),
+    
+    # ---- PAYMENT URLS ----
+    path('payment/', include('student.payment_urls')),
     
     # path('flames/teams/create/<int:registration_id>/', flames.student_create_team, name='student_create_team'),
     # path('flames/teams/add-member/<int:team_id>/', flames.student_add_team_member, name='student_add_team_member'),

@@ -116,6 +116,7 @@ active
                         <span class="badge bg-success">Team Registration</span>
                         <span class="ms-2">5 members with team discount</span>
                     </div>
+                    
                     {% else %}
                     <div class="d-flex justify-content-between mb-3">
                         <span>Original Price</span>
@@ -135,12 +136,33 @@ active
                         <span>₹{{ registration.payable_amount }}</span>
                     </div>
 
-                    {% if registration.referral_code %}
                     <div class="mt-3 small">
-                        <span class="badge bg-success">Referral Applied</span>
-                        <span class="ms-2">{{ registration.referral_code.code }}</span>
+                        <span class="badge bg-primary">Solo Registration</span>
+                        {% if registration.referral_code %}
+                        <span class="badge bg-success">Referral: {{ registration.referral_code.code }}</span>
+                        {% endif %}
                     </div>
                     {% endif %}
+                    
+                    {% if registration.status == 'Rejected' %}
+                    <div class="mt-4">
+                        <div class="alert alert-danger mb-0">
+                            <i class="fas fa-times-circle me-2"></i>REGISTRATION REJECTED
+                        </div>
+                    </div>
+                    {% elif not registration.payment_id and registration.status != 'Completed' %}
+                    <div class="mt-4">
+                        <button id="pay-now-btn" class="btn btn-success w-100" data-registration-id="{{ registration.id }}">
+                            <i class="fas fa-credit-card me-2"></i>Pay Now
+                        </button>
+                    </div>
+                    {% elif registration.payment_id or registration.status == 'Completed' %}
+                    <div class="mt-4">
+                        <div class="alert alert-success mb-0">
+                            <i class="fas fa-check-circle me-2"></i>Payment Completed
+                            <div class="mt-2 small">{% if registration.payment_id %}Payment ID: {{ registration.payment_id }}{% endif %}</div>
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -251,4 +273,124 @@ active
         </div>
     </div>
 </div>
+
+<!-- Razorpay Integration -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const payButton = document.getElementById('pay-now-btn');
+        
+        if (payButton) {
+            payButton.addEventListener('click', function() {
+                // Disable button to prevent multiple clicks
+                payButton.disabled = true;
+                payButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                
+                const registrationId = this.getAttribute('data-registration-id');
+                
+                // Call the API to initialize payment
+                fetch(`/dashboard/payment/initiate-payment/${registrationId}/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Payment initialization successful:', data);
+                            
+                            // Initialize Razorpay checkout
+                            const options = {
+                                key: 'rzp_test_3SQlSCQ0alBcCn',
+                                amount: data.amount,
+                                currency: data.currency,
+                                name: data.name || 'Angaar FLAMES',
+                                description: data.description || 'Course Registration',
+                                order_id: data.order_id,
+                                prefill: data.prefill || {},
+                                handler: function(response) {
+                                    console.log('Payment successful:', response);
+                                    payButton.innerHTML = '<i class="fas fa-check me-2"></i>Payment Successful';
+                                    
+                                    // Submit payment details to backend
+                                    const form = document.createElement('form');
+                                    form.method = 'POST';
+                                    form.action = '{% url "payment_callback" %}';
+                                    
+                                    // Add CSRF token
+                                    const csrfToken = document.createElement('input');
+                                    csrfToken.type = 'hidden';
+                                    csrfToken.name = 'csrfmiddlewaretoken';
+                                    csrfToken.value = '{{ csrf_token }}';
+                                    form.appendChild(csrfToken);
+                                    
+                                    // Add payment details
+                                    for (const key in response) {
+                                        const input = document.createElement('input');
+                                        input.type = 'hidden';
+                                        input.name = key;
+                                        input.value = response[key];
+                                        form.appendChild(input);
+                                    }
+                                    
+                                    // Add registration ID
+                                    const regIdInput = document.createElement('input');
+                                    regIdInput.type = 'hidden';
+                                    regIdInput.name = 'registration_id';
+                                    regIdInput.value = registrationId;
+                                    form.appendChild(regIdInput);
+                                    
+                                    // Submit the form
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                },
+                                modal: {
+                                    ondismiss: function() {
+                                        console.log('Checkout modal closed');
+                                        // Re-enable button if payment modal is dismissed
+                                        payButton.disabled = false;
+                                        payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                                    }
+                                },
+                                theme: {
+                                    color: '#4273fa'
+                                }
+                            };
+                            
+                            try {
+                                console.log('Opening Razorpay checkout with options:', options);
+                                const razorpay = new Razorpay(options);
+                                razorpay.on('payment.failed', function(response) {
+                                    console.error('Payment failed:', response.error);
+                                    alert(`Payment failed: ${response.error.description}`);
+                                    payButton.disabled = false;
+                                    payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                                });
+                                razorpay.open();
+                            } catch (e) {
+                                console.error('Error opening Razorpay checkout:', e);
+                                alert(`Error opening payment gateway: ${e.message}`);
+                                payButton.disabled = false;
+                                payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                            }
+                        } else {
+                            // Show error message
+                            console.error('Payment initialization failed:', data.error);
+                            alert(`Payment initialization failed: ${data.error}`);
+                            payButton.disabled = false;
+                            payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error initializing payment:', error);
+                        alert(`An error occurred while initializing payment: ${error.message}`);
+                        payButton.disabled = false;
+                        payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                    });
+            });
+        }
+    });
+</script>
+
 {% endblock %}

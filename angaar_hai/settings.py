@@ -286,3 +286,7 @@ CELERY_TIMEZONE = 'Asia/Kolkata'
 
 
 # MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'
+
+# Add to settings.py
+RAZORPAY_KEY_ID = 'rzp_test_3SQlSCQ0alBcCn'
+RAZORPAY_KEY_SECRET = 'rQDEoRRaZ3DnAuQjWMuuelIa'
