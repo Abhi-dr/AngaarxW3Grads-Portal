@@ -7,18 +7,45 @@ from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeam
 
 @login_required
 def student_flames(request):
-
-    registrations = FlamesRegistration.objects.filter(
+    # Get registrations where the user is directly registered
+    direct_registrations = FlamesRegistration.objects.filter(
         user=request.user
     ).select_related('course', 'team').order_by('-created_at')
-        
-    # Prefetch team members for teams the student is part of
+    
+    # Find teams where the user is a member but not the team leader
+    team_memberships = FlamesTeamMember.objects.filter(
+        member=request.user,
+        is_leader=False
+    ).select_related('team')
+    
+    team_ids = team_memberships.values_list('team_id', flat=True)
+    
+    # Get registrations for teams where the user is a member
+    team_registrations = FlamesRegistration.objects.filter(
+        team_id__in=team_ids
+    ).select_related('course', 'team').order_by('-created_at')
+    
+    # Combine both types of registrations
+    registrations = list(direct_registrations)
+    
+    # Add team registrations if they're not already included
+    for reg in team_registrations:
+        if reg not in registrations:
+            registrations.append(reg)
+    
+    # Sort by created_at (most recent first)
+    registrations.sort(key=lambda x: x.created_at, reverse=True)
+    
+    # Prefetch team members for all registrations with teams
     for registration in registrations:
         if registration.team:
             registration.team.members_list = FlamesTeamMember.objects.filter(team=registration.team)
     
     # Get available courses (courses that the student hasn't registered for)
-    registered_course_ids = registrations.values_list('course_id', flat=True)
+    registered_course_ids = set()
+    for reg in registrations:
+        registered_course_ids.add(reg.course_id)
+    
     available_courses = FlamesCourse.objects.filter(is_active=True).exclude(id__in=registered_course_ids)
     
     parameters = {
@@ -42,9 +69,25 @@ def view_registration(request, slug):
         course=course
     ).select_related('course', 'team', 'referral_code').first()
     
+    # If not found, check if the user is a team member
     if not registration:
-        messages.error(request, "You are not registered for this course.")
-        return redirect('student_flames')
+        # Check if user is part of a team registered for this course
+        from home.models import FlamesTeamMember
+        team_memberships = FlamesTeamMember.objects.filter(
+            member=request.user,
+            team__registrations__course=course
+        ).select_related('team')
+        
+        if team_memberships.exists():
+            # Get the registration through the team
+            team = team_memberships.first().team
+            registration = FlamesRegistration.objects.filter(
+                team=team,
+                course=course
+            ).select_related('course', 'team', 'referral_code').first()
+        else:
+            messages.error(request, "You are not registered for this course.")
+            return redirect('student_flames')
     
     # If this is a team registration, prefetch team members
     if registration.registration_mode == 'TEAM' and registration.team:

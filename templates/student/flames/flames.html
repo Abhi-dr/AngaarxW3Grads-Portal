@@ -638,7 +638,11 @@ active
 
             <div class="flames-footer">
                 <div class="price-info">
-                    {% if registration.original_price != registration.discounted_price %}
+                    {% if registration.registration_mode == 'TEAM' %}
+                    <span class="original-price">₹{{ registration.original_price }} × 5 = ₹{{ registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price }}</span>
+                    <span class="final-price">₹{{ registration.payable_amount }} (after team discount)</span>
+                    <span class="discount-badge">Team Discount: ₹499 × 5 = ₹2,495</span>
+                    {% elif registration.original_price != registration.discounted_price %}
                     <span class="original-price">₹{{ registration.original_price }}</span>
                     <span class="final-price">₹{{ registration.discounted_price }}</span>
                     <span class="discount-badge">Discount Applied</span>
@@ -650,7 +654,7 @@ active
                 {% if registration.team %}
 
                 <span class="discount-badge fs-2">
-                    Team Registration &nbsp; -₹500🔥
+                    Team Registration (5 members) - ₹2,495 discount
                 </span>
                 
                 {% else %}

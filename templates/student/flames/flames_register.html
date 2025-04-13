@@ -715,7 +715,7 @@ active
                     <div class="price-summary">
                         <div class="price-row">
                             <span class="price-label">Program Fee</span>
-                            <span class="price-value">₹{{ course.price }}</span>
+                            <span class="price-value" id="program-fee">₹{{ course.discount_price }}</span>
                         </div>
 
                         <div id="discount-row" class="price-row" style="display: none;">
@@ -724,13 +724,18 @@ active
                         </div>
 
                         <div id="team-discount-row" class="price-row" style="display: none;">
-                            <span class="price-label">Team Registration Discount</span>
-                            <span class="price-value" id="team-discount-value">-₹500</span>
+                            <span class="price-label">Team Registration (5 members)</span>
+                            <span class="price-value" id="team-discount-value">₹{{ course.discount_price }} × 5 = ₹{{ course.discount_price|add:course.discount_price|add:course.discount_price|add:course.discount_price|add:course.discount_price }}</span>
+                        </div>
+
+                        <div id="team-total-discount-row" class="price-row" style="display: none;">
+                            <span class="price-label">Team Discount</span>
+                            <span class="price-value" id="team-total-discount-value">-₹499 × 5 = -₹2,495</span>
                         </div>
 
                         <div class="price-row price-total">
                             <span>Total</span>
-                            <span id="total-price">₹{{ course.price }}</span>
+                            <span id="total-price">₹{{ course.discount_price }}</span>
                         </div>
                     </div>
                 </div>
@@ -786,10 +791,21 @@ active
                     // Make team_name required
                     document.getElementById('team_name').setAttribute('required', 'required');
 
-                    // Apply team discount
-                    const teamDiscountAmount = 500;
-                    const newTotal = originalPrice - teamDiscountAmount;
-                    totalPrice.textContent = `₹${newTotal}`;
+                    // Calculate team price with discount
+                    const discountPrice = parseFloat("{{ course.discount_price }}");
+                    const totalTeamPrice = discountPrice * 5;
+                    const discountPerPerson = 499;
+                    const teamDiscount = discountPerPerson * 5;
+                    const finalTeamPrice = totalTeamPrice - teamDiscount;
+                    
+                    // Update the program fee to show it's for the whole team
+                    document.getElementById('program-fee').textContent = `₹${discountPrice} per person`;
+                    
+                    // Show team discount row
+                    document.getElementById('team-total-discount-row').style.display = 'flex';
+                    
+                    // Update total price (total team price - discount)
+                    totalPrice.textContent = `₹${finalTeamPrice}`;
 
                     // Clear any referral code
                     document.getElementById('referral_code').value = '';
@@ -806,9 +822,15 @@ active
                     // Remove required attribute from team_name
                     document.getElementById('team_name').removeAttribute('required');
 
+                    // Reset price display to original
+                    document.getElementById('program-fee').textContent = `₹{{ course.discount_price }}`;
+                    
+                    // Hide team discount row
+                    document.getElementById('team-total-discount-row').style.display = 'none';
+                    
                     // Reset price to original if no referral discount
                     if (discountRow.style.display === 'none') {
-                        totalPrice.textContent = `₹${originalPrice}`;
+                        totalPrice.textContent = `₹{{ course.discount_price }}`;
                     }
                 }
             });
@@ -944,7 +966,7 @@ active
                         discountValue.textContent = `-₹${data.discount_amount}`;
 
                         // Calculate new total
-                        const originalPrice = parseFloat("{{ course.price }}");
+                        const originalPrice = parseFloat("{{ course.discount_price }}");
                         const newTotal = Math.max(0, originalPrice - data.discount_amount);
                         totalPrice.textContent = `₹${newTotal}`;
                     } else {

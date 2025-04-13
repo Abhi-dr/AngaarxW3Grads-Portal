@@ -80,8 +80,8 @@ class FlamesCourse(models.Model):
     is_active = models.BooleanField(default=True)
     slug = models.SlugField(unique=True)
     
-    discount_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    discount_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -128,7 +128,7 @@ class ReferralCode(models.Model):
     code = models.CharField(max_length=20, unique=True)
     referral_type = models.CharField(max_length=10, choices=REFERRAL_TYPE_CHOICES)
     alumni = models.ForeignKey(Alumni, on_delete=models.CASCADE, related_name='referral_codes', null=True, blank=True)
-    discount_amount = models.DecimalField(max_digits=10, decimal_places=2, default=500.00)
+    discount_amount = models.IntegerField(default=499, help_text="Discount amount in percentage")
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
@@ -184,8 +184,9 @@ class FlamesRegistration(models.Model):
     referral_code = models.ForeignKey(ReferralCode, on_delete=models.SET_NULL, 
                                      null=True, blank=True, related_name='registrations')
     
-    original_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    discounted_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    original_price = models.IntegerField(blank=True, null=True)
+    discounted_price = models.IntegerField(blank=True, null=True)
+    payable_amount = models.IntegerField(blank=True, null=True)
     
 
     
@@ -199,19 +200,22 @@ class FlamesRegistration(models.Model):
     def save(self, *args, **kwargs):
         # Set the original price from the course
         if not self.original_price:
-            self.original_price = self.course.price
+            # For both solo and team registrations, use the same course price
+            self.original_price = self.course.discount_price
+            self.discounted_price = self.course.discount_price  # Initialize discounted price
             
         # Apply discount if referral code is provided
         if self.referral_code and self.referral_code.is_active:
-            # For team registrations, multiply discount by 5 (for 5 team members)
-            if self.registration_mode == 'TEAM':
-                discount = self.referral_code.discount_amount * 5
-            else:
-                discount = self.referral_code.discount_amount
-                
-            self.discounted_price = max(0, self.original_price - discount)
+            discount = self.referral_code.discount_amount
+            # Apply discount to the discounted_price instead of original_price
+            self.discounted_price -= discount
+        
+        # Calculate payable amount based on registration mode
+        if self.registration_mode == 'TEAM':
+            # Team payable amount is total amount (discount_price * 5) minus the team discount (499 * 5)
+            self.payable_amount = (self.discounted_price * 5) - (499 * 5)
         else:
-            self.discounted_price = self.original_price
+            self.payable_amount = self.discounted_price
             
         super().save(*args, **kwargs)
 

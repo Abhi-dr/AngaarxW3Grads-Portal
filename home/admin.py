@@ -32,9 +32,19 @@ class FlamesCourseTestimonialAdmin(admin.ModelAdmin):
     list_filter = ('course', 'rating')
 
 class FlamesRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('course', 'created_at', 'registration_mode', 'referral_code', 'original_price', 'discounted_price')
+    list_display = ('course', 'created_at', 'registration_mode', 'get_team_name', 'referral_code', 'original_price', 'discounted_price', 'get_payable_amount', 'status')
     list_filter = ('course', 'year', 'created_at', 'registration_mode', 'status')
-    search_fields = ('college',)
+    search_fields = ('college', 'user__username', 'user__email', 'team__name')
+    
+    def get_team_name(self, obj):
+        if obj.registration_mode == 'TEAM' and obj.team:
+            return obj.team.name
+        return '-'
+    get_team_name.short_description = 'Team Name'
+    
+    def get_payable_amount(self, obj):
+        return f'₹{obj.payable_amount}'
+    get_payable_amount.short_description = 'Payable Amount'
 
 class AlumniAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'contact_number', 'college', 'batch_year')
