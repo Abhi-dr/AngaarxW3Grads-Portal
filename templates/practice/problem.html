@@ -910,121 +910,42 @@
                     submit_btn.prop("disabled", false);
                     submit_btn.text("Submit Code");
 
-                    testCaseResultsDiv.scrollIntoView({
-                        behavior: 'smooth'
-                    });
+                    const testCaseResultsDiv = document.getElementById('testCaseResults');
+                    testCaseResultsDiv.innerHTML = ''; // Clear previous content
 
-                    testCaseResultsDiv.innerHTML = "";
-                    // remove all prepend 
-                    while (testCaseResultsDiv.firstChild) {
-                        testCaseResultsDiv.removeChild(testCaseResultsDiv.firstChild);
+                    // Use our utility function to display test results
+                    // The third parameter is false to specify this is a submit_code operation
+                    displayTestResults(data, testCaseResultsDiv, false);
+
+                    // Only show the success modal for successful submissions
+                    if (data.is_all_test_cases_passed) {
+                        submission_accepted(data.score);
                     }
-
-                    if (data.error || data.compile_output) {
-                        const globalErrorDiv = document.createElement('div');
-
-
-                        globalErrorDiv.classList.add('alert', 'alert-danger');
-                        globalErrorDiv.innerHTML = `
-                        <h5>Compiler Error</h5>
-                        Error: <pre>${data.error}</pre>`;
-
-                        if (data.compile_output) {
-                            globalErrorDiv.innerHTML += `
-                            <h5>Compiler Output:</h5>
-                            <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>
-                        `;
-                        }
-
-                        testCaseResultsDiv.prepend(globalErrorDiv);
-                    }
-
-                    // If there are test case results, display them
-                    if (data.test_case_results) {
-                        testCaseResultsDiv.innerHTML = '<h4>Test Case Results:</h4>'; // Clear previous results
-                        data.test_case_results.forEach((result, index) => {
-                            const resultDiv = document.createElement('div');
-                            resultDiv.classList.add(
-                                'card',
-                                'mb-3',
-                                'test-case-result',
-                                result.status === "Passed" ? 'border-success' : 'border-danger',
-                                'shadow-sm'
-                            );
-
-                            resultDiv.id = "test-case-result-id";
-
-                            // Include compiler output only when the test case fails
-                            const compilerOutputHTML = document.createElement('div');
-                            compilerOutputHTML.id = "compiler-output";
-                            if (result.compiler_output) {
-                                compilerOutputHTML += `
-                                <p><strong>Compiler Output:</strong></p>
-                                <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
-                            `;
-
-                                document.getElementById("compiler-output").scrollIntoView({ behavior: 'smooth' });
-                            }
-
-                            resultDiv.innerHTML = `
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <span>
-                                    <strong>Test Case ${index + 1}</strong> - 
-                                    <span class="badge 
-                                        ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">
-                                        ${result.status}
-                                    </span>
-                                </span>
-                                <button 
-                                    class="btn btn-sm btn-outline-primary toggle-details" 
-                                    type="button" 
-                                    data-bs-toggle="collapse" 
-                                    data-bs-target="#details-${index}" 
-                                    aria-expanded="false" 
-                                    aria-controls="details-${index}">
-                                    Show
-                                </button>
-                            </div>
-                            <div id="details-${index}" class="collapse">
-                                <div class="card-body">
-                                    <p><strong>Input:</strong></p>
-                                    <pre class="p-2 rounded">${result.input}</pre>
-                                    <p><strong>Expected Output:</strong></p>
-                                    <pre class="p-2 rounded">${result.expected_output}</pre>
-                                    <p><strong>Your Output:</strong></p>
-                                    <pre class="p-2 rounded">${result.user_output}</pre>
-                                    <p><strong>Status:</strong> 
-                                        <span class="badge 
-                                            ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">
-                                            ${result.status}
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                        `;
-                            testCaseResultsDiv.appendChild(resultDiv);
-                        });
-
-
-                        if (data.is_all_test_cases_passed) {
-                            submission_accepted(data.score);
-                        }
-                        document.getElementById("test-case-result-id").scrollIntoView({ behavior: 'smooth' });
-                    }
-
-                    // If there's a global compiler error (e.g., server-side), display it
-
-                })
-
-                .catch(error => {
-                    console.log('Error:', error);
-                    // print the token from response                
-                    console.log("TOKEN: ", error.token);
-                    clearInterval(countdownInterval); // Clear the interval
-                    submit_btn.prop("disabled", false);
-                    submit_btn.text("Submit Code");
                 });
-        });
+
+
+            // Scroll to the test case results
+            const resultElement = document.getElementById("test-case-result-id");
+            if (resultElement) {
+                resultElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        })
+            .catch((error) => {
+                console.error('Error:', error);
+                clearInterval(countdownInterval); // Clear the interval
+                submit_btn.prop("disabled", false);
+                submit_btn.text("Submit Code");
+
+                // Display error message in the output div instead of using alert
+                const testCaseResultsDiv = document.getElementById('testCaseResults');
+                testCaseResultsDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h5>Error</h5>
+                            <p>An error occurred while submitting your code. Please try again later.</p>
+                        </div>
+                    `;
+            });
+
 
 
         // On successful submission... confetti animation
@@ -1046,6 +967,144 @@
 
         }
 
+    </script>
+
+    <!-- ======================================== TEST CASE DISPLAY UTILITY ================================================= -->
+    <script>
+        // Utility function to properly display test case results regardless of source (run or submit)
+        function displayTestResults(data, outputDiv, isRunCode = false) {
+            // Clear previous content
+            outputDiv.innerHTML = '';
+
+            // Handle errors first
+            if (data.error || data.compile_output) {
+                const errorDiv = document.createElement('div');
+                errorDiv.classList.add('alert', 'alert-danger');
+                errorDiv.innerHTML = `
+                    <h5>Compiler Error</h5>
+                    <pre>${data.error || ''}</pre>`;
+
+                if (data.compile_output) {
+                    errorDiv.innerHTML += `
+                    <h5>Compiler Output:</h5>
+                    <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>`;
+                }
+
+                outputDiv.appendChild(errorDiv);
+                return; // Don't process further if there's an error
+            }
+
+            // For run_code: always show the detailed results regardless of pass/fail
+            // For submit_code: Only show badge for all-passed, detailed for failures
+            const showDetailed = isRunCode || !data.is_all_test_cases_passed;
+
+            // Summary header varies based on pass/fail status
+            const passedCount = data.summary?.passed_count || 0;
+            const totalCount = data.summary?.total || (data.test_case_results ? data.test_case_results.length : 0);
+
+            const summaryDiv = document.createElement('div');
+            summaryDiv.classList.add('alert', data.is_all_test_cases_passed ? 'alert-success' : 'alert-warning', 'mb-3');
+            summaryDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="${data.is_all_test_cases_passed ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'} me-2"></i>
+                        <strong>Test Results:</strong> ${passedCount} passed / ${totalCount} total
+                    </div>
+                </div>
+            `;
+            outputDiv.appendChild(summaryDiv);
+
+            // If we have test case results and should show detailed, display them
+            if (data.test_case_results && data.test_case_results.length > 0 && showDetailed) {
+                // Separate passed and failed tests
+                const failedTests = data.test_case_results.filter(result => !result.passed);
+                const passedTests = data.test_case_results.filter(result => result.passed);
+
+                // Show failed tests first
+                displayTestCases(failedTests, outputDiv, false);
+
+                // Show passed tests if any
+                if (passedTests.length > 0) {
+                    displayTestCases(passedTests, outputDiv, true);
+                }
+            }
+        }
+
+        // Helper to display test cases (both failed and passed)
+        function displayTestCases(testCases, container, isPassed) {
+            if (testCases.length === 0) return;
+
+            // Create collapsible section for passed tests
+            if (isPassed) {
+                const passedHeader = document.createElement('div');
+                passedHeader.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-3', 'mt-4');
+                passedHeader.innerHTML = `
+                    <h5 class="mb-0">
+                        <button class="btn btn-sm btn-outline-success" type="button" data-bs-toggle="collapse" 
+                            data-bs-target="#passedTestsCollapse" aria-expanded="false">
+                            <i class="fas fa-chevron-down me-1"></i>
+                            Show ${testCases.length} Passed Tests
+                        </button>
+                    </h5>
+                `;
+                container.appendChild(passedHeader);
+
+                const passedTestsDiv = document.createElement('div');
+                passedTestsDiv.classList.add('collapse');
+                passedTestsDiv.id = 'passedTestsCollapse';
+                container.appendChild(passedTestsDiv);
+
+                testCases.forEach((result, index) => displayTestCase(result, index, passedTestsDiv, true));
+            } else {
+                // Failed tests are shown directly
+                testCases.forEach((result, index) => displayTestCase(result, index, container, false));
+            }
+        }
+
+        // Display individual test case
+        function displayTestCase(result, index, container, isPassed) {
+            const resultDiv = document.createElement('div');
+            resultDiv.classList.add(
+                'card',
+                'mb-3',
+                'test-case-result',
+                isPassed ? 'border-success' : 'border-danger',
+                'shadow-sm'
+            );
+
+            let testNumber = result.test_number || (index + 1);
+            let headerClass = isPassed ? 'bg-success' : 'bg-danger';
+            let statusBadge = isPassed ? 'Passed' : 'Failed';
+
+            resultDiv.innerHTML = `
+                <div class="card-header d-flex justify-content-between align-items-center ${headerClass} text-white">
+                    <span>
+                        <strong>Test Case ${testNumber}</strong> - 
+                        <span class="badge ${isPassed ? 'bg-success' : 'bg-danger'}">${statusBadge}</span>
+                    </span>
+                    <button 
+                        class="btn btn-sm btn-outline-light toggle-details" 
+                        type="button" 
+                        data-bs-toggle="collapse" 
+                        data-bs-target="#details-${isPassed ? 'passed' : 'failed'}-${index}" 
+                        aria-expanded="${isPassed ? 'false' : 'true'}" 
+                        aria-controls="details-${isPassed ? 'passed' : 'failed'}-${index}">
+                        Details
+                    </button>
+                </div>
+                <div id="details-${isPassed ? 'passed' : 'failed'}-${index}" class="collapse ${isPassed ? '' : 'show'}">
+                    <div class="card-body">
+                        <p><strong>Input:</strong></p>
+                        <pre class="p-2 rounded bg-light">${result.input}</pre>
+                        <p><strong>Expected Output:</strong></p>
+                        <pre class="p-2 rounded bg-light">${result.expected_output}</pre>
+                        <p><strong>Your Output:</strong></p>
+                        <pre class="p-2 rounded bg-light">${result.user_output}</pre>
+                    </div>
+                </div>
+            `;
+            container.appendChild(resultDiv);
+        }
     </script>
 
     <!-- ======================================== RUN CODE FUNCTION ================================================= -->
@@ -1113,99 +1172,53 @@
             })
                 .then((response) => response.json())
                 .then((data) => {
-
                     console.log(data);
 
+                    // Reset button state
                     clearInterval(countdownInterval); // Stop the countdown
                     run_btn.prop("disabled", false);
                     run_btn.text("Run Code");
 
-                    if (data.error || data.compile_output) {
-                        const testCaseResultsDiv = document.getElementById('testCaseResults');
-
-                        const globalErrorDiv = document.createElement('div');
-
-
-                        globalErrorDiv.classList.add('alert', 'alert-danger');
-                        globalErrorDiv.innerHTML = `
-                        <h5>Compiler Error</h5>
-                        <pre>${data.error}</pre>`;
-
-                        if (data.compile_output) {
-                            globalErrorDiv.innerHTML += `
-                            <h5>Compiler Output:</h5>
-                            <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>
-                        `;
-                        }
-
-                        testCaseResultsDiv.prepend(globalErrorDiv);
-                    }
-
-
-                    if (data.test_case_results) {
-                        data.test_case_results.forEach((result, index) => {
-                            const resultDiv = document.createElement('div');
-                            resultDiv.classList.add(
-                                'card',
-                                'mb-3',
-                                'test-case-result',
-                                result.status === "Passed" ? 'border-success' : 'border-danger',
-                                'shadow-sm'
-                            );
-
-                            resultDiv.innerHTML = `
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                <span>
-                                    <strong>Test Case ${index + 1}</strong> - 
-                                    <span class="badge 
-                                        ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">
-                                        ${result.status}
-                                    </span>
-                                </span>
-                                <button 
-                                    class="btn btn-sm btn-outline-primary toggle-details" 
-                                    type="button" 
-                                    data-bs-toggle="collapse" 
-                                    data-bs-target="#details-${index}" 
-                                    aria-expanded="false" 
-                                    aria-controls="details-${index}">
-                                    Show
-                                </button>
-                            </div>
-                            <div id="details-${index}" class="collapse">
-                                <div class="card-body">
-                                    <p><strong>Input:</strong></p>
-                                    <pre class="p-2 rounded">${result.input}</pre>
-                                    <p><strong>Expected Output:</strong></p>
-                                    <pre class="p-2 rounded">${result.expected_output}</pre>
-                                    <p><strong>Your Output:</strong></p>
-                                    <pre class="p-2 rounded">${result.user_output}</pre>
-                                    <p><strong>Status:</strong> 
-                                        <span class="badge 
-                                            ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">
-                                            ${result.status}
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                            `;
-                            outputDiv.appendChild(resultDiv);
-                        });
-
-                    }
-
-                    outputDiv.removeChild(document.getElementById("loader"));
-
-
+                    // Use our utility function to display test results
+                    // The third parameter (true) specifies this is a run_code operation
+                    displayTestResults(data, outputDiv, true);
                 })
                 .catch((error) => {
-                    console.error('Error:', error);
-                    clearInterval(countdownInterval); // Stop the countdown
+                    console.error('Error running code:', error);
+
+                    // Reset button state
+                    clearInterval(countdownInterval);
                     run_btn.prop("disabled", false);
                     run_btn.text("Run Code");
-                    alert("An error occurred while running the code.");
+
+                    // Display error message
+                    outputDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h5>Error</h5>
+                            <p>An error occurred while executing your code. Please try again.</p>
+                            <pre class="p-2 rounded bg-light">${error.message || 'Unknown error'}</pre>
+                        </div>
+                    `;
                 });
-        });
+
+        })
+            .catch((error) => {
+                console.error('Error running code:', error);
+
+                // Reset button state
+                clearInterval(countdownInterval);
+                run_btn.prop("disabled", false);
+                run_btn.text("Run Code");
+
+                // Display error message in the output div instead of using alert
+                outputDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h5>Error</h5>
+                            <p>An error occurred while running your code. Please try again later.</p>
+                        </div>
+                    `;
+            });
+
 
     </script>
 

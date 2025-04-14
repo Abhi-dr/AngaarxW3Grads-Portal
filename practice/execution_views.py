@@ -3,6 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 import time, json
 import requests
+import asyncio
+import aiohttp
+import random
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -11,19 +14,96 @@ import re
 from accounts.models import Student
 from .models import RecommendedQuestions
 from .models import Sheet, Question, TestCase, Submission, DriverCode, Streak
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+# Import Django's asynchronous utilities
+from asgiref.sync import sync_to_async, async_to_sync
 
-
-# Judge0 API endpoint and key
+# Constants
 JUDGE0_URL = "https://theangaarbatch.in/judge0/submissions"
-
 HEADERS = {
     "X-RapidAPI-Host": "98.83.136.105:2358",
     "Content-Type": "application/json"
 }
+DRIVER_CODE_CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours (increased from previous value)
+
+# For backward compatibility - keep this but we'll use aiohttp for async operations
+judge0_session = requests.Session()
+retries = Retry(
+    total=3,  # Maximum number of retries
+    backoff_factor=0.5,  # Backoff factor for retries
+    status_forcelist=[502, 503, 504],  # Retry on these HTTP status codes
+    allowed_methods=["GET", "POST"]  # Allow retrying on these methods
+)
+judge0_session.mount('https://', HTTPAdapter(
+    max_retries=retries,
+    pool_connections=20,  # Keep 20 connections in the pool
+    pool_maxsize=50  # Allow up to 50 total connections
+))
+
+# Global aiohttp session for connection pooling
+_aiohttp_session = None
+
+# Fixed connection settings for aiohttp (reused across sessions)
+AIOHTTP_TIMEOUT = aiohttp.ClientTimeout(total=60)
+AIOHTTP_CONNECTOR_PARAMS = {
+    "limit": 100,  # Max connections overall
+    "limit_per_host": 20,  # Max connections per host
+    "ttl_dns_cache": 300,  # DNS cache TTL in seconds
+    "enable_cleanup_closed": True
+}
+
+# Event loop management
+def run_async_safely(coroutine):
+    """
+    Safely run an async coroutine in sync context, handling event loop issues.
+    This is particularly important in Django/Windows environments where
+    event loop handling can be problematic.
+    """
+    try:
+        # Try to get the current event loop
+        loop = asyncio.get_event_loop()
+        
+        # If the loop is closed, create a new one
+        if loop.is_closed():
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            loop = asyncio.get_event_loop()
+            
+        # Run the coroutine in the loop and return the result
+        return loop.run_until_complete(coroutine)
+    except RuntimeError as e:
+        # This handles "no running event loop" and other runtime errors
+        if str(e).startswith("There is no current event loop in thread"):
+            # Create a new event loop for this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            # Run the coroutine in the new loop
+            return loop.run_until_complete(coroutine)
+        else:
+            # Reraise any other runtime errors
+            raise
+
+async def get_aiohttp_session():
+    """Get or create a shared aiohttp session with connection pooling"""
+    global _aiohttp_session
+    if _aiohttp_session is None or _aiohttp_session.closed:
+        conn = aiohttp.TCPConnector(**AIOHTTP_CONNECTOR_PARAMS)
+        _aiohttp_session = aiohttp.ClientSession(
+            connector=conn,
+            timeout=AIOHTTP_TIMEOUT,
+            headers=HEADERS
+        )
+    return _aiohttp_session
+
+async def close_aiohttp_session():
+    """Properly close the aiohttp session"""
+    global _aiohttp_session
+    if _aiohttp_session and not _aiohttp_session.closed:
+        await _aiohttp_session.close()
+        _aiohttp_session = None
 
 # Cache timeout settings (in seconds)
 TEST_CASE_CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours
-DRIVER_CODE_CACHE_TIMEOUT = 1  # 24 hours
 QUESTION_CACHE_TIMEOUT = 60 * 60 * 6  # 6 hours
 
 
@@ -193,49 +273,130 @@ def normalize_output(output):
     return output.replace("\r\n", "\n").strip()
 
 
+# Helper functions for async database operations
+@sync_to_async
+def get_question_by_id(question_id):
+    return Question.objects.get(id=question_id)
+
+@sync_to_async
+def get_test_cases_for_question(question, is_sample=False):
+    return list(TestCase.objects.filter(question=question, is_sample=is_sample))
+
+# In-memory cache for test cases with LRU cache decorator
+# Use a regular dict for caching instead of lru_cache to avoid coroutine reuse issues
+_test_cases_cache = {}
+
+async def get_test_cases_async(question_id):
+    """
+    Get test cases for a question using async operations with improved in-memory caching.
+    Uses Django's sync_to_async for database operations.
+    """
+    # Check cache first
+    if question_id in _test_cases_cache:
+        return _test_cases_cache[question_id]
+        
+    # Get the question using Django's sync_to_async utility
+    question = await get_question_by_id(question_id)
+    
+    # Try to get non-sample test cases first
+    test_cases = await get_test_cases_for_question(question, is_sample=False)
+    
+    # If no test cases found, check if we have any sample test cases to use
+    if not test_cases:
+        test_cases = await get_test_cases_for_question(question, is_sample=True)
+    
+    # Cache the result
+    if len(_test_cases_cache) > 100:  # Limit cache size
+        _test_cases_cache.clear()
+    _test_cases_cache[question_id] = test_cases
+    
+    return test_cases
+
+# Get test cases for a question with improved caching strategy.
+# Uses both Redis cache and in-memory LRU cache for optimal performance.
 def get_test_cases(question):
     """
-    Get all test cases associated with the question, with Redis caching.
+    Get test cases for a question with improved caching strategy.
+    Uses both Redis cache and in-memory LRU cache for optimal performance.
     """
+    # Try to get from Redis cache first
     cache_key = f"test_cases:{question.id}"
-    
     cached_test_cases = cache.get(cache_key)
     
     if cached_test_cases:
-        from practice.models import TestCase
+        # Deserialize JSON to Python dictionary
+        test_cases_data = json.loads(cached_test_cases)
+        
+        # Create TestCase objects from the cached data
         test_cases = []
-        for tc_data in cached_test_cases:
-            test_case = TestCase(
-                id=tc_data['id'],
-                question_id=tc_data['question_id'],
-                input_data=tc_data['input_data'],
-                expected_output=tc_data['expected_output'],
-                is_sample=tc_data['is_sample']
+        for tc_data in test_cases_data:
+            tc = TestCase(
+                id=tc_data.get('id'),
+                question_id=tc_data.get('question_id'),
+                input_data=tc_data.get('input_data'),
+                expected_output=tc_data.get('expected_output'),
+                is_sample=tc_data.get('is_sample', False),
+                weight=tc_data.get('weight', 1.0)
             )
-            test_cases.append(test_case)
+            test_cases.append(tc)
+            
         return test_cases
     
+    # Try to get from in-memory cache
     try:
-        test_cases = list(question.test_cases.all())
+        # Run the async function in a synchronous context
+        test_cases = asyncio.run(get_test_cases_async(question.id))
         
-        test_cases_data = [
-            {
-                'id': tc.id,
-                'question_id': tc.question_id,
-                'input_data': tc.input_data,
-                'expected_output': tc.expected_output,
-                'is_sample': tc.is_sample
-            }
-            for tc in test_cases
-        ]
-        
-        cache.set(cache_key, test_cases_data, timeout=TEST_CASE_CACHE_TIMEOUT)
-        
-        return test_cases
+        # If we have test cases from memory cache, also store in Redis cache for cross-process usage
+        if test_cases:
+            # Prepare data for caching
+            test_cases_data = []
+            for tc in test_cases:
+                tc_data = {
+                    'id': tc.id,
+                    'question_id': tc.question_id,
+                    'input_data': tc.input_data,
+                    'expected_output': tc.expected_output,
+                    'is_sample': tc.is_sample,
+                    'weight': tc.weight
+                }
+                test_cases_data.append(tc_data)
+            
+            # Cache the serialized test cases in Redis
+            cache.set(cache_key, json.dumps(test_cases_data), timeout=TEST_CASE_CACHE_TIMEOUT)
+            
+            return test_cases
     except Exception as e:
-        print(f"Error fetching test cases: {e}")
+        print(f"Error accessing in-memory cache for test cases: {e}")
+    
+    # If not in any cache, query the database directly
+    test_cases = list(TestCase.objects.filter(question=question, is_sample=False))
+    
+    # If no test cases found, check if we have any sample test cases to use
+    if not test_cases:
+        test_cases = list(TestCase.objects.filter(question=question, is_sample=True))
+    
+    # If still no test cases, return empty list
+    if not test_cases:
         return []
-
+    
+    # Prepare data for caching
+    test_cases_data = []
+    for tc in test_cases:
+        tc_data = {
+            'id': tc.id,
+            'question_id': tc.question_id,
+            'input_data': tc.input_data,
+            'expected_output': tc.expected_output,
+            'is_sample': tc.is_sample,
+            'weight': tc.weight
+        }
+        test_cases_data.append(tc_data)
+    
+    # Cache the serialized test cases
+    cache.set(cache_key, json.dumps(test_cases_data), timeout=TEST_CASE_CACHE_TIMEOUT)
+    
+    return test_cases
 
 def get_driver_code(request, question_id, language_id):
     question = get_object_or_404(Question, id=question_id)
@@ -275,23 +436,47 @@ def create_submission(user, question, source_code, language_id):
 def process_test_case_result(inputs, outputs, expected_outputs):
     """
     Compare outputs against expected outputs and prepare detailed results.
+    Enhanced to support better UI display with all-passed status.
     """
-    
-    # print("\nINPUTS IN PROCESS TC:", inputs)
-    # print("\nOUTPUTS IN PROCESS TC:", outputs)
-    # print("\nEXPECTED OUTPUTS IN PROCESS TC:", expected_outputs)
-    
     results = []
-    for input_data, expected_output, output in zip(inputs, expected_outputs, outputs):
+    all_passed = True
+    passed_count = 0
+    total_count = min(len(inputs), len(outputs), len(expected_outputs))
+    
+    for i in range(total_count):
+        input_data = inputs[i] if i < len(inputs) else "No input"
+        expected_output = expected_outputs[i] if i < len(expected_outputs) else "No expected output"
+        output = outputs[i] if i < len(outputs) else "No output"
+        
+        # Normalize whitespace for comparison
+        normalized_output = output.strip() if isinstance(output, str) else output
+        normalized_expected = expected_output.strip() if isinstance(expected_output, str) else expected_output
+        
+        # Compare the output with the expected output
+        passed = normalized_output == normalized_expected
+        
+        if passed:
+            passed_count += 1
+        else:
+            all_passed = False
+        
         result = {
             "input": input_data,
             "expected_output": expected_output,
             "user_output": output,
-            "passed": output == expected_output,
-            "status": "Passed" if output == expected_output else "Wrong Answer"
+            "passed": passed,
+            "status": "Passed" if passed else "Wrong Answer",
+            "test_number": i + 1  # 1-based index for display
         }
         results.append(result)
-    return results
+    
+    # Return both detailed results and summary information
+    return {
+        "test_cases": results,
+        "all_passed": all_passed,
+        "total": total_count,
+        "passed_count": passed_count
+    }
 
 
 def update_submission_status(submission, passed, total, total_submission_count, status=None):
@@ -356,39 +541,126 @@ def update_user_streak(user):
 
 # ============================================ SUBMIT CODE =========================================
 
+# Helper for retrieving driver code
+@sync_to_async
+def get_driver_code_from_db(question_id, language_id):
+    """
+    Synchronous function to get driver code that can be safely called with sync_to_async
+    """
+    question = Question.objects.get(id=question_id)
+    driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
+    if driver_code:
+        return driver_code.complete_driver_code
+    return None
 
+# Use a regular dict for caching instead of lru_cache to avoid coroutine reuse issues
+_driver_code_cache = {}
+
+async def get_driver_code_async(question_id, language_id):
+    """
+    Async function to get driver code with in-memory caching
+    Uses Django's sync_to_async for database operations
+    """
+    cache_key = f"{question_id}:{language_id}"
+    
+    # Check cache first
+    if cache_key in _driver_code_cache:
+        return _driver_code_cache[cache_key]
+    
+    # Get from database
+    driver_code = await get_driver_code_from_db(question_id, language_id)
+    
+    # Cache the result
+    if len(_driver_code_cache) > 100:  # Limit cache size
+        _driver_code_cache.clear()
+    _driver_code_cache[cache_key] = driver_code
+    
+    return driver_code
+
+# Helper function to safely run async code in a synchronous context
+def run_async_safely(coroutine):
+    """
+    Safely run an async coroutine in a synchronous context, handling event loop properly.
+    This avoids the 'Event loop is closed' error on Windows with ProactorEventLoop.
+    """
+    try:
+        # Get the current event loop
+        loop = asyncio.get_event_loop()
+        
+        # If the loop is closed, create a new one
+        if loop.is_closed():
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            loop = asyncio.get_event_loop()
+            
+        # Run the coroutine and return the result
+        return loop.run_until_complete(coroutine)
+    except RuntimeError as e:
+        if 'There is no current event loop in thread' in str(e):
+            # Create a new event loop if there isn't one in this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            return loop.run_until_complete(coroutine)
+        else:
+            raise
+
+# Sync version wrapper for backward compatibility
 def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_limit, memory_limit):
     """
+    Synchronous wrapper around async run_code_on_judge0_async function.
+    For backward compatibility with existing code.
+    """
+    return run_async_safely(run_code_on_judge0_async(
+        question, source_code, language_id, test_cases, cpu_time_limit, memory_limit
+    ))
+
+async def run_code_on_judge0_async(question, source_code, language_id, test_cases, cpu_time_limit, memory_limit):
+    """
     Send the code to Judge0 API for execution against multiple test cases.
-    Use caching for driver code.
+    Asynchronous version with connection pooling and exponential backoff.
     """
     cache_key = f"driver_code:{question.id}:{language_id}"
-    
     complete_source_code = source_code
     
     if not question.show_complete_driver_code:  # User ko complete code dikh rha h
-        # Try to get driver code from cache
-        cached_driver_code = cache.get(cache_key)
+        # Try to get driver code from cache (Redis)
+        cached_driver_code = await get_cache_value(cache_key)
         
         if cached_driver_code and 'code' in cached_driver_code:
             driver_code_complete = cached_driver_code['code']
             complete_source_code = driver_code_complete.replace("#USER_CODE#", source_code)
         else:
-            # If not in cache, fetch from database
-            driver_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
-            if driver_code:
-                complete_source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)
+            # Try in-memory cache first
+            try:
+                driver_code_complete = await get_driver_code_async(question.id, language_id)
+                if driver_code_complete:
+                    complete_source_code = driver_code_complete.replace("#USER_CODE#", source_code)
+                    # Also set in Redis cache for cross-process caching
+                    await set_cache_value(
+                        cache_key, 
+                        {"success": True, "code": driver_code_complete},
+                        DRIVER_CODE_CACHE_TIMEOUT
+                    )
+            except Exception as e:
+                print(f"Error accessing in-memory cache: {e}")
+                # Use sync_to_async for database operations
+                get_driver_code_fallback = sync_to_async(lambda q, lid: DriverCode.objects.filter(question=q, language_id=lid).first())
+                driver_code = await get_driver_code_fallback(question, language_id)
                 
-                # Cache the driver code
-                cache.set(cache_key, {"success": True, "code": driver_code.complete_driver_code}, 
-                          timeout=DRIVER_CODE_CACHE_TIMEOUT)
+                if driver_code:
+                    complete_source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)
+                    # Cache the driver code
+                    await set_cache_value(
+                        cache_key,
+                        {"success": True, "code": driver_code.complete_driver_code},
+                        DRIVER_CODE_CACHE_TIMEOUT
+                    )
 
-    # Prepare single stdin batch input for Judge0 (~ s hi separate kr rhe hn result ko)
+    # Prepare single stdin batch input for Judge0
     stdin = f"{len(test_cases)}~"
     for test_case in test_cases:
         stdin += f"{test_case.input_data}~"
 
-    # ✅ Convert "~" to newline "\n" before encoding
+    # Convert "~" to newline "\n" before encoding
     stdin = stdin.replace("~", "\n")  
     
     encoded_code = base64.b64encode(complete_source_code.encode('utf-8')).decode('utf-8')
@@ -402,32 +674,52 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
         "wall_time_limit": cpu_time_limit,
         "memory_limit": memory_limit * 1000,
         "enable_per_process_and_thread_time_limit": True,
-        "base64_encoded": True  # Flag to let Judge0 know the code is Base64-encoded
+        "base64_encoded": True
     }
 
     try:
-        # 📝 Submit Code to Judge0
-        response = requests.post(JUDGE0_URL + "?base64_encoded=true", json=submission_data, headers=HEADERS, timeout=10)
-        response.raise_for_status()
-        
-        token = response.json().get("token")
-        if not token:
-            return {"error": "No token received from Judge0.", "outputs": None, "token": None}
+        # Create a fresh session for each request to avoid session reuse issues
+        # This is safer than reusing a global session in a Django environment
+        async with aiohttp.ClientSession(headers=HEADERS) as session:
+            # Submit Code to Judge0 using connection pool
+            async with session.post(
+                JUDGE0_URL + "?base64_encoded=true", 
+                json=submission_data, 
+                timeout=10
+            ) as response:
+                response.raise_for_status()
+                response_data = await response.json()
+                
+                token = response_data.get("token")
+                if not token:
+                    return {"error": "No token received from Judge0.", "outputs": None, "token": None}
 
-        print("✅ TOKEN:", token)
-        
-        # ⏳ Poll Until Completion
-        while True:
-            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
-            result = result_response.json()
-            status_id = result.get("status", {}).get("id")
-
-            if status_id not in [1, 2]:  # Finished Processing
-                break
-            time.sleep(1)
+                print("✅ TOKEN:", token)
             
+            # Poll Until Completion with improved exponential backoff
+            max_retries = 15  # Increased max retries
+            backoff = 0.5  # Start with a smaller backoff
+            jitter = 0.1  # Add jitter to avoid thundering herd problem
+            
+            result = None
+            for retry in range(max_retries):
+                async with session.get(
+                    f"{JUDGE0_URL}/{token}?base64_encoded=true", 
+                    timeout=10
+                ) as result_response:
+                    result_response.raise_for_status()
+                    result = await result_response.json()
+                    status_id = result.get("status", {}).get("id")
+                    
+                    if status_id not in [1, 2]:  # Finished processing
+                        break
+                        
+                    # Enhanced exponential backoff with jitter
+                    sleep_time = min(backoff * (1.0 + random.uniform(-jitter, jitter)), 10.0)  # Cap at 10 seconds
+                    await asyncio.sleep(sleep_time)
+                    backoff = min(backoff * 2.0, 10.0)  # Double the backoff but capped
         
-        # ❗ ------------------------------- Handle Errors ---------------------------
+        # Handle Errors
         if result.get("stderr"):
             stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
             print("❌ STDERR:", stderr)
@@ -444,7 +736,7 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
         if result.get("status", {}).get("id") == 6:
             return {"error": "Compilation Error", "token": token}
 
-        # ✅ Decode Outputs
+        # Decode Outputs
         outputs = result.get("stdout", "")
         
         if outputs:
@@ -459,8 +751,8 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
 
         return {"outputs": outputs, "token": token}
 
-    except requests.exceptions.RequestException as e:
-        return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
+    except aiohttp.ClientError as e:
+        return {"error": f"AIOHTTP Request Error: {str(e)}", "outputs": None, "token": None}
     except Exception as e:
         return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
 
@@ -468,188 +760,412 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
 @csrf_exempt
 def submit_code(request, slug):
     """
-    Handle user code submission for a problem, with improved caching.
+    Handle user code submission for a problem with asyncio support.
+    This is a synchronous wrapper around the async implementation for backward compatibility.
     """
-    
-    if request.method == 'POST':      
-        try:
-            start = time.time()
-            # Validate inputs
-            question = get_object_or_404(Question, slug=slug)
-            user = request.user.student            
+    if request.method == 'POST':
+        return run_async_safely(submit_code_async(request, slug))
+    return JsonResponse({"error": "Method not allowed"}, status=405)
 
-            language_id = request.POST.get('language_id')
-            source_code = request.POST.get('submission_code')
-            
-            if not language_id or not source_code:
-                return JsonResponse({"error": "Missing language ID or source code."}, status=400)
+# Additional helper functions for database operations in async context
+@sync_to_async
+def get_question_by_slug(slug):
+    return get_object_or_404(Question, slug=slug)
 
-            test_cases = get_test_cases(question)
-            
-            if not test_cases:
-                return JsonResponse({"error": "No test cases available for this question."}, status=400)
+@sync_to_async
+def get_sheet_for_question(question):
+    return Sheet.objects.filter(questions=question, is_approved=True).first()
 
-            sheet = Sheet.objects.filter(questions=question, is_approved=True).first()
+@sync_to_async
+def get_student_from_user(user):
+    """Safely get student profile from user in async context"""
+    return user.student
 
-            if sheet and not sheet.is_enabled:
-                return JsonResponse({"sheet_disabled": "Sheet not enabled."}, status=400)
+@sync_to_async
+def create_submission_async(user, question, source_code, language_id):
+    return create_submission(user, question, source_code, language_id)
 
-            # Create a submission record
-            submission = create_submission(user, question, source_code, language_id)
+@sync_to_async
+def get_submission_count(user, question):
+    return Submission.objects.filter(user=user, question=question).count()
 
-            # Run the code and process results
-            judge0_response = run_code_on_judge0(question, source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
-            
-            if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
-                                
-                result = {
-                    "error": judge0_response.get("error"),
-                    "token": judge0_response.get("token")
-                }
-                
-                update_submission_status(submission, 0, len(test_cases), 0, status="Compilation Error")
-                
-                if judge0_response.get("compile_output"):
-                    result["compile_output"] = judge0_response.get("compile_output")
-                
-                return JsonResponse(result, status=400)
+@sync_to_async
+def update_submission_status_async(submission, passed, total, total_submission_count, status=None):
+    return update_submission_status(submission, passed, total, total_submission_count, status)
 
-            # Process successful outputs
-            outputs = judge0_response["outputs"]
-            expected_outputs = [normalize_output(tc.expected_output) for tc in test_cases]
-            inputs = [tc.input_data for tc in test_cases]
-            
-            test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
-            passed_test_cases = sum(1 for result in test_case_results if result['passed'])
-            
-            # Use a cached query to get submission count
-            submission_count_key = f"submission_count:{user.id}:{question.id}"
-            total_submission_count = cache.get(submission_count_key)
-            
-            if total_submission_count is None:
-                total_submission_count = Submission.objects.filter(user=user, question=question).count()
-                cache.set(submission_count_key, total_submission_count, timeout=60*5)  # 5 minutes cache
-            
-            # Update submission
-            score = update_submission_status(submission, passed_test_cases, len(test_cases), total_submission_count)
-            
-            # Increment cached submission count
-            cache.set(submission_count_key, total_submission_count + 1, timeout=60*5)
-            
-            # Update user coins
-            update_coin(user, score, question)       
-            
-            end = time.time()
-            
-            print(f"\n\n TIME TAKEN: {end-start} \n\n")
+@sync_to_async
+def update_coin_async(user, score, question):
+    return update_coin(user, score, question)
 
-            return JsonResponse({
-                "test_case_results": test_case_results,
-                "submission_id": submission.id,
-                "status": submission.status,
-                "score": submission.score,
-                "compile_output": None,  # No compilation error
-                "token": judge0_response.get("token"),
-                "is_all_test_cases_passed": passed_test_cases == len(test_cases)
-            })
+@sync_to_async
+def get_cache_value(key):
+    return cache.get(key)
 
-        except Question.DoesNotExist:
+@sync_to_async
+def set_cache_value(key, value, timeout=None):
+    return cache.set(key, value, timeout=timeout)
+
+@sync_to_async
+def get_post_data(request, key):
+    """Safely get POST data in async context"""
+    return request.POST.get(key)
+
+@sync_to_async
+def parse_json_body(request):
+    """Safely parse JSON body in async context"""
+    return json.loads(request.body)
+
+async def submit_code_async(request, slug):
+    """
+    Asynchronous implementation of code submission with improved performance.
+    Uses Django's sync_to_async for all database operations.
+    """
+    start_time = time.time()
+    try:
+        # Validate inputs
+        question = await get_question_by_slug(slug)
+        # Safely get student in async context
+        user = await get_student_from_user(request.user)            
+
+        # Safely get POST data in async context
+        language_id = await get_post_data(request, 'language_id')
+        source_code = await get_post_data(request, 'submission_code')
+        
+        if not language_id or not source_code:
+            return JsonResponse({"error": "Missing language ID or source code."}, status=400)
+
+        # Use async test case fetching via in-memory cache when possible
+        test_cases = await get_test_cases_async(question.id)
+        if not test_cases:
+            # Fallback to synchronous get_test_cases if async version returns nothing
+            # Use thread executor for this CPU-bound operation
+            test_cases_sync = sync_to_async(get_test_cases)
+            test_cases = await test_cases_sync(question)
+        
+        if not test_cases:
+            return JsonResponse({"error": "No test cases available for this question."}, status=400)
+
+        sheet = await get_sheet_for_question(question)
+
+        if sheet and not sheet.is_enabled:
+            return JsonResponse({"sheet_disabled": "Sheet not enabled."}, status=400)
+
+        # Record operation time for fetching dependencies
+        dependencies_time = time.time() - start_time
+        
+        # Create a submission record asynchronously
+        submission_start = time.time()
+        submission = await create_submission_async(user, question, source_code, language_id)
+        submission_time = time.time() - submission_start
+
+        # Run the code using the async version and process results
+        judge0_start = time.time()
+        judge0_response = await run_code_on_judge0_async(question, source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
+        judge0_time = time.time() - judge0_start
+        
+        if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
+            result = {
+                "error": judge0_response.get("error"),
+                "token": judge0_response.get("token")
+            }
+            
+            await update_submission_status_async(submission, 0, len(test_cases), 0, status="Compilation Error")
+            
+            if judge0_response.get("compile_output"):
+                result["compile_output"] = judge0_response.get("compile_output")
+            
+            end_time = time.time()
+            print(f"PERFORMANCE: Error submission took {end_time - start_time:.2f}s (Dependencies: {dependencies_time:.2f}s, Submission: {submission_time:.2f}s, Judge0: {judge0_time:.2f}s)")
+            
+            return JsonResponse(result, status=400)
+
+        # Process successful outputs
+        processing_start = time.time()
+        outputs = judge0_response["outputs"]
+        
+        # Use thread to run CPU-bound operations concurrently
+        normalize_async = sync_to_async(normalize_output)
+        expected_outputs = await asyncio.gather(*[
+            normalize_async(tc.expected_output) for tc in test_cases
+        ])
+        inputs = [tc.input_data for tc in test_cases]
+        
+        # Process test case results with sync_to_async
+        process_results_async = sync_to_async(process_test_case_result)
+        result_data = await process_results_async(inputs, outputs, expected_outputs)
+        
+        # Extract test case results and summary information
+        test_case_results = result_data["test_cases"]
+        all_passed = result_data["all_passed"]
+        passed_test_cases = result_data["passed_count"]
+        total_test_cases = result_data["total"]
+        
+        # Use a cached query to get submission count with improved caching
+        submission_count_key = f"submission_count:{user.id}:{question.id}"
+        total_submission_count = await get_cache_value(submission_count_key)
+        
+        if total_submission_count is None:
+            total_submission_count = await get_submission_count(user, question)
+            await set_cache_value(submission_count_key, total_submission_count, 60*5)  # 5 minutes cache
+        
+        # Update submission status asynchronously
+        score = await update_submission_status_async(submission, passed_test_cases, len(test_cases), total_submission_count)
+        
+        # Increment cached submission count
+        await set_cache_value(submission_count_key, total_submission_count + 1, 60*5)
+        
+        # Update user coins asynchronously
+        await update_coin_async(user, score, question)
+        processing_time = time.time() - processing_start
+        
+        end_time = time.time()
+        print(f"PERFORMANCE: Successful submission took {end_time - start_time:.2f}s (Dependencies: {dependencies_time:.2f}s, Submission: {submission_time:.2f}s, Judge0: {judge0_time:.2f}s, Processing: {processing_time:.2f}s)")
+
+        # Prepare response with enhanced UI support
+        response_data = {
+            "test_case_results": test_case_results,
+            "submission_id": submission.id,
+            "status": submission.status,
+            "score": submission.score,
+            "compile_output": None,  # No compilation error
+            "token": judge0_response.get("token"),
+            "is_all_test_cases_passed": all_passed,
+            "summary": {
+                "all_passed": all_passed,
+                "passed_count": passed_test_cases,
+                "total": total_test_cases
+            }
+        }
+        
+        # Add display mode for UI enhancement - ALWAYS use success_badge when all tests pass
+        if all_passed:
+            # For all passed tests, use success_badge mode and don't need to include detailed results
+            response_data["display_mode"] = "success_badge"
+            # Keep only summary data to reduce response size
+            response_data["test_case_results"] = []
+        else:
+            # Sort test cases to show failed ones first
+            sorted_results = sorted(test_case_results, key=lambda x: (x["passed"], x.get("test_number", 1)))
+            response_data["test_case_results"] = sorted_results
+            response_data["display_mode"] = "detailed"
+            
+        return JsonResponse(response_data)
+
+    except Question.DoesNotExist:
+            end_time = time.time()
+            print(f"PERFORMANCE: Question not found error took {end_time - start_time:.2f}s")
             return JsonResponse({
                 "error": "Question not found.",
                 "token": judge0_response.get("token") if 'judge0_response' in locals() else None
                 }, status=404)
-        except Exception as e:
-            print(f"Error in submit code views: {e}")
-            return JsonResponse({
-                "error": "Error in submit code backend: " + str(e),
-                "token": judge0_response.get("token") if 'judge0_response' in locals() else None
-                }, status=400)
+    except Exception as e:
+        end_time = time.time()
+        print(f"PERFORMANCE: Exception occurred, took {end_time - start_time:.2f}s")
+        print(f"Error in submit code views: {e}")
+        return JsonResponse({
+            "error": "Error in submit code backend: " + str(e),
+            "token": judge0_response.get("token") if 'judge0_response' in locals() else None
+            }, status=400)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
-
 
 # =================================== RUN CODE AGAINST SAMPLE TEST CASES ===========================
 
 @csrf_exempt
 def run_code(request, slug):
-    if request.method == 'POST':
-        try:
-            question = get_object_or_404(Question, slug=slug)
-            user = request.user.student
+    """
+    Run code against sample test cases (synchronous wrapper).
+    """
+    if request.method != 'POST':
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        source_code = data.get('code', '')
+        language_id = data.get('language_id')
+        sample_test_cases_only = data.get('sample_test_cases_only', True)
+        
+        if not source_code or not language_id:
+            return JsonResponse({"error": "Missing source code or language."}, status=400)
+        
+        # Use run_async_safely to handle event loop issues
+        return run_async_safely(
+            run_code_async(slug, source_code, language_id, request.user, sample_test_cases_only)
+        )
+        
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        print(f"Error in run_code: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
+@sync_to_async
+def get_sample_test_cases(question):
+    """
+    Retrieve only sample test cases for a question
+    """
+    return list(TestCase.objects.filter(question=question, is_sample=True))
+
+async def run_code_async(slug, source_code, language_id, user, sample_test_cases_only=True):
+    """
+    Run code against sample test cases with async processing.
+    Uses Django's sync_to_async for all database operations.
+    """
+    start_time = time.time()
+    judge0_response = {}
+    
+    try:
+        # Get question using sync_to_async
+        get_question = sync_to_async(lambda s: Question.objects.get(slug=s))
+        question = await get_question(slug)
+        
+        # Get sample test cases
+        test_cases = await get_sample_test_cases(question)
+        
+        if not test_cases:
+            return JsonResponse({"error": "No sample test cases found."}, status=400)
+        
+        # Log the time taken for setup
+        setup_time = time.time() - start_time
+        
+        # Execute code with performance monitoring using async version
+        judge0_start = time.time()
+        judge0_response = await run_code_on_judge0_async(question, source_code, language_id, test_cases, question.cpu_time_limit, question.memory_limit)
+        judge0_time = time.time() - judge0_start
+        
+        # Handle execution errors
+        if judge0_response.get("error") or judge0_response.get("compile_output"):
+            result = {
+                "error": judge0_response.get("error"),
+                "token": judge0_response.get("token")
+            }
             
-            data = json.loads(request.body)
-            language_id = data.get('language_id')
-            source_code = data.get('code')   
+            if judge0_response.get("compile_output"):
+                result["compile_output"] = judge0_response.get("compile_output")
             
-
-            if not language_id or not source_code:
-                return JsonResponse({"error": "Missing language ID or source code."}, status=400)
-
-            # Fetch sample test cases
-            sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
-            if not sample_test_cases:
-                return JsonResponse({"error": "No sample test cases available."}, status=400)
-
-            # Execute code against sample test cases
-            judge0_response = run_code_on_judge0(
-                question,
-                source_code,
-                language_id,
-                sample_test_cases,
-                question.cpu_time_limit,
-                question.memory_limit
-            )
-                        
-            if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
-                                
-                result = {
-                    "error": judge0_response.get("error"),
-                    "token": judge0_response.get("token")
-                }
-                
-                if judge0_response.get("compile_output"):                    
-                    result["compile_output"] = judge0_response.get("compile_output")
-                
-                return JsonResponse(result, status=400)
-
-            # Process outputs
-            outputs = judge0_response["outputs"]
-                
-            expected_outputs = [normalize_output(tc.expected_output) for tc in sample_test_cases]
-            inputs = [tc.input_data for tc in sample_test_cases]
-
-            test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
-                        
-            return JsonResponse({
-                "status": "Success",
-                "test_case_results": test_case_results
-            })
-
-        except Exception as e:
-            print(f"Error during code execution: {e}")
-            return JsonResponse({
-                "error": "Some Error Occued: " + str(e),
-                }, status=500)
-
-    return JsonResponse({"error": "Invalid request method."}, status=400)
+            end_time = time.time()
+            print(f"PERFORMANCE: Run code error took {end_time - start_time:.2f}s (Setup: {setup_time:.2f}s, Judge0: {judge0_time:.2f}s)")
+            return JsonResponse(result, status=400)
+        
+        # Process results with concurrent operations
+        processing_start = time.time()
+        outputs = judge0_response["outputs"]
+        
+        # Get expected outputs
+        expected_outputs = await asyncio.gather(*[
+            asyncio.to_thread(normalize_output, tc.expected_output) for tc in test_cases
+        ])
+        inputs = [tc.input_data for tc in test_cases]
+        
+        # Process test case results
+        process_results = sync_to_async(process_test_case_result)
+        result_data = await process_results(inputs, outputs, expected_outputs)
+        
+        # Extract results and summary information
+        test_case_results = result_data["test_cases"]
+        all_passed = result_data["all_passed"]
+        passed_count = result_data["passed_count"]
+        total_count = result_data["total"]
+        
+        processing_time = time.time() - processing_start
+        
+        end_time = time.time()
+        print(f"PERFORMANCE: Successful run took {end_time - start_time:.2f}s (Setup: {setup_time:.2f}s, Judge0: {judge0_time:.2f}s, Processing: {processing_time:.2f}s)")
+        
+        # When all tests pass, we'll only include a summary in the response
+        # This will allow the UI to show a simple green badge instead of all test cases
+        response_data = {
+            "token": judge0_response.get("token"),
+            "is_all_test_cases_passed": all_passed,
+            "summary": {
+                "all_passed": all_passed,
+                "passed_count": passed_count,
+                "total": total_count
+            }
+        }
+        
+        # Different UI display modes for run_code vs submit_code
+        # Sort test cases to always show failed ones first
+        sorted_results = sorted(test_case_results, key=lambda x: (x["passed"], x["test_number"]))
+        
+        # Check if this is a run_code or submit_code operation
+        if not sample_test_cases_only:  # This is a submit_code operation
+            if all_passed:
+                # For all passed tests on submission, use success_badge mode
+                response_data["display_mode"] = "success_badge"
+                response_data["test_case_results"] = []  # Reduce response size for submissions
+            else:
+                response_data["test_case_results"] = sorted_results
+                response_data["display_mode"] = "detailed"
+        else:  # This is a run_code operation
+            # For run_code, always show detailed results regardless of pass/fail status
+            response_data["test_case_results"] = sorted_results
+            response_data["display_mode"] = "detailed"
+            
+        return JsonResponse(response_data)
+        
+    except Exception as e:
+        end_time = time.time()
+        print(f"PERFORMANCE: Run code exception took {end_time - start_time:.2f}s")
+        print(f"Error in run_code_async: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            "error": str(e),
+            "token": judge0_response.get("token") if 'judge0_response' in locals() else None
+        }, status=400)
 
 # ============================================= CUSTOM INPUT =======================================
 
+@csrf_exempt
 def custom_input(request, slug):
-    if request.method == 'POST':
-        question = get_object_or_404(Question, slug=slug)
-        
-        data = json.loads(request.body)
-        
+    """
+    Handle custom input code execution (synchronous wrapper).
+    """
+    if request.method != 'POST':
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        source_code = data.get('code', '')
         language_id = data.get('language_id')
-        source_code = data.get('code')
-        input_data = data.get('input')
+        custom_input_data = data.get('custom_input', '')
         
-        if not language_id or not source_code or not input_data:
+        if not source_code or not language_id:
+            return JsonResponse({"error": "Missing source code or language."}, status=400)
+        
+        # Use run_async_safely to handle event loop issues
+        return run_async_safely(
+            custom_input_async(slug, source_code, language_id, custom_input_data, request.user)
+        )
+        
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON data"}, status=400)
+    except Exception as e:
+        print(f"Error in custom_input: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"error": str(e)}, status=500)
+
+async def custom_input_async(slug, source_code, language_id, custom_input_data, user):
+    """
+    Handle custom input code execution with async processing.
+    """
+    start_time = time.time()
+    judge0_response = {}
+    
+    try:
+        # Get question using sync_to_async
+        get_question = sync_to_async(lambda s: Question.objects.get(slug=s))
+        question = await get_question(slug)
+        
+        if not language_id or not source_code or not custom_input_data:
             return JsonResponse({"error": "Missing language ID, source code, or input data."}, status=400)
         
         # Split the input into lines
-        input_lines = input_data.strip().split('\n')
+        input_lines = custom_input_data.strip().split('\n')
         
         try:
             num_test_cases = int(input_lines[0])
@@ -660,14 +1176,15 @@ def custom_input(request, slug):
         if len(test_case_inputs) != num_test_cases:
             return JsonResponse({"error": "Number of provided inputs does not match the specified number of test cases."}, status=400)
         
-        # Create test cases
+        # Create test cases - this is just in-memory operation, no DB access
         test_cases = [
             TestCase(question=question, input_data=tc_input, expected_output="")
             for tc_input in test_case_inputs
         ]
         
-        # Run code on Judge0
-        judge0_response = run_code_on_judge0(
+        # Run code on Judge0 with async processing
+        judge0_start = time.time()
+        judge0_response = await run_code_on_judge0_async(
             question,
             source_code,
             language_id,
@@ -675,6 +1192,7 @@ def custom_input(request, slug):
             question.cpu_time_limit,
             question.memory_limit
         )
+        judge0_time = time.time() - judge0_start
         
         if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
             result = {
@@ -683,29 +1201,56 @@ def custom_input(request, slug):
             }
             if judge0_response.get("compile_output"):
                 result["compile_output"] = judge0_response.get("compile_output")
+                
+            end_time = time.time()
+            print(f"PERFORMANCE: Custom input error took {end_time - start_time:.2f}s (Judge0: {judge0_time:.2f}s)")
             return JsonResponse(result, status=400)
         
+        # Process results
+        processing_start = time.time()
         outputs = judge0_response["outputs"]
         
-        # Set expected outputs if not already set
+        # Set expected outputs if not already set - can be done in parallel for performance
+        test_cases_with_output = []
+        passed_count = len(test_cases)  # For custom input, all are considered passed
+        
         for i, test_case in enumerate(test_cases):
+            output = outputs[i] if i < len(outputs) else "No output"
             if test_case.expected_output == "":
-                test_case.expected_output = outputs[i]
-        
-        results = [
-            {
+                test_case.expected_output = output
+            
+            # For custom input, we consider all outputs as correct
+            test_cases_with_output.append({
                 "input": test_case.input_data,
-                "expected_output": test_case.expected_output
-            }
-            for test_case in test_cases
-        ]
+                "expected_output": test_case.expected_output,
+                "user_output": output,
+                "passed": True,
+                "status": "Passed",
+                "test_number": i + 1
+            })
+            
+        processing_time = time.time() - processing_start
+        end_time = time.time()
+        print(f"PERFORMANCE: Custom input success took {end_time - start_time:.2f}s (Judge0: {judge0_time:.2f}s, Processing: {processing_time:.2f}s)")
         
+        # Return with the enhanced UI format - consistent with other endpoints
         return JsonResponse({
             "status": "Success",
-            "test_case_results": results
+            "test_case_results": [],  # Don't include detailed results for success badge mode
+            "is_all_test_cases_passed": True,
+            "summary": {
+                "all_passed": True,
+                "passed_count": passed_count,
+                "total": len(test_cases_with_output)
+            },
+            "display_mode": "success_badge"  # Signal for frontend to show a success badge
         })
         
-    return JsonResponse({"error": "Invalid request method."}, status=400)
+    except Exception as e:
+        end_time = time.time()
+        print(f"PERFORMANCE: Custom input exception took {end_time - start_time:.2f}s")
+        print(f"Error: {str(e)}")
+        return JsonResponse({"error": str(e)}, status=400)
 
 # ============================================= UNLOCK HINT ========================================
 
@@ -744,6 +1289,59 @@ def fetch_recommended_questions(request, slug):
     
     return JsonResponse({"status": "success", "questions": data})
 
+
+# ==================================================================================================
+# Resource management and cleanup
+# ==================================================================================================
+
+# Hook into Django's startup and shutdown signals to manage resources properly
+from django.apps import AppConfig
+from django.dispatch import receiver
+from django.db.models.signals import post_migrate
+import atexit
+import asyncio
+import signal
+import sys
+
+# Register the atexit handler to properly close aiohttp session
+@atexit.register
+def cleanup_resources():
+    """Ensure all resources are properly closed when the application exits"""
+    try:
+        loop = asyncio.get_event_loop()
+        if not loop.is_closed():
+            # Run the async cleanup function in the event loop
+            if _aiohttp_session and not _aiohttp_session.closed:
+                loop.run_until_complete(close_aiohttp_session())
+    except Exception as e:
+        print(f"Error during resource cleanup: {e}")
+
+# Register signal handlers for graceful shutdown
+def signal_handler(sig, frame):
+    """Handle termination signals by cleaning up resources before exit"""
+    print(f"Received signal {sig}, cleaning up resources...")
+    cleanup_resources()
+    sys.exit(0)
+
+# Register common termination signals
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
+
+# This ensures our cleanup happens even when Django auto-reloads during development
+def reload_handler():
+    """Clean up resources during development server reload"""
+    cleanup_resources()
+
+# If in Django development server, hook into its reload mechanism
+if 'runserver' in sys.argv:
+    try:
+        from django.utils.autoreload import autoreload_started
+        @receiver(autoreload_started)
+        def on_autoreload(sender, **kwargs):
+            atexit.register(reload_handler)
+    except ImportError:
+        # Older Django versions
+        pass
 
 # ==================================================================================================
 
