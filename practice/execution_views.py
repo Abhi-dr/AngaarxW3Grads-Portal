@@ -22,7 +22,7 @@ from asgiref.sync import sync_to_async, async_to_sync
 # Constants
 JUDGE0_URL = "https://theangaarbatch.in/judge0/submissions"
 HEADERS = {
-    "X-RapidAPI-Host": "98.83.136.105:2358",
+    
     "Content-Type": "application/json"
 }
 DRIVER_CODE_CACHE_TIMEOUT = 60 * 60 * 24  # 24 hours (increased from previous value)
