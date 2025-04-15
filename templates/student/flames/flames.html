@@ -825,10 +825,12 @@ active
                 const registrationId = this.getAttribute('data-registration-id');
 
                 // Call the API to initialize payment
+                // Using complete URL path to ensure proper routing
                 fetch(`/dashboard/payment/initiate-payment/${registrationId}/`)
                     .then(response => {
                         if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
+                            console.error(`Payment initialization HTTP error! Status: ${response.status}`, response);
+                            throw new Error(`HTTP error! Status: ${response.status}. Please check the URL path: /dashboard/payment/initiate-payment/${registrationId}/`);
                         }
                         return response.json();
                     })

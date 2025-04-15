@@ -342,10 +342,12 @@ active
                     const registrationId = this.getAttribute('data-registration-id');
 
                     // Call the API to initialize payment
+                    // Using complete URL path to ensure proper routing
                     fetch(`/dashboard/payment/initiate-payment/${registrationId}/`)
                         .then(response => {
                             if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
+                                console.error(`Payment initialization HTTP error! Status: ${response.status}`, response);
+                                throw new Error(`HTTP error! Status: ${response.status}. Please check the URL path: /dashboard/payment/initiate-payment/${registrationId}/`);
                             }
                             return response.json();
                         })
@@ -441,20 +443,31 @@ active
                                     } else {
                                         payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
                                     }
+                                    console.log('Restored button text:', payButton.innerHTML);
                                 }
                             } else {
                                 // Show error message
                                 console.error('Payment initialization failed:', data.error);
                                 alert(`Payment initialization failed: ${data.error}`);
                                 payButton.disabled = false;
-                                payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                                // Restore button text based on location
+                                if (payButton.id === 'header-pay-btn') {
+                                    payButton.innerHTML = 'Complete My Registration🔥';
+                                } else {
+                                    payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                                }
                             }
                         })
                         .catch(error => {
                             console.error('Error initializing payment:', error);
                             alert(`An error occurred while initializing payment: ${error.message}`);
                             payButton.disabled = false;
-                            payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                            // Restore button text based on location
+                            if (payButton.id === 'header-pay-btn') {
+                                payButton.innerHTML = 'Complete My Registration🔥';
+                            } else {
+                                payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>Pay Now';
+                            }
                         });
                 });
             }
