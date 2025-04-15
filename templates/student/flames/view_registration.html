@@ -9,6 +9,48 @@ active
 {{ registration.course.title }} | Registration
 {% endblock %}
 
+{% block extra_css %}
+
+<style>
+    a {
+        font-size: 1.5rem;
+        padding: 1rem 3rem;
+        color: #f4f4f4;
+        
+      }
+
+    .btn {
+        text-decoration: none;
+        border: 1px solid rgb(146, 148, 248);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn:hover {
+        box-shadow: 1px 1px 25px 10px rgba(146, 148, 248, 0.4);
+    }
+
+    .btn:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg,
+                transparent,
+                rgba(146, 148, 248, 0.4),
+                transparent);
+        transition: all 650ms;
+    }
+
+    .btn:hover:before {
+        left: 100%;
+    }
+</style>
+
+{% endblock %}
+
 {% block body %}
 <div class="container-fluid">
     <!-- Registration Header -->
@@ -23,13 +65,21 @@ active
                         </div>
                         <span
                             class="badge {% if registration.status == 'Approved' %}bg-success{% elif registration.status == 'Pending' %}bg-warning{% elif registration.status == 'Rejected' %}bg-danger{% else %}bg-info{% endif %} p-2">
-                            {{ registration.status }}
+                            Payment {{ registration.status }}
                         </span>
                     </div>
                 </div>
+                {% if not registration.payment_id and registration.status != 'Completed' %}
+                    <div class="justify-center text-center">
+                        <a id="pay-now-btn" class="btn text-white w-75 mb-3 mt-n3" data-registration-id="{{ registration.id }}">
+                            Complete My Registration🔥
+                        </a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
 
     <div class="row">
         <!-- Registration Details -->
@@ -90,33 +140,35 @@ active
                         <span>Original Price (per person)</span>
                         <span>₹{{ registration.original_price }}</span>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between mb-3">
                         <span>Team Size</span>
                         <span>5 members</span>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between mb-3">
                         <span>Subtotal</span>
-                        <span>₹{{ registration.original_price }} × 5 = ₹{{ registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price }}</span>
+                        <span>₹{{ registration.original_price }} × 5 = ₹{{
+                            registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price
+                            }}</span>
                     </div>
-                    
+
                     <div class="d-flex justify-content-between mb-3">
                         <span>Team Discount</span>
                         <span>- ₹499 × 5 = - ₹2,495</span>
                     </div>
                     <hr>
-                    
+
                     <div class="d-flex justify-content-between fw-bold">
                         <span>Final Price (for team)</span>
                         <span>₹{{ registration.payable_amount }}</span>
                     </div>
-                    
+
                     <div class="mt-3 small">
                         <span class="badge bg-success">Team Registration</span>
                         <span class="ms-2">5 members with team discount</span>
                     </div>
-                    
+
                     {% else %}
                     <div class="d-flex justify-content-between mb-3">
                         <span>Original Price</span>
@@ -143,7 +195,7 @@ active
                         {% endif %}
                     </div>
                     {% endif %}
-                    
+
                     {% if registration.status == 'Rejected' %}
                     <div class="mt-4">
                         <div class="alert alert-danger mb-0">
@@ -152,8 +204,9 @@ active
                     </div>
                     {% elif not registration.payment_id and registration.status != 'Completed' %}
                     <div class="mt-4">
-                        <button id="pay-now-btn" class="btn btn-success w-100" data-registration-id="{{ registration.id }}">
-                            <i class="fas fa-credit-card me-2"></i>Pay Now
+                        <button id="pay-now-btn" class="btn btn-primary w-100"
+                            data-registration-id="{{ registration.id }}">
+                            Pay Now
                         </button>
                     </div>
                     {% elif registration.payment_id or registration.status == 'Completed' %}
@@ -277,17 +330,17 @@ active
 <!-- Razorpay Integration -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const payButton = document.getElementById('pay-now-btn');
-        
+
         if (payButton) {
-            payButton.addEventListener('click', function() {
+            payButton.addEventListener('click', function () {
                 // Disable button to prevent multiple clicks
                 payButton.disabled = true;
                 payButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-                
+
                 const registrationId = this.getAttribute('data-registration-id');
-                
+
                 // Call the API to initialize payment
                 fetch(`/dashboard/payment/initiate-payment/${registrationId}/`)
                     .then(response => {
@@ -299,7 +352,7 @@ active
                     .then(data => {
                         if (data.success) {
                             console.log('Payment initialization successful:', data);
-                            
+
                             // Initialize Razorpay checkout
                             const options = {
                                 key: '{{ razorpay_key_id }}',
@@ -309,22 +362,22 @@ active
                                 description: data.description || 'Course Registration',
                                 order_id: data.order_id,
                                 prefill: data.prefill || {},
-                                handler: function(response) {
+                                handler: function (response) {
                                     console.log('Payment successful:', response);
                                     payButton.innerHTML = '<i class="fas fa-check me-2"></i>Payment Successful';
-                                    
+
                                     // Submit payment details to backend
                                     const form = document.createElement('form');
                                     form.method = 'POST';
                                     form.action = '{% url "payment_callback" %}';
-                                    
+
                                     // Add CSRF token
                                     const csrfToken = document.createElement('input');
                                     csrfToken.type = 'hidden';
                                     csrfToken.name = 'csrfmiddlewaretoken';
                                     csrfToken.value = '{{ csrf_token }}';
                                     form.appendChild(csrfToken);
-                                    
+
                                     // Add payment details
                                     for (const key in response) {
                                         const input = document.createElement('input');
@@ -333,20 +386,20 @@ active
                                         input.value = response[key];
                                         form.appendChild(input);
                                     }
-                                    
+
                                     // Add registration ID
                                     const regIdInput = document.createElement('input');
                                     regIdInput.type = 'hidden';
                                     regIdInput.name = 'registration_id';
                                     regIdInput.value = registrationId;
                                     form.appendChild(regIdInput);
-                                    
+
                                     // Submit the form
                                     document.body.appendChild(form);
                                     form.submit();
                                 },
                                 modal: {
-                                    ondismiss: function() {
+                                    ondismiss: function () {
                                         console.log('Checkout modal closed');
                                         // Re-enable button if payment modal is dismissed
                                         payButton.disabled = false;
@@ -357,11 +410,11 @@ active
                                     color: '#4273fa'
                                 }
                             };
-                            
+
                             try {
                                 console.log('Opening Razorpay checkout with options:', options);
                                 const razorpay = new Razorpay(options);
-                                razorpay.on('payment.failed', function(response) {
+                                razorpay.on('payment.failed', function (response) {
                                     console.error('Payment failed:', response.error);
                                     alert(`Payment failed: ${response.error.description}`);
                                     payButton.disabled = false;
