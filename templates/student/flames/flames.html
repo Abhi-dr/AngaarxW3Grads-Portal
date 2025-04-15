@@ -621,12 +621,12 @@ active
                 <a href="{% url 'student_view_registration' registration.course.slug %}"
                     class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
 
-                <!-- {% if not registration.payment_id and registration.status != 'Completed' %}
-                <a class="btn btn-sm mx-2 rounded-3 px-3 "
+                {% if not registration.payment_id and registration.status != 'Completed' %}
+                <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button"
                     data-registration-id="{{ registration.id }}">
                     Pay Now
                 </a>
-                {% endif %} -->
+                {% endif %}
             </div>
             <div class="flames-body">
                 <div class="row">
@@ -719,7 +719,7 @@ active
 
             {% if not registration.payment_id and registration.status != 'Completed' %}
             <div class="m-2 justify-center text-center">
-                <a id="pay-now-btn" class="btn w-50 " data-registration-id="{{ registration.id }}">
+                <a id="reg-{{ registration.id }}" class="payment-button btn w-50" data-registration-id="{{ registration.id }}">
                     Complete My Registration🔥
                 </a>
             </div>
@@ -811,10 +811,12 @@ active
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const payButton = document.getElementById("pay-now-btn");
-        const payButton2 = document.getElementById("pay-now-btn-2");
+        // Find all payment buttons using the class selector
+        const payButtons = document.querySelectorAll('.payment-button');
 
-        if (payButton) {
+        // Add click event listeners to all payment buttons
+        payButtons.forEach(payButton => {
+            console.log('Found payment button:', payButton.id);
             payButton.addEventListener('click', function () {
                 // Disable button to prevent multiple clicks
                 payButton.disabled = true;
@@ -845,7 +847,7 @@ active
                                 prefill: data.prefill || {},
                                 handler: function (response) {
                                     console.log('Payment successful:', response);
-                                    payButton.innerHTML = '<i class="fas fa-check me-2"></i>Payment Successful';
+                                    payButton.innerHTML = 'Complete My Registration🔥';
 
                                     // Submit payment details to backend
                                     const form = document.createElement('form');
@@ -884,7 +886,7 @@ active
                                         console.log('Checkout modal closed');
                                         // Re-enable button if payment modal is dismissed
                                         payButton.disabled = false;
-                                        payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>PAY NOW🔥';
+                                        payButton.innerHTML = 'Complete My Registration🔥';
                                     }
                                 },
                                 theme: {
@@ -899,20 +901,21 @@ active
                                     console.error('Payment failed:', response.error);
                                     alert(`Payment failed: ${response.error.description}`);
                                     payButton.disabled = false;
-                                    payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>PAY NOW🔥';
+                                    payButton.innerHTML = 'Complete My Registration🔥';
                                 });
                                 razorpay.open();
                             } catch (e) {
                                 console.error('Error opening Razorpay checkout:', e);
                                 alert(`Error opening payment gateway: ${e.message}`);
                                 payButton.disabled = false;
-                                payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>PAY NOW🔥';
+                                payButton.innerHTML = 'Complete My Registration🔥';
                             }
                         } else {
                             // Show error message
                             console.error('Payment initialization failed:', data.error);
                             alert(`Payment initialization failed: ${data.error}`);
                             payButton.disabled = false;
+                            payButton.innerHTML = 'Complete My Registration🔥';
                             payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>PAY NOW🔥';
                         }
                     })
@@ -923,7 +926,7 @@ active
                         payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>PAY NOW🔥';
                     });
             });
-        }
+        });
     });
 </script>
 
