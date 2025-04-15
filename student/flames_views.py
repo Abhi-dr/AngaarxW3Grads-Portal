@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.conf import settings
 from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember
 
 # ======================================= FLAMES MAIN PAGE ================================
@@ -105,6 +106,7 @@ def view_registration(request, slug):
     parameters = {
         'registration': registration,
         'course': course,
+        'razorpay_key_id': settings.RAZORPAY_KEY_ID,
     }
     
     return render(request, 'student/flames/view_registration.html', parameters)

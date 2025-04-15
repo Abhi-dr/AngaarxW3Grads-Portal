@@ -13,7 +13,11 @@ logger = logging.getLogger(__name__)
 import razorpay
 from django.conf import settings
 
+# Initialize Razorpay client with live mode
 razorpay_client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
+
+# Force live mode (this is the key change to switch from test to live mode)
+razorpay_client.set_app_details({"title": "Angaar FLAMES", "version": "1.0"})
 
 
 class PaymentGateway:
