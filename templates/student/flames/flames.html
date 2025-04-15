@@ -552,40 +552,37 @@ active
         font-size: 1.5rem;
         padding: 1rem 3rem;
         color: #f4f4f4;
-        
-      }
-      
-      .btn {
+
+    }
+
+    .btn {
         text-decoration: none;
         border: 1px solid rgb(146, 148, 248);
         position: relative;
         overflow: hidden;
-      }
-      
-      .btn:hover {
+    }
+
+    .btn:hover {
         box-shadow: 1px 1px 25px 10px rgba(146, 148, 248, 0.4);
-      }
-      
-      .btn:before {
+    }
+
+    .btn:before {
         content: "";
         position: absolute;
         top: 0;
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(
-          120deg,
-          transparent,
-          rgba(146, 148, 248, 0.4),
-          transparent
-        );
+        background: linear-gradient(120deg,
+                transparent,
+                rgba(146, 148, 248, 0.4),
+                transparent);
         transition: all 650ms;
-      }
-      
-      .btn:hover:before {
+    }
+
+    .btn:hover:before {
         left: 100%;
-      }
-      
+    }
 </style>
 {% endblock %}
 
@@ -619,14 +616,17 @@ active
                     <h4 class="flames-title">{{ registration.course.title }}</h4>
                     <p class="flames-subtitle">{{ registration.course.subtitle }}</p>
                 </div>
-                <span class="flames-status status-{{ registration.status|lower }}">Payment {{ registration.status }}</span>
-                <a href="{% url 'student_view_registration' registration.course.slug %}" class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
-               
-                {% if not registration.payment_id and registration.status != 'Completed' %}
-                <a id="pay-now-btn" class="btn btn-sm mx-2 rounded-3 px-3" data-registration-id="{{ registration.id }}">
+                <span class="flames-status status-{{ registration.status|lower }}">Payment 
+                    {{ registration.status }}</span>
+                <a href="{% url 'student_view_registration' registration.course.slug %}"
+                    class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
+
+                <!-- {% if not registration.payment_id and registration.status != 'Completed' %}
+                <a class="btn btn-sm mx-2 rounded-3 px-3 "
+                    data-registration-id="{{ registration.id }}">
                     Pay Now
                 </a>
-                {% endif %}
+                {% endif %} -->
             </div>
             <div class="flames-body">
                 <div class="row">
@@ -686,7 +686,8 @@ active
             <div class="flames-footer">
                 <div class="price-info">
                     {% if registration.registration_mode == 'TEAM' %}
-                    <span class="original-price">₹{{ registration.original_price }} × 5 = ₹{{ registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price }}</span>
+                    <span class="original-price">₹{{ registration.original_price }} × 5 = ₹
+                        {{ registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price }}</span>
                     <span class="final-price">₹{{ registration.payable_amount }} (after team discount)</span>
                     <span class="discount-badge">Team Discount: ₹499 × 5 = ₹2,495</span>
                     {% elif registration.original_price != registration.discounted_price %}
@@ -703,8 +704,8 @@ active
                 <span class="discount-badge fs-2">
                     Team Registration (5 members) - ₹2,495 discount
                 </span>
-                
-                
+
+
 
                 {% elif registration.referral_code %}
                 <span class="discount-badge fs-2">
@@ -713,12 +714,12 @@ active
 
                 {% endif %}
 
-                
+
             </div>
 
             {% if not registration.payment_id and registration.status != 'Completed' %}
             <div class="m-2 justify-center text-center">
-                <a id="pay-now-btn" class="btn w-50" data-registration-id="{{ registration.id }}">
+                <a id="pay-now-btn" class="btn w-50 " data-registration-id="{{ registration.id }}">
                     Complete My Registration🔥
                 </a>
             </div>
@@ -809,17 +810,18 @@ active
 <!-- Razorpay Integration -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const payButton = document.getElementById('pay-now-btn');
-        
+    document.addEventListener('DOMContentLoaded', function () {
+        const payButton = document.getElementById("pay-now-btn");
+        const payButton2 = document.getElementById("pay-now-btn-2");
+
         if (payButton) {
-            payButton.addEventListener('click', function() {
+            payButton.addEventListener('click', function () {
                 // Disable button to prevent multiple clicks
                 payButton.disabled = true;
                 payButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
-                
+
                 const registrationId = this.getAttribute('data-registration-id');
-                
+
                 // Call the API to initialize payment
                 fetch(`/dashboard/payment/initiate-payment/${registrationId}/`)
                     .then(response => {
@@ -831,7 +833,7 @@ active
                     .then(data => {
                         if (data.success) {
                             console.log('Payment initialization successful:', data);
-                            
+
                             // Initialize Razorpay checkout
                             const options = {
                                 key: '{{ razorpay_key_id }}',
@@ -841,22 +843,22 @@ active
                                 description: data.description || 'Course Registration',
                                 order_id: data.order_id,
                                 prefill: data.prefill || {},
-                                handler: function(response) {
+                                handler: function (response) {
                                     console.log('Payment successful:', response);
                                     payButton.innerHTML = '<i class="fas fa-check me-2"></i>Payment Successful';
-                                    
+
                                     // Submit payment details to backend
                                     const form = document.createElement('form');
                                     form.method = 'POST';
                                     form.action = '{% url "payment_callback" %}';
-                                    
+
                                     // Add CSRF token
                                     const csrfToken = document.createElement('input');
                                     csrfToken.type = 'hidden';
                                     csrfToken.name = 'csrfmiddlewaretoken';
                                     csrfToken.value = '{{ csrf_token }}';
                                     form.appendChild(csrfToken);
-                                    
+
                                     // Add payment details
                                     for (const key in response) {
                                         const input = document.createElement('input');
@@ -865,20 +867,20 @@ active
                                         input.value = response[key];
                                         form.appendChild(input);
                                     }
-                                    
+
                                     // Add registration ID
                                     const regIdInput = document.createElement('input');
                                     regIdInput.type = 'hidden';
                                     regIdInput.name = 'registration_id';
                                     regIdInput.value = registrationId;
                                     form.appendChild(regIdInput);
-                                    
+
                                     // Submit the form
                                     document.body.appendChild(form);
                                     form.submit();
                                 },
                                 modal: {
-                                    ondismiss: function() {
+                                    ondismiss: function () {
                                         console.log('Checkout modal closed');
                                         // Re-enable button if payment modal is dismissed
                                         payButton.disabled = false;
@@ -889,11 +891,11 @@ active
                                     color: '#4273fa'
                                 }
                             };
-                            
+
                             try {
                                 console.log('Opening Razorpay checkout with options:', options);
                                 const razorpay = new Razorpay(options);
-                                razorpay.on('payment.failed', function(response) {
+                                razorpay.on('payment.failed', function (response) {
                                     console.error('Payment failed:', response.error);
                                     alert(`Payment failed: ${response.error.description}`);
                                     payButton.disabled = false;
