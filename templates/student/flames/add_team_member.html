@@ -1,0 +1,284 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}Add Team Member | F.L.A.M.E.S Team Formation{% endblock %}
+
+{% block css %}
+<style>
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 1.75rem;
+        font-weight: 600;
+    }
+
+    .team-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #28a745;
+    }
+
+    .team-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .team-title i {
+        margin-right: 0.75rem;
+        color: #28a745;
+    }
+
+    .team-subtitle {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .form-container {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+    }
+
+    .form-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .form-help {
+        margin-bottom: 1.5rem;
+        padding: 0.75rem 1rem;
+        background-color: #e9f7fe;
+        border-left: 4px solid #3498db;
+        border-radius: 4px;
+        color: #1a5276;
+    }
+
+    .btn-submit {
+        background-color: #28a745;
+        border-color: #28a745;
+        color: #fff;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+    }
+
+    .btn-submit:hover {
+        background-color: #218838;
+        border-color: #218838;
+    }
+
+    .btn-cancel {
+        color: #6c757d;
+        background-color: #f8f9fa;
+        border-color: #f8f9fa;
+        margin-right: 0.5rem;
+    }
+
+    .btn-cancel:hover {
+        background-color: #e9ecef;
+        border-color: #e9ecef;
+    }
+
+    .current-members {
+        margin-top: 2rem;
+    }
+
+    .current-members-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .member-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .member-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+    }
+
+    .member-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        color: #6c757d;
+    }
+
+    .member-info {
+        flex-grow: 1;
+    }
+
+    .member-name {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .member-email {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .member-tag {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 50px;
+        margin-left: 0.5rem;
+    }
+
+    .tag-leader {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+    .tag-count {
+        background-color: #f8f9fa;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        color: #495057;
+        margin-left: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'student_flames' %}">F.L.A.M.E.S</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'student_team_formation' %}">Team Formation</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Add Team Member</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="page-header">
+                <h2 class="page-title">Add Team Member</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="team-info">
+                <h3 class="team-title">
+                    <i class="fas fa-users"></i>
+                    {{ team.name }}
+                </h3>
+                <p class="team-subtitle">{{ team.course.title }}</p>
+            </div>
+
+            <div class="form-container">
+                <h4 class="form-title">New Team Member Details</h4>
+
+                <div class="form-help">
+                    <p><strong>Note:</strong> Add up to {{ 5|add:"-"|add:team.members.count }} more members to complete your team of 5. Each member should be a participant in the F.L.A.M.E.S program.</p>
+                </div>
+
+                <form method="post" action="{% url 'student_add_team_member' team.id %}">
+                    {% csrf_token %}
+                    
+                    <div class="form-group mb-3">
+                        <label for="full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Enter member's full name" required>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Enter member's email address" required>
+                        <small class="form-text text-muted">This email will be used for communications related to the program.</small>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="contact_number" name="contact_number" placeholder="Enter member's contact number" required>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <a href="{% url 'student_team_formation' %}" class="btn btn-cancel">Cancel</a>
+                        <button type="submit" class="btn btn-submit">Add Member</button>
+                    </div>
+                </form>
+
+                <div class="current-members">
+                    <h5 class="current-members-title">Current Team Members</h5>
+                    <span class="tag-count">
+                        <i class="fas fa-user"></i> {{ team.members.count }}/5 Members
+                    </span>
+                    
+                    <ul class="member-list mt-3">
+                        {% for member in team.members.all %}
+                        <li class="member-item">
+                            <div class="member-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="member-info">
+                                <h5 class="member-name">
+                                    {{ member.full_name }}
+                                    {% if member.is_leader %}
+                                    <span class="member-tag tag-leader">Team Leader</span>
+                                    {% endif %}
+                                </h5>
+                                <p class="member-email">{{ member.email }}</p>
+                            </div>
+                        </li>
+                        {% empty %}
+                        <li class="member-item text-center">
+                            <p class="mb-0 text-muted">No members added yet.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Information for Team Members</h5>
+                </div>
+                <div class="card-body">
+                    <p>When adding team members, please note:</p>
+                    <ul>
+                        <li>All team members will be part of the same F.L.A.M.E.S program</li>
+                        <li>Members will receive communications about the program</li>
+                        <li>Members can create their own portal accounts to track progress</li>
+                        <li>You can remove members later if needed</li>
+                    </ul>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Make sure to inform your team members that they've been added to the team.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

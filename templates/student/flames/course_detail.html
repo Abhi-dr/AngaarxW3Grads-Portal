@@ -1,0 +1,461 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block summer_active %}
+active
+{% endblock %}
+
+{% block title %}{{ course.title }} | F.L.A.M.E.S Program{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Course Header Styles */
+    .course-header {
+        background-color: var(--bs-light);
+        border-radius: var(--bs-border-radius-lg);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .course-header-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .course-title {
+        font-size: calc(1.375rem + 1.5vw);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--bs-heading-color);
+    }
+    
+    @media (min-width: 1200px) {
+        .course-title {
+            font-size: 2.5rem;
+        }
+    }
+
+    .course-subtitle {
+        font-size: 1.25rem;
+        color: var(--bs-secondary-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .instructor-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .instructor-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--bs-tertiary-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: var(--bs-secondary-color);
+    }
+
+    .instructor-name {
+        font-weight: 600;
+        color: var(--bs-body-color);
+    }
+    
+    .instructor-role {
+        color: var(--bs-secondary-color);
+        font-size: 0.875rem;
+    }
+
+    .course-price-info {
+        display: flex;
+        align-items: baseline;
+        margin-top: 1rem;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: var(--bs-secondary-color);
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+    }
+
+    .final-price {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--bs-heading-color);
+    }
+
+    /* Course Sections */
+    .course-section {
+        background-color: var(--bs-body-bg);
+        border-radius: var(--bs-border-radius-lg);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--bs-border-color);
+        color: var(--bs-heading-color);
+    }
+
+    /* Learning Points */
+    .learning-points {
+        list-style-type: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .learning-points li {
+        position: relative;
+        padding-left: 2rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: flex-start;
+        color: var(--bs-body-color);
+    }
+
+    .learning-points li:before {
+        content: "\f00c";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        color: var(--bs-success);
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+
+    /* Roadmap */
+    .roadmap-item {
+        padding: 1.5rem;
+        border-radius: var(--bs-border-radius);
+        background-color: var(--bs-tertiary-bg);
+        margin-bottom: 1rem;
+    }
+
+    .roadmap-title {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--bs-heading-color);
+    }
+    
+    .roadmap-content {
+        color: var(--bs-body-color);
+    }
+
+    /* Testimonials */
+    .testimonial-card {
+        background-color: var(--bs-body-bg);
+        border-radius: var(--bs-border-radius);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Testimonial Components */
+    .testimonial-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .testimonial-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--bs-tertiary-bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        overflow: hidden;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .testimonial-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .testimonial-name {
+        font-weight: 600;
+        color: var(--bs-heading-color);
+    }
+
+    .testimonial-rating {
+        color: var(--bs-warning);
+        margin-top: 0.25rem;
+    }
+
+    .testimonial-content {
+        font-style: italic;
+        color: var(--bs-secondary-color);
+        line-height: 1.6;
+    }
+
+    /* Call to Action Section */
+    .cta-section {
+        background-color: var(--bs-tertiary-bg);
+        border-radius: var(--bs-border-radius-lg);
+        padding: 3rem 2rem;
+        text-align: center;
+        margin-top: 3rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .cta-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--bs-heading-color);
+    }
+
+    .cta-subtitle {
+        font-size: 1.1rem;
+        color: var(--bs-secondary-color);
+        margin-bottom: 1.5rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .btn-register {
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    /* Dark mode styles */
+    [data-bs-theme="dark"] .course-header {
+        background-color: var(--bs-dark-bg-subtle);
+    }
+    
+    [data-bs-theme="dark"] .course-section {
+        background-color: var(--bs-dark-bg-subtle);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+    }
+    
+    [data-bs-theme="dark"] .testimonial-card {
+        background-color: var(--bs-dark-bg-subtle);
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+    }
+    
+    [data-bs-theme="dark"] .cta-section {
+        background-color: var(--bs-dark-bg-subtle);
+    }
+    
+    [data-bs-theme="dark"] .instructor-avatar,
+    [data-bs-theme="dark"] .testimonial-avatar {
+        background-color: var(--bs-dark);
+        color: var(--bs-light);
+    }
+    
+    [data-bs-theme="dark"] .roadmap-item {
+        background-color: var(--bs-dark);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .course-title {
+            font-size: 2rem;
+        }
+        
+        .course-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .final-price {
+            font-size: 1.75rem;
+        }
+        
+        .course-section {
+            padding: 1.5rem;
+        }
+        
+        .cta-section {
+            padding: 2rem 1.5rem;
+        }
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .course-section {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .testimonial-card {
+        animation: fadeIn 0.5s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .testimonial-card:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+    
+    .testimonial-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+    
+    /* Course description formatting */
+    .course-description p {
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .course-description ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .course-description h3 {
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid ">
+    <div class="course-header">
+        <div class="course-header-content">
+            <h1 class="course-title">{{ course.title }}</h1>
+            <p class="course-subtitle">{{ course.subtitle }}</p>
+
+            <div class="instructor-info">
+                <div class="instructor-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div>
+                    <div class="instructor-name">{{ course.instructor }}</div>
+                    <div class="instructor-role">Lead Instructor</div>
+                </div>
+            </div>
+
+            <div class="course-price-info">
+                {% if course.discount_price %}
+                <span class="original-price">₹{{ course.price }}</span>
+                <span class="final-price">₹{{ course.discount_price }}</span>
+                {% else %}
+                <span class="final-price">₹{{ course.price }}</span>
+                {% endif %}
+            </div>
+
+            <div class="mt-4">
+                <a href="{% url 'student_flames_register' course.slug %}" class="btn btn-primary btn-lg">Register Now</a>
+                <a href="#course-details" class="btn btn-outline-secondary btn-lg ms-2">Learn More</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="course-details" class="course-section">
+        <h2 class="section-title">About This Program</h2>
+        <div class="course-description">
+            {{ course.description|safe }}
+        </div>
+    </div>
+
+    <div class="course-section">
+        <h2 class="section-title">What You'll Learn</h2>
+        <ul class="learning-points">
+            {% for point in course.get_learning_points %}
+            <li>{{ point }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="course-section">
+        <h2 class="section-title">Program Roadmap</h2>
+        <div class="roadmap-content">
+            {{ course.roadmap|safe|linebreaks }}
+        </div>
+    </div>
+
+    {% if course.testimonials.exists %}
+    <div class="course-section">
+        <h2 class="section-title">What Our Students Say</h2>
+        <div class="testimonials-container row">
+            {% for testimonial in course.testimonials.all %}
+            <div class="col-md-6 mb-4">
+                <div class="testimonial-card h-100">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">
+                            {% if testimonial.student_image %}
+                            <img src="{{ testimonial.student_image.url }}" alt="{{ testimonial.student_name }}">
+                            {% else %}
+                            <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <div class="testimonial-name">{{ testimonial.student_name }}</div>
+                            <div class="testimonial-rating">
+                                {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= testimonial.rating %} <i class="fas fa-star"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content mt-3">
+                        {{ testimonial.content }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="cta-section">
+        <h2 class="cta-title">Ready to Enhance Your Skills?</h2>
+        <p class="cta-subtitle">Join this F.L.A.M.E.S program and take your career to the next level</p>
+        <a href="{% url 'student_flames_register' course.slug %}" class="btn btn-primary btn-register">Register Now</a>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    });
+</script>
+
+
+{% endblock %}

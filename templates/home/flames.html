@@ -266,120 +266,6 @@ F.L.A.M.E.S🔥 | Angaar
         box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
     }
 
-    /* Registration Modal */
-    .registration-modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.8);
-        z-index: 1000;
-        overflow-y: auto;
-        backdrop-filter: blur(5px);
-    }
-
-    .registration-modal-content {
-        position: relative;
-        background-color: rgba(25, 25, 25, 0.95);
-        margin: 5% auto;
-        padding: 30px;
-        width: 90%;
-        max-width: 600px;
-        border-radius: 16px;
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        animation: modalFade 0.3s ease;
-    }
-
-    @keyframes modalFade {
-        from {
-            opacity: 0;
-            transform: translateY(-30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .registration-modal-header {
-        text-align: center;
-        margin-bottom: 25px;
-    }
-
-    .registration-modal-title {
-        font-size: 2rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #ff6026, #ff9a56);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 10px;
-    }
-
-    .registration-form-group {
-        margin-bottom: 20px;
-    }
-
-    .registration-form-control {
-        width: 100%;
-        padding: 12px 15px;
-        background-color: rgba(50, 50, 50, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 8px;
-        color: #fff;
-        font-size: 16px;
-        transition: all 0.3s ease;
-    }
-
-    .registration-form-control:focus {
-        border-color: #ff6026;
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(255, 96, 38, 0.2);
-    }
-
-    .registration-form-label {
-        display: block;
-        margin-bottom: 8px;
-        font-size: 14px;
-        color: #aaa;
-    }
-
-    .registration-form-submit {
-        width: 100%;
-        padding: 12px;
-        background: linear-gradient(135deg, #ff6026, #ff9a56);
-        border: none;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: 600;
-        color: #fff;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .registration-form-submit:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
-    }
-
-    .registration-modal-close {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        font-size: 24px;
-        color: #aaa;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .registration-modal-close:hover {
-        color: #ff6026;
-    }
-
     /* Responsive Styles */
     @media (max-width: 1200px) {
         .team-grid {
@@ -496,24 +382,28 @@ F.L.A.M.E.S🔥 | Angaar
                     </ul>
 
                     <!-- Price Section -->
-                <div style="text-align: right; position: relative; z-index: 1;">
+                    <div style="text-align: right; position: relative; z-index: 1;">
 
-                    
-                    {% if course.discount_price %}
-                    <div style="display: flex; justify-content: flex-end; align-items: baseline;">
-                        <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹{{ course.price }}</span>
-                        <span style="color: #ff6026; font-size: 18px; font-weight: 700;">₹{{ course.discount_price }}</span>
-                    </div>
-                    <div style="color: #2ecc71; font-size: 12px; font-weight: 600; margin-top: 3px;">
-                        {% widthratio course.discount_price course.price 100 as discount_percent %}
-                        {{ discount_percent|add:"-100"|cut:"-" }}% OFF
-                    </div>
-                    {% else %}
-                    <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
-                    {% endif %}
 
-                    
-                    <!-- <div style="display: flex; justify-content: flex-end; align-items: baseline;">
+                        {% if course.discount_price %}
+                        <div style="display: flex; justify-content: flex-end; align-items: baseline;">
+                            <span
+                                style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">
+                                ₹{{ course.price }}</span>
+                            <span style="color: #ff6026; font-size: 18px; font-weight: 700;">
+                                ₹{{ course.discount_price }}</span>
+                        </div>
+                        <div style="color: #2ecc71; font-size: 12px; font-weight: 600; margin-top: 3px;">
+                            {% widthratio course.discount_price course.price 100 as discount_percent %}
+                            {{ discount_percent|add:"-100"|cut:"-" }}% OFF
+                        </div>
+                        {% else %}
+                        <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹
+                            UNAFFORDABLE</span>
+                        {% endif %}
+
+
+                        <!-- <div style="display: flex; justify-content: flex-end; align-items: baseline;">
                         <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
                         <span style="color: #ff6026; font-size: 16px; font-weight: 600;">₹ Less than you expect... (coming soon)</span>
                     </div> -->
@@ -521,62 +411,30 @@ F.L.A.M.E.S🔥 | Angaar
                 </div>
 
                 <div style="display: flex; justify-content: space-between; gap: 10px;">
-                    <a href="{% url 'course_detail' course.slug %}" class="skills-details-btn" 
+                    <a href="{% url 'home_course_detail' course.slug %}" class="skills-details-btn"
                         style="flex: 1; background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; text-align: center; text-decoration: none;">
                         Details
                     </a>
-                    <button class="skills-join-btn" data-course-id="{{ course.id }}" data-course-title="{{ course.title }}"
-                        style="flex: 1; background: {{ course.button_color }}; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1;">
-                        Book My Slot for FREE!
-                    </button>
+
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'student_flames_register' course.slug %}" class="skills-join-btn"
+                        style="flex: 1; background: {{ course.button_color }}; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                        Enroll Now
+                    </a>
+
+                    {% else %}
+
+                    <a href="{% url 'flames_register' course.slug %}" class="skills-join-btn"
+                        style="flex: 1; background: {{ course.button_color }}; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+                        Register Now
+                    </a>
+
+                    {% endif %}
                 </div>
             </div>
 
             {% endfor %}
-                    </div>
-                    </div>
-                </div>
-
-<!-- Registration Modal -->
-<div id="registrationModal" class="registration-modal">
-    <div class="registration-modal-content">
-        <div class="registration-modal-close" onclick="closeModal()">&times;</div>
-        <div class="registration-modal-header">
-            <h2 class="registration-modal-title">Register for <span id="modalCourseName"></span></h2>
-            <p style="color: #aaa;">Fill out the form below to register for this program</p>
         </div>
-        <form id="registrationForm">
-            <input type="hidden" id="course_id" name="course_id">
-            <div class="registration-form-group">
-                <label for="full_name" class="registration-form-label">Full Name *</label>
-                <input type="text" id="full_name" name="full_name" class="registration-form-control" required>
-                    </div>
-            <div class="registration-form-group">
-                <label for="email" class="registration-form-label">Email Address *</label>
-                <input type="email" id="email" name="email" class="registration-form-control" required>
-                </div>
-            <div class="registration-form-group">
-                <label for="contact_number" class="registration-form-label">Contact Number *</label>
-                <input type="tel" id="contact_number" name="contact_number" class="registration-form-control" required>
-                </div>
-            <div class="registration-form-group">
-                <label for="college" class="registration-form-label">College/University *</label>
-                <input type="text" id="college" name="college" class="registration-form-control" required>
-            </div>
-            <div class="registration-form-group">
-                <label for="year" class="registration-form-label">Year of Study *</label>
-                <select id="year" name="year" class="registration-form-control" required>
-                    <option value="">Select Year</option>
-                    <option value="1st Year">1st Year</option>
-                    <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year">4th Year</option>
-                    <option value="5th Year">5th Year</option>
-                    <option value="Graduate">Graduate</option>
-                </select>
-        </div>
-            <button type="submit" id="submitRegistration" class="registration-form-submit">All Set!</button>
-        </form>
     </div>
 </div>
 
@@ -704,7 +562,7 @@ F.L.A.M.E.S🔥 | Angaar
         // Registration Modal functionality
         const registerButtons = document.querySelectorAll('.skills-join-btn');
         registerButtons.forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 const courseId = this.getAttribute('data-course-id');
                 const courseTitle = this.getAttribute('data-course-title');
                 document.getElementById('modalCourseName').textContent = courseTitle;
@@ -714,7 +572,7 @@ F.L.A.M.E.S🔥 | Angaar
         });
 
         // Form submission
-        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        /* document.getElementById('registrationForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
@@ -725,7 +583,7 @@ F.L.A.M.E.S🔥 | Angaar
             submitBtn.textContent = 'Processing...';
             submitBtn.disabled = true;
             
-            fetch('{% url "register_course" %}', {
+            fetch('', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -751,7 +609,7 @@ F.L.A.M.E.S🔥 | Angaar
                 submitBtn.textContent = originalText;
                 submitBtn.disabled = false;
             });
-        });
+        }); */
     });
 
     // Close modal function
@@ -760,10 +618,75 @@ F.L.A.M.E.S🔥 | Angaar
     }
 
     // Close modal if clicked outside
-    window.onclick = function(event) {
+    window.onclick = function (event) {
         const modal = document.getElementById('registrationModal');
         if (event.target === modal) {
             modal.style.display = 'none';
+        }
+    }
+
+    // Handle referral code validation and price display
+    document.getElementById('referral_code').addEventListener('blur', function () {
+        const referralCode = this.value.trim();
+        const courseId = document.getElementById('course_id').value;
+        const registrationMode = document.getElementById('registration_mode').value;
+
+        if (referralCode) {
+            // Fetch to validate referral code
+            fetch(`{% url "validate_referral" %}?code=${referralCode}&course_id=${courseId}&registration_mode=${registrationMode}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const messageElement = document.getElementById('referral_message');
+                    const priceDisplay = document.getElementById('price_display');
+                    const originalPriceElement = document.querySelector('.original-price');
+                    const discountedPriceElement = document.querySelector('.discounted-price');
+
+                    if (data.status === 'success') {
+                        messageElement.textContent = 'Valid referral code! Discount applied.';
+                        messageElement.style.color = '#38cb89';
+
+                        // Display price information
+                        priceDisplay.style.display = 'block';
+                        originalPriceElement.textContent = `Original Price: ₹${data.original_price}`;
+                        discountedPriceElement.textContent = `Discounted Price: ₹${data.discounted_price}`;
+                    } else {
+                        messageElement.textContent = data.message || 'Invalid referral code.';
+                        messageElement.style.color = '#f24e1e';
+                        priceDisplay.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error validating referral code:', error);
+                    document.getElementById('referral_message').textContent = 'Error validating code. Please try again.';
+                    document.getElementById('referral_message').style.color = '#f24e1e';
+                });
+        } else {
+            document.getElementById('referral_message').textContent = '';
+            document.getElementById('price_display').style.display = 'none';
+        }
+    });
+
+    // Toggle referral field based on registration mode
+    function toggleReferralFields() {
+        const registrationMode = document.getElementById('registration_mode').value;
+        const referralGroup = document.getElementById('referral_code_group');
+        const referralInput = document.getElementById('referral_code');
+        const referralMessage = document.getElementById('referral_message');
+
+        // Reset values
+        referralInput.value = '';
+        referralMessage.textContent = '';
+        document.getElementById('price_display').style.display = 'none';
+
+        if (registrationMode === 'TEAM') {
+            referralGroup.querySelector('label').textContent = 'Team Referral Code';
+        } else {
+            referralGroup.querySelector('label').textContent = 'Alumni Referral Code (Optional)';
         }
     }
 </script>

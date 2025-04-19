@@ -1,0 +1,244 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}Payment Failed | FLAMES{% endblock %}
+
+{% block extra_css %}
+<style>
+    .failure-container {
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .failure-card {
+        background: rgba(15, 15, 15, 0.85);
+        border-radius: 15px;
+        padding: 3rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        border: 1px solid rgba(244, 67, 54, 0.3);
+    }
+    
+    .failure-icon {
+        font-size: 5rem;
+        color: #f44336;
+        margin-bottom: 1.5rem;
+        animation: shake 1s ease-in-out;
+    }
+    
+    .failure-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, #F44336, #FF9800);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent; /* Fallback for browsers that don't support -webkit-text-fill-color */
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .failure-message {
+        font-size: 1.2rem;
+        color: #e0e0e0;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .error-details {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #f44336;
+    }
+    
+    .error-details p {
+        margin-bottom: 0.5rem;
+        color: #bdbdbd;
+        text-align: left;
+    }
+    
+    .error-details strong {
+        color: #ffffff;
+    }
+    
+    .action-btn {
+        background: linear-gradient(45deg, #FF5722, #F44336);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+        text-decoration: none;
+        display: inline-block;
+        margin: 0.5rem;
+    }
+    
+    .action-btn.retry {
+        background: linear-gradient(45deg, #FF9800, #FF5722);
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 7px 20px rgba(255, 87, 34, 0.6);
+        color: white;
+    }
+    
+    .redirect-message {
+        margin-top: 1.5rem;
+        font-size: 0.9rem;
+        color: #9e9e9e;
+    }
+    
+    .countdown {
+        font-weight: bold;
+        color: #FF5722;
+    }
+    
+    .flames-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        opacity: 0.2;
+        background-image: url("{% static 'img/flames-bg.jpg' %}");
+        background-size: cover;
+        background-position: center;
+        filter: blur(5px) grayscale(50%);
+    }
+    
+    .ember-particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background: #FF5722;
+        border-radius: 50%;
+        opacity: 0;
+        z-index: 1;
+        animation: float 3s ease-out infinite;
+    }
+    
+    @keyframes float {
+        0% {
+            transform: translateY(0) translateX(0) rotate(0deg);
+            opacity: 1;
+        }
+        100% {
+            transform: translateY(-100px) translateX(var(--x-offset)) rotate(360deg);
+            opacity: 0;
+        }
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="failure-container">
+    <div class="flames-bg"></div>
+    
+    <!-- Ember particles -->
+    <div id="particles-container"></div>
+    
+    <div class="failure-card">
+        <i class="fas fa-times-circle failure-icon"></i>
+        <h1 class="failure-title">Payment Failed</h1>
+        <p class="failure-message">We couldn't process your payment for {{ registration.course.title }}. Don't worry, your registration is still saved and you can try again.</p>
+        
+        <div class="error-details">
+            <p><strong>Course:</strong> {{ registration.course.title }}</p>
+            <p><strong>Amount:</strong> ₹{{ registration.payable_amount }}</p>
+            <p><strong>Registration Mode:</strong> {{ registration.registration_mode }}</p>
+            <p><strong>Error:</strong> {{ error_message|default:"Your payment could not be processed at this time." }}</p>
+            <p><strong>Status:</strong> <span class="badge bg-warning">Pending</span></p>
+        </div>
+        
+        <div>
+            <a href="{% url 'student_view_registration' registration.course.slug %}" class="action-btn retry">
+                <i class="fas fa-redo me-2"></i>Try Again
+            </a>
+            
+            <a href="{% url 'student_flames' %}" class="action-btn">
+                <i class="fas fa-home me-2"></i>Go to Dashboard
+            </a>
+        </div>
+        
+        <p class="redirect-message">You will be redirected in <span id="countdown" class="countdown">5</span> seconds...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Create ember particles
+    document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('particles-container');
+        
+        // Create 30 ember particles
+        for (let i = 0; i < 30; i++) {
+            createEmberParticle(container);
+        }
+        
+        // Countdown for redirect
+        let countdown = 5;
+        const countdownElement = document.getElementById('countdown');
+        
+        const countdownInterval = setInterval(function() {
+            countdown--;
+            countdownElement.textContent = countdown;
+            
+            if (countdown <= 0) {
+                clearInterval(countdownInterval);
+                window.location.href = "{% url 'student_view_registration' registration.course.slug %}";
+            }
+        }, 1000);
+    });
+    
+    function createEmberParticle(container) {
+        const particle = document.createElement('div');
+        particle.classList.add('ember-particle');
+        
+        // Random position, size and delay
+        const size = Math.random() * 4 + 2;
+        const left = Math.random() * 100;
+        const delay = Math.random() * 2;
+        const xOffset = (Math.random() * 100) - 50;
+        
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.left = `${left}%`;
+        particle.style.bottom = '20%';
+        particle.style.animationDelay = `${delay}s`;
+        particle.style.setProperty('--x-offset', `${xOffset}px`);
+        
+        container.appendChild(particle);
+        
+        // Remove and recreate particle after animation ends
+        setTimeout(() => {
+            particle.remove();
+            createEmberParticle(container);
+        }, 3000 + (delay * 1000));
+    }
+</script>
+{% endblock %}

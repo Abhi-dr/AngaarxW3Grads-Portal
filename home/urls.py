@@ -6,10 +6,6 @@ urlpatterns = [
     path("about/", views.about, name="about"),
     path("our-team/", views.our_team, name="our_team"),
     
-    path("flames/", flames.flames, name="flames"),
-    path("flames/course/<slug:slug>/", flames.course_detail, name="course_detail"),
-    path("flames/register/", flames.register_course, name="register_course"),
-    
     path("articles/", views.articles, name="articles"),
     path("article/<slug:slug>/", views.article, name="article"),
     path("like-article/", views.like_article, name="like_article"),
@@ -18,5 +14,16 @@ urlpatterns = [
     path("our_achievers/", views.our_achievers, name="our_achievers"),
     path('fetch_achievers_data/', views.fetch_achievers_data, name='fetch_achievers_data'),
     path('fetch_top_performers/', views.fetch_top_performers, name='fetch_top_performers'),
+]
+
+# ====================================== FLAMES ========================================
+
+
+urlpatterns += [
+    path("flames/", flames.flames, name="flames"),
     
+    path("flames/course/<slug:slug>/", flames.course_detail, name="home_course_detail"),
+    
+    path("flames/<slug:slug>/register/", flames.register_flames, name="flames_register"),
+    path("flames/validate-referral/", flames.validate_referral, name="validate_referral"),
 ]

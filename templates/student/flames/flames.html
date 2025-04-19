@@ -1,0 +1,935 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block summer_active %}
+active
+{% endblock %}
+
+{% block title %}The Angaar Batch | Summers 😎{% endblock %}
+
+{% block extra_css %}
+<style>
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .no-registrations {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .no-registrations i {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .no-registrations p {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+    .flames-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .flames-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .flames-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+    }
+
+    .flames-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .flames-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .flames-subtitle {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .flames-status {
+        margin-left: auto;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-approved {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-rejected {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .status-completed {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+    .flames-body {
+        padding: 1.25rem;
+    }
+
+    .flames-info {
+        margin-bottom: 1rem;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    .flames-team {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    .team-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .team-title i {
+        margin-right: 0.5rem;
+    }
+
+    .team-member {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .team-member:last-child {
+        border-bottom: none;
+    }
+
+    .member-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+    }
+
+    .team-leader-badge {
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 50px;
+        background-color: #e9ecef;
+        color: #495057;
+        margin-left: 0.5rem;
+    }
+
+    .flames-footer {
+        padding: 1rem 1.25rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .price-info {
+        display: flex;
+        align-items: baseline;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin-right: 0.5rem;
+    }
+
+    .final-price {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .available-courses-section {
+        margin-top: 3rem;
+    }
+
+    .course-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .course-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .course-header {
+        padding: 1.25rem;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .course-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .course-body {
+        padding: 1.25rem;
+        flex-grow: 1;
+    }
+
+    .course-learning-points {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+        font-size: 0.9rem;
+    }
+
+    .course-learning-points ul {
+        padding-left: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    .course-learning-points li {
+        margin-bottom: 0.5rem;
+    }
+
+    .course-footer {
+        padding: 1rem 1.25rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-course {
+        display: inline-block;
+        font-weight: 600;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        user-select: none;
+        border: 1px solid transparent;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        border-radius: 0.25rem;
+        transition: all 0.15s ease-in-out;
+        text-decoration: none;
+    }
+
+    .btn-outline {
+        background-color: transparent;
+        border-color: #6c757d;
+        color: #6c757d;
+    }
+
+    .btn-outline:hover {
+        background-color: #6c757d;
+        color: #fff;
+    }
+
+    .btn-primary {
+        background-color: #ff6026;
+        border-color: #ff6026;
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background-color: #e55522;
+        border-color: #e55522;
+    }
+
+    .discount-badge {
+        display: inline-block;
+        background-color: #d4edda;
+        color: #155724;
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.2rem 0.5rem;
+        border-radius: 50px;
+        margin-left: 0.5rem;
+    }
+
+    .tab-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .tab-buttons {
+        display: flex;
+        margin-bottom: 1.5rem;
+    }
+
+    .tab-button {
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        background-color: #f8f9fa;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .tab-button:first-child {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+
+    .tab-button:last-child {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .tab-button.active {
+        background-color: #ff6026;
+        color: #fff;
+    }
+
+    .tab-content {
+        display: none;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    /* Bootstrap Dark Theme Compatible Styles */
+    [data-bs-theme="dark"] {
+        --bs-body-bg: #121212;
+        --bs-body-color: #e0e0e0;
+        --bs-border-color: #383838;
+        --card-bg: #1e1e1e;
+        --secondary-bg: #2d2d2d;
+        --text-secondary: #aaaaaa;
+        --highlight: #ff6026;
+        --highlight-hover: #e55522;
+        --status-pending-bg: #332d00;
+        --status-pending-text: #ffd54f;
+        --status-approved-bg: #133929;
+        --status-approved-text: #4caf50;
+        --status-rejected-bg: #3b1a1d;
+        --status-rejected-text: #f44336;
+        --status-completed-bg: #0a2744;
+        --status-completed-text: #42a5f5;
+        --discount-bg: #133929;
+        --discount-text: #4caf50;
+    }
+
+    [data-bs-theme="dark"] .section-title {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .no-registrations {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .no-registrations i,
+    [data-bs-theme="dark"] .no-registrations p {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .flames-card {
+        background-color: var(--card-bg);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-bs-theme="dark"] .flames-card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-bs-theme="dark"] .flames-header {
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .flames-title {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .flames-subtitle {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .flames-status.status-pending {
+        background-color: var(--status-pending-bg);
+        color: var(--status-pending-text);
+    }
+
+    [data-bs-theme="dark"] .flames-status.status-approved {
+        background-color: var(--status-approved-bg);
+        color: var(--status-approved-text);
+    }
+
+    [data-bs-theme="dark"] .flames-status.status-rejected {
+        background-color: var(--status-rejected-bg);
+        color: var(--status-rejected-text);
+    }
+
+    [data-bs-theme="dark"] .flames-status.status-completed {
+        background-color: var(--status-completed-bg);
+        color: var(--status-completed-text);
+    }
+
+    [data-bs-theme="dark"] .info-label {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .info-value {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .flames-team {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .team-member {
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .member-icon {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .team-leader-badge {
+        background-color: var(--highlight);
+        color: #fff;
+    }
+
+    [data-bs-theme="dark"] .flames-footer {
+        background-color: var(--secondary-bg);
+        border-top: 1px solid var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .original-price {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .final-price {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .course-card {
+        background-color: var(--card-bg);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-bs-theme="dark"] .course-card:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-bs-theme="dark"] .course-header {
+        border-bottom: 1px solid var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .course-learning-points {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .course-footer {
+        background-color: var(--secondary-bg);
+        border-top: 1px solid var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .btn-outline {
+        border-color: var(--text-secondary);
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .btn-outline:hover {
+        background-color: var(--text-secondary);
+        color: var(--bs-body-bg);
+    }
+
+    [data-bs-theme="dark"] .btn-primary {
+        background-color: var(--highlight);
+        border-color: var(--highlight);
+        color: #fff;
+    }
+
+    [data-bs-theme="dark"] .btn-primary:hover {
+        background-color: var(--highlight-hover);
+        border-color: var(--highlight-hover);
+    }
+
+    [data-bs-theme="dark"] .discount-badge {
+        background-color: var(--discount-bg);
+        color: var(--discount-text);
+    }
+
+    [data-bs-theme="dark"] .tab-button {
+        background-color: var(--secondary-bg);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .tab-button.active {
+        background-color: var(--highlight);
+        color: #fff;
+    }
+</style>
+
+<style>
+    a {
+        font-size: 1.5rem;
+        padding: 1rem 3rem;
+        color: #f4f4f4;
+
+    }
+
+    .btn {
+        text-decoration: none;
+        border: 1px solid rgb(146, 148, 248);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn:hover {
+        box-shadow: 1px 1px 25px 10px rgba(146, 148, 248, 0.4);
+    }
+
+    .btn:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(120deg,
+                transparent,
+                rgba(146, 148, 248, 0.4),
+                transparent);
+        transition: all 650ms;
+    }
+
+    .btn:hover:before {
+        left: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+
+    <div id="registrations-tab" class="tab-content active">
+        <div class="section-header">
+            <h3 class="section-title">My F.L.A.M.E.S Registrations</h3>
+        </div>
+
+        {% if registrations %}
+        {% for registration in registrations %}
+        <div class="flames-card">
+            <div class="flames-header">
+                <!-- <div class="flames-icon" style="background-color: rgba({{ registration.course.icon_color }}, 0.1);">
+                    <i class="{{ registration.course.icon_class }}"
+                        style="color: {{ registration.course.icon_color }};"></i>
+                </div> -->
+                <div>
+                    <h4 class="flames-title">{{ registration.course.title }}</h4>
+                    <p class="flames-subtitle">{{ registration.course.subtitle }}</p>
+                </div>
+                <span class="flames-status status-{{ registration.status|lower }}">Payment 
+                    {{ registration.status }}</span>
+                <a href="{% url 'student_view_registration' registration.course.slug %}"
+                    class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
+
+                {% if not registration.payment_id and registration.status != 'Completed' %}
+                <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button"
+                    data-registration-id="{{ registration.id }}">
+                    Pay Now
+                </a>
+                {% endif %}
+            </div>
+            <div class="flames-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="flames-info">
+                            <div class="info-label">Registered On</div>
+                            <div class="info-value">{{ registration.created_at|date:"F d, Y" }}</div>
+                        </div>
+
+                        {% if registration.admin_notes %}
+                        <div class="flames-info">
+                            <div class="info-label">Admin Notes</div>
+                            <div class="info-value">{{ registration.admin_notes }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <div class="flames-info">
+                            <div class="info-label">Registration Mode</div>
+                            <div class="info-value">{{ registration.get_registration_mode_display }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {% if registration.team %}
+
+                <div class="flames-team">
+                    <h5 class="team-title"><i class="fas fa-users"></i> Team Members</h5>
+
+                    {% for member in registration.team.members.all %}
+
+                    <div class="team-member">
+
+                        <div class="member-icon">
+                            <img src="{{ member.member.profile_pic.url }}" alt="{{ member.full_name }}"
+                                class="rounded-circle" width="30" height="30">
+                        </div>
+                        <div>
+                            <div>{{ member.member.first_name }} {{ member.member.last_name }}</div>
+                            <small>{{ member.member.email }}</small>
+                        </div>
+
+                        {% if member.is_leader %}
+                        <span class="team-leader-badge">Team Leader</span>
+                        {% endif %}
+
+                    </div>
+
+                    {% empty %}
+                    <p>No team members found. Please contact support.</p>
+                    {% endfor %}
+
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="flames-footer">
+                <div class="price-info">
+                    {% if registration.registration_mode == 'TEAM' %}
+                    <span class="original-price">₹{{ registration.original_price }} × 5 = ₹
+                        {{ registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price }}</span>
+                    <span class="final-price">₹{{ registration.payable_amount }} (after team discount)</span>
+                    <span class="discount-badge">Team Discount: ₹499 × 5 = ₹2,495</span>
+                    {% elif registration.original_price != registration.discounted_price %}
+                    <span class="original-price">₹{{ registration.original_price }}</span>
+                    <span class="final-price">₹{{ registration.discounted_price }}</span>
+                    <span class="discount-badge">Discount Applied</span>
+                    {% else %}
+                    <span class="final-price">₹{{ registration.original_price }}</span>
+                    {% endif %}
+                </div>
+
+                {% if registration.team %}
+
+                <span class="discount-badge fs-2">
+                    Team Registration (5 members) - ₹2,495 discount
+                </span>
+
+
+
+                {% elif registration.referral_code %}
+                <span class="discount-badge fs-2">
+                    Referred By: {{ registration.referral_code.alumni.name }}🔥
+                </span>
+
+                {% endif %}
+
+
+            </div>
+
+            {% if not registration.payment_id and registration.status != 'Completed' %}
+            <div class="m-2 justify-center text-center">
+                <a id="reg-{{ registration.id }}" class="payment-button btn w-50" data-registration-id="{{ registration.id }}">
+                    Complete My Registration🔥
+                </a>
+            </div>
+
+            {% endif %}
+
+        </div>
+        {% endfor %}
+
+        {% else %}
+
+        <div class="no-registrations">
+            <i class="fas fa-clipboard-list"></i>
+            <h4>No Registrations Found</h4>
+            <p>You haven't registered for any F.L.A.M.E.S programs yet.</p>
+            <button class="tab-button btn-primary" data-tab="available" style="border-radius: 4px;">Explore Available
+                Programs</button>
+        </div>
+
+        {% endif %}
+    </div>
+
+    <hr>
+
+    <!-- =============================== AVAILABLE COURSES ================================= -->
+
+    <div id="available-tab" class="tab-content active">
+        <div class="section-header">
+            <h3 class="section-title">Available F.L.A.M.E.S Programs</h3>
+        </div>
+
+        <div class="course-grid">
+            {% for course in available_courses %}
+            <div class="course-card">
+                <div class="course-header">
+                    <!-- <div class="course-icon" style="background-color: rgba({{ course.icon_color }}, 0.1);">
+                        <i class="{{ course.icon_class }}" style="color: {{ course.icon_color }};"></i>
+                    </div> -->
+                    <div>
+                        <h4 class="flames-title">{{ course.title }}</h4>
+                        <p class="flames-subtitle">{{ course.subtitle }}</p>
+                    </div>
+                </div>
+                <div class="course-body">
+
+                    <div class="course-learning-points">
+                        <strong>What You'll Learn:</strong>
+                        <ul>
+                            {% for point in course.get_learning_points|slice:":3" %}
+                            <li>{{ point }}</li>
+                            {% endfor %}
+                            {% if course.get_learning_points|length > 3 %}
+                            <li>And more...</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="course-footer">
+                    <div class="price-info">
+                        {% if course.discount_price %}
+                        <span class="original-price">₹{{ course.price }}</span>
+                        <span class="final-price">₹{{ course.discount_price }}</span>
+                        {% else %}
+                        <span class="final-price">₹{{ course.price }}</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline">Details</a>
+                        <a href="{% url 'student_flames_register' course.slug %}"
+                            class="btn btn-sm btn-primary">Register</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="no-registrations">
+                    <i class="fas -calendar-times"></i>
+                    <h4>No Programs Available</h4>
+                    <p>There are currently no F.L.A.M.E.S programs available for registration.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+<!-- Razorpay Integration -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Find all payment buttons using the class selector
+        const payButtons = document.querySelectorAll('.payment-button');
+
+        // Add click event listeners to all payment buttons
+        payButtons.forEach(payButton => {
+            console.log('Found payment button:', payButton.id);
+            payButton.addEventListener('click', function () {
+                // Disable button to prevent multiple clicks
+                payButton.disabled = true;
+                payButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+
+                const registrationId = this.getAttribute('data-registration-id');
+
+                // Call the API to initialize payment
+                // Using complete URL path to ensure proper routing
+                fetch(`/dashboard/payment/initiate-payment/${registrationId}/`)
+                    .then(response => {
+                        if (!response.ok) {
+                            console.error(`Payment initialization HTTP error! Status: ${response.status}`, response);
+                            throw new Error(`HTTP error! Status: ${response.status}. Please check the URL path: /dashboard/payment/initiate-payment/${registrationId}/`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            console.log('Payment initialization successful:', data);
+
+                            // Initialize Razorpay checkout
+                            const options = {
+                                key: '{{ razorpay_key_id }}',
+                                amount: data.amount,
+                                currency: data.currency,
+                                name: data.name || 'Angaar FLAMES',
+                                description: data.description || 'Course Registration',
+                                order_id: data.order_id,
+                                prefill: data.prefill || {},
+                                handler: function (response) {
+                                    console.log('Payment successful:', response);
+                                    payButton.innerHTML = 'Complete My Registration🔥';
+
+                                    // Submit payment details to backend
+                                    const form = document.createElement('form');
+                                    form.method = 'POST';
+                                    form.action = '{% url "payment_callback" %}';
+
+                                    // Add CSRF token
+                                    const csrfToken = document.createElement('input');
+                                    csrfToken.type = 'hidden';
+                                    csrfToken.name = 'csrfmiddlewaretoken';
+                                    csrfToken.value = '{{ csrf_token }}';
+                                    form.appendChild(csrfToken);
+
+                                    // Add payment details
+                                    for (const key in response) {
+                                        const input = document.createElement('input');
+                                        input.type = 'hidden';
+                                        input.name = key;
+                                        input.value = response[key];
+                                        form.appendChild(input);
+                                    }
+
+                                    // Add registration ID
+                                    const regIdInput = document.createElement('input');
+                                    regIdInput.type = 'hidden';
+                                    regIdInput.name = 'registration_id';
+                                    regIdInput.value = registrationId;
+                                    form.appendChild(regIdInput);
+
+                                    // Submit the form
+                                    document.body.appendChild(form);
+                                    form.submit();
+                                },
+                                modal: {
+                                    ondismiss: function () {
+                                        console.log('Checkout modal closed');
+                                        // Re-enable button if payment modal is dismissed
+                                        payButton.disabled = false;
+                                        payButton.innerHTML = 'Complete My Registration🔥';
+                                    }
+                                },
+                                theme: {
+                                    color: '#4273fa'
+                                }
+                            };
+
+                            try {
+                                console.log('Opening Razorpay checkout with options:', options);
+                                const razorpay = new Razorpay(options);
+                                razorpay.on('payment.failed', function (response) {
+                                    console.error('Payment failed:', response.error);
+                                    alert(`Payment failed: ${response.error.description}`);
+                                    payButton.disabled = false;
+                                    payButton.innerHTML = 'Complete My Registration🔥';
+                                });
+                                razorpay.open();
+                            } catch (e) {
+                                console.error('Error opening Razorpay checkout:', e);
+                                alert(`Error opening payment gateway: ${e.message}`);
+                                payButton.disabled = false;
+                                payButton.innerHTML = 'Complete My Registration🔥';
+                            }
+                        } else {
+                            // Show error message
+                            console.error('Payment initialization failed:', data.error);
+                            alert(`Payment initialization failed: ${data.error}`);
+                            payButton.disabled = false;
+                            payButton.innerHTML = 'Complete My Registration🔥';
+                            payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>PAY NOW🔥';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error initializing payment:', error);
+                        alert(`An error occurred while initializing payment: ${error.message}`);
+                        payButton.disabled = false;
+                        payButton.innerHTML = '<i class="fas fa-credit-card me-2"></i>PAY NOW🔥';
+                    });
+            });
+        });
+    });
+</script>
+
+{% endblock %}

@@ -161,6 +161,43 @@ def check_username_availability(request):
 
     return JsonResponse(data)
 
+def check_username_exists(request):
+    """Check if a username exists in the Student model and return user details"""
+    username = request.GET.get('username')
+    course_id = request.GET.get('course_id')
+    
+    student = Student.objects.filter(username=username).first()
+    exists = student is not None
+    
+    response_data = {'exists': exists}
+    
+    if exists:        
+        if student:
+            # Add student details to response
+            response_data['full_name'] = f"{student.first_name} {student.last_name}"
+            response_data['email'] = student.email
+            
+            # Check if student is already registered for this course
+            if course_id:
+                from home.models import FlamesRegistration, FlamesTeamMember
+                
+                # Check if directly registered as lead
+                direct_registration = FlamesRegistration.objects.filter(
+                    user=student,
+                    course_id=course_id
+                ).exists()
+                
+                # Check if registered as team member
+                team_membership = FlamesTeamMember.objects.filter(
+                    member=student,
+                    team__course_id=course_id
+                ).exists()
+                
+                already_registered = direct_registration or team_membership
+                response_data['already_registered'] = already_registered
+    
+    return JsonResponse(response_data)
+
 # ====================== check email availability ====================
 def check_email_availability(request):
     email = request.GET.get('email', '')

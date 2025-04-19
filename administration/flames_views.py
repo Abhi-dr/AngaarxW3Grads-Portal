@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from django.views.decorators.http import require_POST
-from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial
+from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember
 from accounts.models import Instructor
 
 @login_required
@@ -27,21 +27,23 @@ def flames_courses(request):
     
     return render(request, 'administration/flames/courses.html', context)
 
+
 @login_required
 def flames_registrations(request):
     """
     Admin view for managing FLAMES registrations with filtering capability
     """
-    registrations = FlamesRegistration.objects.all().select_related('course')
+    registrations = FlamesRegistration.objects.all().select_related('course', 'user', 'team')
     courses = FlamesCourse.objects.all()
     
     # Get stats for dashboard
     total_registrations = registrations.count()
     pending_registrations = registrations.filter(status="Pending").count()
     approved_registrations = registrations.filter(status="Approved").count()
+    completed_registrations = registrations.filter(status="Completed").count()
     
-    # Get unique colleges for filter
-    colleges = registrations.values_list('college', flat=True).distinct()
+    # Get unique colleges for filter (from student profiles)
+    colleges = registrations.filter(user__isnull=False).values_list('user__college', flat=True).distinct()
     
     context = {
         'registrations': registrations,
@@ -50,9 +52,11 @@ def flames_registrations(request):
         'total_registrations': total_registrations,
         'pending_registrations': pending_registrations,
         'approved_registrations': approved_registrations,
+        'completed_registrations': completed_registrations,
     }
     
     return render(request, 'administration/flames/registrations.html', context)
+
 
 @login_required
 def admin_course_detail(request, course_id):
@@ -71,6 +75,7 @@ def admin_course_detail(request, course_id):
     }
     
     return render(request, 'administration/flames/course_detail.html', context)
+
 
 @login_required
 def admin_add_course(request):
@@ -121,6 +126,7 @@ def admin_add_course(request):
     
     return render(request, 'administration/flames/courses.html', context)
 
+
 @login_required
 def admin_edit_course(request, course_id):
     """
@@ -157,6 +163,7 @@ def admin_edit_course(request, course_id):
     
     return render(request, 'administration/flames/edit_course.html', context)
 
+
 @login_required
 @require_POST
 def admin_toggle_course_status(request):
@@ -181,100 +188,223 @@ def admin_toggle_course_status(request):
             'message': str(e)
         })
 
+
 @login_required
 def admin_registrations_ajax(request):
     """
     AJAX endpoint for getting filtered registrations data
     """
+    # Get filter parameters
+    course_id = request.GET.get('course')
+    status = request.GET.get('status')
+    college = request.GET.get('college')
+    search = request.GET.get('search[value]')
     
-    # Extract filter parameters
-    course_id = request.GET.get('course', '')
-    status = request.GET.get('status', '')
-    year = request.GET.get('year', '')
-    college = request.GET.get('college', '')
-    search = request.GET.get('search', '')
-    
-    # Start with all registrations
-    registrations = FlamesRegistration.objects.all().select_related('course')
+    # Base queryset
+    registrations = FlamesRegistration.objects.all().select_related('course', 'user', 'team')
     
     # Apply filters
-    if course_id:
+    if course_id and course_id != 'all':
         registrations = registrations.filter(course_id=course_id)
     
-    if status:
-        # Handle case-insensitive status filtering
-        if status.lower() == 'pending':
-            registrations = registrations.filter(status='Pending')
-        elif status.lower() == 'approved':
-            registrations = registrations.filter(status='Approved')
-        elif status.lower() == 'rejected':
-            registrations = registrations.filter(status='Rejected')
-        elif status.lower() == 'completed':
-            registrations = registrations.filter(status='Completed')
+    if status and status != 'all':
+        registrations = registrations.filter(status=status.capitalize())
     
-    if year:
-        registrations = registrations.filter(year=year)
+    if college and college != 'all':
+        registrations = registrations.filter(user__college=college)
     
-    if college:
-        registrations = registrations.filter(college=college)
-    
+    # Apply search
     if search:
         registrations = registrations.filter(
-            Q(full_name__icontains=search) | 
-            Q(email__icontains=search) | 
-            Q(contact_number__icontains=search) |
-            Q(college__icontains=search)
+            Q(user__first_name__icontains=search) | 
+            Q(user__last_name__icontains=search) | 
+            Q(user__email__icontains=search) | 
+            Q(user__contact_number__icontains=search) | 
+            Q(user__college__icontains=search) | 
+            Q(course__title__icontains=search) |
+            Q(team__name__icontains=search)
         )
     
-    # Prepare data for DataTables
+    # Get total count before pagination
+    total_count = registrations.count()
+    
+    # Pagination
+    start = int(request.GET.get('start', 0))
+    length = int(request.GET.get('length', 10))
+    registrations = registrations[start:start + length]
+    
+    # Format data for DataTables
     data = []
     for reg in registrations:
+        # Get user information if available
+        full_name = ""
+        email = ""
+        contact_number = ""
+        college = ""
+        year = ""
+        
+        if reg.user:
+            full_name = f"{reg.user.first_name} {reg.user.last_name}"
+            email = reg.user.email
+            college = reg.user.college or ""
+            contact_number = reg.user.mobile_number
+            year = reg.year
+        
+        # Registration mode and team info
+        registration_mode = reg.registration_mode
+        team_info = reg.team.name if reg.team else "N/A"
+        
+        # Referral information
+        is_referral = False
+        referral_type = "None"
+        referral_code = "N/A"
+        actual_discount = 0
+        
+        if reg.referral_code:
+            is_referral = True
+            referral_type = reg.referral_code.referral_type
+            referral_code = reg.referral_code.code
+            actual_discount = float(reg.referral_code.discount_amount)
+            
+            # For team registrations, multiply discount by 5
+            if reg.registration_mode == 'TEAM':
+                actual_discount *= 5
+        
+        # Actual amount to pay
+        actual_amount_to_pay = float(reg.discounted_price) if reg.discounted_price else float(reg.original_price)
+        
         data.append({
             'id': reg.id,
-            'full_name': reg.full_name,
+            'full_name': full_name,
             'course': {
                 'title': reg.course.title,
                 'color': reg.course.icon_color
             },
-            'email': reg.email,
-            'contact_number': reg.contact_number,
-            'college': reg.college,
-            'year': reg.year,
+            'email': email,
+            'contact_number': contact_number,
+            'college': college,
+            'year': year,
             'created_at': reg.created_at.strftime('%d %b %Y, %I:%M %p'),
-            'status': reg.status
+            'status': reg.status,
+            'registration_mode': registration_mode,
+            'team': team_info,
+            'payment_id': reg.payment_id or "N/A",
+            'original_price': float(reg.original_price) if reg.original_price else 0,
+            'discounted_price': float(reg.discounted_price) if reg.discounted_price else 0,
+            'actual_amount_to_pay': actual_amount_to_pay,
+            'is_referral': is_referral,
+            'referral_type': referral_type,
+            'referral_code': referral_code,
+            'actual_discount': actual_discount
         })
+    
     # Make sure to return in the format DataTables expects
     return JsonResponse({
         'data': data,
         'draw': int(request.GET.get('draw', 1)),
         'recordsTotal': FlamesRegistration.objects.count(),
-        'recordsFiltered': len(data)
+        'recordsFiltered': total_count
     })
+
 
 @login_required
 def admin_registration_details(request):
     """
     Get registration details for modal view
     """
-    reg_id = request.GET.get('id')
-    
     try:
-        registration = get_object_or_404(FlamesRegistration, id=reg_id)
+        reg_id = request.GET.get('id')
+        registration = FlamesRegistration.objects.select_related('user', 'course', 'team').get(id=reg_id)
+        
+        # Get student information
+        name = "N/A"
+        email = "N/A"
+        phone = "N/A"
+        college = "N/A"
+        year = "N/A"
+        
+        if registration.user:
+            name = f"{registration.user.first_name} {registration.user.last_name}"
+            email = registration.user.email
+            phone = registration.user.mobile_number
+            college = registration.user.college
+            year = registration.year
+        
+        # Team information if applicable
+        team_info = {}
+        if registration.registration_mode == 'TEAM' and registration.team:
+            team = registration.team
+            team_info = {
+                'id': team.id,
+                'name': team.name,
+                'status': team.status
+            }
+            
+            # Get team leader
+            # if team.leader:
+            #     team_info['leader_name'] = f"{team.leader.first_name} {team.leader.last_name}"
+            
+            # Get team members
+            members_list = []
+            for member in FlamesTeamMember.objects.filter(team=team):
+                if member.member:
+                    members_list.append({
+                        'name': f"{member.member.first_name} {member.member.last_name}",
+                        'email': member.member.email,
+                        'is_leader': member.is_leader
+                    })
+            team_info['members'] = members_list
+        
+        # Payment and pricing information
+        payment_info = {
+            'payment_id': registration.payment_id or 'Not available',
+            'original_price': float(registration.original_price) if registration.original_price else 0,
+            'discounted_price': float(registration.discounted_price) if registration.discounted_price else 0,
+            'actual_amount_to_pay': float(registration.discounted_price) if registration.discounted_price else float(registration.original_price),
+        }
+        
+        # Referral information
+        referral_info = {}
+        if registration.referral_code:
+            # Calculate actual discount amount (5x for team registrations)
+            actual_discount = float(registration.referral_code.discount_amount)
+            if registration.registration_mode == 'TEAM':
+                actual_discount *= 5
+                
+            referral_info = {
+                'code': registration.referral_code.code,
+                'type': registration.referral_code.referral_type,
+                'discount_amount': float(registration.referral_code.discount_amount) if registration.referral_code.discount_amount else 0,
+                'actual_discount_amount': actual_discount,
+                'is_active': registration.referral_code.is_active,
+                'is_referral': True
+            }
+        else:
+            referral_info = {
+                'is_referral': False
+            }
         
         data = {
             'id': registration.id,
-            'name': registration.full_name,
-            'email': registration.email,
-            'phone': registration.contact_number,
-            'course': registration.course.title,
-            'college': registration.college,
-            'year': registration.year,
+            'name': name,
+            'email': email,
+            'phone': phone,
+            'course_title': registration.course.title,
+            'college': college,
+            'year': year,
             'message': registration.message or '',
             'status': registration.status,
-            'payment_id': registration.payment_id or '',
+            'registration_mode': registration.registration_mode,
             'admin_notes': registration.admin_notes or '',
             'created_at': registration.created_at.strftime('%d %b %Y, %I:%M %p'),
             'updated_at': registration.updated_at.strftime('%d %b %Y, %I:%M %p') if registration.updated_at else '',
+            'team': team_info,
+            'payment': payment_info,
+            'referral': referral_info,
+            'payment_id': registration.payment_id or 'N/A',
+            'payable_amount': float(registration.payable_amount) if registration.payable_amount else 
+                              float(registration.discounted_price) if registration.discounted_price else 
+                              float(registration.original_price)
         }
         
         return JsonResponse({
@@ -287,6 +417,7 @@ def admin_registration_details(request):
             'message': str(e)
         })
 
+
 @login_required
 @require_POST
 def admin_update_registration_status(request):
@@ -294,7 +425,7 @@ def admin_update_registration_status(request):
     Update a registration's status
     """
     reg_id = request.POST.get('id')
-    status = request.POST.get('status').capitalize()
+    status = request.POST.get('status')
     
     try:
         registration = get_object_or_404(FlamesRegistration, id=reg_id)
@@ -310,6 +441,7 @@ def admin_update_registration_status(request):
             'status': 'error',
             'message': str(e)
         })
+
 
 @login_required
 @require_POST
@@ -334,6 +466,7 @@ def admin_update_registration_notes(request):
             'status': 'error',
             'message': str(e)
         })
+
 
 @login_required
 @require_POST

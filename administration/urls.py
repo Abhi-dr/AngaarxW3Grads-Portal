@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views
+from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views
 
 urlpatterns = [
     path("", views.index, name="administration"),
@@ -208,4 +208,17 @@ urlpatterns += [
 urlpatterns += [
     path('get-user-stats/', views.get_user_stats, name='get_user_stats'),
 
+]
+
+# Alumni Management
+urlpatterns += [
+    path('alumni/', alumni_views.alumni_management, name='alumni_management'),
+    path('alumni/<int:alumni_id>/', alumni_views.alumni_details, name='alumni_details'),
+    path('alumni/add/', alumni_views.add_alumni, name='add_alumni'),
+    path('alumni/update/<int:alumni_id>/', alumni_views.update_alumni, name='update_alumni'),
+    path('alumni/delete/<int:alumni_id>/', alumni_views.delete_alumni, name='delete_alumni'),
+    path('alumni/generate-referral/<int:alumni_id>/', alumni_views.generate_referral_code, name='generate_referral_code'),
+    path('alumni/toggle-referral-status/<int:code_id>/', alumni_views.toggle_referral_code_status, name='toggle_referral_code_status'),
+    path('alumni/stats/', alumni_views.alumni_stats, name='alumni_stats'),
+    path('alumni/list-ajax/', alumni_views.alumni_list_ajax, name='alumni_list_ajax'),
 ]
