@@ -33,7 +33,7 @@ retries = Retry(
     total=3,  # Maximum number of retries
     backoff_factor=0.5,  # Backoff factor for retries
     status_forcelist=[502, 503, 504],  # Retry on these HTTP status codes
-    allowed_methods=["GET", "POST"]  # Allow retrying on these methods
+    
 )
 judge0_session.mount('https://', HTTPAdapter(
     max_retries=retries,
