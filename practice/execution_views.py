@@ -1054,9 +1054,11 @@ async def run_code_async(slug, source_code, language_id, user, sample_test_cases
         outputs = judge0_response["outputs"]
         
         # Get expected outputs
+        loop = asyncio.get_running_loop()
         expected_outputs = await asyncio.gather(*[
-            asyncio.to_thread(normalize_output, tc.expected_output) for tc in test_cases
+            loop.run_in_executor(None, normalize_output, tc.expected_output) for tc in test_cases
         ])
+
         inputs = [tc.input_data for tc in test_cases]
         
         # Process test case results
