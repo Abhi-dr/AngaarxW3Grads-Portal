@@ -16,6 +16,7 @@ from .models import RecommendedQuestions
 from .models import Sheet, Question, TestCase, Submission, DriverCode, Streak
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+from django.conf import settings
 # Import Django's asynchronous utilities
 from asgiref.sync import sync_to_async, async_to_sync
 
@@ -665,7 +666,7 @@ async def run_code_on_judge0_async(question, source_code, language_id, test_case
     
     encoded_code = base64.b64encode(complete_source_code.encode('utf-8')).decode('utf-8')
     encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
-
+    print("yaha AA GYE ------------------------------------------------------------")
     submission_data = {
         "source_code": encoded_code,
         "language_id": language_id,
@@ -674,7 +675,8 @@ async def run_code_on_judge0_async(question, source_code, language_id, test_case
         "wall_time_limit": cpu_time_limit,
         "memory_limit": memory_limit * 1000,
         "enable_per_process_and_thread_time_limit": True,
-        "base64_encoded": True
+        "base64_encoded": True,
+        'callback_url': settings.JUDGE0_CALLBACK_URL,
     }
 
     try:
@@ -694,7 +696,7 @@ async def run_code_on_judge0_async(question, source_code, language_id, test_case
                 if not token:
                     return {"error": "No token received from Judge0.", "outputs": None, "token": None}
 
-                print("✅ TOKEN:", token)
+                print("✅ TOKN:", token)
             
             # Poll Until Completion with improved exponential backoff
             max_retries = 15  # Increased max retries
