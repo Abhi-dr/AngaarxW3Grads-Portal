@@ -850,7 +850,6 @@
             event.preventDefault(); // Prevent default form submission
 
             const editor = ace.edit('editor');
-
             const submit_btn = $("#submit-btn");
 
             submit_btn.prop("disabled", true);
@@ -866,26 +865,28 @@
                 }
             }, 1500);
 
-
             let code = editor.getValue();
 
             if (!code.trim()) {
                 alert("Code cannot be empty!");
-                event.preventDefault(); // Prevent form submission
+                clearInterval(countdownInterval);
+                submit_btn.prop("disabled", false);
+                submit_btn.text("Submit Code");
+                return; // Stop here
             }
 
             const testCaseResultsDiv = document.getElementById('testCaseResults');
             testCaseResultsDiv.innerHTML = `
-                        <h4>Execution in progress...</h4>
-                        <div id='loader'>
-                            <td colspan="6" class="text-center">
-                                <div class="d-flex justify-content-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                </div>
-                            </td>
-                        </div>`;
+                <h4>Execution in progress...</h4>
+                <div id='loader'>
+                    <td colspan="6" class="text-center">
+                        <div class="d-flex justify-content-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </td>
+                </div>`;
 
             document.getElementById('submission_code').value = code;
 
@@ -898,134 +899,354 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log("TOKEN: ", data.token);
-
-
-                    if (data.sheet_disabled) {
-                        alert(data.sheet_disabled);
-                        // rediret to practice page
-                        window.location.href = "{% url 'practice' %}";
-                    }
-
-                    clearInterval(countdownInterval); // Clear the interval
-                    submit_btn.prop("disabled", false);
-                    submit_btn.text("Submit Code");
-
-                    testCaseResultsDiv.scrollIntoView({
-                        behavior: 'smooth'
+                    // ✅ Pass source_code manually
+                    check_result({
+                        token: data.token,
+                        source_code: code // explicitly pass code here
                     });
-
-                    testCaseResultsDiv.innerHTML = "";
-                    // remove all prepend 
-                    while (testCaseResultsDiv.firstChild) {
-                        testCaseResultsDiv.removeChild(testCaseResultsDiv.firstChild);
-                    }
-
-                    if (data.error || data.compile_output) {
-                        const globalErrorDiv = document.createElement('div');
-
-
-                        globalErrorDiv.classList.add('alert', 'alert-danger');
-                        globalErrorDiv.innerHTML = `
-                        <h5>Compiler Error</h5>
-                        Error: <pre>${data.error}</pre>`;
-
-                        if (data.compile_output) {
-                            globalErrorDiv.innerHTML += `
-                            <h5>Compiler Output:</h5>
-                            <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>
-                        `;
-                        }
-
-                        testCaseResultsDiv.prepend(globalErrorDiv);
-                    }
-
-                    // If there are test case results, display them
-                    if (data.test_case_results) {
-                        testCaseResultsDiv.innerHTML = '<h4>Test Case Results:</h4>'; // Clear previous results
-                        data.test_case_results.forEach((result, index) => {
-                            const resultDiv = document.createElement('div');
-                            resultDiv.classList.add(
-                                'card',
-                                'mb-3',
-                                'test-case-result',
-                                result.status === "Passed" ? 'border-success' : 'border-danger',
-                                'shadow-sm'
-                            );
-
-                            resultDiv.id = "test-case-result-id";
-
-                            // Include compiler output only when the test case fails
-                            const compilerOutputHTML = document.createElement('div');
-                            compilerOutputHTML.id = "compiler-output";
-                            if (result.compiler_output) {
-                                compilerOutputHTML += `
-                                <p><strong>Compiler Output:</strong></p>
-                                <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
-                            `;
-
-                                document.getElementById("compiler-output").scrollIntoView({ behavior: 'smooth' });
-                            }
-
-                            resultDiv.innerHTML = `
-                            <div class="card-header d-flex justify-content-between align-items-center">
-                                <span>
-                                    <strong>Test Case ${index + 1}</strong> - 
-                                    <span class="badge 
-                                        ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">
-                                        ${result.status}
-                                    </span>
-                                </span>
-                                <button 
-                                    class="btn btn-sm btn-outline-primary toggle-details" 
-                                    type="button" 
-                                    data-bs-toggle="collapse" 
-                                    data-bs-target="#details-${index}" 
-                                    aria-expanded="false" 
-                                    aria-controls="details-${index}">
-                                    Show
-                                </button>
-                            </div>
-                            <div id="details-${index}" class="collapse">
-                                <div class="card-body">
-                                    <p><strong>Input:</strong></p>
-                                    <pre class="p-2 rounded">${result.input}</pre>
-                                    <p><strong>Expected Output:</strong></p>
-                                    <pre class="p-2 rounded">${result.expected_output}</pre>
-                                    <p><strong>Your Output:</strong></p>
-                                    <pre class="p-2 rounded">${result.user_output}</pre>
-                                    <p><strong>Status:</strong> 
-                                        <span class="badge 
-                                            ${result.status === "Passed" ? 'bg-success' : 'bg-danger'}">
-                                            ${result.status}
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                        `;
-                            testCaseResultsDiv.appendChild(resultDiv);
-                        });
-
-
-                        if (data.is_all_test_cases_passed) {
-                            submission_accepted(data.score);
-                        }
-                        document.getElementById("test-case-result-id").scrollIntoView({ behavior: 'smooth' });
-                    }
-
-                    // If there's a global compiler error (e.g., server-side), display it
-
                 })
-
                 .catch(error => {
                     console.log('Error:', error);
-                    // print the token from response                
-                    console.log("TOKEN: ", error.token);
-                    clearInterval(countdownInterval); // Clear the interval
+                    clearInterval(countdownInterval);
                     submit_btn.prop("disabled", false);
                     submit_btn.text("Submit Code");
                 });
         });
 
+        // Client-side result cache to reduce server load
+        const resultCache = new Map();
+        
+        function check_result(source_data) {
+            const token = source_data.token;
+            const source_code = source_data.source_code;
+            const cached = source_data.cached || false;
+            
+            // Check if we already have this result cached
+            if (resultCache.has(token)) {
+                console.log("Using cached result for token:", token);
+                display_result(resultCache.get(token));
+                return;
+            }
+            
+            const judge0_url = `https://theangaarbatch.in/judge0/submissions/${token}?base64_encoded=true`;
+            console.log("URL HIT: ", judge0_url);
+            
+            // Show polling status to user
+            const testCaseResultsDiv = document.getElementById('testCaseResults');
+            if (testCaseResultsDiv.querySelector('#polling-status') === null) {
+                const statusDiv = document.createElement('div');
+                statusDiv.id = 'polling-status';
+                statusDiv.innerHTML = `<p class="text-info">Checking submission status... <span id="poll-attempt">1</span></p>`;
+                testCaseResultsDiv.appendChild(statusDiv);
+            }
+            
+            // Use exponential backoff for polling
+            let attempts = 0;
+            let delay = 1000; // Start with 1 second
+            const maxDelay = 8000; // Max 8 seconds between polls
+            const maxAttempts = 30; // Maximum number of attempts (about 2 minutes total)
+            
+            // Clear any existing polling intervals
+            if (window.pollIntervalId) {
+                clearInterval(window.pollIntervalId);
+            }
+            
+            function pollOnce() {
+                // Update polling attempt counter in UI
+                const pollAttemptSpan = document.getElementById('poll-attempt');
+                if (pollAttemptSpan) {
+                    pollAttemptSpan.textContent = attempts + 1;
+                }
+                
+                fetch(judge0_url, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    cache: 'no-store' // Prevent browser caching
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Check if processing is complete
+                    if (data.status && (data.status.id === 3 || data.status.id === 6)) {
+                        // Status 3 = Accepted, 6 = Compilation Error
+                        const question_slug = "{{ question.slug }}";
+                        const language_id = $("#language").val()
+                        const get_result_url = `{% url 'send_output' 0 1 %}`
+                            .replace("/0", `/${token}`)
+                            .replace("/1", `/${question_slug}`);
+                        
+                        console.log("RESULT URL: ", get_result_url);
+                        
+                        // Get the final results
+                        fetch(get_result_url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: JSON.stringify({
+                                token: token,
+                                source_code: source_code,
+                                language_id: language_id
+                            })
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(resultData => {
+                            console.log("RESULT DATA: ", resultData);
+                            // Cache the result
+                            resultCache.set(token, resultData);
+                            // Limit cache size to prevent memory leaks
+                            if (resultCache.size > 20) {
+                                // Remove oldest entry
+                                const firstKey = resultCache.keys().next().value;
+                                resultCache.delete(firstKey);
+                            }
+                            display_result(resultData);
+                        })
+                        .catch(error => {
+                            console.error('Error fetching final result:', error);
+                            display_error('Error fetching results from server', error.message);
+                        });
+                    } else if (attempts >= maxAttempts) {
+                        // Too many attempts, show timeout error
+                        display_error(
+                            'Execution Timeout', 
+                            'Your code is taking too long to execute. This could be due to an infinite loop or inefficient algorithm.'
+                        );
+                    } else {
+                        // Still processing, continue polling with backoff
+                        attempts++;
+                        // Exponential backoff with capping
+                        delay = Math.min(delay * 1.5, maxDelay);
+                        setTimeout(pollOnce, delay);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error polling Judge0:', error);
+                    // If we get an error, retry a few times before giving up
+                    if (attempts < 5) {
+                        attempts++;
+                        setTimeout(pollOnce, delay);
+                    } else {
+                        display_error('Error checking submission status', 
+                            'The server is not responding or is experiencing issues. Please try again later.', 
+                            null, null);
+                    }
+                });
+            }
+            
+            // Start polling
+            pollOnce();
+        }
+        
+        // Helper function to display detailed errors
+        function display_error(message, details = null, stderr = null, compile_output = null) {
+            const testCaseResultsDiv = document.getElementById('testCaseResults');
+            
+            let errorHTML = `
+                <div class="alert alert-danger">
+                    <h4><i class="fas fa-exclamation-circle me-2"></i>Execution Error</h4>
+                    <p class="mb-2">${message}</p>
+            `;
+            
+            // Add details if available
+            if (details) {
+                errorHTML += `<div class="mt-3"><strong>Details:</strong> <pre class="p-2 bg-light rounded">${details}</pre></div>`;
+            }
+            
+            // Add stderr if available
+            if (stderr) {
+                errorHTML += `
+                <div class="mt-3">
+                    <strong>Runtime Error:</strong>
+                    <pre class="p-2 bg-light rounded text-danger">${stderr}</pre>
+                </div>`;
+            }
+            
+            // Add compilation output if available
+            if (compile_output) {
+                errorHTML += `
+                <div class="mt-3">
+                    <strong>Compilation Error:</strong>
+                    <pre class="p-2 bg-light rounded text-danger">${compile_output}</pre>
+                </div>`;
+            }
+            
+            errorHTML += `</div>`;
+            testCaseResultsDiv.innerHTML = errorHTML;
+            
+            // Re-enable submit button
+            const submit_btn = $("#submit-btn");
+            submit_btn.prop("disabled", false);
+            submit_btn.text("Submit Code");
+        }
+
+        function display_result(data) {
+            const submit_btn = $("#submit-btn");
+            const testCaseResultsDiv = document.getElementById('testCaseResults');
+
+            console.log("Entering in DISPLAY RESULT");
+
+            // Handle sheet disabled
+            if (data.sheet_disabled) {
+                alert(data.sheet_disabled);
+                window.location.href = "{% url 'practice' %}";
+                return;
+            }
+
+            // Reset submit button
+            submit_btn.prop("disabled", false);
+            submit_btn.text("Submit Code");
+
+            // Scroll to results
+            testCaseResultsDiv.scrollIntoView({
+                behavior: 'smooth'
+            });
+
+            // Clear previous results
+            testCaseResultsDiv.innerHTML = "";
+
+            // Handle errors
+            if (data.error || data.compile_output || data.stderr) {
+                // Use our improved error display function
+                display_error(
+                    data.error ? 'Execution Error' : 'Compilation Error',
+                    data.error || 'Your code failed to compile or execute properly.',
+                    data.stderr || null,
+                    data.compile_output || null
+                );
+                return;
+            }
+
+            // Handle test case results
+            if (data.test_case_results) {
+                // Count passed and failed test cases
+                const totalTests = data.test_case_results.length;
+                const passedTests = data.test_case_results.filter(result => result.status === "Passed").length;
+                const failedTests = totalTests - passedTests;
+                
+                // Create summary header
+                const summaryDiv = document.createElement('div');
+                summaryDiv.classList.add('mb-4');
+                
+                if (passedTests === totalTests) {
+                    // All test cases passed - show simple success message
+                    summaryDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h4><i class="fas fa-check-circle me-2"></i> All Test Cases Passed!</h4>
+                            <p>Successfully passed all ${totalTests} test cases.</p>
+                        </div>
+                    `;
+                    
+                    // Show confetti for success
+                    if (data.is_all_test_cases_passed) {
+                        submission_accepted(data.score);
+                    }
+                } else {
+                    // Some test cases failed - show summary with counts
+                    summaryDiv.innerHTML = `
+                        <div class="alert ${passedTests > 0 ? 'alert-warning' : 'alert-danger'}">
+                            <h4><i class="fas fa-exclamation-triangle me-2"></i> Test Results</h4>
+                            <p>
+                                <span class="badge bg-success me-2">${passedTests} Passed</span>
+                                <span class="badge bg-danger">${failedTests} Failed</span>
+                                <span class="ms-2">out of ${totalTests} total test cases</span>
+                            </p>
+                            <p class="mb-0">Details of failed test cases shown below:</p>
+                        </div>
+                    `;
+                }
+                
+                testCaseResultsDiv.appendChild(summaryDiv);
+                
+                // If all tests passed, don't show individual test cases
+                if (passedTests === totalTests) {
+                    return;
+                }
+                
+                // Show only failed test cases
+                const failedResultsHeader = document.createElement('h5');
+                failedResultsHeader.textContent = 'Failed Test Cases:';
+                failedResultsHeader.classList.add('mt-3', 'mb-3');
+                testCaseResultsDiv.appendChild(failedResultsHeader);
+                
+                // Display only failed test cases
+                data.test_case_results.forEach((result, index) => {
+                    if (result.status === "Passed") {
+                        return; // Skip passed test cases
+                    }
+                    
+                    const resultDiv = document.createElement('div');
+                    resultDiv.classList.add(
+                        'card',
+                        'mb-3',
+                        'test-case-result',
+                        'border-danger',
+                        'shadow-sm'
+                    );
+
+                    resultDiv.id = `test-case-result-${index}`;
+
+                    // Include compiler output only when the test case fails
+                    let compilerOutputHTML = '';
+                    if (result.compiler_output) {
+                        compilerOutputHTML = `
+                        <p><strong>Compiler Output:</strong></p>
+                        <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
+                        `;
+                    }
+
+                    resultDiv.innerHTML = `
+                    <div class="card-header d-flex justify-content-between align-items-center bg-danger text-white">
+                        <span>
+                            <strong>Test Case ${index + 1}</strong> - Failed
+                        </span>
+                        <button 
+                            class="btn btn-sm btn-outline-light toggle-details" 
+                            type="button" 
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#details-${index}" 
+                            aria-expanded="true" 
+                            aria-controls="details-${index}">
+                            Details
+                        </button>
+                    </div>
+                    <div id="details-${index}" class="collapse show">
+                        <div class="card-body">
+                            <p><strong>Input:</strong></p>
+                            <pre class="p-2 rounded bg-light">${result.input}</pre>
+                            <p><strong>Expected Output:</strong></p>
+                            <pre class="p-2 rounded bg-light">${result.expected_output}</pre>
+                            <p><strong>Your Output:</strong></p>
+                            <pre class="p-2 rounded bg-light">${result.user_output}</pre>
+                            ${compilerOutputHTML}
+                        </div>
+                    </div>
+                    `;
+                    testCaseResultsDiv.appendChild(resultDiv);
+                });
+                
+                // Scroll to the first failed test case
+                const firstFailedTestCase = document.querySelector('.test-case-result.border-danger');
+                if (firstFailedTestCase) {
+                    firstFailedTestCase.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+
+        // ==============================================================================================
 
         // On successful submission... confetti animation
         function submission_accepted(score) {
