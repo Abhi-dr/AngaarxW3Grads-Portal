@@ -912,18 +912,6 @@
                 });
         });
 
-<<<<<<< HEAD
-                    const testCaseResultsDiv = document.getElementById('testCaseResults');
-                    testCaseResultsDiv.innerHTML = ''; // Clear previous content
-
-                    // Use our utility function to display test results
-                    // The third parameter is false to specify this is a submit_code operation
-                    displayTestResults(data, testCaseResultsDiv, false);
-
-                    // Only show the success modal for successful submissions
-                    if (data.is_all_test_cases_passed) {
-                        submission_accepted(data.score);
-=======
         // Client-side result cache to reduce server load
         const resultCache = new Map();
         
@@ -1238,35 +1226,9 @@
                         <p><strong>Compiler Output:</strong></p>
                         <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
                         `;
->>>>>>> execution
                     }
                 });
 
-<<<<<<< HEAD
-
-            // Scroll to the test case results
-            const resultElement = document.getElementById("test-case-result-id");
-            if (resultElement) {
-                resultElement.scrollIntoView({ behavior: 'smooth' });
-            }
-        })
-            .catch((error) => {
-                console.error('Error:', error);
-                clearInterval(countdownInterval); // Clear the interval
-                submit_btn.prop("disabled", false);
-                submit_btn.text("Submit Code");
-
-                // Display error message in the output div instead of using alert
-                const testCaseResultsDiv = document.getElementById('testCaseResults');
-                testCaseResultsDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h5>Error</h5>
-                            <p>An error occurred while submitting your code. Please try again later.</p>
-                        </div>
-                    `;
-            });
-
-=======
                     resultDiv.innerHTML = `
                     <div class="card-header d-flex justify-content-between align-items-center bg-danger text-white">
                         <span>
@@ -1304,7 +1266,6 @@
                 }
             }
         }
->>>>>>> execution
 
         // ==============================================================================================
 

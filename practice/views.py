@@ -66,8 +66,6 @@ def sheet(request, slug):
 def playground(request):
     return render(request, "student/playground.html")
 
-<<<<<<< HEAD
-=======
 
 # ========================================= RECOMMENDED QUESTIONS =========================================
 
@@ -88,7 +86,6 @@ def fetch_recommended_questions(request, slug):
     return JsonResponse({"status": "success", "questions": data})
 
 
->>>>>>> execution
 
 # ====================================================================================================
 # ========================================== MY SUBMISSIONS ==========================================
@@ -161,28 +158,6 @@ def fetch_questions(request):
     cache.set(cache_key, data, timeout=300)  # Cache for 5 minutes
     return JsonResponse(data)
 
-<<<<<<< HEAD
-
-# ========================================== NEXT QUESTION ==========================================
-
-@login_required(login_url="login")
-def render_next_question_in_sheet(request, sheet_id, question_id):
-    sheet = get_object_or_404(Sheet, id=sheet_id, is_approved=True)
-    current_question = get_object_or_404(Question, id=question_id)
-
-    if current_question not in sheet.questions.all():
-        messages.error(request, "This question is not a part of the sheet.")
-        return redirect('sheet', slug=sheet.slug)
-
-    # Get the next question in the sheet
-    next_question = sheet.get_next_question(current_question)
-
-    if next_question:
-        # Render the next question
-        return redirect('problem', slug=next_question.slug)
-
-=======
->>>>>>> execution
 
 # ====================================================================================================
 # ====================================== STUDENT QUESTION CRUD =======================================
@@ -342,7 +317,3 @@ def delete_question(request, id):
     
     messages.success(request, 'Question deleted successfully')
     return redirect('student_add_question')
-<<<<<<< HEAD
-
-=======
->>>>>>> execution
