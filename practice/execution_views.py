@@ -477,9 +477,13 @@ def get_result(token):
 # =============================================== SEND OUTPUT ============================================
 
 def send_output(request, token, slug):
+    """
+    Process the output from Judge0 and return formatted results to the client.
+    Handles both successful executions and various error conditions.
+    """
+    judge0_response = None  # Initialize to avoid reference errors in exception handlers
     
     try: 
-        
         print("TOKEN ON SEND OUTPUT:", token)
         
         question = get_object_or_404(Question, slug=slug)
@@ -491,12 +495,22 @@ def send_output(request, token, slug):
         language_id = body.get('language_id')
         token = body.get('token')
         
-        print(token)
-        print(source_code)
+        if not token or not source_code or not language_id:
+            return JsonResponse({
+                "error": "Missing required parameters",
+                "error_details": "Token, source code, and language ID are required."
+            }, status=400)
+        
+        print("Processing submission with token:", token)
         
         test_cases = get_test_cases(question)
+        if not test_cases:
+            return JsonResponse({
+                "error": "No test cases found for this question",
+                "token": token
+            }, status=400)
     
-    
+        # Get result from Judge0
         start = time.time()
         judge0_response = get_result(token)
         end = time.time()
@@ -504,62 +518,94 @@ def send_output(request, token, slug):
         print("Time Taken to get Output:", end - start)
         print("Judge0 Response:", judge0_response)
                     
-        if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
-                            
-            result = {
+        # Handle error cases
+        if judge0_response.get("error") or judge0_response.get("compile_output") or judge0_response.get("stderr"):
+            # Return all error information to the client for detailed display
+            return JsonResponse({
                 "error": judge0_response.get("error"),
+                "error_details": judge0_response.get("error_details"),
+                "stderr": judge0_response.get("stderr"),
+                "compile_output": judge0_response.get("compile_output"),
+                "status_description": judge0_response.get("status_description"),
+                "time_limit_exceeded": judge0_response.get("time_limit_exceeded"),
                 "token": judge0_response.get("token")
-            }
-            
-            print(result["error"])
-            
-            
-            if judge0_response.get("compile_output"):
-                
-                                    
-                result["compile_output"] = judge0_response.get("compile_output")
-            
-            return JsonResponse(result, status=400)
+            })
 
         # Process successful outputs
-        outputs = judge0_response["outputs"]
+        outputs = judge0_response.get("outputs", [])
+        if not outputs:
+            return JsonResponse({
+                "error": "No output generated",
+                "token": judge0_response.get("token")
+            })
         
-        expected_outputs = [normalize_output(tc.expected_output) for tc in test_cases]
-        inputs = [tc.input_data for tc in test_cases]
-        
-        test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
-        passed_test_cases = sum(1 for result in test_case_results if result['passed'])
-        
-        total_submission_count = Submission.objects.filter(user=user, question=question).count()            
-        
-        
-        # Update submission
-        
-        # Create a submission record
-            # submission = create_submission(user, question, source_code, language_id)
-        submission = create_submission(user, question, source_code, language_id, passed_test_cases, len(test_cases), total_submission_count)
-        
-
-        return JsonResponse({
-            "test_case_results": test_case_results,
-            "status": submission.status,
-            "score": submission.score,
-            "compile_output": None,  # No compilation error
-            "token": judge0_response.get("token"),
-            "is_all_test_cases_passed": passed_test_cases == len(test_cases)
-        })
+        # Prepare test case results
+        try:
+            expected_outputs = [normalize_output(tc.expected_output) for tc in test_cases]
+            inputs = [tc.input_data for tc in test_cases]
+            
+            # Handle case where number of outputs doesn't match test cases
+            if len(outputs) != len(expected_outputs):
+                print(f"Warning: Output count mismatch. Expected {len(expected_outputs)}, got {len(outputs)}")
+                # Pad or truncate outputs to match expected count
+                if len(outputs) < len(expected_outputs):
+                    outputs.extend(["No output"] * (len(expected_outputs) - len(outputs)))
+                else:
+                    outputs = outputs[:len(expected_outputs)]
+            
+            test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
+            passed_test_cases = sum(1 for result in test_case_results if result['passed'])
+            
+            # Get submission count for score calculation
+            total_submission_count = Submission.objects.filter(user=user, question=question).count()            
+            
+            # Create a submission record
+            submission = create_submission(user, question, source_code, language_id, passed_test_cases, len(test_cases), total_submission_count)
+            
+            # Add execution metrics if available
+            result = {
+                "test_case_results": test_case_results,
+                "status": submission.status,
+                "score": submission.score,
+                "token": judge0_response.get("token"),
+                "is_all_test_cases_passed": passed_test_cases == len(test_cases)
+            }
+            
+            # Add execution time and memory if available
+            if judge0_response.get("execution_time"):
+                result["execution_time"] = judge0_response.get("execution_time")
+                
+            if judge0_response.get("memory_used"):
+                result["memory_used"] = judge0_response.get("memory_used")
+                
+            return JsonResponse(result)
+            
+        except Exception as process_error:
+            print(f"Error processing test results: {process_error}")
+            return JsonResponse({
+                "error": "Error processing test results",
+                "error_details": str(process_error),
+                "token": judge0_response.get("token") if judge0_response else token
+            })
 
     except Question.DoesNotExist:
         return JsonResponse({
-            "error": "Question not found.",
-            "token": judge0_response.get("token")
-            }, status=404)
-    except Exception as e:
-        print(f"Error in submit code views: {e}")
+            "error": "Question not found",
+            "token": token
+        }, status=404)
+    except json.JSONDecodeError as json_error:
+        print(f"JSON decode error: {json_error}")
         return JsonResponse({
-            "error": "Error in submit code backend: " + str(e),
-            "token": judge0_response.get("token")
-            }, status=400)
+            "error": "Invalid request format",
+            "error_details": "The request body could not be parsed as JSON"
+        }, status=400)
+    except Exception as e:
+        print(f"Error in send_output: {e}")
+        return JsonResponse({
+            "error": "Server error",
+            "error_details": str(e),
+            "token": judge0_response.get("token") if judge0_response else token
+        }, status=500)  # Return 500 for server errors
 
 
     

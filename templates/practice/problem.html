@@ -506,13 +506,13 @@
                 <div class="row justify-content-end">
 
                     <div class="button-group" role="group">
-                        <button type="button" class="btn btn-info" id="custom-input-btn" accesskey="enter">Custom
-                            Input</button>
+                        <!-- <button type="button" class="btn btn-info" id="custom-input-btn" accesskey="enter">Custom
+                            Input</button> -->
 
                         <button type="submit" class="btn btn-secondary float-end w-25" id="submit-btn" accesskey="enter"
                             data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + Enter">Submit Code</button>
-                        <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn" data-bs-toggle="tooltip"
-                            data-bs-placement="top" title="Alt + Enter">Run Code</button>
+                        <!-- <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn" data-bs-toggle="tooltip"
+                            data-bs-placement="top" title="Alt + Enter">Run Code</button> -->
                     </div>
 
                     <div id="customOutput" class="mt-3"></div>
@@ -841,10 +841,6 @@
             fetchDriverCode(languageSelect.val());
         });
     </script>
-
-    <!-- ================================== SUBMIT CODE FUNCTION ================================================ -->
-
-
     <script>
         document.getElementById('codeSubmissionForm').addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent default form submission
@@ -852,26 +848,19 @@
             const editor = ace.edit('editor');
             const submit_btn = $("#submit-btn");
 
+            // Store the original button text
+            const originalButtonText = submit_btn.text();
+            
+            // Disable the button and show loading state
             submit_btn.prop("disabled", true);
-
-            let countdown = 10;
-            submit_btn.text(`Submitting... (Wait for ${countdown} seconds)`);
-
-            const countdownInterval = setInterval(() => {
-                countdown -= 1;
-                submit_btn.text(`Submitting... (Wait for ${countdown} seconds)`);
-                if (countdown <= 0) {
-                    clearInterval(countdownInterval);
-                }
-            }, 1500);
+            submit_btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...`);
 
             let code = editor.getValue();
 
             if (!code.trim()) {
                 alert("Code cannot be empty!");
-                clearInterval(countdownInterval);
                 submit_btn.prop("disabled", false);
-                submit_btn.text("Submit Code");
+                submit_btn.text(originalButtonText);
                 return; // Stop here
             }
 
@@ -899,7 +888,7 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log("TOKEN: ", data.token);
-                    // ✅ Pass source_code manually
+                    // Pass source_code manually
                     check_result({
                         token: data.token,
                         source_code: code // explicitly pass code here
@@ -907,9 +896,19 @@
                 })
                 .catch(error => {
                     console.log('Error:', error);
-                    clearInterval(countdownInterval);
+                    // Reset button state
                     submit_btn.prop("disabled", false);
                     submit_btn.text("Submit Code");
+                    
+                    // Show error message
+                    const testCaseResultsDiv = document.getElementById('testCaseResults');
+                    testCaseResultsDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h4><i class="fas fa-exclamation-circle me-2"></i>Submission Error</h4>
+                            <p>Failed to submit your code. Please try again.</p>
+                            <p><small>${error.message || 'Unknown error'}</small></p>
+                        </div>
+                    `;
                 });
         });
 
@@ -998,10 +997,15 @@
                             })
                         })
                         .then(response => {
-                            if (!response.ok) {
-                                throw new Error(`HTTP error! Status: ${response.status}`);
-                            }
-                            return response.json();
+                            // First convert to JSON even if it's an error response
+                            return response.json().then(data => {
+                                // Add status code to the data for error handling
+                                if (!response.ok) {
+                                    data.status_code = response.status;
+                                    throw data; // Throw the parsed data as an error
+                                }
+                                return data;
+                            });
                         })
                         .then(resultData => {
                             console.log("RESULT DATA: ", resultData);
@@ -1017,7 +1021,23 @@
                         })
                         .catch(error => {
                             console.error('Error fetching final result:', error);
-                            display_error('Error fetching results from server', error.message);
+                            // Check if this is a parsed error response from the server
+                            if (error && typeof error === 'object') {
+                                display_error(
+                                    error.error || 'Server Error', 
+                                    error.error_details || `Status: ${error.status_code || 'Unknown'}`,
+                                    error.stderr || null,
+                                    error.compile_output || null
+                                );
+                            } else {
+                                // This is a network or other client-side error
+                                display_error('Error fetching results', error.message || 'Unknown error');
+                            }
+                            
+                            // Re-enable submit button
+                            const submit_btn = $("#submit-btn");
+                            submit_btn.prop("disabled", false);
+                            submit_btn.text("Submit Code");
                         });
                     } else if (attempts >= maxAttempts) {
                         // Too many attempts, show timeout error
@@ -1099,16 +1119,16 @@
 
             console.log("Entering in DISPLAY RESULT");
 
+            // Always reset submit button first
+            submit_btn.prop("disabled", false);
+            submit_btn.text("Submit Code");
+
             // Handle sheet disabled
             if (data.sheet_disabled) {
                 alert(data.sheet_disabled);
                 window.location.href = "{% url 'practice' %}";
                 return;
             }
-
-            // Reset submit button
-            submit_btn.prop("disabled", false);
-            submit_btn.text("Submit Code");
 
             // Scroll to results
             testCaseResultsDiv.scrollIntoView({
