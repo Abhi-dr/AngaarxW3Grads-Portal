@@ -17,17 +17,6 @@ from .models import RecommendedQuestions
 
 from django.views.decorators.cache import cache_control
 
-# Judge0 API endpoint and key
-JUDGE0_URL = "https://theangaarbatch.in/judge0/submissions"
-# JUDGE0_URL = "https://judge0-ce.p.rapidapi.com/submissions/"
-
-HEADERS = {
-    # "X-RapidAPI-Key": "2466ab7710mshe96d45a19b806efp1a790ajsne8eeb32a6197",  # Replace with your actual API key
-    "X-RapidAPI-Host": "98.83.136.105:2358",
-    # "X-RapidAPI-Host": "judge0-ce.p.rapidapi.com",
-    "Content-Type": "application/json"
-}
-
 
 from .models import Sheet, Question, TestCase, Submission, DriverCode, Streak
 
@@ -77,6 +66,29 @@ def sheet(request, slug):
 def playground(request):
     return render(request, "student/playground.html")
 
+<<<<<<< HEAD
+=======
+
+# ========================================= RECOMMENDED QUESTIONS =========================================
+
+@login_required(login_url="login")
+def fetch_recommended_questions(request, slug):
+    question = get_object_or_404(Question, slug=slug)
+    recommended_questions = RecommendedQuestions.objects.filter(question=question)
+
+    data = [
+        {
+            "id": rq.id,
+            "title": rq.title,
+            "link": rq.link,
+            "platform": rq.platform
+        } for rq in recommended_questions
+    ]
+    
+    return JsonResponse({"status": "success", "questions": data})
+
+
+>>>>>>> execution
 
 # ====================================================================================================
 # ========================================== MY SUBMISSIONS ==========================================
@@ -149,6 +161,7 @@ def fetch_questions(request):
     cache.set(cache_key, data, timeout=300)  # Cache for 5 minutes
     return JsonResponse(data)
 
+<<<<<<< HEAD
 
 # ========================================== NEXT QUESTION ==========================================
 
@@ -168,6 +181,8 @@ def render_next_question_in_sheet(request, sheet_id, question_id):
         # Render the next question
         return redirect('problem', slug=next_question.slug)
 
+=======
+>>>>>>> execution
 
 # ====================================================================================================
 # ====================================== STUDENT QUESTION CRUD =======================================
@@ -327,4 +342,7 @@ def delete_question(request, id):
     
     messages.success(request, 'Question deleted successfully')
     return redirect('student_add_question')
+<<<<<<< HEAD
 
+=======
+>>>>>>> execution
