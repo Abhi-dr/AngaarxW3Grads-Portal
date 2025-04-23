@@ -934,9 +934,7 @@
 
             // Setup for API requests
             const judge0_url = `https://theangaarbatch.in/judge0/submissions/${token}?base64_encoded=true`;
-            const get_result_url = `{% url 'send_output' 0 1 %}`
-                .replace("/0", `/${token}`)
-                .replace("/1", `/${question_slug}`);
+            const get_result_url = `/practice/send_output/${encodeURIComponent(token)}/${encodeURIComponent(question_slug)}/`;
 
             console.log("Starting async code execution check for token:", token);
 
