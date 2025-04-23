@@ -841,6 +841,9 @@
             fetchDriverCode(languageSelect.val());
         });
     </script>
+
+    <!-- ===================================== SUBMIT FUNCTION ================================================ -->
+
     <script>
         document.getElementById('codeSubmissionForm').addEventListener('submit', function (event) {
             event.preventDefault(); // Prevent default form submission
@@ -972,16 +975,14 @@
                         return response.json();
                     })
                     .then(data => {
-                        // Check if processing is complete
-                        if (data.status && (data.status.id === 3 || data.status.id === 6)) {
+
+                        if (data.status && (data.status.id != 2)) {
                             // Status 3 = Accepted, 6 = Compilation Error
                             const question_slug = "{{ question.slug }}";
                             const language_id = $("#language").val()
                             const get_result_url = `{% url 'send_output' 0 1 %}`
                                 .replace("/0", `/${token}`)
                                 .replace("/1", `/${question_slug}`);
-
-                            console.log("RESULT URL: ", get_result_url);
 
                             // Get the final results
                             fetch(get_result_url, {
@@ -1008,7 +1009,6 @@
                                     });
                                 })
                                 .then(resultData => {
-                                    console.log("RESULT DATA: ", resultData);
                                     // Cache the result
                                     resultCache.set(token, resultData);
                                     // Limit cache size to prevent memory leaks

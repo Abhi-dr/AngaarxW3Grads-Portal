@@ -102,35 +102,6 @@ def create_submission(user, question, source_code, language_id, passed, total, t
         print(f"Error creating submission: {e}")
         raise Exception("Could not create submission.")
 
-# def update_submission_status(submission, passed, total, total_submission_count, status=None):
-
-    
-#     try:
-#         if not status:
-#             submission.status = 'Accepted' if passed == total else 'Wrong Answer'
-#         else:
-#             submission.status = status
-        
-#         # update streaks
-#         if submission.status == 'Accepted':
-#             update_user_streak(submission.user)
-        
-#         score = int(((passed / total) * 100) * (1 - 0.1 * (total_submission_count - 1)))
-        
-#         # past_submissions = Submission.objects.filter(user=user, question=question).count()
-        
-#         if score < 0:
-#             score = 0
-        
-#         submission.score = score
-#         submission.save()
-        
-#         return score
-                
-#     except Exception as e:
-#         print(f"Error updating submission: {e}")
-#         raise Exception("Could not update submission status.")
-
 
 def process_test_case_result(inputs, outputs, expected_outputs):
 
@@ -146,7 +117,6 @@ def process_test_case_result(inputs, outputs, expected_outputs):
         }
         results.append(result)
     return results
-
 
 
 @login_required(login_url="login")
@@ -216,7 +186,6 @@ def update_coin(user, score, question):
         user.coins += 1
     user.save()
 
-
 # ============================================ UPDATE STREAKS =============================================
 
 def update_user_streak(user):
@@ -235,7 +204,7 @@ def return_token(question, source_code, language_id, test_cases, cpu_time_limit,
     Submit code to Judge0 and return a token for tracking the submission.
     Optimized for high concurrency with caching and connection pooling.
     """
-    print("Entering the return code function")
+    print("Entering the return token function")
     
     # Check for cached driver code first
     driver_code_key = None
@@ -337,58 +306,6 @@ def return_token(question, source_code, language_id, test_cases, cpu_time_limit,
     finally:
         session.close()
 
-# ============================================== Run Code on Jugde0 ================================
-
-# def run_code_on_judge0(token):
-    
-#     print("Entering the fetcing output from judge0")
-        
-#     try:
-#         # ⏳ Poll Until Completion
-#         while True:
-#             result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
-#             result = result_response.json()
-#             status_id = result.get("status", {}).get("id")
-
-#             if status_id not in [1, 2]:  # Finished Processing
-#                 break
-#             time.sleep(1)
-            
-#         # ❗ Handle Errors
-#         if result.get("stderr"):
-#             stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
-#             print("❌ STDERR:", stderr)
-#             return {"error": f"Runtime Error: {stderr}", "token": token}
-
-#         if result.get("compile_output"):
-#             compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
-#             print("❌ COMPILE OUTPUT:", compile_output)
-#             return {"error": f"Compile Error: {compile_output}", "token": token}
-
-#         if result.get("status", {}).get("id") == 5:
-#             return {"error": "Time Limit Exceeded (TLE)", "token": token}
-
-#         if result.get("status", {}).get("id") == 6:
-#             return {"error": "Compilation Error", "token": token}
-
-#         # ✅ Decode Outputs
-#         outputs = result.get("stdout", "")
-        
-#         if outputs:
-#             outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
-            
-#             outputs = [output.strip() for output in outputs.split("~") if output.strip()]
-            
-#         else:
-#             outputs = ["No output generated."]
-
-#         return {"outputs": outputs, "token": token}
-
-#     except requests.exceptions.RequestException as e:
-#         return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
-#     except Exception as e:
-#         return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
-         
 # =============================================== Get Result ========================================================
 
 def get_result(token):
@@ -454,6 +371,7 @@ def get_result(token):
                 result_dict["outputs"] = ["Error decoding output"]
         else:
             result_dict["outputs"] = ["No output generated."]
+        
         
         return result_dict
         
@@ -521,6 +439,9 @@ def send_output(request, token, slug):
         # Handle error cases
         if judge0_response.get("error") or judge0_response.get("compile_output") or judge0_response.get("stderr"):
             # Return all error information to the client for detailed display
+            
+            print("Error in Judge0 response:", judge0_response.get("error"), judge0_response.get("compile_output"), judge0_response.get("stderr"))
+            
             return JsonResponse({
                 "error": judge0_response.get("error"),
                 "error_details": judge0_response.get("error_details"),
@@ -885,3 +806,57 @@ def convert_backticks_to_code(text):
     pattern = r"`(.*?)`"
     result = re.sub(pattern, r"<code style='font-size: 110%'>\1</code>", text)
     return result
+
+
+# ============================================== Run Code on Jugde0 ================================
+
+# def run_code_on_judge0(token):
+    
+#     print("Entering the fetcing output from judge0")
+        
+#     try:
+#         # ⏳ Poll Until Completion
+#         while True:
+#             result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
+#             result = result_response.json()
+#             status_id = result.get("status", {}).get("id")
+
+#             if status_id not in [1, 2]:  # Finished Processing
+#                 break
+#             time.sleep(1)
+            
+#         # ❗ Handle Errors
+#         if result.get("stderr"):
+#             stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
+#             print("❌ STDERR:", stderr)
+#             return {"error": f"Runtime Error: {stderr}", "token": token}
+
+#         if result.get("compile_output"):
+#             compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
+#             print("❌ COMPILE OUTPUT:", compile_output)
+#             return {"error": f"Compile Error: {compile_output}", "token": token}
+
+#         if result.get("status", {}).get("id") == 5:
+#             return {"error": "Time Limit Exceeded (TLE)", "token": token}
+
+#         if result.get("status", {}).get("id") == 6:
+#             return {"error": "Compilation Error", "token": token}
+
+#         # ✅ Decode Outputs
+#         outputs = result.get("stdout", "")
+        
+#         if outputs:
+#             outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
+            
+#             outputs = [output.strip() for output in outputs.split("~") if output.strip()]
+            
+#         else:
+#             outputs = ["No output generated."]
+
+#         return {"outputs": outputs, "token": token}
+
+#     except requests.exceptions.RequestException as e:
+#         return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
+#     except Exception as e:
+#         return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
+         
