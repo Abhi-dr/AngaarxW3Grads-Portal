@@ -670,7 +670,7 @@ active
                                 <div class="col-md-4">
                                     <div class="form-floating mb-3">
                                         <input type="tel" class="form-control" value="{{ user.student.mobile_number }}"
-                                            disabled>
+                                            disabled required>
                                         <label class="text-white-50">Contact Number</label>
                                     </div>
                                 </div>
@@ -734,7 +734,7 @@ active
                         </div>
 
                         <div class="price-row price-total">
-                            <span>Total</span>
+                            <span>Total</span> required
                             <span id="total-price">₹{{ course.discount_price|floatformat:0 }}</span>
                         </div>
                     </div>
