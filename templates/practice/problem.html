@@ -918,157 +918,194 @@
         // Client-side result cache to reduce server load
         const resultCache = new Map();
 
-        function check_result(source_data) {
+        // Modern async/await implementation for checking results
+        async function check_result(source_data) {
             const token = source_data.token;
             const source_code = source_data.source_code;
-            const cached = source_data.cached || false;
+            const language_id = $("#language").val();
+            const question_slug = "{{ question.slug }}";
 
-            // Check if we already have this result cached
+            // Check client-side cache first
             if (resultCache.has(token)) {
                 console.log("Using cached result for token:", token);
                 display_result(resultCache.get(token));
                 return;
             }
 
+            // Setup for API requests
             const judge0_url = `https://theangaarbatch.in/judge0/submissions/${token}?base64_encoded=true`;
-            console.log("URL HIT: ", judge0_url);
+            const get_result_url = `{% url 'send_output' 0 1 %}`
+                .replace("/0", `/${token}`)
+                .replace("/1", `/${question_slug}`);
+
+            console.log("Starting async code execution check for token:", token);
+
+            // Create AbortController for request cancellation
+            const controller = new AbortController();
+            const signal = controller.signal;
+
+            // Set a timeout to abort extremely long-running requests
+            const timeout = setTimeout(() => controller.abort(), 120000); // 2-minute timeout
 
             // Show polling status to user
             const testCaseResultsDiv = document.getElementById('testCaseResults');
             if (testCaseResultsDiv.querySelector('#polling-status') === null) {
                 const statusDiv = document.createElement('div');
                 statusDiv.id = 'polling-status';
-                statusDiv.innerHTML = `<p class="text-info">Checking submission status... <span id="poll-attempt">1</span></p>`;
+                statusDiv.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
+                        <p class="text-info mb-0">Checking submission status... <span id="poll-attempt">1</span></p>
+                    </div>`;
                 testCaseResultsDiv.appendChild(statusDiv);
             }
 
-            // Use exponential backoff for polling
+            // Setup polling parameters with exponential backoff
             let attempts = 0;
             let delay = 1000; // Start with 1 second
-            const maxDelay = 8000; // Max 8 seconds between polls
-            const maxAttempts = 30; // Maximum number of attempts (about 2 minutes total)
+            const maxDelay = 5000; // Max 5 seconds between polls
+            const maxAttempts = 40; // Maximum number of attempts
 
-            // Clear any existing polling intervals
-            if (window.pollIntervalId) {
-                clearInterval(window.pollIntervalId);
-            }
+            try {
+                // Polling loop with exponential backoff
+                while (attempts < maxAttempts) {
+                    // Update polling UI counter
+                    const pollAttemptSpan = document.getElementById('poll-attempt');
+                    if (pollAttemptSpan) {
+                        pollAttemptSpan.textContent = attempts + 1;
+                    }
 
-            function pollOnce() {
-                // Update polling attempt counter in UI
-                const pollAttemptSpan = document.getElementById('poll-attempt');
-                if (pollAttemptSpan) {
-                    pollAttemptSpan.textContent = attempts + 1;
-                }
+                    // Poll Judge0 for submission status
+                    try {
+                        const response = await fetch(judge0_url, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            cache: 'no-store', // Prevent browser caching
+                            signal // For request cancellation
+                        });
 
-                fetch(judge0_url, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}',
-                    },
-                    cache: 'no-store' // Prevent browser caching
-                })
-                    .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP error! Status: ${response.status}`);
                         }
-                        return response.json();
-                    })
-                    .then(data => {
 
-                        if (data.status && (data.status.id != 2)) {
-                            // Status 3 = Accepted, 6 = Compilation Error
-                            const question_slug = "{{ question.slug }}";
-                            const language_id = $("#language").val()
-                            const get_result_url = `{% url 'send_output' 0 1 %}`
-                                .replace("/0", `/${token}`)
-                                .replace("/1", `/${question_slug}`);
+                        const data = await response.json();
 
-                            // Get the final results
-                            fetch(get_result_url, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRFToken': '{{ csrf_token }}',
-                                },
-                                body: JSON.stringify({
-                                    token: token,
-                                    source_code: source_code,
-                                    language_id: language_id
-                                })
-                            })
-                                .then(response => {
-                                    // First convert to JSON even if it's an error response
-                                    return response.json().then(data => {
-                                        // Add status code to the data for error handling
-                                        if (!response.ok) {
-                                            data.status_code = response.status;
-                                            throw data; // Throw the parsed data as an error
-                                        }
-                                        return data;
-                                    });
-                                })
-                                .then(resultData => {
-                                    // Cache the result
-                                    resultCache.set(token, resultData);
-                                    // Limit cache size to prevent memory leaks
-                                    if (resultCache.size > 20) {
-                                        // Remove oldest entry
-                                        const firstKey = resultCache.keys().next().value;
-                                        resultCache.delete(firstKey);
-                                    }
-                                    display_result(resultData);
-                                })
-                                .catch(error => {
-                                    console.error('Error fetching final result:', error);
-                                    // Check if this is a parsed error response from the server
-                                    if (error && typeof error === 'object') {
-                                        display_error(
-                                            error.error || 'Server Error',
-                                            error.error_details || `Status: ${error.status_code || 'Unknown'}`,
-                                            error.stderr || null,
-                                            error.compile_output || null
-                                        );
-                                    } else {
-                                        // This is a network or other client-side error
-                                        display_error('Error fetching results', error.message || 'Unknown error');
-                                    }
+                        // Check if execution is complete (status 3 = Accepted, 6 = Compilation Error)
+                        if (data.status && (data.status.id === 3 || data.status.id === 6 ||
+                            data.status.id >= 4)) { // Also check for other completion states
+                            console.log("Execution complete, fetching results...");
 
-                                    // Re-enable submit button
-                                    const submit_btn = $("#submit-btn");
-                                    submit_btn.prop("disabled", false);
-                                    submit_btn.text("Submit Code");
+                            // Get the final execution results
+                            try {
+                                const resultResponse = await fetch(get_result_url, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token }}',
+                                    },
+                                    body: JSON.stringify({
+                                        token: token,
+                                        source_code: source_code,
+                                        language_id: language_id
+                                    }),
+                                    signal // For request cancellation
                                 });
-                        } else if (attempts >= maxAttempts) {
-                            // Too many attempts, show timeout error
-                            display_error(
-                                'Execution Timeout',
-                                'Your code is taking too long to execute. This could be due to an infinite loop or inefficient algorithm.'
-                            );
-                        } else {
-                            // Still processing, continue polling with backoff
-                            attempts++;
-                            // Exponential backoff with capping
-                            delay = Math.min(delay * 1.5, maxDelay);
-                            setTimeout(pollOnce, delay);
+
+                                // Parse response data
+                                const resultData = await resultResponse.json();
+
+                                // Check for error response
+                                if (!resultResponse.ok) {
+                                    resultData.status_code = resultResponse.status;
+                                    throw resultData; // Throw the error with details
+                                }
+
+                                console.log("Result data received:", resultData);
+
+                                // Cache successful results
+                                resultCache.set(token, resultData);
+                                if (resultCache.size > 20) { // Limit cache size
+                                    const firstKey = resultCache.keys().next().value;
+                                    resultCache.delete(firstKey);
+                                }
+
+                                // Display the results to the user
+                                display_result(resultData);
+                                return; // Exit successfully
+                            } catch (resultError) {
+                                // Handle result fetching errors
+                                console.error('Error fetching final results:', resultError);
+                                if (resultError && typeof resultError === 'object') {
+                                    display_error(
+                                        resultError.error || 'Server Error',
+                                        resultError.error_details || `Status: ${resultError.status_code || 'Unknown'}`,
+                                        resultError.stderr || null,
+                                        resultError.compile_output || null
+                                    );
+                                } else {
+                                    display_error('Error fetching results',
+                                        resultError.message || 'Unknown error');
+                                }
+                                return; // Exit with error
+                            }
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error polling Judge0:', error);
-                        // If we get an error, retry a few times before giving up
+
+                        // If execution is still in progress, wait before polling again
+                        attempts++;
+                        delay = Math.min(delay * 1.3, maxDelay); // Exponential backoff
+                        await new Promise(resolve => setTimeout(resolve, delay));
+
+                    } catch (pollError) {
+                        console.warn(`Polling attempt ${attempts + 1} failed:`, pollError);
+
+                        // Check if request was aborted
+                        if (pollError.name === 'AbortError') {
+                            throw new Error('Request timeout exceeded');
+                        }
+
+                        // Retry a few times for network errors
                         if (attempts < 5) {
                             attempts++;
-                            setTimeout(pollOnce, delay);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue;
                         } else {
-                            display_error('Error checking submission status',
-                                'The server is not responding or is experiencing issues. Please try again later.',
-                                null, null);
+                            throw pollError; // Give up after multiple failures
                         }
-                    });
-            }
+                    }
+                }
 
-            // Start polling
-            pollOnce();
+                // If we reach here, we've exceeded max attempts
+                throw new Error('Execution timeout: maximum polling attempts exceeded');
+
+            } catch (error) {
+                // Handle all errors from the try block
+                console.error('Error during code execution process:', error);
+
+                let errorTitle = 'Execution Error';
+                let errorMessage = 'An error occurred while processing your code.';
+
+                if (error.message && error.message.includes('timeout')) {
+                    errorTitle = 'Execution Timeout';
+                    errorMessage = 'Your code is taking too long to execute. This could be due to an infinite loop or inefficient algorithm.';
+                } else if (error.message && error.message.includes('aborted')) {
+                    errorTitle = 'Request Aborted';
+                    errorMessage = 'The request was cancelled due to timeout or navigation away from the page.';
+                }
+
+                display_error(errorTitle, errorMessage);
+
+            } finally {
+                // Always clean up
+                clearTimeout(timeout);
+
+                // Re-enable the submit button
+                const submit_btn = $("#submit-btn");
+                submit_btn.prop("disabled", false);
+                submit_btn.text("Submit Code");
+            }
         }
 
         // Helper function to display detailed errors
@@ -1117,7 +1154,7 @@
             const submit_btn = $("#submit-btn");
             const testCaseResultsDiv = document.getElementById('testCaseResults');
 
-            console.log("Entering in DISPLAY RESULT");
+            console.log("Entering in DISPLAY RESULT with data:", data);
 
             // Always reset submit button first
             submit_btn.prop("disabled", false);
@@ -1227,9 +1264,9 @@
                         <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
                         `;
                     }
-                });
 
-                resultDiv.innerHTML = `
+                    // Set the inner HTML for this specific test case result
+                    resultDiv.innerHTML = `
                     <div class="card-header d-flex justify-content-between align-items-center bg-danger text-white">
                         <span>
                             <strong>Test Case ${index + 1}</strong> - Failed
@@ -1256,16 +1293,17 @@
                         </div>
                     </div>
                     `;
-                testCaseResultsDiv.appendChild(resultDiv);
-            
-                
 
-            // Scroll to the first failed test case
-            const firstFailedTestCase = document.querySelector('.test-case-result.border-danger');
-            if (firstFailedTestCase) {
-                firstFailedTestCase.scrollIntoView({ behavior: 'smooth' });
+                    // Add the test case result to the display
+                    testCaseResultsDiv.appendChild(resultDiv);
+                });
+
+                // Scroll to the first failed test case
+                const firstFailedTestCase = document.querySelector('.test-case-result.border-danger');
+                if (firstFailedTestCase) {
+                    firstFailedTestCase.scrollIntoView({ behavior: 'smooth' });
+                }
             }
-        }
         }
 
         // ==============================================================================================

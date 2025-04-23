@@ -306,18 +306,53 @@ def return_token(question, source_code, language_id, test_cases, cpu_time_limit,
     finally:
         session.close()
 
-# =============================================== Get Result ========================================================
+# =============================================== GET RESULT ================================================
+import asyncio
+import concurrent.futures
+from functools import wraps
 
-def get_result(token):
+# ThreadPoolExecutor for running async code in sync contexts
+_thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=10)
+
+def run_async_in_thread(async_func):
+    """Decorator to run an async function in a thread pool, making it callable from sync code."""
+    @wraps(async_func)
+    def wrapper(*args, **kwargs):
+        loop = asyncio.new_event_loop()
+        try:
+            return loop.run_until_complete(async_func(*args, **kwargs))
+        finally:
+            loop.close()
+    return wrapper
+
+async def get_result_async(token):
     """
-    Get the result of a code execution from Judge0 with detailed error information.
+    Asynchronous version of get_result - get code execution result from Judge0 with detailed error information.
     """
-    print("Entering the fetching output from judge0")
+    print("Entering async fetching output from judge0")
     
     try:
-        # Poll Judge0 for results
-        result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
-        result = result_response.json()
+        # Use httpx for async HTTP requests (fallback to sync if needed)
+        try:
+            import httpx
+            async with httpx.AsyncClient() as client:
+                result_response = await client.get(
+                    f"{JUDGE0_URL}/{token}?base64_encoded=true", 
+                    headers=HEADERS, 
+                    timeout=10
+                )
+                result = result_response.json()
+        except ImportError:
+            # Fallback to requests in a thread if httpx is not available
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                loop = asyncio.get_event_loop()
+                def fetch():
+                    return requests.get(
+                        f"{JUDGE0_URL}/{token}?base64_encoded=true", 
+                        headers=HEADERS, 
+                        timeout=10
+                    ).json()
+                result = await loop.run_in_executor(executor, fetch)
         
         # Create a base result dictionary with token
         result_dict = {"token": token}
@@ -372,8 +407,89 @@ def get_result(token):
         else:
             result_dict["outputs"] = ["No output generated."]
         
-        
         return result_dict
+        
+    except Exception as e:
+        print(f"Async Error: {e}")
+        return {
+            "error": f"Request Error", 
+            "error_details": str(e),
+            "outputs": None, 
+            "token": token
+        }
+
+def get_result(token):
+    """
+    Get the result of a code execution from Judge0 with detailed error information.
+    This function can be called from synchronous code and maintains backward compatibility.
+    """
+    print("Entering the fetching output from judge0")
+    
+    try:
+        # Try to use the async version running in a thread
+        try:
+            return run_async_in_thread(get_result_async)(token)
+        except Exception as async_error:
+            print(f"Async execution failed, falling back to sync: {async_error}")
+            # Fall back to the original synchronous implementation
+            # Poll Judge0 for results
+            result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
+            result = result_response.json()
+            
+            # Create a base result dictionary with token
+            result_dict = {"token": token}
+            
+            # Add status information
+            if result.get("status"):
+                status_id = result["status"].get("id")
+                status_description = result["status"].get("description")
+                result_dict["status_id"] = status_id
+                result_dict["status_description"] = status_description
+            
+            # Process stderr if present
+            if result.get("stderr"):
+                stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
+                print("❌ STDERR:", stderr)
+                result_dict["stderr"] = stderr
+                result_dict["error"] = f"Runtime Error"
+            
+            # Process compile output if present
+            if result.get("compile_output"):
+                compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
+                print("❌ COMPILE OUTPUT:", compile_output)
+                result_dict["compile_output"] = compile_output
+                result_dict["error"] = f"Compilation Error"
+            
+            # Handle specific status codes
+            if result.get("status", {}).get("id") == 5:  # Time Limit Exceeded
+                result_dict["error"] = "Time Limit Exceeded (TLE)"
+                result_dict["time_limit_exceeded"] = True
+                
+            elif result.get("status", {}).get("id") == 6:  # Compilation Error
+                result_dict["error"] = "Compilation Error"
+                
+            # Add memory and time usage information
+            if result.get("memory"):
+                result_dict["memory_used"] = result["memory"]
+                
+            if result.get("time"):
+                result_dict["execution_time"] = result["time"]
+            
+            # Process stdout if present
+            outputs = result.get("stdout", "")
+            if outputs:
+                try:
+                    outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
+                    outputs = [output.strip() for output in outputs.split("~") if output.strip()]
+                    result_dict["outputs"] = outputs
+                except Exception as decode_error:
+                    print(f"Error decoding outputs: {decode_error}")
+                    result_dict["error"] = f"Error decoding outputs: {str(decode_error)}"
+                    result_dict["outputs"] = ["Error decoding output"]
+            else:
+                result_dict["outputs"] = ["No output generated."]
+            
+            return result_dict
         
     except requests.exceptions.RequestException as e:
         print(f"Request Error: {e}")
