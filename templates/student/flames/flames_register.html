@@ -715,7 +715,7 @@ active
                     <div class="price-summary">
                         <div class="price-row">
                             <span class="price-label">Program Fee</span>
-                            <span class="price-value" id="program-fee">₹{{ course.discount_price }}</span>
+                            <span class="price-value" id="program-fee">₹{{ course.discount_price|floatformat:0 }}</span>
                         </div>
 
                         <div id="discount-row" class="price-row" style="display: none;">
@@ -735,7 +735,7 @@ active
 
                         <div class="price-row price-total">
                             <span>Total</span>
-                            <span id="total-price">₹{{ course.discount_price }}</span>
+                            <span id="total-price">₹{{ course.discount_price|floatformat:0 }}</span>
                         </div>
                     </div>
                 </div>
@@ -975,7 +975,7 @@ active
 
                         // Reset price summary
                         discountRow.style.display = 'none';
-                        totalPrice.textContent = `₹${parseFloat("{{ course.price }}")}`;
+                        totalPrice.textContent = `₹${parseFloat("{{ course.discount_price }}")}`;
                     }
 
                     referralMessage.style.display = 'block';
