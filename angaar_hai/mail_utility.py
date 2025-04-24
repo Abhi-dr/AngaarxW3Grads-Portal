@@ -51,11 +51,11 @@ def send_flames_confirmation_mail(to, name, course_name=None):
     html_content = f"""
     <html>
     <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
-        <div style="background: linear-gradient(to bottom, #2C3E50, #1a1a1a); padding: 25px; text-align: center; border-radius: 10px;">
-        <img src="https://theangaarbatch.in/static/img/home/angaari_logo.png" alt="The Angaar Batch Logo" style="width: 120px; margin-bottom: 20px;">
-        <h1 style="color: #ff6b35; text-shadow: 0 0 5px rgba(255,107,53,0.3);">🔥WELCOME TO THE AGNI REALM!🔥</h1>
+        <div style="background: linear-gradient(to bottom, #1b1f23, #000000); padding: 25px; text-align: center; border-radius: 10px;">
+        <img src="demo_static/img/student/flames25.png" alt="The Angaar Batch Logo" style="width: 15%; margin-bottom: 20px;">
+        <h1 style="color: #ff6b35; text-shadow: 0 0 5px rgba(255,107,53,0.3);">🔥BIGGER, BETTER, BOLDER!🔥</h1>
         <h2 style="color: #ffffff;">{name}, You're All Set!</h2>
-        {course_info}
+        <p style="color: #f8f8f8">{course_info}</p>
         <div style="background-color: rgba(255,107,53,0.1); border-left: 4px solid #ff6b35; padding: 15px; margin: 20px 0; text-align: left;">
             <p style="font-size: 17px; color: #f8f8f8; font-weight: bold;">The fire has been lit! Your payment is confirmed and your spot is secured.</p>
             <p style="font-size: 16px; color: #dddddd;">Get ready to ignite your potential and transform your skills into blazing talent.</p>
