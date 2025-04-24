@@ -321,6 +321,8 @@ def run_async_in_thread(async_func):
         loop = asyncio.new_event_loop()
         try:
             return loop.run_until_complete(async_func(*args, **kwargs))
+        except Exception as e:
+            print(f"Error running async function in thread: {e}")            
         finally:
             loop.close()
     return wrapper
