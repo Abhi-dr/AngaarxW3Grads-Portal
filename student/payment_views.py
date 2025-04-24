@@ -7,6 +7,8 @@ from django.conf import settings
 from home.models import FlamesRegistration
 from .payment_utils import PaymentGateway
 
+from angaar_hai.mail_utility import send_flames_confirmation_mail
+
 @login_required
 def initiate_payment(request, registration_id):
     """
@@ -47,7 +49,7 @@ def payment_callback(request):
             is_verified = PaymentGateway.verify_payment(payment_id, order_id, signature, registration_id)
             
             if is_verified:
-                # Redirect to success page
+                # Redirect to success page                
                 return redirect(reverse('payment_success', kwargs={'registration_id': registration_id}))
     
     # If verification fails or method is not POST, redirect to failure page
@@ -65,6 +67,14 @@ def payment_success(request, registration_id):
         'course': registration.course,
         'payment_id': registration.payment_id
     }
+    
+    #  Sending mail
+                
+    send_flames_confirmation_mail(
+        request.user.email,
+        request.user.first_name,
+        registration.course.title
+    )
     
     return render(request, 'student/flames/payment_success.html', context)
 
