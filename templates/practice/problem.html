@@ -1264,15 +1264,40 @@
                 summaryDiv.classList.add('mb-4');
                 
                 if (data.is_run_code) {
+                    // Create badge display for individual test cases
+                    let badgesHTML = '';
+                    
+                    // Generate passed test case badges
+                    const passedBadges = data.test_case_results
+                        .map((result, index) => result.status === "Passed" || result.passed === true ? 
+                            `<span class="badge bg-success me-1 mb-1">Test Case ${index + 1}</span>` : '')
+                        .filter(badge => badge !== '')
+                        .join('');
+                    
+                    // Generate failed test case badges
+                    const failedBadges = data.test_case_results
+                        .map((result, index) => result.status !== "Passed" && !result.passed ? 
+                            `<span class="badge bg-danger me-1 mb-1">Test Case ${index + 1}</span>` : '')
+                        .filter(badge => badge !== '')
+                        .join('');
+                    
+                    // Add badge groups if there are any badges
+                    if (passedBadges) {
+                        badgesHTML += `<div class="mt-2"><strong>Passed:</strong> ${passedBadges}</div>`;
+                    }
+                    if (failedBadges) {
+                        badgesHTML += `<div class="mt-2"><strong>Failed:</strong> ${failedBadges}</div>`;
+                    }
+                    
                     // For Run Code, show a simple summary that doesn't draw too much attention
                     summaryDiv.innerHTML = `
-                        <div class="d-flex justify-content-between align-items-center bg-light rounded p-3 border">
-                            <div>
-                                <strong>Sample Test Results:</strong> 
-                                <span class="badge bg-success me-1">${passedTests} Passed</span>
-                                <span class="badge bg-danger">${failedTests} Failed</span>
-                                <span class="ms-2">out of ${totalTests} total</span>
+                        <div class="bg-light rounded p-3 border">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    
+                                </div>
                             </div>
+                            ${badgesHTML}
                         </div>
                     `;
                 } else {
@@ -1413,12 +1438,42 @@
 
             const summaryDiv = document.createElement('div');
             summaryDiv.classList.add('alert', data.is_all_test_cases_passed ? 'alert-success' : 'alert-warning', 'mb-3');
+            
+            // Create badge display for individual test cases
+            let badgesHTML = '';
+            if (data.test_case_results && data.is_run_code) {
+                // Generate passed test case badges
+                const passedBadges = data.test_case_results
+                    .map((result, index) => result.passed || result.status === "Passed" ? 
+                        `<span class="badge bg-success me-1 mb-1">Test Case ${index + 1}</span>` : '')
+                    .filter(badge => badge !== '')
+                    .join('');
+                
+                // Generate failed test case badges
+                const failedBadges = data.test_case_results
+                    .map((result, index) => !result.passed && result.status !== "Passed" ? 
+                        `<span class="badge bg-danger me-1 mb-1">Test Case ${index + 1}</span>` : '')
+                    .filter(badge => badge !== '')
+                    .join('');
+                
+                // Add badge groups if there are any badges
+                if (passedBadges) {
+                    badgesHTML += `<div class="mt-2"><strong>Passed:</strong> ${passedBadges}</div>`;
+                }
+                if (failedBadges) {
+                    badgesHTML += `<div class="mt-2"><strong>Failed:</strong> ${failedBadges}</div>`;
+                }
+            }
+            
             summaryDiv.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <i class="${data.is_all_test_cases_passed ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'} me-2"></i>
-                        <strong>Test Results:</strong> ${passedCount} passed / ${totalCount} total
+                <div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="${data.is_all_test_cases_passed ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'} me-2"></i>
+                            <strong>Test Results:</strong> ${passedCount} passed / ${totalCount} total
+                        </div>
                     </div>
+                    ${badgesHTML}
                 </div>
             `;
             outputDiv.appendChild(summaryDiv);
