@@ -511,8 +511,8 @@
 
                         <button type="submit" class="btn btn-secondary float-end w-25" id="submit-btn" accesskey="enter"
                             data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + Enter">Submit Code</button>
-                        <!-- <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn" data-bs-toggle="tooltip"
-                            data-bs-placement="top" title="Alt + Enter">Run Code</button> -->
+                        <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn" data-bs-toggle="tooltip"
+                            data-bs-placement="top" title="Alt + Enter">Run Code</button>
                     </div>
 
                     <div id="customOutput" class="mt-3"></div>
@@ -922,19 +922,27 @@
         async function check_result(source_data) {
             const token = source_data.token;
             const source_code = source_data.source_code;
+            const is_run_code = source_data.is_run_code || false; // Flag to identify run_code operations
             const language_id = $("#language").val();
             const question_slug = "{{ question.slug }}";
 
-            // Check client-side cache first
-            if (resultCache.has(token)) {
-                console.log("Using cached result for token:", token);
-                display_result(resultCache.get(token));
-                return;
-            }
+            // Show console breadcrumbs for debugging
+            console.log("⚙️ Starting check_result for token:", token);
 
             // Setup for API requests
             const judge0_url = `https://theangaarbatch.in/judge0/submissions/${token}?base64_encoded=true`;
-            const get_result_url = `/practice/send_output/${encodeURIComponent(token)}/${encodeURIComponent(question_slug)}/`;
+            
+            // Use different endpoints for run_code and submit_code
+            let get_result_url;
+            if (is_run_code) {
+                // For run_code operations we use a dedicated endpoint that knows to only use sample test cases
+                get_result_url = `/practice/run_code_result/${encodeURIComponent(token)}/${encodeURIComponent(question_slug)}/`;
+                console.log("Using RUN CODE endpoint for token:", token);
+            } else {
+                // For submit_code operations use the regular endpoint
+                get_result_url = `/practice/send_output/${encodeURIComponent(token)}/${encodeURIComponent(question_slug)}/`;
+                console.log("Using SUBMIT CODE endpoint for token:", token);
+            }
 
             console.log("Starting async code execution check for token:", token);
 
@@ -1106,6 +1114,65 @@
             }
         }
 
+        // Helper function to display a single test case result
+        function displayTestCaseResult(result, index, container, isPassed) {
+            const resultDiv = document.createElement('div');
+            resultDiv.classList.add(
+                'card',
+                'mb-3',
+                'test-case-result',
+                isPassed ? 'border-success' : 'border-danger',
+                'shadow-sm'
+            );
+
+            resultDiv.id = `test-case-result-${index}`;
+
+            // Include compiler output if available
+            let compilerOutputHTML = '';
+            if (result.compiler_output) {
+                compilerOutputHTML = `
+                <p><strong>Compiler Output:</strong></p>
+                <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
+                `;
+            }
+
+            // Set status class and message
+            const headerClass = isPassed ? 'bg-success' : 'bg-danger';
+            const statusText = isPassed ? 'Passed' : 'Failed';
+
+            // Set the inner HTML for this specific test case result
+            resultDiv.innerHTML = `
+            <div class="card-header d-flex justify-content-between align-items-center ${headerClass} text-white">
+                <span>
+                    <strong>Test Case ${index + 1}</strong> - ${statusText}
+                </span>
+                <button 
+                    class="btn btn-sm btn-outline-light toggle-details" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#details-${index}" 
+                    aria-expanded="${isPassed ? 'false' : 'true'}" 
+                    aria-controls="details-${index}">
+                    Details
+                </button>
+            </div>
+            <div id="details-${index}" class="collapse ${isPassed ? '' : 'show'}">
+                <div class="card-body">
+                    <p><strong>Input:</strong></p>
+                    <pre class="p-2 rounded bg-light">${result.input}</pre>
+                    <p><strong>Expected Output:</strong></p>
+                    <pre class="p-2 rounded bg-light">${result.expected_output}</pre>
+                    <p><strong>Your Output:</strong></p>
+                    <pre class="p-2 rounded bg-light">${result.user_output}</pre>
+                    ${compilerOutputHTML}
+                </div>
+            </div>
+            `;
+
+            // Add the test case result to the display
+            container.appendChild(resultDiv);
+        }
+
         // Helper function to display detailed errors
         function display_error(message, details = null, stderr = null, compile_output = null) {
             const testCaseResultsDiv = document.getElementById('testCaseResults');
@@ -1192,46 +1259,80 @@
                 const passedTests = data.test_case_results.filter(result => result.status === "Passed").length;
                 const failedTests = totalTests - passedTests;
 
-                // Create summary header
+                // Create summary header - different for run_code vs submit_code
                 const summaryDiv = document.createElement('div');
                 summaryDiv.classList.add('mb-4');
-
-                if (passedTests === totalTests) {
-                    // All test cases passed - show simple success message
+                
+                if (data.is_run_code) {
+                    // For Run Code, show a simple summary that doesn't draw too much attention
                     summaryDiv.innerHTML = `
-                        <div class="alert alert-success">
-                            <h4><i class="fas fa-check-circle me-2"></i> All Test Cases Passed!</h4>
-                            <p>Successfully passed all ${totalTests} test cases.</p>
-                        </div>
-                    `;
-
-                    // Show confetti for success
-                    if (data.is_all_test_cases_passed) {
-                        submission_accepted(data.score);
-                    }
-                } else {
-                    // Some test cases failed - show summary with counts
-                    summaryDiv.innerHTML = `
-                        <div class="alert ${passedTests > 0 ? 'alert-warning' : 'alert-danger'}">
-                            <h4><i class="fas fa-exclamation-triangle me-2"></i> Test Results</h4>
-                            <p>
-                                <span class="badge bg-success me-2">${passedTests} Passed</span>
+                        <div class="d-flex justify-content-between align-items-center bg-light rounded p-3 border">
+                            <div>
+                                <strong>Sample Test Results:</strong> 
+                                <span class="badge bg-success me-1">${passedTests} Passed</span>
                                 <span class="badge bg-danger">${failedTests} Failed</span>
-                                <span class="ms-2">out of ${totalTests} total test cases</span>
-                            </p>
-                            <p class="mb-0">Details of failed test cases shown below:</p>
+                                <span class="ms-2">out of ${totalTests} total</span>
+                            </div>
                         </div>
                     `;
+                } else {
+                    // For Submit Code, show proper alert banners
+                    if (passedTests === totalTests) {
+                        // All test cases passed - show simple success message
+                        summaryDiv.innerHTML = `
+                            <div class="alert alert-success">
+                                <h4><i class="fas fa-check-circle me-2"></i> All Test Cases Passed!</h4>
+                                <p>Successfully passed all ${totalTests} test cases.</p>
+                            </div>
+                        `;
+
+                        // Show confetti for success on submissions
+                        if (data.is_all_test_cases_passed) {
+                            submission_accepted(data.score);
+                        }
+                    } else {
+                        // Some test cases failed - show summary with counts
+                        summaryDiv.innerHTML = `
+                            <div class="alert ${passedTests > 0 ? 'alert-warning' : 'alert-danger'}">
+                                <h4><i class="fas fa-exclamation-triangle me-2"></i> Test Results</h4>
+                                <p>
+                                    <span class="badge bg-success me-2">${passedTests} Passed</span>
+                                    <span class="badge bg-danger">${failedTests} Failed</span>
+                                    <span class="ms-2">out of ${totalTests} total test cases</span>
+                                </p>
+                                <p class="mb-0">Details of failed test cases shown below:</p>
+                            </div>
+                        `;
+                    }
                 }
 
                 testCaseResultsDiv.appendChild(summaryDiv);
 
+                // For Run Code, we always show all test cases, passed and failed
+                // For Submit Code, we only show failed test cases if all didn't pass
+                if (data.is_run_code) {
+                    // This is run code mode - show all test cases
+                    const allResultsHeader = document.createElement('h5');
+                    allResultsHeader.textContent = 'Sample Test Cases Results:';
+                    allResultsHeader.classList.add('mt-3', 'mb-3');
+                    testCaseResultsDiv.appendChild(allResultsHeader);
+                    
+                    // Display all test cases for run_code
+                    data.test_case_results.forEach((result, index) => {
+                        const isPassed = result.status === "Passed" || result.passed === true;
+                        displayTestCaseResult(result, index, testCaseResultsDiv, isPassed);
+                    });
+                    
+                    return; // Exit after displaying all test cases
+                }
+                
+                // If we got here, this is submit code mode
                 // If all tests passed, don't show individual test cases
                 if (passedTests === totalTests) {
                     return;
                 }
 
-                // Show only failed test cases
+                // Show only failed test cases for submit code mode
                 const failedResultsHeader = document.createElement('h5');
                 failedResultsHeader.textContent = 'Failed Test Cases:';
                 failedResultsHeader.classList.add('mt-3', 'mb-3');
@@ -1242,58 +1343,8 @@
                     if (result.status === "Passed") {
                         return; // Skip passed test cases
                     }
-
-                    const resultDiv = document.createElement('div');
-                    resultDiv.classList.add(
-                        'card',
-                        'mb-3',
-                        'test-case-result',
-                        'border-danger',
-                        'shadow-sm'
-                    );
-
-                    resultDiv.id = `test-case-result-${index}`;
-
-                    // Include compiler output only when the test case fails
-                    let compilerOutputHTML = '';
-                    if (result.compiler_output) {
-                        compilerOutputHTML = `
-                        <p><strong>Compiler Output:</strong></p>
-                        <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
-                        `;
-                    }
-
-                    // Set the inner HTML for this specific test case result
-                    resultDiv.innerHTML = `
-                    <div class="card-header d-flex justify-content-between align-items-center bg-danger text-white">
-                        <span>
-                            <strong>Test Case ${index + 1}</strong> - Failed
-                        </span>
-                        <button 
-                            class="btn btn-sm btn-outline-light toggle-details" 
-                            type="button" 
-                            data-bs-toggle="collapse" 
-                            data-bs-target="#details-${index}" 
-                            aria-expanded="true" 
-                            aria-controls="details-${index}">
-                            Details
-                        </button>
-                    </div>
-                    <div id="details-${index}" class="collapse show">
-                        <div class="card-body">
-                            <p><strong>Input:</strong></p>
-                            <pre class="p-2 rounded bg-light">${result.input}</pre>
-                            <p><strong>Expected Output:</strong></p>
-                            <pre class="p-2 rounded bg-light">${result.expected_output}</pre>
-                            <p><strong>Your Output:</strong></p>
-                            <pre class="p-2 rounded bg-light">${result.user_output}</pre>
-                            ${compilerOutputHTML}
-                        </div>
-                    </div>
-                    `;
-
-                    // Add the test case result to the display
-                    testCaseResultsDiv.appendChild(resultDiv);
+                    
+                    displayTestCaseResult(result, index, testCaseResultsDiv, false);
                 });
 
                 // Scroll to the first failed test case
@@ -1472,112 +1523,108 @@
             event.preventDefault(); // Prevent default button action
 
             const editor = ace.edit('editor');
-
             const run_btn = $("#run-btn");
-
-            run_btn.prop("disabled", true);
-
             const outputDiv = document.getElementById('testCaseResults');
-            outputDiv.innerHTML = `
-                        <div id='loader'>
-                            <h4>Execution in progress...</h4> 
-                            <td colspan="6" class="text-center">
-                                <div class="d-flex justify-content-center">
-                                    <div class="spinner-border text-primary" role="status">
-                                        <span class="sr-only">Loading...</span>
-                                    </div>
-                                </div>
-                            </td>
-                        </div>`;
-            outputDiv.classList.remove('d-none'); // Show the output div
-
-            outputDiv.scrollIntoView({ behavior: 'smooth' });
-
-            let countdown = 5;
-            run_btn.text(`Running... (Wait for ${countdown} seconds)`);
-
-            const countdownInterval = setInterval(() => {
-                countdown -= 1;
-                run_btn.text(`Running... (Wait for ${countdown} seconds)`);
-                if (countdown <= 0) {
-                    clearInterval(countdownInterval);
-                }
-            }, 1300);
-
             let code = editor.getValue();
 
+            // Handle empty code
             if (!code.trim()) {
                 alert("Code cannot be empty!");
-                run_btn.prop("disabled", false);
-                run_btn.text("Run Code");
                 return;
             }
+
+            // Disable button and show loading state
+            run_btn.prop("disabled", true);
+            run_btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Running...`);
+
+            // Show loading in the results area
+            outputDiv.innerHTML = `
+                <div class="d-flex align-items-center justify-content-center p-4">
+                    <div class="spinner-border text-primary me-3" role="status"></div>
+                    <h4 class="mb-0">Running code on sample test cases...</h4>
+                </div>`;
+            
+            outputDiv.classList.remove('d-none'); // Show the output div
+            outputDiv.scrollIntoView({ behavior: 'smooth' });
 
             // Prepare data for running code
             const data = {
                 code: code,
-                language_id: $("#language").val(),
-                sample_test_cases_only: true, // Indicate only sample test cases should be executed
+                language_id: $("#language").val()
             };
 
-            fetch("{% url 'run_code' question.slug %}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token if needed
-                },
-                body: JSON.stringify(data),
-            })
-                .then((response) => response.json())
-                .then((data) => {
-                    console.log(data);
+            // Use async/await pattern for better error handling
+            (async function() {
+                try {
+                    // Create AbortController for timeout
+                    const controller = new AbortController();
+                    const signal = controller.signal;
+                    
+                    // Set a timeout
+                    const timeout = setTimeout(() => controller.abort(), 60000); // 1-minute timeout
+                    
+                    try {
+                        // Send the request to get a token
+                        const response = await fetch("{% url 'run_code' question.slug %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}',
+                            },
+                            body: JSON.stringify(data),
+                            signal: signal // For cancellation
+                        });
 
-                    // Reset button state
-                    clearInterval(countdownInterval); // Stop the countdown
-                    run_btn.prop("disabled", false);
-                    run_btn.text("Run Code");
+                        // Parse response
+                        const result = await response.json();
+                        console.log("Run code token response:", result);
 
-                    // Use our utility function to display test results
-                    // The third parameter (true) specifies this is a run_code operation
-                    displayTestResults(data, outputDiv, true);
-                })
-                .catch((error) => {
+                        // Handle error responses
+                        if (!response.ok) {
+                            throw new Error(result.error || "Server error");
+                        }
+
+                        if (!result.token) {
+                            throw new Error("No token received from server");
+                        }
+
+                        // Now we have the token, use the check_result function with the is_run_code flag
+                        await check_result({
+                            token: result.token,
+                            source_code: code,
+                            is_run_code: true // Flag indicating this is a run_code operation
+                        });
+                    } finally {
+                        clearTimeout(timeout); // Always clear timeout
+                    }
+                } catch (error) {
                     console.error('Error running code:', error);
-
-                    // Reset button state
-                    clearInterval(countdownInterval);
+                    
+                    // Check if it's an abort error
+                    if (error.name === 'AbortError') {
+                        outputDiv.innerHTML = `
+                            <div class="alert alert-warning">
+                                <h4><i class="fas fa-clock me-2"></i>Execution Timeout</h4>
+                                <p>Your code took too long to execute. It might contain an infinite loop or be too inefficient.</p>
+                            </div>
+                        `;
+                    } else {
+                        // Display generic error message
+                        outputDiv.innerHTML = `
+                            <div class="alert alert-danger">
+                                <h4><i class="fas fa-exclamation-triangle me-2"></i>Error</h4>
+                                <p>Failed to execute your code. Please try again.</p>
+                                <pre class="p-2 rounded bg-light">${error.message || 'Unknown error'}</pre>
+                            </div>
+                        `;
+                    }
+                } finally {
+                    // Always reset button state
                     run_btn.prop("disabled", false);
                     run_btn.text("Run Code");
-
-                    // Display error message
-                    outputDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h5>Error</h5>
-                            <p>An error occurred while executing your code. Please try again.</p>
-                            <pre class="p-2 rounded bg-light">${error.message || 'Unknown error'}</pre>
-                        </div>
-                    `;
-                });
-
-        })
-            .catch((error) => {
-                console.error('Error running code:', error);
-
-                // Reset button state
-                clearInterval(countdownInterval);
-                run_btn.prop("disabled", false);
-                run_btn.text("Run Code");
-
-                // Display error message in the output div instead of using alert
-                outputDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h5>Error</h5>
-                            <p>An error occurred while running your code. Please try again later.</p>
-                        </div>
-                    `;
-            });
-
-
+                }
+            })(); // Self-executing async function
+        });
     </script>
 
     <!-- ======================================== CUSTOM INPUT FUNCTION ============================== -->

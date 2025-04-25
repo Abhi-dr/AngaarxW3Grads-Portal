@@ -195,6 +195,96 @@ def update_user_streak(user):
     # Update the streak
     streak.update_streak()
 
+
+def run_code_result(request, token, slug):
+    """
+    Process results for sample test cases only.
+    This endpoint is separate from send_output to handle run_code operations differently from submit_code.
+    """
+    try:
+        print("Entering run_code_result function with token:", token)
+        question = get_object_or_404(Question, slug=slug)
+        
+        # Get the Judge0 result using the token
+        start = time.time()
+        judge0_response = get_result(token)
+        end = time.time()
+        print("Time to get Judge0 result:", end - start)
+        
+        # Handle errors (compilation errors, runtime errors, etc.)
+        if judge0_response.get("error") or judge0_response.get("compile_output") or judge0_response.get("stderr"):
+            print("Error in Judge0 response for run_code_result:", 
+                 judge0_response.get("error"), 
+                 judge0_response.get("compile_output"), 
+                 judge0_response.get("stderr"))
+            
+            return JsonResponse({
+                "error": judge0_response.get("error"),
+                "error_details": judge0_response.get("error_details"),
+                "stderr": judge0_response.get("stderr"),
+                "compile_output": judge0_response.get("compile_output"),
+                "status_description": judge0_response.get("status_description"),
+                "time_limit_exceeded": judge0_response.get("time_limit_exceeded"),
+                "token": token
+            })
+        
+        # Get ONLY sample test cases
+        sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
+        outputs = judge0_response.get("outputs", [])
+        
+        if not outputs:
+            return JsonResponse({
+                "error": "No outputs generated",
+                "token": token
+            })
+        
+        # Process test case results for sample cases only
+        inputs = [tc.input_data for tc in sample_test_cases]
+        expected_outputs = [normalize_output(tc.expected_output) for tc in sample_test_cases]
+        
+        # Handle case where number of outputs doesn't match test cases
+        if len(outputs) != len(expected_outputs):
+            print(f"Warning: Output count mismatch in run_code_result. Expected {len(expected_outputs)}, got {len(outputs)}")
+            # Pad or truncate outputs to match expected count
+            if len(outputs) < len(expected_outputs):
+                outputs.extend(["No output"] * (len(expected_outputs) - len(outputs)))
+            else:
+                outputs = outputs[:len(expected_outputs)]
+        
+        # Process the results
+        test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
+        passed_test_cases = sum(1 for result in test_case_results if result['passed'])
+        
+        # Create the response WITHOUT creating a submission record
+        result = {
+            "status": "Success",
+            "test_case_results": test_case_results,
+            "is_all_test_cases_passed": passed_test_cases == len(test_case_results),
+            "is_run_code": True,  # Flag to indicate this is a run_code result
+            "summary": {
+                "passed_count": passed_test_cases,
+                "total": len(test_case_results)
+            },
+            "token": token
+        }
+        
+        # Add execution metrics if available
+        if judge0_response.get("execution_time"):
+            result["execution_time"] = judge0_response.get("execution_time")
+        
+        if judge0_response.get("memory_used"):
+            result["memory_used"] = judge0_response.get("memory_used")
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        print(f"Error in run_code_result: {e}")
+        return JsonResponse({
+            "error": "Error processing run results", 
+            "error_details": str(e),
+            "token": token
+        }, status=500)
+
 # ==========================================================================================================
 # ====================================== Return Token =============================
 # ==========================================================================================================
@@ -745,65 +835,69 @@ def get_driver_code(request, question_id, language_id):
 
 @csrf_exempt
 def run_code(request, slug):
-    # if request.method == 'POST':
-    #     try:
-    #         question = get_object_or_404(Question, slug=slug)
-    #         user = request.user.student
+    """Run code on sample test cases only (without creating a submission record)
+    This function returns a token that the client can use to poll Judge0 directly.
+    """
+    if request.method == 'POST':
+        try:
+            # Get question and user info
+            question = get_object_or_404(Question, slug=slug)
             
-    #         data = json.loads(request.body)
-    #         language_id = data.get('language_id')
-    #         source_code = data.get('code')   
+            # Parse request data
+            data = json.loads(request.body)
+            language_id = data.get('language_id')
+            source_code = data.get('code')   
             
-    #         print("Source Code in Run Function:", source_code)
+            print("Source Code in Run Function:", source_code[:100], "...")
 
-    #         if not language_id or not source_code:
-    #             return JsonResponse({"error": "Missing language ID or source code."}, status=400)
+            if not language_id or not source_code:
+                return JsonResponse({"error": "Missing language ID or source code."}, status=400)
 
-    #         # Fetch sample test cases
-    #         sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
-    #         if not sample_test_cases:
-    #             return JsonResponse({"error": "No sample test cases available."}, status=400)
+            # Fetch ONLY sample test cases
+            sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
+            if not sample_test_cases:
+                return JsonResponse({"error": "No sample test cases available."}, status=400)
 
-    #         # Execute code against sample test cases
-    #         judge0_response = run_code_on_judge0(
-    #             question,
-    #             source_code,
-    #             language_id,
-    #             sample_test_cases,
-    #             question.cpu_time_limit,
-    #             question.memory_limit
-    #         )
-                        
-    #         if judge0_response.get("error") or judge0_response.get("compile_output"):  # Any Kind of Error
-                                
-    #             result = {
-    #                 "error": judge0_response.get("error"),
-    #                 "token": judge0_response.get("token")
-    #             }
-                
-    #             if judge0_response.get("compile_output"):                    
-    #                 result["compile_output"] = judge0_response.get("compile_output")
-                
-    #             return JsonResponse(result, status=400)
+            # Check if sheet is enabled (with caching)
+            sheet_key = f"sheet_status_{question.id}"
+            sheet_status = cache.get(sheet_key)
+            
+            if sheet_status is None:
+                sheet = Sheet.objects.filter(questions=question, is_approved=True).first()
+                sheet_status = sheet and not sheet.is_enabled
+                cache.set(sheet_key, sheet_status, 300)  # Cache for 5 minutes
 
-    #         # Process outputs
-    #         outputs = judge0_response["outputs"]
-                
-    #         expected_outputs = [normalize_output(tc.expected_output) for tc in sample_test_cases]
-    #         inputs = [tc.input_data for tc in sample_test_cases]
+            if sheet_status:
+                return JsonResponse({"sheet_disabled": "Sheet not enabled."}, status=400)
 
-    #         test_case_results = process_test_case_result(inputs, outputs, expected_outputs)
-                        
-    #         return JsonResponse({
-    #             "status": "Success",
-    #             "test_case_results": test_case_results
-    #         })
+            # Submit code to Judge0 and get token only
+            token = return_token(question, source_code, language_id, sample_test_cases, question.cpu_time_limit, question.memory_limit)
+            
+            if isinstance(token, dict) and token.get("error"): 
+                # Handle error in token generation
+                return JsonResponse({
+                    "error": token.get("error"),
+                    "outputs": None
+                }, status=400)
 
-    #     except Exception as e:
-    #         print(f"Error during code execution: {e}")
-    #         return JsonResponse({
-    #             "error": "Some Error Occued: " + str(e),
-    #             }, status=500)
+            # Return the token to the client
+            # The client will poll Judge0 directly and fetch results when done
+            print(f"Run code: Generated token {token} for sample test cases")
+            return JsonResponse({
+                "token": token,
+                "status": "Token generated"
+            })
+
+        except Question.DoesNotExist:
+            return JsonResponse({"error": "Question not found."}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({"error": "Invalid JSON in request body."}, status=400)
+        except Exception as e:
+            print(f"Error in run_code: {e}")
+            return JsonResponse({
+                "error": "Server error",
+                "error_details": str(e)
+            }, status=500)
 
     return JsonResponse({"error": "Invalid request method."}, status=400)
 
@@ -925,56 +1019,3 @@ def convert_backticks_to_code(text):
     result = re.sub(pattern, r"<code style='font-size: 110%'>\1</code>", text)
     return result
 
-
-# ============================================== Run Code on Jugde0 ================================
-
-# def run_code_on_judge0(token):
-    
-#     print("Entering the fetcing output from judge0")
-        
-#     try:
-#         # ⏳ Poll Until Completion
-#         while True:
-#             result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
-#             result = result_response.json()
-#             status_id = result.get("status", {}).get("id")
-
-#             if status_id not in [1, 2]:  # Finished Processing
-#                 break
-#             time.sleep(1)
-            
-#         # ❗ Handle Errors
-#         if result.get("stderr"):
-#             stderr = base64.b64decode(result['stderr']).decode('utf-8', errors='replace')
-#             print("❌ STDERR:", stderr)
-#             return {"error": f"Runtime Error: {stderr}", "token": token}
-
-#         if result.get("compile_output"):
-#             compile_output = base64.b64decode(result['compile_output']).decode('utf-8', errors='replace')
-#             print("❌ COMPILE OUTPUT:", compile_output)
-#             return {"error": f"Compile Error: {compile_output}", "token": token}
-
-#         if result.get("status", {}).get("id") == 5:
-#             return {"error": "Time Limit Exceeded (TLE)", "token": token}
-
-#         if result.get("status", {}).get("id") == 6:
-#             return {"error": "Compilation Error", "token": token}
-
-#         # ✅ Decode Outputs
-#         outputs = result.get("stdout", "")
-        
-#         if outputs:
-#             outputs = base64.b64decode(outputs).decode('utf-8', errors='replace')
-            
-#             outputs = [output.strip() for output in outputs.split("~") if output.strip()]
-            
-#         else:
-#             outputs = ["No output generated."]
-
-#         return {"outputs": outputs, "token": token}
-
-#     except requests.exceptions.RequestException as e:
-#         return {"error": f"Request Error: {str(e)}", "outputs": None, "token": None}
-#     except Exception as e:
-#         return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
-         

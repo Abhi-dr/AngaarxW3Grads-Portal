@@ -36,6 +36,7 @@ urlpatterns = [
 urlpatterns += [
     path("execute_code", execution_views.execute_code, name="execute_code"),
     path("run_code/<slug:slug>/", execution_views.run_code, name="run_code"),
+    path("run_code_result/<str:token>/<slug:slug>/", execution_views.run_code_result, name="run_code_result"),
     
     path('submit_code/<slug:slug>/', execution_views.submit_code, name='submit_code'),
     path("send_output/<str:token>/<slug:slug>/", execution_views.send_output, name="send_output"),
