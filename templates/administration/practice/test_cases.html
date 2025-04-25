@@ -295,11 +295,11 @@ active
 <script>
     document.getElementById('addTestCaseForm').addEventListener('submit', function (event) {
         event.preventDefault();
-
+    
         const form = event.target;
         const formData = new FormData(form);
         const questionSlug = "{{ question.slug }}";
-
+    
         fetch("{% url 'add_test_case' question.slug %}", {
             method: 'POST',
             headers: {
@@ -310,8 +310,9 @@ active
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert(data.message);
-
+                    // Show success message (you could use a toast notification here instead of alert)
+                    alert(data.message + " The modal will remain open for adding more test cases.");
+    
                     // Update the test cases table dynamically
                     const newRow = `
                     <tr>
@@ -328,13 +329,15 @@ active
                     </tr>
                 `;
                     document.querySelector('table tbody').insertAdjacentHTML('beforeend', newRow);
-
-                    // Close the modal
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('addTestCaseModal'));
-                    modal.hide();
-
-                    // Reset the form
+    
+                    // Reset the form fields for next entry
                     form.reset();
+                    
+                    // Optional: Focus on the first input field for better user experience
+                    const firstInput = form.querySelector('input, textarea');
+                    if (firstInput) firstInput.focus();
+                    
+                    // Note: We're NOT closing the modal here to allow adding multiple test cases
                 } else {
                     alert(data.message);
                 }
@@ -343,6 +346,12 @@ active
                 console.error('Error:', error);
                 alert('An error occurred. Please try again.');
             });
+    });
+    
+    // Add a separate close button handler if you have a specific close button in your modal
+    document.getElementById('closeModalBtn')?.addEventListener('click', function() {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addTestCaseModal'));
+        modal.hide();
     });
 
     document.getElementById('addTestCaseUsingJsonForm').addEventListener('submit', function (event) {
