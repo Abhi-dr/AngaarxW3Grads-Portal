@@ -4,6 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.db.models import Q
 from accounts.models import Administrator
+from django.conf import settings
 from django.http import JsonResponse
 import requests, time, re, json, base64
 from django.db import transaction
@@ -674,7 +675,7 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
     
     encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
     encoded_stdin = base64.b64encode(stdin.encode('utf-8')).decode('utf-8')
-
+    print("YAHA TK A GYE ---------------------------------------")
     submission_data = {
         "source_code": encoded_code,
         "language_id": language_id,
@@ -683,7 +684,9 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
         "wall_time_limit": cpu_time_limit,
         "memory_limit": memory_limit * 1000,
         "enable_per_process_and_thread_time_limit": True,
-        "base64_encoded": True  # Critical flag to let Judge0 know the code is Base64-encoded
+        "base64_encoded": True,  # Critical flag to let Judge0 know the code is Base64-encoded
+        'callback_url': settings.JUDGE0_CALLBACK_URL,
+        
     }
 
     try:
@@ -742,6 +745,13 @@ def run_code_on_judge0(question, source_code, language_id, test_cases, cpu_time_
     except Exception as e:
         return {"error": f"Unexpected Error: {str(e)}", "outputs": None, "token": None}
 
+@csrf_exempt
+def judge0_callback(request):
+    data = request.body.decode('utf-8')
+    print(data)
+    # write the data to redis with token as key
+    
+    return JsonResponse({"status": "success"}, status=200)
 
 
 def process_test_case_result(inputs, outputs, expected_outputs):

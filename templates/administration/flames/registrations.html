@@ -730,14 +730,16 @@
         // Initialize DataTable with server-side processing
         var table = $('#registrationsTable').DataTable({
             processing: true,
-            serverSide: false, // We're handling pagination ourselves
+            serverSide: true, // We're handling pagination ourselves
             ajax: {
                 url: `/administration/flames/registrations/ajax/`,
                 data: function (d) {
+                    // Pass all standard DataTables parameters (search, length, start, etc.)
                     d.course = $('#courseFilter').val();
                     d.status = $('#statusFilter').val();
                     d.year = $('#yearFilter').val();
                     d.college = $('#collegeFilter').val();
+                    d.mode = $('#modeFilter').val();
                     console.log("Sending data:", d);
                 },
                 error: function (xhr, error, thrown) {
@@ -829,11 +831,13 @@
             responsive: true,
             order: [[7, 'desc']], // Sort by registration date (newest first)
             lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+            pageLength: 50, // Set default page length to 50 entries
             dom: '<"d-flex justify-content-between align-items-center mb-3"lf>rt<"d-flex justify-content-between align-items-center mt-3"ip>',
             language: {
                 search: "_INPUT_",
                 searchPlaceholder: "Search registrations...",
-                lengthMenu: "Show _MENU_ entries"
+                lengthMenu: "Show _MENU_ entries",
+                processing: "<div class='spinner-border text-primary' role='status'><span class='visually-hidden'>Loading...</span></div>"
             },
             initComplete: function () {
                 console.log("DataTable initialization complete");
@@ -848,6 +852,8 @@
         $('#filterForm').on('submit', function (e) {
             e.preventDefault();
             console.log("Filter form submitted");
+            // Clear any client-side search, keep only server-side filtering
+            table.search('').columns().search('');
             table.ajax.reload();
         });
 
@@ -855,7 +861,20 @@
         $('#resetFilters').on('click', function () {
             $('#filterForm')[0].reset();
             console.log("Filters reset");
+            // Also clear DataTable search
+            table.search('').columns().search('');
             table.ajax.reload();
+        });
+        
+        // Add event listeners to handle proper search integration
+        $('.dataTables_filter input').on('keyup', function() {
+            // Add a slight delay to prevent excessive requests
+            clearTimeout($.data(this, 'timer'));
+            var timer = setTimeout(function() {
+                console.log("Search triggered");
+                table.ajax.reload();
+            }, 500);
+            $(this).data('timer', timer);
         });
 
         // Attach event handlers for dynamic elements

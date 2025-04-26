@@ -198,20 +198,33 @@ def admin_registrations_ajax(request):
     course_id = request.GET.get('course')
     status = request.GET.get('status')
     college = request.GET.get('college')
+    mode = request.GET.get('mode', 'all')  # Default to 'all' if not provided
     search = request.GET.get('search[value]')
+    year = request.GET.get('year')
     
+
     # Base queryset
     registrations = FlamesRegistration.objects.all().select_related('course', 'user', 'team')
     
     # Apply filters
-    if course_id and course_id != 'all':
+    if course_id and course_id != 'all' and course_id != '':
         registrations = registrations.filter(course_id=course_id)
     
-    if status and status != 'all':
+    if status and status != 'all' and status != '':
         registrations = registrations.filter(status=status.capitalize())
     
-    if college and college != 'all':
+    if college and college != 'all' and college != '':
         registrations = registrations.filter(user__college=college)
+    
+    if year and year != 'all' and year != '':
+        registrations = registrations.filter(year=year)
+        
+    # Apply mode filter (registration mode)
+    if mode and mode != 'all' and mode != '':
+        if mode.lower() == 'team':
+            registrations = registrations.filter(registration_mode='TEAM')
+        elif mode.lower() == 'solo':
+            registrations = registrations.filter(registration_mode='SOLO')
     
     # Apply search
     if search:
@@ -219,7 +232,7 @@ def admin_registrations_ajax(request):
             Q(user__first_name__icontains=search) | 
             Q(user__last_name__icontains=search) | 
             Q(user__email__icontains=search) | 
-            Q(user__contact_number__icontains=search) | 
+            Q(user__mobile_number__icontains=search) | 
             Q(user__college__icontains=search) | 
             Q(course__title__icontains=search) |
             Q(team__name__icontains=search)

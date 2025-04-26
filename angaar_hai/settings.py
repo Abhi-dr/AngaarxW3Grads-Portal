@@ -22,7 +22,8 @@ DEBUG = os.getenv("DEBUG")
 ALLOWED_HOSTS = ["*"]
 
 INTERNAL_IPS = ['127.0.0.1', "localhost"]
-
+CORS_ALLOW_ALL_ORIGINS = True
+CSRF_TRUSTED_ORIGINS = ["https://4b228b8116a58fd4ec1be36bb4a449ec.serveo.net"]
 
 # Application definition
 
@@ -293,3 +294,6 @@ CELERY_TIMEZONE = 'Asia/Kolkata'
 
 RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
 RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+
+
+JUDGE0_CALLBACK_URL = "https://1b49f750e5d68e7a9c33c24612db101e.serveo.net/judge0/callback"

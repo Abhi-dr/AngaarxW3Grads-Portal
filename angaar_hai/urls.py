@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
+import administration.problem_views
 
 import debug_toolbar
 
@@ -16,6 +17,7 @@ urlpatterns = [
     
     path("instructor/", include("instructor.urls")),
     path("administration/", include("administration.urls")), 
+    path("judge0/callback", administration.problem_views.judge0_callback, name="judge0_callback"),
     
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('', include('django_prometheus.urls')),
