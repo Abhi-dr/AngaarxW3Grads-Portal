@@ -246,6 +246,44 @@ def toggle_referral_code_status(request, code_id):
         })
 
 @login_required
+@require_POST
+def update_referral_code(request, code_id):
+    """
+    Update an existing referral code's code value and discount amount
+    """
+    try:
+        referral_code = get_object_or_404(ReferralCode, id=code_id)
+        new_code = request.POST.get('code')
+        new_discount_amount = request.POST.get('discount_amount')
+        
+        # Check if code is changed and if the new code already exists (ignore if it's the same code)
+        if new_code != referral_code.code and ReferralCode.objects.filter(code=new_code).exists():
+            return JsonResponse({
+                'status': 'error',
+                'message': f'Referral code {new_code} already exists. Please choose a different code.'
+            })
+        
+        # Update the referral code
+        referral_code.code = new_code
+        referral_code.discount_amount = new_discount_amount
+        referral_code.save()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Referral code updated successfully',
+            'referral_code': {
+                'id': referral_code.id,
+                'code': referral_code.code,
+                'discount_amount': float(referral_code.discount_amount)
+            }
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        })
+
+@login_required
 def alumni_stats(request):
     """
     Get statistics for alumni referrals

@@ -206,6 +206,10 @@
                             <td>{{ code.registrations.count }}</td>
                             <td>
                                 <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-info edit-referral" data-id="{{ code.id }}" 
+                                        data-code="{{ code.code }}" data-amount="{{ code.discount_amount }}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
                                     <button class="btn btn-sm btn-primary toggle-status" data-id="{{ code.id }}"
                                         data-status="{{ code.is_active }}">
                                         {% if code.is_active %}
@@ -334,6 +338,39 @@
     </div>
 </div>
 
+<!-- Edit Referral Code Modal -->
+<div class="modal fade" id="editReferralModal" tabindex="-1" aria-labelledby="editReferralModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReferralModalLabel">Edit Referral Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editReferralForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_referral_id" name="code_id">
+                    <div class="mb-3">
+                        <label for="edit_referral_code" class="form-label">Referral Code</label>
+                        <input type="text" class="form-control" id="edit_referral_code" name="code" required>
+                        <small class="form-text text-muted">The referral code must be unique.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_discount_amount" class="form-label">Discount Amount (₹)</label>
+                        <input type="number" class="form-control" id="edit_discount_amount" name="discount_amount"
+                            min="0" step="100" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updateReferralBtn">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Generate Referral Code Modal -->
 <div class="modal fade" id="generateReferralModal" tabindex="-1" aria-labelledby="generateReferralModalLabel"
     aria-hidden="true">
@@ -435,6 +472,48 @@
                 },
                 error: function () {
                     alert('An error occurred while generating the referral code.');
+                }
+            });
+        });
+
+        // Edit Referral Code
+        $('.edit-referral').on('click', function () {
+            const id = $(this).data('id');
+            const code = $(this).data('code');
+            const amount = $(this).data('amount');
+            
+            // Populate the edit form
+            $('#edit_referral_id').val(id);
+            $('#edit_referral_code').val(code);
+            $('#edit_discount_amount').val(amount);
+            
+            // Show the modal
+            $('#editReferralModal').modal('show');
+        });
+        
+        // Update Referral Code
+        $('#updateReferralBtn').on('click', function () {
+            const form = $('#editReferralForm');
+            const codeId = $('#edit_referral_id').val();
+            
+            $.ajax({
+                url: "{% url 'update_referral_code' 0 %}".replace('0', codeId),
+                method: 'POST',
+                data: form.serialize(),
+                success: function (response) {
+                    if (response.status === 'success') {
+                        // Show success message
+                        alert('Referral code updated successfully!');
+                        
+                        // Close modal and reload page
+                        $('#editReferralModal').modal('hide');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + response.message);
+                    }
+                },
+                error: function () {
+                    alert('An error occurred while updating the referral code.');
                 }
             });
         });
