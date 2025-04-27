@@ -15,14 +15,22 @@ def flames_courses(request):
     
     # Count stats
     total_courses = courses.count()
-    active_courses = courses.filter(is_active=True).count()
+    
     total_registrations = FlamesRegistration.objects.count()
+    total_completed_registrations = FlamesRegistration.objects.filter(status="Completed").count()
+    total_pending_registrations = FlamesRegistration.objects.filter(status="Pending").count()
+    
+    total_amount = FlamesRegistration.get_total_amount()
     
     context = {
         'courses': courses,
         'total_courses': total_courses,
-        'active_courses': active_courses,
+        
         'total_registrations': total_registrations,
+        'total_completed_registrations': total_completed_registrations,
+        'total_pending_registrations': total_pending_registrations,
+        
+        'total_amount': total_amount,
     }
     
     return render(request, 'administration/flames/courses.html', context)

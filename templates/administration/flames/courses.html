@@ -300,24 +300,31 @@
                 <div class="stat-label">Total Courses</div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon stat-active">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-info">
-                <div class="stat-value">{{ active_courses }}</div>
-                <div class="stat-label">Active Courses</div>
-            </div>
-        </div>
+
         <div class="stat-card">
             <div class="stat-icon stat-reg">
                 <i class="fas fa-user-graduate"></i>
             </div>
             <div class="stat-info">
-                <div class="stat-value">{{ total_registrations }}</div>
+                <div class="stat-value">{{ total_registrations }} |
+                    <span class="text-success">{{ total_completed_registrations }}</span> |
+                    <span class="text-danger">{{ total_pending_registrations }}</span>
+                </div>
                 <div class="stat-label">Total Registrations</div>
             </div>
         </div>
+
+
+        <div class="stat-card">
+            <div class="stat-icon stat-active">
+                <i class="fas fa-indian-rupee-sign"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total_amount }}</div>
+                <div class="stat-label">Total Payment Received</div>
+            </div>
+        </div>
+        
     </div>
 
     <!-- Filter Section -->

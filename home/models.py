@@ -224,6 +224,15 @@ class FlamesRegistration(models.Model):
                 self.payable_amount = self.discounted_price
         
         super().save(*args, **kwargs)
+        
+    # a function to get the total amount we have generated so par (based on payable amount)
+    @classmethod
+    def get_total_amount(cls):
+        total = 0
+        for registration in cls.objects.all():
+            if registration.payable_amount and registration.status == "Completed":
+                total += registration.payable_amount
+        return total
 
 
 # ================= FLAMES TEAMS ======================
