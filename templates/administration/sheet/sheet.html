@@ -86,7 +86,7 @@ active
 
     {% endfor %}
 
-    <!-- ================================= SESSIONS TABLE ================================== -->
+    <!-- ================================= SHEETS TABLE ================================== -->
 
     <div class="card w-100">
         <div class="card-body p-4">
@@ -129,13 +129,13 @@ active
                             </th>
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#2
+                                    Submissions
                                 </h6>
                             </th>
 
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#3
+                                    Test Code
                                 </h6>
                             </th>
                             <th class="border-bottom-0 justify-content-center">
@@ -213,15 +213,18 @@ active
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
                                     <a href="{% url 'administrator_view_submissions' question.slug %}"
-                                        class="btn btn-outline-info text-blue float-end">Submissions
-                                        ({{question.how_many_users_solved }}) </a>
+                                        class="btn btn-outline-info text-blue float-end">
+                                        <i class="ti ti-file-text"></i>
+                                        
+                                        {{question.how_many_users_solved }} </a>
                                 </div>
                             </td>
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
                                     <a href="{% url 'test_code' question.slug %}"
-                                        class="btn btn-info text-blue float-end">TEST CODE</a>
+                                        class="btn btn-info text-blue float-end">
+                                        <i class="ti ti-code"></i></a>
 
                                 </div>
                             </td>

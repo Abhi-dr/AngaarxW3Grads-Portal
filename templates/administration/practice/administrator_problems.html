@@ -88,11 +88,7 @@ Problem Set🔥
                                 </h6>
                             </th>
 
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Extra
-                                </h6>
-                            </th>
+
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
                                     Action#1
@@ -106,19 +102,19 @@ Problem Set🔥
 
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#3
+                                    Submissions
                                 </h6>
                             </th>
 
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#4
+                                    TEST CODE
                                 </h6>
                             </th>
 
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#5
+                                    Make Copy
                                 </h6>
                             </th>
 
@@ -362,7 +358,10 @@ Problem Set🔥
                     <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" data-bs-toggle="tooltip" title="${question.title}">
                         ${question.title.length > 25 ? question.title.slice(0, 25) + "..." : question.title}
                     </h6>
-                    ${question.sheets.map(sheet => `<span style="font-weight: bold;">${sheet.name} | </span>`).join("")}
+                    ${question.sheets.map(sheet => 
+                    `<span style="font-weight: bold;">${sheet.name.length > 15 ? sheet.name.slice(0, 15) + '...' : sheet.name} | </span>`
+                    ).join("")}
+
                 </td>
                 <td class="border-bottom-0">
                     <p class="fw-semibold mb-0">
@@ -380,49 +379,51 @@ Problem Set🔥
                         </span>
                     </p>
                 </td>
-                <td class="border-bottom-0">
-                    <h6 class="fw-semibold mb-0 fs-4">
-                        <span class="badge bg-body-tertiary mb-1">CPU Limit: <strong>${question.cpu_time_limit} s</strong></span><br>
-                        <span class="badge bg-body-tertiary">Memory Limit: <strong>${question.memory_limit} MB</strong></span>
-                    </h6>
-                </td>
+
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2 mb-1">
-                        <a href="/administration/edit_question/${question.id}" class="btn btn-outline-secondary float-end">Edit</a>
+                        <a href="/administration/edit_question/${question.id}" class="btn btn-sm btn-outline-secondary float-end">✏️</a>
                     </div>
 
                     <div class="d-flex align-items-center gap-2">
-                        <a href="/administration/delete_question/${question.id}" class="btn btn-danger float-end"
-                           onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
+                        <a href="/administration/delete_question/${question.id}" class="btn btn-sm btn-outline-danger float-end"
+                           onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">❌</a>
                     </div>
                 </td>
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2 mb-1">
                         <a href="/administration/test_cases/${question.slug}" class="btn btn-outline-success text-blue float-end">
-                            Test Cases (${question.test_cases_count})
+                            TC (${question.test_cases_count})
                         </a>
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <a href="/administration/driver_code/${question.slug}" class="btn btn-outline-warning text-blue float-end">
-                            Driver Codes
+                            DC
                         </a>
                     </div>
                     </div>
                 </td>
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
-                        <a href="/administration/view_submissions/${question.slug}" class="btn btn-outline-info text-blue float-end">Submissions</a>
+                        <a href="/administration/view_submissions/${question.slug}" class="btn btn-outline-info text-blue float-end">
+                            <i class="ti ti-file-text"></i>
+                            
+                        </a>
                     </div>
                 </td>
 
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
-                        <a href="/administration/test_code/${question.slug}" class="btn btn-info text-blue float-end">TEST CODE</a>
+                        <a href="/administration/test_code/${question.slug}" class="btn btn-info text-blue float-end">
+                            <i class="ti ti-code"></i>
+                        </a>
                     </div>
                 </td>
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
-                        <a href="/administration/make_duplicate/${question.id}" class="btn btn-outline-secondary text-blue float-end">Make a copy</a>
+                        <a href="/administration/make_duplicate/${question.id}" class="btn btn-outline-secondary text-blue float-end">
+                            <i class="ti ti-copy"></i>
+                        </a>
                     </div>
                 </td>
             `;
