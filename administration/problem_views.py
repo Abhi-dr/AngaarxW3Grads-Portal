@@ -50,18 +50,34 @@ def administrator_problems(request):
 @staff_member_required(login_url='login')
 @admin_required
 def fetch_problems(request):
-    
+    # Get search parameters
     query = request.GET.get("query", "").strip()
+    
+    # Get pagination parameters
+    page = int(request.GET.get("page", 1))
+    items_per_page = int(request.GET.get("per_page", 10))
+    
+    # Start with all approved questions, ordered by newest first
     questions = Question.objects.filter(is_approved=True).order_by('-id')   
 
-    
+    # Apply search filters if query exists
     if query:
         questions = questions.filter(
             Q(title__icontains=query) | 
             Q(slug__icontains=query) | 
-            Q(id__icontains=query)
+            Q(id__icontains=query) |
+            Q(description__icontains=query)
         )
-        
+    
+    # Calculate total before pagination for metadata
+    total_questions = questions.count()
+    
+    # Apply pagination
+    start_index = (page - 1) * items_per_page
+    end_index = start_index + items_per_page
+    paginated_questions = questions[start_index:end_index]
+    
+    # Transform to JSON serializable format
     question_list = [{
         "id": q.id,
         "title": q.title,
@@ -73,14 +89,19 @@ def fetch_problems(request):
         "memory_limit": q.memory_limit,
         "test_cases_count": q.test_cases.count(),
         "submission_count": q.how_many_users_solved(),
-        "status": "Active",  # Example status
-        "color": "success",  # Example color
+        "status": "Active",
+        "color": "success",
         "sheets": [{"name": sheet.name} for sheet in q.sheets.all()],
-    } for q in questions]
+    } for q in paginated_questions]
+    
+    # Return data with pagination metadata
     return JsonResponse({
-            "questions": question_list,
-            "total_questions": questions.count()
-         })
+        "questions": question_list,
+        "total_questions": total_questions,
+        "current_page": page,
+        "items_per_page": items_per_page,
+        "total_pages": (total_questions + items_per_page - 1) // items_per_page  # Ceiling division
+    })
 
 # ======================================== ADD PROBLEM ======================================
 

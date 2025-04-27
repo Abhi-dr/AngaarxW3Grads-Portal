@@ -35,7 +35,7 @@ Problem Set🔥
             <form onsubmit="event.preventDefault();">
                 <div class="input-group">
                     <input type="text" class="form-control" id="searchInput"
-                        placeholder="Search by ID, Topic or Description" oninput="searchQuestions()" />
+                        placeholder="Search by ID, Topic or Description" oninput="debounceSearch()" />
                     <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
                 </div>
             </form>
@@ -56,7 +56,7 @@ Problem Set🔥
 
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Questions 🔥
+            <h5 class="card-title fw-semibold mb-4" id="questionHeading">Questions 🔥
                 {% if query %}
                 <span class="fs-6"> | Search Results for "{{ query }}"</span>
                 {% endif %}
@@ -135,15 +135,33 @@ Problem Set🔥
                             </td>
                         </tr>
 
-
                     </tbody>
 
                 </table>
             </div>
 
+            <!-- Pagination Controls -->
+            <div class="d-flex justify-content-between align-items-center mt-4" id="paginationContainer">
+                <div class="d-flex align-items-center">
+                    <select class="form-select me-2" id="itemsPerPage" style="width: auto;">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="text-muted">items per page</span>
+                </div>
+                <div>
+                    <nav aria-label="Question pagination">
+                        <ul class="pagination mb-0" id="paginationList">
+                            <!-- Pagination buttons will be generated here -->
+                        </ul>
+                    </nav>
+                </div>
+                <div class="text-muted">Showing <span id="itemsStart">0</span>-<span id="itemsEnd">0</span> of <span id="totalItems">0</span> items</div>
+            </div>
         </div>
     </div>
-
 
     <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
@@ -161,7 +179,6 @@ Problem Set🔥
             </div>
         </div>
     </div>
-
 
 </div>
 
@@ -184,21 +201,122 @@ Problem Set🔥
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+        // Initialize the page and items per page selector
+        document.getElementById("itemsPerPage").addEventListener("change", function() {
+            fetchQuestions(1); // Reset to page 1 when changing items per page
+        });
+        
         fetchQuestions();  // Load all questions initially
     });
+    
+    // Function to update the pagination controls
+    function updatePagination(data) {
+        const paginationList = document.getElementById("paginationList");
+        const totalItems = document.getElementById("totalItems");
+        const itemsStart = document.getElementById("itemsStart");
+        const itemsEnd = document.getElementById("itemsEnd");
+        const totalPages = data.total_pages;
+        const current = data.current_page;
+        
+        // Update count information
+        totalItems.textContent = data.total_questions;
+        const start = ((current - 1) * data.items_per_page) + 1;
+        const end = Math.min(start + data.items_per_page - 1, data.total_questions);
+        itemsStart.textContent = data.total_questions > 0 ? start : 0;
+        itemsEnd.textContent = end;
+        
+        // Clear current pagination
+        paginationList.innerHTML = "";
+        
+        // Don't show pagination if there's only 1 page
+        if (totalPages <= 1) {
+            return;
+        }
+        
+        // Previous button
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${current === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" ${current !== 1 ? `onclick="fetchQuestions(${current - 1}); return false;"` : ''}>Previous</a>`;
+        paginationList.appendChild(prevLi);
+        
+        // Page numbers - show 5 pages with current in the middle if possible
+        let startPage = Math.max(1, current - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        
+        // Adjust if we're at the end
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+        
+        // First page button if needed
+        if (startPage > 1) {
+            const firstLi = document.createElement("li");
+            firstLi.className = "page-item";
+            firstLi.innerHTML = `<a class="page-link" href="#" onclick="fetchQuestions(1); return false;">1</a>`;
+            paginationList.appendChild(firstLi);
+            
+            if (startPage > 2) {
+                const ellipsisLi = document.createElement("li");
+                ellipsisLi.className = "page-item disabled";
+                ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                paginationList.appendChild(ellipsisLi);
+            }
+        }
+        
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLi = document.createElement("li");
+            pageLi.className = `page-item ${i === current ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#" ${i !== current ? `onclick="fetchQuestions(${i}); return false;"` : ''}>${i}</a>`;
+            paginationList.appendChild(pageLi);
+        }
+        
+        // Last page button if needed
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsisLi = document.createElement("li");
+                ellipsisLi.className = "page-item disabled";
+                ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                paginationList.appendChild(ellipsisLi);
+            }
+            
+            const lastLi = document.createElement("li");
+            lastLi.className = "page-item";
+            lastLi.innerHTML = `<a class="page-link" href="#" onclick="fetchQuestions(${totalPages}); return false;">${totalPages}</a>`;
+            paginationList.appendChild(lastLi);
+        }
+        
+        // Next button
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${current === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" ${current !== totalPages ? `onclick="fetchQuestions(${current + 1}); return false;"` : ''}>Next</a>`;
+        paginationList.appendChild(nextLi);
+    }
 
+    // Debounce function to limit the rate at which search is fired
+    let searchTimeout;
+    function debounceSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            searchQuestions();
+        }, 300); // Wait 300ms after user stops typing before searching
+    }
 
     function searchQuestions() {
         const query = document.getElementById("searchInput").value;
-        fetch("{% url 'administrator_fetch_problems' %}?query=" + encodeURIComponent(query))
+        const itemsPerPage = document.getElementById("itemsPerPage").value;
+        currentPage = 1; // Reset to first page when searching
+        
+        fetch(`{% url 'administrator_fetch_problems' %}?query=${encodeURIComponent(query)}&page=${currentPage}&per_page=${itemsPerPage}`)
             .then(response => response.json())
             .then(data => {
                 displayQuestions(data.questions);
+                updatePagination(data);
                 const heading = document.getElementById("questionHeading");
                 if (query) {
-                    heading.innerHTML = `QUESTIONS 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`;
+                    heading.innerHTML = `Questions 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`;
                 } else {
-                    heading.innerHTML = "QUESTIONS 🔥";
+                    heading.innerHTML = "Questions 🔥";
                 }
             })
             .catch(error => console.error("Error fetching questions:", error));
@@ -206,18 +324,25 @@ Problem Set🔥
 
     function clearSearch() {
         document.getElementById("searchInput").value = "";
+        currentPage = 1; // Reset to first page
         fetchQuestions();  // Reload all questions after clearing
     }
 
-    function fetchQuestions() {
-        fetch("{% url 'administrator_fetch_problems' %}")
+    let currentPage = 1;
+
+    function fetchQuestions(page = 1) {
+        currentPage = page;
+        const itemsPerPage = document.getElementById("itemsPerPage").value;
+        const query = document.getElementById("searchInput").value;
+        
+        fetch(`{% url 'administrator_fetch_problems' %}?page=${page}&per_page=${itemsPerPage}&query=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(data => {
                 displayQuestions(data.questions);
+                updatePagination(data);
             })
             .catch(error => console.error("Error fetching questions:", error));
     }
-
 
     function displayQuestions(questions) {
         const questionTableBody = document.getElementById("questionTableBody");
