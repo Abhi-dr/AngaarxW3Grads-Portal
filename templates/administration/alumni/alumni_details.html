@@ -406,6 +406,7 @@
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 
 <script>
@@ -421,7 +422,8 @@
 
         // Edit Alumni Button Click
         $('.edit-alumni').on('click', function () {
-            $('#editAlumniModal').modal('show');
+            const alumniModal = new bootstrap.Modal(document.getElementById('editAlumniModal'));
+            alumniModal.show();
         });
 
         // Update Alumni Form Submission
@@ -438,7 +440,10 @@
                         alert('Alumni updated successfully!');
 
                         // Close modal and reload page
-                        $('#editAlumniModal').modal('hide');
+                        const alumniModal = bootstrap.Modal.getInstance(document.getElementById('editAlumniModal'));
+                        if (alumniModal) {
+                            alumniModal.hide();
+                        }
                         location.reload();
                     } else {
                         alert('Error: ' + response.message);
@@ -464,7 +469,10 @@
                         alert('Referral code generated successfully: ' + response.referral_code.code);
 
                         // Close modal and reload page
-                        $('#generateReferralModal').modal('hide');
+                        const genModal = bootstrap.Modal.getInstance(document.getElementById('generateReferralModal'));
+                        if (genModal) {
+                            genModal.hide();
+                        }
                         location.reload();
                     } else {
                         alert('Error: ' + response.message);
@@ -487,8 +495,9 @@
             $('#edit_referral_code').val(code);
             $('#edit_discount_amount').val(amount);
             
-            // Show the modal
-            $('#editReferralModal').modal('show');
+            // Show the modal using Bootstrap 5 API
+            const editModal = new bootstrap.Modal(document.getElementById('editReferralModal'));
+            editModal.show();
         });
         
         // Update Referral Code
@@ -506,7 +515,10 @@
                         alert('Referral code updated successfully!');
                         
                         // Close modal and reload page
-                        $('#editReferralModal').modal('hide');
+                        const editModal = bootstrap.Modal.getInstance(document.getElementById('editReferralModal'));
+                        if (editModal) {
+                            editModal.hide();
+                        }
                         location.reload();
                     } else {
                         alert('Error: ' + response.message);

@@ -219,6 +219,7 @@ urlpatterns += [
     path('alumni/delete/<int:alumni_id>/', alumni_views.delete_alumni, name='delete_alumni'),
     path('alumni/generate-referral/<int:alumni_id>/', alumni_views.generate_referral_code, name='generate_referral_code'),
     path('alumni/toggle-referral-status/<int:code_id>/', alumni_views.toggle_referral_code_status, name='toggle_referral_code_status'),
+    path('alumni/update-referral-code/<int:code_id>/', alumni_views.update_referral_code, name='update_referral_code'),
     path('alumni/stats/', alumni_views.alumni_stats, name='alumni_stats'),
     path('alumni/list-ajax/', alumni_views.alumni_list_ajax, name='alumni_list_ajax'),
 ]
