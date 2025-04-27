@@ -31,9 +31,77 @@ HEADERS = {
 }
 
 
-@login_required(login_url="login")
 def execute_code(request):
     print("🛠️ execute_code called")
+    
+    if request.method == 'POST':
+        
+        language_id = request.POST.get('language_id')
+        source_code = request.POST.get('source_code')
+        input_data = request.POST.get('input_data')  # Get input data from the request
+        
+        # Ensure required fields are provided
+        if not (language_id and source_code):
+            return JsonResponse({"error": "Missing required fields (language_id, source_code)"}, status=400)
+
+        # Encode source code and input data
+        encoded_code = base64.b64encode(source_code.encode('utf-8')).decode('utf-8')
+        encoded_input = base64.b64encode(input_data.encode('utf-8')).decode('utf-8') if input_data else None
+
+        # Prepare submission payload
+        data = {
+            "source_code": encoded_code,
+            "language_id": language_id,
+            "cpu_time_limit": 1,
+            "cpu_extra_time": 1,
+            "base64_encoded": True,
+            "stdin": encoded_input  # Add input data to the payload
+        }
+
+        try:
+            response = requests.post(f"{JUDGE0_URL}?base64_encoded=true", json=data, headers=HEADERS, timeout=10)
+            response.raise_for_status()
+        except requests.exceptions.RequestException as e:
+            return JsonResponse({"error": f"Request failed: {str(e)}"}, status=500)
+
+        if response.status_code == 201:
+            token = response.json().get('token')
+            
+            if not token:
+                return JsonResponse({"error": "Failed to retrieve submission token"}, status=500)
+
+            for i in range(10):  # Maximum of 10 attempts
+                try:
+                    result_response = requests.get(f"{JUDGE0_URL}/{token}?base64_encoded=true", headers=HEADERS, timeout=10)
+                    result_response.raise_for_status()
+                    result = result_response.json()
+                except requests.exceptions.RequestException as e:
+                    return JsonResponse({"error": f"Polling failed: {str(e)}"}, status=500)
+
+                status_id = result.get('status', {}).get('id')
+                status_description = result.get('status', {}).get('description', 'Unknown Status')
+
+                if status_id == 3:  # ✅ Accepted (Successful Execution)
+                    output = result.get('stdout')
+                    if output:
+                        decoded_output = base64.b64decode(output).decode('utf-8')
+                        return JsonResponse({"output": decoded_output, "status": status_description})
+
+                elif status_id in [5, 6, 7, 11]:  # ❌ Error Cases
+                    error_output = (
+                        result.get('stderr') or
+                        result.get('compile_output') or
+                        result.get('message')
+                    )
+                    if error_output:
+                        decoded_error = base64.b64decode(error_output).decode('utf-8', errors='replace')
+                        return JsonResponse({"error": decoded_error, "status": status_description})
+    
+                time.sleep(1)  # Poll every 1 second
+
+            return JsonResponse({"error": "Timeout while waiting for the result"}, status=408)
+
+        return JsonResponse({"error": "Failed to submit code to Judge0"}, status=response.status_code)
 
     return JsonResponse({"error": "Invalid request method"}, status=405)
 
