@@ -241,6 +241,32 @@ def admin_registrations_ajax(request):
     # Get total count before pagination
     total_count = registrations.count()
     
+    # Handle sorting
+    order_column_index = request.GET.get('order[0][column]')
+    order_direction = request.GET.get('order[0][dir]')
+    
+    if order_column_index and order_direction:
+        # Map DataTable column index to model field
+        column_mapping = {
+            '0': 'id',
+            '1': 'user__first_name',  # For full_name
+            '2': 'course__title',
+            '3': 'user__mobile_number',
+            '4': 'user__college',
+            '5': 'year',
+            '6': 'registration_mode',
+            '7': 'team__name',
+            '8': 'created_at',
+            '9': 'status'
+        }
+        
+        order_field = column_mapping.get(order_column_index)
+        if order_field:
+            # Apply ordering
+            if order_direction == 'desc':
+                order_field = f'-{order_field}'
+            registrations = registrations.order_by(order_field)
+    
     # Pagination
     start = int(request.GET.get('start', 0))
     length = int(request.GET.get('length', 10))
