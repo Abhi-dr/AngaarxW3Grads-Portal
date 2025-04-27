@@ -427,7 +427,12 @@ class Submission(models.Model):
     
     def get_todays_submissions(self, user):
         return self.submissions.filter(user=user, submitted_at__date=datetime.now().date())
-
+    
+    @classmethod
+    def get_todays_total_submissions(cls):
+        today = now().date()
+        return cls.objects.filter(submitted_at__date=today).count()
+    
     def __str__(self):
         return f"{self.user.username} - {self.question.title} - {self.status}"
     

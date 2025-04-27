@@ -33,6 +33,8 @@ def index(request):
     administrator = Administrator.objects.get(id=request.user.id)
     latest_sheet = Sheet.objects.latest('id')
     
+    todays_submissions = Submission.get_todays_total_submissions()
+    
     # get the total number of submissions happened today only
     # today = datetime.date.today()
     # total_submissions_today = Submission.objects.filter(submitted_at__date=today).count()
@@ -63,6 +65,8 @@ def index(request):
     parameters = {
         "administrator": administrator,
         "latest_sheet": latest_sheet,
+        
+        "todays_submissions": todays_submissions,
         # "total_enrolled_students": total_enrolled_students,
         # "total_sessions": total_sessions,
         # "sessions": sessions,

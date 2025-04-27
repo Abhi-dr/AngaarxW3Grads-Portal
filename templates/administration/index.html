@@ -154,7 +154,7 @@ Administration -> Home
                             <div class="row align-items-center">
                                 <div class="col-8">
                                     <h4 class="fw-semibold mb-3">
-                                        {{ total_sessions }}
+                                        {{ todays_submissions }}
                                     </h4>
                                     <div class="d-flex align-items-center mb-3">
                                         <span class="">
@@ -235,6 +235,9 @@ Administration -> Home
                         <div class="card-body p-3">
 
                             <div id="stats-result">
+                                <h4>
+                                    Loading...
+                                </h4>
                                 <!-- Results will be displayed here -->
                             </div>
 
@@ -334,8 +337,7 @@ Administration -> Home
                                         class="btn btn-outline-info">Open {{ latest_sheet.name }} Sheet</a>
                                 </td>
                                 <td class="border-bottom-0">
-                                    <a href="{% url 'question_requests' %}" class="btn btn-outline-indigo">Question
-                                        Requests</a>
+                                    <a href="{% url 'admin_flames_registrations' %}" class="btn btn-outline-success">FLAMES REGISTRATIONS</a>
                                 </td>
                             </tr>
 
