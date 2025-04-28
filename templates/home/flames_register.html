@@ -424,8 +424,9 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                 <div class="col-md-6 form-group">
                     <label for="contact_number" class="form-label">Contact Number *</label>
                     <input type="tel" id="contact_number" minlength="10" maxlength="10" name="contact_number"
-                        class="form-control" required {% if user.is_authenticated and user.profile.contact_number %}
-                        value="{{ user.profile.contact_number }}" {% endif %}>
+                    required
+                    class="form-control" required {% if user.is_authenticated and user.profile.contact_number %}
+                    value="{{ user.profile.contact_number }}" {% endif %}>
                 </div>
             </div>
 
