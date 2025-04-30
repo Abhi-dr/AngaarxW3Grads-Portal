@@ -32,7 +32,7 @@ class FlamesCourseTestimonialAdmin(admin.ModelAdmin):
     list_filter = ('course', 'rating')
 
 class FlamesRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('course', 'created_at', 'registration_mode', 'get_team_name', 'referral_code', 'original_price', 'discounted_price', 'get_payable_amount', 'status')
+    list_display = ('user', 'course', 'created_at', 'registration_mode', 'get_team_name', 'referral_code', 'original_price', 'discounted_price', 'get_payable_amount', 'status')
     list_filter = ('course', 'year', 'created_at', 'registration_mode', 'status')
     search_fields = ('college', 'user__username', 'user__email', 'team__name')
     
