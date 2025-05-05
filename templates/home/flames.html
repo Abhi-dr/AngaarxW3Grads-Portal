@@ -321,6 +321,71 @@ F.L.A.M.E.S🔥 | Angaar
             font-size: 2rem;
         }
     }
+
+
+    /* FAQ Styles */
+    .faq-accordion {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .faq-item {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+        border-color: rgba(255, 96, 38, 0.3);
+    }
+
+    .faq-question {
+        padding: 20px;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .faq-question span {
+        font-weight: 600;
+        font-size: 17px;
+        color: #fff;
+    }
+
+    .faq-icon {
+        color: #ff6026;
+        font-size: 14px;
+        transition: transform 0.3s ease;
+    }
+
+    .faq-question.active .faq-icon {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .faq-answer p {
+        margin: 0;
+        padding: 20px;
+        color: #aaa;
+        line-height: 1.6;
+    }
+
+    .faq-question.active+.faq-answer {
+        max-height: 500px;
+        padding: 0;
+    }
 </style>
 {% endblock %}
 
@@ -436,6 +501,60 @@ F.L.A.M.E.S🔥 | Angaar
             {% endfor %}
         </div>
     </div>
+
+    <div class="container mt-4">
+        <div class="team-header" data-aos="fade-up" data-aos-duration="1000">
+            <h1 class="team-title">FAQs <i class="fas fa-fire"></i>
+            </h1>
+        </div>
+    </div>
+    <div style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 25px;">
+        <div class="faq-accordion">
+            <!-- FAQ Item 1 -->
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and
+                        LPU?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities do
+                        accept the FLAMES 25 course certificate. So
+                        it’s not just a cool flex — it’s officially recognized too! 😉</p>
+                </div>
+            </div>
+
+            <!-- FAQ Item 2 -->
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>Do I need prior experience to join this FLAME?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Not really! 🔥 Anyone can join. But since it’s made mainly for students going into 3rd year,
+                        it’s better if you know a little bit of HTML, CSS, and JavaScript. It’ll make things easier
+                        for you!</p>
+                </div>
+            </div>
+
+            <!-- FAQ Item 3 -->
+            <div class="faq-item">
+                <div class="faq-question">
+                    <span>How does team registration work?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Team registration allows you to register a group of people at a special discounted rate. When
+                        you
+                        select "Team Registration" during enrollment, enter your team member's usernames and done!.
+                        The pricing
+                        is
+                        calculated as (course price * 5) - (499 * 5), giving everyone a substantial discount!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <!-- Particle.js for background effects -->
@@ -444,6 +563,27 @@ F.L.A.M.E.S🔥 | Angaar
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
 <script>
+
+    // FAQ accordion functionality
+    const faqQuestions = document.querySelectorAll('.faq-question');
+
+    faqQuestions.forEach(question => {
+        question.addEventListener('click', function () {
+            this.classList.toggle('active');
+
+            // Get the answer element (next sibling)
+            const answer = this.nextElementSibling;
+
+            // Toggle the answer visibility
+            if (this.classList.contains('active')) {
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+            } else {
+                answer.style.maxHeight = '0';
+            }
+        });
+    });
+
+
     // Initialize AOS animations
     document.addEventListener('DOMContentLoaded', function () {
         AOS.init({

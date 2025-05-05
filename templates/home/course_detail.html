@@ -403,7 +403,7 @@
         transform: translateY(-3px);
         box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
     }
-    
+
     .registration-modal-close {
         position: absolute;
         top: 15px;
@@ -416,6 +416,70 @@
 
     .registration-modal-close:hover {
         color: #ff6026;
+    }
+
+    /* FAQ Styles */
+    .faq-accordion {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .faq-item {
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+        border-color: rgba(255, 96, 38, 0.3);
+    }
+
+    .faq-question {
+        padding: 20px;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .faq-question span {
+        font-weight: 600;
+        font-size: 17px;
+        color: #fff;
+    }
+
+    .faq-icon {
+        color: #ff6026;
+        font-size: 14px;
+        transition: transform 0.3s ease;
+    }
+
+    .faq-question.active .faq-icon {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .faq-answer p {
+        margin: 0;
+        padding: 20px;
+        color: #aaa;
+        line-height: 1.6;
+    }
+
+    .faq-question.active+.faq-answer {
+        max-height: 500px;
+        padding: 0;
     }
 
     /* Responsive Styles */
@@ -483,7 +547,7 @@
                 <!-- Course Description -->
                 <div class="course-content" data-aos="fade-up">
                     <div class="course-section text-white ">
-                        <h2 class="course-section-title">About This Flame🔥</h2>
+                        <h2 class="course-section-title">About This Flame</h2>
                         <p style="line-height: 1.8;">{{ course.description|linebreaks }}</p>
                     </div>
 
@@ -497,7 +561,7 @@
                             </div>
                             <div class="instructor-info">
                                 <h3>{{ course.instructor }}</h3>
-                                <p>Flower Nahi, Fire Hain Ye🔥</p>
+                                <p>Flower Nahi, Fire Hain Ye</p>
                             </div>
                         </div>
                     </div>
@@ -523,14 +587,14 @@
                         <h2 class="course-section-title">Flame Roadmap</h2>
                         <div class="roadmap-container">
                             {% with roadmap_lines=course.roadmap.splitlines %}
-                                {% for line in roadmap_lines %}
-                                    <div class="roadmap-item">
-                                        <div class="roadmap-content">
-                                            <h4>Week {{ forloop.counter }}</h4>
-                                            <p>{{ line }}</p>
-                                        </div>
-                                    </div>
-                                {% endfor %}
+                            {% for line in roadmap_lines %}
+                            <div class="roadmap-item">
+                                <div class="roadmap-content">
+                                    <h4>Week {{ forloop.counter }}</h4>
+                                    <p>{{ line }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
                             {% endwith %}
                         </div>
                     </div>
@@ -557,12 +621,11 @@
                                         <h4>{{ testimonial.student_name }}</h4>
                                         <div class="testimonial-rating">
                                             {% for i in "12345" %}
-                                                {% if forloop.counter <= testimonial.rating %}
-                                                <i class="fas fa-star"></i>
+                                            {% if forloop.counter <= testimonial.rating %} <i class="fas fa-star"></i>
                                                 {% else %}
                                                 <i class="far fa-star"></i>
                                                 {% endif %}
-                                            {% endfor %}
+                                                {% endfor %}
                                         </div>
                                     </div>
                                 </div>
@@ -575,28 +638,34 @@
                     <!-- Price Section -->
                     <div class="course-section">
                         <h2 class="course-section-title">All Of This At Just</h2>
-                        <div style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 25px; text-align: center;">
+                        <div
+                            style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 25px; text-align: center;">
 
-                            
+
 
                             {% if course.discount_price %}
-                            <div style="display: flex; align-items: baseline; justify-content: center; margin-bottom: 15px;">
-                                <span style="color: #aaa; font-size: 18px; text-decoration: line-through; margin-right: 15px;">₹{{ course.price }}</span>
-                                <span style="color: #ff6026; font-size: 32px; font-weight: 700;">₹{{ course.discount_price }}</span>
+                            <div
+                                style="display: flex; align-items: baseline; justify-content: center; margin-bottom: 15px;">
+                                <span
+                                    style="color: #aaa; font-size: 18px; text-decoration: line-through; margin-right: 15px;">₹{{
+                                    course.price }}</span>
+                                <span style="color: #ff6026; font-size: 32px; font-weight: 700;">₹{{
+                                    course.discount_price }}</span>
                             </div>
                             <div style="color: #2ecc71; font-size: 16px; font-weight: 600; margin-bottom: 20px;">
                                 {% widthratio course.discount_price course.price 100 as discount_percent %}
                                 {{ discount_percent|add:"-100"|cut:"-" }}% OFF
                             </div>
                             {% else %}
-                            <div style="color: #ff6026; font-size: 32px; font-weight: 700; margin-bottom: 20px;">₹{{ course.price }}</div>
+                            <div style="color: #ff6026; font-size: 32px; font-weight: 700; margin-bottom: 20px;">₹{{
+                                course.price }}</div>
                             {% endif %}
                             <p style="color: #aaa; margin-bottom: 0;">
-                                Respect Our Efforts, And Your Efforts Will Respect You🔥
+                                Respect Our Efforts, And Your Efforts Will Respect You
                             </p>
 
-                            
-<!-- 
+
+                            <!-- 
                                 <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
                                 <span style="color: #ff6026; font-size: 16px; font-weight: 600;">₹ Less than you expect... (coming soon)</span> -->
 
@@ -607,13 +676,15 @@
                     <div style="display: flex; gap: 15px; margin-top: 20px;">
 
                         {% if user.is_authenticated %}
-                        <a href="{% url 'student_flames_register' course.slug %}" class="join-course-btn" style="flex: 1; text-align: center; text-decoration: none; background: rgba(255, 96, 38, 0.2); border: 1px solid #ff6026; display: flex; align-items: center; justify-content: center;">
+                        <a href="{% url 'student_flames_register' course.slug %}" class="join-course-btn"
+                            style="flex: 1; text-align: center; text-decoration: none; background: rgba(255, 96, 38, 0.2); border: 1px solid #ff6026; display: flex; align-items: center; justify-content: center;">
                             Enroll Now
                         </a>
-                        
+
                         {% else %}
-                        
-                        <a href="{% url 'flames_register' course.slug %}" class="join-course-btn" style="flex: 1; text-align: center; text-decoration: none; background: rgba(255, 96, 38, 0.2); border: 1px solid #ff6026; display: flex; align-items: center; justify-content: center;">
+
+                        <a href="{% url 'flames_register' course.slug %}" class="join-course-btn"
+                            style="flex: 1; text-align: center; text-decoration: none; background: rgba(255, 96, 38, 0.2); border: 1px solid #ff6026; display: flex; align-items: center; justify-content: center;">
                             Register & Enroll
                         </a>
 
@@ -623,6 +694,53 @@
                 </div>
             </div>
         </div>
+
+        <h2 class="course-section-title">Frequently Asked Questions</h2>
+        <div style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 25px;">
+            <div class="faq-accordion">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and LPU?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities do accept the FLAMES 25 course certificate. So
+                            it’s not just a cool flex — it’s officially recognized too! 😉</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Do I need prior experience to join this FLAME?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Not really! 🔥 Anyone can join. But since it’s made mainly for students going into 3rd year,
+                            it’s better if you know a little bit of HTML, CSS, and JavaScript. It’ll make things easier
+                            for you!</p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How does team registration work?</span>
+                        <i class="fas fa-chevron-down faq-icon"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Team registration allows you to register a group of people at a special discounted rate. When
+                            you
+                            select "Team Registration" during enrollment, enter your team member's usernames and done!.
+                            The pricing
+                            is
+                            calculated as (course price * 5) - (499 * 5), giving everyone a substantial discount!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -638,6 +756,25 @@
             duration: 800,
             easing: 'ease-in-out',
             once: false
+        });
+
+        // FAQ accordion functionality
+        const faqQuestions = document.querySelectorAll('.faq-question');
+
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', function () {
+                this.classList.toggle('active');
+
+                // Get the answer element (next sibling)
+                const answer = this.nextElementSibling;
+
+                // Toggle the answer visibility
+                if (this.classList.contains('active')) {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                } else {
+                    answer.style.maxHeight = '0';
+                }
+            });
         });
 
         // Initialize particles.js
@@ -794,11 +931,11 @@
         });
 
         // Handle referral code validation and price display
-        document.getElementById('referral_code').addEventListener('blur', function() {
+        document.getElementById('referral_code').addEventListener('blur', function () {
             const referralCode = this.value.trim();
             const courseId = document.getElementById('course_id').value;
             const registrationMode = document.getElementById('registration_mode').value;
-            
+
             if (referralCode) {
                 // Fetch to validate referral code
                 fetch(`{% url "validate_referral" %}?code=${referralCode}&course_id=${courseId}&registration_mode=${registrationMode}`, {
@@ -807,50 +944,50 @@
                         'X-CSRFToken': '{{ csrf_token }}'
                     }
                 })
-                .then(response => response.json())
-                .then(data => {
-                    const messageElement = document.getElementById('referral_message');
-                    const priceDisplay = document.getElementById('price_display');
-                    const originalPriceElement = document.querySelector('.original-price');
-                    const discountedPriceElement = document.querySelector('.discounted-price');
-                    
-                    if (data.status === 'success') {
-                        messageElement.textContent = 'Valid referral code! Discount applied.';
-                        messageElement.style.color = '#38cb89';
-                        
-                        // Display price information
-                        priceDisplay.style.display = 'block';
-                        originalPriceElement.textContent = `Original Price: ₹${data.original_price}`;
-                        discountedPriceElement.textContent = `Discounted Price: ₹${data.discounted_price}`;
-                    } else {
-                        messageElement.textContent = data.message || 'Invalid referral code.';
-                        messageElement.style.color = '#f24e1e';
-                        priceDisplay.style.display = 'none';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error validating referral code:', error);
-                    document.getElementById('referral_message').textContent = 'Error validating code. Please try again.';
-                    document.getElementById('referral_message').style.color = '#f24e1e';
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        const messageElement = document.getElementById('referral_message');
+                        const priceDisplay = document.getElementById('price_display');
+                        const originalPriceElement = document.querySelector('.original-price');
+                        const discountedPriceElement = document.querySelector('.discounted-price');
+
+                        if (data.status === 'success') {
+                            messageElement.textContent = 'Valid referral code! Discount applied.';
+                            messageElement.style.color = '#38cb89';
+
+                            // Display price information
+                            priceDisplay.style.display = 'block';
+                            originalPriceElement.textContent = `Original Price: ₹${data.original_price}`;
+                            discountedPriceElement.textContent = `Discounted Price: ₹${data.discounted_price}`;
+                        } else {
+                            messageElement.textContent = data.message || 'Invalid referral code.';
+                            messageElement.style.color = '#f24e1e';
+                            priceDisplay.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error validating referral code:', error);
+                        document.getElementById('referral_message').textContent = 'Error validating code. Please try again.';
+                        document.getElementById('referral_message').style.color = '#f24e1e';
+                    });
             } else {
                 document.getElementById('referral_message').textContent = '';
                 document.getElementById('price_display').style.display = 'none';
             }
         });
-        
+
         // Toggle referral field based on registration mode
         function toggleReferralFields() {
             const registrationMode = document.getElementById('registration_mode').value;
             const referralGroup = document.getElementById('referral_code_group');
             const referralInput = document.getElementById('referral_code');
             const referralMessage = document.getElementById('referral_message');
-            
+
             // Reset values
             referralInput.value = '';
             referralMessage.textContent = '';
             document.getElementById('price_display').style.display = 'none';
-            
+
             if (registrationMode === 'TEAM') {
                 referralGroup.querySelector('label').textContent = 'Team Referral Code';
             } else {
