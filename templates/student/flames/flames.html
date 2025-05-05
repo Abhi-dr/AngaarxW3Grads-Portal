@@ -5,7 +5,7 @@
 active
 {% endblock %}
 
-{% block title %}The Angaar Batch | Summers 😎{% endblock %}
+{% block title %}The Angaar Batch | Summers {% endblock %}
 
 {% block extra_css %}
 <style>
@@ -545,6 +545,91 @@ active
         background-color: var(--highlight);
         color: #fff;
     }
+
+    /* FAQ Styles */
+    .faq-accordion {
+        display: flex;
+        flex-direction: column;
+        
+    }
+
+    .faq-item {
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+        border-color: var(--highlight);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .faq-question {
+        padding: 1rem 1.25rem;
+        background-color: #fff;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .faq-question span {
+        font-weight: 600;
+        font-size: 1rem;
+        color: #212529;
+    }
+
+    .faq-icon {
+        color: var(--highlight);
+        font-size: 0.875rem;
+        transition: transform 0.3s ease;
+    }
+
+    .faq-question.active .faq-icon {
+        transform: rotate(180deg);
+    }
+
+    .faq-answer {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .faq-answer p {
+        margin: 0;
+        padding: 1rem 1.25rem;
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    .faq-question.active + .faq-answer {
+        max-height: 300px;
+    }
+
+    /* Dark Mode Styles for FAQ */
+    [data-bs-theme="dark"] .faq-item {
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .faq-question {
+        background-color: var(--card-bg);
+    }
+
+    [data-bs-theme="dark"] .faq-question span {
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .faq-answer {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .faq-answer p {
+        color: var(--text-secondary);
+    }
 </style>
 
 <style>
@@ -616,14 +701,13 @@ active
                     <h4 class="flames-title">{{ registration.course.title }}</h4>
                     <p class="flames-subtitle">{{ registration.course.subtitle }}</p>
                 </div>
-                <span class="flames-status status-{{ registration.status|lower }}">Payment 
+                <span class="flames-status status-{{ registration.status|lower }}">Payment
                     {{ registration.status }}</span>
                 <a href="{% url 'student_view_registration' registration.course.slug %}"
                     class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
 
                 {% if not registration.payment_id and registration.status != 'Completed' %}
-                <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button"
-                    data-registration-id="{{ registration.id }}">
+                <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button" data-registration-id="{{ registration.id }}">
                     Pay Now
                 </a>
                 {% endif %}
@@ -687,7 +771,9 @@ active
                 <div class="price-info">
                     {% if registration.registration_mode == 'TEAM' %}
                     <span class="original-price">₹{{ registration.original_price }} × 5 = ₹
-                        {{ registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price }}</span>
+                        {{
+                        registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price
+                        }}</span>
                     <span class="final-price">₹{{ registration.payable_amount }} (after team discount)</span>
                     <span class="discount-badge">Team Discount: ₹499 × 5 = ₹2,495</span>
                     {% elif registration.original_price != registration.discounted_price %}
@@ -719,7 +805,8 @@ active
 
             {% if not registration.payment_id and registration.status != 'Completed' %}
             <div class="m-2 justify-center text-center">
-                <a id="reg-{{ registration.id }}" class="payment-button btn w-50" data-registration-id="{{ registration.id }}">
+                <a id="reg-{{ registration.id }}" class="payment-button btn w-50"
+                    data-registration-id="{{ registration.id }}">
                     Complete My Registration🔥
                 </a>
             </div>
@@ -804,6 +891,51 @@ active
             {% endfor %}
         </div>
     </div>
+
+    <hr>
+
+
+    <!-- FAQ Section -->
+    <div class="section-header mt-4">
+        <h3 class="section-title">Frequently Asked Questions</h3>
+    </div>
+
+    <div class="mb-4">
+        <div class="faq-accordion">
+            <!-- FAQ Item 1 -->
+            <div class="faq-item mb-3">
+                <div class="faq-question">
+                    <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and LPU?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities do accept the FLAMES 25 course certificate. So it's not just a cool flex — it's officially recognized too! 😉</p>
+                </div>
+            </div>
+
+            <!-- FAQ Item 2 -->
+            <div class="faq-item mb-3">
+                <div class="faq-question">
+                    <span>Do I need prior experience to join FLAMES?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Not really! 🔥 Anyone can join. But since it's made mainly for students going into 3rd year, it's better if you know a little bit of HTML, CSS, and JavaScript. It'll make things easier for you!</p>
+                </div>
+            </div>
+
+            <!-- FAQ Item 3 -->
+            <div class="faq-item mb-3">
+                <div class="faq-question">
+                    <span>How does team registration work?</span>
+                    <i class="fas fa-chevron-down faq-icon"></i>
+                </div>
+                <div class="faq-answer">
+                    <p>Team registration allows you to register a group of people at a special discounted rate. When you select "Team Registration" during enrollment, enter your team member's usernames and done! The pricing is calculated as (course price * 5) - (499 * 5), giving everyone a substantial discount!</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -811,6 +943,25 @@ active
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // FAQ accordion functionality
+        const faqQuestions = document.querySelectorAll('.faq-question');
+
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', function() {
+                this.classList.toggle('active');
+
+                // Get the answer element (next sibling)
+                const answer = this.nextElementSibling;
+
+                // Toggle the answer visibility
+                if (this.classList.contains('active')) {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                } else {
+                    answer.style.maxHeight = '0';
+                }
+            });
+        });
+
         // Find all payment buttons using the class selector
         const payButtons = document.querySelectorAll('.payment-button');
 
