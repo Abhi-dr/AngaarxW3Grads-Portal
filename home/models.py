@@ -232,6 +232,9 @@ class FlamesRegistration(models.Model):
         for registration in cls.objects.all():
             if registration.payable_amount and registration.status == "Completed":
                 total += registration.payable_amount
+                
+        # deduct 2% of the total amount as payment gateway charges
+        total -= (total * 0.02)
         return total
 
 
