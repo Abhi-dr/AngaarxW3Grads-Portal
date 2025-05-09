@@ -1,7 +1,7 @@
 {% extends "administration/base.html" %}
 {% load static %}
 
-{% block title %}Manage FLAMES Courses | Angaar{% endblock %}
+{% block title %}FLAMES '25 | Management{% endblock %}
 
 {% block flames_active %}active{% endblock %}
 
@@ -268,8 +268,8 @@
     }
 
     .course-card .course-icon {
-        background-color: {{course.icon_color}}
-        }
+        background-color: rgba(66, 115, 250, 0.1);
+    }
 </style>
 {% endblock %}
 
@@ -279,6 +279,12 @@
         <div class="card-body d-flex justify-content-between align-items-center">
             <h3 class="heading">FLAMES Courses</h3>
             <div class="export-buttons float-end">
+                <a href="{% url 'admin_flames_emails' %}" class="btn btn-outline-info mx-1">
+                    Send Mail 
+                    <i class="fas fa-paper-plane ms-1"></i>
+                </a>
+                |
+                &nbsp;
                 <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#addCourseModal">
                     <i class="fas fa-plus me-2"></i>Add New Course
                 </button>

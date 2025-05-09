@@ -1,0 +1,396 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}FLAMES | Send Emails{% endblock %}
+
+{% block flames_active %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .email-section {
+        background: rgb(55, 55, 55);
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .email-title {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #e0e0e0;
+        display: flex;
+        align-items: center;
+    }
+
+    .email-title i {
+        margin-right: 10px;
+        color: #FF5722;
+    }
+
+    .email-form .form-control {
+        background-color: #444;
+        border-color: #555;
+        color: #fff;
+    }
+
+    .email-form label {
+        color: #ddd;
+        font-weight: 500;
+    }
+
+    .filter-section {
+        background: rgb(48, 48, 48);
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .filter-title {
+        font-size: 16px;
+        color: #FF5722;
+        margin-bottom: 15px;
+        font-weight: 600;
+    }
+
+    .preview-container {
+        background-color: #f8f8f8;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        overflow: auto;
+        max-height: 500px;
+        display: none;
+    }
+
+    .stats-card {
+        background: rgb(48, 48, 48);
+        border-radius: 8px;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .stats-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        background-color: rgba(255, 87, 34, 0.1);
+        color: #FF5722;
+        font-size: 18px;
+    }
+
+    .stats-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .stats-label {
+        font-size: 13px;
+        color: #aaa;
+    }
+
+    .btn-primary {
+        background: linear-gradient(45deg, #FF5722, #F44336);
+        border: none;
+        box-shadow: 0 4px 10px rgba(255, 87, 34, 0.3);
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(45deg, #F44336, #FF5722);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 87, 34, 0.4);
+    }
+
+    .btn-secondary {
+        background: #444;
+        border: none;
+    }
+
+    .btn-secondary:hover {
+        background: #555;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h3 class="heading"><i class="fas fa-fire text-danger me-2"></i> Send FLAMES Emails</h3>
+            <div>
+                <a href="{% url 'admin_flames_courses' %}" class="btn btn-outline-secondary me-2">
+                    <i class="fas fa-arrow-left me-1"></i> Back to Courses
+                </a>
+                <a href="{% url 'admin_flames_registrations' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-list me-1"></i> View Registrations
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <!-- Statistics Cards -->
+            <div class="mb-4">
+                <h4 class="mb-3">Email Statistics</h4>
+
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="stats-value">{{ total_recipients }}</div>
+                        <div class="stats-label">Total Recipients</div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                        <div class="stats-value">{{ completed_registrations }}</div>
+                        <div class="stats-label">Completed Registrations</div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div>
+                        <div class="stats-value">{{ pending_registrations }}</div>
+                        <div class="stats-label">Pending Registrations</div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div>
+                        <div class="stats-value">{{ solo_registrations }}</div>
+                        <div class="stats-label">Solo Registrations</div>
+                    </div>
+                </div>
+
+                <div class="stats-card">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="stats-value">{{ team_registrations }}</div>
+                        <div class="stats-label">Team Registrations</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <!-- Email Form -->
+            <div class="email-section">
+                <h4 class="email-title"><i class="fas fa-paper-plane"></i> Compose Email</h4>
+
+                <form id="emailForm" class="email-form" method="post" action="{% url 'admin_send_flames_emails' %}">
+                    {% csrf_token %}
+
+                    <div class="filter-section">
+                        <h5 class="filter-title"><i class="fas fa-filter me-2"></i>Filter Recipients</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="course_filter" class="form-label">Course</label>
+                                    <select class="form-select" id="course_filter" name="course_filter">
+                                        <option value="all" selected>All Courses</option>
+                                        {% for course in courses %}
+                                        <option value="{{ course.id }}">{{ course.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="status_filter" class="form-label">Registration Status</label>
+                                    <select class="form-select" id="status_filter" name="status_filter">
+                                        <option value="all" selected>All Statuses</option>
+                                        <option value="PENDING">Pending</option>
+                                        <option value="APPROVED">Approved</option>
+                                        <option value="COMPLETED">Completed</option>
+                                        <option value="REJECTED">Rejected</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="registration_mode" class="form-label">Registration Mode</label>
+                            <select class="form-select" id="registration_mode" name="registration_mode">
+                                <option value="all" selected>All Modes</option>
+                                <option value="SOLO">Solo Registrations</option>
+                                <option value="TEAM">Team Registrations</option>
+                            </select>
+                        </div>
+
+                        <button type="button" id="countRecipientsBtn" class="btn btn-secondary">
+                            <i class="fas fa-calculator me-1"></i> Count Recipients
+                        </button>
+                        <div id="recipientCount" class="mt-2 d-none">
+                            <span class="badge bg-success-subtle p-2">You will be sending to <span
+                                    id="recipientCountNumber">0</span> recipients</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email_subject" class="form-label">Email Subject</label>
+                        <input type="text" class="form-control" id="email_subject" name="email_subject" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="email_content" class="form-label">Email Content (HTML)</label>
+                        <textarea class="form-control" id="email_content" name="email_content" rows="15" required>
+<html>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+    <div style="background: linear-gradient(to bottom, #1b1f23, #000000); padding: 25px; text-align: center; border-radius: 10px;">
+    <img src="../../../demo_static/img/student/flames25.png" alt="The Angaar Batch Logo" style="width: 15%; margin-bottom: 20px;">
+    <h1 style="color: #ff6b35; text-shadow: 0 0 5px rgba(255,107,53,0.3);">🔥BIGGER, BETTER, BOLDER!🔥</h1>
+    <h2 style="color: #ffffff;">Hello {{name}}, Important Update!</h2>
+    <p style="color: #f8f8f8">{{course_info}}</p>
+    <div style="background-color: rgba(255,107,53,0.1); border-left: 4px solid #ff6b35; padding: 15px; margin: 20px 0; text-align: left;">
+        <p style="font-size: 17px; color: #f8f8f8; font-weight: bold;">Your message here</p>
+        <p style="font-size: 16px; color: #dddddd;">Additional details here</p>
+    </div>
+    <a href="https://theangaarbatch.in/accounts/login" style="background-color: #ff6b35; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; font-size: 16px; display: inline-block; margin-top: 25px; font-weight: bold; box-shadow: 0 4px 8px rgba(255, 107, 53, 0.5); transition: all 0.3s;">ACCESS YOUR DASHBOARD</a>
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
+        <p style="font-size: 14px; color: #b0b0b0;">Questions? Reach out to us at theangaarbatch@gmail.com</p>
+        <p style="font-size: 16px; color: #ff6b35; font-weight: bold; margin-top: 15px;">READY TO BURN BRIGHT! 🚀🔥</p>
+    </div>
+    </div>
+</body>
+</html></textarea>
+                        <small class="text-muted">Use {{name}} for student name and {{course_info}} for course
+                            information.</small>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="send_test" name="send_test">
+                        <label class="form-check-label" for="send_test">
+                            Send test email to me first
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" id="previewEmailBtn" class="btn btn-secondary">
+                            <i class="fas fa-eye me-1"></i> Preview Email
+                        </button>
+                        <button type="submit" id="sendEmailBtn" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i> Send Emails
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Preview Container -->
+                <div id="previewContainer" class="preview-container mt-4">
+                    <h5 class="mb-3 text-center">Email Preview</h5>
+                    <div id="previewFrame"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        console.log("entered");
+        
+        // Count Recipients
+        $('#countRecipientsBtn').on('click', function () {
+            console.log("clicked");
+            const courseFilter = $('#course_filter').val();
+            const statusFilter = $('#status_filter').val();
+            const registrationMode = $('#registration_mode').val();
+
+            // Show loading state
+            $(this).html('<i class="fas fa-spinner fa-spin me-1"></i> Counting...');
+
+            // Make AJAX request to count recipients
+            $.ajax({
+                url: '{% url "admin_count_flames_email_recipients" %}',
+                type: 'GET',
+                data: {
+                    course_filter: courseFilter,
+                    status_filter: statusFilter,
+                    registration_mode: registrationMode
+                },
+                success: function (response) {
+                    if (response.success) {
+                        $('#recipientCountNumber').text(response.count);
+                        $('#recipientCount').removeClass('d-none');
+                    } else {
+                        alert('Error counting recipients: ' + response.error);
+                    }
+
+                    // Reset button
+                    $('#countRecipientsBtn').html('<i class="fas fa-calculator me-1"></i> Count Recipients');
+                },
+                error: function () {
+                    alert('An error occurred while counting recipients.');
+
+                    // Reset button
+                    $('#countRecipientsBtn').html('<i class="fas fa-calculator me-1"></i> Count Recipients');
+                }
+            });
+        });
+
+
+        // Preview Email
+        $('#previewEmailBtn').on('click', function () {
+            const previewFrame = $('#previewFrame');
+            const emailContent = $('#email_content').val();
+            const previewContainer = $('#previewContainer');
+
+            // Replace placeholders with sample data
+            let previewContent = 'Sample Student';
+            previewContent = emailContent;
+
+            previewFrame.html(previewContent);
+            previewContainer.show();
+
+            // Scroll to preview
+            $('html, body').animate({
+                scrollTop: previewContainer.offset().top - 100
+            }, 500);
+        });
+
+
+        // Form submission
+        $('#emailForm').on('submit', function () {
+            if (!confirm('Are you sure you want to send these emails? This action cannot be undone.')) {
+                return false;
+            }
+
+            // Show loading state
+            $('#sendEmailBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Sending...');
+
+            return true;
+        });
+    });
+</script>
+{% endblock %}

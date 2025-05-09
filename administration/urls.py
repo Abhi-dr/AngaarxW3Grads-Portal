@@ -203,6 +203,11 @@ urlpatterns += [
     path("flames/update-registration-status/", flames_views.admin_update_registration_status, name="admin_update_registration_status"),
     path("flames/update-registration-notes/", flames_views.admin_update_registration_notes, name="admin_update_registration_notes"),
     path("flames/add-testimonial/", flames_views.admin_add_testimonial, name="admin_add_testimonial"),
+    
+    # Email functionality
+    path("flames/emails/", flames_views.admin_flames_emails, name="admin_flames_emails"),
+    path("flames/emails/count-recipients/", flames_views.admin_count_flames_email_recipients, name="admin_count_flames_email_recipients"),
+    path("flames/emails/send/", flames_views.admin_flames_emails, name="admin_send_flames_emails"),
 ]
 
 urlpatterns += [
