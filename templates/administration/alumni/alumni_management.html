@@ -44,7 +44,7 @@
     <!-- Statistics Cards -->
     <div class="row mb-4">
         <!-- Total Alumni Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-md-4 mb-4">
             <div class="card border-left-primary shadow h-100">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -62,7 +62,7 @@
         </div>
 
         <!-- Total Referral Codes Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-md-4 mb-4">
             <div class="card border-left-success shadow h-100">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -80,7 +80,7 @@
         </div>
 
         <!-- Total Registrations Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
+        <div class="col-md-4 mb-4">
             <div class="card border-left-info shadow h-100">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
@@ -91,30 +91,6 @@
                         </div>
                         <div class="col-auto">
                             <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Conversion Rate Card -->
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100">
-                <div class="card-body">
-                    <div class="row no-gutters align-items-center">
-                        <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                Conversion Rate</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                {% if total_referrals > 0 %}
-                                {{ total_registrations|floatformat:0 }}%
-                                {% else %}
-                                0%
-                                {% endif %}
-                            </div>
-                        </div>
-                        <div class="col-auto">
-                            <i class="fas fa-percentage fa-2x text-gray-300"></i>
                         </div>
                     </div>
                 </div>
@@ -174,9 +150,9 @@
                             <th>Contact</th>
                             <th>College</th>
                             <th>Batch Year</th>
-                            <th>Referrals</th>
+                            
                             <th>Registrations</th>
-                            <th>Created At</th>
+                            
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -365,9 +341,8 @@
                             contact_number: "9876543210",
                             college: "Example College",
                             batch_year: "2020",
-                            total_referrals: 0,
+                            
                             total_registrations: 0,
-                            created_at: "01 Jan 2023"
                         }
                     ];
                     table.clear();
@@ -385,9 +360,9 @@
                 { data: "contact_number" },
                 { data: "college" },
                 { data: "batch_year" },
-                { data: "total_referrals" },
+                
                 { data: "total_registrations" },
-                { data: "created_at" },
+                
                 {
                     data: null,
                     render: function (data, type, row) {
@@ -767,12 +742,9 @@
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <div>
                                 <span class="badge bg-primary me-2">${index + 1}</span>
-                                <strong>${alumni.name}</strong><br>
-                                <small>${alumni.email}</small>
-                            </div>
-                            <div class="text-end">
-                                <span class="badge bg-success">${alumni.total_registrations} Registrations</span><br>
-                                <small>₹${alumni.total_discount.toFixed(2)}</small>
+                                <strong>${alumni.name} <small>(${alumni.email})</small> </strong><br>
+                                <span class="badge bg-success mt-2">${alumni.total_registrations} Registrations</span><br>
+                                 <small>₹${alumni.total_discount.toFixed(2)}</small>
                             </div>
                         </li>
                     `;

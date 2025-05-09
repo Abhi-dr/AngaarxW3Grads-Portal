@@ -4,6 +4,9 @@
 {% block title %}Payment Successful | FLAMES{% endblock %}
 
 {% block extra_css %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <style>
     .success-container {
         min-height: 70vh;
@@ -93,6 +96,21 @@
         box-shadow: 0 7px 20px rgba(255, 87, 34, 0.6);
         color: white;
     }
+
+    .whatsapp-btn {
+        background: linear-gradient(45deg, #25D366, #128C7E);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 1rem;
+    }
     
     .redirect-message {
         margin-top: 1.5rem;
@@ -167,7 +185,7 @@
     <div id="particles-container"></div>
     
     <div class="success-card">
-        <i class="fas fa-check-circle success-icon"></i>
+        <i class="fa fa-check-circle success-icon"></i>
         <h1 class="success-title">Payment Successful!</h1>
         <p class="success-message">Your payment for {{ registration.course.title }} has been successfully processed. You're now officially registered for the course!</p>
         
@@ -180,15 +198,18 @@
         </div>
         
         <a href="{% url 'student_view_registration' registration.course.slug %}" class="action-btn">
-            <i class="fas fa-arrow-right me-2"></i>View Registration
+            <i class="fa fa-arrow-right me-2"></i>View Registration
+        </a>
+        <a href="https://chat.whatsapp.com/CuSZyEww8FjBDItbfNxLJY" class="whatsapp-btn">
+            <i class="fa fa-whatsapp me-2"></i>Join Whatsapp Group
         </a>
         
-        <p class="redirect-message">You will be redirected in <span id="countdown" class="countdown">5</span> seconds...</p>
+        <p class="redirect-message">You will be redirected to Join Whatsapp Group in <span id="countdown" class="countdown">5</span> seconds...</p>
     </div>
 </div>
 {% endblock %}
 
-{% block extra_js %}
+{% block myjs %}
 <script>
     // Create fire particles
     document.addEventListener('DOMContentLoaded', function() {
@@ -209,7 +230,7 @@
             
             if (countdown <= 0) {
                 clearInterval(countdownInterval);
-                window.location.href = "{% url 'student_view_registration' registration.course.slug %}";
+                window.location.href = "https://chat.whatsapp.com/CuSZyEww8FjBDItbfNxLJY";
             }
         }, 1000);
     });

@@ -70,11 +70,11 @@ def payment_success(request, registration_id):
     
     #  Sending mail
                 
-    send_flames_confirmation_mail(
-        request.user.email,
-        request.user.first_name,
-        registration.course.title
-    )
+    # send_flames_confirmation_mail(
+    #     request.user.email,
+    #     request.user.first_name,
+    #     registration.course.title
+    # )
     
     return render(request, 'student/flames/payment_success.html', context)
 
