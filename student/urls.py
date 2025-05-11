@@ -30,6 +30,9 @@ urlpatterns = [
     path("new_message", views.new_message, name="new_message"),
     path("feedback", views.feedback, name="feedback"),
     
+    # ======================== REFERRALS WORK ========================
+    path("my-referrals/", views.my_referrals, name="my_referrals"),
+    
 ]
 
 # ========================================= FLAMES WORK =========================================
