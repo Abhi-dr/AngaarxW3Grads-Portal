@@ -10,9 +10,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='flamesregistration',
-            name='payable_amount',
-            field=models.IntegerField(blank=True, null=True),
-        ),
+        
     ]

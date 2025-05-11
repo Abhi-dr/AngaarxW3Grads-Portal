@@ -89,6 +89,8 @@ class FlamesCourse(models.Model):
     icon_color = models.CharField(max_length=200, help_text="Color for the course card")
     button_color = models.CharField(max_length=200, help_text="Color for the course button")
     
+    whatsapp_group_link = models.URLField(blank=True, null=True)
+    
     def __str__(self):
         return self.title
     

@@ -200,7 +200,7 @@
         <a href="{% url 'student_view_registration' registration.course.slug %}" class="action-btn">
             <i class="fa fa-arrow-right me-2"></i>View Registration
         </a>
-        <a href="https://chat.whatsapp.com/CuSZyEww8FjBDItbfNxLJY" class="whatsapp-btn">
+        <a href="{{ registration.course.whatsapp_group_link }}" class="whatsapp-btn">
             <i class="fa fa-whatsapp me-2"></i>Join Whatsapp Group
         </a>
         
@@ -230,7 +230,8 @@
             
             if (countdown <= 0) {
                 clearInterval(countdownInterval);
-                window.location.href = "https://chat.whatsapp.com/CuSZyEww8FjBDItbfNxLJY";
+                const url = "{{ registration.course.whatsapp_group_link }}";
+                window.location.href = url;
             }
         }, 1000);
     });
