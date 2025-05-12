@@ -208,6 +208,9 @@ urlpatterns += [
     path("flames/emails/", flames_views.admin_flames_emails, name="admin_flames_emails"),
     path("flames/emails/count-recipients/", flames_views.admin_count_flames_email_recipients, name="admin_count_flames_email_recipients"),
     path("flames/emails/send/", flames_views.admin_flames_emails, name="admin_send_flames_emails"),
+    
+    
+    path("export-to-excel", flames_views.export_flames_registrations_to_excel, name="export_flames_registrations_to_excel"),
 ]
 
 urlpatterns += [

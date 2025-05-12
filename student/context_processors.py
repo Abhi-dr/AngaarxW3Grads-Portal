@@ -26,18 +26,14 @@ def user_context_processor(request):
                 user_type = 'administrator'
                 user_object = request.user.administrator
                 
-            alumni = Alumni.objects.filter(email=user_object.email).first()
-            if alumni:
-                referral_code = ReferralCode.objects.filter(alumni=alumni).first()
-                parameters['alumni'] = alumni
-                parameters['referral_code'] = referral_code
+            
 
         except (Student.DoesNotExist, Instructor.DoesNotExist, Administrator.DoesNotExist):
             pass
         
-    parameters['user_type'] =  user_type,
+    parameters['user_type'] =  user_type
     parameters['user'] = user_object
-    
+        
     return parameters
 
 def streak_context(request):
