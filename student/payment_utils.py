@@ -167,7 +167,7 @@ class PaymentGateway:
                 # Update payment details and set status to Completed
                 registration.payment_id = payment_id
                 registration.status = 'Completed'  # Set to Completed after successful payment
-                registration.save(update_fields=['payment_id', 'status'])
+                registration.save()
                 
                 print(f"Payment {payment_id} verified for registration {registration_id}")
                 return True

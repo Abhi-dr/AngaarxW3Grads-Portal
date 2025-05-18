@@ -42,42 +42,42 @@ def login(request):
     next_url = request.GET.get('next', '')
 
     if request.method == 'POST':
-        username = request.POST.get('username').strip().lower()
+        input_id = request.POST.get('username').strip().lower()
         password = request.POST.get('password')
 
-        if Student.objects.filter(username=username).exists():
-            user = auth.authenticate(username=username, password=password)
-
-            if user is not None:
+        # Check for Student
+        student = Student.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
+        if student:
+            user = auth.authenticate(username=student.username, password=password)
+            if user:
                 auth.login(request, user)
                 return redirect(next_url if next_url else 'student')
-
             messages.error(request, "Invalid Password")
             return redirect("login")
 
-        elif Instructor.objects.filter(username=username).exists():
-            user = auth.authenticate(username=username, password=password)
-
-            if user is not None:
+        # Check for Instructor
+        instructor = Instructor.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
+        if instructor:
+            user = auth.authenticate(username=instructor.username, password=password)
+            if user:
                 auth.login(request, user)
                 return redirect(next_url if next_url else 'instructor')
-
             messages.error(request, "Invalid Password")
             return redirect("login")
 
-        elif Administrator.objects.filter(username=username).exists():
-            user = auth.authenticate(username=username, password=password)
-
-            if user is not None:
+        # Check for Administrator
+        administrator = Administrator.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
+        if administrator:
+            user = auth.authenticate(username=administrator.username, password=password)
+            if user:
                 auth.login(request, user)
                 return redirect(next_url if next_url else 'administration')
-
             messages.error(request, "Invalid Password")
             return redirect("login")
 
-        else:
-            messages.error(request, "Invalid Username or Password")
-            return redirect("login")
+        # No matching user found
+        messages.error(request, "Invalid Username/Email or Password")
+        return redirect("login")
 
     return render(request, 'accounts/login.html', {'next': next_url})
 
