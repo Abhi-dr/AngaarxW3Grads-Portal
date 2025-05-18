@@ -10,7 +10,8 @@
     <link rel="icon" type="image/png" href="{% static 'img/home/angaar_logo-circle.png' %}">
 
     <meta property="og:title" content="The Angaar Batch🔥">
-    <meta property="og:description" content="Agr Angaar Hai Tere Houslo Me, To Bas Dekhke Mat Ja... Seekh... Or Lga de... ANGAAR🔥">
+    <meta property="og:description"
+        content="Agr Angaar Hai Tere Houslo Me, To Bas Dekhke Mat Ja... Seekh... Or Lga de... ANGAAR🔥">
     <meta property="og:image" content="https://theangaarbatch.in/static/img/home/angaari_logo.png">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://theangaarbatch.in">
@@ -103,6 +104,24 @@
             }
         }
     </style>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Bebas+Neue&family=Poppins:wght@600&display=swap"
+        rel="stylesheet">
+
+    <style>
+        #navbar-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 23px;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            #navbar-title {
+                font-size: 17px;
+            }
+        }
+    </style>
 
 </head>
 
@@ -112,9 +131,12 @@
 
     <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container-fluid">
-            <a class="navbar-brand text-white" href="/">
+            <a class="navbar-brand text-white 
+            d-flex align-items-center
+            " href="/" id="navbar-title">
                 <!-- <img src="demo_static/img/home/angaar_logo-2.png" alt="The Angaar Batch" width="50" height="40" class="d-inline-block align-text-top"> -->
-                The Angaar Batch🔥
+                The Angaar Batch&nbsp;
+                <i class="fas fa-fire" style="font-size: 30px;color: #ff6026;"></i>
             </a>
 
             <button class="navbar-toggler menu" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -151,7 +173,8 @@
                         <a class="nav-link article-link" href="{% url 'articles' %}">Job Articles</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" style="text-decoration: underline; color: rgb(253, 135, 0);" href="{% url 'flames' %}">Summer Training🔥</a>
+                        <a class="nav-link" style="text-decoration: underline; color: rgb(253, 135, 0);"
+                            href="{% url 'flames' %}">Summer Training🔥</a>
                     </li>
                     <!--  <li class="nav-item">
                         <a class="nav-link" href="#">Contact</a>
