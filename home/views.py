@@ -192,3 +192,8 @@ def fetch_top_performers(request):
                 })
     
     return JsonResponse(data, safe=False)
+
+# ======================================= CERTIFICATE ================================
+
+def verify_certificate(request):
+    return render(request, 'home/verify_my_certificate.html')

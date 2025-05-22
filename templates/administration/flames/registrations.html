@@ -169,9 +169,41 @@
         color: #ffffff;
     }
 
+    /* Base styles for length dropdown */
     .dataTables_wrapper .dataTables_length select {
-        min-width: 60px;
+        padding: 6px 10px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        color: #333;
+        transition: all 0.3s ease;
+        outline: none;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
     }
+
+    /* On focus */
+    .dataTables_wrapper .dataTables_length select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 4px rgba(0, 123, 255, 0.4);
+    }
+
+    /* Dark mode styles */
+    @media (prefers-color-scheme: dark) {
+        .dataTables_wrapper .dataTables_length select {
+            background-color: #1e1e1e;
+            color: #f1f1f1;
+            border: 1px solid #444;
+            box-shadow: 0 1px 2px rgba(255, 255, 255, 0.05);
+        }
+
+        .dataTables_wrapper .dataTables_length select:focus {
+            border-color: #66b2ff;
+            box-shadow: 0 0 4px rgba(102, 178, 255, 0.4);
+        }
+    }
+
 
     @media (max-width: 768px) {
         .course-stats {
@@ -354,6 +386,41 @@
     .form-check-input:checked {
         background-color: #4273FA;
         border-color: #4273FA;
+    }
+
+    /* Base styles for search box */
+    div.dataTables_wrapper div.dataTables_filter input {
+        padding: 8px 12px;
+        font-size: 14px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        background-color: #fff;
+        color: #333;
+        transition: all 0.3s ease;
+        outline: none;
+        width: 200px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    /* On focus */
+    div.dataTables_wrapper div.dataTables_filter input:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+
+    /* Dark mode support using prefers-color-scheme */
+    @media (prefers-color-scheme: dark) {
+        div.dataTables_wrapper div.dataTables_filter input {
+            background-color: #1e1e1e;
+            color: #f1f1f1;
+            border: 1px solid #444;
+            box-shadow: 0 1px 3px rgba(255, 255, 255, 0.1);
+        }
+
+        div.dataTables_wrapper div.dataTables_filter input:focus {
+            border-color: #66b2ff;
+            box-shadow: 0 0 5px rgba(102, 178, 255, 0.5);
+        }
     }
 </style>
 {% endblock %}
@@ -612,7 +679,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Pricing Details -->
                     <div class="row detail-row">
                         <div class="col-md-12">
@@ -634,7 +701,7 @@
                                     </tr>
                                 </table>
                             </div>
-                            
+
                             <!-- For Team Registration -->
                             <div id="team-pricing-details" style="display: none;">
                                 <table class="table table-sm table-borderless mb-0">
@@ -865,12 +932,12 @@
             table.search('').columns().search('');
             table.ajax.reload();
         });
-        
+
         // Add event listeners to handle proper search integration
-        $('.dataTables_filter input').on('keyup', function() {
+        $('.dataTables_filter input').on('keyup', function () {
             // Add a slight delay to prevent excessive requests
             clearTimeout($.data(this, 'timer'));
-            var timer = setTimeout(function() {
+            var timer = setTimeout(function () {
                 console.log("Search triggered");
                 table.ajax.reload();
             }, 500);
@@ -907,36 +974,36 @@
                             $('#reg-payment').text(reg.payment_id || 'N/A');
                             $('#reg-message').text(reg.message || 'No message');
                             $('#reg-notes').val(reg.admin_notes || '');
-                            
+
                             // Display registration mode
                             $('#reg-mode').text(reg.registration_mode === 'TEAM' ? 'Team Registration' : 'Solo Registration');
 
                             // Handle team information and pricing display
                             const isTeam = reg.registration_mode === 'TEAM';
-                            
+
                             // Format currency function
                             const formatCurrency = (amount) => {
                                 return '₹' + parseFloat(amount).toLocaleString('en-IN');
                             };
-                            
+
                             // Show/hide pricing details based on registration mode
                             if (isTeam) {
                                 $('#solo-pricing-details').hide();
                                 $('#team-pricing-details').show();
-                                
+
                                 // Calculate team pricing details
                                 const originalPrice = parseFloat(reg.payment.original_price);
                                 const payableAmount = parseFloat(reg.payable_amount || reg.payment.actual_amount_to_pay);
                                 const teamSize = 5; // Fixed team size
                                 const subtotal = originalPrice * teamSize;
                                 const teamDiscount = 499 * teamSize; // Fixed discount of 499 per member
-                                
+
                                 // Display team pricing breakdown
                                 $('#team-price-per-member').text(formatCurrency(originalPrice));
                                 $('#team-subtotal').text(formatCurrency(subtotal));
                                 $('#team-discount').text(formatCurrency(teamDiscount));
                                 $('#team-payable-amount').text(formatCurrency(payableAmount));
-                                
+
                                 // Handle referral discount if applicable
                                 if (reg.referral && reg.referral.is_referral) {
                                     const referralDiscount = parseFloat(reg.referral.actual_discount_amount);
@@ -945,7 +1012,7 @@
                                 } else {
                                     $('#team-referral-row').hide();
                                 }
-                                
+
                                 // Show team member information
                                 $('#team-info-section').show();
                                 $('#modal-team-name').text(reg.team.name || 'N/A');
@@ -972,13 +1039,13 @@
                                 $('#team-pricing-details').hide();
                                 $('#solo-pricing-details').show();
                                 $('#team-info-section').hide();
-                                
+
                                 const originalPrice = parseFloat(reg.payment.original_price);
                                 const payableAmount = parseFloat(reg.payable_amount || reg.payment.actual_amount_to_pay);
-                                
+
                                 $('#solo-original-price').text(formatCurrency(originalPrice));
                                 $('#solo-payable-amount').text(formatCurrency(payableAmount));
-                                
+
                                 // Handle referral discount for solo registration
                                 if (reg.referral && reg.referral.is_referral) {
                                     const referralDiscount = parseFloat(reg.referral.discount_amount);
