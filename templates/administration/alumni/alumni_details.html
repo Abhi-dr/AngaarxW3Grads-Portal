@@ -1,13 +1,12 @@
 {% extends 'administration/base.html' %}
 {% load static %}
 
-{% block title %}Alumni Details{% endblock %}
+{% block title %}Alumni | {{ alumni.name }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-
 
 <style>
     .card {
@@ -134,9 +133,10 @@
                                 <div class="col mr-2">
                                     <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
                                         Total Registrations</div>
-                                        <span class="h5 mb-0 font-weight-bold text-success">{{ total_completed_registrations }}</span>
-                                        |
-                                        <span class="h5 mb-0 font-weight-bold">{{ total_registrations }}</span>
+                                    <span class="h5 mb-0 font-weight-bold text-success">
+                                        {{ total_completed_registrations }}</span>
+                                    |
+                                    <span class="h5 mb-0 font-weight-bold">{{ total_registrations }}</span>
                                 </div>
                                 <div class="col-auto">
                                     <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
@@ -208,7 +208,7 @@
                             <td>{{ code.registrations.count }}</td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <button class="btn btn-sm btn-info edit-referral" data-id="{{ code.id }}" 
+                                    <button class="btn btn-sm btn-info edit-referral-btn" data-id="{{ code.id }}"
                                         data-code="{{ code.code }}" data-amount="{{ code.discount_amount }}">
                                         <i class="fas fa-edit"></i> Edit
                                     </button>
@@ -405,21 +405,52 @@
     </div>
 </div>
 
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
-
 <script>
     $(document).ready(function () {
+        // Configure Toastr
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
         // Initialize DataTables
         $('#referralCodesTable').DataTable({
-            order: [[0, 'desc']]
+            order: [[0, 'desc']],
+            responsive: true,
+            pageLength: 10,
+            language: {
+                emptyTable: "No referral codes found"
+            }
         });
 
         $('#registrationsTable').DataTable({
-            order: [[0, 'desc']]
+            order: [[0, 'desc']],
+            responsive: true,
+            pageLength: 10,
+            language: {
+                emptyTable: "No registrations found"
+            }
         });
 
         // Edit Alumni Button Click
@@ -431,6 +462,10 @@
         // Update Alumni Form Submission
         $('#updateAlumniBtn').on('click', function () {
             const form = $('#editAlumniForm');
+            const submitBtn = $(this);
+
+            // Disable button and show loading
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
 
             $.ajax({
                 url: "{% url 'update_alumni' alumni.id %}",
@@ -438,21 +473,23 @@
                 data: form.serialize(),
                 success: function (response) {
                     if (response.status === 'success') {
-                        // Show success message
-                        alert('Alumni updated successfully!');
-
-                        // Close modal and reload page
+                        toastr.success('Alumni updated successfully!');
                         const alumniModal = bootstrap.Modal.getInstance(document.getElementById('editAlumniModal'));
                         if (alumniModal) {
                             alumniModal.hide();
                         }
-                        location.reload();
+                        setTimeout(() => location.reload(), 1500);
                     } else {
-                        alert('Error: ' + response.message);
+                        toastr.error('Error: ' + response.message);
                     }
                 },
-                error: function () {
-                    alert('An error occurred while updating the alumni.');
+                error: function (xhr, status, error) {
+                    console.error('Error updating alumni:', error);
+                    toastr.error('An error occurred while updating the alumni.');
+                },
+                complete: function () {
+                    // Re-enable button
+                    submitBtn.prop('disabled', false).html('Update');
                 }
             });
         });
@@ -460,6 +497,12 @@
         // Generate Referral Form Submission
         $('#generateReferralBtn').on('click', function () {
             const form = $('#generateReferralForm');
+            const submitBtn = $(this);
+
+            console.log("Generate referral button clicked");
+
+            // Disable button and show loading
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Generating...');
 
             $.ajax({
                 url: "{% url 'generate_referral_code' alumni.id %}",
@@ -467,78 +510,102 @@
                 data: form.serialize(),
                 success: function (response) {
                     if (response.status === 'success') {
-                        // Show success message
-                        alert('Referral code generated successfully: ' + response.referral_code.code);
-
-                        // Close modal and reload page
+                        toastr.success('Referral code generated successfully: ' + response.referral_code.code);
                         const genModal = bootstrap.Modal.getInstance(document.getElementById('generateReferralModal'));
                         if (genModal) {
                             genModal.hide();
                         }
-                        location.reload();
+                        setTimeout(() => location.reload(), 1500);
                     } else {
-                        alert('Error: ' + response.message);
+                        toastr.error('Error: ' + response.message);
                     }
                 },
-                error: function () {
-                    alert('An error occurred while generating the referral code.');
+                error: function (xhr, status, error) {
+                    console.error('Error generating referral code:', error);
+                    toastr.error('An error occurred while generating the referral code.');
+                },
+                complete: function () {
+                    // Re-enable button
+                    submitBtn.prop('disabled', false).html('Generate');
                 }
             });
         });
 
-        // Edit Referral Code
-        $('.edit-referral').on('click', function () {
+        // Edit Referral Code - Use event delegation and class selector
+        $(document).on('click', '.edit-referral-btn', function () {
+            console.log("Edit referral button clicked");
             const id = $(this).data('id');
             const code = $(this).data('code');
             const amount = $(this).data('amount');
-            
+
+            console.log('Edit data:', { id, code, amount });
+
             // Populate the edit form
             $('#edit_referral_id').val(id);
             $('#edit_referral_code').val(code);
             $('#edit_discount_amount').val(amount);
-            
+
             // Show the modal using Bootstrap 5 API
             const editModal = new bootstrap.Modal(document.getElementById('editReferralModal'));
             editModal.show();
         });
-        
+
         // Update Referral Code
         $('#updateReferralBtn').on('click', function () {
             const form = $('#editReferralForm');
             const codeId = $('#edit_referral_id').val();
-            
+            const submitBtn = $(this);
+
+            if (!codeId) {
+                toastr.error('No referral code selected for update.');
+                return;
+            }
+
+            // Disable button and show loading
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+
             $.ajax({
                 url: "{% url 'update_referral_code' 0 %}".replace('0', codeId),
                 method: 'POST',
                 data: form.serialize(),
                 success: function (response) {
                     if (response.status === 'success') {
-                        // Show success message
-                        alert('Referral code updated successfully!');
-                        
-                        // Close modal and reload page
+                        toastr.success('Referral code updated successfully!');
                         const editModal = bootstrap.Modal.getInstance(document.getElementById('editReferralModal'));
                         if (editModal) {
                             editModal.hide();
                         }
-                        location.reload();
+                        setTimeout(() => location.reload(), 1500);
                     } else {
-                        alert('Error: ' + response.message);
+                        toastr.error('Error: ' + response.message);
                     }
                 },
-                error: function () {
-                    alert('An error occurred while updating the referral code.');
+                error: function (xhr, status, error) {
+                    console.error('Error updating referral code:', error);
+                    toastr.error('An error occurred while updating the referral code.');
+                },
+                complete: function () {
+                    // Re-enable button
+                    submitBtn.prop('disabled', false).html('Update');
                 }
             });
         });
 
-        // Toggle Referral Code Status
-        $('.toggle-status').on('click', function () {
+        // Toggle Referral Code Status - Use event delegation
+        $(document).on('click', '.toggle-status', function () {
             const id = $(this).data('id');
             const currentStatus = $(this).data('status');
             const statusText = currentStatus ? 'deactivate' : 'activate';
+            const button = $(this);
+
+            console.log('Toggle status clicked:', { id, currentStatus, statusText });
 
             if (confirm(`Are you sure you want to ${statusText} this referral code?`)) {
+                // Disable button and show loading
+                button.prop('disabled', true);
+                const originalHtml = button.html();
+                button.html('<i class="fas fa-spinner fa-spin"></i>');
+
                 $.ajax({
                     url: "{% url 'toggle_referral_code_status' 0 %}".replace('0', id),
                     method: 'POST',
@@ -547,20 +614,36 @@
                     },
                     success: function (response) {
                         if (response.status === 'success') {
-                            // Show success message
-                            alert('Referral code ' + (response.is_active ? 'activated' : 'deactivated') + ' successfully!');
-
-                            // Reload page
-                            location.reload();
+                            const actionText = response.is_active ? 'activated' : 'deactivated';
+                            toastr.success(`Referral code ${actionText} successfully!`);
+                            setTimeout(() => location.reload(), 1500);
                         } else {
-                            alert('Error: ' + response.message);
+                            toastr.error('Error: ' + response.message);
+                            button.prop('disabled', false).html(originalHtml);
                         }
                     },
-                    error: function () {
-                        alert('An error occurred while updating the referral code status.');
+                    error: function (xhr, status, error) {
+                        console.error('Error toggling referral code status:', error);
+                        toastr.error('An error occurred while updating the referral code status.');
+                        button.prop('disabled', false).html(originalHtml);
                     }
                 });
             }
+        });
+
+        // Handle modal close events to reset forms
+        $('#editAlumniModal').on('hidden.bs.modal', function () {
+            $('#editAlumniForm')[0].reset();
+        });
+
+        $('#editReferralModal').on('hidden.bs.modal', function () {
+            $('#editReferralForm')[0].reset();
+            $('#edit_referral_id').val('');
+        });
+
+        $('#generateReferralModal').on('hidden.bs.modal', function () {
+            $('#generateReferralForm')[0].reset();
+            $('#discount_amount').val('500'); // Reset to default value
         });
     });
 </script>
