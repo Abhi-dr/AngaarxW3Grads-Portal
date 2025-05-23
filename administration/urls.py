@@ -202,6 +202,7 @@ urlpatterns += [
     path("flames/registration-details/", flames_views.admin_registration_details, name="admin_registration_details"),
     path("flames/update-registration-status/", flames_views.admin_update_registration_status, name="admin_update_registration_status"),
     path("flames/update-registration-notes/", flames_views.admin_update_registration_notes, name="admin_update_registration_notes"),
+    path("flames/delete-registration/", flames_views.admin_delete_registration, name="admin_delete_registration"),
     path("flames/add-testimonial/", flames_views.admin_add_testimonial, name="admin_add_testimonial"),
     
     # Email functionality

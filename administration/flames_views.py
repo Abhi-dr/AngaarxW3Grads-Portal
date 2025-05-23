@@ -726,6 +726,39 @@ def send_flames_email(to, name, subject, html_content):
     
     print(f"FLAMES EMAIL SENT! to {to_email}")
 
+
+@login_required
+@require_POST
+def admin_delete_registration(request):
+    """
+    Delete a registration record
+    """
+    # Check if user has permission (only staff/admin should be able to delete)
+    if not request.user.is_staff:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'You do not have permission to delete registrations.'
+        }, status=403)
+    
+    registration_id = request.POST.get('id')
+    
+    try:
+        registration = get_object_or_404(FlamesRegistration, id=registration_id)
+       
+        # Delete the registration
+        registration.delete()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Registration deleted successfully.'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error deleting registration: {str(e)}'
+        }, status=500)
+
+
 # ============================================================
 
 def export_flames_registrations_to_excel(request):

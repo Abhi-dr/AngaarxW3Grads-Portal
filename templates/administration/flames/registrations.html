@@ -771,9 +771,12 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveStatusBtn">Update Status</button>
-                <button type="button" class="btn btn-success" id="saveNotesBtn">Save Notes</button>
+                <button type="button" class="btn btn-danger" id="deleteRegistrationBtn">Delete Registration</button>
+                <div class="ms-auto">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveStatusBtn">Update Status</button>
+                    <button type="button" class="btn btn-success" id="saveNotesBtn">Save Notes</button>
+                </div>
             </div>
         </div>
     </div>
@@ -886,7 +889,12 @@
                 {
                     data: "id",
                     render: function (data) {
-                        return `<button class="btn btn-sm btn-primary view-details" data-id="${data}"><i class="fas fa-eye"></i></button>`;
+                        return `
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-primary view-details" data-id="${data}" title="View Details"><i class="fas fa-eye"></i></button>
+                                <button class="btn btn-sm btn-danger delete-registration" data-id="${data}" title="Delete Registration"><i class="fas fa-trash"></i></button>
+                            </div>
+                        `;
                     },
                     orderable: false
                 }
@@ -1082,6 +1090,19 @@
                 });
             });
 
+            // Handle delete registration button in the table
+            $('#registrationsTable').on('click', '.delete-registration', function (e) {
+                e.stopPropagation(); // Prevent row click event from triggering
+                const regId = $(this).data('id');
+                confirmDeleteRegistration(regId);
+            });
+            
+            // Handle delete registration button in the modal
+            $('#deleteRegistrationBtn').on('click', function () {
+                const regId = $('#saveStatusBtn').data('id');
+                confirmDeleteRegistration(regId);
+            });
+
             // Quick approve/reject handlers for table buttons
             $('#registrationsTable').on('click', '.approve-reg', function () {
                 var regId = $(this).data('id');
@@ -1179,6 +1200,36 @@
                 }
             });
         });
+
+        // Function to confirm and delete a registration
+        function confirmDeleteRegistration(regId) {
+            if (confirm('Are you sure you want to delete this registration? This action cannot be undone.')) {
+                $.ajax({
+                    url: '{% url "admin_delete_registration" %}',
+                    type: 'POST',
+                    data: {
+                        'id': regId,
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            // Close the modal if it's open
+                            $('#registrationDetailsModal').modal('hide');
+                            
+                            // Show success message and reload the table
+                            alert('Registration deleted successfully');
+                            table.ajax.reload();
+                        } else {
+                            alert('Error: ' + response.message);
+                        }
+                    },
+                    error: function (xhr) {
+                        console.error('Delete error:', xhr.responseText);
+                        alert('An error occurred while deleting the registration. Check console for details.');
+                    }
+                });
+            }
+        }
 
         // Function to update admin notes
         function updateAdminNotes(regId, notes) {
