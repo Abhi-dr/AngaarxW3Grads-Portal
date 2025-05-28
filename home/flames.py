@@ -281,10 +281,22 @@ def register_flames(request, slug):
             # Redirect to the summer training page
             return redirect('student_flames')
     
+    colleges = [
+        "GLA University, Mathura",
+        "Lovely Professional University, Jalandhar",
+        "Shiv Nadar University, Greater Noida",
+        "Delhi Technological University, Delhi",
+        "Acharya Narendra Dev College, Delhi",
+        "LDRP Institute of Technology and Research, Gandhinagar",
+        "BSA College of Engineering, Mathura",
+        "Other"
+    ]
+    
     # GET request - show registration form
     return render(request, "home/flames_register.html", {
         'course': course,
-        'user': request.user if request.user.is_authenticated else None
+        'user': request.user if request.user.is_authenticated else None,
+        'colleges': colleges,
     })
 
 

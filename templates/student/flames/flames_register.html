@@ -75,6 +75,14 @@ active
         margin-bottom: 2.5rem;
     }
 
+    select > option {
+        color: #212529;
+    }
+
+    [data-bs-theme="dark"] select > option {
+        color: #f8f9fa;
+    }
+
     .mode-option {
         flex: 1;
         padding: 1.75rem 1.25rem;
@@ -701,7 +709,8 @@ active
                                 <label for="referral_code">Referral Code</label>
                             </div>
                             <button type="button" id="verify-referral"
-                                class="custom-btn btn-outline-primary">Verify</button>
+                                class="custom-btn btn-outline-primary">
+                                Verify</button>
                         </div>
 
                         <div id="referral-message" class="referral-message" style="display: none;"></div>
