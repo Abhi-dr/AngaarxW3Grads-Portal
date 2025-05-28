@@ -14,9 +14,9 @@ Administration -> Students
                 <span class="fw-semibold">Angaari Public🔥 &nbsp; <span id="total-count"></span> </span>
             </h3>
             <span id="students-birthday">
-
             </span>
         </div>
+
     </div>
 
     {% for message in messages %}
@@ -42,6 +42,52 @@ Administration -> Students
             </nav>
         </div>
     </div>
+
+    <!-- ========================= INACTIVE SUDENTS =============================== -->
+    
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <div class="table-responsive">
+
+                <h5 class="card-title fw-semibold mb-0">Inactive Students
+                    <span class="fs-6">({{ inactive_students|length }})</span>
+                </h5>
+               <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in inactive_students %}
+                        <tr>
+                            <td>{{ student.id }}</td>
+                            <td>{{ student.first_name }} {{ student.last_name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>
+                                <a href="{{ student.unblock_url }}" class="btn btn-success btn-sm">Unblock</a>
+                                <a href="/administration/view_student_profile/{{ student.id }}"
+                                    class="btn btn-secondary btn-sm">View Profile</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center">No inactive students found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+            
+        </div>
+    </div>
+
+
+
 </div>
 
 <!-- Change Password Modal -->
@@ -184,7 +230,7 @@ Administration -> Students
                         </p>
                     </td>
                     <td class="border-bottom-0">
-                        <h6 class="fw-semibold mb-0">${student.college} </h6> </td>
+                        <h6 class="fw-semibold text-wrap mb-0">${student.college} </h6> </td>
                     <td class="border-bottom-0">
                         <a href="${student.linkedin_id}" target="_blank" class="btn btn-outline-info">
                             <i class="ti ti-brand-linkedin"></i>

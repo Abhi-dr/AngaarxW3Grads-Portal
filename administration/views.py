@@ -186,7 +186,16 @@ def fetch_all_students(request):
     return JsonResponse(data)
 
 def all_students(request):
-    return render(request, "administration/all_students.html")
+    
+    # get the student count who are inactive from last 3 months
+    three_months_ago = timezone.now() - timedelta(days=90)
+    inactive_students = Student.objects.filter(last_login__lt=three_months_ago, is_active=True)
+    
+    parameters = {
+        "inactive_students": inactive_students,
+    }
+    
+    return render(request, "administration/all_students.html", parameters)
 
 
 # ===================================== CHANGE STUDENT PASSWORD API =======================
