@@ -475,3 +475,109 @@ def my_referrals(request):
     }
     
     return render(request, 'student/my_referrals.html', context)
+
+# =======================================================================================================
+
+
+# =========================================== ASSIGNMENTS =============================================
+
+@login_required(login_url="login")
+def assignments(request):
+    
+    assignments= Assignment.objects.filter(course__in=request.user.student.courses.all())
+    student = request.user.student
+    submissions = AssignmentSubmission.objects.filter(student=student)
+    
+    submitted_assignments = submissions.values_list('assignment_id', flat=True)
+    current_time = timezone.now()
+
+    
+    parameters = {
+        "assignments": assignments,
+        "student": student,
+        "submitted_assignments": submitted_assignments,
+        "current_time": current_time,
+        "submissions": submissions
+    }
+    
+    return render(request, "student/assignments.html", parameters)
+
+
+# =========================================== SUBMIT ASSIGNMENT =============================================
+
+@login_required(login_url="login")
+def submit_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    student = request.user.student
+    
+    if AssignmentSubmission.objects.filter(assignment=assignment, student=student).exists() or assignment.due_date < timezone.now():
+        messages.error(request, "Beta jab tumne URL dekha bhi nhi tha tbse isse khel rhe hain hum🔥")
+        return redirect('assignments')
+
+    if request.method == 'POST':
+        submission = AssignmentSubmission(
+            assignment=assignment,
+            student=student,
+        )
+        
+        if assignment.assignment_type == 'Coding':
+            submission.submission_code = request.POST.get('submission_code')
+        elif assignment.assignment_type == 'Text':
+            submission.submission_text = request.POST.get('submission_text')
+        elif assignment.assignment_type == 'File':
+            submission.submission_file = request.FILES.get('submission_file')
+        elif assignment.assignment_type == 'Image':
+            submission.submission_image = request.FILES.get('submission_image')
+        elif assignment.assignment_type == 'Link':
+            submission.submission_link = request.POST.get('submission_link')
+        
+        submission.extra_info = request.POST.get('extra_info')
+        
+        try:
+            submission.save()
+            messages.success(request, "Assignment submitted successfully.")
+            return redirect('assignments')
+        except ValueError as e:
+            messages.error(request, str(e))
+    
+    
+    parameters = {
+        "assignment": assignment,
+        'student': student
+    }
+    
+    return render(request, "student/submit_assignment.html", parameters)
+
+
+# =========================================== VIEW SUBMISSION =============================================
+
+@login_required(login_url="login")
+def view_submission(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    submission = get_object_or_404(AssignmentSubmission, assignment=assignment, student=request.user)
+    
+    parameters = {
+        'assignment': assignment,
+        'submission': submission
+    }
+    
+    return render(request, 'student/view_submission.html', parameters)
+
+# =========================================== DELETE SUBMISSION =============================================
+
+@login_required(login_url="login")
+def delete_submission(request, submission_id):
+    
+    # check if the deadline is passed
+    
+    if AssignmentSubmission.objects.get(id=submission_id).assignment.due_date < timezone.now():
+        messages.error(request, "You cannot delete the submission after the deadline.")
+        return redirect('assignments')
+    
+    submission = get_object_or_404(AssignmentSubmission, id=submission_id)
+    submission.delete()
+    
+    messages.success(request, "Submission deleted successfully.")
+    
+    return redirect('assignments')
+

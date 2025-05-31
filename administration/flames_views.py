@@ -843,3 +843,6 @@ def export_flames_registrations_to_excel(request):
 
     wb.save(response)
     return response
+
+
+# ============================================= TEAMS ==========================================

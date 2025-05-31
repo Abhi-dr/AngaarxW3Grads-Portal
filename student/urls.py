@@ -106,3 +106,20 @@ urlpatterns += [
 
 
 
+
+
+
+
+
+
+
+
+
+
+urlpatterns += [
+    path("assignments", views.assignments, name="assignments"),
+    path("submit_assignment/<int:assignment_id>", views.submit_assignment, name="submit_assignment"),
+    path("assignments/<int:assignment_id>/submission", views.view_submission, name="view_submission"),
+    path("delete_submission/<int:submission_id>", views.delete_submission, name="delete_submission"),
+
+]
