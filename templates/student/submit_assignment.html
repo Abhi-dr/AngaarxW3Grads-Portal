@@ -49,7 +49,7 @@ Student -> Submit Assignment
 
     <div class="card" id="card-title-2">
         <div class="card-header ">
-            <h5 class="card-title"><strong>({{ assignment.course.name }}) Title:</strong> {{ assignment.title }}</h5>
+            <h5 class="card-title"><strong>({{ assignment.course_name }}) Title:</strong> {{ assignment.title }}</h5>
         </div>
         <div class="card-body">
             <p class="card-text">{{ assignment.description|linebreaks }}</p>
@@ -137,7 +137,7 @@ Student -> Submit Assignment
                 <div class="mb-3 mt-4">
                     <label for="extra_info" class="form-label">Any Extra Information <small>(optional)</small>:</label>
                     <textarea id="extra_info" name="extra_info" rows="2" class="form-control"
-                        placeholder="// Anything you wanna say to {{ assignment.course.instructor.first_name }}..."></textarea>
+                        placeholder="// Any additional comments..."></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-outline-success mt-3"

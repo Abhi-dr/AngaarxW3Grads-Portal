@@ -131,7 +131,7 @@ class AssignmentInline(admin.TabularInline):
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
     list_display = [
-        'title', 'get_course_name', 'assignment_type', 'due_date', 
+        'title', 'assignment_type', 'due_date', 
         'status', 'submission_count_display', 'overdue_status'
     ]
     list_filter = [
@@ -166,20 +166,6 @@ class AssignmentAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
-    def get_course_name(self, obj):
-        """Display the course name with a link"""
-        if obj.course:
-            course_name = getattr(obj.course, 'name', None) or getattr(obj.course, 'title', 'Unknown')
-            if hasattr(obj.course, '_meta'):
-                model_name = obj.course._meta.model_name
-                app_label = obj.course._meta.app_label
-                url = reverse(f'admin:{app_label}_{model_name}_change', args=[obj.course.pk])
-                return format_html('<a href="{}">{}</a>', url, course_name)
-            return course_name
-        return "No course assigned"
-    get_course_name.short_description = 'Course'
-    get_course_name.admin_order_field = 'object_id'
     
     def submission_count_display(self, obj):
         """Display submission count with link to submissions"""

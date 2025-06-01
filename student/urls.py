@@ -103,18 +103,7 @@ urlpatterns += [
     path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
 ]
 
-
-
-
-
-
-
-
-
-
-
-
-
+# ============================== ASSIGNMENTS WORK ==============================
 
 urlpatterns += [
     path("assignments", views.assignments, name="assignments"),
@@ -123,3 +112,4 @@ urlpatterns += [
     path("delete_submission/<int:submission_id>", views.delete_submission, name="delete_submission"),
 
 ]
+

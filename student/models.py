@@ -192,8 +192,7 @@ class Assignment(models.Model):
     )
 
     def __str__(self):
-        course_name = getattr(self.course, 'name', None) or getattr(self.course, 'title', 'Unknown Course')
-        return f"{self.title} - {course_name}"
+        return f"{self.title}"
     
     def clean(self):
         # Validate that content_type is either Course or FlamesCourse
