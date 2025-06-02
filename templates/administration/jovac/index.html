@@ -1,0 +1,94 @@
+{% extends 'administration/base.html' %}
+
+{% load custom_filters %}
+
+{% block jovac_active %} 
+active
+{% endblock %}
+
+{% block title %}
+Administration | JOVAC
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">JOVAC Courses 🔥</span>
+                <span class="fs-4"> | Angaar x W3Grads
+                </span>
+            </h3>
+        </div>
+
+        <div class="row mt-n3">
+            <div class="col-md-5 mx-auto">
+                <a href="{% url 'administrator_add_jovac' %}"
+                    class="btn btn-outline-primary button mt-n2 mb-3 w-100 ">Add Course
+                </a>
+            </div>
+            <!-- <div class="col-md-5 mx-auto">
+                <a href="{% url 'administrator_pending_sheet' %}"
+                    class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Pendng Sheets
+                </a>
+            </div> -->
+        </div>
+
+    </div>
+
+    <!-- ======== SHeets Container ======== -->
+
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container">
+
+        {% for course in courses %}
+        <div class="col-md-3">
+
+            <div class="card">
+
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.name }}🔥</h5>
+
+                    <p class="card-text mb-2">
+                        <b>By: </b>
+                        <span class="text-success">
+                            abhi add krunga
+                        </span>
+                    </p>
+
+                    <p class="card-text mb-1">Total Assignments: {{ course.get_total_assignments }}</p>
+
+                    {% if course.is_active %}
+                    <span class="badge bg-success">
+                        Active
+                    </span>
+
+                    {% else %}
+                    <span class="badge bg-danger">
+                        Inactive
+                    </span>
+                    {% endif %}
+
+                    <a href="{% url 'administrator_jovac' course.slug %}"
+                        class="btn btn-outline-secondary w-100 mt-2">View
+                        More</a>
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

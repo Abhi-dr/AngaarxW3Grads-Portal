@@ -511,16 +511,19 @@ def assignments(request):
         # Get course information
         course_name = "Unknown Course"
         
-        
         # If it's a regular course assignment
         if assignment.content_type.model == 'course':
+            print("Regular Course")
             course = Course.objects.get(id=assignment.object_id)
             course_name = course.name
             
             # Check if student is enrolled
-            if not student.courses.filter(id=course.id).exists():
-                continue  # Skip this assignment if not enrolled
-                
+            try:
+                if not student.courses.filter(id=course.id).exists():
+                    continue  # Skip this assignment if not enrolled
+            except Exception as e:
+                print(f"Error accessing course: {e}")
+                pass
         # If it's a flames course assignment
         elif assignment.content_type.model == 'flamescourse':
             from home.models import FlamesCourse, FlamesRegistration, FlamesTeamMember
@@ -533,10 +536,7 @@ def assignments(request):
             has_access = False
             
             # Direct registration
-            if FlamesRegistration.objects.filter(user=student,
-                course=flames_course,
-                status='Completed'
-            ).exists():
+            if FlamesRegistration.objects.filter(user=student,course=flames_course,status='Completed').exists():
                 has_access = True
             
             # Team membership
@@ -579,50 +579,45 @@ def submit_assignment(request, assignment_id):
     Submit assignment response in a simplified manner
     """
     assignment = get_object_or_404(Assignment, id=assignment_id)
-    student = request.user.student
+    student = Student.objects.get(id=request.user.id)
     
     # Check if student can access this assignment
     can_access = False
     course_name = "Unknown Course"
     
-    try:
-        # Regular course assignment
-        if assignment.content_type.model == 'course':
-            course = Course.objects.get(id=assignment.object_id)
-            course_name = course.name
-            
-            # Check enrollment
-            if student.courses.filter(id=course.id).exists():
-                can_access = True
+    if assignment.content_type.model == 'course':
+        course = Course.objects.get(id=assignment.object_id)
+        course_name = course.name
+        
+        # Check enrollment
+        if student.courses.filter(id=course.id).exists():
+            can_access = True
                 
         # Flames course assignment
-        elif assignment.content_type.model == 'flamescourse':
-            from home.models import FlamesCourse, FlamesRegistration, FlamesTeamMember
+    elif assignment.content_type.model == 'flamescourse':
+        from home.models import FlamesCourse, FlamesRegistration, FlamesTeamMember
+        
+        flames_course = FlamesCourse.objects.get(id=assignment.object_id)
+        course_name = flames_course.title
+        
+        # Check direct registration
+        if FlamesRegistration.objects.filter(user=student,
+            course=flames_course,
+            status='Completed'
+        ).exists():
+            can_access = True
             
-            flames_course = FlamesCourse.objects.get(id=assignment.object_id)
-            course_name = flames_course.title
-            
-            # Check direct registration
-            if FlamesRegistration.objects.filter(
-                Q(user=student) | Q(email=student.user.email),
+        # Check team registration
+        if not can_access:
+            student_teams = FlamesTeamMember.objects.filter(member=student)
+            team_ids = [member.team.id for member in student_teams if member.team]
+            if team_ids and FlamesRegistration.objects.filter(
+                team__id__in=team_ids,
                 course=flames_course,
                 status='Completed'
             ).exists():
                 can_access = True
-                
-            # Check team registration
-            if not can_access:
-                student_teams = FlamesTeamMember.objects.filter(member=student)
-                team_ids = [member.team.id for member in student_teams if member.team]
-                if team_ids and FlamesRegistration.objects.filter(
-                    team__id__in=team_ids,
-                    course=flames_course,
-                    status='Completed'
-                ).exists():
-                    can_access = True
-    except Exception as e:
-        messages.error(request, f"Error accessing assignment: {str(e)}")
-        return redirect('assignments')
+
     
     # Redirect if no access
     if not can_access:
@@ -685,7 +680,7 @@ def view_submission(request, assignment_id):
     Display a student's submission for an assignment with simplified approach
     """
     assignment = get_object_or_404(Assignment, id=assignment_id)
-    student = request.user.student
+    student = Student.objects.get(id=request.user.id)
     
     # Check if student can access this assignment
     can_access = False
@@ -709,8 +704,7 @@ def view_submission(request, assignment_id):
             course_name = flames_course.title
             
             # Check direct registration
-            if FlamesRegistration.objects.filter(
-                Q(user=student) | Q(email=student.user.email),
+            if FlamesRegistration.objects.filter(user=student,
                 course=flames_course,
                 status='Completed'
             ).exists():
@@ -750,18 +744,15 @@ def view_submission(request, assignment_id):
     late_penalty = 0
     final_score = submission.score if submission.score is not None else None
     
-    if submission.submission_date and assignment.due_date and submission.submission_date > assignment.due_date:
-        is_late = True
-        if submission.score is not None and assignment.late_penalty > 0:
-            late_penalty = submission.score * (assignment.late_penalty / 100)
-            final_score = submission.score - late_penalty
+    
     
     parameters = {
         'assignment': assignment,
         'submission': submission,
         'is_late': is_late,
         'late_penalty': late_penalty,
-        'final_score': final_score
+        'final_score': final_score,
+        "course_name": course_name,
     }
     
     return render(request, 'student/view_submission.html', parameters)
