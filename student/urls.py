@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views
+from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views
 
 urlpatterns = [
     path("", views.dashboard, name="student"),
@@ -103,13 +103,17 @@ urlpatterns += [
     path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
 ]
 
-# ============================== ASSIGNMENTS WORK ==============================
+# ============================== JOVAC WORK ==============================
 
 urlpatterns += [
-    path("assignments", views.assignments, name="assignments"),
-    path("submit_assignment/<int:assignment_id>", views.submit_assignment, name="submit_assignment"),
-    path("assignments/<int:assignment_id>/submission", views.view_submission, name="view_submission"),
-    path("delete_submission/<int:submission_id>", views.delete_submission, name="delete_submission"),
+
+    path("enroll_jovac/<slug:slug>/", jovac_views.enroll_jovac, name="student_enroll_jovac"),
+    path("jovac/<slug:slug>/", jovac_views.jovac, name="student_jovac"),
+
+    path("assignments", jovac_views.assignments, name="assignments"),
+    path("submit_assignment/<int:assignment_id>", jovac_views.submit_assignment, name="submit_assignment"),
+    path("assignments/<int:assignment_id>/submission", jovac_views.view_submission, name="view_submission"),
+    path("delete_submission/<int:submission_id>", jovac_views.delete_submission, name="delete_submission"),
 
 ]
 

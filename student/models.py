@@ -126,11 +126,34 @@ class Course(models.Model):
     def __str__(self):
         return self.name or "Unnamed Course"
     
+    def get_instructor_names(self):
+        return ' and '.join([str(instructor.first_name) + " " + str(instructor.last_name) for instructor in self.instructors.all()])
+    
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Course'
         verbose_name_plural = 'Courses'
 
+class CourseRegistration(models.Model):
+
+    STATUS_CHOICES = [
+        ('Approved', 'Approved'),
+        ('Pending', 'Pending'),
+        ('Rejected', 'Rejected'),
+    ]
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
+    
+    registration_date = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+
+    class Meta:
+        verbose_name = 'Course Registration'
+        verbose_name_plural = 'Course Registrations'
+
+# ================================================== Assignment ==========================================
 
 class Assignment(models.Model):
     ASSIGNMENT_TYPES = [

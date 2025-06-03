@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Notification, Anonymous_Message, Feedback, AIQuestion
+from .models import Notification, Anonymous_Message, Feedback, AIQuestion, CourseRegistration
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest, TeamInvite
 
 
@@ -59,13 +59,12 @@ class TeamInviteAdmin(admin.ModelAdmin):
 # ===========================================================================================
 
 from django.contrib import admin
-from django.contrib.contenttypes.models import ContentType
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils import timezone
 from django.db.models import Count, Q
 from django.contrib import messages
-from .models import Course, Assignment, AssignmentSubmission, FlamesCourse
+from .models import Course, Assignment, AssignmentSubmission
 
 
 @admin.register(Course)
@@ -78,6 +77,10 @@ class CourseAdmin(admin.ModelAdmin):
     list_editable = ['is_active']
     list_per_page = 25
 
+@admin.register(CourseRegistration)
+class CourseRegistrationAdmin(admin.ModelAdmin):
+    list_display = ['student', 'course', 'registration_date']
+    list_filter = ['course', 'registration_date']
 
 class AssignmentInline(admin.TabularInline):
     """Inline for showing assignments in course admin"""

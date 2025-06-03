@@ -23,6 +23,117 @@ Dashboard | My Courses
 
     {% endfor %}
 
+    <!-- ===============================================================================================-->
+    <!-- ============================================ JOVAC ============================================-->
+    <!-- ===============================================================================================-->
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">J O V A C 🔥</span>
+                <span class="fs-4"> | Angaar x W3Grads
+                </span>
+            </h3>
+        </div>
+    </div>
+
+    <!-- =========================================== APPROVED JOVAC COURSES =========================== -->
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        {% for course in approved_courses %}
+
+        <div class="col-md-3">
+            <h5 class="card-title fw-semibold mb-0"></h5>
+            <div class="card">
+                <a href="{% url 'student_jovac' course.slug %}">
+                    <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="JOVAC Thumbnail" />
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {{ course.name }}🔥
+                        </h5>
+                        By: <p class="card-text text-success fs-2 mb-2">
+                             {{ course.get_instructor_names }}
+                        </p>
+                        <!-- <p class="card-text text-black mb-1">
+                            Total Registrations: {{ company.job_set.all }}
+                        </p> -->
+                        <a href="{% url 'student_jovac' course.slug %}" class="btn btn-outline-secondary w-100">View More</a>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+    <!-- ====================================== PENDING JOVAC ======================================== -->
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+
+        {% for course in pending_courses %}
+
+        <div class="col-md-3">
+            <div class="card">
+                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" />
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.name }}🔥</h5>
+
+                    By: <p class="card-text text-success fs-2 mb-2">
+                             {{ course.get_instructor_names }}
+                        </p>
+                    <button class="btn btn-outline-warning w-100" disabled>Requested</button>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+
+        <!-- ====================================== REJECTED JOVAC ======================================== -->
+
+        {% for course in rejected_courses %}
+
+        <div class="col-md-3">
+            <div class="card">
+                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" />
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.name }}🔥</h5>
+                    <button class="btn btn-danger w-100" disabled>Rejected</button>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+
+        <!-- ====================================== ALL OTHER JOVAC ======================================== -->
+
+        {% for course in other_courses %}
+        <div class="col-md-3">
+            <div class="card">
+                <a href="#">
+                    <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" />
+                    <div class="card-body">
+                        <h5 class="card-title">{{ course.name }}🔥</h5>
+
+                         By: <p class="card-text text-success fs-2 mb-2">
+                             {{ course.get_instructor_names }}
+                        </p>
+
+                        <a href="{% url 'student_enroll_jovac' course.slug %}" class="btn btn-success w-100">Enroll
+                            Now</a>
+
+                    </div>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- ===============================================================================================-->
+    <!-- =========================================== BATCHES ===========================================-->
+    <!-- ===============================================================================================-->
 
     <div class="card">
         {% if student_batches %}
@@ -135,12 +246,9 @@ Dashboard | My Courses
 
                         {% if batch.required_fields %}
                         <!-- If extra fields exist, open modal -->
-                        <button class="btn btn-success w-100 enroll-btn" 
-                            data-bs-toggle="modal" 
-                            data-bs-target="#enrollModal" 
-                            data-batch-id="{{ batch.id }}" 
-                            data-batch-name="{{ batch.name }}"
-                            data-required-fields="{{ batch.required_fields|safe }}">
+                        <button class="btn btn-success w-100 enroll-btn" data-bs-toggle="modal"
+                            data-bs-target="#enrollModal" data-batch-id="{{ batch.id }}"
+                            data-batch-name="{{ batch.name }}" data-required-fields="{{ batch.required_fields|safe }}">
                             Enroll Now
                         </button>
 
@@ -189,7 +297,7 @@ Dashboard | My Courses
         const modalBatchId = document.getElementById("modalBatchId");
         const extraFieldsContainer = document.getElementById("extraFieldsContainer");
         const enrollForm = document.getElementById("enrollForm");
-    
+
         enrollButtons.forEach(button => {
             button.addEventListener("click", function () {
                 const batchId = this.getAttribute("data-batch-id");
@@ -197,7 +305,7 @@ Dashboard | My Courses
                 let requiredFields = this.getAttribute("data-required-fields");
                 // convert requiredFields to JSON parsable string
                 requiredFields = requiredFields.replace(/'/g, '"');
-    
+
                 try {
                     requiredFields = JSON.parse(requiredFields);  // Properly parse JSON
                     console.log(requiredFields);
@@ -205,11 +313,11 @@ Dashboard | My Courses
                     requiredFields = [];  // Fallback to empty array if invalid
                     alert("Invalid required fields data");
                 }
-    
+
                 // Set batch name and ID
                 modalBatchName.textContent = batchName;
                 modalBatchId.value = batchId;
-    
+
                 // Generate required fields dynamically
                 extraFieldsContainer.innerHTML = "";
                 requiredFields.forEach(field => {
@@ -221,13 +329,13 @@ Dashboard | My Courses
                         </div>
                     `;
                 });
-    
+
                 // Update form action dynamically
                 enrollForm.action = `/dashboard/enroll_course/${batchId}/`;
             });
         });
     });
-    
+
 </script>
 
 
