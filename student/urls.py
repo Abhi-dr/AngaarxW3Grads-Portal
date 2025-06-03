@@ -110,7 +110,7 @@ urlpatterns += [
     path("enroll_jovac/<slug:slug>/", jovac_views.enroll_jovac, name="student_enroll_jovac"),
     path("jovac/<slug:slug>/", jovac_views.jovac, name="student_jovac"),
 
-    path("assignments", jovac_views.assignments, name="assignments"),
+    # path("assignments", jovac_views.assignments, name="assignments"),
     path("submit_assignment/<int:assignment_id>", jovac_views.submit_assignment, name="submit_assignment"),
     path("assignments/<int:assignment_id>/submission", jovac_views.view_submission, name="view_submission"),
     path("delete_submission/<int:submission_id>", jovac_views.delete_submission, name="delete_submission"),

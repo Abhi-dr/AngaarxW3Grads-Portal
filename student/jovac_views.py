@@ -41,7 +41,7 @@ def jovac(request, slug):
         'course': course,
         'instructors': instructors,
         'assignments': assignments,
-        "submitted_assignment_ids": submitted_assignment_ids,
+        "submitted_assignments": submitted_assignment_ids,
     }
     return render(request, 'student/jovac/jovac.html', context)
 
@@ -72,91 +72,90 @@ def enroll_jovac(request, slug):
 # =======================================================================================================
 
 
-@login_required(login_url="login")
-def assignments(request):
-    """
-    Display assignments from both Course and FlamesCourse models
-    """
-    # Access the student profile associated with the logged-in user
-    student = request.user.student
-    current_time = timezone.now()
+# @login_required(login_url="login")
+# def assignments(request):
+#     """
+#     Display assignments from both Course and FlamesCourse models
+#     """
+#     # Access the student profile associated with the logged-in user
+#     student = request.user.student
+#     current_time = timezone.now()
     
-    # Simple approach: get all assignments regardless of course type
-    all_assignments = Assignment.objects.filter(
-        # Only include published and draft assignments
-        status__in=['Published', 'Draft']
-    ).order_by('-due_date')
+#     # Simple approach: get all assignments regardless of course type
+#     all_assignments = Assignment.objects.filter(
+#         # Only include published and draft assignments
+#         status__in=['Published', 'Draft']
+#     ).order_by('-due_date')
     
-    # Get student submissions
-    submissions = AssignmentSubmission.objects.filter(student=student)
-    submitted_assignment_ids = list(submissions.values_list('assignment_id', flat=True))
+#     # Get student submissions
+#     submissions = AssignmentSubmission.objects.filter(student=student)
+#     submitted_assignment_ids = list(submissions.values_list('assignment_id', flat=True))
     
-    # Create a list to hold assignments with course info
-    assignments_with_info = []
+#     # Create a list to hold assignments with course info
+#     assignments_with_info = []
     
-    for assignment in all_assignments:
-        # Get course information
-        course_name = "Unknown Course"
+#     for assignment in all_assignments:
+#         # Get course information
+#         course_name = "Unknown Course"
         
-        # If it's a regular course assignment
-        if assignment.content_type.model == 'course':
-            print("Regular Course")
-            course = Course.objects.get(id=assignment.object_id)
-            course_name = course.name
+#         # If it's a regular course assignment
+#         if assignment.content_type.model == 'course':
+#             print("Regular Course")
+#             course = Course.objects.get(id=assignment.object_id)
+#             course_name = course.name
             
-            # Check if student is enrolled
-            try:
-                if not student.courses.filter(id=course.id).exists():
-                    continue  # Skip this assignment if not enrolled
-            except Exception as e:
-                print(f"Error accessing course: {e}")
-                pass
-        # If it's a flames course assignment
-        elif assignment.content_type.model == 'flamescourse':
-            from home.models import FlamesCourse, FlamesRegistration, FlamesTeamMember
+#             # Check if student is enrolled
+#             try:
+#                 if not student.courses.filter(id=course.id).exists():
+#                     continue  # Skip this assignment if not enrolled
+#             except Exception as e:
+#                 print(f"Error accessing course: {e}")
+#                 pass
+#         # If it's a flames course assignment
+#         elif assignment.content_type.model == 'flamescourse':
+#             from home.models import FlamesCourse, FlamesRegistration, FlamesTeamMember
             
-            # Get the course
-            flames_course = FlamesCourse.objects.get(id=assignment.object_id)
-            course_name = flames_course.title
+#             # Get the course
+#             flames_course = FlamesCourse.objects.get(id=assignment.object_id)
+#             course_name = flames_course.title
             
-            # Check if user is registered for this flames course
-            has_access = False
+#             # Check if user is registered for this flames course
+#             has_access = False
             
-            # Direct registration
-            if FlamesRegistration.objects.filter(user=student,course=flames_course,status='Completed').exists():
-                has_access = True
+#             # Direct registration
+#             if FlamesRegistration.objects.filter(user=student,course=flames_course,status='Completed').exists():
+#                 has_access = True
             
-            # Team membership
-            if not has_access:
-                student_teams = FlamesTeamMember.objects.filter(member=student)
-                if student_teams.exists() and FlamesRegistration.objects.filter(
-                    team__in=[member.team for member in student_teams if member.team], 
-                    course=flames_course,
-                    status='Completed'
-                ).exists():
-                    has_access = True
+#             # Team membership
+#             if not has_access:
+#                 student_teams = FlamesTeamMember.objects.filter(member=student)
+#                 if student_teams.exists() and FlamesRegistration.objects.filter(
+#                     team__in=[member.team for member in student_teams if member.team], 
+#                     course=flames_course,
+#                     status='Completed'
+#                 ).exists():
+#                     has_access = True
             
-            if not has_access:
-                continue  # Skip if no access to course
-        else:
-            continue  # Skip unknown content types
+#             if not has_access:
+#                 continue  # Skip if no access to course
+#         else:
+#             continue  # Skip unknown content types
         
-        # Add course info to the assignment
-        assignment.course_name = course_name
-        assignment.is_submitted = assignment.id in submitted_assignment_ids
+#         # Add course info to the assignment
+#         assignment.course_name = course_name
+#         assignment.is_submitted = assignment.id in submitted_assignment_ids
         
-        # Add assignment to our list
-        assignments_with_info.append(assignment)
+#         # Add assignment to our list
+#         assignments_with_info.append(assignment)
     
-    parameters = {
-        "assignments": assignments_with_info,
-        "student": student,
-        "submitted_assignments": submitted_assignment_ids,
-        "current_time": current_time
-    }
+#     parameters = {
+#         "assignments": assignments_with_info,
+#         "student": student,
+#         "submitted_assignments": submitted_assignment_ids,
+#         "current_time": current_time
+#     }
     
-    return render(request, "student/assignments.html", parameters)
-
+#     return render(request, "student/assignments.html", parameters)
 
 # =========================================== SUBMIT ASSIGNMENT =============================================
 
@@ -177,44 +176,18 @@ def submit_assignment(request, assignment_id):
         course_name = course.name
         
         # Check enrollment
-        if student.courses.filter(id=course.id).exists():
+        if CourseRegistration.objects.filter(student=student, course=course).exists():
             can_access = True
-                
-        # Flames course assignment
-    elif assignment.content_type.model == 'flamescourse':
-        from home.models import FlamesCourse, FlamesRegistration, FlamesTeamMember
-        
-        flames_course = FlamesCourse.objects.get(id=assignment.object_id)
-        course_name = flames_course.title
-        
-        # Check direct registration
-        if FlamesRegistration.objects.filter(user=student,
-            course=flames_course,
-            status='Completed'
-        ).exists():
-            can_access = True
-            
-        # Check team registration
-        if not can_access:
-            student_teams = FlamesTeamMember.objects.filter(member=student)
-            team_ids = [member.team.id for member in student_teams if member.team]
-            if team_ids and FlamesRegistration.objects.filter(
-                team__id__in=team_ids,
-                course=flames_course,
-                status='Completed'
-            ).exists():
-                can_access = True
-
     
     # Redirect if no access
     if not can_access:
         messages.error(request, "You do not have access to this assignment")
-        return redirect('assignments')
+        return redirect('student_jovac', slug=course.slug)
     
     # Check if already submitted
     if AssignmentSubmission.objects.filter(assignment=assignment, student=student).exists():
         messages.error(request, "You have already submitted this assignment")
-        return redirect('assignments')
+        return redirect('student_jovac', slug=course.slug)
     
     # Check deadline
     if assignment.due_date and assignment.due_date < timezone.now():
@@ -244,7 +217,7 @@ def submit_assignment(request, assignment_id):
         try:
             submission.save()
             messages.success(request, "Assignment submitted successfully!")
-            return redirect('assignments')
+            return redirect('student_jovac', slug=course.slug)
         except ValueError as e:
             messages.error(request, str(e))
     
@@ -256,7 +229,7 @@ def submit_assignment(request, assignment_id):
         "student": student
     }
     
-    return render(request, "student/submit_assignment.html", parameters)
+    return render(request, "student/jovac/submit_assignment.html", parameters)
 
 
 # =========================================== VIEW SUBMISSION =============================================
@@ -280,48 +253,24 @@ def view_submission(request, assignment_id):
             course_name = course.name
             
             # Check enrollment
-            if student.courses.filter(id=course.id).exists():
+            if CourseRegistration.objects.filter(student=student, course=course).exists():
                 can_access = True
                 
-        # Flames course assignment
-        elif assignment.content_type.model == 'flamescourse':
-            from home.models import FlamesCourse, FlamesRegistration, FlamesTeamMember
-            
-            flames_course = FlamesCourse.objects.get(id=assignment.object_id)
-            course_name = flames_course.title
-            
-            # Check direct registration
-            if FlamesRegistration.objects.filter(user=student,
-                course=flames_course,
-                status='Completed'
-            ).exists():
-                can_access = True
-                
-            # Check team registration
-            if not can_access:
-                student_teams = FlamesTeamMember.objects.filter(member=student)
-                team_ids = [member.team.id for member in student_teams if member.team]
-                if team_ids and FlamesRegistration.objects.filter(
-                    team__id__in=team_ids,
-                    course=flames_course,
-                    status='Completed'
-                ).exists():
-                    can_access = True
     except Exception as e:
         messages.error(request, f"Error accessing assignment: {str(e)}")
-        return redirect('assignments')
+        return redirect('student_jovac', slug=course.slug)
     
     # Redirect if no access
     if not can_access:
         messages.error(request, "You do not have access to this assignment")
-        return redirect('assignments')
+        return redirect('student_jovac', slug=course.slug)
     
     # Get submission
     try:
         submission = AssignmentSubmission.objects.get(assignment=assignment, student=student)
     except AssignmentSubmission.DoesNotExist:
         messages.error(request, "You haven't submitted this assignment yet")
-        return redirect('assignments')
+        return redirect('student_jovac', slug=course.slug)
     
     # Add course name to assignment
     assignment.course_name = course_name
@@ -342,7 +291,7 @@ def view_submission(request, assignment_id):
         "course_name": course_name,
     }
     
-    return render(request, 'student/view_submission.html', parameters)
+    return render(request, 'student/jovac/view_submission.html', parameters)
 
 # =========================================== DELETE SUBMISSION =============================================
 
@@ -358,16 +307,16 @@ def delete_submission(request, submission_id):
     # Verify the submission belongs to the current user
     if submission.student != request.user.student:
         messages.error(request, "You cannot delete another student's submission")
-        return redirect('assignments')
+        return redirect('student_jovac', slug=assignment.course.slug)
         
     # Check if past deadline
     if assignment.due_date and assignment.due_date < timezone.now() and assignment.status != 'Draft':
         messages.error(request, "You cannot delete the submission after the deadline.")
-        return redirect('assignments')
+        return redirect('student_jovac', slug=assignment.course.slug)
     
     # Delete the submission
     submission.delete()
     messages.success(request, "Submission deleted successfully.")
     
-    return redirect('assignments')
+    return redirect('student_jovac', slug=assignment.course.slug)
 
