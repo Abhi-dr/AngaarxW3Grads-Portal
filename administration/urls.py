@@ -243,6 +243,9 @@ urlpatterns += [
     path("jovac/add_course/", jovac_views.add_course, name="administrator_add_jovac"),
     path("jovac/edit_course/<slug:slug>/", jovac_views.edit_course, name="administrator_edit_jovac"),
 
+    path("enrollment-requests/<slug:slug>", jovac_views.enrollment_requests, name="administrator_jovac_enrollment_requests"),
+    path("approve_enrollment_request/<int:id>", jovac_views.approve_enrollment_request, name="administrator_approve_jovac_request"),
+
     path("add_assignment/<slug:slug>", jovac_views.add_assignment, name="administrator_add_assignment"),
     path("edit_assignment/<int:id>", jovac_views.edit_assignment, name="administrator_edit_assignment"),
 

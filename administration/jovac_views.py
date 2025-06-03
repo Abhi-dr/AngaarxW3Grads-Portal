@@ -5,7 +5,7 @@ from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
 from accounts.models import Administrator, Student, Instructor
-from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
+from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration
 
 from django.contrib.contenttypes.models import ContentType
 
@@ -129,6 +129,37 @@ def edit_course(request, slug):
     }
 
     return render(request, 'administration/jovac/edit_course.html', parameters)
+
+# ========================================= Enrollment Requests =============================
+
+def enrollment_requests(request, slug):
+    course = get_object_or_404(Course, slug=slug)
+    pending_requests = CourseRegistration.objects.filter(course=course, status='pending')
+
+    parameters = {
+        "course": course,
+        "pending_requests": pending_requests,
+        "total_pending_requests": pending_requests.count(),
+    }
+
+    return render(request, 'administration/jovac/enrollment_requests.html', parameters)
+
+# ============================= APPROVE ENROLLMENT REQUEST =============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def approve_enrollment_request(request, id):
+    registration = get_object_or_404(CourseRegistration, id=id)
+    
+    # Update the registration status and save it
+    registration.status = 'Approved'
+    registration.save()
+
+    return redirect(reverse('administrator_jovac_enrollment_requests', args=[registration.course.slug]))
+
+
+
 
 # ================================================================================================
 # ========================================= ASSIGNMENTS WORK =====================================
