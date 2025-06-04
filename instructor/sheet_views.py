@@ -12,6 +12,10 @@ from django.utils.safestring import mark_safe
 from django.db import transaction
 from django.urls import reverse
 
+import pandas as pd
+from django.http import HttpResponse
+from django.utils.timezone import make_naive
+
 from accounts.models import Student, Instructor
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 
@@ -445,9 +449,6 @@ def sheet_leaderboard(request, slug):
     return JsonResponse({'leaderboard': leaderboard})
 
 # =========================================== DOWNLOAD LEADERBOARD =============================
-import pandas as pd
-from django.http import HttpResponse
-from django.utils.timezone import make_naive
 
 def download_leaderboard_excel(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)

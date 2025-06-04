@@ -27,18 +27,22 @@ from datetime import timedelta
 
 from practice.models import Streak
 
-# ======================================== JOVAC ======================================
+# ======================================== MY JOVAC COURSE ======================================
 
 def jovacs(request):
-    courses = Course.objects.all()
+    instructor = get_object_or_404(Instructor, id=request.user.id)
+
+    # Get only courses where the logged-in instructor is assigned
+    courses = Course.objects.filter(instructors=instructor, is_active=True)
 
     parameters = {
         "courses": courses,
     }
 
-    return render(request, "administration/jovac/index.html", parameters)
+    return render(request, "instructor/jovac/jovacs.html", parameters)
 
-# ======================================== JOVAC COURSE ======================================
+
+# ======================================== MY JOVAC COURSE ======================================
 
 def jovac(request, slug):
     course = get_object_or_404(Course, slug=slug)
@@ -67,68 +71,7 @@ def jovac(request, slug):
         "query": query
     }
 
-    return render(request, "administration/jovac/course.html", parameters)
-
-# ======================================= ADD COURSE ======================================
-
-def add_course(request):
-
-    instructors = Instructor.objects.all()
-
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        description = request.POST.get('description')
-        my_instructors = request.POST.getlist('instructors')
-
-        course = Course(
-            name=name,
-            description=description
-        )
-
-        course.save()
-
-        for instructor_id in my_instructors:
-            instructor = Instructor.objects.get(id=instructor_id)
-            course.instructors.add(instructor)
-
-        course.save()
-
-        messages.success(request, "Course added successfully!")
-        return redirect('administrator_jovacs')
-    
-    parameters = {
-        "instructors": instructors,
-    }
-    
-    return render(request, 'administration/jovac/add_course.html', parameters)
-
-# ============================= EDIT COURSE =============================
-
-def edit_course(request, slug):
-    course = Course.objects.get(slug=slug)
-    instructors = Instructor.objects.all()
-
-    if request.method == 'POST':
-        course.name = request.POST.get('name')
-        course.description = request.POST.get('description')
-        selected_instructors = request.POST.getlist('instructors')
-
-        # Clear existing instructors and add the new ones
-        course.instructors.clear()
-        for instructor_id in selected_instructors:
-            instructor = Instructor.objects.get(id=instructor_id)
-            course.instructors.add(instructor)
-
-        course.save()
-        messages.success(request, "Course updated successfully!")
-        return redirect('administrator_jovacs')
-
-    parameters = {
-        "course": course,
-        "instructors": instructors,
-    }
-
-    return render(request, 'administration/jovac/edit_course.html', parameters)
+    return render(request, "instructor/jovac/course.html", parameters)
 
 # ========================================= Enrollment Requests =============================
 
@@ -142,22 +85,7 @@ def enrollment_requests(request, slug):
         "total_pending_requests": pending_requests.count(),
     }
 
-    return render(request, 'administration/jovac/enrollment_requests.html', parameters)
-
-# ============================= APPROVE ENROLLMENT REQUEST =============================
-
-@login_required(login_url='login')
-@staff_member_required(login_url='login')
-def approve_enrollment_request(request, id):
-    registration = get_object_or_404(CourseRegistration, id=id)
-    
-    # Update the registration status and save it
-    registration.status = 'Approved'
-    registration.save()
-
-    return redirect(reverse('administrator_jovac_enrollment_requests', args=[registration.course.slug]))
-
-
+    return render(request, 'instructor/jovac/enrollment_requests.html', parameters)
 
 
 # ================================================================================================
@@ -168,11 +96,12 @@ def approve_enrollment_request(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def add_assignment(request, slug):
     # Get the course object and its content type
     course = get_object_or_404(Course, slug=slug)
     course_content_type = ContentType.objects.get_for_model(course)
+
+    print(course)
 
     if request.method == 'POST':
         title = request.POST.get('title')
@@ -202,17 +131,19 @@ def add_assignment(request, slug):
         assignment.save()
 
         messages.success(request, "Assignment added successfully.")
-        return redirect('administrator_jovac', slug=course.slug)
+        return redirect('instructor_jovac', slug=course.slug)
 
     context = {
         'course': course,
         'assignment_types': Assignment.ASSIGNMENT_TYPES,
         'status_choices': Assignment.STATUS_CHOICES
     }
-    return render(request, 'administration/jovac/add_assignment.html', context)
+    return render(request, 'instructor/jovac/add_assignment.html', context)
 
 # ======================================== EDIT ASSIGNMENT ======================================
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
 def edit_assignment(request, id):
     assignment = get_object_or_404(Assignment, id=id)
     course = assignment.course
@@ -242,30 +173,16 @@ def edit_assignment(request, id):
             assignment.full_clean()
             assignment.save()
             messages.success(request, "Assignment updated successfully!")
-            return redirect('administrator_jovac', course.slug)
+            return redirect('instructor_jovac', course.slug)
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
-    return render(request, 'administration/jovac/edit_assignment.html', {
+    return render(request, 'instructor/jovac/edit_assignment.html', {
         'assignment': assignment,
         'course': course,
         'assignment_types': Assignment.ASSIGNMENT_TYPES,
         'status_choices': Assignment.STATUS_CHOICES,
     })
-
-
-# ======================================== DELETE ASSIGNMENT (STANDARD NON-AJAX VERSION) ===================================
-
-@login_required(login_url='login')
-@staff_member_required(login_url='login')
-def delete_assignment(request, id):
-        
-    assignment = Assignment.objects.get(id=id)
-    assignment.delete()
-    
-    messages.success(request, "Assignment deleted successfully!")
-    
-    return redirect("administrator_jovac", slug=assignment.course.slug)
 
 
 # ======================================== VIEW SUBMISSIONS ===================================
@@ -292,5 +209,4 @@ def view_submissions(request, id):
         "query": query
     }
     
-    return render(request, "administration/jovac/submissions.html", parameters)
-
+    return render(request, "instructor/jovac/submissions.html", parameters)
