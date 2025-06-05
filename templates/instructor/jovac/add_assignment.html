@@ -1,0 +1,103 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block title %}
+Add Assignment | {{ course.name }}
+{% endblock %}
+
+{% block jovac_active %} 
+active
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Add Assignment for {{ course.name }}</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title *</label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter assignment title"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description *</label>
+                    <textarea class="form-control" id="description" name="description" rows="4"
+                        placeholder="Enter detailed assignment description" required></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="assignment_type" class="form-label">Assignment Type *</label>
+                    <select class="form-select" id="assignment_type" name="assignment_type" required>
+                        <option value="" disabled selected>Select type</option>
+                        {% for value, label in assignment_types %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="due_date" class="form-label">Due Date *</label>
+                    <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="max_score" class="form-label">Max Score *</label>
+                    <input type="number" class="form-control" id="max_score" name="max_score" min="1" value="100"
+                        placeholder="e.g. 100" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status *</label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="" disabled selected>Select status</option>
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="instructions" class="form-label">Instructions</label>
+                    <textarea class="form-control" id="instructions" name="instructions" rows="3"
+                        placeholder="Provide any specific instructions (optional)"></textarea>
+                </div>
+
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="allow_late_submission"
+                        name="allow_late_submission">
+                    <label class="form-check-label" for="allow_late_submission">
+                        Allow Late Submission
+                    </label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="late_penalty_per_day" class="form-label">Late Penalty per Day (%)</label>
+                    <input type="number" class="form-control" id="late_penalty_per_day" name="late_penalty_per_day"
+                        step="0.01" min="0" max="100" placeholder="e.g. 10 for 10%">
+                    <small class="form-text text-muted">Set penalty percentage for late submissions (0-100%).</small>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">Add Assignment</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    document.getElementById('late_penalty_per_day').addEventListener('input', function () {
+        if (this.value > 100) {
+            alert("Late penalty cannot exceed 100%");
+            this.value = 100;
+        }
+    });
+</script>
+
+
+{% endblock %}

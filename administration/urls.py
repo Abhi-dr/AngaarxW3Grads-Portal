@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views
+from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views
 
 urlpatterns = [
     path("", views.index, name="administration"),
@@ -188,6 +188,11 @@ urlpatterns += [
 
 ]
 
+urlpatterns += [
+    path('get-user-stats/', views.get_user_stats, name='get_user_stats'),
+
+]
+
 # Flames Management 
 urlpatterns += [
     path("flames/courses/", flames_views.flames_courses, name="admin_flames_courses"),
@@ -214,10 +219,6 @@ urlpatterns += [
     path("export-to-excel", flames_views.export_flames_registrations_to_excel, name="export_flames_registrations_to_excel"),
 ]
 
-urlpatterns += [
-    path('get-user-stats/', views.get_user_stats, name='get_user_stats'),
-
-]
 
 # Alumni Management
 urlpatterns += [
@@ -231,4 +232,24 @@ urlpatterns += [
     path('alumni/update-referral-code/<int:code_id>/', alumni_views.update_referral_code, name='update_referral_code'),
     path('alumni/stats/', alumni_views.alumni_stats, name='alumni_stats'),
     path('alumni/list-ajax/', alumni_views.alumni_list_ajax, name='alumni_list_ajax'),
+]
+
+# JOVAC Work
+
+urlpatterns += [
+
+    path("jovacs/", jovac_views.jovacs, name="administrator_jovacs"),
+    path("jovac/<slug:slug>", jovac_views.jovac, name="administrator_jovac"),
+    path("jovac/add_course/", jovac_views.add_course, name="administrator_add_jovac"),
+    path("jovac/edit_course/<slug:slug>/", jovac_views.edit_course, name="administrator_edit_jovac"),
+
+    path("enrollment-requests/<slug:slug>", jovac_views.enrollment_requests, name="administrator_jovac_enrollment_requests"),
+    path("approve_enrollment_request/<int:id>", jovac_views.approve_enrollment_request, name="administrator_approve_jovac_request"),
+
+    path("add_assignment/<slug:slug>", jovac_views.add_assignment, name="administrator_add_assignment"),
+    path("edit_assignment/<int:id>", jovac_views.edit_assignment, name="administrator_edit_assignment"),
+
+    path("submissions/<int:id>/", jovac_views.view_submissions, name="view_assignment_submissions"),
+    path("delete_assignment/<int:id>/", jovac_views.delete_assignment, name="administrator_delete_assignment"),
+
 ]

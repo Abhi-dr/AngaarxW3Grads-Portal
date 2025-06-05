@@ -100,13 +100,9 @@ class AIQuestion(models.Model):
 class Course(models.Model):
     
     name = models.CharField(max_length=100, db_index=True)  # Increased length and added index
-    
-    instructor = models.ForeignKey(
-        'accounts.Instructor', 
-        on_delete=models.CASCADE, 
-        blank=True, null=True,
-        related_name='courses'
-    )
+
+    # instructors can be multiple for a single course
+    instructors = models.ManyToManyField('accounts.Instructor', related_name='courses', blank=True, null=True)
     
     description = models.TextField(max_length=500)  # Increased length for better descriptions
     
@@ -130,11 +126,34 @@ class Course(models.Model):
     def __str__(self):
         return self.name or "Unnamed Course"
     
+    def get_instructor_names(self):
+        return ' and '.join([str(instructor.first_name) + " " + str(instructor.last_name) for instructor in self.instructors.all()])
+    
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Course'
         verbose_name_plural = 'Courses'
 
+class CourseRegistration(models.Model):
+
+    STATUS_CHOICES = [
+        ('Approved', 'Approved'),
+        ('Pending', 'Pending'),
+        ('Rejected', 'Rejected'),
+    ]
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
+    
+    registration_date = models.DateTimeField(auto_now_add=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pending')
+
+    class Meta:
+        verbose_name = 'Course Registration'
+        verbose_name_plural = 'Course Registrations'
+
+# ================================================== Assignment ==========================================
 
 class Assignment(models.Model):
     ASSIGNMENT_TYPES = [
@@ -179,6 +198,7 @@ class Assignment(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
     
     # Additional fields
     instructions = models.TextField(blank=True, help_text="Detailed instructions for students")

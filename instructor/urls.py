@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import sheet_views, batch_views, views
+from . import sheet_views, batch_views, views, jovac_views
 
 urlpatterns = [
 
@@ -78,3 +78,20 @@ urlpatterns += [
 
 
 ]
+
+
+# ======================== JOVAC URLS ==========================
+
+urlpatterns += [
+    path("jovacs/", jovac_views.jovacs, name="instructor_jovacs"),
+    path("jovac/<slug:slug>", jovac_views.jovac, name="instructor_jovac"),
+
+    path("enrollment-requests/<slug:slug>", jovac_views.enrollment_requests, name="instructor_jovac_enrollment_requests"),
+
+    path("add_assignment/<slug:slug>", jovac_views.add_assignment, name="instructor_jovac_add_assignment"),
+    path("edit_assignment/<int:id>", jovac_views.edit_assignment, name="instructor_jovac_edit_assignment"),
+
+    path("submissions/<int:id>/", jovac_views.view_submissions, name="instructor_view_assignment_submissions"),
+
+]
+

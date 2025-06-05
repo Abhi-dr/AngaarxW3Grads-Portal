@@ -1,0 +1,91 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Edit Assignment | {{ course.name }}
+{% endblock %}
+
+{% block jovac_active %} 
+active
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Edit Assignment for {{ course.name }}</h5>
+        </div>
+
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Title *</label>
+                    <input type="text" class="form-control" id="title" name="title" value="{{ assignment.title }}"
+                        required placeholder="Enter assignment title">
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description *</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required
+                        placeholder="Write a short description">{{ assignment.description }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="assignment_type" class="form-label">Assignment Type *</label>
+                    <select class="form-select" id="assignment_type" name="assignment_type" required>
+                        {% for value, label in assignment_types %}
+                        <option value="{{ value }}" {% if assignment.assignment_type == value %}selected{% endif %}>
+                            {{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="due_date" class="form-label">Due Date *</label>
+                    <input type="datetime-local" class="form-control" id="due_date" name="due_date"
+                        value="{{ assignment.due_date|date:'Y-m-d\\TH:i' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="max_score" class="form-label">Max Score *</label>
+                    <input type="number" class="form-control" id="max_score" name="max_score" min="1"
+                        value="{{ assignment.max_score }}" required placeholder="Enter maximum score">
+                </div>
+
+                <div class="mb-3">
+                    <label for="status" class="form-label">Status *</label>
+                    <select class="form-select" id="status" name="status" required>
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if assignment.status == value %}selected{% endif %}>{{ label }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="instructions" class="form-label">Instructions</label>
+                    <textarea class="form-control" id="instructions" name="instructions" rows="3"
+                        placeholder="Optional instructions">{{ assignment.instructions }}</textarea>
+                </div>
+
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="allow_late_submission"
+                        name="allow_late_submission" {% if assignment.allow_late_submission %}checked{% endif %}>
+                    <label class="form-check-label" for="allow_late_submission">Allow Late Submission</label>
+                </div>
+
+                <div class="mb-3">
+                    <label for="late_penalty_per_day" class="form-label">Late Penalty per Day (%)</label>
+                    <input type="number" class="form-control" id="late_penalty_per_day" name="late_penalty_per_day"
+                        step="0.01" min="0" max="100" value="{{ assignment.late_penalty_per_day }}"
+                        placeholder="0.00 - 100.00%">
+                </div>
+
+                <button type="submit" class="btn btn-warning w-100">Update Assignment</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
