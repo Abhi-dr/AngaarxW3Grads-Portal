@@ -10,6 +10,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 
+from django.utils.timezone import now
 
 # ========================================== NOTIFICATIONS =========================================
     
@@ -134,6 +135,74 @@ class Course(models.Model):
         verbose_name = 'Course'
         verbose_name_plural = 'Courses'
 
+# ===================================================== COURSE SHEET ===========================================
+
+class CourseSheet(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    
+    slug = models.SlugField(unique=True, blank=True, null=True)
+    
+    thumbnail = models.ImageField(upload_to='course_sheets/thumbnails/', blank=True, null=True)
+    course = models.ManyToManyField(Course, related_name="course_sheets", blank=True)
+    
+    created_by = models.ForeignKey(Instructor, on_delete=models.CASCADE, related_name="course_sheets", blank=True, null=True)
+    
+    custom_order = models.JSONField(default=dict)  # Store order as {assignment_id: position}
+
+    
+    # Is sheet enabled or not
+    is_enabled = models.BooleanField(default=True)
+    
+    is_approved = models.BooleanField(default=False)
+    
+    def is_active(self):
+        """Checks if the sheet is active based on the current time."""
+        return self.is_enabled and (self.start_time <= now() <= self.end_time)
+        
+    
+    def get_ordered_assignments(self):
+        # Get questions in the custom order
+        assignments = list(self.assignments.all())
+        if self.custom_order:
+            assignments.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
+        return assignments
+
+    
+    class Meta:
+        verbose_name = 'Course Sheet'
+        verbose_name_plural = 'Course Sheets'
+
+    def save(self, *args, **kwargs):
+        
+        if not self.slug:
+            text = ""
+        
+            for word in self.name.split():
+                if word.isalnum():
+                    text += word + "-"
+                else:
+                    word = ''.join(e for e in word if e.isalnum())
+                    text += word + "-"
+            
+            # Generate base slug
+            base_slug = text.lower().strip("-")
+            slug = base_slug
+
+            # Check for uniqueness
+            counter = 1
+            while CourseSheet.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+        
+        super(CourseSheet, self).save(*args, **kwargs)
+        
+
+
+# ================================================== COURSE REGISTRATION =======================================
+
 class CourseRegistration(models.Model):
 
     STATUS_CHOICES = [
@@ -174,6 +243,9 @@ class Assignment(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     course = GenericForeignKey('content_type', 'object_id')
+
+    course_sheets = models.ManyToManyField(CourseSheet, related_name="assignments", blank=True)
+
     
     title = models.CharField(max_length=255, db_index=True)
     description = models.TextField()
@@ -184,7 +256,7 @@ class Assignment(models.Model):
         db_index=True
     )
     
-    due_date = models.DateTimeField(db_index=True)
+    due_date = models.DateTimeField(db_index=True, blank=True, null=True)
     
     max_score = models.PositiveIntegerField(default=100)
     
@@ -210,6 +282,10 @@ class Assignment(models.Model):
         default=0,
         help_text="Percentage penalty per day (0-100)"
     )
+
+    # IS IT A TUTORIAL
+    is_tutorial = models.BooleanField(default=False)
+    content = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.title}"

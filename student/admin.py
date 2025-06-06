@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Notification, Anonymous_Message, Feedback, AIQuestion, CourseRegistration
+from .models import Notification, Anonymous_Message, Feedback, AIQuestion, CourseRegistration, CourseSheet
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest, TeamInvite
 
 
@@ -82,6 +82,10 @@ class CourseRegistrationAdmin(admin.ModelAdmin):
     list_display = ['student', 'course', 'registration_date']
     list_filter = ['course', 'registration_date']
 
+@admin.register(CourseSheet)
+class CourseSheetAdmin(admin.ModelAdmin):
+    list_display = ["name",]
+
 class AssignmentInline(admin.TabularInline):
     """Inline for showing assignments in course admin"""
     model = Assignment
@@ -112,28 +116,6 @@ class AssignmentAdmin(admin.ModelAdmin):
     list_per_page = 25
     date_hierarchy = 'due_date'
     
-    fieldsets = (
-        ('Course Assignment', {
-            'fields': ('content_type', 'object_id', 'title', 'description')
-        }),
-        ('Assignment Details', {
-            'fields': ('assignment_type', 'max_score', 'instructions')
-        }),
-        ('Due Date & Submission Settings', {
-            'fields': ('due_date', 'allow_late_submission', 'late_penalty_per_day')
-        }),
-        ('Status', {
-            'fields': ('status',)
-        }),
-        ('Statistics', {
-            'fields': ('submission_count_display', 'overdue_status'),
-            'classes': ('collapse',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
-    )
     
     def submission_count_display(self, obj):
         """Display submission count with link to submissions"""

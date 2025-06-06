@@ -5,9 +5,10 @@ from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
 from accounts.models import Administrator, Student, Instructor
-from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration
+from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration, CourseSheet
 
 from django.contrib.contenttypes.models import ContentType
+from django.utils.dateparse import parse_datetime
 
 from practice.models import Sheet, Submission, Question
 from home.models import FlamesRegistration, FlamesCourse
@@ -45,10 +46,44 @@ def jovac(request, slug):
     instructors = course.instructors.all()
     course_ct = ContentType.objects.get_for_model(Course)
 
-    assignments = Assignment.objects.filter(
-        content_type=course_ct,
-        object_id=course.id
-    )
+    course_sheets = CourseSheet.objects.filter(course = course)
+
+    # assignments = Assignment.objects.filter(
+    #     content_type=course_ct,
+    #     object_id=course.id
+    # )
+
+    # query = request.POST.get("query")
+    # if query:
+    #     assignments = Assignment.objects.filter(
+    #         Q(id__icontains=query) |
+    #         Q(title__icontains=query) |
+    #         Q(description__icontains=query)|
+    #         Q(assignment_type__icontains=query)
+    #         )
+
+
+    parameters = {
+        "course": course,
+        "instructors": instructors,
+        "course_sheets": course_sheets,
+        # "assignments": assignments,
+    }
+
+    return render(request, "administration/jovac/course.html", parameters)
+
+# ======================================== JOVAC SHEETS ======================================
+
+def jovac_sheet(request, course_slug, sheet_slug):
+    course = get_object_or_404(Course, slug=course_slug)
+    instructors = course.instructors.all()
+    course_ct = ContentType.objects.get_for_model(Course)
+
+    course_sheet = CourseSheet.objects.get(course = course, slug=sheet_slug)
+
+    assignments = course_sheet.get_ordered_assignments()
+
+    print(assignments)
 
     query = request.POST.get("query")
     if query:
@@ -62,12 +97,50 @@ def jovac(request, slug):
 
     parameters = {
         "course": course,
+        "sheet": course_sheet,
         "instructors": instructors,
         "assignments": assignments,
-        "query": query
     }
 
-    return render(request, "administration/jovac/course.html", parameters)
+    return render(request, "administration/jovac/course_sheet.html", parameters)
+
+
+# ======================================= EDIT COURSE SHEET ===============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def edit_sheet(request, course_slug, sheet_slug):
+    course = get_object_or_404(Course, slug=course_slug)
+    sheet = get_object_or_404(CourseSheet, slug=sheet_slug, course=course)
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        is_enabled = bool(request.POST.get('is_enabled'))
+        is_approved = bool(request.POST.get('is_approved'))
+        thumbnail = request.FILES.get('thumbnail')
+
+        sheet.name = name
+        sheet.description = description
+        sheet.is_enabled = is_enabled
+        sheet.is_approved = is_approved
+
+        if thumbnail:
+            sheet.thumbnail = thumbnail
+
+        sheet.save()
+
+        messages.success(request, "Sheet updated successfully.")
+        return redirect('administrator_jovac', slug=course.slug)
+
+    context = {
+        'course': course,
+        'sheet': sheet,
+    }
+    return render(request, 'administration/jovac/edit_sheet.html', context)
+
+
 
 # ======================================= ADD COURSE ======================================
 
@@ -130,6 +203,33 @@ def edit_course(request, slug):
 
     return render(request, 'administration/jovac/edit_course.html', parameters)
 
+
+# ======================================= ADD COURSE SHEET ==================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def add_sheet(request, course_slug):
+    course = get_object_or_404(Course, slug=course_slug)
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        description = request.POST.get('description')
+        thumbnail = request.FILES.get('thumbnail')
+        created_by = request.user.instructor if hasattr(request.user, 'instructor') else None
+
+        sheet = CourseSheet.objects.create(
+            name=name,
+            description=description,
+            thumbnail=thumbnail,
+            created_by=created_by,
+        )
+        sheet.course.add(course)
+
+        messages.success(request, "Sheet created successfully.")
+        return redirect('administrator_jovac', slug=course.slug)
+
+    return render(request, 'administration/jovac/add_sheet.html', {'course': course})
+
 # ========================================= Enrollment Requests =============================
 
 def enrollment_requests(request, slug):
@@ -165,41 +265,55 @@ def approve_enrollment_request(request, id):
 # ================================================================================================
 
 # ======================================== ADD ASSIGNMENT ========================================
-
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
-def add_assignment(request, slug):
-    # Get the course object and its content type
-    course = get_object_or_404(Course, slug=slug)
+def add_assignment(request, course_slug, sheet_slug):
+    # Get Course and Sheet
+    course = get_object_or_404(Course, slug=course_slug)
     course_content_type = ContentType.objects.get_for_model(course)
+    course_sheet = get_object_or_404(CourseSheet, slug=sheet_slug, course=course)
 
     if request.method == 'POST':
         title = request.POST.get('title')
-        description = request.POST.get('description')
-        assignment_type = request.POST.get('assignment_type')
-        due_date = request.POST.get('due_date')
-        max_score = request.POST.get('max_score')
-        status = request.POST.get('status')
-        instructions = request.POST.get('instructions')
-        allow_late = bool(request.POST.get('allow_late_submission'))
-        late_penalty = request.POST.get('late_penalty_per_day') or 0
+        is_tutorial = request.POST.get('is_tutorial') == 'on'
 
-        assignment = Assignment.objects.create(
-            content_type=course_content_type,
-            object_id=course.id,
-            title=title,
-            description=description,
-            assignment_type=assignment_type,
-            due_date=due_date,
-            max_score=max_score,
-            status=status,
-            instructions=instructions,
-            allow_late_submission=allow_late,
-            late_penalty_per_day=late_penalty
-        )
+        # Shared fields for both
+        assignment_data = {
+            'content_type': course_content_type,
+            'object_id': course.id,
+            'title': title,
+            'is_tutorial': is_tutorial,
+        }
 
-        assignment.save()
+        if is_tutorial:
+            # For tutorials: use only content field
+            content = request.POST.get('content')
+            assignment_data['content'] = content
+        else:
+            # For regular assignments
+            description = request.POST.get('description')
+            due_date = request.POST.get('due_date')
+            assignment_type = request.POST.get('assignment_type')
+            max_score = request.POST.get('max_score')
+            status = request.POST.get('status')
+            instructions = request.POST.get('instructions')
+            allow_late = bool(request.POST.get('allow_late_submission'))
+            late_penalty = request.POST.get('late_penalty_per_day') or 0
+
+            assignment_data.update({
+                'description': description,
+                'assignment_type': assignment_type,
+                'max_score': max_score,
+                'status': status,
+                'instructions': instructions,
+                'allow_late_submission': allow_late,
+                'late_penalty_per_day': late_penalty,
+            })
+
+        # Save assignment
+        assignment = Assignment.objects.create(**assignment_data)
+        assignment.course_sheets.add(course_sheet)
 
         messages.success(request, "Assignment added successfully.")
         return redirect('administrator_jovac', slug=course.slug)
@@ -219,30 +333,51 @@ def edit_assignment(request, id):
 
     if request.method == "POST":
         title = request.POST.get('title')
-        description = request.POST.get('description')
-        assignment_type = request.POST.get('assignment_type')
-        due_date = request.POST.get('due_date')
-        max_score = request.POST.get('max_score')
-        status = request.POST.get('status')
-        instructions = request.POST.get('instructions')
-        allow_late_submission = bool(request.POST.get('allow_late_submission'))
-        late_penalty = request.POST.get('late_penalty_per_day') or 0
+        is_tutorial = bool(request.POST.get('is_tutorial'))
 
         assignment.title = title
-        assignment.description = description
-        assignment.assignment_type = assignment_type
-        assignment.due_date = due_date
-        assignment.max_score = max_score
-        assignment.status = status
-        assignment.instructions = instructions
-        assignment.allow_late_submission = allow_late_submission
-        assignment.late_penalty_per_day = late_penalty
+        assignment.is_tutorial = is_tutorial
+
+        if is_tutorial:
+            content = request.POST.get('content', '').strip()
+            assignment.content = content
+
+            # Provide default dummy values for required fields to avoid validation error
+            assignment.description = content[:100] or "Tutorial content"
+            assignment.assignment_type = Assignment.ASSIGNMENT_TYPES[0][0]  # first choice as default
+            assignment.due_date = None
+            assignment.max_score = 0  # or 1 if 0 not allowed
+            assignment.status = Assignment.STATUS_CHOICES[0][0]  # first status choice
+            assignment.instructions = ""
+            assignment.allow_late_submission = False
+            assignment.late_penalty_per_day = 0
+
+        else:
+            description = request.POST.get('description')
+            assignment_type = request.POST.get('assignment_type')
+            due_date_str = request.POST.get('due_date')
+            max_score = request.POST.get('max_score')
+            status = request.POST.get('status')
+            instructions = request.POST.get('instructions')
+            allow_late_submission = bool(request.POST.get('allow_late_submission'))
+            late_penalty = request.POST.get('late_penalty_per_day') or 0
+
+            assignment.description = description
+            assignment.assignment_type = assignment_type
+            assignment.due_date = parse_datetime(due_date_str) if due_date_str else None
+            assignment.max_score = max_score
+            assignment.status = status
+            assignment.instructions = instructions
+            assignment.allow_late_submission = allow_late_submission
+            assignment.late_penalty_per_day = late_penalty
+
+            assignment.content = ""
 
         try:
             assignment.full_clean()
             assignment.save()
             messages.success(request, "Assignment updated successfully!")
-            return redirect('administrator_jovac', course.slug)
+            return redirect('administrator_jovac_sheet', course.slug, )
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
@@ -252,7 +387,6 @@ def edit_assignment(request, id):
         'assignment_types': Assignment.ASSIGNMENT_TYPES,
         'status_choices': Assignment.STATUS_CHOICES,
     })
-
 
 # ======================================== DELETE ASSIGNMENT (STANDARD NON-AJAX VERSION) ===================================
 

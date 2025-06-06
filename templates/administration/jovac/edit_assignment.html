@@ -20,67 +20,88 @@ active
             <form method="POST">
                 {% csrf_token %}
 
+                <!-- Is Tutorial Checkbox -->
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="is_tutorial" name="is_tutorial" {% if assignment.is_tutorial %}checked{% endif %}>
+                    <label class="form-check-label" for="is_tutorial">Is this a Tutorial?</label>
+                </div>
+
+                <!-- Title -->
                 <div class="mb-3">
                     <label for="title" class="form-label">Title *</label>
                     <input type="text" class="form-control" id="title" name="title" value="{{ assignment.title }}"
                         required placeholder="Enter assignment title">
                 </div>
 
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description *</label>
-                    <textarea class="form-control" id="description" name="description" rows="4" required
-                        placeholder="Write a short description">{{ assignment.description }}</textarea>
+                <!-- Tutorial Content (only visible if tutorial) -->
+                <div class="mb-3 tutorial-field">
+                    <label for="content" class="form-label">Tutorial Content *</label>
+                    <textarea class="form-control" id="content" name="content" rows="6"
+                        placeholder="Enter HTML content for the tutorial">{% if assignment.is_tutorial %}{{ assignment.content|safe }}{% endif %}</textarea>
                 </div>
 
-                <div class="mb-3">
-                    <label for="assignment_type" class="form-label">Assignment Type *</label>
-                    <select class="form-select" id="assignment_type" name="assignment_type" required>
-                        {% for value, label in assignment_types %}
-                        <option value="{{ value }}" {% if assignment.assignment_type == value %}selected{% endif %}>
-                            {{ label }}</option>
-                        {% endfor %}
-                    </select>
+                <!-- Content Preview (only visible if tutorial) -->
+                <div class="mb-3 tutorial-field">
+                    <label class="form-label">Content Preview</label>
+                    <div id="content-preview" style="border:1px solid #ccc; padding:15px; min-height:200px; background:#fff; overflow:auto;"></div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="due_date" class="form-label">Due Date *</label>
-                    <input type="datetime-local" class="form-control" id="due_date" name="due_date"
-                        value="{{ assignment.due_date|date:'Y-m-d\\TH:i' }}" required>
-                </div>
+                <!-- Assignment Fields (only visible if NOT tutorial) -->
+                <div class="assignment-fields">
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="4"
+                            placeholder="Write a short description">{{ assignment.description }}</textarea>
+                    </div>
 
-                <div class="mb-3">
-                    <label for="max_score" class="form-label">Max Score *</label>
-                    <input type="number" class="form-control" id="max_score" name="max_score" min="1"
-                        value="{{ assignment.max_score }}" required placeholder="Enter maximum score">
-                </div>
+                    <div class="mb-3">
+                        <label for="assignment_type" class="form-label">Assignment Type *</label>
+                        <select class="form-select" id="assignment_type" name="assignment_type" required>
+                            {% for value, label in assignment_types %}
+                            <option value="{{ value }}" {% if assignment.assignment_type == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <div class="mb-3">
-                    <label for="status" class="form-label">Status *</label>
-                    <select class="form-select" id="status" name="status" required>
-                        {% for value, label in status_choices %}
-                        <option value="{{ value }}" {% if assignment.status == value %}selected{% endif %}>{{ label }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+                    <div class="mb-3">
+                        <label for="due_date" class="form-label">Due Date *</label>
+                        <input type="datetime-local" class="form-control" id="due_date" name="due_date"
+                            value="{{ assignment.due_date|date:'Y-m-d\\TH:i' }}">
+                    </div>
 
-                <div class="mb-3">
-                    <label for="instructions" class="form-label">Instructions</label>
-                    <textarea class="form-control" id="instructions" name="instructions" rows="3"
-                        placeholder="Optional instructions">{{ assignment.instructions }}</textarea>
-                </div>
+                    <div class="mb-3">
+                        <label for="max_score" class="form-label">Max Score *</label>
+                        <input type="number" class="form-control" id="max_score" name="max_score" min="0"
+                            value="{{ assignment.max_score }}" placeholder="Enter maximum score">
+                    </div>
 
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" id="allow_late_submission"
-                        name="allow_late_submission" {% if assignment.allow_late_submission %}checked{% endif %}>
-                    <label class="form-check-label" for="allow_late_submission">Allow Late Submission</label>
-                </div>
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status *</label>
+                        <select class="form-select" id="status" name="status" required>
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if assignment.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
 
-                <div class="mb-3">
-                    <label for="late_penalty_per_day" class="form-label">Late Penalty per Day (%)</label>
-                    <input type="number" class="form-control" id="late_penalty_per_day" name="late_penalty_per_day"
-                        step="0.01" min="0" max="100" value="{{ assignment.late_penalty_per_day }}"
-                        placeholder="0.00 - 100.00%">
+                    <div class="mb-3">
+                        <label for="instructions" class="form-label">Instructions</label>
+                        <textarea class="form-control" id="instructions" name="instructions" rows="3"
+                            placeholder="Optional instructions">{{ assignment.instructions }}</textarea>
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="allow_late_submission"
+                            name="allow_late_submission" {% if assignment.allow_late_submission %}checked{% endif %}>
+                        <label class="form-check-label" for="allow_late_submission">Allow Late Submission</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="late_penalty_per_day" class="form-label">Late Penalty per Day (%)</label>
+                        <input type="number" class="form-control" id="late_penalty_per_day" name="late_penalty_per_day"
+                            step="0.01" min="0" max="100" value="{{ assignment.late_penalty_per_day }}"
+                            placeholder="0.00 - 100.00%">
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-warning w-100">Update Assignment</button>
@@ -88,4 +109,58 @@ active
         </div>
     </div>
 </div>
+
+<script>
+    const isTutorialCheckbox = document.getElementById('is_tutorial');
+    const tutorialFields = document.querySelectorAll('.tutorial-field');
+    const assignmentFields = document.querySelector('.assignment-fields');
+    const contentTextarea = document.getElementById('content');
+    const contentPreview = document.getElementById('content-preview');
+
+    function toggleFields() {
+        if (isTutorialCheckbox.checked) {
+            tutorialFields.forEach(el => el.classList.remove('d-none'));
+            assignmentFields.classList.add('d-none');
+        } else {
+            tutorialFields.forEach(el => el.classList.add('d-none'));
+            assignmentFields.classList.remove('d-none');
+        }
+    }
+
+    function updatePreview() {
+        if (contentTextarea && contentPreview) {
+            contentPreview.innerHTML = contentTextarea.value;
+        }
+    }
+
+    // Initial toggle and preview update
+    toggleFields();
+    if (isTutorialCheckbox.checked) {
+        updatePreview();
+    }
+
+    // Event listeners
+    isTutorialCheckbox.addEventListener('change', () => {
+        toggleFields();
+        if (isTutorialCheckbox.checked) {
+            updatePreview();
+        }
+    });
+
+    if (contentTextarea) {
+        contentTextarea.addEventListener('input', updatePreview);
+    }
+
+    // Limit late penalty to max 100
+    const latePenaltyInput = document.getElementById('late_penalty_per_day');
+    if (latePenaltyInput) {
+        latePenaltyInput.addEventListener('input', function () {
+            if (this.value > 100) {
+                alert("Late penalty cannot exceed 100%");
+                this.value = 100;
+            }
+        });
+    }
+</script>
+
 {% endblock %}
