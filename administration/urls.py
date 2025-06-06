@@ -240,13 +240,20 @@ urlpatterns += [
 
     path("jovacs/", jovac_views.jovacs, name="administrator_jovacs"),
     path("jovac/<slug:slug>", jovac_views.jovac, name="administrator_jovac"),
+
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>", jovac_views.jovac_sheet, name="administrator_jovac_sheet"),
+
+
     path("jovac/add_course/", jovac_views.add_course, name="administrator_add_jovac"),
     path("jovac/edit_course/<slug:slug>/", jovac_views.edit_course, name="administrator_edit_jovac"),
+
+    path('jovac/<slug:course_slug>/add-sheet/', jovac_views.add_sheet, name='administrator_add_jovac_sheet'),
+    path('course/<slug:course_slug>/sheet/<slug:sheet_slug>/edit/', jovac_views.edit_sheet, name='administrator_edit_jovac_sheet'),
 
     path("enrollment-requests/<slug:slug>", jovac_views.enrollment_requests, name="administrator_jovac_enrollment_requests"),
     path("approve_enrollment_request/<int:id>", jovac_views.approve_enrollment_request, name="administrator_approve_jovac_request"),
 
-    path("add_assignment/<slug:slug>", jovac_views.add_assignment, name="administrator_add_assignment"),
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>/add_assignment/", jovac_views.add_assignment, name="administrator_add_assignment"),
     path("edit_assignment/<int:id>", jovac_views.edit_assignment, name="administrator_edit_assignment"),
 
     path("submissions/<int:id>/", jovac_views.view_submissions, name="view_assignment_submissions"),
