@@ -118,5 +118,7 @@ urlpatterns += [
     path("assignments/<int:assignment_id>/submission", jovac_views.view_submission, name="view_submission"),
     path("delete_submission/<int:submission_id>", jovac_views.delete_submission, name="delete_submission"),
 
+
+
 ]
 

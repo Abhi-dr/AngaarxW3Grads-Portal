@@ -153,7 +153,6 @@ urlpatterns += [
     path("sheet_leaderboard/<slug:slug>", sheet_views.leaderboard, name="administrator_leaderboard"),
     path("sheet_leaderboard_api/<slug:slug>", sheet_views.sheet_leaderboard, name="administrator_sheet_leaderboard"),
     
-    path("reorder/<slug:slug>/", sheet_views.reorder, name="administrator_reorder"),
     path('update-sheet-order/<int:sheet_id>/', sheet_views.update_sheet_order, name='update_sheet_order'),
 
     path("administrator_set_sheet_timer/<int:sheet_id>/", sheet_views.set_sheet_timer, name="administrator_set_sheet_timer"),
@@ -258,5 +257,9 @@ urlpatterns += [
 
     path("submissions/<int:id>/", jovac_views.view_submissions, name="view_assignment_submissions"),
     path("delete_assignment/<int:id>/", jovac_views.delete_assignment, name="administrator_delete_assignment"),
+
+    path('course-sheet/<slug:slug>/reorder/', jovac_views.reorder_assignments, name='reorder_course_sheet_assignments'),
+    path('course-sheet/<int:id>/update-order/', jovac_views.update_assignment_order, name='update_course_sheet_order'),
+
 
 ]

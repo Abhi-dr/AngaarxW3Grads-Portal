@@ -434,3 +434,30 @@ def view_submissions(request, id):
     
     return render(request, "administration/jovac/submissions.html", parameters)
 
+
+
+@admin_required
+def reorder_assignments(request, slug):
+    course_sheet = get_object_or_404(CourseSheet, slug=slug)
+    assignments = course_sheet.get_ordered_assignments()
+    administrator = Administrator.objects.get(id=request.user.id)
+
+    return render(request, 'administration/jovac/reorder.html', {
+        "administrator": administrator,
+        "course_sheet": course_sheet,
+        "assignments": assignments
+    })
+
+
+@admin_required
+def update_assignment_order(request, id):
+    course_sheet = get_object_or_404(CourseSheet, id=id)
+    order = request.POST.getlist("order[]")  # JS will send order[]=1&order[]=2
+
+    try:
+        new_order = {str(assignment_id): index for index, assignment_id in enumerate(order)}
+        course_sheet.custom_order = new_order
+        course_sheet.save()
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)})
