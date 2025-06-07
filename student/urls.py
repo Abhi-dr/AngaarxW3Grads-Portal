@@ -109,6 +109,9 @@ urlpatterns += [
 
     path("enroll_jovac/<slug:slug>/", jovac_views.enroll_jovac, name="student_enroll_jovac"),
     path("jovac/<slug:slug>/", jovac_views.jovac, name="student_jovac"),
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>", jovac_views.jovac_sheet, name="student_jovac_sheet"),
+    path("jovac/tutorial/<int:id>/", jovac_views.view_jovac_tutorial, name="view_jovac_tutorial"),
+
 
     # path("assignments", jovac_views.assignments, name="assignments"),
     path("submit_assignment/<int:assignment_id>", jovac_views.submit_assignment, name="submit_assignment"),

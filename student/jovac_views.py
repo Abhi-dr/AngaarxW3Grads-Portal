@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 
 
 from accounts.models import Student, Instructor
-from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration
+from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration, CourseSheet
 from practice.models import POD, Submission, Question, Sheet, Streak
 from home.models import Alumni, ReferralCode
 from django.db.models import Max, Sum
@@ -26,24 +26,26 @@ def jovac(request, slug):
 
     content_type = ContentType.objects.get_for_model(Course)
     
-    assignments = Assignment.objects.filter(
-        content_type=content_type,
-        object_id=course.id
-    )
+    # assignments = Assignment.objects.filter(
+    #     content_type=content_type,
+    #     object_id=course.id
+    # )
 
-    submitted_assignment_ids = AssignmentSubmission.objects.filter(
-        assignment__content_type=content_type,
-        assignment__object_id=course.id
-        ).values_list('assignment_id', flat=True)
+    # submitted_assignment_ids = AssignmentSubmission.objects.filter(
+    #     assignment__content_type=content_type,
+    #     assignment__object_id=course.id
+    #     ).values_list('assignment_id', flat=True)
     
+    course_sheets = CourseSheet.objects.filter(course=course)
 
     context = {
         'course': course,
         'instructors': instructors,
-        'assignments': assignments,
-        "submitted_assignments": submitted_assignment_ids,
+        "course_sheets": course_sheets,
+        # 'assignments': assignments,
+        # "submitted_assignments": submitted_assignment_ids,
     }
-    return render(request, 'student/jovac/jovac.html', context)
+    return render(request, 'student/jovac/jovac_sheets.html', context)
 
 @login_required(login_url="login")
 def enroll_jovac(request, slug):
@@ -65,6 +67,39 @@ def enroll_jovac(request, slug):
 
     messages.success(request, "Your enrollment request in this JOVAC has been submitted successfully!")
     return redirect('my_batches')
+
+
+# ======================================== JOVAC SHEETS ======================================
+
+def jovac_sheet(request, course_slug, sheet_slug):
+    course = get_object_or_404(Course, slug=course_slug)
+    instructors = course.instructors.all()
+    course_ct = ContentType.objects.get_for_model(Course)
+
+    course_sheet = CourseSheet.objects.get(course = course, slug=sheet_slug)
+
+    assignments = course_sheet.get_ordered_assignments()
+
+    print(assignments)
+
+    query = request.POST.get("query")
+    if query:
+        assignments = Assignment.objects.filter(
+            Q(id__icontains=query) |
+            Q(title__icontains=query) |
+            Q(description__icontains=query)|
+            Q(assignment_type__icontains=query)
+            )
+
+
+    parameters = {
+        "course": course,
+        "sheet": course_sheet,
+        "instructors": instructors,
+        "assignments": assignments,
+    }
+
+    return render(request, "student/jovac/course_sheet.html", parameters)
 
 
 # =======================================================================================================
@@ -231,6 +266,33 @@ def submit_assignment(request, assignment_id):
     
     return render(request, "student/jovac/submit_assignment.html", parameters)
 
+# =========================================== VIEW TUTORIAL =============================================
+
+@login_required(login_url="login")
+def view_jovac_tutorial(request, id):
+    """
+    View a JOVAC tutorial
+    """
+    # Get the tutorial by ID
+    tutorial = get_object_or_404(Assignment, id=id)
+    course = tutorial.course
+
+    
+    # Check if the user is enrolled in the course
+    student = request.user.student
+    
+    if not CourseRegistration.objects.filter(student=student, course=course).exists():
+        messages.error(request, "You are not enrolled in this course")
+        return redirect('my_batches')
+    
+    # Render the tutorial page
+    parameters = {
+        'tutorial': tutorial,
+        'course': course,
+        'student': student,
+    }
+    
+    return render(request, 'student/jovac/view_tutorial.html', parameters)
 
 # =========================================== VIEW SUBMISSION =============================================
 

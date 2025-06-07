@@ -1,0 +1,33 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ assignment.title }} | Tutorial
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card shadow">
+        <div class="card-body">
+            <h2 class="card-title mb-3">{{ tutorial.title }}</h2>
+
+            <div class="alert alert-info">
+                This is a tutorial. No submission required.
+            </div>
+
+            <hr>
+
+            <!-- Render the HTML tutorial content safely -->
+            <div id="tutorial-content">
+                {{ tutorial.content|safe }}
+            </div>
+
+            <hr>
+
+            <!-- create a back to sheet page button using js history-->
+            <button class="btn btn-secondary" onclick="history.back()">Back to Sheet</button>
+            
+        </div>
+    </div>
+</div>
+{% endblock %}
