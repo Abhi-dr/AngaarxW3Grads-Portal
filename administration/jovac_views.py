@@ -289,7 +289,9 @@ def add_assignment(request, course_slug, sheet_slug):
         if is_tutorial:
             # For tutorials: use only content field
             content = request.POST.get('content')
+            tutorial_link = request.POST.get('tutorial_link', '').strip()
             assignment_data['content'] = content
+            assignment_data['tutorial_link'] = tutorial_link
         else:
             # For regular assignments
             description = request.POST.get('description')

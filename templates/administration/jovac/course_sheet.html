@@ -9,6 +9,35 @@
 active
 {% endblock %}
 
+{% block extra_css %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<style>
+    .fa-youtube-play {
+        font-size: 220%;
+        color: red
+    }
+
+    .text-color {
+        color: white;
+    }
+
+    [data-bs-theme="dark"] {
+        .fa-youtube-play {
+            font-size: 220%;
+            color: red;
+        }
+
+        .text-color {
+            color: rgb(33, 33, 33);
+            font-weight: 500;
+        }
+    }
+</style>
+
+{% endblock %}
+
 {% block body %}
 
 <div class="container-fluid">
@@ -175,8 +204,13 @@ active
                             </td>
 
                             <td class="border-bottom-0">
-                                 <p class="fw-semibold mb-0">
-                                    -
+                                <p class="fw-semibold mb-0">
+                                    {% if assignment.tutorial_link %}
+                                    <a href="{{ assignment.tutorial_link }}" target="_blank">
+                                        <i class="fa fa-youtube-play"></i></a>
+                                    {% else %}
+                                    <span class="text-muted fw-normal">No Tutorial Link</span>
+                                    {% endif %}
                                 </p>
                             </td>
 
@@ -216,7 +250,7 @@ active
 
                             {% endif %}
 
-                            
+
 
 
                             </td>

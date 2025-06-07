@@ -286,6 +286,7 @@ class Assignment(models.Model):
     # IS IT A TUTORIAL
     is_tutorial = models.BooleanField(default=False)
     content = models.TextField(blank=True, null=True)
+    tutorial_link = models.URLField(blank=True, null=True, help_text="Link to the tutorial video")
 
     def __str__(self):
         return f"{self.title}"
