@@ -333,6 +333,8 @@ def edit_assignment(request, id):
     assignment = get_object_or_404(Assignment, id=id)
     course = assignment.course
 
+    print(assignment.content)
+
     if request.method == "POST":
         title = request.POST.get('title')
         is_tutorial = bool(request.POST.get('is_tutorial'))
@@ -343,6 +345,8 @@ def edit_assignment(request, id):
         if is_tutorial:
             content = request.POST.get('content', '').strip()
             assignment.content = content
+
+            print(content)
 
             # Provide default dummy values for required fields to avoid validation error
             assignment.description = content[:100] or "Tutorial content"
@@ -379,7 +383,7 @@ def edit_assignment(request, id):
             assignment.full_clean()
             assignment.save()
             messages.success(request, "Assignment updated successfully!")
-            return redirect('administrator_jovac_sheet', course.slug, )
+            return redirect('administrator_jovac_sheet', course.slug, assignment.course_sheets.first().slug)
         except Exception as e:
             messages.error(request, f"Error: {e}")
 
