@@ -54,11 +54,7 @@ def my_batches(request):
     approved_courses = all_courses.filter(registration_status='Approved')
     pending_courses = all_courses.filter(registration_status='Pending')
     rejected_courses = all_courses.filter(registration_status='Rejected')
-    other_courses = all_courses.exclude(
-        Q(registration_status='Approved') |
-        Q(registration_status='Pending') |
-        Q(registration_status='Rejected')
-    )
+    other_courses = [course for course in all_courses if course not in approved_courses and course not in pending_courses and course not in rejected_courses]
 
 
     parameters = {
