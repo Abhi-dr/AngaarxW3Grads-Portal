@@ -298,6 +298,7 @@ def add_assignment(request, course_slug, sheet_slug):
             due_date = request.POST.get('due_date')
             assignment_type = request.POST.get('assignment_type')
             max_score = request.POST.get('max_score')
+            evaluation_script = request.FILES.get('evaluation_script')
             status = request.POST.get('status')
             instructions = request.POST.get('instructions')
             allow_late = bool(request.POST.get('allow_late_submission'))
@@ -307,6 +308,7 @@ def add_assignment(request, course_slug, sheet_slug):
                 'description': description,
                 'assignment_type': assignment_type,
                 'max_score': max_score,
+                "evaluation_script": evaluation_script,
                 'status': status,
                 'instructions': instructions,
                 'allow_late_submission': allow_late,

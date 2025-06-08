@@ -84,6 +84,17 @@ active
                             value="{{ assignment.max_score }}" placeholder="Enter maximum score">
                     </div>
 
+                    <!-- submission script  -->
+
+                    <div class="mb-3">
+                        <label for="evaluation_script" class="form-label">Submission Script</label>
+                        <textarea class="form-control" id="evaluation_script" name="evaluation_script" rows="6"
+                            placeholder="Enter the script to run on submission (optional)">{{ assignment.evaluation_script }}</textarea>
+                        <small class="form-text text-muted">This script will be executed when the assignment is
+                            submitted.</small>
+                    </div>
+
+
                     <div class="mb-3">
                         <label for="status" class="form-label">Status *</label>
                         <select class="form-select" id="status" name="status" required>
