@@ -283,6 +283,11 @@ class Assignment(models.Model):
         help_text="Percentage penalty per day (0-100)"
     )
 
+    evaluation_script = models.TextField(
+        blank=True, 
+        help_text="Python script for automated evaluation (if applicable)"
+    )
+
     # IS IT A TUTORIAL
     is_tutorial = models.BooleanField(default=False)
     content = models.TextField(blank=True, null=True)

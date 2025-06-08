@@ -7,7 +7,8 @@ from django.db.models import Q
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 from django.contrib.contenttypes.models import ContentType
-
+import sys
+import traceback
 
 from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration, CourseSheet
@@ -238,6 +239,17 @@ def submit_assignment(request, assignment_id):
         # Process submission based on type
         if assignment.assignment_type == 'Coding':
             submission.submission_code = request.POST.get('submission_code')
+            submission.save()
+
+            # Running the evaluator
+
+            if assignment.evaluation_script:
+                try:
+                    run_evaluation(assignment, submission)
+                except Exception as e:
+                    messages.error(request, f"Error during evaluation: {str(e)}")
+                    return redirect('student_jovac', slug=course.slug)
+
         elif assignment.assignment_type == 'Text':
             submission.submission_text = request.POST.get('submission_text')
         elif assignment.assignment_type == 'File':
@@ -265,6 +277,37 @@ def submit_assignment(request, assignment_id):
     }
     
     return render(request, "student/jovac/submit_assignment.html", parameters)
+
+# =========================================== RUN EVALUATION ============================================
+
+def run_evaluation(assignment: Assignment, submission: AssignmentSubmission):
+    code = assignment.evaluation_script
+    student_input = submission.submission_code or ""
+
+    local_vars = {
+    'submission_code': submission.submission_code,
+    'score': 0,
+        'feedback': [],
+    }
+    exec(assignment.evaluation_script, {}, local_vars)
+
+    try:
+        exec(code, {}, local_vars)
+    except Exception:
+        feedback = traceback.format_exc()
+        local_vars['feedback'] = [f"Execution error:\n{feedback}"]
+        local_vars['score'] = 0
+
+    score = local_vars.get('score', 0)
+    feedback_data = "\n".join(local_vars.get('feedback', []))
+
+    # Save results
+    submission.score = score
+    submission.feedback = feedback_data
+    submission.status = 'Accepted'
+    submission.graded_at = timezone.now()
+    submission.save()
+
 
 # =========================================== VIEW TUTORIAL =============================================
 
