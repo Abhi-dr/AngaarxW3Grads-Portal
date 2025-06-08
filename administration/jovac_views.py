@@ -352,8 +352,8 @@ def edit_assignment(request, id):
         if is_tutorial:
             content = request.POST.get('content', '').strip()
             assignment.content = content
-
-            print(content)
+            tutorial_link = request.POST.get('tutorial_link', '').strip()
+            assignment.tutorial_link = tutorial_link
 
             # Provide default dummy values for required fields to avoid validation error
             assignment.description = content[:100] or "Tutorial content"
