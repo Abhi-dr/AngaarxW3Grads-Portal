@@ -189,7 +189,7 @@ def edit_course(request, slug):
         selected_instructors = request.POST.getlist('instructors')
 
         if 'thumbnail' in request.FILES:
-            course.thumbnail = request.FILES['thumbnail']
+            course.thumbnail = request.FILES.get('thumbnail')
 
         # Clear existing instructors and add the new ones
         course.instructors.clear()
