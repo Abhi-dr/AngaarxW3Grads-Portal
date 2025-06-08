@@ -95,6 +95,8 @@ urlpatterns += [
     path("jovac/<slug:course_slug>/<slug:sheet_slug>/add_assignment/", jovac_views.add_assignment, name="instructor_add_assignment"),
 
     path("edit_assignment/<int:id>", jovac_views.edit_assignment, name="instructor_jovac_edit_assignment"),
+    path("delete_assignment/<int:id>/", jovac_views.delete_assignment, name="instructor_delete_assignment"),
+
     path("submissions/<int:id>/", jovac_views.view_submissions, name="instructor_view_assignment_submissions"),
 
 

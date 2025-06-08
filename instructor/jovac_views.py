@@ -301,6 +301,21 @@ def edit_assignment(request, id):
     })
 
 
+# ======================================== DELETE ASSIGNMENT ==================================
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def delete_assignment(request, id):
+        
+    assignment = Assignment.objects.get(id=id)
+    assignment.delete()
+    
+    messages.success(request, "Assignment deleted successfully!")
+    
+    return redirect("instructor_jovac", slug=assignment.course.slug)
+
+
 # ======================================== VIEW SUBMISSIONS ===================================
 
 @login_required(login_url='login')
