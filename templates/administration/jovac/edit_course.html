@@ -44,8 +44,8 @@ active
                                     <select class="form-select form-control" name="instructors" id="instructors"
                                         multiple>
                                         {% for instructor in instructors %}
-                                        <option value="{{ instructor.id }}" {% if instructor in course.instructors.all
-                                            %}selected{% endif %}>
+                                        <option value="{{ instructor.id }}" 
+                                        {% if instructor in course.instructors.all %}selected{% endif %}>
                                             {{ instructor.first_name }} {{ instructor.last_name }}
                                         </option>
                                         {% endfor %}
