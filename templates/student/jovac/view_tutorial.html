@@ -6,33 +6,42 @@
 {% endblock %}
 
 {% block extra_css %}
-
-
 {% endblock %}
-
 
 {% block body %}
 <div class="container-fluid">
     <div class="card shadow">
         <div class="card-body">
             <h2 class="card-title mb-3">{{ tutorial.title }}</h2>
- <!-- create a back to sheet page button using js history-->
+
+            <!-- Buttons at the top -->
             <button class="btn btn-danger" onclick="history.back()">Previous</button>
             <a class="btn btn-success float-end" href="{% url 'get_next_jovac_assignment' tutorial.id %}">Next</a>
-            
+
             <hr>
 
-            <!-- Render the HTML tutorial content safely -->
+            <!-- Render HTML content -->
             <div id="tutorial-content">
                 {{ tutorial.content|safe }}
             </div>
 
             <hr>
 
-            <!-- create a back to sheet page button using js history-->
+            <!-- Embedded YouTube Video -->
+            {% if tutorial.tutorial_link %}
+            <div class="ratio ratio-16x9 mb-3">
+                <iframe src="https://www.youtube.com/embed/{{ youtube_video_id }}"
+                        title="Tutorial Video"
+                        allowfullscreen
+                        frameborder="0"></iframe>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            <!-- Buttons at the bottom -->
             <button class="btn btn-danger" onclick="history.back()">Previous</button>
             <a class="btn btn-success float-end" href="{% url 'get_next_jovac_assignment' tutorial.id %}">Next</a>
-            
         </div>
     </div>
 </div>

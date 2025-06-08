@@ -335,11 +335,14 @@ def view_jovac_tutorial(request, id):
         messages.error(request, "You are not enrolled in this course")
         return redirect('my_batches')
     
+    youtube_video_id = tutorial.tutorial_link.replace("https://www.youtube.com/watch?v=", "")
+
     # Render the tutorial page
     parameters = {
         'tutorial': tutorial,
         'course': course,
         'student': student,
+        "youtube_video_id": youtube_video_id,
     }
     
     return render(request, 'student/jovac/view_tutorial.html', parameters)
@@ -357,7 +360,12 @@ def get_next_jovac_assignment(request, id):
     if not next_assignment:
         messages.error(request, "No more assignments available in this course sheet.")
         course = course_sheet.course.first()
-        return redirect('student_jovac', slug=course.slug)
+        if current_assignment.is_tutorial:
+            # If the current assignment is a tutorial, redirect to the course sheet
+            return redirect('view_jovac_tutorial', id=current_assignment.id)
+        else:
+            # Otherwise, redirect to the course sheet
+            return redirect('submit_assignment', assignment_id=current_assignment.id)
 
 
     else:

@@ -415,6 +415,8 @@ class AssignmentSubmission(models.Model):
     # Legacy fields (keeping for backward compatibility)
     extra_info = models.TextField(blank=True)
 
+    # mark_as_completed = models.BooleanField(default=False, help_text="Mark submission as completed")
+
     def clean(self):
         """Validate submission based on assignment type"""
         assignment_type = self.assignment.assignment_type

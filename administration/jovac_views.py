@@ -152,6 +152,7 @@ def add_course(request):
         name = request.POST.get('name')
         description = request.POST.get('description')
         my_instructors = request.POST.getlist('instructors')
+        thumbnail = request.FILES.get('thumbnail')
 
         course = Course(
             name=name,
@@ -164,6 +165,7 @@ def add_course(request):
             instructor = Instructor.objects.get(id=instructor_id)
             course.instructors.add(instructor)
 
+        course.thumbnail = thumbnail
         course.save()
 
         messages.success(request, "Course added successfully!")
@@ -185,6 +187,9 @@ def edit_course(request, slug):
         course.name = request.POST.get('name')
         course.description = request.POST.get('description')
         selected_instructors = request.POST.getlist('instructors')
+
+        if 'thumbnail' in request.FILES:
+            course.thumbnail = request.FILES['thumbnail']
 
         # Clear existing instructors and add the new ones
         course.instructors.clear()
