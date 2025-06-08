@@ -20,22 +20,23 @@
 
             <hr>
 
-            <!-- Render HTML content -->
-            <div id="tutorial-content">
-                {{ tutorial.content|safe }}
-            </div>
-
-            <hr>
-
-            <!-- Embedded YouTube Video -->
+             <!-- Embedded YouTube Video -->
             {% if tutorial.tutorial_link %}
             <div class="ratio ratio-16x9 mb-3">
                 <iframe src="https://www.youtube.com/embed/{{ youtube_video_id }}"
                         title="Tutorial Video"
                         allowfullscreen
+                        class=" rounded rounded-3"
                         frameborder="0"></iframe>
             </div>
             {% endif %}
+
+            <hr>
+
+            <!-- Render HTML content -->
+            <div id="tutorial-content">
+                {{ tutorial.content|safe }}
+            </div>
 
             <hr>
 
