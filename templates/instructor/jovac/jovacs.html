@@ -57,6 +57,12 @@ Instructor | JOVAC
 
             <div class="card">
 
+                                <!-- Thumbnail with lazy loading -->
+                <a href="{% url 'instructor_jovac' course.slug %}">
+                    <img src="{{ course.thumbnail.url }}" class="card-img-top lazy-load" alt="${sheet.name}">
+                </a>
+
+
                 <div class="card-body">
                     <h5 class="card-title">{{ course.name }}🔥</h5>
 
