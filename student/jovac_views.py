@@ -73,6 +73,7 @@ def enroll_jovac(request, slug):
 # ======================================== JOVAC SHEETS ======================================
 
 def jovac_sheet(request, course_slug, sheet_slug):
+    student = request.user.student
     course = get_object_or_404(Course, slug=course_slug)
     instructors = course.instructors.all()
     course_ct = ContentType.objects.get_for_model(Course)
@@ -80,6 +81,11 @@ def jovac_sheet(request, course_slug, sheet_slug):
     course_sheet = CourseSheet.objects.get(course = course, slug=sheet_slug)
 
     assignments = course_sheet.get_ordered_assignments()
+
+    submissions = AssignmentSubmission.objects.filter(student=student)
+
+    submitted_assignment_ids = list(submissions.values_list('assignment_id', flat=True))
+
 
     print(assignments)
 
@@ -98,6 +104,7 @@ def jovac_sheet(request, course_slug, sheet_slug):
         "sheet": course_sheet,
         "instructors": instructors,
         "assignments": assignments,
+        "submitted_assignments": submitted_assignment_ids,
     }
 
     return render(request, "student/jovac/course_sheet.html", parameters)

@@ -155,7 +155,7 @@ active
 
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#1
+                                    Link🔗
                                 </h6>
                             </th>
                             <th class="border-bottom-0 justify-content-center">
@@ -209,7 +209,14 @@ active
                                     <a href="{{ assignment.tutorial_link }}" target="_blank">
                                         <i class="fa fa-youtube-play"></i></a>
                                     {% else %}
-                                    <span class="text-muted fw-normal">No Tutorial Link</span>
+                                        {% if assignment.id in submitted_assignments %}
+                                        <a href="{% url 'view_submission' assignment.id %}"
+                                            class="btn btn-outline-success mx-1">View Submission</a>
+                                        {% elif assignment.due_date < current_time %} <button
+                                            class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>
+                                        {% else %}
+                                        -
+                                        {% endif %}
                                     {% endif %}
                                 </p>
                             </td>
@@ -241,7 +248,7 @@ active
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
-                                    <span class="text-muted fw-normal">No Tutorial Link</span>
+                                    <span class="text-muted fw-normal">-</span>
                                 </div>
                             </td>
 
@@ -260,11 +267,20 @@ active
                                     <a class="btn btn-success delete-btn"
                                         href="{% url 'view_jovac_tutorial' assignment.id %}">View More</a>
                                     {% else %}
-                                    <a class="btn btn-primary delete-btn"
-                                        href="{% url 'submit_assignment' assignment.id %}">Submit</a>
-                                    {% endif %}
+                                    {% if assignment.id in submitted_assignments %}
+                                    <a href="{% url 'view_submission' assignment.id %}"
+                                        class="btn btn-outline-success mx-1">View Submission</a>
+                                    {% elif assignment.due_date < current_time %} <button
+                                        class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>
+                                        {% else %}
+                                        <a href="{% url 'submit_assignment' assignment.id %}"
+                                            class="btn btn-outline-primary mx-1" id="viewbtn">Submit Assignment</a>
+                                        {% endif %}
+                                        {% endif %}
                                 </div>
                             </td>
+
+
                         </tr>
                         {% endfor %}
 
