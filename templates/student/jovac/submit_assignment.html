@@ -125,7 +125,8 @@ Student -> Submit Assignment
                 <div class="mb-3">
                     <label for="submission_link" class="form-label
                         ">Your Link:
-                        <div class="star">*</div></label>
+                        <div class="star">*</div>
+                    </label>
                     <input type="url" id="submission_link" name="submission_link" class="form-control" required
                         placeholder="https://maihuangaari.com">
                 </div>
@@ -143,6 +144,13 @@ Student -> Submit Assignment
                 <button type="submit" class="btn btn-outline-success mt-3"
                     onclick="return confirm('Are you sure?')">Submit</button>
             </form>
+
+            <div class="mt-4">
+                <button class="btn btn-secondary" onclick="history.back()">Previous</button>
+                <a class="btn btn-secondary float-end"
+                    href="{% url 'get_next_jovac_assignment' assignment.id %}">Next</a>
+            </div>
+
         </div>
     </div>
 
@@ -165,13 +173,13 @@ Student -> Submit Assignment
         enableEmmet: true,
     });
 
-    document.getElementById('assignmentForm').addEventListener('submit', function(event) {
+    document.getElementById('assignmentForm').addEventListener('submit', function (event) {
         const code = editor.getValue();
         document.getElementById('submission_code').value = code;
         console.log('Code submitted: ', code); // Add this line to verify the code
     });
 
-    
+
 
 </script>
 

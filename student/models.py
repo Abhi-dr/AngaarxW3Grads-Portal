@@ -4,6 +4,7 @@ from django.core.validators import FileExtensionValidator
 from accounts.models import Student, Instructor
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest
 from home.models import FlamesCourse
+from django.contrib import messages
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -167,6 +168,25 @@ class CourseSheet(models.Model):
         if self.custom_order:
             assignments.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
         return assignments
+    
+    
+
+    def get_next_assignment(self, current_assignment):
+        """Get the next assignment based on custom order."""
+        assignments = self.get_ordered_assignments()
+        if not assignments:
+            return None
+        
+        current_index = assignments.index(current_assignment)
+
+        # If current assignment is the last one, return None
+        if current_index == len(assignments) - 1:
+            return None
+        
+
+        if current_index + 1 < len(assignments):
+            return assignments[current_index + 1]
+        return None
 
     
     class Meta:
@@ -282,6 +302,7 @@ class Assignment(models.Model):
         default=0,
         help_text="Percentage penalty per day (0-100)"
     )
+
 
     evaluation_script = models.TextField(
         blank=True, 

@@ -344,6 +344,39 @@ def view_jovac_tutorial(request, id):
     
     return render(request, 'student/jovac/view_tutorial.html', parameters)
 
+def get_next_jovac_assignment(request, id):
+    """
+    Get the next assignment for a JOVAC course
+    """
+    # Get the current assignment
+    course_sheet = get_object_or_404(CourseSheet, assignments__id=id)
+    current_assignment = get_object_or_404(Assignment, id=id)
+    
+    next_assignment = course_sheet.get_next_assignment(current_assignment)
+
+    if not next_assignment:
+        messages.error(request, "No more assignments available in this course sheet.")
+        course = course_sheet.course.first()
+        return redirect('student_jovac', slug=course.slug)
+
+
+    else:
+        if next_assignment.is_tutorial:
+            # If the next assignment is a tutorial, redirect to the tutorial view
+            return redirect('view_jovac_tutorial', id=next_assignment.id)
+        else:
+            # Otherwise, redirect to the assignment submission page
+            # Ensure the course slug is passed correctly
+            if next_assignment.content_type.model == 'course':
+                course_slug = next_assignment.course.slug
+            else:
+                course_slug = course_sheet.course.slug
+            
+            return redirect('submit_assignment', assignment_id=next_assignment.id)
+            
+        # Redirect to the assignment submission page
+
+
 # =========================================== VIEW SUBMISSION =============================================
 
 @login_required(login_url="login")

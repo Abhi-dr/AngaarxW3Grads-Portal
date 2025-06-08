@@ -135,11 +135,6 @@ active
                                     Title🗒️
                                 </h6>
                             </th>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Description📝
-                                </h6>
-                            </th>
 
                             <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">
@@ -177,17 +172,12 @@ active
                             </td>
                             <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ assignment.title }}">{{ assignment.title|truncatechars:10 }}</h6>
+                                    title="{{ assignment.title }}">{{ assignment.title|truncatechars:30 }}</h6>
 
                             </td>
 
                             {% if assignment.is_tutorial %}
 
-                            <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal">
-                                    -
-                                </p>
-                            </td>
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
@@ -223,12 +213,6 @@ active
 
                             {% else %}
 
-                            <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ assignment.description }}">
-                                    {{ assignment.description|truncatechars:30 }}
-                                </p>
-                            </td>
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
