@@ -306,6 +306,7 @@ def add_assignment(request, course_slug, sheet_slug):
             evaluation_script = request.FILES.get('evaluation_script')
             status = request.POST.get('status')
             instructions = request.POST.get('instructions')
+            downloadable_file = request.FILES.get('downloadable_content')
             allow_late = bool(request.POST.get('allow_late_submission'))
             late_penalty = request.POST.get('late_penalty_per_day') or 0
 
@@ -316,6 +317,7 @@ def add_assignment(request, course_slug, sheet_slug):
                 "evaluation_script": evaluation_script,
                 'status': status,
                 'instructions': instructions,
+                'downloadable_content': downloadable_file,
                 'allow_late_submission': allow_late,
                 'late_penalty_per_day': late_penalty,
             })
@@ -372,6 +374,8 @@ def edit_assignment(request, id):
             max_score = request.POST.get('max_score')
             status = request.POST.get('status')
             instructions = request.POST.get('instructions')
+            downloadable_file = request.FILES.get('downloadable_content')
+
             allow_late_submission = bool(request.POST.get('allow_late_submission'))
             late_penalty = request.POST.get('late_penalty_per_day') or 0
 
@@ -381,6 +385,8 @@ def edit_assignment(request, id):
             assignment.max_score = max_score
             assignment.status = status
             assignment.instructions = instructions
+            if downloadable_file:
+                assignment.downloadable_file = downloadable_file
             assignment.allow_late_submission = allow_late_submission
             assignment.late_penalty_per_day = late_penalty
 

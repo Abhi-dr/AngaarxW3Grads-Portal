@@ -59,6 +59,13 @@ Student -> Submit Assignment
         <div class="card-body">
             <p class="card-text">{{ assignment.description|linebreaks }}</p>
         </div>
+
+        {% if assignment.downloadable_file %}
+        <a href="{{ assignment.downloadable_file.url }}" download="{{ assignment.downloadable_file.url }}" class="btn btn-primary mb-3 mx-3">
+            Download Assignment
+        </a>
+        {% endif %}
+
         <div class="card-footer d-sm-flex justify-content-between align-items-center">
             <div class="card-footer-link mb-4 mb-sm-0">
                 <p class="card-text d-inline">

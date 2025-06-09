@@ -306,7 +306,18 @@ class Assignment(models.Model):
 
     evaluation_script = models.TextField(
         blank=True, 
+        null=True,
         help_text="Python script for automated evaluation (if applicable)"
+    )
+
+    downloadable_file = models.FileField(
+        upload_to='assignments/files/%Y/%m/', 
+        blank=True, 
+        null=True,
+        validators=[FileExtensionValidator(
+            allowed_extensions=['pdf', 'doc', 'docx', 'zip', 'txt', 'py', 'js', 'html', 'css']
+        )],
+        help_text="Allowed formats: PDF, DOC, DOCX, ZIP, TXT, PY, JS, HTML, CSS"
     )
 
     # IS IT A TUTORIAL
