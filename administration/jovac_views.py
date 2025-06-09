@@ -317,7 +317,7 @@ def add_assignment(request, course_slug, sheet_slug):
                 "evaluation_script": evaluation_script,
                 'status': status,
                 'instructions': instructions,
-                'downloadable_content': downloadable_file,
+                'downloadable_file': downloadable_file,
                 'allow_late_submission': allow_late,
                 'late_penalty_per_day': late_penalty,
             })
