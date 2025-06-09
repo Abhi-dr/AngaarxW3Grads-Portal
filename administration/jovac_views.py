@@ -342,7 +342,6 @@ def edit_assignment(request, id):
     assignment = get_object_or_404(Assignment, id=id)
     course = assignment.course
 
-    print(assignment.content)
 
     if request.method == "POST":
         title = request.POST.get('title')
