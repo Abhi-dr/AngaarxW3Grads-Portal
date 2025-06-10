@@ -30,6 +30,9 @@ from practice.models import Streak
 
 # ======================================== JOVAC ======================================
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
 def jovacs(request):
     courses = Course.objects.all()
 
@@ -41,6 +44,9 @@ def jovacs(request):
 
 # ======================================== JOVAC COURSE ======================================
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
 def jovac(request, slug):
     course = get_object_or_404(Course, slug=slug)
     instructors = course.instructors.all()
@@ -74,6 +80,9 @@ def jovac(request, slug):
 
 # ======================================== JOVAC SHEETS ======================================
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
 def jovac_sheet(request, course_slug, sheet_slug):
     course = get_object_or_404(Course, slug=course_slug)
     instructors = course.instructors.all()
@@ -144,6 +153,9 @@ def edit_sheet(request, course_slug, sheet_slug):
 
 # ======================================= ADD COURSE ======================================
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
 def add_course(request):
 
     instructors = Instructor.objects.all()
@@ -179,6 +191,9 @@ def add_course(request):
 
 # ============================= EDIT COURSE =============================
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
 def edit_course(request, slug):
     course = Course.objects.get(slug=slug)
     instructors = Instructor.objects.all()
@@ -338,6 +353,9 @@ def add_assignment(request, course_slug, sheet_slug):
 
 # ======================================== EDIT ASSIGNMENT ======================================
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
 def edit_assignment(request, id):
     assignment = get_object_or_404(Assignment, id=id)
     course = assignment.course
@@ -424,6 +442,7 @@ def delete_assignment(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
 def view_submissions(request, id):
             
     assignment = Assignment.objects.get(id=id)
@@ -448,6 +467,8 @@ def view_submissions(request, id):
 
 
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
 @admin_required
 def reorder_assignments(request, slug):
     course_sheet = get_object_or_404(CourseSheet, slug=slug)
@@ -461,6 +482,8 @@ def reorder_assignments(request, slug):
     })
 
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
 @admin_required
 def update_assignment_order(request, id):
     course_sheet = get_object_or_404(CourseSheet, id=id)

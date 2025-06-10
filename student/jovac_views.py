@@ -21,6 +21,7 @@ from django.db.models import Max, Sum
 # ============================================== JOVAC ==================================================
 # =======================================================================================================
 
+@login_required(login_url="login")
 def jovac(request, slug):
     course = get_object_or_404(Course, slug=slug)
     instructors = course.instructors.all()
@@ -72,6 +73,7 @@ def enroll_jovac(request, slug):
 
 # ======================================== JOVAC SHEETS ======================================
 
+@login_required(login_url="login")
 def jovac_sheet(request, course_slug, sheet_slug):
     student = request.user.student
     course = get_object_or_404(Course, slug=course_slug)
@@ -286,7 +288,7 @@ def submit_assignment(request, assignment_id):
     return render(request, "student/jovac/submit_assignment.html", parameters)
 
 # =========================================== RUN EVALUATION ============================================
-
+@login_required(login_url="login")
 def run_evaluation(assignment: Assignment, submission: AssignmentSubmission):
     code = assignment.evaluation_script
     student_input = submission.submission_code or ""
@@ -347,6 +349,7 @@ def view_jovac_tutorial(request, id):
     
     return render(request, 'student/jovac/view_tutorial.html', parameters)
 
+@login_required(login_url="login")
 def get_next_jovac_assignment(request, id):
     """
     Get the next assignment for a JOVAC course
