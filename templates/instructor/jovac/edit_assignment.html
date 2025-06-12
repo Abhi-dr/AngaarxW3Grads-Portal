@@ -17,7 +17,7 @@ active
         </div>
 
         <div class="card-body">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <!-- Is Tutorial Checkbox -->
@@ -108,6 +108,19 @@ active
                         <label for="instructions" class="form-label">Instructions</label>
                         <textarea class="form-control" id="instructions" name="instructions" rows="3"
                             placeholder="Optional instructions">{{ assignment.instructions }}</textarea>
+                    </div>
+
+                    <!-- uploading downloadable content -->
+                    <div class="mb-3">
+                        <label for="downloadable_content" class="form-label">Downloadable Content</label>
+                        {% if assignment.downloadable_file %}
+                        <div class="mb-2">
+                            <a href="{{ assignment.downloadable_file.url }}" download="{{ assignment.downloadable_file.name }}"
+                                class="btn btn-primary">Download Current File</a>
+                        </div>
+                        {% endif %}
+                        <input type="file" class="form-control" id="downloadable_content" name="downloadable_content">
+                        <small class="form-text text-muted">Upload any files related to the assignment (optional).</small>
                     </div>
 
                     <div class="form-check mb-2">

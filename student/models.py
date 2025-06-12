@@ -314,9 +314,6 @@ class Assignment(models.Model):
         upload_to='assignments/files/%Y/%m/', 
         blank=True, 
         null=True,
-        validators=[FileExtensionValidator(
-            allowed_extensions=['pdf', 'doc', 'docx', 'zip', 'txt', 'py', 'js', 'html', 'css']
-        )],
         help_text="Allowed formats: PDF, DOC, DOCX, ZIP, TXT, PY, JS, HTML, CSS"
     )
 

@@ -16,7 +16,7 @@ active
             <h5 class="card-title fw-semibold mb-0">Add Assignment for {{ course.name }}</h5>
         </div>
         <div class="card-body">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <!-- Is Tutorial Checkbox -->
@@ -108,8 +108,7 @@ active
                     <!-- uploading downloadable content -->
                     <div class="mb-3">
                         <label for="downloadable_content" class="form-label">Downloadable Content</label>
-                        <input type="file" class="form-control" id="downloadable_content" name="downloadable_content"
-                            accept=".zip,.pdf,.docx,.txt">
+                        <input type="file" class="form-control" id="downloadable_content" name="downloadable_content">
                         <small class="form-text text-muted">Upload any files related to the assignment (optional).</small>
                     </div>
 

@@ -8,6 +8,7 @@ from accounts.models import Administrator, Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration, CourseSheet
 
 from django.contrib.contenttypes.models import ContentType
+from django.utils.dateparse import parse_datetime
 
 from practice.models import Sheet, Submission, Question
 from home.models import FlamesRegistration, FlamesCourse
@@ -209,8 +210,6 @@ def approve_all_jovac_enrollment_requests(request, id):
 # ================================================================================================
 
 # ======================================== ADD ASSIGNMENT ========================================
-
-# ======================================== ADD ASSIGNMENT ========================================
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 def add_assignment(request, course_slug, sheet_slug):
@@ -285,29 +284,54 @@ def edit_assignment(request, id):
     assignment = get_object_or_404(Assignment, id=id)
     course = assignment.course
 
+
     if request.method == "POST":
         title = request.POST.get('title')
-        description = request.POST.get('description')
-        assignment_type = request.POST.get('assignment_type')
-        due_date = request.POST.get('due_date')
-        max_score = request.POST.get('max_score')
-        status = request.POST.get('status')
-        instructions = request.POST.get('instructions')
-        downloadable_file = request.FILES.get('downloadable_content')
-        allow_late_submission = bool(request.POST.get('allow_late_submission'))
-        late_penalty = request.POST.get('late_penalty_per_day') or 0
+        is_tutorial = bool(request.POST.get('is_tutorial'))
 
         assignment.title = title
-        assignment.description = description
-        assignment.assignment_type = assignment_type
-        assignment.due_date = due_date
-        assignment.max_score = max_score
-        assignment.status = status
-        assignment.instructions = instructions
-        if downloadable_file:
-            assignment.downloadable_file = downloadable_file
-        assignment.allow_late_submission = allow_late_submission
-        assignment.late_penalty_per_day = late_penalty
+        assignment.is_tutorial = is_tutorial
+
+        if is_tutorial:
+            content = request.POST.get('content', '').strip()
+            assignment.content = content
+            tutorial_link = request.POST.get('tutorial_link', '').strip()
+            assignment.tutorial_link = tutorial_link
+
+            # Provide default dummy values for required fields to avoid validation error
+            assignment.description = content[:100] or "Tutorial content"
+            assignment.assignment_type = Assignment.ASSIGNMENT_TYPES[0][0]  # first choice as default
+            assignment.due_date = None
+            assignment.max_score = 0  # or 1 if 0 not allowed
+            assignment.status = Assignment.STATUS_CHOICES[0][0]  # first status choice
+            assignment.instructions = ""
+            assignment.allow_late_submission = False
+            assignment.late_penalty_per_day = 0
+
+        else:
+            description = request.POST.get('description')
+            assignment_type = request.POST.get('assignment_type')
+            due_date_str = request.POST.get('due_date')
+            max_score = request.POST.get('max_score')
+            status = request.POST.get('status')
+            instructions = request.POST.get('instructions')
+            downloadable_file = request.FILES.get('downloadable_content')
+
+            allow_late_submission = bool(request.POST.get('allow_late_submission'))
+            late_penalty = request.POST.get('late_penalty_per_day') or 0
+
+            assignment.description = description
+            assignment.assignment_type = assignment_type
+            assignment.due_date = parse_datetime(due_date_str) if due_date_str else None
+            assignment.max_score = max_score
+            assignment.status = status
+            assignment.instructions = instructions
+            if downloadable_file:
+                assignment.downloadable_file = downloadable_file
+            assignment.allow_late_submission = allow_late_submission
+            assignment.late_penalty_per_day = late_penalty
+
+            assignment.content = ""
 
         try:
             assignment.full_clean()
