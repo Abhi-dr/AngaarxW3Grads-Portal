@@ -99,9 +99,8 @@ urlpatterns += [
 
     path("submissions/<int:id>/", jovac_views.view_submissions, name="instructor_view_assignment_submissions"),
 
-
-
     path("approve_enrollment_request/<int:id>", jovac_views.approve_enrollment_request, name="instructor_approve_jovac_request"),
+    path("approve_all/<int:id>", jovac_views.approve_all_jovac_enrollment_requests, name="approve_all_jovac_enrollment_requests"),
 
     path('course-sheet/<slug:slug>/reorder/', jovac_views.reorder_assignments, name='instructor_reorder_course_sheet_assignments'),
     path('course-sheet/<int:id>/update-order/', jovac_views.update_assignment_order, name='instructor_update_course_sheet_order'),

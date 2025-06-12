@@ -184,6 +184,24 @@ def approve_enrollment_request(request, id):
     return redirect(reverse('instructor_jovac_enrollment_requests', args=[registration.course.slug]))
 
 
+# ============================= APPROVE ALL ENROLLMENT REQUESTS =============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def approve_all_jovac_enrollment_requests(request, id):
+    course = get_object_or_404(Course, id=id)
+    
+    # Get all pending registrations for the course
+    pending_registrations = CourseRegistration.objects.filter(course=course, status='pending')
+    
+    # Update each registration to 'Approved'
+    for registration in pending_registrations:
+        registration.status = 'Approved'
+        registration.save()
+
+    messages.success(request, "All enrollment requests approved successfully.")
+    
+    return redirect(reverse('instructor_jovac_enrollment_requests', args=[course.slug]))
 
 
 # ================================================================================================
