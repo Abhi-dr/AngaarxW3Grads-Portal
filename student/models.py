@@ -104,7 +104,7 @@ class Course(models.Model):
     name = models.CharField(max_length=100, db_index=True)  # Increased length and added index
 
     # instructors can be multiple for a single course
-    instructors = models.ManyToManyField('accounts.Instructor', related_name='courses', blank=True, null=True)
+    instructors = models.ManyToManyField('accounts.Instructor', related_name='courses', blank=True)
     
     description = models.TextField(max_length=500)  # Increased length for better descriptions
     
