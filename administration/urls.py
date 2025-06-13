@@ -200,6 +200,11 @@ urlpatterns += [
     path("flames/registrations/ajax/", flames_views.admin_registrations_ajax, name="admin_registrations_ajax"),
     
     path("flames/course/<int:course_id>/", flames_views.admin_course_detail, name="admin_course_detail"),
+    path("flames/course/<slug:course_slug>/sessions/", flames_views.admin_course_sessions, name="admin_course_sessions"),
+    path("flames/course/<slug:course_slug>/sessions/add/", flames_views.admin_add_session, name="admin_add_session"),
+    path("flames/session/<int:session_id>/edit/", flames_views.admin_edit_session, name="admin_edit_session"),
+    path("flames/session/<int:session_id>/delete/", flames_views.admin_delete_session, name="admin_delete_session"),
+    
     path("flames/course/add/", flames_views.admin_add_course, name="admin_add_course"),
     path("flames/course/edit/<int:course_id>/", flames_views.admin_edit_course, name="admin_edit_course"),
     path("flames/toggle-course-status/", flames_views.admin_toggle_course_status, name="admin_toggle_course_status"),

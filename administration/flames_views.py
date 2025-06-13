@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from openpyxl import Workbook
-from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember
+from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session
 from accounts.models import Instructor, Student
 
 @login_required
@@ -68,6 +68,7 @@ def flames_registrations(request):
     
     return render(request, 'administration/flames/registrations.html', context)
 
+# ======================================== FLAMES COURSE ===================================
 
 @login_required
 def admin_course_detail(request, course_id):
@@ -86,6 +87,75 @@ def admin_course_detail(request, course_id):
     }
     
     return render(request, 'administration/flames/course_detail.html', context)
+
+
+# ======================================== COURSE SESSIONS =================================
+
+@login_required(login_url='login')
+def admin_add_session(request, course_slug):
+    course = get_object_or_404(FlamesCourse, slug=course_slug)
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        date = request.POST.get('date')
+        joining_link = request.POST.get('joining_link')
+        recording_url = request.POST.get('recording_url')
+        start_datetime = request.POST.get('start_datetime')
+        end_datetime = request.POST.get('end_datetime')
+
+        Session.objects.create(
+            course=course,
+            title=title,
+            date=date,
+            joining_link=joining_link,
+            recording_url=recording_url,
+            start_datetime=start_datetime,
+            end_datetime=end_datetime
+        )
+        messages.success(request, 'Session added successfully.')
+        return redirect('admin_course_sessions', course_slug=course.slug)
+    return redirect('admin_course_sessions', course_slug=course.slug)
+
+@login_required(login_url='login')
+def admin_edit_session(request, session_id):
+    session = get_object_or_404(Session, id=session_id)
+    if request.method == 'POST':
+        session.title = request.POST.get('title')
+        session.date = request.POST.get('date')
+        session.joining_link = request.POST.get('joining_link')
+        session.recording_url = request.POST.get('recording_url')
+        session.start_datetime = request.POST.get('start_datetime')
+        session.end_datetime = request.POST.get('end_datetime')
+        session.save()
+        messages.success(request, 'Session updated successfully.')
+        return redirect('admin_course_sessions', course_slug=session.course.slug)
+    return redirect('admin_course_sessions', course_slug=session.course.slug)
+
+@login_required(login_url='login')
+def admin_delete_session(request, session_id):
+    session = get_object_or_404(Session, id=session_id)
+    course_slug = session.course.slug
+    session.delete()
+    messages.success(request, 'Session deleted successfully.')
+    return redirect('admin_course_sessions', course_slug=course_slug)
+
+@login_required(login_url='login')
+def admin_course_sessions(request, course_slug):
+    """
+    View for managing course sessions
+    """
+    course = get_object_or_404(FlamesCourse, slug=course_slug)
+
+    sessions = course.sessions.all()
+    total_sessions = sessions.count()
+
+    context = {
+        'course': course,
+        'sessions': sessions,
+        'total_sessions': total_sessions,
+    }
+
+    return render(request, 'administration/flames/course_sessions.html', context)
+
 
 
 @login_required
