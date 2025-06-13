@@ -268,3 +268,66 @@ class FlamesTeamMember(models.Model):
     def __str__(self):
         return f"{self.team.name} - {self.member.first_name}"
 
+
+# ======================== SESSION MODEL ========================
+
+class Session(models.Model):
+    title = models.CharField(max_length=200)
+    date = models.DateTimeField()
+    joining_link = models.URLField(help_text="Link to join the session")
+    
+    course = models.ForeignKey(FlamesCourse, on_delete=models.CASCADE, related_name='sessions')
+
+    recording_url = models.URLField(blank=True, null=True, help_text="URL to the session recording")
+
+    start_datetime = models.DateTimeField(help_text="Start date and time of the session")
+    end_datetime = models.DateTimeField(help_text="End date and time of the session")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_upcoming(self):
+        """Check if the session is upcoming based on the start date and time."""
+        from django.utils import timezone
+        return self.start_datetime > timezone.now()
+    
+    def is_past(self):
+        """Check if the session is past based on the end date and time."""
+        from django.utils import timezone
+        return self.end_datetime < timezone.now()
+    
+    def is_live(self):
+        """Check if the session is currently live based on the start and end date and time."""
+        from django.utils import timezone
+        now = timezone.now()
+        return self.start_datetime <= now <= self.end_datetime
+    
+
+    def get_status(self):
+        """Get the status of the session."""
+        if self.is_upcoming():
+            return "Upcoming"
+        elif self.is_live():
+            return "Live"
+        elif self.is_past():
+            return "Finished"
+        else:
+            return "Unknown"
+        
+    def get_status_color(self):
+        """Get the color associated with the session status."""
+        if self.is_upcoming():
+            return "warning"
+        elif self.is_live():
+            return "success"
+        elif self.is_past():
+            return "secondary"
+        else:
+            return "dark"
+    
+    class Meta:
+        ordering = ['-start_datetime']
+        verbose_name = "Session"
+        verbose_name_plural = "Sessions"
+    
+    def __str__(self):
+        return f"{self.title} - {self.course.title}"

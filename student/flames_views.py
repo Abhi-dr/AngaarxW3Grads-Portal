@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
-from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember
+from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember, Session
 
 # ======================================= FLAMES MAIN PAGE ================================
 
-@login_required
+@login_required(login_url='login')
 def student_flames(request):
     # Get registrations where the user is directly registered
     direct_registrations = FlamesRegistration.objects.filter(
@@ -60,7 +60,7 @@ def student_flames(request):
 
 # ====================================== VIEW REGISTRATION ================================
 
-@login_required
+@login_required(login_url='login')
 def view_registration(request, slug):
     course = get_object_or_404(FlamesCourse, slug=slug)
     
@@ -112,10 +112,35 @@ def view_registration(request, slug):
     return render(request, 'student/flames/view_registration.html', parameters)
 
 
+# ========================================= MY COURSE =====================================
 
+@login_required(login_url='login')
+def my_course(request, slug):
 
+    course = get_object_or_404(FlamesCourse, slug=slug)
 
+    registration = FlamesRegistration.objects.filter(
+        user=request.user,
+        course=course
+    ).select_related('course', 'team').first()
 
+    if not registration:
+        messages.error(request, "You are not registered for this course.")
+        return redirect('student_flames')
+    
+    sessions = Session.objects.filter(
+        course=course
+    ).order_by('start_datetime')
+
+    print(f"Sessions for course {course.slug}: {sessions}")
+
+    parameters = {
+        'registration': registration,
+        'course': course,
+        'sessions': sessions,
+    }
+
+    return render(request, 'student/flames/my_course.html', parameters)
 
 
 

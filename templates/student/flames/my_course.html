@@ -1,0 +1,192 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}
+{{ course.title|truncatechars:20 }} | Sessions
+{% endblock %}
+
+{% block summer_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">{{ course.title }} Sessions😎</span>
+                <span class="fs-4"> | 🔥Isi Me To Angaar Hai🔥</span>
+
+                <a href="{% url 'student_view_registration' registration.course.slug %}" class="btn btn-primary btn-sm float-end">Registration Details</a>
+
+            </h3>
+            
+            
+        </div>
+    </div>
+
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- create a search bar -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+
+                    {% if query %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic, Instructor or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query"
+                        value="{{ query }}">
+
+                    {% else %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic, Instructor or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
+
+                    {% endif %}
+
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <!-- make a button to clear the search -->
+                    <a href="#" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="fw-semibold mb-4">Angaari Sabha 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Topic🗒️
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    By👨‍🏫
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    At🕒
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Status
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for session in sessions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ session.topic }}">{{ session.title|truncatechars:20 }}</h6>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span style="font-weight: bold;"> {{ session.course.instructor }}
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span> {{ session.start_datetime|date }} </span>
+                                    <br>
+                                    <span style="font-weight: bold;">
+                                        @{{ session.start_datetime|time }} </span>
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0 fs-4">
+                                    <span class="badge bg-{{ session.get_status_color }}">{{session.get_status }}</span>
+                                </h6>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    {% if session.is_live %}
+                                    <a href="{{ session.link }}" target="_blank"
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Join🔥</a>
+                                    {% elif session.is_upcoming %}
+                                    <a href="#"
+                                        class="btn btn-outline-{{ session.get_status_color }} text-black float-end">Wait😎</a>
+                                    {% elif session.is_past %}
+                                    <a href="{{ session.recording_url }}" target="_blank"
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Watch Recording👀</a>
+
+                                    {% else %}
+                                    <button class="btn btn-outline-indigo float-end">Session Ended🔥</button>
+
+                                    {% endif %}
+                                </div>
+
+            </div>
+            </td>
+            </tr>
+
+            {% endfor %}
+
+            </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+</div>
+
+
+{% endblock %}

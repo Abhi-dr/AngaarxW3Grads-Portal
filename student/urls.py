@@ -40,6 +40,7 @@ urlpatterns = [
 urlpatterns += [
     path('summer-training/', flames_views.student_flames, name='student_flames'),
     
+    path("summer-training/<slug:slug>/", flames_views.my_course, name="flames_my_course"),
     path("course/<slug:slug>/registration", flames_views.view_registration, name="student_view_registration"),
     
     

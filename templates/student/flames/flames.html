@@ -703,7 +703,10 @@ active
                 </div>
                 <span class="flames-status status-{{ registration.status|lower }}">Registration
                     {{ registration.status }}</span>
-                <a href="{% url 'student_view_registration' registration.course.slug %}"
+                <!-- <a href="{% url 'student_view_registration' registration.course.slug %}"
+                    class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a> -->
+
+                <a href="{% url 'flames_my_course' registration.course.slug %}"
                     class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
 
                 {% if registration.status != 'Completed' and registration.status != 'Rejected' %}

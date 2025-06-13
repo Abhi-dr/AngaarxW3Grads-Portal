@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
@@ -118,4 +118,5 @@ admin.site.register(Alumni, AlumniAdmin)
 admin.site.register(ReferralCode, ReferralCodeAdmin)
 admin.site.register(FlamesTeam, FlamesTeamAdmin)
 admin.site.register(FlamesTeamMember, FlamesTeamMemberAdmin)
+admin.site.register(Session)
 
