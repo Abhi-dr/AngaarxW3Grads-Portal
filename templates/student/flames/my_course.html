@@ -162,10 +162,10 @@ active
                                         class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Join🔥</a>
                                     {% elif session.is_upcoming %}
                                     <a href="#"
-                                        class="btn btn-outline-{{ session.get_status_color }} text-black float-end">Wait😎</a>
+                                        class="btn btn-outline-{{ session.get_status_color }} float-end">Wait😎</a>
                                     {% elif session.is_past %}
                                     <a href="{{ session.recording_url }}" target="_blank"
-                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Watch Recording👀</a>
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Recording👀</a>
 
                                     {% else %}
                                     <button class="btn btn-outline-indigo float-end">Session Ended🔥</button>
