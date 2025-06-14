@@ -2,6 +2,9 @@ from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
 from accounts.models import Student
+
+from datetime import datetime, timedelta
+
     
 # ======================= JOB ARTICLE MODEL ======================
 
@@ -273,7 +276,6 @@ class FlamesTeamMember(models.Model):
 
 class Session(models.Model):
     title = models.CharField(max_length=200)
-    date = models.DateTimeField()
     joining_link = models.URLField(help_text="Link to join the session")
     
     course = models.ForeignKey(FlamesCourse, on_delete=models.CASCADE, related_name='sessions')
@@ -281,7 +283,7 @@ class Session(models.Model):
     recording_url = models.URLField(blank=True, null=True, help_text="URL to the session recording")
 
     start_datetime = models.DateTimeField(help_text="Start date and time of the session")
-    end_datetime = models.DateTimeField(help_text="End date and time of the session")
+    end_datetime = models.DateTimeField(help_text="End date and time of the session", blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -323,6 +325,16 @@ class Session(models.Model):
             return "secondary"
         else:
             return "dark"
+        
+    # set the end time automatically to 1 hour after the start time if not provided
+    def save(self, *args, **kwargs):
+        if not self.end_datetime:
+            if isinstance(self.start_datetime, str):
+                from django.utils.dateparse import parse_datetime
+                self.start_datetime = parse_datetime(self.start_datetime)
+
+            self.end_datetime = self.start_datetime + timedelta(hours=1)
+        super(Session, self).save(*args, **kwargs)
     
     class Meta:
         ordering = ['-start_datetime']

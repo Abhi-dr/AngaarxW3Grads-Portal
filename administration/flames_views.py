@@ -96,20 +96,16 @@ def admin_add_session(request, course_slug):
     course = get_object_or_404(FlamesCourse, slug=course_slug)
     if request.method == 'POST':
         title = request.POST.get('title')
-        date = request.POST.get('date')
         joining_link = request.POST.get('joining_link')
         recording_url = request.POST.get('recording_url')
         start_datetime = request.POST.get('start_datetime')
-        end_datetime = request.POST.get('end_datetime')
 
         Session.objects.create(
             course=course,
             title=title,
-            date=date,
             joining_link=joining_link,
             recording_url=recording_url,
             start_datetime=start_datetime,
-            end_datetime=end_datetime
         )
         messages.success(request, 'Session added successfully.')
         return redirect('admin_course_sessions', course_slug=course.slug)
@@ -120,11 +116,9 @@ def admin_edit_session(request, session_id):
     session = get_object_or_404(Session, id=session_id)
     if request.method == 'POST':
         session.title = request.POST.get('title')
-        session.date = request.POST.get('date')
         session.joining_link = request.POST.get('joining_link')
         session.recording_url = request.POST.get('recording_url')
         session.start_datetime = request.POST.get('start_datetime')
-        session.end_datetime = request.POST.get('end_datetime')
         session.save()
         messages.success(request, 'Session updated successfully.')
         return redirect('admin_course_sessions', course_slug=session.course.slug)
