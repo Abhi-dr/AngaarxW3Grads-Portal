@@ -709,7 +709,7 @@ active
                 <a href="{% url 'flames_my_course' registration.course.slug %}"
                     class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
 
-                {% if registration.status != 'Completed' and registration.status != 'Rejected' %}
+                {% if registration.status == 'Pending' %}
 
                 <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button" data-registration-id="{{ registration.id }}">
                     Pay Now
@@ -808,11 +808,19 @@ active
 
             </div>
 
-            {% if not registration.payment_id and registration.status != 'Completed' %}
+            {% if not registration.payment_id and registration.status == 'Pending' %}
             <div class="m-2 justify-center text-center">
                 <a id="reg-{{ registration.id }}" class="payment-button btn w-50"
                     data-registration-id="{{ registration.id }}">
                     Complete My Registration🔥
+                </a>
+            </div>
+
+            {% else %}
+
+            <div class="m-2 justify-center text-center">
+                <a class=" btn w-50" href="{% url 'flames_my_course' registration.course.slug %}">
+                    My Sessions🔥
                 </a>
             </div>
 

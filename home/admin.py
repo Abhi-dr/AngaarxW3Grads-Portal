@@ -22,8 +22,8 @@ class CommentAdmin(admin.ModelAdmin):
 # ================== FLAMES ===================
 
 class FlamesCourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'instructor', 'is_active', 'created_at')
-    list_filter = ('is_active', 'instructor')
+    list_display = ('title', 'is_active', 'created_at')
+    list_filter = ('is_active',)
     search_fields = ('title', 'subtitle', 'description')
     prepopulated_fields = {'slug': ('title',)}
 

@@ -39,9 +39,8 @@ active
 
     <!-- create a search bar -->
 
-    <div class="card w-100">
+    <!-- <div class="card w-100">
         <div class="card-body p-4">
-            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
             <form method="post">
 
                 {% csrf_token %}
@@ -62,12 +61,11 @@ active
                     {% endif %}
 
                     <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
-                    <!-- make a button to clear the search -->
                     <a href="#" class="btn btn-outline-danger">Clear</a>
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 
     {% if sessions %}
 
@@ -137,7 +135,7 @@ active
 
                             <td class="border-bottom-0">
                                 <p class="fw-semibold mb-0">
-                                    <span style="font-weight: bold;"> {{ session.course.instructor }}
+                                    <span style="font-weight: bold;"> {{ session.course.get_all_instructors }}
                                     </span>
                                 </p>
                             </td>
@@ -267,7 +265,7 @@ active
 
                             <td class="border-bottom-0">
                                 <p class="fw-semibold mb-0">
-                                    <span style="font-weight: bold;"> {{ session.course.instructor }}
+                                    <span style="font-weight: bold;"> {{ session.course.get_all_instructors }}
                                     </span>
                                 </p>
                             </td>
@@ -398,7 +396,7 @@ active
 
                             <td class="border-bottom-0">
                                 <p class="fw-semibold mb-0">
-                                    <span style="font-weight: bold;"> {{ session.course.instructor }}
+                                    <span style="font-weight: bold;"> {{ session.course.get_all_instructors }}
                                     </span>
                                 </p>
                             </td>

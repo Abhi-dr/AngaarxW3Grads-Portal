@@ -1,7 +1,7 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
-from accounts.models import Student
+from accounts.models import Student, Instructor
 
 from datetime import datetime, timedelta
 
@@ -73,7 +73,7 @@ class FlamesCourse(models.Model):
     subtitle = models.CharField(max_length=255)
     description = models.TextField()
     
-    instructor = models.CharField(max_length=200)
+    instructor = models.ManyToManyField(Instructor, related_name='flames_courses', blank=True)
     
     
     what_you_will_learn = models.TextField(help_text="Enter points separated by new lines")
@@ -100,6 +100,13 @@ class FlamesCourse(models.Model):
     def get_learning_points(self):
         """Return what_you_will_learn as a list of points"""
         return self.what_you_will_learn.strip().split('\n')
+    
+    def get_all_instructors(self):
+        """Return a list of all instructors for this course"""
+        names = []
+        for instructor in self.instructor.all():
+            names.append(instructor.first_name)
+        return ' & '.join(names)
 
 # ================= FLAMES COURSE TESTIMONIALS ======================
 
