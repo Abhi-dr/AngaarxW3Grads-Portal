@@ -18,11 +18,12 @@ active
                 <span class="fw-semibold">{{ course.title }} Sessions😎</span>
                 <span class="fs-4"> | 🔥Isi Me To Angaar Hai🔥</span>
 
-                <a href="{% url 'student_view_registration' registration.course.slug %}" class="btn btn-primary btn-sm float-end">Registration Details</a>
+                <a href="{% url 'student_view_registration' registration.course.slug %}"
+                    class="btn btn-primary btn-sm float-end">Registration Details</a>
 
             </h3>
-            
-            
+
+
         </div>
     </div>
 
@@ -68,6 +69,7 @@ active
         </div>
     </div>
 
+    {% if sessions %}
 
     <div class="card w-100">
         <div class="card-body p-4">
@@ -117,6 +119,8 @@ active
                         </tr>
                     </thead>
 
+
+
                     <tbody>
 
                         {% for session in sessions %}
@@ -165,16 +169,18 @@ active
                                         class="btn btn-outline-{{ session.get_status_color }} float-end">Wait😎</a>
                                     {% elif session.is_past %}
                                     {% if session.recording_url %}
-                                    
+
                                     <a href="{{ session.recording_url }}" target="_blank"
                                         class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Watch
                                         Recording👀</a>
-                                    
+
                                     {% else %}
-                                    
-                                    <button disabled class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Recording Not
+
+                                    <button disabled
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Recording
+                                        Not
                                         Available</button>
-                                    
+
                                     {% endif %}
 
                                     {% else %}
@@ -182,17 +188,292 @@ active
 
                                     {% endif %}
                                 </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
 
+                    </tbody>
+
+                </table>
             </div>
-            </td>
-            </tr>
 
-            {% endfor %}
 
-            </tbody>
-            </table>
+
         </div>
     </div>
+
+    {% elif dsa_sessions and full_stack_sessions %}
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="fw-semibold mb-4">Full Stack with Django and AI Agents🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Topic🗒️
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    By👨‍🏫
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    At🕒
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Status
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        {% for session in full_stack_sessions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ session.topic }}">{{ session.title|truncatechars:20 }}</h6>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span style="font-weight: bold;"> {{ session.course.instructor }}
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span> {{ session.start_datetime|date }} </span>
+                                    <br>
+                                    <span style="font-weight: bold;">
+                                        @{{ session.start_datetime|time }} </span>
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0 fs-4">
+                                    <span class="badge bg-{{ session.get_status_color }}">{{session.get_status }}</span>
+                                </h6>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    {% if session.is_live %}
+                                    <a href="{{ session.link }}" target="_blank"
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Join🔥</a>
+                                    {% elif session.is_upcoming %}
+                                    <a href="#"
+                                        class="btn btn-outline-{{ session.get_status_color }} float-end">Wait😎</a>
+                                    {% elif session.is_past %}
+                                    {% if session.recording_url %}
+
+                                    <a href="{{ session.recording_url }}" target="_blank"
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Watch
+                                        Recording👀</a>
+
+                                    {% else %}
+
+                                    <button disabled
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Recording
+                                        Not
+                                        Available</button>
+
+                                    {% endif %}
+
+                                    {% else %}
+                                    <button class="btn btn-outline-indigo float-end">Session Ended🔥</button>
+
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================= DSA Sessions ======================= -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="fw-semibold mb-4">Master Java with DSA🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Topic🗒️
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    By👨‍🏫
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    At🕒
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Status
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+
+
+                    <tbody>
+
+                        {% for session in dsa_sessions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ session.topic }}">{{ session.title|truncatechars:20 }}</h6>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span style="font-weight: bold;"> {{ session.course.instructor }}
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span> {{ session.start_datetime|date }} </span>
+                                    <br>
+                                    <span style="font-weight: bold;">
+                                        @{{ session.start_datetime|time }} </span>
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0 fs-4">
+                                    <span class="badge bg-{{ session.get_status_color }}">{{session.get_status }}</span>
+                                </h6>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    {% if session.is_live %}
+                                    <a href="{{ session.link }}" target="_blank"
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Join🔥</a>
+                                    {% elif session.is_upcoming %}
+                                    <a href="#"
+                                        class="btn btn-outline-{{ session.get_status_color }} float-end">Wait😎</a>
+                                    {% elif session.is_past %}
+                                    {% if session.recording_url %}
+
+                                    <a href="{{ session.recording_url }}" target="_blank"
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Watch
+                                        Recording👀</a>
+
+                                    {% else %}
+
+                                    <button disabled
+                                        class="btn btn-outline-{{ session.get_status_color }} text-blue float-end">Recording
+                                        Not
+                                        Available</button>
+
+                                    {% endif %}
+
+                                    {% else %}
+                                    <button class="btn btn-outline-indigo float-end">Session Ended🔥</button>
+
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+            </div>
+
+
+
+        </div>
+    </div>
+
+    {% else %}
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="fw-semibold mb-4">No Sessions Found 😢</h5>
+            <p class="text-muted">Please check back later or contact support for more information.</p>
+        </div>
+    </div>
+
+    {% endif %}
+
 </div>
 
 

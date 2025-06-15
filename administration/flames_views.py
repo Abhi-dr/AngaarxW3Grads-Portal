@@ -132,11 +132,10 @@ def admin_delete_session(request, session_id):
     messages.success(request, 'Session deleted successfully.')
     return redirect('admin_course_sessions', course_slug=course_slug)
 
+# ========================== Course sessions ======================
+
 @login_required(login_url='login')
 def admin_course_sessions(request, course_slug):
-    """
-    View for managing course sessions
-    """
     course = get_object_or_404(FlamesCourse, slug=course_slug)
 
     sessions = course.sessions.all()

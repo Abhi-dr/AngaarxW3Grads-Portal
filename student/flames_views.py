@@ -121,24 +121,40 @@ def my_course(request, slug):
 
     registration = FlamesRegistration.objects.filter(
         user=request.user,
-        course=course
+        course=course,
+        status__in=['Approved', "Completed"]
     ).select_related('course', 'team').first()
 
     if not registration:
         messages.error(request, "You are not registered for this course.")
         return redirect('student_flames')
     
-    sessions = Session.objects.filter(
-        course=course
-    ).order_by('start_datetime')
+    if course.id == 8: # means bundle offer combining course having id 3 and 4
+        dsa_sessions = Session.objects.filter(
+            course__id=3
+        ).order_by('start_datetime')
 
-    print(f"Sessions for course {course.slug}: {sessions}")
+        full_stack_sessions = Session.objects.filter(
+            course__id=4
+        ).order_by('start_datetime')
 
-    parameters = {
-        'registration': registration,
-        'course': course,
-        'sessions': sessions,
-    }
+        parameters = {
+            'registration': registration,
+            'course': course,
+            'dsa_sessions': dsa_sessions,
+            'full_stack_sessions': full_stack_sessions,
+        }
+    
+    else:
+        sessions = Session.objects.filter(
+            course=course
+        ).order_by('start_datetime')
+
+        parameters = {
+            'registration': registration,
+            'course': course,
+            'sessions': sessions,
+        }
 
     return render(request, 'student/flames/my_course.html', parameters)
 
