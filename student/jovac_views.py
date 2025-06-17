@@ -7,10 +7,11 @@ from django.db.models import Q
 from django.http import JsonResponse
 from datetime import datetime, timedelta
 from django.contrib.contenttypes.models import ContentType
-
+import sys
+import traceback
 
 from accounts.models import Student, Instructor
-from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration
+from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration, CourseSheet
 from practice.models import POD, Submission, Question, Sheet, Streak
 from home.models import Alumni, ReferralCode
 from django.db.models import Max, Sum
@@ -20,30 +21,33 @@ from django.db.models import Max, Sum
 # ============================================== JOVAC ==================================================
 # =======================================================================================================
 
+@login_required(login_url="login")
 def jovac(request, slug):
     course = get_object_or_404(Course, slug=slug)
     instructors = course.instructors.all()
 
     content_type = ContentType.objects.get_for_model(Course)
     
-    assignments = Assignment.objects.filter(
-        content_type=content_type,
-        object_id=course.id
-    )
+    # assignments = Assignment.objects.filter(
+    #     content_type=content_type,
+    #     object_id=course.id
+    # )
 
-    submitted_assignment_ids = AssignmentSubmission.objects.filter(
-        assignment__content_type=content_type,
-        assignment__object_id=course.id
-        ).values_list('assignment_id', flat=True)
+    # submitted_assignment_ids = AssignmentSubmission.objects.filter(
+    #     assignment__content_type=content_type,
+    #     assignment__object_id=course.id
+    #     ).values_list('assignment_id', flat=True)
     
+    course_sheets = CourseSheet.objects.filter(course=course)
 
     context = {
         'course': course,
         'instructors': instructors,
-        'assignments': assignments,
-        "submitted_assignments": submitted_assignment_ids,
+        "course_sheets": course_sheets,
+        # 'assignments': assignments,
+        # "submitted_assignments": submitted_assignment_ids,
     }
-    return render(request, 'student/jovac/jovac.html', context)
+    return render(request, 'student/jovac/jovac_sheets.html', context)
 
 @login_required(login_url="login")
 def enroll_jovac(request, slug):
@@ -65,6 +69,47 @@ def enroll_jovac(request, slug):
 
     messages.success(request, "Your enrollment request in this JOVAC has been submitted successfully!")
     return redirect('my_batches')
+
+
+# ======================================== JOVAC SHEETS ======================================
+
+@login_required(login_url="login")
+def jovac_sheet(request, course_slug, sheet_slug):
+    student = request.user.student
+    course = get_object_or_404(Course, slug=course_slug)
+    instructors = course.instructors.all()
+    course_ct = ContentType.objects.get_for_model(Course)
+
+    course_sheet = CourseSheet.objects.get(course = course, slug=sheet_slug)
+
+    assignments = course_sheet.get_ordered_assignments()
+
+    submissions = AssignmentSubmission.objects.filter(student=student)
+
+    submitted_assignment_ids = list(submissions.values_list('assignment_id', flat=True))
+
+
+    print(assignments)
+
+    query = request.POST.get("query")
+    if query:
+        assignments = Assignment.objects.filter(
+            Q(id__icontains=query) |
+            Q(title__icontains=query) |
+            Q(description__icontains=query)|
+            Q(assignment_type__icontains=query)
+            )
+
+
+    parameters = {
+        "course": course,
+        "sheet": course_sheet,
+        "instructors": instructors,
+        "assignments": assignments,
+        "submitted_assignments": submitted_assignment_ids,
+    }
+
+    return render(request, "student/jovac/course_sheet.html", parameters)
 
 
 # =======================================================================================================
@@ -203,6 +248,17 @@ def submit_assignment(request, assignment_id):
         # Process submission based on type
         if assignment.assignment_type == 'Coding':
             submission.submission_code = request.POST.get('submission_code')
+            submission.save()
+
+            # Running the evaluator
+
+            if assignment.evaluation_script:
+                try:
+                    run_evaluation(assignment, submission)
+                except Exception as e:
+                    messages.error(request, f"Error during evaluation: {str(e)}")
+                    return redirect('student_jovac', slug=course.slug)
+
         elif assignment.assignment_type == 'Text':
             submission.submission_text = request.POST.get('submission_text')
         elif assignment.assignment_type == 'File':
@@ -230,6 +286,106 @@ def submit_assignment(request, assignment_id):
     }
     
     return render(request, "student/jovac/submit_assignment.html", parameters)
+
+# =========================================== RUN EVALUATION ============================================
+@login_required(login_url="login")
+def run_evaluation(assignment: Assignment, submission: AssignmentSubmission):
+    code = assignment.evaluation_script
+    student_input = submission.submission_code or ""
+
+    local_vars = {
+    'submission_code': submission.submission_code,
+    'score': 0,
+        'feedback': [],
+    }
+    exec(assignment.evaluation_script, {}, local_vars)
+
+    try:
+        exec(code, {}, local_vars)
+    except Exception:
+        feedback = traceback.format_exc()
+        local_vars['feedback'] = [f"Execution error:\n{feedback}"]
+        local_vars['score'] = 0
+
+    score = local_vars.get('score', 0)
+    feedback_data = "\n".join(local_vars.get('feedback', []))
+
+    # Save results
+    submission.score = score
+    submission.feedback = feedback_data
+    submission.status = 'Accepted'
+    submission.graded_at = timezone.now()
+    submission.save()
+
+
+# =========================================== VIEW TUTORIAL =============================================
+
+@login_required(login_url="login")
+def view_jovac_tutorial(request, id):
+    """
+    View a JOVAC tutorial
+    """
+    # Get the tutorial by ID
+    tutorial = get_object_or_404(Assignment, id=id)
+    course = tutorial.course
+
+    
+    # Check if the user is enrolled in the course
+    student = request.user.student
+    
+    if not CourseRegistration.objects.filter(student=student, course=course).exists():
+        messages.error(request, "You are not enrolled in this course")
+        return redirect('my_batches')
+    
+    youtube_video_id = tutorial.tutorial_link.replace("https://www.youtube.com/watch?v=", "")
+
+    # Render the tutorial page
+    parameters = {
+        'tutorial': tutorial,
+        'course': course,
+        'student': student,
+        "youtube_video_id": youtube_video_id,
+    }
+    
+    return render(request, 'student/jovac/view_tutorial.html', parameters)
+
+@login_required(login_url="login")
+def get_next_jovac_assignment(request, id):
+    """
+    Get the next assignment for a JOVAC course
+    """
+    # Get the current assignment
+    course_sheet = get_object_or_404(CourseSheet, assignments__id=id)
+    current_assignment = get_object_or_404(Assignment, id=id)
+    
+    next_assignment = course_sheet.get_next_assignment(current_assignment)
+
+    if not next_assignment:
+        messages.error(request, "No more assignments available in this course sheet.")
+        course = course_sheet.course.first()
+        if current_assignment.is_tutorial:
+            # If the current assignment is a tutorial, redirect to the course sheet
+            return redirect('view_jovac_tutorial', id=current_assignment.id)
+        else:
+            # Otherwise, redirect to the course sheet
+            return redirect('submit_assignment', assignment_id=current_assignment.id)
+
+
+    else:
+        if next_assignment.is_tutorial:
+            # If the next assignment is a tutorial, redirect to the tutorial view
+            return redirect('view_jovac_tutorial', id=next_assignment.id)
+        else:
+            # Otherwise, redirect to the assignment submission page
+            # Ensure the course slug is passed correctly
+            if next_assignment.content_type.model == 'course':
+                course_slug = next_assignment.course.slug
+            else:
+                course_slug = course_sheet.course.slug
+            
+            return redirect('submit_assignment', assignment_id=next_assignment.id)
+            
+        # Redirect to the assignment submission page
 
 
 # =========================================== VIEW SUBMISSION =============================================

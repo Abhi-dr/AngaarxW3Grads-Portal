@@ -5,7 +5,7 @@
 JOVAC | Edit Course
 {% endblock %}
 
-{% block jovac_active %} 
+{% block jovac_active %}
 active
 {% endblock %}
 
@@ -17,7 +17,7 @@ active
         </div>
 
         <div class="container px-4">
-            <form action="#" method="POST">
+            <form action="#" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <hr class="mt-0">
                 <div class="row">
@@ -34,7 +34,7 @@ active
 
                                 <div class="mb-3">
                                     <label for="description" class="form-label">Description <div class="star">*</div>
-                                        </label>
+                                    </label>
                                     <textarea class="form-control" id="description" name="description" rows="5"
                                         required>{{ course.description }}</textarea>
                                 </div>
@@ -50,6 +50,12 @@ active
                                         </option>
                                         {% endfor %}
                                     </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="thumbnail" class="form-label">Thumbnail Image</label>
+                                    <input type="file" class="form-control" id="thumbnail" name="thumbnail"
+                                        accept="image/*">
                                 </div>
 
                                 <div class="col-md-12">

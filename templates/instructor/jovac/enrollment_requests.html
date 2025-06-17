@@ -19,7 +19,7 @@ active
                     <span class="fw-semibold">
                         &nbsp;Pending Requests: ({{ total_pending_requests }})
                     </span>
-                    <!-- <a id="approve-all-button" class="btn btn-success btn-lg">Approve All</a> -->
+                    <a href="{% url 'approve_all_jovac_enrollment_requests' course.id %}" class="btn btn-success btn-lg float-end">Approve All</a>
 
                 </h3>
             </h3>
@@ -128,7 +128,7 @@ active
                                     class="btn btn-outline-danger">Reject</button>
                             </td> -->
                             <td>
-                                <a href="{% url 'administrator_approve_jovac_request' request.id %}"
+                                <a href="{% url 'instructor_approve_jovac_request' request.id %}"
                                     class="btn btn-success">Approve</a>
                             </td>
 

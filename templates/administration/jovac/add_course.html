@@ -5,7 +5,7 @@
 JOVAC | Add Course
 {% endblock %}
 
-{% block jovac_active %} 
+{% block jovac_active %}
 active
 {% endblock %}
 
@@ -18,7 +18,7 @@ active
         </div>
 
         <div class="container px-4">
-            <form action="#" method="POST">
+            <form action="#" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <hr class="mt-0">
@@ -55,9 +55,16 @@ active
                                     <select class="form-select form-control" name="instructors" id="instructors"
                                         multiple>
                                         {% for instructor in instructors %}
-                                        <option value="{{ instructor.id }}">{{ instructor.first_name }} &nbsp;{{ instructor.last_name }} </option>
+                                        <option value="{{ instructor.id }}">{{ instructor.first_name }} &nbsp;{{
+                                            instructor.last_name }} </option>
                                         {% endfor %}
                                     </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="thumbnail" class="form-label">Thumbnail Image</label>
+                                    <input type="file" class="form-control" id="thumbnail" name="thumbnail"
+                                        accept="image/*">
                                 </div>
 
                                 <div>

@@ -4,12 +4,14 @@ from django.core.validators import FileExtensionValidator
 from accounts.models import Student, Instructor
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest
 from home.models import FlamesCourse
+from django.contrib import messages
 
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
 
+from django.utils.timezone import now
 
 # ========================================== NOTIFICATIONS =========================================
     
@@ -102,7 +104,7 @@ class Course(models.Model):
     name = models.CharField(max_length=100, db_index=True)  # Increased length and added index
 
     # instructors can be multiple for a single course
-    instructors = models.ManyToManyField('accounts.Instructor', related_name='courses', blank=True, null=True)
+    instructors = models.ManyToManyField('accounts.Instructor', related_name='courses', blank=True)
     
     description = models.TextField(max_length=500)  # Increased length for better descriptions
     
@@ -133,6 +135,93 @@ class Course(models.Model):
         ordering = ['-created_at']
         verbose_name = 'Course'
         verbose_name_plural = 'Courses'
+
+# ===================================================== COURSE SHEET ===========================================
+
+class CourseSheet(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    
+    slug = models.SlugField(unique=True, blank=True, null=True)
+    
+    thumbnail = models.ImageField(upload_to='course_sheets/thumbnails/', blank=True, null=True)
+    course = models.ManyToManyField(Course, related_name="course_sheets", blank=True)
+    
+    created_by = models.ForeignKey(Instructor, on_delete=models.CASCADE, related_name="course_sheets", blank=True, null=True)
+    
+    custom_order = models.JSONField(default=dict)  # Store order as {assignment_id: position}
+
+    
+    # Is sheet enabled or not
+    is_enabled = models.BooleanField(default=True)
+    
+    is_approved = models.BooleanField(default=False)
+    
+    def is_active(self):
+        """Checks if the sheet is active based on the current time."""
+        return self.is_enabled and (self.start_time <= now() <= self.end_time)
+        
+    
+    def get_ordered_assignments(self):
+        # Get questions in the custom order
+        assignments = list(self.assignments.all())
+        if self.custom_order:
+            assignments.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
+        return assignments
+    
+    
+
+    def get_next_assignment(self, current_assignment):
+        """Get the next assignment based on custom order."""
+        assignments = self.get_ordered_assignments()
+        if not assignments:
+            return None
+        
+        current_index = assignments.index(current_assignment)
+
+        # If current assignment is the last one, return None
+        if current_index == len(assignments) - 1:
+            return None
+        
+
+        if current_index + 1 < len(assignments):
+            return assignments[current_index + 1]
+        return None
+
+    
+    class Meta:
+        verbose_name = 'Course Sheet'
+        verbose_name_plural = 'Course Sheets'
+
+    def save(self, *args, **kwargs):
+        
+        if not self.slug:
+            text = ""
+        
+            for word in self.name.split():
+                if word.isalnum():
+                    text += word + "-"
+                else:
+                    word = ''.join(e for e in word if e.isalnum())
+                    text += word + "-"
+            
+            # Generate base slug
+            base_slug = text.lower().strip("-")
+            slug = base_slug
+
+            # Check for uniqueness
+            counter = 1
+            while CourseSheet.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+        
+        super(CourseSheet, self).save(*args, **kwargs)
+        
+
+
+# ================================================== COURSE REGISTRATION =======================================
 
 class CourseRegistration(models.Model):
 
@@ -174,6 +263,9 @@ class Assignment(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     course = GenericForeignKey('content_type', 'object_id')
+
+    course_sheets = models.ManyToManyField(CourseSheet, related_name="assignments", blank=True)
+
     
     title = models.CharField(max_length=255, db_index=True)
     description = models.TextField()
@@ -184,7 +276,7 @@ class Assignment(models.Model):
         db_index=True
     )
     
-    due_date = models.DateTimeField(db_index=True)
+    due_date = models.DateTimeField(db_index=True, blank=True, null=True)
     
     max_score = models.PositiveIntegerField(default=100)
     
@@ -210,6 +302,25 @@ class Assignment(models.Model):
         default=0,
         help_text="Percentage penalty per day (0-100)"
     )
+
+
+    evaluation_script = models.TextField(
+        blank=True, 
+        null=True,
+        help_text="Python script for automated evaluation (if applicable)"
+    )
+
+    downloadable_file = models.FileField(
+        upload_to='assignments/files/%Y/%m/', 
+        blank=True, 
+        null=True,
+        help_text="Allowed formats: PDF, DOC, DOCX, ZIP, TXT, PY, JS, HTML, CSS"
+    )
+
+    # IS IT A TUTORIAL
+    is_tutorial = models.BooleanField(default=False)
+    content = models.TextField(blank=True, null=True)
+    tutorial_link = models.URLField(blank=True, null=True, help_text="Link to the tutorial video")
 
     def __str__(self):
         return f"{self.title}"
@@ -311,6 +422,8 @@ class AssignmentSubmission(models.Model):
     
     # Legacy fields (keeping for backward compatibility)
     extra_info = models.TextField(blank=True)
+
+    # mark_as_completed = models.BooleanField(default=False, help_text="Mark submission as completed")
 
     def clean(self):
         """Validate submission based on assignment type"""

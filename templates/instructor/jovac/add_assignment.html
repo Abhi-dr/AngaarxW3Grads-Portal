@@ -2,10 +2,10 @@
 {% load static %}
 
 {% block title %}
-Add Assignment | {{ course.name }}
+Add Assignment | JOVAC
 {% endblock %}
 
-{% block jovac_active %} 
+{% block jovac_active %}
 active
 {% endblock %}
 
@@ -16,81 +16,148 @@ active
             <h5 class="card-title fw-semibold mb-0">Add Assignment for {{ course.name }}</h5>
         </div>
         <div class="card-body">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
+                <!-- Is Tutorial Checkbox -->
+                <div class="form-check form-switch mb-3">
+                    <input class="form-check-input" type="checkbox" id="is_tutorial" name="is_tutorial">
+                    <label class="form-check-label" for="is_tutorial">Is this a Tutorial?</label>
+                </div>
+
+                <!-- Title -->
                 <div class="mb-3">
                     <label for="title" class="form-label">Title *</label>
                     <input type="text" class="form-control" id="title" name="title" placeholder="Enter assignment title"
                         required>
                 </div>
 
-                <div class="mb-3">
-                    <label for="description" class="form-label">Description *</label>
-                    <textarea class="form-control" id="description" name="description" rows="4"
-                        placeholder="Enter detailed assignment description" required></textarea>
+
+                <!-- Content (Only for Tutorial) -->
+                <div class="mb-3 tutorial-field d-none">
+                    <label for="content" class="form-label">Tutorial Content *</label>
+                    <textarea class="form-control" id="content" name="content" rows="6"
+                        placeholder="Enter HTML content for the tutorial"></textarea>
                 </div>
 
-                <div class="mb-3">
-                    <label for="assignment_type" class="form-label">Assignment Type *</label>
-                    <select class="form-select" id="assignment_type" name="assignment_type" required>
-                        <option value="" disabled selected>Select type</option>
-                        {% for value, label in assignment_types %}
-                        <option value="{{ value }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
+                <!-- Tutorial link -->
+                <div class="mb-3 tutorial-field d-none">
+                    <label for="content" class="form-label">Tutorial Video</label>
+                    <input type="text" class="form-control" id="tutorial_link" name="tutorial_link"
+                        placeholder="Enter YouTube link for the tutorial video...">
                 </div>
 
-                <div class="mb-3">
-                    <label for="due_date" class="form-label">Due Date *</label>
-                    <input type="datetime-local" class="form-control" id="due_date" name="due_date" required>
+
+                <!-- Fields only for assignments -->
+                <div class="assignment-fields">
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description *</label>
+                        <textarea class="form-control" id="description" name="description" rows="4"
+                            placeholder="Enter detailed assignment description"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="assignment_type" class="form-label">Assignment Type *</label>
+                        <select class="form-select" id="assignment_type" name="assignment_type">
+                            <option value="" disabled selected>Select type</option>
+                            {% for value, label in assignment_types %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Due Date -->
+                    <div class="mb-3">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="datetime-local" class="form-control" id="due_date" name="due_date">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="max_score" class="form-label">Max Score *</label>
+                        <input type="number" class="form-control" id="max_score" name="max_score" min="1" value="100"
+                            placeholder="e.g. 100">
+                    </div>
+
+                    <!-- submission script  -->
+
+                    <div class="mb-3">
+                        <label for="evaluation_script" class="form-label">Submission Script</label>
+                        <textarea class="form-control" id="evaluation_script" name="evaluation_script" rows="6"
+                            placeholder="Enter the script to run on submission (optional)"></textarea>
+                        <small class="form-text text-muted">This script will be executed when the assignment is
+                            submitted.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Status *</label>
+                        <select class="form-select" id="status" name="status">
+                            <option value="" disabled selected>Select status</option>
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="instructions" class="form-label">Instructions</label>
+                        <textarea class="form-control" id="instructions" name="instructions" rows="3"
+                            placeholder="Provide any specific instructions (optional)"></textarea>
+                    </div>
+
+                    <!-- uploading downloadable content -->
+                    <div class="mb-3">
+                        <label for="downloadable_content" class="form-label">Downloadable Content</label>
+                        <input type="file" class="form-control" id="downloadable_content" name="downloadable_content">
+                        <small class="form-text text-muted">Upload any files related to the assignment (optional).</small>
+                    </div>
+
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="allow_late_submission"
+                            name="allow_late_submission">
+                        <label class="form-check-label" for="allow_late_submission">Allow Late Submission</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="late_penalty_per_day" class="form-label">Late Penalty per Day (%)</label>
+                        <input type="number" class="form-control" id="late_penalty_per_day" name="late_penalty_per_day"
+                            step="0.01" min="0" max="100" placeholder="e.g. 10 for 10%">
+                        <small class="form-text text-muted">Set penalty percentage for late submissions
+                            (0-100%).</small>
+                    </div>
+
                 </div>
 
-                <div class="mb-3">
-                    <label for="max_score" class="form-label">Max Score *</label>
-                    <input type="number" class="form-control" id="max_score" name="max_score" min="1" value="100"
-                        placeholder="e.g. 100" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="status" class="form-label">Status *</label>
-                    <select class="form-select" id="status" name="status" required>
-                        <option value="" disabled selected>Select status</option>
-                        {% for value, label in status_choices %}
-                        <option value="{{ value }}">{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="instructions" class="form-label">Instructions</label>
-                    <textarea class="form-control" id="instructions" name="instructions" rows="3"
-                        placeholder="Provide any specific instructions (optional)"></textarea>
-                </div>
-
-                <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" id="allow_late_submission"
-                        name="allow_late_submission">
-                    <label class="form-check-label" for="allow_late_submission">
-                        Allow Late Submission
-                    </label>
-                </div>
-
-                <div class="mb-3">
-                    <label for="late_penalty_per_day" class="form-label">Late Penalty per Day (%)</label>
-                    <input type="number" class="form-control" id="late_penalty_per_day" name="late_penalty_per_day"
-                        step="0.01" min="0" max="100" placeholder="e.g. 10 for 10%">
-                    <small class="form-text text-muted">Set penalty percentage for late submissions (0-100%).</small>
-                </div>
-
+                <!-- Submit -->
                 <button type="submit" class="btn btn-success w-100">Add Assignment</button>
             </form>
         </div>
     </div>
 </div>
 
-
 <script>
+    const isTutorialCheckbox = document.getElementById('is_tutorial');
+    const tutorialFields = document.querySelectorAll('.tutorial-field');
+    const assignmentFields = document.querySelector('.assignment-fields');
+
+    function toggleFields() {
+        if (isTutorialCheckbox.checked) {
+            tutorialFields.forEach(el => el.classList.remove('d-none'));
+            assignmentFields.classList.add('d-none');
+        } else {
+            tutorialFields.forEach(el => el.classList.add('d-none'));
+            assignmentFields.classList.remove('d-none');
+        }
+    }
+
+    // Initial toggle
+    toggleFields();
+
+    // On change toggle
+    isTutorialCheckbox.addEventListener('change', toggleFields);
+
+    // Limit late penalty to max 100
     document.getElementById('late_penalty_per_day').addEventListener('input', function () {
         if (this.value > 100) {
             alert("Late penalty cannot exceed 100%");
@@ -98,6 +165,5 @@ active
         }
     });
 </script>
-
 
 {% endblock %}

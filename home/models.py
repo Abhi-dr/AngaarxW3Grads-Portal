@@ -1,7 +1,10 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
-from accounts.models import Student
+from accounts.models import Student, Instructor
+
+from datetime import datetime, timedelta
+
     
 # ======================= JOB ARTICLE MODEL ======================
 
@@ -70,7 +73,7 @@ class FlamesCourse(models.Model):
     subtitle = models.CharField(max_length=255)
     description = models.TextField()
     
-    instructor = models.CharField(max_length=200)
+    instructor = models.ManyToManyField(Instructor, related_name='flames_courses', blank=True)
     
     
     what_you_will_learn = models.TextField(help_text="Enter points separated by new lines")
@@ -97,6 +100,13 @@ class FlamesCourse(models.Model):
     def get_learning_points(self):
         """Return what_you_will_learn as a list of points"""
         return self.what_you_will_learn.strip().split('\n')
+    
+    def get_all_instructors(self):
+        """Return a list of all instructors for this course"""
+        names = []
+        for instructor in self.instructor.all():
+            names.append(instructor.first_name)
+        return ' & '.join(names)
 
 # ================= FLAMES COURSE TESTIMONIALS ======================
 
@@ -268,3 +278,75 @@ class FlamesTeamMember(models.Model):
     def __str__(self):
         return f"{self.team.name} - {self.member.first_name}"
 
+
+# ======================== SESSION MODEL ========================
+
+class Session(models.Model):
+    title = models.CharField(max_length=200)
+    joining_link = models.URLField(help_text="Link to join the session")
+    
+    course = models.ForeignKey(FlamesCourse, on_delete=models.CASCADE, related_name='sessions')
+
+    recording_url = models.URLField(blank=True, null=True, help_text="URL to the session recording")
+
+    start_datetime = models.DateTimeField(help_text="Start date and time of the session")
+    end_datetime = models.DateTimeField(help_text="End date and time of the session", blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_upcoming(self):
+        """Check if the session is upcoming based on the start date and time."""
+        from django.utils import timezone
+        return self.start_datetime > timezone.now()
+    
+    def is_past(self):
+        """Check if the session is past based on the end date and time."""
+        from django.utils import timezone
+        return self.end_datetime < timezone.now()
+    
+    def is_live(self):
+        """Check if the session is currently live based on the start and end date and time."""
+        from django.utils import timezone
+        now = timezone.now()
+        return self.start_datetime <= now <= self.end_datetime
+    
+
+    def get_status(self):
+        """Get the status of the session."""
+        if self.is_upcoming():
+            return "Upcoming"
+        elif self.is_live():
+            return "Live"
+        elif self.is_past():
+            return "Finished"
+        else:
+            return "Unknown"
+        
+    def get_status_color(self):
+        """Get the color associated with the session status."""
+        if self.is_upcoming():
+            return "warning"
+        elif self.is_live():
+            return "success"
+        elif self.is_past():
+            return "secondary"
+        else:
+            return "dark"
+        
+    # set the end time automatically to 1 hour after the start time if not provided
+    def save(self, *args, **kwargs):
+        if not self.end_datetime:
+            if isinstance(self.start_datetime, str):
+                from django.utils.dateparse import parse_datetime
+                self.start_datetime = parse_datetime(self.start_datetime)
+
+            self.end_datetime = self.start_datetime + timedelta(hours=1)
+        super(Session, self).save(*args, **kwargs)
+    
+    class Meta:
+        ordering = ['-start_datetime']
+        verbose_name = "Session"
+        verbose_name_plural = "Sessions"
+    
+    def __str__(self):
+        return f"{self.title} - {self.course.title}"

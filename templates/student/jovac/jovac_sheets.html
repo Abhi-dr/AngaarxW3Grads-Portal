@@ -1,11 +1,11 @@
-{% extends "instructor/base.html" %}
+{% extends "student/base.html" %}
 {% load static %}
 
 {% block title %}
 JOVAC | {{ course.name }}
 {% endblock %}
 
-{% block jovac_active %} 
+{% block jovac_active %}
 active
 {% endblock %}
 
@@ -17,22 +17,26 @@ active
             <h3 class="heading">
                 <span class="fw-semibold">{{ course.name }}🔥</span>
                 <span class="fs-4"> | 🔥By:
-                    {{ course.get_instructor_names }}
-                    🔥</span>
+                    {{ course.get_instructor_names }}🔥</span>
             </h3>
         </div>
-        <div class="row mt-n3">
+        <!-- <div class="row mt-n3">
 
             <div class="col-md-3 mx-auto">
-                <a href="{% url 'instructor_add_jovac_sheet' course.slug %}"
+                <a href="{% url 'administrator_add_jovac_sheet' course.slug %}"
                     class="btn btn-outline-success button mt-n2 mb-3 w-100 ">Add Sheet</a>
             </div>
 
             <div class="col-md-3 mx-auto">
-                <a href="{% url 'instructor_jovac_enrollment_requests' course.slug %}"
+                <a href="{% url 'administrator_edit_jovac' course.slug %}"
+                    class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Edit Course</a>
+            </div>
+
+            <div class="col-md-3 mx-auto">
+                <a href="{% url 'administrator_jovac_enrollment_requests' course.slug %}"
                     class="btn btn-outline-secondary button mt-n2 mb-3 w-100 ">Enrollment Requests</a>
             </div>
-        </div>
+        </div> -->
 
     </div>
 
@@ -45,7 +49,7 @@ active
 
     <!-- ================================= SESSIONS TABLE ================================== -->
 
- <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container">
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container">
 
         {% for sheet in course_sheets %}
         <div class="col-md-3">
@@ -53,11 +57,8 @@ active
             <div class="card">
 
                 <!-- Thumbnail with lazy loading -->
-                <a href="{% url 'instructor_jovac_sheet' course.slug sheet.slug %}">
-                    <img 
-                        src="{{ sheet.thumbnail.url }}" 
-                        class="card-img-top lazy-load" 
-                        alt="${sheet.name}">
+                <a href="{% url 'student_jovac_sheet' course.slug sheet.slug %}">
+                    <img src="{{ sheet.thumbnail.url }}" class="card-img-top lazy-load" alt="${sheet.name}">
                 </a>
 
                 <div class="card-body">
@@ -76,8 +77,7 @@ active
                     </span>
                     {% endif %}
 
-                    <a href="{% url 'instructor_jovac_sheet' course.slug sheet.slug %}"
-                        class="btn btn-outline-secondary w-100 mt-2">View
+                    <a href="{% url 'student_jovac_sheet' course.slug sheet.slug %}" class="btn btn-outline-secondary w-100 mt-2">View
                         More</a>
                 </div>
             </div>
@@ -85,7 +85,6 @@ active
         </div>
         {% endfor %}
     </div>
-
 
 </div>
 

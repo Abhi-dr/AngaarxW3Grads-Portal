@@ -165,8 +165,8 @@
 <script>
     const editor = ace.edit("editor");
     editor.setTheme("ace/theme/twilight");
-    editor.session.setMode("ace/mode/python");
-    const submission_code = "{{ submission.submission_code }}";
+    editor.session.setMode("ace/mode/");
+    const submission_code = "{{ submission.submission_code|escapejs }}";
     console.log(submission_code);
     editor.session.setValue(submission_code, -1);
     editor.setOptions({
@@ -175,6 +175,7 @@
         enableLiveAutocompletion: true,
         cursorStyle: "smooth",
         enableEmmet: true,
+        readOnly: true
     });
 </script>
 

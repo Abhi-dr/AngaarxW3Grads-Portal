@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
@@ -22,8 +22,8 @@ class CommentAdmin(admin.ModelAdmin):
 # ================== FLAMES ===================
 
 class FlamesCourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'instructor', 'is_active', 'created_at')
-    list_filter = ('is_active', 'instructor')
+    list_display = ('title', 'is_active', 'created_at')
+    list_filter = ('is_active',)
     search_fields = ('title', 'subtitle', 'description')
     prepopulated_fields = {'slug': ('title',)}
 
@@ -118,4 +118,5 @@ admin.site.register(Alumni, AlumniAdmin)
 admin.site.register(ReferralCode, ReferralCodeAdmin)
 admin.site.register(FlamesTeam, FlamesTeamAdmin)
 admin.site.register(FlamesTeamMember, FlamesTeamMemberAdmin)
+admin.site.register(Session)
 
