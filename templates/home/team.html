@@ -323,6 +323,197 @@ Our Team | Angaar
         }
     }
 </style>
+
+<style>
+/* Contributors Section Styles */
+.contributors-section {
+    margin-top: 80px;
+    position: relative;
+    z-index: 1;
+}
+
+.section-divider {
+    width: 100px;
+    height: 2px;
+    background: linear-gradient(90deg, #ff6026, #ff9a56);
+    margin: 0 auto 60px auto;
+    border-radius: 1px;
+}
+
+.contributors-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.contributors-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    background: linear-gradient(135deg, #ff6026, #ff9a56);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    display: inline-block;
+}
+
+.contributors-subtitle {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    color: #aaa;
+    line-height: 1.6;
+}
+
+.contributors-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
+    justify-content: center;
+}
+
+.contributor-card {
+    background: rgba(25, 25, 25, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(5px);
+    position: relative;
+    overflow: hidden;
+}
+
+.contributor-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(255, 96, 38, 0.05) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1;
+}
+
+.contributor-card:hover::before {
+    opacity: 1;
+}
+
+.contributor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(255, 96, 38, 0.15);
+    border-color: rgba(255, 96, 38, 0.2);
+}
+
+.contributor-img-wrapper {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 15px;
+}
+
+.contributor-img {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 96, 38, 0.3);
+    transition: all 0.3s ease;
+}
+
+.contributor-card:hover .contributor-img {
+    border-color: #ff6026;
+    transform: scale(1.1);
+}
+
+.contributor-content {
+    position: relative;
+    z-index: 2;
+}
+
+.contributor-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #fff;
+}
+
+.contributor-role {
+    font-size: 0.85rem;
+    color: #ff6026;
+    margin-bottom: 15px;
+    font-weight: 500;
+}
+
+.contributor-social {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+}
+
+.contributor-card:hover .contributor-social {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.contributor-social-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.contributor-social-icon:hover {
+    background: #ff6026;
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+/* Responsive Styles for Contributors */
+@media (max-width: 768px) {
+    .contributors-title {
+        font-size: 2.2rem;
+    }
+    
+    .contributors-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 20px;
+    }
+    
+    .contributors-section {
+        margin-top: 60px;
+    }
+}
+
+@media (max-width: 576px) {
+    .contributors-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+    
+    .contributor-card {
+        padding: 15px;
+    }
+    
+    .contributors-title {
+        font-size: 1.8rem;
+    }
+}
+</style>
+
 {% endblock %}
 
 {% block body %}
@@ -466,7 +657,113 @@ Our Team | Angaar
                 </div>
             </div>
         </div>
+
+        <!-- Contributors Section -->
+<div class="contributors-section" data-aos="fade-up" data-aos-delay="600">
+    <div class="section-divider"></div>
+    
+    <div class="contributors-header" data-aos="fade-up" data-aos-duration="1000">
+        <h2 class="contributors-title">Our Contributors</h2>
+        <p class="contributors-subtitle">Amazing individuals who have contributed to our mission and helped us grow.</p>
     </div>
+
+    <div class="contributors-grid" data-aos="fade-up" data-aos-delay="200">
+        <!-- Contributor Card 1 -->
+        <div class="contributor-card" data-aos="zoom-in" data-aos-delay="100">
+            <div class="contributor-img-wrapper">
+                <img class="contributor-img" src="https://via.placeholder.com/120x120/333/fff?text=JD" alt="John Doe">
+            </div>
+            <div class="contributor-content">
+                <h4 class="contributor-name">John Doe</h4>
+                <p class="contributor-role">Content Creator</p>
+                <div class="contributor-social">
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contributor Card 2 -->
+        <div class="contributor-card" data-aos="zoom-in" data-aos-delay="200">
+            <div class="contributor-img-wrapper">
+                <img class="contributor-img" src="https://via.placeholder.com/120x120/333/fff?text=JS" alt="Jane Smith">
+            </div>
+            <div class="contributor-content">
+                <h4 class="contributor-name">Jane Smith</h4>
+                <p class="contributor-role">Community Manager</p>
+                <div class="contributor-social">
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-twitter"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contributor Card 3 -->
+        <div class="contributor-card" data-aos="zoom-in" data-aos-delay="300">
+            <div class="contributor-img-wrapper">
+                <img class="contributor-img" src="https://via.placeholder.com/120x120/333/fff?text=MJ" alt="Mike Johnson">
+            </div>
+            <div class="contributor-content">
+                <h4 class="contributor-name">Mike Johnson</h4>
+                <p class="contributor-role">Open Source Contributor</p>
+                <div class="contributor-social">
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-github"></i></a>
+                    <a href="#" class="contributor-social-icon"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contributor Card 4 -->
+        <div class="contributor-card" data-aos="zoom-in" data-aos-delay="400">
+            <div class="contributor-img-wrapper">
+                <img class="contributor-img" src="https://via.placeholder.com/120x120/333/fff?text=SL" alt="Sarah Lee">
+            </div>
+            <div class="contributor-content">
+                <h4 class="contributor-name">Sarah Lee</h4>
+                <p class="contributor-role">Technical Writer</p>
+                <div class="contributor-social">
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-medium"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contributor Card 5 -->
+        <div class="contributor-card" data-aos="zoom-in" data-aos-delay="500">
+            <div class="contributor-img-wrapper">
+                <img class="contributor-img" src="https://via.placeholder.com/120x120/333/fff?text=RK" alt="Raj Kumar">
+            </div>
+            <div class="contributor-content">
+                <h4 class="contributor-name">Raj Kumar</h4>
+                <p class="contributor-role">Beta Tester</p>
+                <div class="contributor-social">
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contributor Card 6 -->
+        <div class="contributor-card" data-aos="zoom-in" data-aos-delay="600">
+            <div class="contributor-img-wrapper">
+                <img class="contributor-img" src="https://via.placeholder.com/120x120/333/fff?text=AP" alt="Anita Patel">
+            </div>
+            <div class="contributor-content">
+                <h4 class="contributor-name">Anita Patel</h4>
+                <p class="contributor-role">Mentor</p>
+                <div class="contributor-social">
+                    <a href="#" class="contributor-social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="contributor-social-icon"><i class="fas fa-envelope"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+        
+    </div>
+
+
+
 </div>
 
 <!-- Particle.js for background effects -->
