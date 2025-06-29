@@ -1,0 +1,402 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Course | {{ batch.name }} | POD
+{% endblock %}
+
+{% block my_batches_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">{{ batch.name }}</h5>
+        </div>
+        <div class="container px-4">
+            <hr class="mt-0">
+            <div class="row">
+                <div class="w-100">
+                    <div class="card p-4">
+                        <div class="mb-3">
+                            <label for="searchInput" class="form-label">Search Question</label>
+                            <input type="text" id="searchInput" class="form-control" placeholder="Search question...">
+                        </div>
+                        <form id="setPodForm">
+                            <div class="row">
+                                <div class="mb-3 col-md-6">
+                                    <label for="questionSelect" class="form-label">Select Question</label>
+                                    <select name="question_id" id="questionSelect" class="form-control">
+                                        <!-- Options will be populated dynamically via JavaScript -->
+                                    </select>
+                                </div>
+                                <div class="mb-3 col-md-6">
+                                    <label for="dateInput" class="form-label">Select Date</label>
+                                    <input type="date" name="pod_date" id="dateInput" class="form-control"
+                                        value="{{ default_date }}">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Set POD</button>
+                        </form>
+                        <a href="{% url 'administrator_batch' batch.slug %}" class="btn btn-secondary mt-3">Back to
+                            Batches</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+
+        <div class="col-lg-6 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-semibold mb-4">PAST PODs🔥
+                        {% if query %}
+                        <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                        {% endif %}
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table text-nowrap mb-0 align-middle">
+                            <thead class=" fs-4">
+
+                                <tr>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            #
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Title
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Description
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Level
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0 justify-content-center">
+                                        <h6 class="fw-semibold mb-0">
+                                            Date
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0 justify-content-center">
+                                        <h6 class="fw-semibold mb-0">
+                                            Submissions
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0 justify-content-center">
+                                        <h6 class="fw-semibold mb-0">
+                                            Action#3
+                                        </h6>
+                                    </th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for pod in past_pods %}
+
+                                <tr>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1 text-wrap" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="{{ question.title }}">{{ pod.question.title}}
+                                        </h6>
+
+                                        {% for sheet in question.sheets.all %}
+                                        <span style="font-weight: bold;"> {{ pod.question.sheet.name }} |
+                                        </span>
+                                        {% endfor %}
+
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <p class="fw-semibold mb-0">
+                                            <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap"
+                                                style="width: 100%;" data-bs-toggle="modal"
+                                                data-bs-target="#questionModal" data-title="{{ pod.question.title }}"
+                                                data-description="{{ pod.question.description }}"
+                                                title="{{ pod.question.title }}"> View</button>
+                                        </p>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <p class="fw-semibold mb-0">
+                                            <span
+                                                class="badge bg-{{ pod.question.get_difficulty_level_color }} text-color">
+                                                {{ pod.question.difficulty_level }}
+                                            </span>
+                                        </p>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <!-- <h6 class="fw-semibold mb-1">{{ pod.question.how_many_users_solved }}</h6> -->
+                                        <h6 class="fw-semibold mb-1">{{ pod.date }}</h6>
+                                    </td>
+
+
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1">Accepted: <span class="text-success">
+                                                {{ pod.question.how_many_users_solved }}</span>
+                                        </h6>
+                                        <h6 class="fw-semibold mb-1">Attempted: <span class="text-warning">
+                                                {{ pod.question.how_many_users_attempted }}</span>
+                                        </h6>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="{% url 'administrator_view_submissions' pod.question.slug %}"
+                                                class="btn btn-outline-info text-blue float-end">View Submissions </a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 d-flex align-items-stretch">
+            <div class="card w-100">
+
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-semibold mb-4">UPCOMING PODs🔥
+                        {% if query %}
+                        <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                        {% endif %}
+                    </h5>
+                    <div class="table-responsive">
+                        <table class="table text-nowrap mb-0 align-middle">
+                            <thead class=" fs-4">
+
+                                <tr>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            #
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Title
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Description
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Level
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0 justify-content-center">
+                                        <h6 class="fw-semibold mb-0">
+                                            Date
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0 justify-content-center">
+                                        <h6 class="fw-semibold mb-0">
+                                            Submissions
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0 justify-content-center">
+                                        <h6 class="fw-semibold mb-0">
+                                            Action#3
+                                        </h6>
+                                    </th>
+
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% for pod in upcoming_pods %}
+
+                                <tr>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1 text-wrap" data-bs-toggle="tooltip"
+                                            data-bs-placement="top" title="{{ question.title }}">
+                                            {{ pod.question.title }}
+                                        </h6>
+
+                                        {% for sheet in question.sheets.all %}
+                                        <span style="font-weight: bold;"> {{ pod.question.sheet.name }} |
+                                        </span>
+                                        {% endfor %}
+
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <p class="fw-semibold mb-0">
+                                            <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap"
+                                                style="width: 100%;" data-bs-toggle="modal"
+                                                data-bs-target="#questionModal" data-title="{{ pod.question.title }}"
+                                                data-description="{{ pod.question.description }}"
+                                                title="{{ pod.question.title }}"> View</button>
+                                        </p>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <p class="fw-semibold mb-0">
+                                            <span
+                                                class="badge bg-{{ pod.question.get_difficulty_level_color }} text-color">
+                                                {{ pod.question.difficulty_level }}
+                                            </span>
+                                        </p>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <!-- <h6 class="fw-semibold mb-1">{{ pod.question.how_many_users_solved }}</h6> -->
+                                        <h6 class="fw-semibold mb-1">{{ pod.date }}</h6>
+                                    </td>
+
+
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1">Accepted: <span class="text-success">
+                                                {{ pod.question.how_many_users_solved }}</span>
+                                        </h6>
+                                        <h6 class="fw-semibold mb-1">Attempted: <span class="text-warning">
+                                                {{ pod.question.how_many_users_attempted }}</span>
+                                        </h6>
+                                    </td>
+
+                                    <td class="border-bottom-0">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <a href="{% url 'administrator_view_submissions' pod.question.slug %}"
+                                                class="btn btn-outline-info text-blue float-end">View Submissions </a>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    // Disable past dates in date input (picked form stackoverflow)
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementsByName("pod_date")[0].setAttribute('min', today);
+
+    // JavaScript to handle AJAX requests and search
+    document.addEventListener("DOMContentLoaded", () => {
+        const questionSelect = document.getElementById("questionSelect");
+        const searchInput = document.getElementById("searchInput");
+        const form = document.getElementById("setPodForm");
+
+        let allQuestions = []; // To store all fetched questions
+
+        // Function to fetch questions initially
+        const fetchQuestions = () => {
+            fetch(`{% url 'administrator_fetch_pod_questions_for_batch' %}`)
+                .then(response => response.json())
+                .then(data => {
+                    allQuestions = data.questions; // Store fetched questions
+                    populateDropdown(allQuestions); // Populate dropdown with all questions
+                })
+                .catch(error => console.error("Error fetching questions:", error));
+        };
+
+        // Function to populate the dropdown
+        const populateDropdown = (questions) => {
+            questionSelect.innerHTML = ""; // Clear existing options
+            questions.forEach(question => {
+                const option = document.createElement("option");
+                option.classList.add("text-black");
+                option.value = question.id;
+                option.textContent = question.title;
+                questionSelect.appendChild(option);
+            });
+        };
+
+        // Event listener for search input to filter questions
+        searchInput.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase();
+            const filteredQuestions = allQuestions.filter(question =>
+                question.title.toLowerCase().includes(query)
+            );
+            populateDropdown(filteredQuestions); // Update dropdown with filtered questions
+        });
+
+        // Fetch questions on page load
+        fetchQuestions();
+
+        // Handle form submission via AJAX
+        form.addEventListener("submit", (e) => {
+            e.preventDefault(); // Prevent default form submission
+            const formData = new FormData(form);
+            fetch("{% url 'administrator_set_pod_for_batch' batch.slug %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                },
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => console.error("Error setting POD:", error));
+        });
+    });
+
+</script>
+
+
+{% endblock %}

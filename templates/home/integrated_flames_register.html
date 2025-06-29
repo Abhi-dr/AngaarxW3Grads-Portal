@@ -1,0 +1,818 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Register | {{ course.title }}{% endblock %}
+
+{% block css %}
+
+<style>
+    /* Base Styles */
+    .registration-container {
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .registration-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .registration-title {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 700;
+        margin-bottom: 0.75rem;
+        line-height: 1.2;
+    }
+
+    .registration-subtitle {
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        color: #6c757d;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .registration-card {
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: clamp(1.5rem, 5vw, 2.5rem);
+        margin-bottom: 2.5rem;
+        transition: box-shadow 0.3s ease;
+    }
+
+    .registration-card:hover {
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-title {
+        font-size: clamp(1.25rem, 3vw, 1.75rem);
+        font-weight: 700;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        position: relative;
+    }
+
+    .card-title::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 80px;
+        height: 3px;
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        border-radius: 3px;
+    }
+
+    /* Registration Mode Selector */
+    .registration-mode-selector {
+        display: flex;
+        flex-direction: row;
+        gap: 1.25rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .mode-option {
+        flex: 1;
+        padding: 1.75rem 1.25rem;
+        text-align: center;
+        border: 2px solid #e9ecef;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mode-option::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #6610f2);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .mode-option:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .mode-option.active {
+        border-color: #007bff;
+        background-color: rgba(0, 123, 255, 0.05);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 123, 255, 0.15);
+    }
+
+    .mode-option.active::before {
+        opacity: 1;
+    }
+
+    .mode-icon {
+        font-size: 2.25rem;
+        margin-bottom: 1.25rem;
+        color: #6c757d;
+        transition: transform 0.3s ease, color 0.3s ease;
+    }
+
+    .mode-option:hover .mode-icon {
+        transform: scale(1.1);
+    }
+
+    .mode-option.active .mode-icon {
+        color: #007bff;
+        transform: scale(1.1);
+    }
+
+    .mode-title {
+        font-weight: 700;
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .mode-description {
+        font-size: 0.9rem;
+        color: #6c757d;
+        line-height: 1.5;
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 2.5rem;
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        color: #212529;
+    }
+
+    .section-title::before {
+        content: '';
+        display: inline-block;
+        width: 5px;
+        height: 20px;
+        background: linear-gradient(180deg, #007bff, #6610f2);
+        margin-right: 10px;
+        border-radius: 3px;
+    }
+
+    .form-floating {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    /* Team Members */
+    .team-members {
+        margin-top: 2rem;
+    }
+
+    .team-member {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+        position: relative;
+        transition: all 0.3s ease;
+        border-left: 4px solid #6c757d;
+    }
+
+    .team-member:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .team-member:first-child {
+        border-left-color: #007bff;
+    }
+
+    .team-member-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .member-number {
+        font-weight: 700;
+        color: #212529;
+    }
+
+    .remove-member {
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: 1.25rem;
+        transition: transform 0.3s ease;
+    }
+
+    .remove-member:hover {
+        transform: rotate(90deg);
+    }
+
+    .add-member-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 10px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 1.25rem;
+    }
+
+    .add-member-btn:hover {
+        background-color: #e9ecef;
+        border-color: #ced4da;
+    }
+
+    .add-member-icon {
+        font-size: 1.5rem;
+        margin-right: 0.75rem;
+        color: #6c757d;
+        transition: transform 0.3s ease;
+    }
+
+    .add-member-btn:hover .add-member-icon {
+        transform: rotate(90deg);
+    }
+
+    /* Price Summary */
+    .price-summary {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.75rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .price-summary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, #007bff, #6610f2);
+    }
+
+    .price-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+    }
+
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+
+    .price-label {
+        color: #6c757d;
+    }
+
+    .price-value {
+        font-weight: 600;
+    }
+
+    .price-total {
+        margin-top: 1.25rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid #dee2e6;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    /* Referral Code */
+    .referral-input {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .referral-message {
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+        display: none;
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        display: inline-block;
+    }
+
+    .referral-valid {
+        color: #28a745;
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+
+    .referral-invalid {
+        color: #dc3545;
+        background-color: rgba(220, 53, 69, 0.1);
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.5rem 1.5rem;
+        font-weight: 600;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background: linear-gradient(90deg, #007bff, #0056b3);
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(90deg, #0069d9, #004494);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(0, 105, 217, 0.3);
+    }
+
+    .btn-outline-primary {
+        border-color: #007bff;
+        color: #007bff;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: rgba(0, 123, 255, 0.1);
+        color: #007bff;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .registration-mode-selector {
+            flex-direction: column;
+        }
+
+        .mode-option {
+            margin-bottom: 1rem;
+        }
+
+        .referral-input {
+            flex-direction: column;
+        }
+
+        .referral-input .btn {
+            align-self: flex-start;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .team-member .row {
+            flex-direction: column;
+        }
+
+        .team-member .col-md-4 {
+            width: 100%;
+        }
+    }
+
+    /* Dark Mode Styles */
+    [data-bs-theme="dark"] {
+        --text-primary: #f8f9fa;
+        --text-secondary: #adb5bd;
+        --card-bg: #2b3035;
+        --secondary-bg: #343a40;
+        --border-color: #495057;
+        --highlight: #0d6efd;
+    }
+
+    [data-bs-theme="dark"] .registration-card {
+        background-color: var(--card-bg);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-bs-theme="dark"] .card-title {
+        color: var(--text-primary);
+        border-bottom-color: var(--border-color);
+    }
+
+    [data-bs-theme="dark"] .mode-option {
+        border-color: var(--border-color);
+        background-color: var(--card-bg);
+    }
+
+    [data-bs-theme="dark"] .mode-option:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-bs-theme="dark"] .mode-option.active {
+        border-color: var(--highlight);
+        background-color: rgba(13, 110, 253, 0.15);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.25);
+    }
+
+    [data-bs-theme="dark"] .mode-icon {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .mode-option.active .mode-icon {
+        color: var(--highlight);
+    }
+
+    [data-bs-theme="dark"] .mode-title {
+        color: var(--text-primary);
+    }
+
+    [data-bs-theme="dark"] .mode-description {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .section-title {
+        color: var(--text-primary);
+    }
+
+    [data-bs-theme="dark"] .team-member {
+        background-color: var(--secondary-bg);
+        border-left-color: var(--border-color);
+    }
+
+    [data-bs-theme="dark"] .team-member:first-child {
+        border-left-color: var(--highlight);
+    }
+
+    [data-bs-theme="dark"] .team-member:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-bs-theme="dark"] .member-number {
+        color: var(--text-primary);
+    }
+
+    [data-bs-theme="dark"] .add-member-btn {
+        background-color: var(--secondary-bg);
+        border-color: var(--border-color);
+    }
+
+    [data-bs-theme="dark"] .add-member-btn:hover {
+        background-color: var(--card-bg);
+    }
+
+    [data-bs-theme="dark"] .add-member-icon {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .price-summary {
+        background-color: var(--secondary-bg);
+    }
+
+    [data-bs-theme="dark"] .price-label {
+        color: var(--text-secondary);
+    }
+
+    [data-bs-theme="dark"] .price-value {
+        color: var(--text-primary);
+    }
+
+    [data-bs-theme="dark"] .price-total {
+        border-top-color: var(--border-color);
+    }
+
+    [data-bs-theme="dark"] .btn-outline-primary {
+        border-color: var(--highlight);
+        color: var(--highlight);
+    }
+
+    [data-bs-theme="dark"] .btn-outline-primary:hover {
+        background-color: rgba(13, 110, 253, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="registration-container">
+        <div class="registration-header">
+            <h1 class="registration-title">Register for SUMMER TRAINING Program</h1>
+            <p class="registration-subtitle">{{ course.title }} - {{ course.subtitle }}</p>
+        </div>
+        
+        <div class="registration-card">
+            <h2 class="card-title">Registration Details</h2>
+            
+            <form id="registration-form" method="POST" action="">
+                {% csrf_token %}
+                
+                <!-- Registration Mode Selection -->
+                <div class="form-section">
+                    <h3 class="section-title">Registration Mode</h3>
+                    <div class="registration-mode-selector">
+                        <div class="mode-option active" data-mode="SOLO">
+                            <i class="fas fa-user mode-icon"></i>
+                            <h4 class="mode-title">Solo Registration</h4>
+                            <p class="mode-description">Register as an individual participant for the program.</p>
+                        </div>
+                        <div class="mode-option" data-mode="TEAM">
+                            <i class="fas fa-users mode-icon"></i>
+                            <h4 class="mode-title">Team Registration</h4>
+                            <p class="mode-description">Form a team of up to 5 members and register together.</p>
+                        </div>
+                    </div>
+                    <input type="hidden" name="registration_mode" id="registration_mode" value="SOLO">
+                </div>
+                
+                <!-- Personal Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Personal Information</h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Full Name" required>
+                                <label for="full_name">Full Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
+                                <label for="email">Email Address</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control" id="contact_number" name="contact_number" placeholder="Contact Number" required>
+                                <label for="contact_number">Contact Number</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating mb-3">
+                                <select class="form-select" id="year" name="year" required>
+                                    <option value="" selected disabled>Select Year</option>
+                                    <option value="1">1st Year</option>
+                                    <option value="2">2nd Year</option>
+                                    <option value="3">3rd Year</option>
+                                    <option value="4">4th Year</option>
+                                    <option value="5">5th Year</option>
+                                    <option value="Graduated">Graduated</option>
+                                </select>
+                                <label for="year">Year of Study</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="college" name="college" placeholder="College/University">
+                        <label for="college">College/University</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" id="message" name="message" placeholder="Any message for us?" style="height: 100px"></textarea>
+                        <label for="message">Any message for us? (Optional)</label>
+                    </div>
+                </div>
+                
+                <!-- Team Information (Hidden by default) -->
+                <div class="form-section" id="team-section" style="display: none;">
+                    <h3 class="section-title">Team Information</h3>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="team_name" name="team_name" placeholder="Team Name">
+                        <label for="team_name">Team Name</label>
+                    </div>
+                    
+                    <div class="team-members">
+                        <div class="team-member" id="team-leader">
+                            <div class="team-member-header">
+                                <span class="member-number">Team Leader (You)</span>
+                            </div>
+                            <p class="text-muted mb-0">Your information from the Personal Information section will be used.</p>
+                        </div>
+                        
+                        <div id="additional-members"></div>
+                        
+                        <div class="add-member-btn" id="add-member-btn">
+                            <i class="fas fa-plus-circle add-member-icon"></i>
+                            <span>Add Team Member</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Referral Code -->
+                <div class="form-section">
+                    <h3 class="section-title">Referral Code (Optional)</h3>
+                    <div class="referral-input">
+                        <div class="form-floating flex-grow-1">
+                            <input type="text" class="form-control" id="referral_code" name="referral_code" placeholder="Referral Code">
+                            <label for="referral_code">Referral Code</label>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" id="verify-referral">Verify</button>
+                    </div>
+                    <div class="referral-message" id="referral-message"></div>
+                </div>
+                
+                <!-- Price Summary -->
+                <div class="form-section">
+                    <div class="price-summary">
+                        <h3 class="price-title">Price Summary</h3>
+                        <div class="price-row">
+                            <span class="price-label">Base Price</span>
+                            <span class="price-value">₹{{ course.price }}</span>
+                        </div>
+                        <div class="price-row" id="discount-row" style="display: none;">
+                            <span class="price-label">Discount</span>
+                            <span class="price-value" id="discount-value">-₹0</span>
+                        </div>
+                        <div class="price-row price-total">
+                            <span class="price-label">Total</span>
+                            <span class="price-value" id="total-price">₹{{ course.price }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">Register Now</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Registration mode selection
+        const modeOptions = document.querySelectorAll('.mode-option');
+        const registrationModeInput = document.getElementById('registration_mode');
+        const teamSection = document.getElementById('team-section');
+        
+        modeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Remove active class from all options
+                modeOptions.forEach(opt => opt.classList.remove('active'));
+                
+                // Add active class to clicked option
+                this.classList.add('active');
+                
+                // Update hidden input value
+                const mode = this.getAttribute('data-mode');
+                registrationModeInput.value = mode;
+                
+                // Show/hide team section based on selection
+                if (mode === 'TEAM') {
+                    teamSection.style.display = 'block';
+                } else {
+                    teamSection.style.display = 'none';
+                }
+            });
+        });
+        
+        // Team member management
+        const addMemberBtn = document.getElementById('add-member-btn');
+        const additionalMembers = document.getElementById('additional-members');
+        let memberCount = 1; // Start with 1 (team leader)
+        
+        addMemberBtn.addEventListener('click', function() {
+            if (memberCount < 5) { // Maximum 5 members including leader
+                memberCount++;
+                
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'team-member';
+                memberDiv.id = `member-${memberCount}`;
+                
+                memberDiv.innerHTML = `
+                    <div class="team-member-header">
+                        <span class="member-number">Team Member ${memberCount}</span>
+                        <button type="button" class="remove-member" data-member="${memberCount}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="text" class="form-control" id="member_name_${memberCount}" name="member_name_${memberCount}" placeholder="Full Name" required>
+                                <label for="member_name_${memberCount}">Full Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="email" class="form-control" id="member_email_${memberCount}" name="member_email_${memberCount}" placeholder="Email Address" required>
+                                <label for="member_email_${memberCount}">Email Address</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating mb-3">
+                                <input type="tel" class="form-control" id="member_contact_${memberCount}" name="member_contact_${memberCount}" placeholder="Contact Number" required>
+                                <label for="member_contact_${memberCount}">Contact Number</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                additionalMembers.appendChild(memberDiv);
+                
+                // Add event listener to remove button
+                const removeBtn = memberDiv.querySelector('.remove-member');
+                removeBtn.addEventListener('click', function() {
+                    const memberToRemove = document.getElementById(`member-${this.getAttribute('data-member')}`);
+                    memberToRemove.remove();
+                    memberCount--;
+                    
+                    // Update member numbers
+                    const memberDivs = additionalMembers.querySelectorAll('.team-member');
+                    memberDivs.forEach((div, index) => {
+                        const memberNumber = div.querySelector('.member-number');
+                        memberNumber.textContent = `Team Member ${index + 2}`;
+                    });
+                });
+            }
+        });
+        
+        // Referral code verification
+        const verifyReferralBtn = document.getElementById('verify-referral');
+        const referralCodeInput = document.getElementById('referral_code');
+        const referralMessage = document.getElementById('referral-message');
+        const discountRow = document.getElementById('discount-row');
+        const discountValue = document.getElementById('discount-value');
+        const totalPrice = document.getElementById('total-price');
+        
+        verifyReferralBtn.addEventListener('click', function() {
+            const referralCode = referralCodeInput.value.trim();
+            
+            if (referralCode === '') {
+                referralMessage.textContent = 'Please enter a referral code.';
+                referralMessage.className = 'referral-message referral-invalid';
+                referralMessage.style.display = 'block';
+                return;
+            }
+            
+            // Send AJAX request to verify referral code
+            fetch(`/dashboard/api/verify-referral-code/${referralCode}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.valid) {
+                        referralMessage.textContent = `Valid referral code! ${data.discount_amount} discount applied.`;
+                        referralMessage.className = 'referral-message referral-valid';
+                        
+                        // Update price summary
+                        discountRow.style.display = 'flex';
+                        discountValue.textContent = `-₹${data.discount_amount}`;
+                        
+                        // Calculate new total
+                        const originalPrice = parseFloat("{{ course.price }}");
+                        const newTotal = Math.max(0, originalPrice - data.discount_amount);
+                        totalPrice.textContent = `₹${newTotal}`;
+                    } else {
+                        referralMessage.textContent = 'Invalid referral code. Please check and try again.';
+                        referralMessage.className = 'referral-message referral-invalid';
+                        
+                        // Reset price summary
+                        discountRow.style.display = 'none';
+                        totalPrice.textContent = `₹${parseFloat("{{ course.price }}")}`;
+                    }
+                    
+                    referralMessage.style.display = 'block';
+                })
+                .catch(error => {
+                    referralMessage.textContent = 'Error verifying referral code. Please try again.';
+                    referralMessage.className = 'referral-message referral-invalid';
+                    referralMessage.style.display = 'block';
+                    console.error('Error:', error);
+                });
+        });
+        
+        // Form validation before submission
+        const registrationForm = document.getElementById('registration-form');
+        
+        registrationForm.addEventListener('submit', function(event) {
+            const mode = registrationModeInput.value;
+            
+            if (mode === 'TEAM') {
+                const teamName = document.getElementById('team_name').value.trim();
+                
+                if (teamName === '') {
+                    event.preventDefault();
+                    alert('Please enter a team name.');
+                    return;
+                }
+                
+                // Add hidden input with team member count
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'team_member_count';
+                hiddenInput.value = memberCount;
+                registrationForm.appendChild(hiddenInput);
+            }
+        });
+    });
+</script>
+{% endblock %}

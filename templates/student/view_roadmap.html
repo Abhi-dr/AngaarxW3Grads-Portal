@@ -1,0 +1,66 @@
+{% extends "student/base.html" %} 
+{% load static %} 
+
+{% block title %} 
+Student -> View Roadmap 
+{% endblock %} 
+
+{% block extra_css %}
+
+<style>
+    .vertical_dotted_line
+{
+    border-left: 2px dashed rgb(0, 0, 0);
+    height: 100%;
+    z-index: -1;
+    left: 50%;
+    position: absolute;
+} 
+
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+   
+
+    <div class="vertical_dotted_line"></div>
+    {% for roadmap in roadmaps %}
+
+    
+    {% if forloop.counter|divisibleby:2 %}
+
+    <div class="card col-md-8 float-lg-end mb-5">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-2">{{ roadmap.topic }}</h5>
+            <p class="mb-2">{{ roadmap.description }}</p>
+        </div>
+    </div>    
+
+    {% else %}
+
+    <div class="card col-md-8 mb-5">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-2">{{ roadmap.topic }}</h5>
+            <p class="mb-2">{{ roadmap.description }}</p>
+        </div>
+    </div>
+
+    {% endif %}
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}
+</div>

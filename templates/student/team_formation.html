@@ -1,0 +1,507 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}F.L.A.M.E.S Team Formation | Student Dashboard{% endblock %}
+
+{% block css %}
+<style>
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .no-registrations {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .no-registrations i {
+        font-size: 3rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .no-registrations p {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+    .registration-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .registration-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+    }
+
+    .registration-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .registration-icon[data-color] {
+        background-color: rgba(var(--color), 0.1);
+    }
+
+    .registration-icon[data-color] i {
+        color: rgb(var(--color));
+    }
+
+    .registration-title {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .registration-subtitle {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .registration-body {
+        padding: 1.25rem;
+    }
+
+    .registration-footer {
+        padding: 1rem 1.25rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-create-team {
+        background-color: #ff6026;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-create-team:hover {
+        background-color: #e55522;
+        transform: translateY(-2px);
+    }
+
+    .team-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .team-header {
+        padding: 1.25rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .team-name {
+        margin: 0;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+
+    .team-name i {
+        margin-right: 0.75rem;
+        color: #ff6026;
+    }
+
+    .team-course {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .team-status {
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status-completed {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+    .team-body {
+        padding: 1.25rem;
+    }
+
+    .team-members {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .team-member {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .team-member:last-child {
+        border-bottom: none;
+    }
+
+    .member-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: #6c757d;
+    }
+
+    .member-info {
+        flex-grow: 1;
+    }
+
+    .member-name {
+        margin: 0;
+        font-weight: 500;
+    }
+
+    .member-email {
+        margin: 0;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .member-tag {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 50px;
+        margin-left: 0.5rem;
+    }
+
+    .tag-leader {
+        background-color: #cce5ff;
+        color: #004085;
+    }
+
+    .tag-you {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .empty-members {
+        text-align: center;
+        padding: 1.5rem;
+        color: #6c757d;
+    }
+
+    .team-footer {
+        padding: 1rem 1.25rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .btn-add-member {
+        display: inline-flex;
+        align-items: center;
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-add-member i {
+        margin-right: 0.5rem;
+    }
+
+    .btn-add-member:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+    }
+
+    .btn-remove {
+        color: #dc3545;
+        background: none;
+        border: none;
+        padding: 0;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-remove:hover {
+        color: #bd2130;
+        transform: scale(1.1);
+    }
+
+    .team-count {
+        background-color: #f8f9fa;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .team-warning {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background-color: #fff3cd;
+        border-left: 4px solid #ffc107;
+        border-radius: 4px;
+        color: #856404;
+    }
+
+    .team-success {
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        background-color: #d4edda;
+        border-left: 4px solid #28a745;
+        border-radius: 4px;
+        color: #155724;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'student_dashboard' %}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'student_flames' %}">F.L.A.M.E.S</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Team Formation</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Solo Registrations Section -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="section-header">
+                <h3 class="section-title">Solo Registrations Without Teams</h3>
+            </div>
+
+            {% if solo_registrations %}
+                <div class="row">
+                    {% for registration in solo_registrations %}
+                    <div class="col-md-6">
+                        <div class="registration-card">
+                            <div class="registration-header">
+                                <div class="registration-icon" data-color="{{ registration.course.icon_color }}">
+                                    <i class="{{ registration.course.icon_class }}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="registration-title">{{ registration.course.title }}</h4>
+                                    <p class="registration-subtitle">{{ registration.course.subtitle }}</p>
+                                </div>
+                            </div>
+                            <div class="registration-body">
+                                <p>You are currently registered as a solo participant for this course. Create a team to organize your participation in the program.</p>
+                                
+                                <div class="team-warning">
+                                    <strong>Note:</strong> Even if you registered solo, you will be placed in a team of 5 members. You can create your own team now, or let the administrators assign you to a team later.
+                                </div>
+                            </div>
+                            <div class="registration-footer">
+                                <a href="{% url 'student_create_team' registration.id %}" class="btn-create-team">
+                                    <i class="fas fa-users"></i> Create Team
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-registrations">
+                    <i class="fas fa-user"></i>
+                    <h4>No Solo Registrations Found</h4>
+                    <p>You don't have any solo registrations without teams.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Teams Section -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="section-header">
+                <h3 class="section-title">My Teams</h3>
+            </div>
+
+            {% if teams %}
+                <div class="row">
+                    {% for team in teams %}
+                    <div class="col-md-6">
+                        <div class="team-card">
+                            <div class="team-header">
+                                <div>
+                                    <h4 class="team-name">
+                                        <i class="fas fa-users"></i>
+                                        {{ team.name }}
+                                    </h4>
+                                    <p class="team-course">{{ team.course.title }}</p>
+                                </div>
+                                <span class="team-status status-{{ team.status|lower }}">{{ team.status }}</span>
+                            </div>
+                            <div class="team-body">
+                                <ul class="team-members">
+                                    {% for member in team.members.all %}
+                                    <li class="team-member">
+                                        <div class="member-icon">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="member-info">
+                                            <h5 class="member-name">
+                                                {{ member.full_name }}
+                                                {% if member.is_leader %}
+                                                <span class="member-tag tag-leader">Team Leader</span>
+                                                {% endif %}
+                                                {% if member.user == request.user %}
+                                                <span class="member-tag tag-you">You</span>
+                                                {% endif %}
+                                            </h5>
+                                            <p class="member-email">{{ member.email }}</p>
+                                        </div>
+                                        {% if not member.is_leader %}
+                                        <form method="post" action="{% url 'student_remove_team_member' member.id %}" onsubmit="return confirm('Are you sure you want to remove this member from the team?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-remove" title="Remove member">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </li>
+                                    {% empty %}
+                                    <div class="empty-members">
+                                        <i class="fas fa-users"></i>
+                                        <p>No team members found. Please add members to your team.</p>
+                                    </div>
+                                    {% endfor %}
+                                </ul>
+
+                                {% if team.members.count < 5 %}
+                                <div class="team-warning">
+                                    <strong>Note:</strong> Your team is not complete. Please add {% widthratio team.members.count 1 -5 as remaining_members %}{{ remaining_members|add:"5" }} more member{{ remaining_members|add:"5"|pluralize }} to complete your team.
+                                </div>
+                                {% else %}
+                                <div class="team-success">
+                                    <strong>Success!</strong> Your team is complete with 5 members. You're all set for the program!
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="team-footer">
+                                <span class="team-count">
+                                    <i class="fas fa-user"></i> {{ team.members.count }}/5 Members
+                                </span>
+                                {% if team.members.count < 5 %}
+                                <a href="{% url 'student_add_team_member' team.id %}" class="btn-add-member">
+                                    <i class="fas fa-plus"></i> Add Member
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-registrations">
+                    <i class="fas fa-users"></i>
+                    <h4>No Teams Found</h4>
+                    <p>You haven't created any teams yet.</p>
+                    <a href="{% url 'student_flames' %}" class="btn btn-primary">View F.L.A.M.E.S Registrations</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle course icon colors
+        document.querySelectorAll('.registration-icon[data-color]').forEach(function(icon) {
+            const colorValue = icon.getAttribute('data-color');
+            // Convert RGB format (r, g, b) to CSS variable
+            const cleanedColor = colorValue.replace(/[()]/g, '').trim();
+            icon.style.setProperty('--color', cleanedColor);
+        });
+
+        // Handle team member actions
+        document.querySelectorAll('.btn-remove-member').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to remove this team member?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
+        // Handle team card toggle
+        document.querySelectorAll('.team-card-header').forEach(function(header) {
+            header.addEventListener('click', function() {
+                const teamBody = this.closest('.team-card').querySelector('.team-card-body');
+                if (teamBody.style.display === 'none' || !teamBody.style.display) {
+                    teamBody.style.display = 'block';
+                    this.querySelector('.toggle-icon').classList.replace('fa-chevron-down', 'fa-chevron-up');
+                } else {
+                    teamBody.style.display = 'none';
+                    this.querySelector('.toggle-icon').classList.replace('fa-chevron-up', 'fa-chevron-down');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

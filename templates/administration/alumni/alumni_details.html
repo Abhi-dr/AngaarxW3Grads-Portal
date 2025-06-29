@@ -1,0 +1,650 @@
+{% extends 'administration/base.html' %}
+{% load static %}
+
+{% block title %}Alumni | {{ alumni.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<style>
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+
+    .badge-active {
+        background-color: #28a745;
+    }
+
+    .badge-inactive {
+        background-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Alumni Details</h1>
+        <div>
+            <a href="{% url 'alumni_management' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left fa-sm"></i> Back to Alumni List
+            </a>
+            <button class="btn btn-success ms-2" data-bs-toggle="modal" data-bs-target="#generateReferralModal">
+                <i class="fas fa-tag fa-sm"></i> Generate Referral Code
+            </button>
+        </div>
+    </div>
+
+    <!-- Alumni Information Card -->
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Alumni Information</h6>
+                    <button class="btn btn-sm btn-primary edit-alumni" data-id="{{ alumni.id }}">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h5 class="font-weight-bold">{{ alumni.name }}</h5>
+                        <p class="text-muted">ID: {{ alumni.id }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Contact Information</h6>
+                        <p>
+                            <i class="fas fa-envelope me-2"></i> {{ alumni.email }}<br>
+                            <i class="fas fa-phone me-2"></i> {{ alumni.contact_number|default:"Not provided" }}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Education</h6>
+                        <p>
+                            <i class="fas fa-university me-2"></i> {{ alumni.college|default:"Not provided" }}<br>
+                            <i class="fas fa-graduation-cap me-2"></i> Batch:
+                            {{ alumni.batch_year|default:"Not provided" }}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="font-weight-bold">Created At</h6>
+                        <p><i class="fas fa-calendar me-2"></i> {{ alumni.created_at|date:"d M Y, h:i A" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="row">
+                <!-- Statistics Cards -->
+                <div class="col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                        Total Referral Codes</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_referrals }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-tag fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                        Active Referral Codes</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ active_referrals }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                        Total Registrations</div>
+                                    <span class="h5 mb-0 font-weight-bold text-success">
+                                        {{ total_completed_registrations }}</span>
+                                    |
+                                    <span class="h5 mb-0 font-weight-bold">{{ total_registrations }}</span>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="card border-left-warning shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                        Total Discount Amount</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                        ₹{{ total_discount|floatformat:2 }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-rupee-sign fa-2x text-gray-300"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Referral Codes Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">Referral Codes</h6>
+            <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#generateReferralModal">
+                <i class="fas fa-plus"></i> Generate New Code
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="referralCodesTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Code</th>
+                            <th>Discount Amount</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th>Expires At</th>
+                            <th>Used Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for code in referral_codes %}
+                        <tr>
+                            <td>{{ code.id }}</td>
+                            <td><code>{{ code.code }}</code></td>
+                            <td>₹{{ code.discount_amount|floatformat:2 }}</td>
+                            <td>
+                                {% if code.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ code.created_at|date:"d M Y, h:i A" }}</td>
+                            <td>{{ code.expires_at|date:"d M Y, h:i A"|default:"Never" }}</td>
+                            <td>{{ code.registrations.count }}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button class="btn btn-sm btn-info edit-referral-btn" data-id="{{ code.id }}"
+                                        data-code="{{ code.code }}" data-amount="{{ code.discount_amount }}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-primary toggle-status" data-id="{{ code.id }}"
+                                        data-status="{{ code.is_active }}">
+                                        {% if code.is_active %}
+                                        <i class="fas fa-ban"></i> Deactivate
+                                        {% else %}
+                                        <i class="fas fa-check"></i> Activate
+                                        {% endif %}
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No referral codes found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registrations Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Registrations Using Referral Codes</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="registrationsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Student</th>
+                            <th>Course</th>
+                            <th>Referral Code</th>
+                            <th>Original Price</th>
+                            <th>Discounted Price</th>
+                            <th>Status</th>
+                            <th>Registered On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reg in registrations %}
+                        <tr>
+                            <td>{{ reg.id }}</td>
+                            <td>
+                                {% if reg.user %}
+                                {{ reg.user.first_name }} {{ reg.user.last_name }}
+                                {% else %}
+                                N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ reg.course.title }}</td>
+                            <td><code>{{ reg.referral_code.code }}</code></td>
+                            <td>₹{{ reg.original_price|floatformat:2 }}</td>
+                            <td>₹{{ reg.discounted_price|floatformat:2 }}</td>
+                            <td>
+                                {% if reg.status == 'Completed' %}
+                                <span class="badge bg-success">{{ reg.status }}</span>
+                                {% elif reg.status == 'Approved' %}
+                                <span class="badge bg-primary">{{ reg.status }}</span>
+                                {% elif reg.status == 'Rejected' %}
+                                <span class="badge bg-danger">{{ reg.status }}</span>
+                                {% else %}
+                                <span class="badge bg-warning">{{ reg.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ reg.created_at|date:"d M Y, h:i A" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No registrations found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Alumni Modal -->
+<div class="modal fade" id="editAlumniModal" tabindex="-1" aria-labelledby="editAlumniModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editAlumniModalLabel">Edit Alumni</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editAlumniForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="edit_name" name="name" value="{{ alumni.name }}"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="edit_email" name="email" value="{{ alumni.email }}"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_contact_number" class="form-label">Contact Number</label>
+                        <input type="text" class="form-control" id="edit_contact_number" name="contact_number"
+                            value="{{ alumni.contact_number|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_college" class="form-label">College</label>
+                        <input type="text" class="form-control" id="edit_college" name="college"
+                            value="{{ alumni.college|default:'' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_batch_year" class="form-label">Batch Year</label>
+                        <input type="text" class="form-control" id="edit_batch_year" name="batch_year"
+                            value="{{ alumni.batch_year|default:'' }}">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updateAlumniBtn">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Referral Code Modal -->
+<div class="modal fade" id="editReferralModal" tabindex="-1" aria-labelledby="editReferralModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editReferralModalLabel">Edit Referral Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editReferralForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="edit_referral_id" name="code_id">
+                    <div class="mb-3">
+                        <label for="edit_referral_code" class="form-label">Referral Code</label>
+                        <input type="text" class="form-control" id="edit_referral_code" name="code" required>
+                        <small class="form-text text-muted">The referral code must be unique.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_discount_amount" class="form-label">Discount Amount (₹)</label>
+                        <input type="number" class="form-control" id="edit_discount_amount" name="discount_amount"
+                            min="0" step="100" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updateReferralBtn">Update</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Referral Code Modal -->
+<div class="modal fade" id="generateReferralModal" tabindex="-1" aria-labelledby="generateReferralModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="generateReferralModalLabel">Generate Referral Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="generateReferralForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="alumni_name_display" class="form-label">Alumni</label>
+                        <input type="text" class="form-control" id="alumni_name_display" value="{{ alumni.name }}"
+                            readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="discount_amount" class="form-label">Discount Amount (₹)</label>
+                        <input type="number" class="form-control" id="discount_amount" name="discount_amount"
+                            value="500" min="0" step="100">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="generateReferralBtn">Generate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // Configure Toastr
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+        // Initialize DataTables
+        $('#referralCodesTable').DataTable({
+            order: [[0, 'desc']],
+            responsive: true,
+            pageLength: 10,
+            language: {
+                emptyTable: "No referral codes found"
+            }
+        });
+
+        $('#registrationsTable').DataTable({
+            order: [[0, 'desc']],
+            responsive: true,
+            pageLength: 10,
+            language: {
+                emptyTable: "No registrations found"
+            }
+        });
+
+        // Edit Alumni Button Click
+        $('.edit-alumni').on('click', function () {
+            const alumniModal = new bootstrap.Modal(document.getElementById('editAlumniModal'));
+            alumniModal.show();
+        });
+
+        // Update Alumni Form Submission
+        $('#updateAlumniBtn').on('click', function () {
+            const form = $('#editAlumniForm');
+            const submitBtn = $(this);
+
+            // Disable button and show loading
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+
+            $.ajax({
+                url: "{% url 'update_alumni' alumni.id %}",
+                method: 'POST',
+                data: form.serialize(),
+                success: function (response) {
+                    if (response.status === 'success') {
+                        toastr.success('Alumni updated successfully!');
+                        const alumniModal = bootstrap.Modal.getInstance(document.getElementById('editAlumniModal'));
+                        if (alumniModal) {
+                            alumniModal.hide();
+                        }
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        toastr.error('Error: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating alumni:', error);
+                    toastr.error('An error occurred while updating the alumni.');
+                },
+                complete: function () {
+                    // Re-enable button
+                    submitBtn.prop('disabled', false).html('Update');
+                }
+            });
+        });
+
+        // Generate Referral Form Submission
+        $('#generateReferralBtn').on('click', function () {
+            const form = $('#generateReferralForm');
+            const submitBtn = $(this);
+
+            console.log("Generate referral button clicked");
+
+            // Disable button and show loading
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Generating...');
+
+            $.ajax({
+                url: "{% url 'generate_referral_code' alumni.id %}",
+                method: 'POST',
+                data: form.serialize(),
+                success: function (response) {
+                    if (response.status === 'success') {
+                        toastr.success('Referral code generated successfully: ' + response.referral_code.code);
+                        const genModal = bootstrap.Modal.getInstance(document.getElementById('generateReferralModal'));
+                        if (genModal) {
+                            genModal.hide();
+                        }
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        toastr.error('Error: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error generating referral code:', error);
+                    toastr.error('An error occurred while generating the referral code.');
+                },
+                complete: function () {
+                    // Re-enable button
+                    submitBtn.prop('disabled', false).html('Generate');
+                }
+            });
+        });
+
+        // Edit Referral Code - Use event delegation and class selector
+        $(document).on('click', '.edit-referral-btn', function () {
+            console.log("Edit referral button clicked");
+            const id = $(this).data('id');
+            const code = $(this).data('code');
+            const amount = $(this).data('amount');
+
+            console.log('Edit data:', { id, code, amount });
+
+            // Populate the edit form
+            $('#edit_referral_id').val(id);
+            $('#edit_referral_code').val(code);
+            $('#edit_discount_amount').val(amount);
+
+            // Show the modal using Bootstrap 5 API
+            const editModal = new bootstrap.Modal(document.getElementById('editReferralModal'));
+            editModal.show();
+        });
+
+        // Update Referral Code
+        $('#updateReferralBtn').on('click', function () {
+            const form = $('#editReferralForm');
+            const codeId = $('#edit_referral_id').val();
+            const submitBtn = $(this);
+
+            if (!codeId) {
+                toastr.error('No referral code selected for update.');
+                return;
+            }
+
+            // Disable button and show loading
+            submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Updating...');
+
+            $.ajax({
+                url: "{% url 'update_referral_code' 0 %}".replace('0', codeId),
+                method: 'POST',
+                data: form.serialize(),
+                success: function (response) {
+                    if (response.status === 'success') {
+                        toastr.success('Referral code updated successfully!');
+                        const editModal = bootstrap.Modal.getInstance(document.getElementById('editReferralModal'));
+                        if (editModal) {
+                            editModal.hide();
+                        }
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        toastr.error('Error: ' + response.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error updating referral code:', error);
+                    toastr.error('An error occurred while updating the referral code.');
+                },
+                complete: function () {
+                    // Re-enable button
+                    submitBtn.prop('disabled', false).html('Update');
+                }
+            });
+        });
+
+        // Toggle Referral Code Status - Use event delegation
+        $(document).on('click', '.toggle-status', function () {
+            const id = $(this).data('id');
+            const currentStatus = $(this).data('status');
+            const statusText = currentStatus ? 'deactivate' : 'activate';
+            const button = $(this);
+
+            console.log('Toggle status clicked:', { id, currentStatus, statusText });
+
+            if (confirm(`Are you sure you want to ${statusText} this referral code?`)) {
+                // Disable button and show loading
+                button.prop('disabled', true);
+                const originalHtml = button.html();
+                button.html('<i class="fas fa-spinner fa-spin"></i>');
+
+                $.ajax({
+                    url: "{% url 'toggle_referral_code_status' 0 %}".replace('0', id),
+                    method: 'POST',
+                    data: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    },
+                    success: function (response) {
+                        if (response.status === 'success') {
+                            const actionText = response.is_active ? 'activated' : 'deactivated';
+                            toastr.success(`Referral code ${actionText} successfully!`);
+                            setTimeout(() => location.reload(), 1500);
+                        } else {
+                            toastr.error('Error: ' + response.message);
+                            button.prop('disabled', false).html(originalHtml);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('Error toggling referral code status:', error);
+                        toastr.error('An error occurred while updating the referral code status.');
+                        button.prop('disabled', false).html(originalHtml);
+                    }
+                });
+            }
+        });
+
+        // Handle modal close events to reset forms
+        $('#editAlumniModal').on('hidden.bs.modal', function () {
+            $('#editAlumniForm')[0].reset();
+        });
+
+        $('#editReferralModal').on('hidden.bs.modal', function () {
+            $('#editReferralForm')[0].reset();
+            $('#edit_referral_id').val('');
+        });
+
+        $('#generateReferralModal').on('hidden.bs.modal', function () {
+            $('#generateReferralForm')[0].reset();
+            $('#discount_amount').val('500'); // Reset to default value
+        });
+    });
+</script>
+{% endblock %}

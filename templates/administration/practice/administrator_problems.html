@@ -1,0 +1,441 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Problem Set🔥
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Problem Set</span>
+                <span class="fs-4"> | 🔥Total: <span id="totalQustions">{{ questions.count }}</span>🔥</span>
+            </h3>
+        </div>
+
+        <div class="row mt-n3">
+            <div class="col-md-5 mx-auto">
+                <a href="{% url 'add_question' %}" class="btn btn-outline-primary button w-100">Add
+                    Question</a>
+            </div>
+            <div class="col-md-5 mx-auto">
+                <a href="{% url 'question_requests' %}" class="btn btn-outline-warning button w-100">Question
+                    Requests ({{unapproved_question_number}})</a>
+            </div>
+        </div>
+
+        <!-- ========================== SEARCH BAR ==================================== -->
+
+        <div class="card-body p-4">
+            <form onsubmit="event.preventDefault();">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="searchInput"
+                        placeholder="Search by ID, Topic or Description" oninput="debounceSearch()" />
+                    <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4" id="questionHeading">Questions 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Title
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Description
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Level
+                                </h6>
+                            </th>
+
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Submissions
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    TEST CODE
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Make Copy
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody id="questionTableBody">
+
+                        <tr>
+                            <td colspan="10" class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="d-flex justify-content-between align-items-center mt-4" id="paginationContainer">
+                <div class="d-flex align-items-center">
+                    <select class="form-select me-2" id="itemsPerPage" style="width: auto;">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                    <span class="text-muted">items per page</span>
+                </div>
+                <div>
+                    <nav aria-label="Question pagination">
+                        <ul class="pagination mb-0" id="paginationList">
+                            <!-- Pagination buttons will be generated here -->
+                        </ul>
+                    </nav>
+                </div>
+                <div class="text-muted">Showing <span id="itemsStart">0</span>-<span id="itemsEnd">0</span> of <span id="totalItems">0</span> items</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="questionModalLabel">Question Title...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="questionDescription">Description...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Script to dynamically set modal content -->
+<script>
+    var questionModal = document.getElementById('questionModal');
+    questionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var title = button.getAttribute('data-title'); // Extract info from data-* attributes
+        var description = button.getAttribute('data-description');
+
+        // Update the modal's content.
+        var modalTitle = questionModal.querySelector('.modal-title');
+        var modalBody = questionModal.querySelector('.modal-body p');
+
+        modalTitle.textContent = title;
+        modalBody.innerHTML = description;
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Initialize the page and items per page selector
+        document.getElementById("itemsPerPage").addEventListener("change", function() {
+            fetchQuestions(1); // Reset to page 1 when changing items per page
+        });
+        
+        fetchQuestions();  // Load all questions initially
+    });
+    
+    // Function to update the pagination controls
+    function updatePagination(data) {
+        const paginationList = document.getElementById("paginationList");
+        const totalItems = document.getElementById("totalItems");
+        const itemsStart = document.getElementById("itemsStart");
+        const itemsEnd = document.getElementById("itemsEnd");
+        const totalPages = data.total_pages;
+        const current = data.current_page;
+        
+        // Update count information
+        totalItems.textContent = data.total_questions;
+        const start = ((current - 1) * data.items_per_page) + 1;
+        const end = Math.min(start + data.items_per_page - 1, data.total_questions);
+        itemsStart.textContent = data.total_questions > 0 ? start : 0;
+        itemsEnd.textContent = end;
+        
+        // Clear current pagination
+        paginationList.innerHTML = "";
+        
+        // Don't show pagination if there's only 1 page
+        if (totalPages <= 1) {
+            return;
+        }
+        
+        // Previous button
+        const prevLi = document.createElement("li");
+        prevLi.className = `page-item ${current === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#" ${current !== 1 ? `onclick="fetchQuestions(${current - 1}); return false;"` : ''}>Previous</a>`;
+        paginationList.appendChild(prevLi);
+        
+        // Page numbers - show 5 pages with current in the middle if possible
+        let startPage = Math.max(1, current - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        
+        // Adjust if we're at the end
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+        
+        // First page button if needed
+        if (startPage > 1) {
+            const firstLi = document.createElement("li");
+            firstLi.className = "page-item";
+            firstLi.innerHTML = `<a class="page-link" href="#" onclick="fetchQuestions(1); return false;">1</a>`;
+            paginationList.appendChild(firstLi);
+            
+            if (startPage > 2) {
+                const ellipsisLi = document.createElement("li");
+                ellipsisLi.className = "page-item disabled";
+                ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                paginationList.appendChild(ellipsisLi);
+            }
+        }
+        
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            const pageLi = document.createElement("li");
+            pageLi.className = `page-item ${i === current ? 'active' : ''}`;
+            pageLi.innerHTML = `<a class="page-link" href="#" ${i !== current ? `onclick="fetchQuestions(${i}); return false;"` : ''}>${i}</a>`;
+            paginationList.appendChild(pageLi);
+        }
+        
+        // Last page button if needed
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsisLi = document.createElement("li");
+                ellipsisLi.className = "page-item disabled";
+                ellipsisLi.innerHTML = `<span class="page-link">...</span>`;
+                paginationList.appendChild(ellipsisLi);
+            }
+            
+            const lastLi = document.createElement("li");
+            lastLi.className = "page-item";
+            lastLi.innerHTML = `<a class="page-link" href="#" onclick="fetchQuestions(${totalPages}); return false;">${totalPages}</a>`;
+            paginationList.appendChild(lastLi);
+        }
+        
+        // Next button
+        const nextLi = document.createElement("li");
+        nextLi.className = `page-item ${current === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#" ${current !== totalPages ? `onclick="fetchQuestions(${current + 1}); return false;"` : ''}>Next</a>`;
+        paginationList.appendChild(nextLi);
+    }
+
+    // Debounce function to limit the rate at which search is fired
+    let searchTimeout;
+    function debounceSearch() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            searchQuestions();
+        }, 300); // Wait 300ms after user stops typing before searching
+    }
+
+    function searchQuestions() {
+        const query = document.getElementById("searchInput").value;
+        const itemsPerPage = document.getElementById("itemsPerPage").value;
+        currentPage = 1; // Reset to first page when searching
+        
+        fetch(`{% url 'administrator_fetch_problems' %}?query=${encodeURIComponent(query)}&page=${currentPage}&per_page=${itemsPerPage}`)
+            .then(response => response.json())
+            .then(data => {
+                displayQuestions(data.questions);
+                updatePagination(data);
+                const heading = document.getElementById("questionHeading");
+                if (query) {
+                    heading.innerHTML = `Questions 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`;
+                } else {
+                    heading.innerHTML = "Questions 🔥";
+                }
+            })
+            .catch(error => console.error("Error fetching questions:", error));
+    }
+
+    function clearSearch() {
+        document.getElementById("searchInput").value = "";
+        currentPage = 1; // Reset to first page
+        fetchQuestions();  // Reload all questions after clearing
+    }
+
+    let currentPage = 1;
+
+    function fetchQuestions(page = 1) {
+        currentPage = page;
+        const itemsPerPage = document.getElementById("itemsPerPage").value;
+        const query = document.getElementById("searchInput").value;
+        
+        fetch(`{% url 'administrator_fetch_problems' %}?page=${page}&per_page=${itemsPerPage}&query=${encodeURIComponent(query)}`)
+            .then(response => response.json())
+            .then(data => {
+                displayQuestions(data.questions);
+                updatePagination(data);
+            })
+            .catch(error => console.error("Error fetching questions:", error));
+    }
+
+    function displayQuestions(questions) {
+        const questionTableBody = document.getElementById("questionTableBody");
+        questionTableBody.innerHTML = "";  // Clear existing rows
+
+        const totalQustions = document.getElementById("totalQustions");
+        totalQustions.textContent = questions.length;
+
+        questions.forEach((question) => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td class="border-bottom-0">
+                    <h6 class="fw-semibold mb-0">${question.id}</h6>
+                </td>
+                <td class="border-bottom-0">
+                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" data-bs-toggle="tooltip" title="${question.title}">
+                        ${question.title.length > 25 ? question.title.slice(0, 25) + "..." : question.title}
+                    </h6>
+                    ${question.sheets.map(sheet => 
+                    `<span style="font-weight: bold;">${sheet.name.length > 15 ? sheet.name.slice(0, 15) + '...' : sheet.name} | </span>`
+                    ).join("")}
+
+                </td>
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">
+                        <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width: 100%;" data-bs-toggle="modal" 
+                                data-bs-target="#questionModal" data-title="${question.title}" data-description="${question.description}" 
+                                title="${question.title}">
+                            View
+                        </button>
+                    </p>
+                </td>
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">
+                        <span class="badge bg-${question.difficulty_color} text-color">
+                            ${question.difficulty_level}
+                        </span>
+                    </p>
+                </td>
+
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <a href="/administration/edit_question/${question.id}" class="btn btn-sm btn-outline-secondary float-end">✏️</a>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/administration/delete_question/${question.id}" class="btn btn-sm btn-outline-danger float-end"
+                           onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">❌</a>
+                    </div>
+                </td>
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <a href="/administration/test_cases/${question.slug}" class="btn btn-outline-success text-blue float-end">
+                            TC (${question.test_cases_count})
+                        </a>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/administration/driver_code/${question.slug}" class="btn btn-outline-warning text-blue float-end">
+                            DC
+                        </a>
+                    </div>
+                    </div>
+                </td>
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/administration/view_submissions/${question.slug}" class="btn btn-outline-info text-blue float-end">
+                            <i class="ti ti-file-text"></i>
+                            
+                        </a>
+                    </div>
+                </td>
+
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/administration/test_code/${question.slug}" class="btn btn-info text-blue float-end">
+                            <i class="ti ti-code"></i>
+                        </a>
+                    </div>
+                </td>
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a href="/administration/make_duplicate/${question.id}" class="btn btn-outline-secondary text-blue float-end">
+                            <i class="ti ti-copy"></i>
+                        </a>
+                    </div>
+                </td>
+            `;
+
+            questionTableBody.appendChild(row);
+        });
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+
+    }
+</script>
+
+{% endblock %}

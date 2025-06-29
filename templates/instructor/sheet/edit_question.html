@@ -1,0 +1,229 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block title %}
+Instructor | Edit Question
+{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Edit Question</i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+
+                        <div class="card">
+                            <div class="card-header">Sheet</div>
+                            <div class="card-body h-100">
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="assignment_type" class="form-label">Sheets
+                                            <div class="star">*</div>
+                                        </label>
+                                        <select class="form-select form-control" name="sheet" id="assignment_type"
+                                            multiple>
+
+                                            {% for sheet in sheets %}
+
+                                            <option value="{{ sheet.id }}">{{ sheet.name }}</option>
+
+                                            {% endfor %}
+
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Title
+                                            <div class="star">*</div>
+                                        </label>
+                                        <input type="text" class="form-control" id="job_title" name="title"
+                                            value="{{ question.title }}" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Scenario
+                                        <div class="star"></div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="scenario" rows="7"
+                                        placeholder="Scenario here...">{{ question.scenario }}</textarea>
+                                </div>
+
+                                <div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Description
+                                            <div class="star">*</div>
+                                        </label>
+                                        <textarea class="form-control" id="job_title" name="description" rows="5"
+                                            required>{{ question.description }}</textarea>
+                                        <!-- <iframe frameBorder="0" height="450px"
+                                            src="https://onecompiler.com/embed/html?theme=dark" width="100%"></iframe> -->
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Input Format
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="input_format" name="input_format" rows="5"
+                                        placeholder="Input format here..."
+                                        >{{ question.input_format }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Output Format
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="output_format" name="output_format" rows="5"
+                                        placeholder="Output format here..."
+                                        >{{ question.output_format }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Constraints
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="constraints" rows="5"
+                                        placeholder="Description here..." required>{{ question.constraints }}</textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Hint <small>(optional)</small>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="hint" rows="3"
+                                        placeholder="Hint here...">{{ question.hint }}</textarea>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="assignment_type" class="form-label">Difficulty Level
+                                                <div class="star">*</div>
+                                            </label>
+                                            <select class="form-select form-control" name="difficulty_level"
+                                                id="assignment_type" required>
+                                                <!-- <option value="" selected disabled>Select Level</option> -->
+                                                <option value="Easy">Easy</option>
+                                                <option value="Medium">Medium</option>
+                                                <option value="Hard">Hard</option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_title" class="form-label">Position
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="number" class="form-control" id="job_title" name="position"
+                                                value="{{ question.position }}" required>
+
+                                            </select>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="assignment_type" class="form-label">CPU TIME LIMIT <small>(in
+                                                    seconds)</small>
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="text" value="{{ question.cpu_time_limit }}"
+                                                class="form-control" name="cpu_time_limit"
+                                                placeholder="CPU time limit here..." required>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_title" class="form-label">MEMORY LIMIT <small>(in
+                                                    kilobytes)</small>
+                                                <div class="star">*</div>
+                                            </label>
+                                            <input type="text" value="{{ question.memory_limit }}" class="form-control"
+                                                name="memory_limit" placeholder="Memory limit here..." required>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+                                <div>
+
+                                </div>
+
+                                <!-- <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="job_type" class="form-label">For & By</label>
+                                            <input type="text" class="form-control" id="job_type"
+                                                value="{{ course.name|title }} by {{ instructor.first_name }}" disabled>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="deadline" class="form-label">Created At</label>
+                                            <input type="text" class="form-control" id="deadline"
+                                                value="{% now 'l, F j, Y g:i A' %}" disabled>
+                                        </div>
+                                    </div>
+                                </div> -->
+
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Edit &nbsp;
+                                            Question</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+        </div>
+
+
+
+
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

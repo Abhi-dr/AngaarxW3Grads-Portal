@@ -1,0 +1,232 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Set PODs🔥
+{% endblock %}
+
+{% block pod_active %}
+active
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <!-- <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Problem of the day</span>
+                <span class="fs-4"> | 🔥Total: {{ pods.count }}🔥</span>
+            </h3>
+        </div>
+        <a href="#" class="btn btn-outline-primary button mt-n3 mx-4 m-3">Set PODs</a>
+    </div> -->
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- ========================== SEARCH BAR ==================================== -->
+
+    <!-- <div class="card w-100">
+        <div class="card-body p-4">
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+
+                    {% if query %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query" value="{{ query }}">
+
+                        {% else %}
+
+                        <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
+
+                        {% endif %}
+
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <a href="#" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div> -->
+
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Questions 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Title
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Description
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Level
+                                </h6>
+                            </th>
+
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Test Cases
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for question in questions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1 text-wrap" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ question.title }}">{{ question.title }}</h6>
+
+                                {% for sheet in question.sheets.all %}
+                                <span style="font-weight: bold;"> {{ question.sheet.name }}
+                                </span>
+                                {% endfor %}
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width: 100%;"
+                                        data-bs-toggle="modal" data-bs-target="#questionModal"
+                                        data-title="{{ question.title }}" data-description="{{ question.description }}"
+                                        title="{{ question.title }}"> View</button>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'test_cases' question.slug %}" class="btn btn-outline-success text-blue float-end">Test Cases ({{question.test_cases.count }})</a>
+                                </div>
+                            </td>
+
+                            <form method="post" action="{% url 'save_pod' question.id %}">
+
+                                {% csrf_token %}
+
+                                <td class="border-bottom-0">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <input type="date" class="form-control" name="pod_date" id="">
+                                    </div>
+                                </td>
+
+                                <td class="border-bottom-0">
+                                    <div class="d-flex align-items-center gap-2">
+
+                                        <button type="submit"
+                                            class="btn btn-outline-success text-blue float-end">Save</button>
+
+                                    </div>
+                                </td>
+
+                            </form>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="questionModalLabel">Question Title...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="questionDescription">Description...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Script to dynamically set modal content -->
+<script>
+    var questionModal = document.getElementById('questionModal');
+    questionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var title = button.getAttribute('data-title'); // Extract info from data-* attributes
+        var description = button.getAttribute('data-description');
+
+        // Update the modal's content.
+        var modalTitle = questionModal.querySelector('.modal-title');
+        var modalBody = questionModal.querySelector('.modal-body p');
+
+        modalTitle.textContent = title;
+        modalBody.innerHTML = description;
+    });
+</script>
+
+{% endblock %}

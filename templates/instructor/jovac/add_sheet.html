@@ -1,0 +1,43 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block title %}
+Add Sheet | JOVAC
+{% endblock %}
+
+{% block jovac_active %}
+active
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Add New Sheet for {{ course.name }}</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Sheet Name *</label>
+                    <input type="text" class="form-control" id="name" name="name" placeholder="Enter sheet name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description (Optional)</label>
+                    <textarea class="form-control" id="description" name="description" rows="4"
+                        placeholder="Enter brief sheet description"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="thumbnail" class="form-label">Thumbnail Image (Optional)</label>
+                    <input type="file" class="form-control" id="thumbnail" name="thumbnail" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">Create Sheet</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

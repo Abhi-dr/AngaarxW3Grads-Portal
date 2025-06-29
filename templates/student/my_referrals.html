@@ -1,0 +1,437 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}My Referrals - Angaar Hai{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    .filter-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .referral-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-align: center;
+        white-space: nowrap;
+        border-radius: 0.5rem;
+        transition: all 0.15s ease-in;
+        background: linear-gradient(310deg, #2152ff 0%, #21d4fd 100%);
+        color: #fff;
+        margin-top: 10px;
+    }
+
+    .empty-state {
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #8392AB;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <!-- Referral Card with Stats -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <!-- Card with automatic dark/light mode support -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-3 p-md-4">
+                    <h5 class="fw-bold mb-3">My Referral Code</h5>
+
+                    <div class="row g-4">
+                        <!-- Left Column - Referral Info -->
+                        <div class="col-12 col-md-7">
+                            <p class="mb-3 fw-semibold">Share your code with others!</p>
+
+                            {% if referral_code %}
+                            <div class="d-flex align-items-center">
+                                <div class="referral-badge p-3 rounded-3 copy-on-click w-100 border position-relative"
+                                    data-clipboard-text="{{ referral_code.code }}"
+                                    style="cursor: pointer; transition: all 0.2s ease-in-out;">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-gift me-2 text-primary"></i>
+                                        <span class="fw-bold flex-grow-1">{{ referral_code.code }}</span>
+                                        <span
+                                            class="badge bg-primary ms-2 opacity-75 position-absolute end-0 me-3 copy-indicator"
+                                            style="display: none;">Copied!</span>
+                                        <i class="fas fa-copy ms-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-muted small mt-2 mb-0">
+                                <i class="fas fa-info-circle me-1"></i> Click to copy your referral code
+                            </p>
+
+                            {% else %}
+                            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <div>
+                                    <strong>You don't have a referral code yet.</strong>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Right Column - Stats -->
+                        <div class="col-12 col-md-5">
+                            <div class="card h-100 border-0 bg-body-tertiary">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-shape rounded-circle bg-primary d-flex align-items-center justify-content-center"
+                                            style="width: 48px; height: 48px;">
+                                            <i class="ti ti-users fs-6"></i>
+                                        </div>
+                                        <div class="ms-3">
+                                            <p class="text-sm mb-1 text-muted">Total Referrals</p>
+                                            <h3 class="fw-bold mb-0">{{ registrations|length }}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- All Registrations Section with Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card filter-card">
+                <div class="card-header pb-0">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-0">All Registrations</h6>
+                            <p class="text-sm mb-0">Complete list of registrations using your referral code</p>
+                        </div>
+                        <div class="col-md-6 d-flex justify-content-md-end">
+                            <div class="ms-auto">
+                                <button type="button" class="btn btn-outline-primary btn-sm mb-0"
+                                    onclick="toggleFilters('all-filters')">Filter Options <i
+                                        class="fas fa-filter ms-1"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Controls -->
+                <div id="all-filters" class="card-body pt-3 pb-2">
+                    <div class="row mb-3">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">Status</label>
+                            <select class="form-control form-control-sm" id="all-status-filter"
+                                onchange="filterTable('all')">
+                                <option value="">All Statuses</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">Course</label>
+                            <select class="form-control form-control-sm" id="all-course-filter"
+                                onchange="filterTable('all')">
+                                <option value="">All Courses</option>
+                                {% regroup registrations by course.title as course_list %}
+                                {% for course in course_list %}
+                                <option value="{{ course.grouper }}">{{ course.grouper }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label">Search</label>
+                            <div class="input-group input-group-sm">
+
+                                <input type="text" class="form-control" id="all-search-filter"
+                                    placeholder="Search users..." onkeyup="filterTable('all')">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Table -->
+                <div class="table-responsive p-0">
+                    <table class="table align-items-center mb-0" id="all-table">
+                        <thead>
+                            <tr>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#
+                                </th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Student
+                                </th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                    Course</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                    Registration Date</th>
+                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">
+                                    Status</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if registrations %}
+                            {% for registration in registrations %}
+
+                            <tr class="all-row" data-status="{{ registration.status }}"
+                                data-course="{{ registration.course.title }}"
+                                data-date="{{ registration.created_at|date:'Y-m-d' }}"
+                                data-amount="{{ registration.payable_amount }}"
+                                data-type="{% if registration.is_alumni %}alumni{% else %}non-alumni{% endif %}"
+                                data-search="{{ registration.user.first_name }} {{ registration.user.last_name }} {{ registration.user.email }}">
+
+                                <td class="align-middle text-sm">
+                                    {{ forloop.counter }}
+                                </td>
+
+                                <td>
+                                    <div class="d-flex px-2 py-1">
+                                        <div class="d-flex flex-column justify-content-center">
+                                            <h6 class="mb-1 text-sm">
+                                                {{ registration.user.first_name }} {{ registration.user.last_name }}
+                                            </h6>
+                                            <p class="text-xs text-secondary mb-1">{{ registration.user.email }}</p>
+                                            {% if registration.is_alumni %}
+                                            <span class="badge badge-sm bg-secondary">Alumni</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="text-xs font-weight-bold mb-0">{{ registration.course.title }}</p>
+                                </td>
+                                <td>
+                                    <p class="text-xs font-weight-bold mb-0">{{ registration.created_at|date:"M d, Y" }}
+                                    </p>
+                                </td>
+                                <td>
+                                    <span
+                                        class="badge badge-sm bg-{% if registration.status == 'Completed' %}success{% elif registration.status == 'Failed' %}danger{% else %}warning{% endif %}">
+                                        {{ registration.status }}
+                                    </span>
+                                </td>
+
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+
+                    {% if not registrations %}
+                    <div class="empty-state">
+                        <i class="fas fa-users-slash"></i>
+                        <h6>No Registrations Found</h6>
+                        <p class="text-muted">No users have used your referral code yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for Filtering -->
+    <script>
+        // Function to toggle filters visibility
+        function toggleFilters(filterId) {
+            const filterElement = document.getElementById(filterId);
+            if (filterElement.style.display === 'none') {
+                filterElement.style.display = 'block';
+            } else {
+                filterElement.style.display = 'none';
+            }
+        }
+
+        // Filter tables based on selection
+        function filterTable(tableType) {
+            // Get filter values
+            const statusFilter = document.getElementById(`${tableType}-status-filter`)?.value || '';
+            const courseFilter = document.getElementById(`${tableType}-course-filter`)?.value || '';
+            const searchFilter = document.getElementById(`${tableType}-search-filter`)?.value?.toLowerCase() || '';
+
+            // Get additional filters based on table type
+            let dateFilter, typeFilter, dateFrom, dateTo, amountMin, amountMax;
+
+            if (tableType === 'alumni') {
+                dateFilter = document.getElementById('alumni-date-filter')?.value || '';
+            } else {
+                typeFilter = document.getElementById('all-type-filter')?.value || '';
+                dateFrom = document.getElementById('all-date-from')?.value || '';
+                dateTo = document.getElementById('all-date-to')?.value || '';
+                amountMin = document.getElementById('all-amount-min')?.value || '';
+                amountMax = document.getElementById('all-amount-max')?.value || '';
+            }
+
+            // Get all rows
+            const rows = document.querySelectorAll(`.${tableType}-row`);
+
+            // Calculate date threshold if needed for alumni table
+            let dateThreshold = null;
+            if (tableType === 'alumni' && dateFilter) {
+                const today = new Date();
+                dateThreshold = new Date();
+                dateThreshold.setDate(today.getDate() - parseInt(dateFilter));
+            }
+
+            // Apply filters to each row
+            rows.forEach(row => {
+                const rowStatus = row.getAttribute('data-status');
+                const rowCourse = row.getAttribute('data-course');
+                const rowSearch = row.getAttribute('data-search').toLowerCase();
+                const rowDate = new Date(row.getAttribute('data-date'));
+
+                // Filter logic
+                let showRow = true;
+
+                // Apply common filters
+                if (statusFilter && rowStatus !== statusFilter) showRow = false;
+                if (courseFilter && rowCourse !== courseFilter) showRow = false;
+                if (searchFilter && !rowSearch.includes(searchFilter)) showRow = false;
+
+                // Apply table-specific filters
+                if (tableType === 'alumni' && dateFilter) {
+                    if (rowDate < dateThreshold) showRow = false;
+                }
+
+                if (tableType === 'all') {
+                    const rowType = row.getAttribute('data-type');
+                    const rowAmount = parseFloat(row.getAttribute('data-amount'));
+
+                    // Type filter
+                    if (typeFilter === 'alumni' && rowType !== 'alumni') showRow = false;
+                    if (typeFilter === 'non-alumni' && rowType !== 'non-alumni') showRow = false;
+
+                    // Date range filter
+                    if (dateFrom && rowDate < new Date(dateFrom)) showRow = false;
+                    if (dateTo && rowDate > new Date(dateTo)) showRow = false;
+
+                    // Amount range filter
+                    if (amountMin && rowAmount < parseFloat(amountMin)) showRow = false;
+                    if (amountMax && rowAmount > parseFloat(amountMax)) showRow = false;
+                }
+
+                // Show or hide the row
+                row.style.display = showRow ? '' : 'none';
+            });
+
+            // Check if any rows are visible
+            checkNoResults(tableType);
+        }
+
+        // Check if there are visible rows, if not show a message
+        function checkNoResults(tableType) {
+            const table = document.getElementById(`${tableType}-table`);
+            const rows = table.querySelectorAll(`.${tableType}-row`);
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                if (row.style.display !== 'none') visibleCount++;
+            });
+
+            // Get or create the no results row
+            let noResultsRow = document.getElementById(`${tableType}-no-results`);
+            if (!noResultsRow) {
+                noResultsRow = document.createElement('tr');
+                noResultsRow.id = `${tableType}-no-results`;
+                noResultsRow.innerHTML = `
+                    <td colspan="5" class="text-center py-4">
+                        <div class="empty-state">
+                            <i class="fas fa-filter"></i>
+                            <h6>No Results Found</h6>
+                            <p class="text-muted">Try adjusting your filters</p>
+                        </div>
+                    </td>
+                `;
+                table.querySelector('tbody').appendChild(noResultsRow);
+            }
+
+            // Show or hide the no results message
+            noResultsRow.style.display = visibleCount === 0 ? '' : 'none';
+        }
+
+        // Reset all filters for a specific table
+        function resetFilters(tableType) {
+            if (tableType === 'alumni') {
+                document.getElementById('alumni-status-filter').value = '';
+                document.getElementById('alumni-course-filter').value = '';
+                document.getElementById('alumni-date-filter').value = '';
+                document.getElementById('alumni-search-filter').value = '';
+            } else {
+                document.getElementById('all-status-filter').value = '';
+                document.getElementById('all-course-filter').value = '';
+                document.getElementById('all-type-filter').value = '';
+                document.getElementById('all-search-filter').value = '';
+                document.getElementById('all-date-from').value = '';
+                document.getElementById('all-date-to').value = '';
+                document.getElementById('all-amount-min').value = '';
+                document.getElementById('all-amount-max').value = '';
+            }
+
+            // Reapply filters (which will show all rows now)
+            filterTable(tableType);
+        }
+
+        // Initialize clipboard for copying referral code
+        document.addEventListener('DOMContentLoaded', function () {
+            // Check if the copy-on-click element exists
+            const copyElement = document.querySelector('.copy-on-click');
+            if (copyElement) {
+                copyElement.addEventListener('click', function () {
+                    const textToCopy = this.getAttribute('data-clipboard-text');
+                    navigator.clipboard.writeText(textToCopy).then(() => {
+                        // Show a success toast message
+                        const toastHTML = `
+                            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                                <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="d-flex">
+                                        <div class="toast-body">
+                                            <i class="fas fa-check-circle me-2"></i> Referral code copied to clipboard!
+                                        </div>
+                                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        // Add the toast to the DOM
+                        const toastContainer = document.createElement('div');
+                        toastContainer.innerHTML = toastHTML;
+                        document.body.appendChild(toastContainer);
+
+                        // Initialize and show the toast
+                        const toast = new bootstrap.Toast(document.querySelector('.toast'));
+                        toast.show();
+
+                        // Remove the toast after it's hidden
+                        const toastElement = document.querySelector('.toast');
+                        toastElement.addEventListener('hidden.bs.toast', function () {
+                            toastContainer.remove();
+                        });
+                    }).catch(err => {
+                        console.error('Could not copy text: ', err);
+                    });
+                });
+            }
+        });
+    </script>
+</div>
+
+{% endblock %}

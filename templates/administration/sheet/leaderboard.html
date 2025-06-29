@@ -1,0 +1,182 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Leaderboard | {{ sheet.name }}
+{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block extra_css %}
+
+<style>
+    .download-btn {
+        background: linear-gradient(to right, #ff4500, #ffa500);
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .download-btn:hover {
+        background: linear-gradient(to right, #ff6347, #ff4500);
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">{{ sheet.name }}'s Leaderboard🔥</span>
+            </h3>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{% url 'download_leaderboard' slug=sheet.slug %}" class="download-btn">Download
+                    Leaderboard</a>
+            </div>
+
+        </div>
+    </div>
+
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+
+    <!-- <div class="card w-100">
+        <div class="card-body p-4">
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search by ID, Name, Email or Phone Number"
+                        aria-label="Search by ID, Name, Email or Phone Number" aria-describedby="button-addon2"
+                        name="query">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <a href="#" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div> -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Leaderboard 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="text-dark fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Rank
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Student
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Total Score
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Earliest Submission
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Solved Problem
+                                </h6>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard">
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const leaderboardContainer = document.getElementById('leaderboard');
+            const filterForm = document.getElementById('filter-form');
+            const apiUrl = "{% url 'administrator_sheet_leaderboard' sheet.slug %}";
+
+            leaderboardContainer.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </td>
+            </tr>`
+
+            async function fetchLeaderboard() {
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                console.log(data);
+                renderLeaderboard(data.leaderboard);
+            }
+
+            function renderLeaderboard(leaderboard) {
+                leaderboardContainer.innerHTML = '';
+
+                leaderboard.forEach((entry, index) => {
+                    const row = `
+                    <tr>
+                        <td class="border-bottom-0">
+                            <p class="fw-semibold mb-0">${index + 1}</p>
+                        </td>
+                        <td class="border-bottom-0">
+                            <p class="fw-semibold mb-0">${entry.student.name}</p>
+                        </td>
+                        <td class="border-bottom-0">
+                            <p class="fw-semibold mb-0">${entry.total_score}</p>
+                        </td>
+                        <td class="border-bottom-0">
+                            <p class="fw-semibold mb-0">${new Date(entry.earliest_submission).toLocaleString()}</p>
+                        </td>
+                        <td class="border-bottom-0">
+                            <p class="fw-semibold mb-0">${entry.solved_problems}</p>
+                        </td>
+                    </tr>
+                `;
+                    leaderboardContainer.innerHTML += row;
+                });
+            }
+
+            fetchLeaderboard(); // Initial fetch
+        });
+
+    </script>
+
+
+{% endblock %}

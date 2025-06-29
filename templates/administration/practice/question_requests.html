@@ -1,0 +1,282 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Questions Add Requests
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">Requests</span>
+                <span class="fs-4"> | 🔥Total: {{ questions.count }}🔥</span>
+            </h3>
+        </div>
+        <!-- <div class="row">
+            <div class="col-md-6">
+                <a href="{% url 'add_question' %}" class="btn btn-outline-primary button mt-n3 m-3 w-100">Add
+                    Question</a>
+            </div>
+            <div class="col-md-5">
+                <a href="{% url 'add_question' %}" class="btn btn-outline-warning button mt-n3 m-3 w-100">Question Requests</a>
+            </div>
+        </div> -->
+    </div>
+
+    <!-- {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %} -->
+
+    <!-- ========================== SEARCH BAR ==================================== -->
+
+    <!-- <div class="card w-100">
+        <div class="card-body p-4">
+            <form method="post">
+
+                {% csrf_token %}
+
+                <div class="input-group">
+
+                    {% if query %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query" value="{{ query }}">
+
+                        {% else %}
+
+                        <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
+
+                        {% endif %}
+
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <a href="#" class="btn btn-outline-danger">Clear</a>
+                </div>
+            </form>
+        </div>
+    </div> -->
+
+    <!-- ================================= SESSIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Questions 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Title
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Description
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Level
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Test Cases
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for question in questions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ question.title }}">{{ question.title|truncatechars:25 }}</h6>
+
+                                <span>
+                                    <pre>By: {{ question.added_by.first_name }} {{ question.added_by.last_name }}</pre>
+                                </span>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width: 100%;"
+                                        data-bs-toggle="modal" data-bs-target="#questionModal"
+                                        data-title="{{ question.title }}" data-scenario="{{ question.scenario }}"
+                                        data-description="{{ question.description }}"
+                                        data-constraints="{{ question.constraints }}" title="{{ question.title }}">
+                                        View</button>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
+                                </p>
+                            </td>
+
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'test_cases' question.slug %}"
+                                        class="btn btn-outline-success text-blue float-end">Test Cases
+                                        ({{question.test_cases.count }})</a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'edit_question' question.id %}"
+                                        class="btn btn-outline-success text-blue float-end">Edit</a>
+                                </div>
+                            </td>
+
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-danger float-end" onclick="confirmReject({{ question.id }})">
+                                        Reject
+                                    </button>
+
+                                    <button class="btn btn-outline-secondary float-end"
+                                        onclick="confirmApprove({{ question.id }})">
+                                        Approve
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="questionModalLabel">Question Title...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="questionScenario" style="white-space: pre-wrap;">Scenario...</p>
+                    <p id="questionDescription" style="white-space: pre-wrap;">Description...</p>
+                    <p id="questionConstraints" style="white-space: pre-wrap;">Constraints...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<!-- Script to dynamically set modal content -->
+<script>
+    var questionModal = document.getElementById('questionModal');
+    questionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var title = button.getAttribute('data-title'); // Extract info from data-* attributes
+        var description = button.getAttribute('data-description');
+        var scenario = button.getAttribute('data-scenario');
+        var constraints = button.getAttribute('data-constraints');
+
+        // Update the modal's content.
+        var modalTitle = questionModal.querySelector('.modal-title');
+        var modalScenario = questionModal.querySelector('#questionScenario');
+        var modalDescription = questionModal.querySelector('#questionDescription');
+        var modalConstraints = questionModal.querySelector('#questionConstraints');
+
+        modalTitle.textContent = title;
+        modalScenario.innerHTML = `<h6><strong>Scenario:</strong></h6> ${scenario}`;
+        modalDescription.innerHTML = `<h6><strong>Description:</strong></h6> ${description}`;
+        modalConstraints.innerHTML = `<h6><strong>Constraints:</strong></h6> <code> ${constraints} </code>`;
+
+
+
+    });
+</script>
+
+<script>
+
+    function confirmApprove(questionId) {
+        if (confirm('Pakka approve krna h na?')) {
+            handleAjaxRequest("{% url 'approve_question' 0 %}".replace('0', questionId));
+        }
+    }
+
+    function confirmReject(questionId) {
+        if (confirm('Pakka reject krna h soch lo!!!')) {
+            handleAjaxRequest("{% url 'reject_question' 0 %}".replace('0', questionId));
+        }
+    }
+
+    function handleAjaxRequest(url) {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}', // Ensure the CSRF token is included
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Reload or update only the relevant part of the page
+                } else {
+                    alert("Something went wrong.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+</script>
+
+{% endblock %}

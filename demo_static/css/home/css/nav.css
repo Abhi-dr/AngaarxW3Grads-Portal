@@ -1,0 +1,153 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    background-color: rgb(0, 0, 0);
+    width: 100%;
+}
+
+/* Navbar */
+.navbar {
+    display: flex;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #000;
+    color: rgb(71, 47, 47);
+    padding: 0px 30px;
+}
+
+.logo img {
+    width: 100px;
+    height: 60px;
+}
+
+.navbar ul {
+    display: flex;
+    list-style: none;
+}
+
+.navbar ul li {
+    margin-right: 20px;
+}
+
+.navbar ul li a {
+    text-decoration: none;
+    color: #aaa;
+    font-size: 1.2rem;
+}
+
+.auth .signup {
+    background-color: #402E2E;
+    padding: 5px 20px;
+    border-radius: 50px;
+    font-size: 1.4rem;
+    color: #FF8C67;
+    border: 2px solid #402E2E;
+}
+
+.auth .login {
+    background-color: transparent;
+    border: none;
+    color: #aaa;
+    padding: 5px 20px;
+    border-radius: 5px;
+    font-size: 1.4rem;
+}
+
+/* Hamburger Icon */
+.hamburger {
+    display: none;
+    cursor: pointer;
+}
+.hamburger i {
+    font-size: 24px;
+    color: white;
+}
+
+
+/* Responsiveness */
+@media (max-width: 768px) {
+    .navbar ul,
+    .auth {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+    }
+
+    .navbar ul.active,
+    .auth.active {
+        display: flex;
+        
+    }
+
+    .hamburger {
+        display: block;
+    }
+
+    .navbar {
+        flex-direction: column;
+        /* gap: 10px; */
+    }
+    .navbar ul li {
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    .fix{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .fix .logo{
+        width: 90%;
+    }
+    .fix .hamburger{
+        width: 10%;
+    }
+    .navbar ul li :hover{
+        background-color: #FF8C67;
+        color: #000;
+        padding: 0 20px;
+        border-radius: 25px;
+        transition: all 0.2s ease-in-out;
+    }
+
+}
+
+/* Alert baar */
+.alert{
+    background-color: #EA9C47;
+    color: white;
+    padding: 10px 20px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top:70px ;
+}
+.alert h1{
+    font-size: large;
+    font-weight: 500;
+    color: #000;
+}
+.alert button{
+    background-color: #000;
+    color: white;
+    padding: 5px 20px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin: 0 10px;
+}
+@media (max-width: 668px){
+    .alert h1{
+        font-size: 17px;
+    }
+}

@@ -1,0 +1,201 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}Edit {{ course.title }} | FLAMES Course{% endblock %}
+
+{% block flames_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        background-color: #363636;
+    }
+
+    .card-header {
+        background-color: #424242;
+        border-bottom: 1px solid #505050;
+        padding: 15px 20px;
+    }
+
+    .card-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #e0e0e0;
+    }
+
+    .course-form .form-control,
+    .course-form .form-select {
+        border-radius: 8px;
+        padding: 12px 15px;
+        background-color: #3a3a3a;
+        color: #f0f0f0;
+        border: 1px solid #505050;
+    }
+
+    .course-form label {
+        font-weight: 500;
+        margin-bottom: 5px;
+        color: #d0d0d0;
+    }
+
+    .course-form .text-muted {
+        color: #a0a0a0 !important;
+    }
+
+    .course-color-preview {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        display: inline-block;
+        vertical-align: middle;
+        margin-left: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-4">
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="{% url 'admin_course_detail' course.id %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Course Details
+        </a>
+    </div>
+
+    <h2 class="mb-4">Edit Course: {{ course.title }}</h2>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="card-title">Course Information</h5>
+        </div>
+        <div class="card-body">
+            <form class="course-form" method="post" action="{% url 'admin_edit_course' course.id %}">
+                {% csrf_token %}
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Course Title</label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ course.title }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="subtitle" class="form-label">Subtitle</label>
+                            <input type="text" class="form-control" id="subtitle" name="subtitle" value="{{ course.subtitle }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="instructor" class="form-label">Instructor</label>
+                            <input type="text" class="form-control" id="instructor" name="instructor" value="{{ course.instructor }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="slug" class="form-label">Slug</label>
+                            <input type="text" class="form-control" id="slug" name="slug" value="{{ course.slug }}" required>
+                            <small class="text-muted">Used in URL, e.g., flames/course/your-slug</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="icon_class" class="form-label">Icon Class</label>
+                            <input type="text" class="form-control" id="icon_class" name="icon_class" value="{{ course.icon_class }}" placeholder="fa-python">
+                            <small class="text-muted">Font Awesome icon class</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="color" class="form-label">Color</label>
+                            <div class="d-flex align-items-center">
+                                <input type="color" class="form-control form-control-color" id="color" name="color" value="{{ course.icon_color }}">
+                                <div class="course-color-preview" id="colorPreview" style="background-color: {{ course.icon_color }};"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="button_color" class="form-label">Button Color</label>
+                            <input type="text" class="form-control" id="button_color" name="button_color" value="{{ course.button_color }}" placeholder="linear-gradient(135deg, #ff6026, #ff9a56)">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="price" class="form-label">Regular Price (₹)</label>
+                            <input type="number" class="form-control" id="price" name="price" value="{{ course.price }}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="discount_price" class="form-label">Discount Price (₹)</label>
+                            <input type="number" class="form-control" id="discount_price" name="discount_price" value="{{ course.discount_price }}">
+                            <small class="text-muted">Leave empty if no discount</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" required>{{ course.description }}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="what_you_will_learn" class="form-label">What You'll Learn</label>
+                    <textarea class="form-control" id="what_you_will_learn" name="what_you_will_learn" rows="4" placeholder="Enter points separated by new lines" required>{{ course.what_you_will_learn }}</textarea>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="roadmap" class="form-label">Course Roadmap</label>
+                    <textarea class="form-control" id="roadmap" name="roadmap" rows="4" placeholder="Enter roadmap points separated by new lines" required>{{ course.roadmap }}</textarea>
+                </div>
+                
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if course.is_active %}checked{% endif %}>
+                    <label class="form-check-label" for="is_active">Active Course</label>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+                    <a href="{% url 'admin_course_detail' course.id %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+    $(document).ready(function() {
+        // Update color preview when color input changes
+        $('#color').on('input', function() {
+            $('#colorPreview').css('background-color', $(this).val());
+        });
+        
+        // Auto-generate slug from title if slug is empty
+        $('#title').on('keyup', function() {
+            if ($('#slug').val() === '') {
+                var title = $(this).val();
+                var slug = title.toLowerCase()
+                    .replace(/[^\w ]+/g, '')
+                    .replace(/ +/g, '-');
+                $('#slug').val(slug);
+            }
+        });
+    });
+</script>
+{% endblock %} 

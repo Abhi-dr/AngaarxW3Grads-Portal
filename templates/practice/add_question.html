@@ -1,0 +1,364 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% load custom_filters %}
+
+{% block title %}
+Student -> Add Question
+{% endblock %}
+
+{% block pp_active %}
+active
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    #question_description::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    #question_description {
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'practice' %}">Practice</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Add Question</li>
+            </li>
+        </ol>
+    </nav>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Add Question</i> </h5>
+
+        </div>
+        <div class="container px-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                <hr class="mt-0">
+                <div class="row">
+
+                    <div class="w-100">
+
+                        <div class="card">
+                            <div class="card-body h-100">
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Title
+                                        <div class="star">*</div>
+                                    </label>
+                                    <input type="text" class="form-control" id="question_title" name="title"
+                                        placeholder="Title goes here..." required>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Scenario <small>(optional)</small>
+                                        <div class="star"></div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="scenario" rows="5"
+                                        placeholder="Scenario here..."></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Problem Description
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="description" rows="5"
+                                        placeholder="Description here..." required></textarea>
+                                </div>
+
+
+                                <div class="mb-3">
+                                    <label for="job_title" class="form-label">Constraints
+                                        <div class="star">*</div>
+                                    </label>
+                                    <textarea class="form-control" id="question_description" name="constraints" rows="5"
+                                        placeholder="Constraints here..." required></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="assignment_type" class="form-label">Difficulty Level
+                                        <div class="star">*</div>
+                                    </label>
+                                    <select class="form-select form-control" name="difficulty_level"
+                                        id="assignment_type" required>
+                                        <!-- <option value="" selected disabled>Select Level</option> -->
+                                        <option value="Easy">Easy</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Hard">Hard</option>
+
+                                    </select>
+                                </div>
+
+
+
+
+                                <div>
+                                    <div class="col-md-12">
+                                        <button type="submit" class="btn btn-success w-100 mt-3">Add &nbsp;
+                                            Question</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+        </div>
+        </form>
+
+    </div>
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4" id="questionHeading"> My Added Questions 🔥
+
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
+
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Title
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Description
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Level
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Test Cases
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#1
+                                </h6>
+                            </th>
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for question in student_added_questions %}
+
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ question.title }}">{{ question.title|truncatechars:25 }}</h6>
+
+                                <span class="badge bg-{{ question.get_approved_status_color }} text-color">
+                                    {{ question.get_approved_status }}
+                                </span>
+
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width: 100%;"
+                                        data-bs-toggle="modal" data-bs-target="#questionModal"
+                                        data-title="{{ question.title }}" data-scenario="{{ question.scenario }}"
+                                        data-description="{{ question.description }}"
+                                        data-constraints="{{ question.constraints }}" title="{{ question.title }}">
+                                        View</button>
+                                </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
+                                </p>
+                            </td>
+
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'student_test_cases' question.slug %}"
+                                        class="btn btn-outline-success text-blue float-end">Test Cases
+                                        ({{question.test_cases.count }})</a>
+                                </div>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    {% if question.get_approved_status == 'Pending' %}
+
+                                    <a href="{% url 'student_edit_question' question.slug %}"
+                                        class="btn btn-outline-info text-blue float-end">Edit</a>
+
+                                    <a href="{% url 'student_delete_question' question.id %}"
+                                        onclick="return confirm('Are you sure you want to delete this question?')"
+                                        class="btn btn-danger text-blue float-end">Delete</a>
+                                    
+                                        
+
+                                    {% else %}
+
+                                    <a class="btn btn-success disabled text-white float-end">Approved</a>
+
+                                    {% endif %}
+
+
+                                </div>
+                            </td>
+
+
+                            <!-- <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <button class="btn btn-danger float-end" onclick="confirmReject({{ question.id }})">
+                                        Reject
+                                    </button>
+
+                                    <button class="btn btn-outline-secondary float-end"
+                                        onclick="confirmApprove({{ question.id }})">
+                                        Approve
+                                    </button>
+                                </div>
+                            </td> -->
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-semibold" id="questionModalLabel">Question Title...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="questionScenario" style="white-space: pre-wrap;">Scenario...</p>
+                    <p id="questionDescription" style="white-space: pre-wrap;">Description...</p>
+                    <p id="questionConstraints" style="white-space: pre-wrap;">Constraints...</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    var questionModal = document.getElementById('questionModal');
+    questionModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget; // Button that triggered the modal
+        var title = button.getAttribute('data-title'); // Extract info from data-* attributes
+        var description = button.getAttribute('data-description');
+        var scenario = button.getAttribute('data-scenario');
+        var constraints = button.getAttribute('data-constraints');
+
+        // Update the modal's content.
+        var modalTitle = questionModal.querySelector('.modal-title');
+        var modalScenario = questionModal.querySelector('#questionScenario');
+        var modalDescription = questionModal.querySelector('#questionDescription');
+        var modalConstraints = questionModal.querySelector('#questionConstraints');
+
+        modalTitle.textContent = title;
+        modalScenario.innerHTML = `<h6><strong>Scenario:</strong></h6> ${scenario}`;
+        modalDescription.innerHTML = `<h6><strong>Description:</strong></h6> ${description}`;
+        modalConstraints.innerHTML = `<h6><strong>Constraints:</strong></h6> <code> ${constraints} </code>`;
+
+
+
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#generateQuestionBtn').click(function (e) {
+            e.preventDefault();
+            var title = $('#question_title').val();  // Assuming you have an input for the title
+            var btn = $(this);
+            btn.prop('disabled', true);
+            btn.text('Generating...');
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url "generate_description" %}',  // Use the URL name you defined
+                contentType: 'application/json',  // Send data as JSON
+                data: JSON.stringify({
+                    'title': title,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'  // Include CSRF token
+                }),
+                success: function (response) {
+                    if (response.response) {
+                        // Update the textarea with the generated HTML code
+                        $('#question_description').val(response.response);
+                        btn.prop('disabled', false);
+                        btn.text('Generate Question using AI');
+                    } else {
+                        alert("Error: " + response.error);
+                    }
+                },
+                error: function (xhr) {
+                    alert('Error: ' + xhr.responseJSON.error);
+                }
+            });
+        });
+    });
+</script>
+
+
+
+{% endblock %}

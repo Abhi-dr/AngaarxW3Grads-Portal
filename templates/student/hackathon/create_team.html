@@ -1,0 +1,246 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}
+Hackathon | Create Team
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title fw-semibold">Create a New Hackathon Team</h5>
+                <a href="{% url 'hackathon_dashboard' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="ti ti-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            {% for message in messages %}
+            <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form id="create-team-form" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="team-name" class="form-label">Team Name <span
+                                    class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="team-name" name="name"
+                                placeholder="Enter your Team Name here..." required>
+                            <div class="form-text">Choose a unique name for your team.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="team-description" class="form-label">
+                                Team Description
+                                <small>(optional)</small>
+                                </span></label>
+                            <textarea class="form-control"
+                                placeholder="Enter your team description. Example: 'Looking for dedicated members, etc'"
+                                id="team-description" name="description" rows="4"></textarea>
+                            <div class="form-text">Describe your team's purpose or project idea.</div>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+                                <label for="members-limit" class="form-label">Team Members Limit
+                                    <small>(Max. 5 allowed)</small>
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="members-limit" name="members_limit"
+                                    min="2" max="5" value="5"  required>
+                                <div class="form-text">Maximum number of team members (including you as the leader).
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="team-status" class="form-label">Team Status
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="team-status" required name="status">
+                                    <option value="open" selected>Open (Accepting new members)</option>
+                                    <option value="in_progress">In Progress (Working on project)</option>
+                                    <option value="closed">Closed (Not accepting new members)</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="required-skills" class="form-label">Required Skills
+                                <small>(optional)</small>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="skill-input" placeholder="Add a skill...">
+                                <button class="btn btn-outline-primary" type="button" id="add-skill-btn">Add</button>
+                            </div>
+                            <div class="form-text">Add skills that your team is looking for.</div>
+
+                            <div class="mt-2" id="skills-container">
+                                <!-- Skills will be added here dynamically -->
+                            </div>
+                            <input type="hidden" id="required-skills" name="required_skills" value="[]">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Create Team</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('create-team-form');
+        const skillInput = document.getElementById('skill-input');
+        const addSkillBtn = document.getElementById('add-skill-btn');
+        const skillsContainer = document.getElementById('skills-container');
+        const requiredSkillsInput = document.getElementById('required-skills');
+
+        document.addEventListener('click', function (e) {
+            if (e.target.classList.contains('remove-skill')) {
+                const index = parseInt(e.target.getAttribute('data-index'), 10);
+                skills.splice(index, 1);
+                updateSkillsDisplay();
+            }
+        });
+
+        let skills = [];
+
+        function updateSkillsDisplay() {
+            skillsContainer.innerHTML = '';  // Clear container
+        
+            skills.forEach((skill, index) => {
+                const skillBadge = document.createElement('span');
+                skillBadge.className = 'badge bg-primary me-2 mb-2';
+                skillBadge.innerHTML = `${skill} <i class="ti ti-x ms-1 remove-skill" style="cursor: pointer;" data-index="${index}"></i>`;
+        
+                skillsContainer.appendChild(skillBadge);
+            });
+        
+            requiredSkillsInput.value = JSON.stringify(skills);
+        }
+        
+
+        // Add skill when button is clicked
+        addSkillBtn.addEventListener('click', function () {
+            const skill = skillInput.value.trim();
+            if (skill && !skills.includes(skill)) {
+                skills.push(skill);
+                updateSkillsDisplay();
+                skillInput.value = '';
+            }
+            skillInput.focus();
+        });
+
+        // Add skill when Enter key is pressed
+        skillInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addSkillBtn.click();
+            }
+        });
+
+        // Remove skill when X is clicked
+        skillsContainer.addEventListener('click', function (e) {
+            if (e.target.tagName === 'I') {
+                const index = parseInt(e.target.getAttribute('data-index'));
+                skills.splice(index, 1);
+                updateSkillsDisplay();
+            }
+        });
+
+        // Fetch available skills for autocomplete
+        fetch("{% url 'get_all_skills' %}", {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                // If you want to implement autocomplete, you can use the skills from data.skills
+                console.log('Available skills:', data.skills);
+            })
+            .catch(error => console.error('Error fetching skills:', error));
+
+        // Handle form submission with AJAX
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('team-name').value,
+                description: document.getElementById('team-description').value,
+                members_limit: document.getElementById('members-limit').value,
+                status: document.getElementById('team-status').value,
+                required_skills: skills
+            };
+
+            fetch("{% url 'create_team' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(data.message, 'success');
+
+                        // Redirect if specified
+                        if (data.redirect) {
+                            setTimeout(() => {
+                                window.location.href = data.redirect;
+                            }, 1000);
+                        }
+                    } else {
+                        showToast(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('An error occurred. Please try again.', 'error');
+                });
+        });
+
+        // Function to show toast notification
+        function showToast(message, type) {
+            // Check if toastr is available
+            if (typeof toastr !== 'undefined') {
+                toastr[type](message);
+            } else {
+                alert(message);
+            }
+        }
+
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}

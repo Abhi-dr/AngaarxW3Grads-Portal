@@ -1,0 +1,203 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}
+Registration Successful | F.L.A.M.E.S🔥 | Angaar
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    body {
+        background-color: #0d0d0d;
+    }
+
+    .success-container {
+        position: relative;
+        padding: 80px 0;
+        max-width: 900px;
+        margin: 0 auto;
+        z-index: 1;
+    }
+
+    .success-bg-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
+            radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .success-card {
+        background-color: rgba(30, 30, 30, 0.5);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        padding: 40px;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .success-icon {
+        font-size: 80px;
+        color: #2ecc71;
+        margin-bottom: 20px;
+    }
+
+    .success-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+    }
+
+    .success-message {
+        color: #ddd;
+        font-size: 1.2rem;
+        margin-bottom: 30px;
+    }
+
+    .success-details {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        text-align: left;
+    }
+
+    .detail-item {
+        margin-bottom: 15px;
+    }
+
+    .detail-label {
+        color: #aaa;
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .detail-value {
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+    }
+
+    .action-btn {
+        padding: 12px 25px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .primary-btn {
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        color: #fff;
+        border: none;
+    }
+
+    .primary-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
+    }
+
+    .secondary-btn {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .secondary-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: translateY(-3px);
+    }
+
+    .glow-effect {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(46, 204, 113, 0.2) 0%, rgba(46, 204, 113, 0) 70%);
+        top: -100px;
+        right: -100px;
+        z-index: 0;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="success-bg-gradient"></div>
+
+<div class="success-container">
+    <div class="success-card">
+        <div class="glow-effect"></div>
+        <i class="fas fa-check-circle success-icon"></i>
+        <h1 class="success-title">Registration Successful!</h1>
+        <p class="success-message">You have successfully registered for the F.L.A.M.E.S program. Here are your registration details:</p>
+        
+        <div class="success-details">
+            <div class="detail-item">
+                <div class="detail-label">Program</div>
+                <div class="detail-value">{{ course.title }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Name</div>
+                <div class="detail-value">{{ registration.full_name }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Email</div>
+                <div class="detail-value">{{ registration.email }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Registration Mode</div>
+                <div class="detail-value">
+                    {% if registration.registration_mode == 'SOLO' %}
+                        Solo Registration
+                    {% else %}
+                        Team Registration
+                    {% endif %}
+                </div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Status</div>
+                <div class="detail-value" style="color: #f1c40f;">{{ registration.status }}</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label">Registration ID</div>
+                <div class="detail-value">#{{ registration.id }}</div>
+            </div>
+        </div>
+        
+        <p style="color: #aaa; margin-bottom: 20px;">
+            Create an account or log in to track your registration status and access exclusive features.
+        </p>
+        
+        <div class="action-buttons">
+            <a href="{% url 'register' %}?email={{ registration.email }}" class="action-btn primary-btn">Create Account</a>
+            <a href="{% url 'login' %}" class="action-btn secondary-btn">Login</a>
+            <a href="{% url 'flames' %}" class="action-btn secondary-btn">Back to F.L.A.M.E.S</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

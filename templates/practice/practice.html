@@ -1,0 +1,72 @@
+{% extends 'student/base.html' %}
+
+{% block title %}
+Practice
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">A N G A A R I &nbsp; S H E E T 🔥</span>
+                <span class="fs-4"> | Practice
+                </span>
+            </h3>
+        </div>
+    </div>
+
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <!-- ======================== SHEET CODE ====================== -->
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+        {% for sheet in sheets %}
+
+        <div class="col-md-3">
+            <h5 class="card-title fw-semibold mb-0"></h5>
+            <div class="card">
+
+                {% if sheet.is_enabled %}
+                <a href="{% url 'sheet' sheet.slug %}">
+                {% endif %}
+                    <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            {{ sheet.name }}🔥
+                        </h5>
+                        <p class="card-text mb-2">
+                            Total Sawal : {{ sheet.get_total_questions }}
+                        </p>
+                        <!-- <p class="card-text text-black mb-1">
+                            Total Registrations: {{ company.job_set.all }}
+                        </p> -->
+                        
+                        {% if sheet.is_enabled %}
+                        <a href="{% url 'sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue Solving</a>
+                        {% else %}
+                        <a href="#" class="btn btn-dark w-100 disabled">Wait {{ student.first_name }}</a>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+</div>
+
+{% endblock %}

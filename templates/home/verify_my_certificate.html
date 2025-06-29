@@ -1,0 +1,1098 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}
+#AngaarHai
+{% endblock %}
+
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #FF6026;
+        --secondary-color: #ffac33;
+        --background-color: #0d0d0d;
+        --text-color: #ffffff;
+        --card-color: #1a1a1a;
+        --accent-color: #FF8C5A;
+        --success-color: #4CAF50;
+        --error-color: #F44336;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        font-family: 'Poppins', sans-serif;
+        overflow-x: hidden;
+        min-height: 100vh;
+    }
+
+    /* Particles background */
+    #particles-js {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        z-index: 0;
+    }
+
+    /* Header */
+    .header {
+        padding: 1.5rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 100;
+        backdrop-filter: blur(10px);
+        background: rgba(13, 13, 13, 0.9);
+    }
+
+
+
+    /* Main content */
+    .main-content {
+        position: relative;
+        z-index: 10;
+        padding: 2rem 0;
+    }
+
+    /* Hero section with enhanced search */
+    .hero-section {
+        text-align: center;
+        padding: 6rem 2rem 4rem;
+        background: radial-gradient(circle at center, rgba(255, 96, 38, 0.1) 0%, transparent 70%);
+    }
+
+    .hero-badge {
+        display: inline-block;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        padding: 0.5rem 1.5rem;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 2rem;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .hero-title {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .hero-subtitle {
+        font-size: 1.3rem;
+        color: #cccccc;
+        margin-bottom: 3rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Enhanced search container */
+    .search-container {
+        max-width: 800px;
+        margin: 0 auto;
+        position: relative;
+    }
+
+    .search-wrapper {
+        position: relative;
+        background: var(--card-color);
+        border-radius: 60px;
+        padding: 8px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        transition: all 0.3s ease;
+    }
+
+    .search-wrapper:focus-within {
+        box-shadow: 0 10px 60px rgba(255, 96, 38, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .search-wrapper::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        border-radius: 60px;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .search-wrapper:focus-within::before {
+        opacity: 1;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1.0rem 2rem;
+        font-size: 1.1rem;
+        border: none;
+        background: transparent;
+        color: var(--text-color);
+        outline: none;
+        font-family: inherit;
+    }
+
+    .search-input::placeholder {
+        color: #666;
+    }
+
+    .search-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        border-radius: 50px;
+        padding: 1rem 2rem;
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: inherit;
+    }
+
+    .search-btn:hover {
+        transform: translateY(-50%) scale(1.05);
+        box-shadow: 0 5px 20px rgba(255, 96, 38, 0.5);
+    }
+
+    .search-btn i {
+        margin-right: 0.5rem;
+    }
+
+    /* Quick actions */
+    .quick-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .quick-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 30px;
+        padding: 0.7rem 1.5rem;
+        color: var(--text-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .quick-btn:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+    }
+
+    /* Section headers */
+    .section-header {
+        text-align: center;
+        padding: 4rem 2rem 2rem;
+    }
+
+    .section-title {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+    }
+
+    .section-subtitle {
+        color: #cccccc;
+        font-size: 1.1rem;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    /* Enhanced content strips */
+    .content-strips {
+        padding: 2rem 0 4rem;
+    }
+
+    .content-strip-container {
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: 3rem;
+        padding: 1rem 0;
+    }
+
+    .content-strip {
+        display: flex;
+        animation: scrollStrip 50s linear infinite;
+        gap: 2rem;
+    }
+
+    .reverse-strip {
+        animation-direction: reverse;
+        animation-duration: 45s;
+    }
+
+    @keyframes scrollStrip {
+        0% {
+            transform: translateX(0);
+        }
+
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+
+    .content-card {
+        min-width: 320px;
+        background: var(--card-color);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s ease;
+        flex: 0 0 auto;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .content-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 0 20px 50px rgba(255, 96, 38, 0.3);
+    }
+
+    .card-img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+
+    .content-card:hover .card-img {
+        transform: scale(1.1);
+    }
+
+    .card-content {
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.3rem;
+        margin-bottom: 0.8rem;
+        color: var(--text-color);
+        font-weight: 600;
+    }
+
+    .card-text {
+        font-size: 0.95rem;
+        color: #cccccc;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 1rem;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+    }
+
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .user-name {
+        font-size: 0.9rem;
+        color: #aaa;
+        font-weight: 500;
+    }
+
+    .card-stats {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.3rem 0.8rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        font-size: 0.8rem;
+    }
+
+    /* Enhanced image gallery */
+    .gallery-section {
+        padding: 2rem 0 4rem;
+        background: linear-gradient(180deg, transparent 0%, rgba(255, 96, 38, 0.05) 50%, transparent 100%);
+    }
+
+    .image-strip-container {
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+    }
+
+    .image-strip {
+        display: flex;
+        animation: scrollStrip 60s linear infinite;
+        gap: 1.5rem;
+    }
+
+    .gallery-image {
+        height: 250px;
+        min-width: 350px;
+        border-radius: 15px;
+        object-fit: cover;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .gallery-image::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, rgba(255, 96, 38, 0.3), rgba(255, 172, 51, 0.3));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .gallery-image:hover::before {
+        opacity: 1;
+    }
+
+    .gallery-image:hover {
+        transform: scale(1.05);
+        box-shadow: 0 15px 40px rgba(255, 96, 38, 0.4);
+    }
+
+    /* Testimonials as comments */
+    .testimonials-section {
+        position: relative;
+        padding: 4rem 0;
+        overflow: hidden;
+    }
+
+    .floating-testimonials {
+        position: absolute;
+        bottom: 0;
+        height: 120px;
+        width: max-content;
+        display: none;
+        gap: 2rem;
+        animation: floatTestimonials 80s linear infinite;
+        z-index: 5;
+    }
+
+    @keyframes floatTestimonials {
+        0% {
+            transform: translateX(100%);
+        }
+
+        100% {
+            transform: translateX(-200%);
+        }
+    }
+
+    .testimonial-bubble {
+        background: rgba(26, 26, 26, 0.95);
+        backdrop-filter: blur(15px);
+        padding: 1rem 1.5rem;
+        border-radius: 25px;
+        border: 1px solid rgba(255, 96, 38, 0.3);
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        height: fit-content;
+        margin-top: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        position: relative;
+    }
+
+    .testimonial-bubble::before {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 30px;
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-top: 10px solid rgba(26, 26, 26, 0.95);
+    }
+
+    .testimonial-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        font-weight: bold;
+        color: white;
+    }
+
+    .testimonial-content {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .testimonial-text {
+        font-size: 0.95rem;
+        color: var(--text-color);
+    }
+
+    .testimonial-author {
+        font-size: 0.8rem;
+        color: #888;
+        font-weight: 500;
+    }
+
+    /* Success/Error states */
+    .result-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+    }
+
+    .result-container.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .result-card {
+        background: var(--card-color);
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        border: 2px solid;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .result-card.success {
+        border-color: var(--success-color);
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), var(--card-color));
+    }
+
+    .result-card.error {
+        border-color: var(--error-color);
+        background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), var(--card-color));
+    }
+
+    .result-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .result-icon.success {
+        color: var(--success-color);
+    }
+
+    .result-icon.error {
+        color: var(--error-color);
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+
+        .search-input {
+            width: calc(100% - 100px);
+            padding: 1rem 1.5rem;
+        }
+
+        .search-btn {
+            padding: 0.8rem 1.5rem;
+        }
+
+        .nav-menu {
+            display: none;
+        }
+
+        .content-card {
+            min-width: 280px;
+        }
+
+        .gallery-image {
+            height: 200px;
+            min-width: 280px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+
+        .search-wrapper {
+            padding: 6px;
+        }
+
+        .search-input {
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+        }
+
+        .search-btn {
+            padding: 0.7rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .quick-actions {
+            gap: 0.5rem;
+        }
+
+        .quick-btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Loading animation */
+    .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+<div id="particles-js"></div>
+
+
+<main class="main-content">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-badge">
+            <i class="fas fa-certificate"></i> Official Certificate Verification
+        </div>
+        <h1 class="hero-title">Verify Your Achievement</h1>
+        <p class="hero-subtitle">
+            Enter your certificate ID below to instantly verify the authenticity of your #AngaarHai event
+            certificate
+        </p>
+
+        <div class="search-container">
+            <div class="search-wrapper">
+                <input type="text" class="search-input" id="certificateId"
+                    placeholder="Enter your Certificate ID (e.g., ANGAAR-FLAME001)" style="text-transform:uppercase">
+                <button class="search-btn" id="verifyBtn">
+                    <i class="fas fa-search"></i>
+                    <span>Verify</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <!-- <a href="#" class="quick-btn">
+                <i class="fas fa-download"></i> Download Sample
+            </a> -->
+            <a href="#" class="quick-btn">
+                <i class="fas fa-question-circle"></i> Need Help?
+            </a>
+            <a href="#" class="quick-btn">
+                <i class="fas fa-shield-alt"></i> Verification Guide
+            </a>
+        </div>
+    </section>
+
+    <!-- Event Gallery Section -->
+    <section class="gallery-section">
+        <div class="section-header">
+            <h2 class="section-title">Event Gallery</h2>
+            <p class="section-subtitle">
+                Relive the moments from our incredible #AngaarHai events
+            </p>
+        </div>
+
+        <div class="image-strip-container">
+            <div class="image-strip" id="imageStrip1">
+                {% for i in '12345678910'|make_list %}
+                    <img class="gallery-image" src="{% static 'img/home/about.jpg' %}" alt="Workshop Session">
+                    <img class="gallery-image" src="{% static 'images/events/networking_event.jpg' %}" alt="Networking Event">
+                    <img class="gallery-image" src="{% static 'images/events/keynote_speaker.jpg' %}" alt="Keynote Speaker">
+                    <img class="gallery-image" src="{% static 'images/events/hands_on_training.jpg' %}" alt="Hands-on Training">
+                    <img class="gallery-image" src="{% static 'images/events/awards_ceremony.jpg' %}" alt="Awards Ceremony">
+                {% endfor %}
+            </div>
+        </div>
+        <div class="image-strip-container">
+            <div class="image-strip reverse-strip" id="imageStrip2">
+                {% for i in '12345678910'|make_list %}
+                    <img class="gallery-image" src="{% static 'images/events/tech_demo.jpg' %}" alt="Tech Demo">
+                    <img class="gallery-image" src="{% static 'images/events/group_photo.jpg' %}" alt="Group Photo">
+                    <img class="gallery-image" src="{% static 'images/events/startup_pitch.jpg' %}" alt="Startup Pitch">
+                    <img class="gallery-image" src="{% static 'images/events/code_review.jpg' %}" alt="Code Review">
+                    <img class="gallery-image" src="{% static 'images/events/panel_discussion.jpg' %}" alt="Panel Discussion">
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Strips Section -->
+    <section class="content-strips">
+        <div class="section-header">
+            <h2 class="section-title">Our Events</h2>
+            <p class="section-subtitle">
+                Discover the amazing courses and workshops that make #AngaarHai special
+            </p>
+        </div>
+
+        <div class="content-strip-container">
+            <div class="content-strip" id="strip1"></div>
+        </div>
+
+        <div class="content-strip-container">
+            <div class="content-strip reverse-strip" id="strip2"></div>
+        </div>
+    </section>
+</main>
+
+<!-- Floating Testimonials -->
+<div class="floating-testimonials" id="floatingTestimonials"></div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    // Initialize particles.js
+    particlesJS("particles-js", {
+        "particles": {
+            "number": {
+                "value": 100,
+                "density": {
+                    "enable": true,
+                    "value_area": 1000
+                }
+            },
+            "color": {
+                "value": "#FF6026"
+            },
+            "shape": {
+                "type": "circle",
+                "stroke": {
+                    "width": 0,
+                    "color": "#000000"
+                }
+            },
+            "opacity": {
+                "value": 0.6,
+                "random": true,
+                "anim": {
+                    "enable": true,
+                    "speed": 1,
+                    "opacity_min": 0.1,
+                    "sync": false
+                }
+            },
+            "size": {
+                "value": 3,
+                "random": true,
+                "anim": {
+                    "enable": true,
+                    "speed": 2,
+                    "size_min": 0.1,
+                    "sync": false
+                }
+            },
+            "line_linked": {
+                "enable": true,
+                "distance": 150,
+                "color": "#FF6026",
+                "opacity": 0.4,
+                "width": 1
+            },
+            "move": {
+                "enable": true,
+                "speed": 2,
+                "direction": "none",
+                "random": true,
+                "straight": false,
+                "out_mode": "out",
+                "bounce": false,
+                "attract": {
+                    "enable": false,
+                    "rotateX": 600,
+                    "rotateY": 1200
+                }
+            }
+        },
+        "interactivity": {
+            "detect_on": "canvas",
+            "events": {
+                "onhover": {
+                    "enable": true,
+                    "mode": "grab"
+                },
+                "onclick": {
+                    "enable": true,
+                    "mode": "push"
+                },
+                "resize": true
+            },
+            "modes": {
+                "grab": {
+                    "distance": 140,
+                    "line_linked": {
+                        "opacity": 1
+                    }
+                },
+                "bubble": {
+                    "distance": 400,
+                    "size": 40,
+                    "duration": 2,
+                    "opacity": 8,
+                    "speed": 3
+                },
+                "repulse": {
+                    "distance": 200,
+                    "duration": 0.4
+                },
+                "push": {
+                    "particles_nb": 4
+                },
+                "remove": {
+                    "particles_nb": 2
+                }
+            }
+        },
+        "retina_detect": true
+    });
+
+    // Event data
+    const eventData = [
+        {
+            title: "Web Development Masterclass",
+            text: "Learn modern web development with React, Node.js, and advanced JavaScript techniques.",
+            avatar: "W",
+            avatarColor: "#FF6026",
+            likes: 245,
+            comments: 89,
+            participants: 150,
+            username: "Tech Guru"
+        },
+        {
+            title: "Digital Marketing Bootcamp",
+            text: "Master SEO, social media marketing, and digital advertising strategies for 2024.",
+            avatar: "D",
+            avatarColor: "#ffac33",
+            likes: 189,
+            comments: 67,
+            participants: 120,
+            username: "Marketing Pro"
+        },
+        {
+            title: "AI & Machine Learning Workshop",
+            text: "Dive into artificial intelligence and machine learning with practical projects.",
+            avatar: "A",
+            avatarColor: "#4CAF50",
+            likes: 312,
+            comments: 134,
+            participants: 95,
+            username: "AI Expert"
+        },
+        {
+            title: "Blockchain & Cryptocurrency",
+            text: "Understand blockchain technology and cryptocurrency development fundamentals.",
+            avatar: "B",
+            avatarColor: "#2196F3",
+            likes: 156,
+            comments: 78,
+            participants: 85,
+            username: "Crypto Analyst"
+        },
+        {
+            title: "UI/UX Design Intensive",
+            text: "Create stunning user interfaces and optimize user experiences for digital products.",
+            avatar: "U",
+            avatarColor: "#9c27b0",
+            likes: 203,
+            comments: 91,
+            participants: 110,
+            username: "Design Ninja"
+        },
+        {
+            title: "Cybersecurity Fundamentals",
+            text: "Learn essential cybersecurity skills to protect digital assets and systems.",
+            avatar: "C",
+            avatarColor: "#e91e63",
+            likes: 178,
+            comments: 56,
+            participants: 75,
+            username: "Security Expert"
+        }
+    ];
+
+    // Testimonials data
+    const testimonials = [
+        {
+            text: "Best event I've ever attended! 🔥🔥",
+            author: "Tech Enthusiast",
+            avatar: "T"
+        },
+        {
+            text: "Amazing learning experience at #AngaarHai! 💯",
+            author: "Student Developer",
+            avatar: "S"
+        },
+        {
+            text: "The networking opportunities were incredible!",
+            author: "Startup Founder",
+            avatar: "F"
+        },
+        {
+            text: "Mind-blowing workshops and sessions! 🤯",
+            author: "Design Lead",
+            avatar: "D"
+        },
+        {
+            text: "Certificate se zyada knowledge mili! ❤️",
+            author: "College Student",
+            avatar: "C"
+        },
+        {
+            text: "Already registered for the next event! 🚀",
+            author: "Software Engineer",
+            avatar: "E"
+        },
+        {
+            text: "This changed my career trajectory completely!",
+            author: "Product Manager",
+            avatar: "P"
+        },
+        {
+            text: "The practical knowledge gained is invaluable 💎",
+            author: "Freelancer",
+            avatar: "G"
+        },
+        {
+            text: "Community support ka level hi alag hai! 🌟",
+            author: "Web Developer",
+            avatar: "W"
+        },
+        {
+            text: "Looking forward to #AngaarHai 2025! 🎯",
+            author: "Data Scientist",
+            avatar: "A"
+        }
+    ];
+
+    // Create event cards
+    function createEventCard(data) {
+        const card = document.createElement('div');
+        card.className = 'content-card';
+
+        card.innerHTML = `
+                <img src="/api/placeholder/400/200" alt="${data.title}" class="card-img">
+                <div class="card-content">
+                    <h3 class="card-title">${data.title}</h3>
+                    <p class="card-text">${data.text}</p>
+                    <div class="card-footer">
+                        <div class="user-info">
+                            <div class="user-avatar" style="background-color: ${data.avatarColor};">${data.avatar}</div>
+                            <span class="user-name">${data.username}</span>
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-heart"></i>
+                                <span>${data.likes}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-comment"></i>
+                                <span>${data.comments}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-users"></i>
+                                <span>${data.participants}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        return card;
+    }
+
+    // Create testimonial bubbles
+    function createTestimonialBubble(data, index) {
+        const bubble = document.createElement('div');
+        bubble.className = 'testimonial-bubble';
+        bubble.style.animationDelay = `${index * 3}s`;
+
+        bubble.innerHTML = `
+                <div class="testimonial-avatar">${data.avatar}</div>
+                <div class="testimonial-content">
+                    <div class="testimonial-text">${data.text}</div>
+                    <div class="testimonial-author">- ${data.author}</div>
+                </div>
+            `;
+
+        return bubble;
+    }
+
+    // Populate content strips
+    function populateEventStrips() {
+        const strip1 = document.getElementById('strip1');
+        const strip2 = document.getElementById('strip2');
+
+        // Add original cards
+        eventData.forEach(data => {
+            strip1.appendChild(createEventCard(data));
+            strip2.appendChild(createEventCard(data));
+        });
+
+        // Add duplicates for continuous scrolling
+        for (let i = 0; i < eventData.length * 2; i++) {
+            const index = i % eventData.length;
+            strip1.appendChild(createEventCard(eventData[index]));
+            strip2.appendChild(createEventCard(eventData[index]));
+        }
+    }
+
+    // Populate testimonials
+    function populateTestimonials() {
+        const testimonialsContainer = document.getElementById('floatingTestimonials');
+
+        testimonials.forEach((testimonial, index) => {
+            testimonialsContainer.appendChild(createTestimonialBubble(testimonial, index));
+        });
+    }
+
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', () => {
+        populateEventStrips();
+        populateTestimonials();
+    });
+
+    // Enhanced scroll effects
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const parallax = document.getElementById('particles-js');
+        const speed = scrolled * 0.5;
+        parallax.style.transform = `translateY(${speed}px)`;
+    });
+
+    // Add some interactivity to quick action buttons
+    const quickBtns = document.querySelectorAll('.quick-btn');
+    quickBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            // Add ripple effect
+            const ripple = document.createElement('span');
+            ripple.style.position = 'absolute';
+            ripple.style.borderRadius = '50%';
+            ripple.style.background = 'rgba(255, 255, 255, 0.6)';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.animation = 'ripple 0.6s linear';
+            ripple.style.left = e.offsetX - 10 + 'px';
+            ripple.style.top = e.offsetY - 10 + 'px';
+            ripple.style.width = ripple.style.height = '20px';
+
+            btn.style.position = 'relative';
+            btn.appendChild(ripple);
+
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+
+    // Add CSS for ripple effect
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+</script>
+
+{% endblock %}
