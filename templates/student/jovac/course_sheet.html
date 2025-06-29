@@ -199,15 +199,15 @@ active
                                     <a href="{{ assignment.tutorial_link }}" target="_blank">
                                         <i class="fa fa-youtube-play"></i></a>
                                     {% else %}
-                                        {% if assignment.id in submitted_assignments %}
-                                        <a href="{% url 'view_submission' assignment.id %}"
-                                            class="btn btn-outline-success mx-1">View Submission</a>
-                                        {% elif assignment.due_date < current_time %} <button
-                                            class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>
+                                    {% if assignment.id in submitted_assignments %}
+                                    <a href="{% url 'view_submission' assignment.id %}"
+                                        class="btn btn-outline-success mx-1">View Submission</a>
+                                    {% elif assignment.due_date < current_time %} <button
+                                        class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>
                                         {% else %}
                                         -
                                         {% endif %}
-                                    {% endif %}
+                                        {% endif %}
                                 </p>
                             </td>
 
@@ -220,7 +220,9 @@ active
                                 </div>
                             </td>
 
+
                             <td class="border-bottom-0">
+                                {% if assignment.due_date %}
                                 <p class="fw-semibold mb-0">
                                     <span> {{ assignment.due_date|date }} </span>
                                     <br>
@@ -228,6 +230,12 @@ active
                                         @{{ assignment.due_date|time }} </span>
                                     </span>
                                 </p>
+                                {% else %}
+                                <p class="fw-semibold mb-0 text-muted">
+                                    -
+                                </p>
+                                {% endif %}
+
                             </td>
 
                             <td class="border-bottom-0">
@@ -238,10 +246,6 @@ active
 
                             {% endif %}
 
-
-
-
-                            </td>
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
