@@ -56,9 +56,11 @@ Student -> Submit Assignment
             </div>
         </div>
 
+        {% autoescape off %}
         <div class="card-body">
             <p class="card-text">{{ assignment.description|linebreaks }}</p>
         </div>
+        {% endautoescape %}
 
         {% if assignment.downloadable_file %}
         <a href="{{ assignment.downloadable_file.url }}" download="{{ assignment.downloadable_file.url }}" class="btn btn-primary mb-3 mx-3">
