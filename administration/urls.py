@@ -226,6 +226,10 @@ urlpatterns += [
 
     path('flames/teams/', flames_views.flames_teams, name='flames_teams'),
 
+    path('flames/teams/create/', flames_views.create_flames_team, name='create_flames_team'),
+    path('get-available-students/<int:course_id>/', flames_views.get_available_students, name='get_available_students'),
+
+
 ]
 
 

@@ -720,10 +720,6 @@ active
             <div class="flames-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <div class="flames-info">
-                            <div class="info-label">Registered On</div>
-                            <div class="info-value">{{ registration.created_at|date:"F d, Y" }}</div>
-                        </div>
 
                         {% if registration.admin_notes %}
                         <div class="flames-info">
@@ -732,12 +728,7 @@ active
                         </div>
                         {% endif %}
                     </div>
-                    <div class="col-md-6">
-                        <div class="flames-info">
-                            <div class="info-label">Registration Mode</div>
-                            <div class="info-value">{{ registration.get_registration_mode_display }}</div>
-                        </div>
-                    </div>
+                    
                 </div>
 
                 {% if registration.team %}

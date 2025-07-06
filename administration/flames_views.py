@@ -925,5 +925,74 @@ def flames_teams(request):
 
     return render(request, 'administration/flames/teams.html', context)
 
+# =============================== Create New Team ===============================
+
+@staff_member_required
+def create_flames_team(request):
+    courses = FlamesCourse.objects.filter(is_active=True)
+
+    if request.method == 'POST':
+        course_id = request.POST.get('course')
+        team_name = request.POST.get('team_name')
+        member_ids = request.POST.getlist('members')
+        leader_id = request.POST.get('leader')
+
+        if not course_id or not team_name or not member_ids or not leader_id:
+            messages.error(request, "All fields are required.")
+            return redirect('create_flames_team')
+
+        course = FlamesCourse.objects.get(id=course_id)
+        leader_student = Student.objects.get(id=leader_id)
+
+        team = FlamesTeam.objects.create(
+            name=team_name,
+            course=course,
+            team_leader=leader_student,
+            is_auto_created=False,
+            status="Active"
+        )
+
+        for member_id in member_ids:
+            student = Student.objects.get(id=member_id)
+            FlamesTeamMember.objects.create(
+                team=team,
+                member=student,
+                is_leader=(student.id == int(leader_id))
+            )
+
+        # update registration team mapping
+        FlamesRegistration.objects.filter(user__id__in=member_ids, course=course).update(team=team)
 
 
+        messages.success(request, "Team created successfully!")
+        return redirect('flames_teams')
+
+    context = {
+        'courses': courses,
+    }
+    return render(request, 'administration/flames/create_team.html', context)
+
+
+
+@staff_member_required
+def get_available_students(request, course_id):
+    print(f"Fetching available students for course ID: {course_id}")
+    registrations = FlamesRegistration.objects.filter(
+        course_id=course_id,
+        registration_mode='SOLO',
+        team__isnull=True,
+        status__in=['Approved', 'Completed']
+    )
+
+    students = []
+    for reg in registrations:
+        student = reg.user.student
+        if student:
+            students.append({
+                'id': student.id,
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'email': student.email
+            })
+
+    return JsonResponse({'students': students})

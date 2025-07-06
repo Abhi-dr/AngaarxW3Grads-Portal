@@ -308,8 +308,9 @@ FLAMES | Teams
             </div>
             <div class="col-md-3">
                 <div class="stat-item">
-                    <span class="stat-number">100%</span>
-                    <span class="stat-label">Engagement</span>
+                    <a href="{% url 'create_flames_team' %}" class="btn btn-primary w-100">
+                        <i class="fas fa-plus me-2"></i> Create New Team
+                    </a>
                 </div>
             </div>
         </div>
@@ -338,8 +339,8 @@ FLAMES | Teams
                         {% for team_member in team.members.all %}
                         <li class="member-item">
                             <i class="fas fa-user-circle me-2"></i>
-                            <span class="fs-4 text-success">{{ team_member.member.get_full_name }}</span> ({{
-                            team_member.member.email }})
+                            <span class="fs-4 text-success">{{ team_member.member.get_full_name }}</span>
+                            ({{ team_member.member.email }})
                             {% if team_member.is_leader %}
                             <span class="course-badge mx-2">Leader</span>
                             {% endif %}
