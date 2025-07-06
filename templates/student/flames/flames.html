@@ -550,7 +550,7 @@ active
     .faq-accordion {
         display: flex;
         flex-direction: column;
-        
+
     }
 
     .faq-item {
@@ -606,7 +606,7 @@ active
         line-height: 1.6;
     }
 
-    .faq-question.active + .faq-answer {
+    .faq-question.active+.faq-answer {
         max-height: 300px;
     }
 
@@ -776,9 +776,8 @@ active
                 <div class="price-info">
                     {% if registration.registration_mode == 'TEAM' %}
                     <span class="original-price">₹{{ registration.original_price }} × 5 = ₹
-                        {{
-                        registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price
-                        }}</span>
+
+                        {{registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price}}</span>
                     <span class="final-price">₹{{ registration.payable_amount }} (after team discount)</span>
                     <span class="discount-badge">Team Discount: ₹499 × 5 = ₹2,495</span>
                     {% elif registration.original_price != registration.discounted_price %}
@@ -918,11 +917,14 @@ active
             <!-- FAQ Item 1 -->
             <div class="faq-item mb-3">
                 <div class="faq-question">
-                    <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and LPU?</span>
+                    <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and
+                        LPU?</span>
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities do accept the FLAMES 25 course certificate. So it's not just a cool flex — it's officially recognized too! 😉</p>
+                    <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities do
+                        accept the FLAMES 25 course certificate. So it's not just a cool flex — it's officially
+                        recognized too! 😉</p>
                 </div>
             </div>
 
@@ -933,7 +935,9 @@ active
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>Not really! 🔥 Anyone can join. But since it's made mainly for students going into 3rd year, it's better if you know a little bit of HTML, CSS, and JavaScript. It'll make things easier for you!</p>
+                    <p>Not really! 🔥 Anyone can join. But since it's made mainly for students going into 3rd year, it's
+                        better if you know a little bit of HTML, CSS, and JavaScript. It'll make things easier for you!
+                    </p>
                 </div>
             </div>
 
@@ -944,7 +948,10 @@ active
                     <i class="fas fa-chevron-down faq-icon"></i>
                 </div>
                 <div class="faq-answer">
-                    <p>Team registration allows you to register a group of people at a special discounted rate. When you select "Team Registration" during enrollment, enter your team member's usernames and done! The pricing is calculated as (course price * 5) - (499 * 5), giving everyone a substantial discount!</p>
+                    <p>Team registration allows you to register a group of people at a special discounted rate. When you
+                        select "Team Registration" during enrollment, enter your team member's usernames and done! The
+                        pricing is calculated as (course price * 5) - (499 * 5), giving everyone a substantial discount!
+                    </p>
                 </div>
             </div>
         </div>
@@ -960,7 +967,7 @@ active
         const faqQuestions = document.querySelectorAll('.faq-question');
 
         faqQuestions.forEach(question => {
-            question.addEventListener('click', function() {
+            question.addEventListener('click', function () {
                 this.classList.toggle('active');
 
                 // Get the answer element (next sibling)

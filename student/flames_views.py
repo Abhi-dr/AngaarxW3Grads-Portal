@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
+from django.db.models import Q
 from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember, Session
 
 # ======================================= FLAMES MAIN PAGE ================================
@@ -116,49 +117,52 @@ def view_registration(request, slug):
 
 @login_required(login_url='login')
 def my_course(request, slug):
-
     course = get_object_or_404(FlamesCourse, slug=slug)
 
-    registration = FlamesRegistration.objects.filter(
+    # Try to get direct registration
+    registration = FlamesRegistration.objects.select_related('course', 'team').filter(
         user=request.user,
         course=course,
-        status__in=['Approved', "Completed"]
-    ).select_related('course', 'team').first()
+        status__in=['Approved', 'Completed']
+    ).first()
 
+    # If not directly registered, check team membership
+    team_registration = None
     if not registration:
-        messages.error(request, "You are not registered for this course.")
-        return redirect('student_flames')
-    
-    if course.id == 8: # means bundle offer combining course having id 3 and 4
-        dsa_sessions = Session.objects.filter(
-            course__id=3
-        ).order_by('start_datetime')
+        team_registration = FlamesTeamMember.objects.select_related('team__course').filter(
+            member=request.user,
+            team__registrations__course=course,
+            team__registrations__status__in=['Approved', 'Completed']
+        ).first()
 
-        full_stack_sessions = Session.objects.filter(
-            course__id=4
-        ).order_by('start_datetime')
+        if not team_registration:
+            messages.error(request, "You are not registered for this course.")
+            return redirect('student_flames')
+
+    # Use whichever is available (priority to individual registration)
+    effective_registration = registration or team_registration.team.registrations.get(course=course)
+
+    # Check for special bundle course (id=8)
+    if course.id == 8:  # Bundle: DSA (3) + Full Stack (4)
+        dsa_sessions = Session.objects.filter(course_id=3).order_by('start_datetime')
+        full_stack_sessions = Session.objects.filter(course_id=4).order_by('start_datetime')
 
         parameters = {
-            'registration': registration,
+            'registration': effective_registration,
             'course': course,
             'dsa_sessions': dsa_sessions,
             'full_stack_sessions': full_stack_sessions,
         }
-    
     else:
-        sessions = Session.objects.filter(
-            course=course
-        ).order_by('start_datetime')
+        sessions = Session.objects.filter(course=course).order_by('start_datetime')
 
         parameters = {
-            'registration': registration,
+            'registration': effective_registration,
             'course': course,
             'sessions': sessions,
         }
 
     return render(request, 'student/flames/my_course.html', parameters)
-
-
 
 
 
