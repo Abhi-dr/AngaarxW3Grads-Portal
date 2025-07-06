@@ -774,13 +774,8 @@ active
 
             <div class="flames-footer">
                 <div class="price-info">
-                    {% if registration.registration_mode == 'TEAM' %}
-                    <span class="original-price">₹{{ registration.original_price }} × 5 = ₹
 
-                        {{registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price}}</span>
-                    <span class="final-price">₹{{ registration.payable_amount }} (after team discount)</span>
-                    <span class="discount-badge">Team Discount: ₹499 × 5 = ₹2,495</span>
-                    {% elif registration.original_price != registration.discounted_price %}
+                    {% if registration.original_price != registration.discounted_price %}
                     <span class="original-price">₹{{ registration.original_price }}</span>
                     <span class="final-price">₹{{ registration.discounted_price }}</span>
                     <span class="discount-badge">Discount Applied</span>
@@ -789,15 +784,8 @@ active
                     {% endif %}
                 </div>
 
-                {% if registration.team %}
 
-                <span class="discount-badge fs-2">
-                    Team Registration (5 members) - ₹2,495 discount
-                </span>
-
-
-
-                {% elif registration.referral_code %}
+                {% if registration.referral_code %}
                 <span class="discount-badge fs-2">
                     Referred By: {{ registration.referral_code.alumni.name }}🔥
                 </span>
@@ -845,7 +833,7 @@ active
 
     <!-- =============================== AVAILABLE COURSES ================================= -->
 
-    <div id="available-tab" class="tab-content active">
+    <!-- <div id="available-tab" class="tab-content active">
         <div class="section-header">
             <h3 class="section-title">Available F.L.A.M.E.S Programs</h3>
         </div>
@@ -854,9 +842,9 @@ active
             {% for course in available_courses %}
             <div class="course-card">
                 <div class="course-header">
-                    <!-- <div class="course-icon" style="background-color: rgba({{ course.icon_color }}, 0.1);">
+                    <div class="course-icon" style="background-color: rgba({{ course.icon_color }}, 0.1);">
                         <i class="{{ course.icon_class }}" style="color: {{ course.icon_color }};"></i>
-                    </div> -->
+                    </div>
                     <div>
                         <h4 class="flames-title">{{ course.title }}</h4>
                         <p class="flames-subtitle">{{ course.subtitle }}</p>
@@ -902,19 +890,17 @@ active
             </div>
             {% endfor %}
         </div>
-    </div>
+    </div> -->
 
-    <hr>
+    <!-- <hr>
 
 
-    <!-- FAQ Section -->
     <div class="section-header mt-4">
         <h3 class="section-title">Frequently Asked Questions</h3>
     </div>
 
     <div class="mb-4">
         <div class="faq-accordion">
-            <!-- FAQ Item 1 -->
             <div class="faq-item mb-3">
                 <div class="faq-question">
                     <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and
@@ -928,7 +914,6 @@ active
                 </div>
             </div>
 
-            <!-- FAQ Item 2 -->
             <div class="faq-item mb-3">
                 <div class="faq-question">
                     <span>Do I need prior experience to join FLAMES?</span>
@@ -941,7 +926,6 @@ active
                 </div>
             </div>
 
-            <!-- FAQ Item 3 -->
             <div class="faq-item mb-3">
                 <div class="faq-question">
                     <span>How does team registration work?</span>
@@ -955,9 +939,10 @@ active
                 </div>
             </div>
         </div>
-    </div>
-</div>
+    </div> -->
 
+
+</div>
 
 <!-- Razorpay Integration -->
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
