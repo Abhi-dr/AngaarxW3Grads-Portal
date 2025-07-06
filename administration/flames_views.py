@@ -8,6 +8,8 @@ from django.contrib import messages
 from openpyxl import Workbook
 from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session
 from accounts.models import Instructor, Student
+from django.contrib.admin.views.decorators import staff_member_required
+
 
 @login_required
 def flames_courses(request):
@@ -909,3 +911,19 @@ def export_flames_registrations_to_excel(request):
 
 
 # ============================================= TEAMS ==========================================
+
+
+@staff_member_required
+def flames_teams(request):
+
+    teams = FlamesTeam.objects.select_related('team_leader', 'course')\
+        .prefetch_related('members__member')  # members -> FlamesTeamMember -> member -> Student
+
+    context = {
+        'teams': teams,
+    }
+
+    return render(request, 'administration/flames/teams.html', context)
+
+
+

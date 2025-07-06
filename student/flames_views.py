@@ -224,12 +224,6 @@ def my_course(request, slug):
 
 
 
-
-
-
-
-
-
 # @login_required
 # def team_formation(request):
 #     """

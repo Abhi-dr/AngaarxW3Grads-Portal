@@ -221,6 +221,11 @@ urlpatterns += [
     
     
     path("export-to-excel", flames_views.export_flames_registrations_to_excel, name="export_flames_registrations_to_excel"),
+
+    # -------- Teams ---------
+
+    path('flames/teams/', flames_views.flames_teams, name='flames_teams'),
+
 ]
 
 
