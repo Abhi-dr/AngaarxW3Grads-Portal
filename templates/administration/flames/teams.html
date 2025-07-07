@@ -4,6 +4,10 @@
 FLAMES | Teams
 {% endblock %}
 
+{% block flames_active %}
+active
+{% endblock %}
+
 {% block extra_css %}
 <style>
     body {
@@ -298,6 +302,16 @@ FLAMES | Teams
 
 {% block body %}
 <div class="container-fluid">
+
+        {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
     <div class="page-header">
         <h2 class="page-title">
             <i class="fas fa-fire flame-icon"></i>
@@ -369,13 +383,13 @@ FLAMES | Teams
                         </button>
                     </td>
                     <td>
-                         <a href="{% url 'edit_flames_team' team.id %}" class="btn btn-secondary ms-2">
-                            <i class="fas fa-edit"></i> Edit
+                         <a href="{% url 'edit_flames_team' team.id %}" class="btn btn-outline-secondary ms-2">
+                            ✏️
                         </a>
                     </td>
                 </tr>
                 <tr class="team-details" id="details-{{ forloop.counter }}">
-                    <td colspan="4">
+                    <td colspan="5">
                         <div class="details-content">
 
                             <div class="detail-section">
