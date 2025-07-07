@@ -42,6 +42,9 @@ urlpatterns += [
     
     path("summer-training/<slug:slug>/", flames_views.my_course, name="flames_my_course"),
     path("course/<slug:slug>/registration", flames_views.view_registration, name="student_view_registration"),
+
+    path('team/<int:team_id>/update-project/', flames_views.update_team_project, name='update_team_project'),
+
     
     
     # ---- REGISTRATION URLS ----
