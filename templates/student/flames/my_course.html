@@ -14,13 +14,19 @@ active
 <div class="container-fluid">
     <div class="card">
         <div class="card-body">
+            <span class="text-white"></span>
             <h3 class="heading">
-                <span class="fw-semibold">{{ course.title }} Sessions😎</span>
-                <span class="fs-4"> | 🔥Isi Me To Angaar Hai🔥</span>
+                <span class="fw-semibold">Team {{ registration.team.name|default:"Your Team" }}</span>
+                <span class="fs-4"> | {{ course.title }} Sessions😎</span>
+
 
                 <a href="{% url 'student_view_registration' registration.course.slug %}"
-                    class="btn btn-primary btn-sm float-end">Registration Details</a>
+                    class="btn btn-primary btn-sm float-end mx-1">Registration Details</a>
+
+
             </h3>
+            <a href="{% url 'team_scrum' registration.team.id %}"
+                class="btn btn-success float-end mx-1">Scrums Meetings</a>
         </div>
     </div>
 
@@ -39,13 +45,14 @@ active
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <h5 class="card-title fw-bold">🚀 Project Details</h5>
-                    <p class="mb-1"><strong>Title:</strong> 
+                    <p class="mb-1"><strong>Title:</strong>
                         {{ registration.team.project_title|default:"Not added yet" }}</p>
-                    <p class="mb-1"><strong>Description:</strong> 
+                    <p class="mb-1"><strong>Description:</strong>
                         {{ registration.team.project_description|default:"Not added yet" }}</p>
                     <p class="mb-1"><strong>Project Link:</strong>
                         {% if registration.team.project_link %}
-                        <a class="btn btn-sm btn-outline-success" href="{{ registration.team.project_link }}" target="_blank">Visit Project</a>
+                        <a class="btn btn-sm btn-outline-success" href="{{ registration.team.project_link }}"
+                            target="_blank">Visit Project</a>
                         {% else %}
                         Not added yet
                         {% endif %}

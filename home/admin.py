@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session, FlamesScrum
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
@@ -111,6 +111,12 @@ class FlamesTeamMemberAdmin(admin.ModelAdmin):
     list_filter = ('team',)
     search_fields = ('team__name', 'student__username')
 
+@admin.register(FlamesScrum)
+class FlamesScrumAdmin(admin.ModelAdmin):
+    list_display = ('team', 'date', 'filled_by', 'updated_at')
+    list_filter = ('team', 'date')
+    search_fields = ('team__team_name', 'filled_by__username', 'what_done', 'what_doing', 'any_issues', 'something_more')
+
 admin.site.register(FlamesCourse, FlamesCourseAdmin)
 admin.site.register(FlamesCourseTestimonial, FlamesCourseTestimonialAdmin)
 admin.site.register(FlamesRegistration, FlamesRegistrationAdmin)
@@ -119,4 +125,5 @@ admin.site.register(ReferralCode, ReferralCodeAdmin)
 admin.site.register(FlamesTeam, FlamesTeamAdmin)
 admin.site.register(FlamesTeamMember, FlamesTeamMemberAdmin)
 admin.site.register(Session)
+
 

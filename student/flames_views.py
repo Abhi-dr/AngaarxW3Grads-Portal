@@ -3,7 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
 from django.db.models import Q
-from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember, Session
+from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember, Session, FlamesScrum
+
+from django.utils import timezone
 
 # ======================================= FLAMES MAIN PAGE ================================
 
@@ -177,7 +179,55 @@ def update_team_project(request, team_id):
         team.save()
         messages.success(request, "Project details updated successfully!")
         return redirect('flames_my_course', team.course.slug)
+    
+# ========================================= TEAM SCRUM VIEW =============================
 
+@login_required(login_url='login')
+def team_scrum_view(request, team_id):
+    team = get_object_or_404(FlamesTeam, id=team_id)
+
+    # Check if the user is part of this team
+    is_member = FlamesTeamMember.objects.filter(team=team, member=request.user).exists()
+    if not is_member:
+        messages.error(request, "You're not a member of this team.")
+        return redirect('student_flames')
+
+    is_leader = FlamesTeamMember.objects.filter(team=team, member=request.user, is_leader=True).exists()
+    today = timezone.now().date()
+
+    # Check if today's scrum exists
+    today_scrum = FlamesScrum.objects.filter(team=team, date=today).first()
+
+    # Handle form submission
+    if request.method == 'POST' and is_leader and not today_scrum:
+        what_done = request.POST.get('what_done')
+        what_doing = request.POST.get('what_doing')
+        any_issues = request.POST.get('any_issues')
+        something_more = request.POST.get('something_more', '')
+
+        FlamesScrum.objects.create(
+            team=team,
+            date=today,
+            what_done=what_done,
+            what_doing=what_doing,
+            any_issues=any_issues,
+            something_more=something_more,
+            filled_by=request.user.student if hasattr(request.user, 'student') else None
+        )
+
+        messages.success(request, "✅ Today's Scrum submitted successfully!")
+        return redirect('team_scrum', team_id=team.id)
+
+    # Past scrums (excluding today)
+    past_scrums = FlamesScrum.objects.filter(team=team).exclude(date=today).order_by('-date')
+
+    return render(request, 'student/flames/scrums.html', {
+        'team': team,
+        'today': today,
+        'today_scrum': today_scrum,
+        'past_scrums': past_scrums,
+        'is_leader': is_leader,
+    })
 
 
 

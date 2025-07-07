@@ -45,6 +45,9 @@ urlpatterns += [
 
     path('team/<int:team_id>/update-project/', flames_views.update_team_project, name='update_team_project'),
 
+    path('summer-training/flames/team/<int:team_id>/scrum/', flames_views.team_scrum_view, name='team_scrum'),
+
+
     
     
     # ---- REGISTRATION URLS ----

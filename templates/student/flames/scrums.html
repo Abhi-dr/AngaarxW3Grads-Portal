@@ -1,0 +1,95 @@
+{% extends "student/base.html" %}
+{% load static %}
+{% block title %}Scrum Meeting - {{ team.team_name }}{% endblock %}
+
+{% block summer_active %}
+active
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Today's Scrum Meeting 📝</h5>
+            <span class="badge bg-light text-dark">{{ today }}</span>
+        </div>
+        <div class="card-body">
+            {% if today_scrum %}
+            <div class="alert alert-success">✅ Scrum for today has already been submitted.</div>
+            <h6><strong>What have you done so far?</strong></h6>
+            <p>{{ today_scrum.what_done }}</p>
+            <h6><strong>What are you currently working on?</strong></h6>
+            <p>{{ today_scrum.what_doing }}</p>
+            <h6><strong>Any specific issue you are facing?</strong></h6>
+            <p>{{ today_scrum.any_issues }}</p>
+            <h6><strong>Something more?</strong></h6>
+            <p>{{ today_scrum.something_more|default:"-" }}</p>
+            {% elif is_leader %}
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">What have you done so far?</label>
+                    <textarea name="what_done" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">What are you currently working on?</label>
+                    <textarea name="what_doing" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Is there any specific issue you are facing?</label>
+                    <textarea name="any_issues" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Something more? (Optional)</label>
+                    <textarea name="something_more" class="form-control" rows="2"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Submit Scrum</button>
+            </form>
+            {% else %}
+            <div class="alert alert-info">Only the <strong>team leader</strong> can fill the Scrum Meeting.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-4 shadow-sm">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">Past Scrum Meetings 📅</h5>
+        </div>
+        <div class="card-body">
+            {% if past_scrums %}
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">📅 Date</th>
+                            <th scope="col">✅ What was done</th>
+                            <th scope="col">🚧 Currently working on</th>
+                            <th scope="col">❓ Issues</th>
+                            <th scope="col">📝 More</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for scrum in past_scrums %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td><strong>{{ scrum.date }}</strong></td>
+                            <td>{{ scrum.what_done|linebreaksbr }}</td>
+                            <td>{{ scrum.what_doing|linebreaksbr }}</td>
+                            <td class="text-danger">{{ scrum.any_issues|default:"-" }}</td>
+                            <td>{{ scrum.something_more|default:"-"|linebreaksbr }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning text-center" role="alert">
+                💤 No past scrum records available yet.
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

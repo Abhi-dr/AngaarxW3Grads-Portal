@@ -1,6 +1,8 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
+from django.utils import timezone
+
 from accounts.models import Student, Instructor
 
 from datetime import datetime, timedelta
@@ -357,3 +359,26 @@ class Session(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.course.title}"
+
+# ============================== SCRUM MODEL ==============================
+
+class FlamesScrum(models.Model):
+    team = models.ForeignKey("FlamesTeam", on_delete=models.CASCADE, related_name="scrums")
+    date = models.DateField(default=timezone.now, help_text="This should be unique per team per day.")
+    
+    what_done = models.TextField(verbose_name="What have you done so far?")
+    what_doing = models.TextField(verbose_name="What are you currently working on?")
+    any_issues = models.TextField(verbose_name="Any specific issues you're facing?")
+    something_more = models.TextField(blank=True, null=True, verbose_name="Anything else you'd like to share?")
+
+    filled_by = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('team', 'date')  # Prevent multiple scrums on the same day for the same team
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.team.name} Scrum - {self.date}"
+
+
