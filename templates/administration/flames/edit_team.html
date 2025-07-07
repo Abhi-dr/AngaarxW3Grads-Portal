@@ -1,0 +1,580 @@
+{% extends "administration/base.html" %}
+{% block title %}Edit Team - {{ team.name }}{% endblock %}
+{% block flames_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        position: relative;
+    }
+
+    .page-title {
+        font-size: 2.8rem;
+        font-weight: 700;
+        background: linear-gradient(45deg, #ff6b6b, #feca57, #ff9ff3, #54a0ff);
+        background-size: 400% 400%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: gradientShift 3s ease-in-out infinite;
+        text-shadow: 0 0 30px rgba(255, 107, 107, 0.3);
+        margin-bottom: 0.5rem;
+    }
+
+    @keyframes gradientShift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .page-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+
+    .flame-icon {
+        font-size: 2rem;
+        margin-right: 1rem;
+        animation: flicker 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes flicker {
+        0% { transform: rotate(-2deg) scale(1); }
+        100% { transform: rotate(2deg) scale(1.1); }
+    }
+
+    .form-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 3rem;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .form-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transition: left 0.5s;
+    }
+
+    .form-container:hover::before {
+        left: 100%;
+    }
+
+    .form-group {
+        margin-bottom: 2rem;
+        position: relative;
+    }
+
+    .form-label {
+        display: block;
+        color: #feca57;
+        font-weight: 600;
+        margin-bottom: 0.8rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 1rem 1.2rem;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .form-control:focus, .form-select:focus {
+        outline: none;
+        border-color: #feca57;
+        box-shadow: 0 0 20px rgba(254, 202, 87, 0.3);
+        background: rgba(255, 255, 255, 0.15);
+    }
+
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-box {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .search-box i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.6);
+        z-index: 2;
+    }
+
+    .search-box input {
+        padding-left: 3rem;
+    }
+
+    .members-container {
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+        position: relative;
+    }
+
+    .member-checkbox {
+        display: flex;
+        align-items: center;
+        padding: 0.8rem;
+        margin-bottom: 0.5rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 1px solid transparent;
+    }
+
+    .member-checkbox:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .member-checkbox.selected {
+        background: rgba(254, 202, 87, 0.2);
+        border-color: #feca57;
+        box-shadow: 0 0 15px rgba(254, 202, 87, 0.2);
+    }
+
+    .member-checkbox input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-right: 1rem;
+        accent-color: #feca57;
+    }
+
+    .member-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .member-name {
+        color: white;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    .member-email {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
+    .leader-section {
+        background: rgba(255, 107, 107, 0.1);
+        border: 2px solid rgba(255, 107, 107, 0.3);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .leader-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .leader-option {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .leader-option:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .leader-option.selected {
+        background: rgba(255, 107, 107, 0.2);
+        border-color: #ff6b6b;
+        box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
+    }
+
+    .leader-option input[type="radio"] {
+        width: 18px;
+        height: 18px;
+        margin-right: 1rem;
+        accent-color: #ff6b6b;
+    }
+
+    .crown-icon {
+        color: #feca57;
+        margin-left: auto;
+        font-size: 1.2rem;
+    }
+
+    .btn-create {
+        background: linear-gradient(45deg, #ff6b6b, #feca57);
+        color: white;
+        padding: 1rem 2.5rem;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn-create:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(255, 107, 107, 0.4);
+    }
+
+    .btn-create:active {
+        transform: translateY(-1px);
+    }
+
+    .member-count {
+        background: linear-gradient(45deg, #54a0ff, #5f27cd);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .validation-message {
+        color: #ff6b6b;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        display: none;
+    }
+
+    .validation-message.show {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .no-members-message {
+        text-align: center;
+        color: rgba(255, 255, 255, 0.6);
+        font-style: italic;
+        padding: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 2rem 1.5rem;
+            margin: 0 1rem;
+        }
+        
+        .page-title {
+            font-size: 2.2rem;
+        }
+        
+        .leader-options {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="page-header">
+        <h2 class="page-title">
+            <i class="fas fa-pencil-alt flame-icon"></i>
+            Edit Team - {{ team.name }}
+        </h2>
+        <p class="page-subtitle">Update team members and team leader</p>
+    </div>
+
+    <div class="form-container">
+        <form method="post" id="editTeamForm">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="team_name" class="form-label">
+                    <i class="fas fa-users"></i> Team Name
+                </label>
+                <input type="text" name="team_name" id="team_name" class="form-control"
+                    value="{{ team.name }}" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-user-friends"></i> Select Members
+                </label>
+                <div class="member-count" id="memberCount">
+                    Selected: <span id="selectedCount">0</span> / 5 members
+                </div>
+                
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control" id="searchMembersInput" 
+                           placeholder="Search members by name or email..." onkeyup="filterMembers()">
+                </div>
+
+                <div class="members-container" id="membersContainer">
+                    {% for student in students %}
+                    <div class="member-checkbox" data-student-id="{{ student.id }}">
+                        <input type="checkbox" name="members" value="{{ student.id }}" 
+                               id="member_{{ student.id }}"
+                               {% if student.id|stringformat:"s" in current_member_ids %}checked{% endif %}>
+                        <div class="member-info">
+                            <div class="member-name">{{ student.first_name }} {{ student.last_name }}</div>
+                            <div class="member-email">{{ student.email }}</div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="validation-message" id="memberValidation">
+                    Please select between 1-5 members for the team.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="leader-section">
+                    <label class="form-label">
+                        <i class="fas fa-crown"></i> Select Team Leader
+                    </label>
+                    <div class="leader-options" id="leaderOptions">
+                        <!-- Leader options will be populated here -->
+                    </div>
+                    <div class="validation-message" id="leaderValidation">
+                        Please select a team leader from the chosen members.
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn-create">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+    const searchInput = document.getElementById('searchMembersInput');
+    const membersContainer = document.getElementById('membersContainer');
+    const leaderOptions = document.getElementById('leaderOptions');
+    const selectedCountSpan = document.getElementById('selectedCount');
+    const memberValidation = document.getElementById('memberValidation');
+    const leaderValidation = document.getElementById('leaderValidation');
+    const editTeamForm = document.getElementById('editTeamForm');
+    
+    let selectedMembers = [];
+    let currentLeader = "{{ team.team_leader.id }}";
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+        updateSelectedMembers();
+        updateLeaderOptions();
+        updateMemberStyles();
+    });
+
+    function filterMembers() {
+        const query = searchInput.value.toLowerCase();
+        const memberCheckboxes = membersContainer.querySelectorAll('.member-checkbox');
+        
+        memberCheckboxes.forEach(checkbox => {
+            const name = checkbox.querySelector('.member-name').textContent.toLowerCase();
+            const email = checkbox.querySelector('.member-email').textContent.toLowerCase();
+            const matches = name.includes(query) || email.includes(query);
+            checkbox.style.display = matches ? 'flex' : 'none';
+        });
+    }
+
+    function updateSelectedMembers() {
+        const checkboxes = document.querySelectorAll('input[name="members"]:checked');
+        selectedMembers = Array.from(checkboxes).map(cb => cb.value);
+        selectedCountSpan.textContent = selectedMembers.length;
+        
+        // Update member count color
+        const memberCountEl = document.getElementById('memberCount');
+        if (selectedMembers.length > 5) {
+            memberCountEl.style.background = 'linear-gradient(45deg, #ff6b6b, #ff4757)';
+        } else if (selectedMembers.length === 0) {
+            memberCountEl.style.background = 'linear-gradient(45deg, #ff6b6b, #ff4757)';
+        } else {
+            memberCountEl.style.background = 'linear-gradient(45deg, #54a0ff, #5f27cd)';
+        }
+    }
+
+    function updateMemberStyles() {
+        const memberCheckboxes = document.querySelectorAll('.member-checkbox');
+        memberCheckboxes.forEach(checkbox => {
+            const input = checkbox.querySelector('input[type="checkbox"]');
+            if (input.checked) {
+                checkbox.classList.add('selected');
+            } else {
+                checkbox.classList.remove('selected');
+            }
+        });
+    }
+
+    function updateLeaderOptions() {
+        leaderOptions.innerHTML = '';
+        
+        if (selectedMembers.length === 0) {
+            leaderOptions.innerHTML = '<div class="no-members-message">Select team members first to choose a leader</div>';
+            return;
+        }
+        
+        selectedMembers.forEach(memberId => {
+            const memberData = getMemberData(memberId);
+            if (memberData) {
+                const leaderOption = document.createElement('div');
+                leaderOption.className = 'leader-option';
+                leaderOption.innerHTML = `
+                    <input type="radio" name="leader" value="${memberId}" id="leader_${memberId}" 
+                           ${memberId == currentLeader ? 'checked' : ''}>
+                    <div class="member-info">
+                        <div class="member-name">${memberData.name}</div>
+                        <div class="member-email">${memberData.email}</div>
+                    </div>
+                    <i class="fas fa-crown crown-icon"></i>
+                `;
+                
+                leaderOption.addEventListener('click', function() {
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    updateLeaderStyles();
+                });
+                
+                leaderOptions.appendChild(leaderOption);
+            }
+        });
+        
+        updateLeaderStyles();
+    }
+
+    function updateLeaderStyles() {
+        const leaderOptionElements = document.querySelectorAll('.leader-option');
+        leaderOptionElements.forEach(option => {
+            const radio = option.querySelector('input[type="radio"]');
+            if (radio.checked) {
+                option.classList.add('selected');
+            } else {
+                option.classList.remove('selected');
+            }
+        });
+    }
+
+    function getMemberData(memberId) {
+        const students = [
+            {% for student in students %}
+            {
+                id: "{{ student.id }}",
+                name: "{{ student.first_name }} {{ student.last_name }}",
+                email: "{{ student.email }}"
+            },
+            {% endfor %}
+        ];
+        return students.find(student => student.id === memberId);
+    }
+
+    // Event listeners
+    membersContainer.addEventListener('change', function(e) {
+        if (e.target.type === 'checkbox') {
+            const memberId = e.target.value;
+            
+            if (e.target.checked && selectedMembers.length >= 5) {
+                e.target.checked = false;
+                return;
+            }
+            
+            updateSelectedMembers();
+            updateLeaderOptions();
+            updateMemberStyles();
+        }
+    });
+
+    membersContainer.addEventListener('click', function(e) {
+        const memberCheckbox = e.target.closest('.member-checkbox');
+        if (memberCheckbox && e.target.type !== 'checkbox') {
+            const checkbox = memberCheckbox.querySelector('input[type="checkbox"]');
+            if (checkbox.checked && selectedMembers.length >= 5) {
+                return;
+            }
+            checkbox.checked = !checkbox.checked;
+            checkbox.dispatchEvent(new Event('change'));
+        }
+    });
+
+    // Form validation
+    editTeamForm.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Validate members
+        if (selectedMembers.length === 0 || selectedMembers.length > 5) {
+            memberValidation.classList.add('show');
+            isValid = false;
+        } else {
+            memberValidation.classList.remove('show');
+        }
+        
+        // Validate leader
+        const selectedLeader = document.querySelector('input[name="leader"]:checked');
+        if (!selectedLeader) {
+            leaderValidation.classList.add('show');
+            isValid = false;
+        } else {
+            leaderValidation.classList.remove('show');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+</script>
+{% endblock %}

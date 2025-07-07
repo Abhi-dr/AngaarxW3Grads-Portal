@@ -229,6 +229,9 @@ urlpatterns += [
     path('flames/teams/create/', flames_views.create_flames_team, name='create_flames_team'),
     path('get-available-students/<int:course_id>/', flames_views.get_available_students, name='get_available_students'),
 
+    path("flames/edit-team/<int:team_id>/", flames_views.edit_flames_team, name="edit_flames_team"),
+
+
 
 ]
 

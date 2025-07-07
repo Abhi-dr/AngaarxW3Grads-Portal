@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
+from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
@@ -996,3 +997,146 @@ def get_available_students(request, course_id):
             })
 
     return JsonResponse({'students': students})
+
+# =============================== Edit Team ===============================
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db import transaction
+from home.models import FlamesTeam, FlamesTeamMember, FlamesRegistration, Student
+
+@staff_member_required
+def edit_flames_team(request, team_id):
+    team = get_object_or_404(FlamesTeam, id=team_id)
+    course = team.course
+
+    if request.method == "POST":
+        team_name    = request.POST.get("team_name", "").strip()
+        member_ids   = request.POST.getlist("members")
+        leader_id    = request.POST.get("leader")
+
+        # ——— Validation ———
+        if not team_name:
+            messages.error(request, "Team name is required.")
+            return redirect("edit_flames_team", team_id=team.id)
+
+        if not member_ids:
+            messages.error(request, "At least one team member is required.")
+            return redirect("edit_flames_team", team_id=team.id)
+
+        if len(member_ids) > 5:
+            messages.error(request, "Maximum 5 members allowed per team.")
+            return redirect("edit_flames_team", team_id=team.id)
+
+        if not leader_id or leader_id not in member_ids:
+            messages.error(request, "Team leader must be one of the selected members.")
+            return redirect("edit_flames_team", team_id=team.id)
+
+        # Fetch your Student instances
+        selected_students = list(Student.objects.filter(id__in=member_ids))
+        if len(selected_students) != len(member_ids):
+            messages.error(request, "One or more selected members are invalid.")
+            return redirect("edit_flames_team", team_id=team.id)
+
+        leader_student = next(s for s in selected_students if str(s.id) == leader_id)
+
+        # Prevent adding someone already in another team for this course
+        current_member_ids = set(team.members.values_list("member__id", flat=True))
+        new_member_ids     = set(int(mid) for mid in member_ids)
+        adding_members     = new_member_ids - current_member_ids
+
+        if adding_members:
+            conflicts = FlamesTeamMember.objects.filter(
+                team__course=course,
+                member__id__in=adding_members
+            ).exclude(team=team)
+            if conflicts.exists():
+                names = [tm.member.get_full_name() for tm in conflicts]
+                messages.error(request, 
+                    f"The following members are already in other teams: {', '.join(names)}"
+                )
+                return redirect("edit_flames_team", team_id=team.id)
+
+        # ——— Perform the update atomically ———
+        try:
+            with transaction.atomic():
+                # 1) Update team name & leader
+                team.name = team_name
+                team.team_leader = leader_student
+                team.save()
+
+                # 2) Compute removals & additions
+                to_remove = current_member_ids - new_member_ids
+                to_add    = new_member_ids - current_member_ids
+
+                if to_remove:
+                    FlamesTeamMember.objects.filter(
+                        team=team,
+                        member__id__in=to_remove
+                    ).delete()
+
+                    # Unlink registrations for removed members
+                    FlamesRegistration.objects.filter(
+                        course=course,
+                        user__id__in=to_remove
+                    ).update(team=None)
+
+                # Add new members
+                for mid in to_add:
+                    student = Student.objects.get(id=mid)
+                    FlamesTeamMember.objects.create(
+                        team=team,
+                        member=student,
+                        is_leader=(str(mid) == leader_id)
+                    )
+
+                # Ensure exactly one leader flag
+                FlamesTeamMember.objects.filter(team=team).update(is_leader=False)
+                FlamesTeamMember.objects.filter(team=team, member__id=leader_id).update(is_leader=True)
+
+                # 3) Link registrations for all current team members
+                FlamesRegistration.objects.filter(
+                    course=course,
+                    user__id__in=list(new_member_ids)
+                ).update(team=team)
+
+                messages.success(request, f"Team '{team_name}' updated successfully.")
+                return redirect("flames_teams")
+
+        except Exception as e:
+            messages.error(request, f"Error updating team: {str(e)}")
+            return redirect("edit_flames_team", team_id=team.id)
+
+    # ——— GET: Build the “available_students” list ———
+    solo_regs = FlamesRegistration.objects.filter(
+        course=course,
+        registration_mode="SOLO",
+        status__in=["Approved", "Completed"]
+    )
+
+    # Current team members
+    current_members = team.members.values_list("member__id", flat=True)
+
+    # Include SOLO regs not in any team + the current members
+    students_set = {
+        reg.user for reg in solo_regs if reg.team is None
+    } | {
+        tm.member for tm in team.members.all()
+    }
+
+    # Exclude students in other teams
+    others = FlamesTeamMember.objects.filter(
+        team__course=course
+    ).exclude(team=team).values_list("member__id", flat=True)
+
+    available_students = sorted(
+        [s for s in students_set if s.id not in others],
+        key=lambda s: (s.first_name, s.last_name)
+    )
+
+    context = {
+        "team": team,
+        "students": available_students,
+        "current_member_ids": [str(i) for i in current_members],
+    }
+    return render(request, "administration/flames/edit_team.html", context)
