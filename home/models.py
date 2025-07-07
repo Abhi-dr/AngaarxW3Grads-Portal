@@ -256,8 +256,15 @@ class FlamesTeam(models.Model):
     name = models.CharField(max_length=100)
     team_leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='led_flames_teams', null=True, blank=True)
     course = models.ForeignKey(FlamesCourse, on_delete=models.CASCADE, related_name='teams')
+
+    project_title = models.CharField(max_length=200, blank=True, null=True, help_text="Title of the project")
+    project_description = models.TextField(blank=True, null=True, help_text="Description of the project")
+    project_link = models.URLField(blank=True, null=True, help_text="Link to the project repository or demo")
+    
+
     created_at = models.DateTimeField(auto_now_add=True)
     is_auto_created = models.BooleanField(default=False)
+
     status = models.CharField(max_length=20, default="Pending", 
                               choices=[("Pending", "Pending"), 
                                       ("Active", "Active"), 
