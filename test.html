@@ -1,52 +1,264 @@
-<html>
-
-<body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
-    <div
-        style="background: linear-gradient(to bottom, #1b1f23, #000000); padding: 25px; text-align: center; border-radius: 10px;">
-        <img src="https://s6.imgcdn.dev/Y6D89g.png" alt="The Angaar Batch Logo"
-            style="width: 35%; margin-bottom: 20px; border-radius: 10px;">
-        <h1 style="color: #ff6b35; text-shadow: 0 0 5px rgba(255,107,53,0.3);">🔥COMPLETE YOUR FLAMES '25 JOURNEY!🔥
-        </h1>
-        <h2 style="color: #ffffff;">Payment Pending: One Step Away!</h2>
-        <p style="color: #f8f8f8">Your registration is confirmed, but payment is required to secure your spot</p>
-        <div
-            style="background-color: rgba(255,107,53,0.1); border-left: 4px solid #ff6b35; padding: 15px; margin: 20px 0; text-align: left;">
-            <p style="font-size: 17px; color: #f8f8f8; font-weight: bold;">You're almost there, {{name}}! </p>
-            <p style="font-size: 16px; color: #dddddd;">Thank you for registering for Flames '25 Industrial Training. To
-                unlock all program benefits including exclusive WhatsApp group access, study materials, and expert
-                mentorship, please complete your payment today.</p>
-            <p style="font-size: 16px; color: #dddddd;">Limited spots remaining - secure yours before they're gone!</p>
-                <p style="font-size: 15px; color: #bbbbbb; font-style: italic;">Have a referral code from a Flames alumnus? You can apply it during checkout for added benefits.</p>
-
+    <!-- <section class="gallery-section">
+        <div class="section-header">
+            <h2 class="section-title">Event Gallery</h2>
+            <p class="section-subtitle">
+                Relive the moments from our incredible #AngaarHai events
+            </p>
         </div>
-        <a href="https://theangaarbatch.in/dashboard/summer-training/"
-            style="background-color: #ff6b35; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; font-size: 16px; display: inline-block; margin-top: 25px; font-weight: bold; box-shadow: 0 4px 8px rgba(255, 107, 53, 0.5); transition: all 0.3s;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffffff"
-                style="vertical-align: middle; margin-right: 8px;">
-                <path
-                    d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
-            </svg>
-            COMPLETE PAYMENT NOW
-        </a>
-        <div style="margin-top: 30px; padding: 20px; background-color: rgba(255,107,53,0.1); border-radius: 10px;">
-            <h3 style="color: #ff6b35;">🔥 Why Choose Flames '25? 🔥</h3>
-            <ul style="list-style-type: none; padding: 0; color: #dddddd;">
-                <li style="margin-bottom: 10px;">🚀 Hands-on experience with real-world projects</li>
-                <li style="margin-bottom: 10px;">👨‍🏫 Expert mentorship from industry professionals</li>
-                <li style="margin-bottom: 10px;">📚 Comprehensive study materials and resources</li>
-                <li style="margin-bottom: 10px;">🤝 Networking opportunities with peers and mentors</li>
-            </ul>
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
-                <p style="font-size: 14px; color: #b0b0b0;">Questions? Reach out to us:
-                    <a href="mailto:
-                    theangaarbatch@gmail.com" style="color: #ff6b35; text-decoration: none;">theangaarbatch@gmail.com</a>
-                    or message us at <a href="tel:8273619318" style="color: #ff6b35; text-decoration: none;">+918273619318</a>
-                </p>
-                    
-                <p style="font-size: 16px; color: #ff6b35; font-weight: bold; margin-top: 15px;">READY TO BURN BRIGHT!
-                    🚀🔥</p>
+
+        <div class="image-strip-container">
+            <div class="image-strip" id="imageStrip1">
+                {% for i in '12345678910'|make_list %}
+                <img class="gallery-image" src="{% static 'img/home/about.jpg' %}" alt="Workshop Session">
+                <img class="gallery-image" src="{% static 'images/events/networking_event.jpg' %}"
+                    alt="Networking Event">
+                <img class="gallery-image" src="{% static 'images/events/keynote_speaker.jpg' %}" alt="Keynote Speaker">
+                <img class="gallery-image" src="{% static 'images/events/hands_on_training.jpg' %}"
+                    alt="Hands-on Training">
+                <img class="gallery-image" src="{% static 'images/events/awards_ceremony.jpg' %}" alt="Awards Ceremony">
+                {% endfor %}
             </div>
         </div>
-</body>
+        <div class="image-strip-container">
+            <div class="image-strip reverse-strip" id="imageStrip2">
+                {% for i in '12345678910'|make_list %}
+                <img class="gallery-image" src="{% static 'images/events/tech_demo.jpg' %}" alt="Tech Demo">
+                <img class="gallery-image" src="{% static 'images/events/group_photo.jpg' %}" alt="Group Photo">
+                <img class="gallery-image" src="{% static 'images/events/startup_pitch.jpg' %}" alt="Startup Pitch">
+                <img class="gallery-image" src="{% static 'images/events/code_review.jpg' %}" alt="Code Review">
+                <img class="gallery-image" src="{% static 'images/events/panel_discussion.jpg' %}"
+                    alt="Panel Discussion">
+                {% endfor %}
+            </div>
+        </div>
+    </section>
 
-</html>
+    <section class="content-strips">
+        <div class="section-header">
+            <h2 class="section-title">Our Events</h2>
+            <p class="section-subtitle">
+                Discover the amazing courses and workshops that make #AngaarHai special
+            </p>
+        </div>
+
+        <div class="content-strip-container">
+            <div class="content-strip" id="strip1"></div>
+        </div>
+
+        <div class="content-strip-container">
+            <div class="content-strip reverse-strip" id="strip2"></div>
+        </div>
+    </section> -->
+
+
+    <!-- ================================================================================================== -->
+
+
+    
+    // Event data
+    const eventData = [
+        {
+            title: "Web Development Masterclass",
+            text: "Learn modern web development with React, Node.js, and advanced JavaScript techniques.",
+            avatar: "W",
+            avatarColor: "#FF6026",
+            likes: 245,
+            comments: 89,
+            participants: 150,
+            username: "Tech Guru"
+        },
+        {
+            title: "Digital Marketing Bootcamp",
+            text: "Master SEO, social media marketing, and digital advertising strategies for 2024.",
+            avatar: "D",
+            avatarColor: "#ffac33",
+            likes: 189,
+            comments: 67,
+            participants: 120,
+            username: "Marketing Pro"
+        },
+        {
+            title: "AI & Machine Learning Workshop",
+            text: "Dive into artificial intelligence and machine learning with practical projects.",
+            avatar: "A",
+            avatarColor: "#4CAF50",
+            likes: 312,
+            comments: 134,
+            participants: 95,
+            username: "AI Expert"
+        },
+        {
+            title: "Blockchain & Cryptocurrency",
+            text: "Understand blockchain technology and cryptocurrency development fundamentals.",
+            avatar: "B",
+            avatarColor: "#2196F3",
+            likes: 156,
+            comments: 78,
+            participants: 85,
+            username: "Crypto Analyst"
+        },
+        {
+            title: "UI/UX Design Intensive",
+            text: "Create stunning user interfaces and optimize user experiences for digital products.",
+            avatar: "U",
+            avatarColor: "#9c27b0",
+            likes: 203,
+            comments: 91,
+            participants: 110,
+            username: "Design Ninja"
+        },
+        {
+            title: "Cybersecurity Fundamentals",
+            text: "Learn essential cybersecurity skills to protect digital assets and systems.",
+            avatar: "C",
+            avatarColor: "#e91e63",
+            likes: 178,
+            comments: 56,
+            participants: 75,
+            username: "Security Expert"
+        }
+    ];
+
+    // Testimonials data
+    const testimonials = [
+        {
+            text: "Best event I've ever attended! 🔥🔥",
+            author: "Tech Enthusiast",
+            avatar: "T"
+        },
+        {
+            text: "Amazing learning experience at #AngaarHai! 💯",
+            author: "Student Developer",
+            avatar: "S"
+        },
+        {
+            text: "The networking opportunities were incredible!",
+            author: "Startup Founder",
+            avatar: "F"
+        },
+        {
+            text: "Mind-blowing workshops and sessions! 🤯",
+            author: "Design Lead",
+            avatar: "D"
+        },
+        {
+            text: "Certificate se zyada knowledge mili! ❤️",
+            author: "College Student",
+            avatar: "C"
+        },
+        {
+            text: "Already registered for the next event! 🚀",
+            author: "Software Engineer",
+            avatar: "E"
+        },
+        {
+            text: "This changed my career trajectory completely!",
+            author: "Product Manager",
+            avatar: "P"
+        },
+        {
+            text: "The practical knowledge gained is invaluable 💎",
+            author: "Freelancer",
+            avatar: "G"
+        },
+        {
+            text: "Community support ka level hi alag hai! 🌟",
+            author: "Web Developer",
+            avatar: "W"
+        },
+        {
+            text: "Looking forward to #AngaarHai 2025! 🎯",
+            author: "Data Scientist",
+            avatar: "A"
+        }
+    ];
+
+    // Create event cards
+    function createEventCard(data) {
+        const card = document.createElement('div');
+        card.className = 'content-card';
+
+        card.innerHTML = `
+                <img src="/api/placeholder/400/200" alt="${data.title}" class="card-img">
+                <div class="card-content">
+                    <h3 class="card-title">${data.title}</h3>
+                    <p class="card-text">${data.text}</p>
+                    <div class="card-footer">
+                        <div class="user-info">
+                            <div class="user-avatar" style="background-color: ${data.avatarColor};">${data.avatar}</div>
+                            <span class="user-name">${data.username}</span>
+                        </div>
+                        <div class="card-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-heart"></i>
+                                <span>${data.likes}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-comment"></i>
+                                <span>${data.comments}</span>
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-users"></i>
+                                <span>${data.participants}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        return card;
+    }
+
+    // Create testimonial bubbles
+    function createTestimonialBubble(data, index) {
+        const bubble = document.createElement('div');
+        bubble.className = 'testimonial-bubble';
+        bubble.style.animationDelay = `${index * 3}s`;
+
+        bubble.innerHTML = `
+                <div class="testimonial-avatar">${data.avatar}</div>
+                <div class="testimonial-content">
+                    <div class="testimonial-text">${data.text}</div>
+                    <div class="testimonial-author">- ${data.author}</div>
+                </div>
+            `;
+
+        return bubble;
+    }
+
+    // Populate content strips
+    function populateEventStrips() {
+        const strip1 = document.getElementById('strip1');
+        const strip2 = document.getElementById('strip2');
+
+        // Add original cards
+        eventData.forEach(data => {
+            strip1.appendChild(createEventCard(data));
+            strip2.appendChild(createEventCard(data));
+        });
+
+        // Add duplicates for continuous scrolling
+        for (let i = 0; i < eventData.length * 2; i++) {
+            const index = i % eventData.length;
+            strip1.appendChild(createEventCard(eventData[index]));
+            strip2.appendChild(createEventCard(eventData[index]));
+        }
+    }
+
+    // Populate testimonials
+    function populateTestimonials() {
+        const testimonialsContainer = document.getElementById('floatingTestimonials');
+
+        testimonials.forEach((testimonial, index) => {
+            testimonialsContainer.appendChild(createTestimonialBubble(testimonial, index));
+        });
+    }
+
+
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', () => {
+        populateEventStrips();
+        populateTestimonials();
+    });
+
+    

@@ -709,6 +709,11 @@ active
                 <a href="{% url 'flames_my_course' registration.course.slug %}"
                     class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
 
+                    <a href="{% url 'team_scrum' registration.team.id %}"
+                    class="btn btn-sm mx-2 rounded-3 btn-success">Scrums</a>
+
+                    
+
                 {% if registration.status == 'Pending' %}
 
                 <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button" data-registration-id="{{ registration.id }}">

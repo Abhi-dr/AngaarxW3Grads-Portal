@@ -8,57 +8,71 @@ from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeam
 from django.utils import timezone
 
 # ======================================= FLAMES MAIN PAGE ================================
-
 @login_required(login_url='login')
 def student_flames(request):
-    # Get registrations where the user is directly registered
-    direct_registrations = FlamesRegistration.objects.filter(
-        user=request.user
+    user = request.user
+
+    # Step 1: Get all registrations for this user (solo or team-based)
+    # user is the main registered user in all cases
+    # all_registrations = FlamesRegistration.objects.filter(
+    #     user=user
+    # ).select_related('course', 'team').order_by('-created_at')
+
+    solo_registrations = FlamesRegistration.objects.filter(
+        user=user,
+        registration_mode='SOLO'
     ).select_related('course', 'team').order_by('-created_at')
-    
-    # Find teams where the user is a member but not the team leader
-    team_memberships = FlamesTeamMember.objects.filter(
-        member=request.user,
-        is_leader=False
+
+    team_registrations = FlamesTeam.objects.filter(
+        registrations__user=user,
+        registrations__registration_mode='TEAM'
+    ).distinct().select_related('course').order_by('-registrations__created_at')
+
+    print(f"Solo registrations: {solo_registrations.count()}, Team registrations: {team_registrations.count()}")
+
+
+    # Step 2: If user is added in another team (not the registered user, just a member)
+    extra_team_memberships = FlamesTeamMember.objects.filter(
+        member=user
     ).select_related('team')
-    
-    team_ids = team_memberships.values_list('team_id', flat=True)
-    
-    # Get registrations for teams where the user is a member
-    team_registrations = FlamesRegistration.objects.filter(
-        team_id__in=team_ids
-    ).select_related('course', 'team').order_by('-created_at')
-    
-    # Combine both types of registrations
-    registrations = list(direct_registrations)
-    
-    # Add team registrations if they're not already included
-    for reg in team_registrations:
-        if reg not in registrations:
-            registrations.append(reg)
-    
-    # Sort by created_at (most recent first)
-    registrations.sort(key=lambda x: x.created_at, reverse=True)
-    
-    # Prefetch team members for all registrations with teams
-    for registration in registrations:
+
+    extra_team_ids = extra_team_memberships.values_list('team_id', flat=True)
+
+    # Step 3: Find any additional registrations where user is not the one who registered, but part of the team
+    extra_registrations = FlamesRegistration.objects.filter(
+        team_id__in=extra_team_ids
+    ).exclude(user=user).select_related('course', 'team')
+
+    # Combine both
+    registration_set = set()
+    combined_registrations = []
+
+    for reg in list(all_registrations) + list(extra_registrations):
+        if reg.id not in registration_set:
+            registration_set.add(reg.id)
+            combined_registrations.append(reg)
+
+    # Sort by creation time
+    combined_registrations.sort(key=lambda x: x.created_at, reverse=True)
+
+    # Attach team members if it's a team
+    for registration in combined_registrations:
         if registration.team:
             registration.team.members_list = FlamesTeamMember.objects.filter(team=registration.team)
-    
-    # Get available courses (courses that the student hasn't registered for)
-    registered_course_ids = set()
-    for reg in registrations:
-        registered_course_ids.add(reg.course_id)
-    
-    available_courses = FlamesCourse.objects.filter(is_active=True).exclude(id__in=registered_course_ids)
-    
-    parameters = {
-        'registrations': registrations,
+
+    # Step 4: Get available courses (not registered for already)
+    registered_course_ids = set(reg.course_id for reg in combined_registrations)
+
+    available_courses = FlamesCourse.objects.filter(
+        is_active=True
+    ).exclude(id__in=registered_course_ids)
+
+    return render(request, 'student/flames/flames.html', {
+        'registrations': combined_registrations,
         'available_courses': available_courses,
         'active_tab': 'flames'
-    }
-    
-    return render(request, 'student/flames/flames.html', parameters)
+    })
+
 
 
 # ====================================== VIEW REGISTRATION ================================
