@@ -391,3 +391,6 @@ def get_students_api(request):
             'status': 'error',
             'message': str(e)
         }, status=400)
+
+
+# just adding a simple line
