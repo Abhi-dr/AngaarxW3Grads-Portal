@@ -52,6 +52,11 @@ INSTALLED_APPS = [
     
     "channels",
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
 
 ]
 
@@ -68,6 +73,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+
+    'allauth.account.middleware.AccountMiddleware',
 
     
 ]
@@ -297,3 +304,31 @@ RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 
 JUDGE0_CALLBACK_URL = "https://1b49f750e5d68e7a9c33c24612db101e.serveo.net/judge0/callback"
+
+# =================== AllAuth Settings =========================
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+LOGIN_REDIRECT_URL = '/accounts/social/google/handler/'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': '869693616227-n6c803j4adn6ai62eb198ofl1g5vutlq.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}

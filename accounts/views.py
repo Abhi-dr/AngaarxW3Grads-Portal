@@ -148,6 +148,51 @@ def logout(request):
      auth.logout(request)
      return redirect("home")
 
+
+# accounts/views.py
+
+# ... keep all your existing imports and views ...
+
+# ==============================================================================
+# NEW VIEW FOR HANDLING GOOGLE LOGIN FOR STUDENTS
+# ==============================================================================
+@login_required
+def google_login_handler(request):
+    user = request.user
+
+    # Security Check: If the logged-in user is already an Instructor or Admin, block them.
+    if hasattr(user, 'instructor') or hasattr(user, 'administrator'):
+        messages.error(request, "Google login is for students only. Please use your username and password.")
+        auth.logout(request)
+        return redirect('login')
+
+    # This will find the Student profile if it exists, or create a new one.
+    # It's the safest way to handle both new and returning users.
+    student, created = Student.objects.get_or_create(
+        user_ptr_id=user.id,  # Link to the base User model
+        defaults={
+            # --- Fields from the base User model ---
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+
+            # --- Fields specific to your Student model ---
+            # Your 'mobile_number' and 'gender' fields cannot be empty.
+            # We will set them to a placeholder and the user can update them later.
+            'mobile_number': '0000000000',
+            'gender': 'Unknown',
+        }
+    )
+
+    if created:
+        messages.success(request, f"Welcome to Angaar, {user.first_name}! Your student account is ready.")
+        # You could add a step here to redirect them to a "complete your profile" page
+        # if you want them to update the placeholder mobile/gender right away.
+
+    # For both new and existing students, redirect to the student dashboard.
+    return redirect('student')
+
 # ====================== check username availability ====================
 
 def check_username_availability(request):
@@ -392,5 +437,3 @@ def get_students_api(request):
             'message': str(e)
         }, status=400)
 
-
-# just adding a simple line
