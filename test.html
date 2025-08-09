@@ -1,52 +1,1686 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
-<body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
-    <div
-        style="background: linear-gradient(to bottom, #1b1f23, #000000); padding: 25px; text-align: center; border-radius: 10px;">
-        <img src="https://s6.imgcdn.dev/Y6D89g.png" alt="The Angaar Batch Logo"
-            style="width: 35%; margin-bottom: 20px; border-radius: 10px;">
-        <h1 style="color: #ff6b35; text-shadow: 0 0 5px rgba(255,107,53,0.3);">🔥COMPLETE YOUR FLAMES '25 JOURNEY!🔥
-        </h1>
-        <h2 style="color: #ffffff;">Payment Pending: One Step Away!</h2>
-        <p style="color: #f8f8f8">Your registration is confirmed, but payment is required to secure your spot</p>
-        <div
-            style="background-color: rgba(255,107,53,0.1); border-left: 4px solid #ff6b35; padding: 15px; margin: 20px 0; text-align: left;">
-            <p style="font-size: 17px; color: #f8f8f8; font-weight: bold;">You're almost there, {{name}}! </p>
-            <p style="font-size: 16px; color: #dddddd;">Thank you for registering for Flames '25 Industrial Training. To
-                unlock all program benefits including exclusive WhatsApp group access, study materials, and expert
-                mentorship, please complete your payment today.</p>
-            <p style="font-size: 16px; color: #dddddd;">Limited spots remaining - secure yours before they're gone!</p>
-                <p style="font-size: 15px; color: #bbbbbb; font-style: italic;">Have a referral code from a Flames alumnus? You can apply it during checkout for added benefits.</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 
-        </div>
-        <a href="https://theangaarbatch.in/dashboard/summer-training/"
-            style="background-color: #ff6b35; color: #ffffff; text-decoration: none; padding: 12px 25px; border-radius: 5px; font-size: 16px; display: inline-block; margin-top: 25px; font-weight: bold; box-shadow: 0 4px 8px rgba(255, 107, 53, 0.5); transition: all 0.3s;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#ffffff"
-                style="vertical-align: middle; margin-right: 8px;">
-                <path
-                    d="M20 4H4c-1.11 0-1.99.89-1.99 2L2 18c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V6c0-1.11-.89-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z" />
-            </svg>
-            COMPLETE PAYMENT NOW
-        </a>
-        <div style="margin-top: 30px; padding: 20px; background-color: rgba(255,107,53,0.1); border-radius: 10px;">
-            <h3 style="color: #ff6b35;">🔥 Why Choose Flames '25? 🔥</h3>
-            <ul style="list-style-type: none; padding: 0; color: #dddddd;">
-                <li style="margin-bottom: 10px;">🚀 Hands-on experience with real-world projects</li>
-                <li style="margin-bottom: 10px;">👨‍🏫 Expert mentorship from industry professionals</li>
-                <li style="margin-bottom: 10px;">📚 Comprehensive study materials and resources</li>
-                <li style="margin-bottom: 10px;">🤝 Networking opportunities with peers and mentors</li>
-            </ul>
-            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.2);">
-                <p style="font-size: 14px; color: #b0b0b0;">Questions? Reach out to us:
-                    <a href="mailto:
-                    theangaarbatch@gmail.com" style="color: #ff6b35; text-decoration: none;">theangaarbatch@gmail.com</a>
-                    or message us at <a href="tel:8273619318" style="color: #ff6b35; text-decoration: none;">+918273619318</a>
-                </p>
-                    
-                <p style="font-size: 16px; color: #ff6b35; font-weight: bold; margin-top: 15px;">READY TO BURN BRIGHT!
-                    🚀🔥</p>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css?family=Raleway:700,900');
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        /* Video background styling */
+
+        .background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+
+        /* Glassy navbar styling */
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.073);
+            /* Transparent glassy effect */
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            left: 0;
+            right: 0;
+            position: fixed;
+            z-index: 999;
+        }
+
+
+        /* Positioning and styling adjustments */
+
+        .navbar {
+            margin: 20px;
+            padding: 0.75rem 1.5rem;
+        }
+
+
+        /* Styling for nav links */
+
+        .nav-link {
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #f8c146;
+            /* Hover effect color */
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+
+        /* Sections */
+
+        .section {
+            height: 100vh;
+            min-height: 500px;
+            position: relative;
+        }
+
+
+        /* Containers */
+
+        .content-container {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 2;
+            clip: rect(auto, auto, auto, auto);
+            pointer-events: none;
+        }
+
+        .content-inner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            padding: 0;
+            z-index: 99;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            will-change: transform;
+            -webkit-perspective: 1000;
+            perspective: 1000;
+            pointer-events: all;
+        }
+
+        .content-center {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+
+        /* Aesthetics */
+
+        .top-section {
+
+            background: url("../../../img/home/bg.jpeg");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .bottom-section {
+            background: url("../../../img/home/bg2.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .section h1 {
+            font-size: 200px;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .section p,
+        .section a {
+            font-weight: 700;
+            letter-spacing: 7px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .content-theme-dark h1 {
+            color: #ff4f0f;
+            text-shadow: 0 20px 40px rgba(0, 0, 0, .5);
+        }
+
+        .content-theme-dark p,
+        .content-theme-dark a {
+            color: #FEA98D;
+        }
+
+        .content-theme-light h1 {
+            color: #ffffff;
+            text-shadow: 0 20px 40px rgba(0, 0, 0, .5);
+        }
+
+        .content-theme-light p,
+        .content-theme-light a {
+            color: #728E93;
+        }
+
+        @media (max-width: 768px) {
+            .section h1 {
+                font-size: 100px;
+            }
+
+            .section p,
+            .section a {
+                letter-spacing: 3px;
+            }
+
+            .nav-item {
+                margin-top: 2%;
+            }
+        }
+
+
+        /* Button styling */
+
+        button {
+            padding: 10px 25px;
+            border: 0;
+            border-radius: 15px;
+            color: #212121;
+            z-index: 1;
+            background: #e8e8e8;
+            position: relative;
+            font-weight: 1000;
+            font-size: 17px;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 0;
+            width: 0;
+            border-radius: 14px;
+            background-color: #212121;
+            z-index: -1;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+        }
+
+        button:hover {
+            color: #ff4f0f;
+        }
+
+        button:hover::before {
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+        }
+
+        button:active {
+            transform: scale(80%);
+        }
+
+        #register-btn {
+            padding: 10px 25px;
+            border: 0;
+            border-radius: 15px;
+            color: #212121;
+            z-index: 1;
+            background: #ff6026;
+            position: relative;
+            font-weight: 1000;
+            font-size: 17px;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+            overflow: hidden;
+        }
+
+        #register-btn::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 0;
+            width: 0;
+            border-radius: 14px;
+            background-color: #212121;
+            z-index: -1;
+            -webkit-box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            box-shadow: 4px 8px 19px -3px rgba(0, 0, 0, 0.27);
+            transition: all 250ms;
+        }
+
+        #register-btn:hover {
+            color: #ff4f0f;
+        }
+
+        #register-btn:hover::before {
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+        }
+
+        #register-btn:active {
+            transform: scale(80%);
+        }
+
+        .image-container {
+            background-color: #212121;
+        }
+
+        .full-width-image {
+            aspect-ratio: 2.85;
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+        }
+
+        @media (max-width: 991px) {
+            .full-width-image {
+                max-width: 100%;
+            }
+        }
+
+        .community-section {
+            display: flex;
+            flex-direction: column;
+            background-color: #212121;
+            text-align: center;
+            font: 900 50px Red Hat Display, sans-serif;
+        }
+
+        .community-container {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-height: 711px;
+            width: 100%;
+            padding: 64px 75px;
+        }
+
+        .background-image {
+            position: absolute;
+            inset: 0;
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .community-title {
+            position: relative;
+            align-self: center;
+            color: white;
+        }
+
+        .community-logo {
+            aspect-ratio: 2.35;
+            object-fit: contain;
+            object-position: center;
+            width: 100%;
+            margin-top: 69px;
+        }
+
+        @media (max-width: 991px) {
+            .community-section {
+                font-size: 40px;
+            }
+
+            .community-container {
+                max-width: 100%;
+                font-size: 40px;
+                padding: 0 20px;
+            }
+
+            .community-title {
+                max-width: 100%;
+                font-size: 40px;
+            }
+
+            .community-logo {
+                max-width: 100%;
+                margin-top: 40px;
+            }
+        }
+
+        .learn-code-connect {
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .section-title {
+            color: #fff;
+            text-align: center;
+            align-self: center;
+            z-index: 10;
+            margin-top: -12px;
+            font: 900 40px Red Hat Display, sans-serif;
+        }
+
+        .features-container {
+            z-index: 10;
+            margin-top: 77px;
+            width: 100%;
+        }
+
+        .features-grid {
+            gap: 20px;
+            display: flex;
+        }
+
+        .feature-column {
+            display: flex;
+            flex-direction: column;
+            line-height: normal;
+            width: 33%;
+            margin-left: 0;
+        }
+
+        .feature-content {
+            display: flex;
+            flex-grow: 1;
+            flex-direction: column;
+            align-items: center;
+            font-family: Red Hat Display, sans-serif;
+            color: #fff;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .feature-icon {
+            aspect-ratio: 1.23;
+            object-fit: contain;
+            object-position: center;
+            width: 116px;
+            max-width: 100%;
+        }
+
+        .feature-title {
+            font-size: 30px;
+            margin-top: 28px;
+            width: 342px;
+        }
+
+        .feature-description {
+            font-size: 20px;
+            align-self: stretch;
+            margin-top: 30px;
+        }
+
+        @media (max-width: 991px) {
+            .section-title {
+                max-width: 100%;
+            }
+
+            .features-container {
+                max-width: 100%;
+                margin-top: 40px;
+            }
+
+            .features-grid {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+            }
+
+            .feature-column {
+                width: 100%;
+            }
+
+            .feature-content {
+                margin-top: 40px;
+            }
+        }
+
+        .journey-container {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: black;
+            padding: 5%;
+        }
+
+        .journey-title {
+            color: #fff;
+            text-align: center;
+            align-self: center;
+            font: 900 40px 'Red Hat Display', sans-serif;
+        }
+
+        .journey-content {
+            margin-top: 105px;
+            width: 100%;
+            padding: 2px 0;
+        }
+
+        .journey-columns {
+            display: flex;
+            gap: 20px;
+        }
+
+        .journey-column {
+            display: flex;
+            flex-direction: column;
+            width: 33%;
+        }
+
+        .journey-text-container {
+            display: flex;
+            flex-grow: 1;
+            flex-direction: column;
+            align-items: flex-start;
+            color: rgba(255, 255, 255, 0.5);
+            font: 500 24px 'Red Hat Display', sans-serif;
+        }
+
+        .journey-heading {
+            z-index: 10;
+            margin-top: -22px;
+        }
+
+        .journey-paragraph {
+            font-size: 13px;
+            align-self: stretch;
+            margin-top: 15px;
+        }
+
+        .journey-heading-collaborate {
+            margin-top: 87px;
+        }
+
+        .journey-images-container {
+            display: flex;
+            width: 100%;
+            flex-direction: column;
+            align-self: stretch;
+            margin: auto 0;
+        }
+
+        .journey-image-row {
+            display: flex;
+            gap: 0px;
+        }
+
+        .journey-image {
+            aspect-ratio: 1;
+            object-fit: contain;
+            object-position: center;
+            width: 160px;
+            max-width: 100%;
+        }
+
+        .journey-image-group {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .journey-image-offset {
+            margin: 0 0 0 0;
+        }
+
+        .journey-image-circle {
+            background-color: #873202;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100px;
+            height: 100px;
+            padding: 0 10px;
+        }
+
+        .journey-image-circle img {
+            width: 80px;
+            height: 80px;
+        }
+
+        .journey-text-right {
+            text-align: right;
+        }
+
+        .journey-heading-right {
+            align-self: flex-end;
+        }
+
+        .journey-heading-reflect {
+            margin-top: 106px;
+        }
+
+        @media (max-width: 991px) {
+            .journey-title {
+                max-width: 100%;
+            }
+
+            .journey-content {
+                max-width: 100%;
+                margin-top: 40px;
+            }
+
+            .journey-columns {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+            }
+
+            .journey-column {
+                width: 100%;
+                margin-top: 40px;
+            }
+
+            .journey-heading-collaborate,
+            .journey-image-offset,
+            .journey-heading-reflect {
+                margin-top: 40px;
+            }
+
+            .journey-paragraph-reflect {
+                margin-left: 6px;
+            }
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .glimpse-section {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: black;
+            text-align: center;
+            padding-top: 3%;
+            font: 900 50px 'Red Hat Display', sans-serif;
+        }
+
+        .glimpse-title {
+            margin: 0;
+            color: white;
+            font: 900 40px 'Red Hat Display', sans-serif;
+        }
+
+
+        /* MacBook container styling */
+
+        .macbook-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+
+        /* MacBook image styling */
+
+        .glimpse-image {
+            width: 100%;
+            object-fit: contain;
+        }
+
+
+        /* Video Masking - Clipping the video to fit the MacBook screen */
+
+        .video-mask {
+            position: absolute;
+            top: 22%;
+            /* Adjust to align with MacBook screen */
+            left: 14%;
+            /* Adjust to align with MacBook screen */
+            width: 72%;
+            /* Adjust to fill the MacBook screen */
+            height: 53%;
+            /* Adjust to fill the MacBook screen */
+            overflow: hidden;
+            border-radius: 12px;
+            /* Rounded corners to match screen look */
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+            /* Optional: add shadow for depth */
+        }
+
+        .vid {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Ensures video fills the screen area perfectly */
+        }
+
+
+        /* Responsive adjustments */
+
+        @media (max-width: 991px) {
+            .glimpse-section {
+                font-size: 40px;
+            }
+
+            .glimpse-title {
+                font-size: 32px;
+            }
+
+            .macbook-container {
+                max-width: 90%;
+            }
+
+            .video-mask {
+                top: 22%;
+                /* Adjust for responsiveness */
+                left: 13%;
+                width: 74%;
+                height: 52%;
+            }
+        }
+
+        .learn-code-connect-section {
+            background-color: #212121;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .section-title {
+            color: #fff;
+            text-align: center;
+            align-self: center;
+            z-index: 10;
+            margin-top: 2%;
+            font: 900 40px 'Red Hat Display', sans-serif;
+        }
+
+        .features-container {
+            z-index: 10;
+            width: 100%;
+            display: flex;
+        }
+
+        .feature-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: 'Red Hat Display', sans-serif;
+            color: #fff;
+            font-weight: 800;
+            text-align: center;
+            width: 33%;
+        }
+
+        .feature-icon {
+            aspect-ratio: 1;
+            object-fit: contain;
+            object-position: center;
+            width: 91px;
+        }
+
+        .feature-title {
+            font-size: 30px;
+            width: 342px;
+        }
+
+        .feature-description {
+            font-size: 20px;
+            align-self: stretch;
+        }
+
+        @media (max-width: 991px) {
+            .section-title {
+                max-width: 100%;
+            }
+
+            .features-container {
+                max-width: 100%;
+                margin-top: 40px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 0;
+            }
+
+            .feature-column {
+                width: 100%;
+                margin-top: 40px;
+            }
+        }
+
+        ul {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        .footer-section {
+            position: relative;
+        }
+
+        .footer-cta {
+            border-bottom: 1px solid #373636;
+        }
+
+        .single-cta i {
+            color: #ff5e14;
+            font-size: 30px;
+            float: left;
+            margin-top: 8px;
+        }
+
+        .cta-text {
+            padding-left: 15px;
+            display: inline-block;
+        }
+
+        .cta-text h4 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .cta-text span {
+            color: #757575;
+            font-size: 15px;
+        }
+
+        .footer-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-pattern img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 330px;
+            background-size: cover;
+            background-position: 100% 100%;
+        }
+
+        .footer-logo {
+            margin-bottom: 30px;
+        }
+
+        .footer-logo img {
+            max-width: 200px;
+        }
+
+        .footer-text p {
+            margin-bottom: 14px;
+            font-size: 14px;
+            color: #7e7e7e;
+            line-height: 28px;
+        }
+
+        .footer-social-icon span {
+            color: #fff;
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 20px;
+        }
+
+        .footer-social-icon a {
+            color: #fff;
+            font-size: 16px;
+            margin-right: 15px;
+        }
+
+        .footer-social-icon i {
+            height: 40px;
+            width: 40px;
+            text-align: center;
+            line-height: 38px;
+            border-radius: 50%;
+        }
+
+        .facebook-bg {
+            background: #3B5998;
+        }
+
+        .twitter-bg {
+            background: #55ACEE;
+        }
+
+        .google-bg {
+            background: #DD4B39;
+        }
+
+        .footer-widget-heading h3 {
+            color: #fff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .footer-widget-heading h3::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -15px;
+            height: 2px;
+            width: 50px;
+            background: #ff5e14;
+        }
+
+        .footer-widget ul li {
+            display: inline-block;
+            float: left;
+            width: 50%;
+            margin-bottom: 12px;
+        }
+
+        .footer-widget ul li a:hover {
+            color: #ff5e14;
+        }
+
+        .footer-widget ul li a {
+            color: #878787;
+            text-transform: capitalize;
+        }
+
+        .subscribe-form {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .subscribe-form input {
+            width: 100%;
+            padding: 14px 28px;
+            background: #2E2E2E;
+            border: 1px solid #2E2E2E;
+            color: #fff;
+            margin: 1%;
+        }
+
+        .subscribe-form button {
+            width: 99%;
+            margin-top: 1%;
+            background: #ff5e14;
+            border: 1px solid #ff5e14;
+            float: inline-end;
+        }
+
+        .subscribe-form button i {
+            color: #fff;
+            font-size: 22px;
+            transform: rotate(-6deg);
+        }
+
+        .copyright-area {
+            background: #202020;
+            padding: 25px 0;
+        }
+
+        .copyright-text p {
+            margin: 0;
+            font-size: 14px;
+            color: #878787;
+        }
+
+        .copyright-text p a {
+            color: #ff5e14;
+        }
+
+        .footer-menu li {
+            display: inline-block;
+            margin-left: 20px;
+        }
+
+        .footer-menu li:hover a {
+            color: #ff5e14;
+        }
+
+        .footer-menu li a {
+            font-size: 14px;
+            color: #878787;
+        }
+
+        .powered-by {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            bottom: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            color: #ffffff;
+        }
+
+        .powered-by h5 {
+            margin-top: 5%;
+            font-size: 1rem;
+            /* Responsive font size */
+        }
+
+        .logo-img {
+            width: 100px;
+            /* Adjust width for logo */
+            height: auto;
+            margin-left: 8px;
+        }
+
+
+        /* Responsive styling */
+
+        @media (max-width: 768px) {
+            .powered-by {
+                align-items: center;
+                bottom: 10px;
+                right: 10px;
+                padding: 3px 7px;
+            }
+
+            .powered-by h5 {
+                font-size: 0.9rem;
+            }
+        }
+
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+            /* Makes the outline border white */
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3E%3Cpath stroke='rgba%28255, 255, 255, 1%29' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+            /* Sets icon color to white */
+        }
+
+        .menu {
+            background-color: transparent;
+            border: 1px solid white;
+            cursor: pointer;
+            display: flex;
+            padding: 0;
+        }
+
+        .line {
+            fill: none;
+            stroke: rgb(232, 232, 232);
+            stroke-width: 6;
+            transition: stroke-dasharray 600ms cubic-bezier(0.4, 0, 0.2, 1),
+                stroke-dashoffset 600ms cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .line1 {
+            stroke-dasharray: 60 207;
+            stroke-width: 6;
+        }
+
+        .line2 {
+            stroke-dasharray: 60 60;
+            stroke-width: 6;
+        }
+
+        .line3 {
+            stroke-dasharray: 60 207;
+            stroke-width: 6;
+        }
+
+        .opened .line1 {
+            stroke-dasharray: 90 207;
+            stroke-dashoffset: -134;
+            stroke-width: 6;
+        }
+
+        .opened .line2 {
+            stroke-dasharray: 1 60;
+            stroke-dashoffset: -30;
+            stroke-width: 6;
+        }
+
+        .opened .line3 {
+            stroke-dasharray: 90 207;
+            stroke-dashoffset: -134;
+            stroke-width: 6;
+        }
+    </style>
+
+    <style>
+        body {
+            background-color: #0d0d0d;
+
+        }
+
+        /* Team Page Container */
+        .team-page-container {
+            position: relative;
+            padding: 80px 0;
+            overflow: hidden;
+        }
+
+        /* Background Elements */
+        .team-bg-gradient {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .team-bg-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Team Header */
+        .team-header {
+            position: relative;
+            text-align: center;
+            margin-bottom: 60px;
+            z-index: 1;
+        }
+
+        .team-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ff6026, #ff9a56);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+            display: inline-block;
+        }
+
+        .team-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6026, #ff9a56);
+            border-radius: 2px;
+        }
+
+        .team-subtitle {
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+            color: #aaa;
+            line-height: 1.6;
+        }
+
+        /* Team Grid */
+        .team-grid {
+            display: grid;
+            justify-content: center;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Founders Row */
+        .founders-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 50px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .founders-row .team-card {
+            width: 280px;
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+
+        /* Team Card */
+        .team-card {
+            position: relative;
+            background: rgba(30, 30, 30, 0.5);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transition: all 0.4s ease;
+            transform-style: preserve-3d;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(255, 96, 38, 0.2);
+        }
+
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 96, 38, 0.1) 0%, transparent 100%);
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .team-card:hover::before {
+            opacity: 1;
+        }
+
+        .team-img-wrapper {
+            position: relative;
+            padding-top: 20px;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .team-img {
+            width: 85%;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .team-card:hover .team-img {
+            transform: scale(1.05);
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .team-card-content {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .team-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #fff;
+            position: relative;
+            display: inline-block;
+        }
+
+        .team-name::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #ff6026, #ff9a56);
+            transition: width 0.3s ease;
+        }
+
+        .team-card:hover .team-name::after {
+            width: 100%;
+        }
+
+        .team-position {
+            font-size: 1rem;
+            color: #ff6026;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .team-social {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s ease;
+        }
+
+        .team-card:hover .team-social {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .social-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .social-icon:hover {
+            background: #ff6026;
+            transform: translateY(-5px);
+        }
+
+        /* Team Categories */
+        .team-categories {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .category-btn {
+            padding: 8px 20px;
+            background: rgba(30, 30, 30, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .category-btn.active,
+        .category-btn:hover {
+            background: linear-gradient(135deg, #ff6026, #ff9a56);
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 1200px) {
+            .team-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+
+            .founders-row .team-card {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .team-title {
+                font-size: 2.5rem;
+            }
+
+            .team-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 20px;
+            }
+
+            .founders-row {
+                gap: 20px;
+            }
+
+            .founders-row .team-card {
+                width: 220px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .team-page-container {
+                padding: 60px 0;
+            }
+
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                max-width: 450px;
+                margin: 0 auto;
+            }
+
+            .founders-row {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .founders-row .team-card {
+                width: 280px;
+            }
+
+            .team-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="team-page-container">
+        <div class="team-bg-gradient"></div>
+        <div class="team-bg-particles" id="particles-js"></div>
+
+        <div class="container mt-4">
+            <div class="team-header" data-aos="fade-up" data-aos-duration="1000">
+                <h1 class="team-title">Meet Our Team</h1>
+                <p class="team-subtitle">The passionate individuals behind Angaar who are dedicated to transforming
+                    education and empowering the next generation of tech professionals.</p>
+            </div>
+
+            <!-- <div class="team-categories" data-aos="fade-up" data-aos-delay="200">
+            <div class="category-btn active" data-filter="all">All</div>
+            <div class="category-btn" data-filter="founder">Founders</div>
+            <div class="category-btn" data-filter="technical">Technical</div>
+            <div class="category-btn" data-filter="design">Design</div>
+        </div> -->
+
+            <!-- Founders Row -->
+            <div class="founders-row" data-aos="fade-up">
+                <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="100">
+                    <div class="team-img-wrapper">
+                        <img class="team-img" src="https://theangaarbatch.in/static/img/home/ns.png" alt="Naman Sharma">
+                    </div>
+                    <div class="team-card-content">
+                        <h3 class="team-name">Naman Sharma</h3>
+                        <p class="team-position">Founder and Educator</p>
+                        <div class="team-social">
+                            <a href="https://www.linkedin.com/in/namansharma1412" class="social-icon"><i
+                                    class="fab fa-linkedin-in"></i></a>
+                            <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="200">
+                    <div class="team-img-wrapper">
+                        <img class="team-img" src="https://theangaarbatch.in/static/img/home/dk.png" alt="DK">
+                    </div>
+                    <div class="team-card-content">
+                        <h3 class="team-name">Divyanshu Khandelwal</h3>
+                        <p class="team-position">Co-Founder and Educator</p>
+                        <div class="team-social">
+                            <a href="https://www.linkedin.com/in/divyanshu-khandelwal-dkoder" class="social-icon"><i
+                                    class="fab fa-linkedin-in"></i></a>
+                            <a href="https://www.instagram.com/iamblackorder/" class="social-icon"><i
+                                    class="fab fa-instagram"></i></a>
+                            <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="300">
+                    <div class="team-img-wrapper">
+                        <img class="team-img"
+                            src="https://th.bing.com/th/id/OIP._kIPlIMql8MzNRzIE5fV5gAAAA?rs=1&pid=ImgDetMain"
+                            alt="Piyush Khandelwal">
+                    </div>
+                    <div class="team-card-content">
+                        <h3 class="team-name">Piyush Khandelwal</h3>
+                        <p class="team-position">Advisor and Director @W3Grads</p>
+                        <div class="team-social">
+                            <a href="https://www.linkedin.com/in/piyush-khandelwal-5a9b9718" class="social-icon"><i
+                                    class="fab fa-linkedin-in"></i></a>
+                            <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rest of Team in Grid -->
+
+            <div class="team-grid">
+                <div class="team-card" data-category="design" data-aos="fade-up" data-aos-delay="100">
+                    <div class="team-img-wrapper">
+                        <img class="team-img" src="{% static 'img/home/gauri.png' %}" alt="-">
+                    </div>
+                    <div class="team-card-content">
+                        <h3 class="team-name">Gaurika Dhingra</h3>
+                        <p class="team-position">Operations Team</p>
+                        <div class="team-social">
+                            <a href="https://www.linkedin.com/in/gaurika-dhingra/" class="social-icon"><i
+                                    class="fab fa-linkedin-in"></i></a>
+                            <!-- <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-card" data-category="design" data-aos="fade-up" data-aos-delay="200">
+                    <div class="team-img-wrapper">
+                        <img class="team-img"
+                            src="https://media.licdn.com/dms/image/v2/D5603AQHNkZy8pXwVJA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1718273999260?e=1747267200&v=beta&t=kTRp7uu_umxDgyzg5zqkaY6vglPEVEPrzQTlssnTG-I"
+                            alt="Ishaan Khan">
+                    </div>
+                    <div class="team-card-content">
+                        <h3 class="team-name">Ishaan Khan</h3>
+                        <p class="team-position">Design Team</p>
+                        <div class="team-social">
+                            <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <!-- <a href="#" class="social-icon"><i class="fab fa-behance"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-card" data-category="technical" data-aos="fade-up" data-aos-delay="300">
+                    <div class="team-img-wrapper">
+                        <img class="team-img"
+                            src="https://media.licdn.com/dms/image/v2/D5603AQGzRz0uCzlJWQ/profile-displayphoto-shrink_400_400/B56ZRAdNPXHIAk-/0/1736248187102?e=1747267200&v=beta&t=gxla4LY0jzX2_7YUtsfAe9WYEPoppSQw8FJAQmqSW9s"
+                            alt="Adwait Patel">
+                    </div>
+                    <div class="team-card-content">
+                        <h3 class="team-name">Adwait Patel</h3>
+                        <p class="team-position">Core Technical Team</p>
+                        <div class="team-social">
+                            <a href="https://www.linkedin.com/in/adp-pythondev" class="social-icon"><i
+                                    class="fab fa-linkedin-in"></i></a>
+                            <!-- <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="team-card" data-category="technical" data-aos="fade-up" data-aos-delay="400">
+                    <div class="team-img-wrapper">
+                        <img class="team-img"
+                            src="https://media.licdn.com/dms/image/v2/D4E03AQHECQIZzTZdCg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1713275914043?e=1747267200&v=beta&t=L-ge91Qwk0xEBOlnTuyaYdPl0pKTs_b4xL7FdVAf0TQ"
+                            alt="Shashank Upadhyay">
+                    </div>
+                    <div class="team-card-content">
+                        <h3 class="team-name">Shashank Upadhyay</h3>
+                        <p class="team-position">Core Technical Team</p>
+                        <div class="team-social">
+                            <a href="https://www.linkedin.com/in/shubhcoder0269" class="social-icon"><i
+                                    class="fab fa-linkedin-in"></i></a>
+                            <!-- <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
+
+    <!-- Particle.js for background effects -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <!-- AOS Library for scroll animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+    <script>
+        // Initialize AOS animations
+        document.addEventListener('DOMContentLoaded', function () {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: false
+            });
+
+            // Initialize particles.js
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 100,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#ff6026"
+                    },
+                    "shape": {
+                        "type": "circle",
+                        "stroke": {
+                            "width": 0,
+                            "color": "#000000"
+                        },
+                        "polygon": {
+                            "nb_sides": 5
+                        }
+                    },
+                    "opacity": {
+                        "value": 0.3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 1,
+                            "opacity_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true,
+                        "anim": {
+                            "enable": true,
+                            "speed": 2,
+                            "size_min": 0.1,
+                            "sync": false
+                        }
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#ff6026",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 1,
+                        "direction": "none",
+                        "random": true,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false,
+                        "attract": {
+                            "enable": false,
+                            "rotateX": 600,
+                            "rotateY": 1200
+                        }
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        },
+                        "resize": true
+                    },
+                    "modes": {
+                        "grab": {
+                            "distance": 140,
+                            "line_linked": {
+                                "opacity": 0.5
+                            }
+                        },
+                        "bubble": {
+                            "distance": 400,
+                            "size": 40,
+                            "duration": 2,
+                            "opacity": 8,
+                            "speed": 3
+                        },
+                        "repulse": {
+                            "distance": 200,
+                            "duration": 0.4
+                        },
+                        "push": {
+                            "particles_nb": 4
+                        },
+                        "remove": {
+                            "particles_nb": 2
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+
+            // Team filtering functionality
+            const categoryBtns = document.querySelectorAll('.category-btn');
+            const teamCards = document.querySelectorAll('.team-card');
+
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    // Remove active class from all buttons
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+
+                    const filter = this.getAttribute('data-filter');
+
+                    // Filter team cards
+                    teamCards.forEach(card => {
+                        if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                            card.style.display = 'block';
+                            setTimeout(() => {
+                                card.style.opacity = '1';
+                                card.style.transform = 'translateY(0)';
+                            }, 100);
+                        } else {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(20px)';
+                            setTimeout(() => {
+                                card.style.display = 'none';
+                            }, 300);
+                        }
+                    });
+                });
+            });
+
+            // Add parallax effect to team section
+            window.addEventListener('scroll', function () {
+                const scrollPosition = window.pageYOffset;
+                const teamSection = document.querySelector('.team-page-container');
+                if (teamSection) {
+                    teamSection.style.backgroundPosition = `center ${scrollPosition * 0.05}px`;
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>
