@@ -659,14 +659,18 @@
         </p>
 
         <div class="search-container">
-            <div class="search-wrapper">
-                <input type="text" class="search-input" id="certificateId"
-                    placeholder="Enter your Certificate ID (e.g., ANGAAR-FLAME001)" style="text-transform:uppercase">
-                <button class="search-btn" id="verifyBtn">
-                    <i class="fas fa-search"></i>
-                    <span>Verify</span>
-                </button>
-            </div>
+            <form method="post" action="{% url 'verify_certificate' %}">
+                {% csrf_token %}
+                <div class="search-wrapper">
+                    <input type="text" name="certificate_id" class="search-input" id="certificateId"
+                        placeholder="Enter your Certificate ID (e.g., ANGAAR-FLAME001)"
+                        style="text-transform:uppercase">
+                    <button type="submit" class="search-btn" id="verifyBtn">
+                        <i class="fas fa-search"></i>
+                        <span>Verify</span>
+                    </button>
+                </div>
+            </form>
         </div>
 
         <div class="quick-actions">
@@ -682,6 +686,18 @@
         </div>
     </section>
 
+    {% if status == "approved" %}
+    <p class="success-msg">✅ Certificate is valid and approved.</p>
+    <a href="{% url 'download_certificate' certificate_obj.certificate_id %}" class="download-btn">
+        Download Certificate
+    </a>
+    {% elif status == "pending" %}
+    <p class="pending-msg">⏳ Certificate found but pending approval.</p>
+    {% elif status == "not_found" %}
+    <p class="error-msg">❌ Certificate not found.</p>
+    {% endif %}
+
+
     <!-- Event Gallery Section -->
     <section class="gallery-section">
         <div class="section-header">
@@ -694,22 +710,25 @@
         <div class="image-strip-container">
             <div class="image-strip" id="imageStrip1">
                 {% for i in '12345678910'|make_list %}
-                    <img class="gallery-image" src="{% static 'img/home/about.jpg' %}" alt="Workshop Session">
-                    <img class="gallery-image" src="{% static 'images/events/networking_event.jpg' %}" alt="Networking Event">
-                    <img class="gallery-image" src="{% static 'images/events/keynote_speaker.jpg' %}" alt="Keynote Speaker">
-                    <img class="gallery-image" src="{% static 'images/events/hands_on_training.jpg' %}" alt="Hands-on Training">
-                    <img class="gallery-image" src="{% static 'images/events/awards_ceremony.jpg' %}" alt="Awards Ceremony">
+                <img class="gallery-image" src="{% static 'img/home/about.jpg' %}" alt="Workshop Session">
+                <img class="gallery-image" src="{% static 'images/events/networking_event.jpg' %}"
+                    alt="Networking Event">
+                <img class="gallery-image" src="{% static 'images/events/keynote_speaker.jpg' %}" alt="Keynote Speaker">
+                <img class="gallery-image" src="{% static 'images/events/hands_on_training.jpg' %}"
+                    alt="Hands-on Training">
+                <img class="gallery-image" src="{% static 'images/events/awards_ceremony.jpg' %}" alt="Awards Ceremony">
                 {% endfor %}
             </div>
         </div>
         <div class="image-strip-container">
             <div class="image-strip reverse-strip" id="imageStrip2">
                 {% for i in '12345678910'|make_list %}
-                    <img class="gallery-image" src="{% static 'images/events/tech_demo.jpg' %}" alt="Tech Demo">
-                    <img class="gallery-image" src="{% static 'images/events/group_photo.jpg' %}" alt="Group Photo">
-                    <img class="gallery-image" src="{% static 'images/events/startup_pitch.jpg' %}" alt="Startup Pitch">
-                    <img class="gallery-image" src="{% static 'images/events/code_review.jpg' %}" alt="Code Review">
-                    <img class="gallery-image" src="{% static 'images/events/panel_discussion.jpg' %}" alt="Panel Discussion">
+                <img class="gallery-image" src="{% static 'images/events/tech_demo.jpg' %}" alt="Tech Demo">
+                <img class="gallery-image" src="{% static 'images/events/group_photo.jpg' %}" alt="Group Photo">
+                <img class="gallery-image" src="{% static 'images/events/startup_pitch.jpg' %}" alt="Startup Pitch">
+                <img class="gallery-image" src="{% static 'images/events/code_review.jpg' %}" alt="Code Review">
+                <img class="gallery-image" src="{% static 'images/events/panel_discussion.jpg' %}"
+                    alt="Panel Discussion">
                 {% endfor %}
             </div>
         </div>

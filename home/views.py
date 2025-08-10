@@ -195,5 +195,78 @@ def fetch_top_performers(request):
 
 # ======================================= CERTIFICATE ================================
 
+from django.shortcuts import render
+from django.http import HttpResponse, Http404
+from django.conf import settings
+from django.template.loader import render_to_string
+from io import BytesIO
+from xhtml2pdf import pisa
+from student.event_models import Certificate
+
 def verify_certificate(request):
-    return render(request, 'home/verify_my_certificate.html')
+    certificate_obj = None
+    status = None
+
+    if request.method == "POST":
+        cert_id = request.POST.get("certificate_id", "").strip().upper()
+        if cert_id:
+            try:
+                certificate_obj = Certificate.objects.select_related("event", "student").get(certificate_id=cert_id)
+                if certificate_obj.approved:
+                    status = "approved"
+                else:
+                    status = "pending"
+            except Certificate.DoesNotExist:
+                status = "not_found"
+
+    return render(request, "home/verify_my_certificate.html", {
+        "certificate_obj": certificate_obj,
+        "status": status
+    })
+
+
+from django.template import Context, Template
+
+from weasyprint import HTML
+from django.template import Context, Template
+from django.http import HttpResponse, Http404
+from io import BytesIO
+
+def download_certificate(request, cert_id):
+    try:
+        certificate_obj = Certificate.objects.select_related(
+            "event", "student", "template_version"
+        ).get(certificate_id=cert_id, approved=True)
+    except Certificate.DoesNotExist:
+        raise Http404("Certificate not found or not approved.")
+
+    template_obj = Template(certificate_obj.template_version.html_template)
+    html_content = template_obj.render(Context({
+        "student": certificate_obj.student,
+        "event": certificate_obj.event,
+        "issued_date": certificate_obj.issued_date.strftime("%B %d, %Y"),
+        "certificate_id": certificate_obj.certificate_id,
+    }))
+
+    base_url = settings.STATIC_ROOT  # or your static folder path
+
+    pdf_bytes = HTML(string=html_content, base_url=base_url).write_pdf()
+
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{certificate_obj.certificate_id}.pdf"'
+    return response
+
+
+def link_callback(uri, rel):
+    """Ensures static/media file paths work in xhtml2pdf."""
+    import os
+    from django.contrib.staticfiles import finders
+    if uri.startswith(settings.MEDIA_URL):
+        path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
+    elif uri.startswith(settings.STATIC_URL):
+        path = finders.find(uri.replace(settings.STATIC_URL, ""))
+    else:
+        return uri
+    if not os.path.isfile(path):
+        raise Exception(f"Media URI must start with {settings.STATIC_URL} or {settings.MEDIA_URL}")
+    return path
