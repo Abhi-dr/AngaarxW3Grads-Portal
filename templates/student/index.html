@@ -462,11 +462,13 @@ Student -> Home
         <div class="card w-100">
             <div class="card-body p-4">
                 <div class="mb-4">
-                    <h5 class="card-title fw-semibold">Summer Training Schedule😎
+                    <h5 class="card-title fw-semibold">Latest Schedule
                     </h5>
                 </div>
 
                 <ul class="timeline-widget mb-0 position-relative mb-n3">
+
+                    {% comment %}
 
 
                     {% if sessions %}
@@ -508,9 +510,7 @@ Student -> Home
 
                     </li>
 
-
                     {% endfor %}
-
 
                     {% else %}
 
@@ -552,6 +552,46 @@ Student -> Home
                     </li>                    
                    
                     {% endif %}
+
+                    {% endcomment %}
+
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
+                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1 text-primary fw-semibold">Coming Soon!
+                        </div>
+                    </li>
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1 text-success fw-semibold">Coming Soon!
+                        </div>
+                    </li>
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
+                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1 text-danger fw-semibold">Coming Soon!
+                        </div>
+                    </li>
+                    <li class="timeline-item d-flex position-relative overflow-hidden">
+                        <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
+                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                            <span class="timeline-badge border-2 border border-secondary flex-shrink-0 my-8"></span>
+                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                        </div>
+                        <div class="timeline-desc fs-3 mt-n1 text-secondary fw-semibold">Coming Soon!
+                        </div>
+                    </li>      
+
                 </ul>
             </div>
         </div>
