@@ -52,6 +52,11 @@ INSTALLED_APPS = [
     
     "channels",
 
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+
 
 ]
 
@@ -68,6 +73,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+
+    'allauth.account.middleware.AccountMiddleware',
 
     
 ]
@@ -316,8 +323,8 @@ SOCIALACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': os.getenv('client_id'),
-            'secret': os.getenv('secret'),
+            'client_id': os.getenv("GOOGLE_CLIENT_ID"),
+            'secret': os.getenv("GOOGLE_SECRET"),
             'key': ''
         },
         'SCOPE': [

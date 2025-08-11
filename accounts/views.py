@@ -148,7 +148,6 @@ def logout(request):
      auth.logout(request)
      return redirect("home")
 
-<<<<<<< HEAD
 
 # accounts/views.py
 
@@ -200,8 +199,6 @@ def google_login_handler(request):
     # For both new and existing students, redirect to the student dashboard.
     return redirect('student')
 
-=======
->>>>>>> parent of 2af9c3bf (setup google auth but not migrated')
 # ====================== check username availability ====================
 
 def check_username_availability(request):
@@ -446,5 +443,3 @@ def get_students_api(request):
             'message': str(e)
         }, status=400)
 
-
-# just adding a simple line
