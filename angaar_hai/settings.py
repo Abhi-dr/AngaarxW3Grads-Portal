@@ -323,8 +323,8 @@ SOCIALACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': '869693616227-n6c803j4adn6ai62eb198ofl1g5vutlq.apps.googleusercontent.com',
-            'secret': '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',
+            'client_id': os.getenv("GOOGLE_CLIENT_ID"),
+            'secret': os.getenv("GOOGLE_SECRET"),
             'key': ''
         },
         'SCOPE': [
