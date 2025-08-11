@@ -413,7 +413,7 @@
                                 <span>
                                     <i class="ti ti-flame"></i>
                                 </span>
-                                <span class="hide-menu">Summer Training😎</span>
+                                <span class="hide-menu">FLAMES '25</span>
                             </a>
                         </li>
 
@@ -426,17 +426,18 @@
                                 </span>
                                 <span class="hide-menu">My Sessions</span>
                             </a>
-                        </li>
+                        </li>-->
 
+                        
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'assignments' %}" aria-expanded="false">
+                            <a class="sidebar-link" href="#" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-copy"></i>
                                 </span>
                                 <span class="hide-menu">Assignments</span>
                             </a>
-                        </li> -->
-
+                        </li> 
+                        
                         {% endcomment %}
 
                         <!-- ========================= LEARNING ============================= -->
@@ -531,6 +532,19 @@
                             <span class="hide-menu">Collaboration</span>
                         </li>
 
+                        {% if alumni %}
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="{% url 'my_referrals' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-receipt"></i>
+                                </span>
+                                <span class="hide-menu">My Referrals</span>
+
+                            </a>
+                        </li>
+
+                        {% endif %}
+
                         <li class="sidebar-item">
                             <a class="sidebar-link {% block hackathon_active %} {% endblock %}"
                                 href="{% url 'hackathon_dashboard' %}" aria-expanded="false">
@@ -540,6 +554,8 @@
                                 <span class="hide-menu">Hackathon Teams 🚀</span>
                             </a>
                         </li>
+
+                        
 
                         <!-- ============================= EXTRA ==================== -->
                         <li class="nav-small-cap">

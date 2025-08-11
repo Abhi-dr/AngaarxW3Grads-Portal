@@ -560,7 +560,7 @@
                                 <i class="fas fa-user" style="font-size: 40px; color: white;"></i>
                             </div>
                             <div class="instructor-info">
-                                <h3>{{ course.instructor }}</h3>
+                                <h3>{{ course.get_all_instructors }}</h3>
                                 <p>Flower Nahi, Fire Hain Ye</p>
                             </div>
                         </div>
@@ -647,18 +647,18 @@
                             <div
                                 style="display: flex; align-items: baseline; justify-content: center; margin-bottom: 15px;">
                                 <span
-                                    style="color: #aaa; font-size: 18px; text-decoration: line-through; margin-right: 15px;">₹{{
-                                    course.price }}</span>
-                                <span style="color: #ff6026; font-size: 32px; font-weight: 700;">₹{{
-                                    course.discount_price }}</span>
+                                    style="color: #aaa; font-size: 18px; text-decoration: line-through; margin-right: 15px;">
+                                    ₹{{ course.price }}</span>
+                                <span style="color: #ff6026; font-size: 32px; font-weight: 700;">
+                                    ₹{{ course.discount_price }}</span>
                             </div>
                             <div style="color: #2ecc71; font-size: 16px; font-weight: 600; margin-bottom: 20px;">
                                 {% widthratio course.discount_price course.price 100 as discount_percent %}
                                 {{ discount_percent|add:"-100"|cut:"-" }}% OFF
                             </div>
                             {% else %}
-                            <div style="color: #ff6026; font-size: 32px; font-weight: 700; margin-bottom: 20px;">₹{{
-                                course.price }}</div>
+                            <div style="color: #ff6026; font-size: 32px; font-weight: 700; margin-bottom: 20px;">
+                                ₹{{ course.price }}</div>
                             {% endif %}
                             <p style="color: #aaa; margin-bottom: 0;">
                                 Respect Our Efforts, And Your Efforts Will Respect You
@@ -701,11 +701,13 @@
                 <!-- FAQ Item 1 -->
                 <div class="faq-item">
                     <div class="faq-question">
-                        <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and LPU?</span>
+                        <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and
+                            LPU?</span>
                         <i class="fas fa-chevron-down faq-icon"></i>
                     </div>
                     <div class="faq-answer">
-                        <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities do accept the FLAMES 25 course certificate. So
+                        <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities
+                            do accept the FLAMES 25 course certificate. So
                             it’s not just a cool flex — it’s officially recognized too! 😉</p>
                     </div>
                 </div>

@@ -2,11 +2,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
-from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember
+from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember, Session
 
 # ======================================= FLAMES MAIN PAGE ================================
 
-@login_required
+@login_required(login_url='login')
 def student_flames(request):
     # Get registrations where the user is directly registered
     direct_registrations = FlamesRegistration.objects.filter(
@@ -60,7 +60,7 @@ def student_flames(request):
 
 # ====================================== VIEW REGISTRATION ================================
 
-@login_required
+@login_required(login_url='login')
 def view_registration(request, slug):
     course = get_object_or_404(FlamesCourse, slug=slug)
     
@@ -112,10 +112,51 @@ def view_registration(request, slug):
     return render(request, 'student/flames/view_registration.html', parameters)
 
 
+# ========================================= MY COURSE =====================================
 
+@login_required(login_url='login')
+def my_course(request, slug):
 
+    course = get_object_or_404(FlamesCourse, slug=slug)
 
+    registration = FlamesRegistration.objects.filter(
+        user=request.user,
+        course=course,
+        status__in=['Approved', "Completed"]
+    ).select_related('course', 'team').first()
 
+    if not registration:
+        messages.error(request, "You are not registered for this course.")
+        return redirect('student_flames')
+    
+    if course.id == 8: # means bundle offer combining course having id 3 and 4
+        dsa_sessions = Session.objects.filter(
+            course__id=3
+        ).order_by('start_datetime')
+
+        full_stack_sessions = Session.objects.filter(
+            course__id=4
+        ).order_by('start_datetime')
+
+        parameters = {
+            'registration': registration,
+            'course': course,
+            'dsa_sessions': dsa_sessions,
+            'full_stack_sessions': full_stack_sessions,
+        }
+    
+    else:
+        sessions = Session.objects.filter(
+            course=course
+        ).order_by('start_datetime')
+
+        parameters = {
+            'registration': registration,
+            'course': course,
+            'sessions': sessions,
+        }
+
+    return render(request, 'student/flames/my_course.html', parameters)
 
 
 

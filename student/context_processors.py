@@ -1,5 +1,6 @@
 from accounts.models import Student, Instructor, Administrator
 from practice.models import Streak
+from home.models import Alumni, ReferralCode
 from datetime import datetime, timedelta
 
 
@@ -10,6 +11,8 @@ def user_context_processor(request):
     
     user_type = None
     user_object = None
+    
+    parameters = {}
 
     if request.user.is_authenticated:
         try:
@@ -22,13 +25,16 @@ def user_context_processor(request):
             elif hasattr(request.user, 'administrator'):
                 user_type = 'administrator'
                 user_object = request.user.administrator
+                
+            
+
         except (Student.DoesNotExist, Instructor.DoesNotExist, Administrator.DoesNotExist):
             pass
-
-    return {
-        'user_type': user_type,
-        'user': user_object,
-    }
+        
+    parameters['user_type'] =  user_type
+    parameters['user'] = user_object
+        
+    return parameters
 
 def streak_context(request):
     context = {}

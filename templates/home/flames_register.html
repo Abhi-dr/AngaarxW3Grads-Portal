@@ -349,7 +349,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                 <h2 class="course-name">{{ course.title }}</h2>
                 <p class="course-subtitle">{{ course.subtitle }}</p>
                 <p style="color: #aaa; margin-top: 5px;">By: <span style="color: white; font-weight: 600;">
-                        {{ course.instructor }}🔥</span></p>
+                        {{ course.get_all_instructors }}🔥</span></p>
             </div>
         </div>
 
@@ -423,17 +423,21 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
 
                 <div class="col-md-6 form-group">
                     <label for="contact_number" class="form-label">Contact Number *</label>
-                    <input type="tel" id="contact_number" minlength="10" maxlength="10" name="contact_number"
-                    required
-                    class="form-control" required {% if user.is_authenticated and user.profile.contact_number %}
-                    value="{{ user.profile.contact_number }}" {% endif %}>
+                    <input type="tel" id="contact_number" minlength="10" maxlength="10" name="contact_number" required
+                        class="form-control" required {% if user.is_authenticated and user.profile.contact_number %}
+                        value="{{ user.profile.contact_number }}" {% endif %}>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 form-group">
                     <label for="college" class="form-label">College/University *</label>
-                    <input type="text" id="college" name="college" class="form-control" required>
+                    <select id="college" name="college" class="form-control" required>
+                        <option value="">Select College/University</option>
+                        {% for college in colleges %}
+                        <option value="{{ college }}">{{ college }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div class="col-md-6 form-group">
@@ -740,7 +744,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
     function toggleTeamFields() {
         const isTeam = elements.registrationMode.value === 'TEAM';
         elements.teamMembersSection.style.display = isTeam ? 'block' : 'none';
-        
+
         // Hide referral code field for team registration
         const referralGroup = elements.referralCode.closest('.form-group');
         if (referralGroup) {
@@ -1044,7 +1048,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                     } else {
                         // Username exists and not registered, valid team member
                         let studentInfo = '<span class="valid text-success">Username verified</span>';
-                        
+
                         // Add student details if available
                         if (data.full_name) {
                             studentInfo += `<div class="mt-2 p-2" style="background-color: rgba(46, 204, 113, 0.1); border-radius: 4px; border-left: 3px solid #2ecc71;">`;
@@ -1052,7 +1056,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                             if (data.email) studentInfo += `<small>${data.email}</small>`;
                             studentInfo += '</div>';
                         }
-                        
+
                         feedbackElement.innerHTML = studentInfo;
                         input.classList.add('is-valid');
                         input.classList.remove('is-invalid');
@@ -1194,13 +1198,13 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
             if (elements.username && elements.username.value) {
                 usernames.push(elements.username.value.toLowerCase());
             }
-            
+
             // Check all team members
             for (let i = 1; i <= 4; i++) {
                 const field = document.getElementById(`team_member_username_${i}`);
                 if (field && field.value) {
                     const username = field.value.toLowerCase();
-                    
+
                     // Check if this username is already in our array
                     if (usernames.includes(username)) {
                         valid = false;
@@ -1215,7 +1219,7 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
                         }
                         break;
                     }
-                    
+
                     usernames.push(username);
                 }
             }
@@ -1249,21 +1253,21 @@ Register for {{ course.title }} | F.L.A.M.E.S🔥 | Angaar
         if (elements.registrationMode.value === 'TEAM') {
             // Perform a final check for duplicate usernames and already registered users
             // This ensures that any manual edits after initial validation are caught
-            
+
             // First verify all team members are valid
             const teamValidation = validateTeamMembers();
             teamValid = teamValidation.valid;
             if (!teamValid) {
                 missingFields.push(teamValidation.reason);
             }
-            
+
             // Additional check for already registered users
             if (teamValid) {
                 for (let i = 1; i <= 4; i++) {
                     const field = document.getElementById(`team_member_username_${i}`);
                     if (field && field.value && !field.classList.contains('is-valid')) {
                         teamValid = false;
-                        missingFields.push(`Team member ${i + 1} username must be verified`);                        
+                        missingFields.push(`Team member ${i + 1} username must be verified`);
                         break;
                     }
                 }

@@ -1,13 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
 from accounts.models import Administrator, Student, Instructor
-from student.models import Notification, Anonymous_Message, Feedback
+from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
+
+# Helper function for instructor authorization
+def is_instructor(user):
+    """Check if user is an instructor"""
+    return hasattr(user, 'instructor') and user.instructor is not None
 from practice.models import Sheet, Submission, Question
-from home.models import FlamesRegistration
+from home.models import FlamesRegistration, FlamesCourse
 from angaar_hai.custom_decorators import admin_required
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +22,7 @@ from django.utils import timezone
 import datetime
 from django.http import JsonResponse
 import math
+
 
 from django.utils.timezone import now
 from datetime import timedelta
@@ -186,7 +192,16 @@ def fetch_all_students(request):
     return JsonResponse(data)
 
 def all_students(request):
-    return render(request, "administration/all_students.html")
+    
+    # get the student count who are inactive from last 3 months
+    three_months_ago = timezone.now() - timedelta(days=90)
+    inactive_students = Student.objects.filter(last_login__lt=three_months_ago, is_active=True)
+    
+    parameters = {
+        "inactive_students": inactive_students,
+    }
+    
+    return render(request, "administration/all_students.html", parameters)
 
 
 # ===================================== CHANGE STUDENT PASSWORD API =======================
@@ -476,7 +491,6 @@ def change_administrator_password(request):
         return redirect("administrator_profile")
 
 
-
 # ================================================================================================
 # ========================================= EXTRA WORK =========================================
 # ================================================================================================
@@ -656,14 +670,15 @@ def fetch_view_student_profile(request,id):
 
 
 def get_user_stats(request):
-    if request.method == "GET":
-        # Get the start and end of today
-        today_start = now().replace(hour=0, minute=0, second=0, microsecond=0)
-        today_end = today_start + timedelta(days=1)
-
-        # Query for users registered today
+    """Get user statistics for the admin dashboard"""
+    if request.method == 'GET':
+        # Get today's date range
+        today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = today_start + timezone.timedelta(days=1)
+        
+        # Query for new user registrations today
         users_registered_today = Student.objects.filter(date_joined__gte=today_start, date_joined__lt=today_end).count()
-
+        
         # Query for users who logged in today
         users_logged_in_today = Student.objects.filter(last_login__gte=today_start, last_login__lt=today_end).count()
         
@@ -674,19 +689,21 @@ def get_user_stats(request):
         total_flames_registrations = FlamesRegistration.objects.all().count()
         flames_registered_today = FlamesRegistration.objects.filter(created_at__gte=today_start, created_at__lt=today_end).count()
 
+        # Format students birthday data
+        birthday_data = []
+        for student in students_birthday_today:
+            birthday_data.append({
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+            })
+
         # Return the data as JSON
         return JsonResponse({
             'users_registered_today': users_registered_today,
             'users_logged_in_today': users_logged_in_today,
-            "total_flames_registrations": total_flames_registrations,
-            "flames_registered_today": flames_registered_today,
-            'students_birthday_today': [
-                {
-                    'first_name': student.first_name,
-                    'last_name': student.last_name,
-                }
-                for student in students_birthday_today
-            ]
+            'total_flames_registrations': total_flames_registrations,
+            'flames_registered_today': flames_registered_today,
+            'students_birthday_today': birthday_data
         })
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=400)

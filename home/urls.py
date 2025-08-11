@@ -27,3 +27,10 @@ urlpatterns += [
     path("flames/<slug:slug>/register/", flames.register_flames, name="flames_register"),
     path("flames/validate-referral/", flames.validate_referral, name="validate_referral"),
 ]
+
+# ===================================== CERTIFICATE ====================================
+
+
+urlpatterns += [
+    path("verify-my-certificate/", views.verify_certificate, name="verify_certificate"),
+]

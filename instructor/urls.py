@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import sheet_views, batch_views, views
+from . import sheet_views, batch_views, views, jovac_views
 
 urlpatterns = [
 
@@ -76,5 +76,33 @@ urlpatterns += [
     
     path("<slug:slug>/enrollment_requests/", batch_views.batch_enrollment_requests, name="instructor_batch_enrollment_requests"),
 
+
+]
+
+
+# ======================== JOVAC URLS ==========================
+
+urlpatterns += [
+    path("jovacs/", jovac_views.jovacs, name="instructor_jovacs"),
+    path("jovac/<slug:slug>", jovac_views.jovac, name="instructor_jovac"),
+
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>", jovac_views.jovac_sheet, name="instructor_jovac_sheet"),
+    path("enrollment-requests/<slug:slug>", jovac_views.enrollment_requests, name="instructor_jovac_enrollment_requests"),
+
+    path('jovac/<slug:course_slug>/add-sheet/', jovac_views.add_sheet, name='instructor_add_jovac_sheet'),
+    path('course/<slug:course_slug>/sheet/<slug:sheet_slug>/edit/', jovac_views.edit_sheet, name='instructor_edit_jovac_sheet'),
+
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>/add_assignment/", jovac_views.add_assignment, name="instructor_add_assignment"),
+
+    path("edit_assignment/<int:id>", jovac_views.edit_assignment, name="instructor_jovac_edit_assignment"),
+    path("delete_assignment/<int:id>/", jovac_views.delete_assignment, name="instructor_delete_assignment"),
+
+    path("submissions/<int:id>/", jovac_views.view_submissions, name="instructor_view_assignment_submissions"),
+
+    path("approve_enrollment_request/<int:id>", jovac_views.approve_enrollment_request, name="instructor_approve_jovac_request"),
+    path("approve_all/<int:id>", jovac_views.approve_all_jovac_enrollment_requests, name="approve_all_jovac_enrollment_requests"),
+
+    path('course-sheet/<slug:slug>/reorder/', jovac_views.reorder_assignments, name='instructor_reorder_course_sheet_assignments'),
+    path('course-sheet/<int:id>/update-order/', jovac_views.update_assignment_order, name='instructor_update_course_sheet_order'),
 
 ]

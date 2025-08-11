@@ -17,7 +17,7 @@ def alumni_management(request):
     # Get stats for dashboard
     total_alumni = alumni.count()
     total_referrals = ReferralCode.objects.filter(referral_type='ALUMNI').count()
-    total_registrations = FlamesRegistration.objects.filter(referral_code__referral_type='ALUMNI').count()
+    total_registrations = FlamesRegistration.objects.filter(referral_code__referral_type='ALUMNI', status="COMPLETED").count()
     
     context = {
         'alumni': alumni,
@@ -43,9 +43,10 @@ def alumni_details(request, alumni_id):
     total_referrals = referral_codes.count()
     active_referrals = referral_codes.filter(is_active=True).count()
     total_registrations = registrations.count()
+    total_completed_registrations = registrations.filter(status='COMPLETED').count()
     
     # Calculate total discount amount provided
-    total_discount = registrations.aggregate(
+    total_discount = registrations.filter(status='COMPLETED').aggregate(
         total_discount=Sum('referral_code__discount_amount')
     )['total_discount'] or 0
     
@@ -56,6 +57,7 @@ def alumni_details(request, alumni_id):
         'total_referrals': total_referrals,
         'active_referrals': active_referrals,
         'total_registrations': total_registrations,
+        "total_completed_registrations": total_completed_registrations,
         'total_discount': total_discount,
     }
     
@@ -292,8 +294,8 @@ def alumni_stats(request):
     alumni_with_stats = Alumni.objects.annotate(
         total_referrals=Count('referral_codes'),
         active_referrals=Count('referral_codes', filter=Q(referral_codes__is_active=True)),
-        total_registrations=Count('referral_codes__registrations'),
-        total_discount=Sum('referral_codes__registrations__referral_code__discount_amount')
+        total_registrations=Count('referral_codes__registrations', filter=Q(referral_codes__registrations__status='COMPLETED')),
+        total_discount=Sum('referral_codes__registrations__referral_code__discount_amount', filter=Q(referral_codes__registrations__status='COMPLETED'))
     ).order_by('-total_registrations')
     
     # Prepare data for the chart

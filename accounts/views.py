@@ -42,42 +42,42 @@ def login(request):
     next_url = request.GET.get('next', '')
 
     if request.method == 'POST':
-        username = request.POST.get('username').strip().lower()
+        input_id = request.POST.get('username').strip().lower()
         password = request.POST.get('password')
 
-        if Student.objects.filter(username=username).exists():
-            user = auth.authenticate(username=username, password=password)
-
-            if user is not None:
+        # Check for Student
+        student = Student.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
+        if student:
+            user = auth.authenticate(username=student.username, password=password)
+            if user:
                 auth.login(request, user)
                 return redirect(next_url if next_url else 'student')
-
             messages.error(request, "Invalid Password")
             return redirect("login")
 
-        elif Instructor.objects.filter(username=username).exists():
-            user = auth.authenticate(username=username, password=password)
-
-            if user is not None:
+        # Check for Instructor
+        instructor = Instructor.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
+        if instructor:
+            user = auth.authenticate(username=instructor.username, password=password)
+            if user:
                 auth.login(request, user)
                 return redirect(next_url if next_url else 'instructor')
-
             messages.error(request, "Invalid Password")
             return redirect("login")
 
-        elif Administrator.objects.filter(username=username).exists():
-            user = auth.authenticate(username=username, password=password)
-
-            if user is not None:
+        # Check for Administrator
+        administrator = Administrator.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
+        if administrator:
+            user = auth.authenticate(username=administrator.username, password=password)
+            if user:
                 auth.login(request, user)
                 return redirect(next_url if next_url else 'administration')
-
             messages.error(request, "Invalid Password")
             return redirect("login")
 
-        else:
-            messages.error(request, "Invalid Username or Password")
-            return redirect("login")
+        # No matching user found
+        messages.error(request, "Invalid Username/Email or Password")
+        return redirect("login")
 
     return render(request, 'accounts/login.html', {'next': next_url})
 
@@ -148,6 +148,60 @@ def logout(request):
      auth.logout(request)
      return redirect("home")
 
+<<<<<<< HEAD
+
+# accounts/views.py
+
+# ... keep all your existing imports and views ...
+
+# ==============================================================================
+# NEW VIEW FOR HANDLING GOOGLE LOGIN FOR STUDENTS
+# ==============================================================================
+@login_required
+def google_login_handler(request):
+    user = request.user
+
+    # Security Check: If the logged-in user is already an Instructor or Admin, block them.
+    if hasattr(user, 'instructor') or hasattr(user, 'administrator'):
+        messages.error(request, "Google login is for students only. Please use your username and password.")
+        auth.logout(request)
+        return redirect('login')
+
+    # This will find the Student profile if it exists, or create a new one.
+    # It's the safest way to handle both new and returning users.
+    student, created = Student.objects.get_or_create(
+        user_ptr=user,  # This is the correct way to link to the inherited User model.
+        defaults={
+            # The 'defaults' dictionary is ONLY used if a NEW Student object is being created.
+            # All the user fields (username, email, etc.) are already on the 'user' object,
+            # so we only need to provide defaults for fields that are ONLY on the Student model.
+            
+            'first_name': user.first_name,  # Use 'Not Set' if first name is empty
+            'last_name': user.last_name,    # Use 'Not Set
+            'email': user.email or 'Not Set',
+            
+            'mobile_number': '-', # Placeholder
+            'gender': 'Not Set',           # Placeholder
+        }
+    )
+
+    username = student.first_name.lower() + str(student.id)
+    student.username = username
+    student.save()
+
+    user = student.user_ptr  # This ensures we are using the correct User instance.
+    auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+
+    if created:
+        # This message will only show for brand new signups.
+        messages.success(request, f"Welcome to Angaar, {user.first_name}! Your student account is ready.")
+        
+
+    # For both new and existing students, redirect to the student dashboard.
+    return redirect('student')
+
+=======
+>>>>>>> parent of 2af9c3bf (setup google auth but not migrated')
 # ====================== check username availability ====================
 
 def check_username_availability(request):
@@ -391,3 +445,6 @@ def get_students_api(request):
             'status': 'error',
             'message': str(e)
         }, status=400)
+
+
+# just adding a simple line

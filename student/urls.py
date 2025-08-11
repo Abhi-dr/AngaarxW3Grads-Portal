@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views
+from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views
 
 urlpatterns = [
     path("", views.dashboard, name="student"),
@@ -30,6 +30,9 @@ urlpatterns = [
     path("new_message", views.new_message, name="new_message"),
     path("feedback", views.feedback, name="feedback"),
     
+    # ======================== REFERRALS WORK ========================
+    path("my-referrals/", views.my_referrals, name="my_referrals"),
+    
 ]
 
 # ========================================= FLAMES WORK =========================================
@@ -37,6 +40,7 @@ urlpatterns = [
 urlpatterns += [
     path('summer-training/', flames_views.student_flames, name='student_flames'),
     
+    path("summer-training/<slug:slug>/", flames_views.my_course, name="flames_my_course"),
     path("course/<slug:slug>/registration", flames_views.view_registration, name="student_view_registration"),
     
     
@@ -100,6 +104,23 @@ urlpatterns += [
     path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
 ]
 
+# ============================== JOVAC WORK ==============================
+
+urlpatterns += [
+
+    path("enroll_jovac/<slug:slug>/", jovac_views.enroll_jovac, name="student_enroll_jovac"),
+    path("jovac/<slug:slug>/", jovac_views.jovac, name="student_jovac"),
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>", jovac_views.jovac_sheet, name="student_jovac_sheet"),
+    path("jovac/tutorial/<int:id>/", jovac_views.view_jovac_tutorial, name="view_jovac_tutorial"),
+    path("jovac/assignment/<int:id>/next", jovac_views.get_next_jovac_assignment, name="get_next_jovac_assignment"),
 
 
+    # path("assignments", jovac_views.assignments, name="assignments"),
+    path("submit_assignment/<int:assignment_id>", jovac_views.submit_assignment, name="submit_assignment"),
+    path("assignments/<int:assignment_id>/submission", jovac_views.view_submission, name="view_submission"),
+    path("delete_submission/<int:submission_id>", jovac_views.delete_submission, name="delete_submission"),
+
+
+
+]
 

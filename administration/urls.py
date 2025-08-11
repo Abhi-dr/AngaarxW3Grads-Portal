@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views
+from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views
 
 urlpatterns = [
     path("", views.index, name="administration"),
@@ -153,7 +153,6 @@ urlpatterns += [
     path("sheet_leaderboard/<slug:slug>", sheet_views.leaderboard, name="administrator_leaderboard"),
     path("sheet_leaderboard_api/<slug:slug>", sheet_views.sheet_leaderboard, name="administrator_sheet_leaderboard"),
     
-    path("reorder/<slug:slug>/", sheet_views.reorder, name="administrator_reorder"),
     path('update-sheet-order/<int:sheet_id>/', sheet_views.update_sheet_order, name='update_sheet_order'),
 
     path("administrator_set_sheet_timer/<int:sheet_id>/", sheet_views.set_sheet_timer, name="administrator_set_sheet_timer"),
@@ -188,6 +187,11 @@ urlpatterns += [
 
 ]
 
+urlpatterns += [
+    path('get-user-stats/', views.get_user_stats, name='get_user_stats'),
+
+]
+
 # Flames Management 
 urlpatterns += [
     path("flames/courses/", flames_views.flames_courses, name="admin_flames_courses"),
@@ -196,24 +200,29 @@ urlpatterns += [
     path("flames/registrations/ajax/", flames_views.admin_registrations_ajax, name="admin_registrations_ajax"),
     
     path("flames/course/<int:course_id>/", flames_views.admin_course_detail, name="admin_course_detail"),
+    path("flames/course/<slug:course_slug>/sessions/", flames_views.admin_course_sessions, name="admin_course_sessions"),
+    path("flames/course/<slug:course_slug>/sessions/add/", flames_views.admin_add_session, name="admin_add_session"),
+    path("flames/session/<int:session_id>/edit/", flames_views.admin_edit_session, name="admin_edit_session"),
+    path("flames/session/<int:session_id>/delete/", flames_views.admin_delete_session, name="admin_delete_session"),
+    
     path("flames/course/add/", flames_views.admin_add_course, name="admin_add_course"),
     path("flames/course/edit/<int:course_id>/", flames_views.admin_edit_course, name="admin_edit_course"),
     path("flames/toggle-course-status/", flames_views.admin_toggle_course_status, name="admin_toggle_course_status"),
     path("flames/registration-details/", flames_views.admin_registration_details, name="admin_registration_details"),
     path("flames/update-registration-status/", flames_views.admin_update_registration_status, name="admin_update_registration_status"),
     path("flames/update-registration-notes/", flames_views.admin_update_registration_notes, name="admin_update_registration_notes"),
+    path("flames/delete-registration/", flames_views.admin_delete_registration, name="admin_delete_registration"),
     path("flames/add-testimonial/", flames_views.admin_add_testimonial, name="admin_add_testimonial"),
     
     # Email functionality
     path("flames/emails/", flames_views.admin_flames_emails, name="admin_flames_emails"),
     path("flames/emails/count-recipients/", flames_views.admin_count_flames_email_recipients, name="admin_count_flames_email_recipients"),
     path("flames/emails/send/", flames_views.admin_flames_emails, name="admin_send_flames_emails"),
+    
+    
+    path("export-to-excel", flames_views.export_flames_registrations_to_excel, name="export_flames_registrations_to_excel"),
 ]
 
-urlpatterns += [
-    path('get-user-stats/', views.get_user_stats, name='get_user_stats'),
-
-]
 
 # Alumni Management
 urlpatterns += [
@@ -227,4 +236,35 @@ urlpatterns += [
     path('alumni/update-referral-code/<int:code_id>/', alumni_views.update_referral_code, name='update_referral_code'),
     path('alumni/stats/', alumni_views.alumni_stats, name='alumni_stats'),
     path('alumni/list-ajax/', alumni_views.alumni_list_ajax, name='alumni_list_ajax'),
+]
+
+# JOVAC Work
+
+urlpatterns += [
+
+    path("jovacs/", jovac_views.jovacs, name="administrator_jovacs"),
+    path("jovac/<slug:slug>", jovac_views.jovac, name="administrator_jovac"),
+
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>", jovac_views.jovac_sheet, name="administrator_jovac_sheet"),
+
+
+    path("jovac/add_course/", jovac_views.add_course, name="administrator_add_jovac"),
+    path("jovac/edit_course/<slug:slug>/", jovac_views.edit_course, name="administrator_edit_jovac"),
+
+    path('jovac/<slug:course_slug>/add-sheet/', jovac_views.add_sheet, name='administrator_add_jovac_sheet'),
+    path('course/<slug:course_slug>/sheet/<slug:sheet_slug>/edit/', jovac_views.edit_sheet, name='administrator_edit_jovac_sheet'),
+
+    path("enrollment-requests/<slug:slug>", jovac_views.enrollment_requests, name="administrator_jovac_enrollment_requests"),
+    path("approve_enrollment_request/<int:id>", jovac_views.approve_enrollment_request, name="administrator_approve_jovac_request"),
+
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>/add_assignment/", jovac_views.add_assignment, name="administrator_add_assignment"),
+    path("edit_assignment/<int:id>", jovac_views.edit_assignment, name="administrator_edit_assignment"),
+
+    path("submissions/<int:id>/", jovac_views.view_submissions, name="view_assignment_submissions"),
+    path("delete_assignment/<int:id>/", jovac_views.delete_assignment, name="administrator_delete_assignment"),
+
+    path('course-sheet/<slug:slug>/reorder/', jovac_views.reorder_assignments, name='reorder_course_sheet_assignments'),
+    path('course-sheet/<int:id>/update-order/', jovac_views.update_assignment_order, name='update_course_sheet_order'),
+
+
 ]

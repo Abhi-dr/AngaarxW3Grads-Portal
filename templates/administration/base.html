@@ -195,16 +195,20 @@
                             </a>
                         </li>
 
+                        {% endcomment %}
+
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'administrator_assignments' %}" aria-expanded="false">
+                            <a class="sidebar-link"
+                             href="{% url 'administrator_jovacs' %}"  {% block jovac_active %} {% endblock %} aria-expanded="false">
                                 <span>
                                     <i class="ti ti-copy"></i>
                                 </span>
-                                <span class="hide-menu">Assignments</span>
+                                <span class="hide-menu">JOVAC</span>
                             </a>
                         </li>
 
-                        {% endcomment %}
+
+                        
 
                         <li class="sidebar-item">
                             <a class="sidebar-link {% block problem_active %} {% endblock %}"

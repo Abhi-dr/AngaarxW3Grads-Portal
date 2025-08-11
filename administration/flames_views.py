@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
 from django.views.decorators.http import require_POST
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
-from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember
+from openpyxl import Workbook
+from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session
 from accounts.models import Instructor, Student
 
 @login_required
@@ -67,6 +68,7 @@ def flames_registrations(request):
     
     return render(request, 'administration/flames/registrations.html', context)
 
+# ======================================== FLAMES COURSE ===================================
 
 @login_required
 def admin_course_detail(request, course_id):
@@ -85,6 +87,68 @@ def admin_course_detail(request, course_id):
     }
     
     return render(request, 'administration/flames/course_detail.html', context)
+
+
+# ======================================== COURSE SESSIONS =================================
+
+@login_required(login_url='login')
+def admin_add_session(request, course_slug):
+    course = get_object_or_404(FlamesCourse, slug=course_slug)
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        joining_link = request.POST.get('joining_link')
+        recording_url = request.POST.get('recording_url')
+        start_datetime = request.POST.get('start_datetime')
+
+        Session.objects.create(
+            course=course,
+            title=title,
+            joining_link=joining_link,
+            recording_url=recording_url,
+            start_datetime=start_datetime,
+        )
+        messages.success(request, 'Session added successfully.')
+        return redirect('admin_course_sessions', course_slug=course.slug)
+    return redirect('admin_course_sessions', course_slug=course.slug)
+
+@login_required(login_url='login')
+def admin_edit_session(request, session_id):
+    session = get_object_or_404(Session, id=session_id)
+    if request.method == 'POST':
+        session.title = request.POST.get('title')
+        session.joining_link = request.POST.get('joining_link')
+        session.recording_url = request.POST.get('recording_url')
+        session.start_datetime = request.POST.get('start_datetime')
+        session.save()
+        messages.success(request, 'Session updated successfully.')
+        return redirect('admin_course_sessions', course_slug=session.course.slug)
+    return redirect('admin_course_sessions', course_slug=session.course.slug)
+
+@login_required(login_url='login')
+def admin_delete_session(request, session_id):
+    session = get_object_or_404(Session, id=session_id)
+    course_slug = session.course.slug
+    session.delete()
+    messages.success(request, 'Session deleted successfully.')
+    return redirect('admin_course_sessions', course_slug=course_slug)
+
+# ========================== Course sessions ======================
+
+@login_required(login_url='login')
+def admin_course_sessions(request, course_slug):
+    course = get_object_or_404(FlamesCourse, slug=course_slug)
+
+    sessions = course.sessions.all()
+    total_sessions = sessions.count()
+
+    context = {
+        'course': course,
+        'sessions': sessions,
+        'total_sessions': total_sessions,
+    }
+
+    return render(request, 'administration/flames/course_sessions.html', context)
+
 
 
 @login_required
@@ -724,3 +788,124 @@ def send_flames_email(to, name, subject, html_content):
     email.send()
     
     print(f"FLAMES EMAIL SENT! to {to_email}")
+
+
+@login_required
+@require_POST
+def admin_delete_registration(request):
+    """
+    Delete a registration record
+    """
+    # Check if user has permission (only staff/admin should be able to delete)
+    if not request.user.is_staff:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'You do not have permission to delete registrations.'
+        }, status=403)
+    
+    registration_id = request.POST.get('id')
+    
+    try:
+        registration = get_object_or_404(FlamesRegistration, id=registration_id)
+       
+        # Delete the registration
+        registration.delete()
+        
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Registration deleted successfully.'
+        })
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': f'Error deleting registration: {str(e)}'
+        }, status=500)
+
+
+# ============================================================
+
+def export_flames_registrations_to_excel(request):
+    """
+    Export all FLAMES registrations to an Excel file.
+    """
+    import datetime
+
+    # Only allow staff/admins
+    if not request.user.is_staff:
+        return HttpResponse("Unauthorized", status=401)
+
+    # Create a workbook and worksheet
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "FLAMES Registrations"
+
+    # Define headers
+    headers = [
+        "ID", "Name", "Email", "Phone", "College", "Year", "Course",
+        "Registration Mode", "Team Name", "Status", "Payment ID",
+        "Original Price", "Discounted Price", "Payable Amount",
+        "Referral Code", "Referral Type", "Referral Discount",
+        "Created At", "Updated At"
+    ]
+    ws.append(headers)
+
+    # Fetch all registrations
+    registrations = FlamesRegistration.objects.select_related('user', 'course', 'team', 'referral_code').all()
+
+    for reg in registrations:
+        # User info
+        name = f"{reg.user.first_name} {reg.user.last_name}" if reg.user else "N/A"
+        email = reg.user.email if reg.user else "N/A"
+        phone = reg.user.mobile_number if reg.user else "N/A"
+        college = reg.user.college if reg.user else "N/A"
+        year = reg.year if reg.user else "N/A"
+
+        # Course info
+        course_title = reg.course.title if reg.course else "N/A"
+
+        # Team info
+        team_name = reg.team.name if reg.team else "N/A"
+
+        # Referral info
+        referral_code = reg.referral_code.code if reg.referral_code else "N/A"
+        referral_type = reg.referral_code.referral_type if reg.referral_code else "N/A"
+        referral_discount = reg.referral_code.discount_amount if reg.referral_code else 0
+
+        # Dates
+        created_at = reg.created_at.strftime('%Y-%m-%d %H:%M:%S') if reg.created_at else ""
+        updated_at = reg.updated_at.strftime('%Y-%m-%d %H:%M:%S') if reg.updated_at else ""
+
+        ws.append([
+            reg.id,
+            name,
+            email,
+            phone,
+            college,
+            year,
+            course_title,
+            reg.registration_mode,
+            team_name,
+            reg.status,
+            reg.payment_id or "N/A",
+            float(reg.original_price) if reg.original_price else 0,
+            float(reg.discounted_price) if reg.discounted_price else 0,
+            float(reg.payable_amount) if reg.payable_amount else 0,
+            referral_code,
+            referral_type,
+            float(referral_discount),
+            created_at,
+            updated_at
+        ])
+
+    # Prepare response
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    filename = f"flames_registrations_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx"
+    response['Content-Disposition'] = f'attachment; filename={filename}'
+
+    wb.save(response)
+    return response
+
+
+# ============================================= TEAMS ==========================================

@@ -10,7 +10,7 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator
 
 from accounts.models import Student
-from student.models import Notification
+from student.models import Notification, Course
 from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest
 
 from asgiref.sync import async_to_sync
@@ -35,19 +35,39 @@ def my_batches(request):
             )
         ).select_related().distinct()  # Ensure distinct batches
 
-        # Split the batches into two categories: Accepted and others
     student_batches = all_batches.filter(enrollment_status='Accepted')
     pending_batches = all_batches.filter(enrollment_status='Pending')
     rejected_batches = all_batches.filter(enrollment_status='Rejected')
     other_batches = [batch for batch in all_batches if batch not in student_batches and batch not in pending_batches and batch not in rejected_batches]
     
-    print(other_batches)
+    # ======== COURSE REGISTRATIONS ========
+    all_courses = Course.objects.annotate(
+        registration_status=Case(
+            When(courseregistration__student=student, courseregistration__status='Approved', then=Value('Approved')),
+            When(courseregistration__student=student, courseregistration__status='Pending', then=Value('Pending')),
+            When(courseregistration__student=student, courseregistration__status='Rejected', then=Value('Rejected')),
+            default=Value('Not Enrolled'),
+            output_field=CharField(),
+        )
+    ).prefetch_related('courseregistration_set').distinct()
+
+    approved_courses = all_courses.filter(registration_status='Approved')
+    pending_courses = all_courses.filter(registration_status='Pending')
+    rejected_courses = all_courses.filter(registration_status='Rejected')
+    other_courses = [course for course in all_courses if course not in approved_courses and course not in pending_courses and course not in rejected_courses]
+
 
     parameters = {
         "student_batches": student_batches,  # Only Accepted batches
         "pending_batches": pending_batches,
         "rejected_batches": rejected_batches,
         "other_batches": other_batches,
+
+        # Courses
+        "approved_courses": approved_courses,
+        "pending_courses": pending_courses,
+        "rejected_courses": rejected_courses,
+        "other_courses": other_courses,
     }
     
     return render(request, 'student/batch/my_batches.html', parameters)

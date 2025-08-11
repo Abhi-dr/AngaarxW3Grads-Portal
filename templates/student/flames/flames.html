@@ -701,15 +701,20 @@ active
                     <h4 class="flames-title">{{ registration.course.title }}</h4>
                     <p class="flames-subtitle">{{ registration.course.subtitle }}</p>
                 </div>
-                <span class="flames-status status-{{ registration.status|lower }}">Payment
+                <span class="flames-status status-{{ registration.status|lower }}">Registration
                     {{ registration.status }}</span>
-                <a href="{% url 'student_view_registration' registration.course.slug %}"
+                <!-- <a href="{% url 'student_view_registration' registration.course.slug %}"
+                    class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a> -->
+
+                <a href="{% url 'flames_my_course' registration.course.slug %}"
                     class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
 
-                {% if not registration.payment_id and registration.status != 'Completed' %}
+                {% if registration.status == 'Pending' %}
+
                 <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button" data-registration-id="{{ registration.id }}">
                     Pay Now
                 </a>
+
                 {% endif %}
             </div>
             <div class="flames-body">
@@ -803,11 +808,19 @@ active
 
             </div>
 
-            {% if not registration.payment_id and registration.status != 'Completed' %}
+            {% if not registration.payment_id and registration.status == 'Pending' %}
             <div class="m-2 justify-center text-center">
                 <a id="reg-{{ registration.id }}" class="payment-button btn w-50"
                     data-registration-id="{{ registration.id }}">
                     Complete My Registration🔥
+                </a>
+            </div>
+
+            {% else %}
+
+            <div class="m-2 justify-center text-center">
+                <a class=" btn w-50" href="{% url 'flames_my_course' registration.course.slug %}">
+                    My Sessions🔥
                 </a>
             </div>
 

@@ -9,8 +9,9 @@ from datetime import datetime, timedelta
 
 
 from accounts.models import Student, Instructor
-from student.models import Notification, Anonymous_Message, Feedback
+from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
 from practice.models import POD, Submission, Question, Sheet, Streak
+from home.models import Alumni, ReferralCode
 from django.db.models import Max, Sum
 
 # ========================================= DASHBOARD =========================================
@@ -82,6 +83,13 @@ def dashboard(request):
         # "assignment_percentage": assignment_percentage,
         # "left_assignments": total_assignments - completed_assignments,
     }
+    
+        # check if the student's email is in the email list of Alumnis as well
+    alumni = Alumni.objects.filter(email=request.user.email).first()
+    if alumni:
+        referral_code = ReferralCode.objects.filter(alumni=alumni).first()
+        parameters['alumni'] = alumni
+        parameters['referral_code'] = referral_code
     
     return render(request, "student/index.html", parameters)
 
@@ -195,7 +203,8 @@ def my_profile(request):
 @login_required(login_url="login")
 def edit_profile(request):
     
-    student = Student.objects.get(id=request.user.id)
+    # Access the student profile associated with the logged-in user
+    student = request.user.student
 
     if request.method == "POST":
         coins_earned = 0  # Track how many coins the user earns during this update
@@ -270,7 +279,8 @@ def upload_profile(request):
 
     if request.method == 'POST':
 
-        student = Student.objects.get(id=request.user.id)
+        # Access the student profile associated with the logged-in user
+        student = request.user.student
 
         student.profile_pic = request.FILES['profile_pic']
         
@@ -289,7 +299,8 @@ def upload_profile(request):
 @login_required(login_url="login")
 def change_password(request):
         
-    student = Student.objects.get(id=request.user.id)
+    # Access the student profile associated with the logged-in user
+    student = request.user.student
     
     old_password = request.POST.get("old_password")
     new_password = request.POST.get("new_password")
@@ -324,7 +335,8 @@ def change_password(request):
 
 @login_required(login_url="login")
 def delete_account(request):
-    student = Student.objects.get(id=request.user.id)
+    # Access the student profile associated with the logged-in user
+    student = request.user.student
     
     if request.method == "POST":
     
@@ -419,3 +431,51 @@ def calculate_total_user_score(user):
 
     return total_score['total_score'] or 0
 
+
+# ========================================= MY REFERRALS =========================================
+
+@login_required
+def my_referrals(request):
+    """
+    View to display registrations made using alumni's referral code.
+    Alumni status is determined by matching email addresses.
+    """
+    # Check if the logged-in user is an alumni
+    alumni = Alumni.objects.filter(email=request.user.email).first()
+    
+    if not alumni:
+        messages.warning(request, "You don't have alumni status.")
+        return redirect('student')
+    
+    # Get the referral code for this alumni
+    referral_code = ReferralCode.objects.filter(alumni=alumni).first()
+    
+    if not referral_code:
+        messages.warning(request, "You don't have a referral code yet.")
+        return redirect('student')
+    
+    # Get all registrations that used this referral code
+    from home.models import FlamesRegistration
+    registrations = FlamesRegistration.objects.filter(
+        referral_code=referral_code
+    ).select_related('course', 'user').order_by('-created_at')
+    
+    # Check which users are alumni by comparing email addresses
+    for registration in registrations:
+        if registration.user:
+            # Check if this user is also an alumni
+            registration.is_alumni = Alumni.objects.filter(email=registration.user.email).exists()
+        else:
+            registration.is_alumni = False
+    
+    # Filter registrations made by alumni
+    alumni_registrations = [reg for reg in registrations if reg.is_alumni]
+    
+    context = {
+        'referral_code': referral_code,
+        'registrations': registrations,
+        'alumni_registrations': alumni_registrations,
+        'active_tab': 'my_referrals'
+    }
+    
+    return render(request, 'student/my_referrals.html', context)

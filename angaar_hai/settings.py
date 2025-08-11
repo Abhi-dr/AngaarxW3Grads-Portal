@@ -297,3 +297,35 @@ RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 
 
 JUDGE0_CALLBACK_URL = "https://1b49f750e5d68e7a9c33c24612db101e.serveo.net/judge0/callback"
+
+# =================== AllAuth Settings =========================
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+LOGIN_REDIRECT_URL = '/accounts/social/google/handler/'
+SOCIALACCOUNT_LOGIN_ON_GET = True 
+SOCIALACCOUNT_LOGOUT_ON_GET = True
+
+
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': os.getenv('client_id'),
+            'secret': os.getenv('secret'),
+            'key': ''
+        },
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
