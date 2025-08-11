@@ -640,6 +640,347 @@
     }
 </style>
 
+<style>
+    /* Status Section Styles - Updated for Dark Orange Theme */
+.status-section {
+    max-width: 800px;
+    margin: 30px auto;
+    padding: 0 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.status-card {
+    background: var(--card-color);
+    backdrop-filter: blur(15px);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.status-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, rgba(255, 96, 38, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.status-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+}
+
+.status-icon {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    display: block;
+    position: relative;
+    z-index: 2;
+}
+
+.status-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    letter-spacing: -0.5px;
+    color: var(--text-color);
+    position: relative;
+    z-index: 2;
+}
+
+.status-message {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    line-height: 1.6;
+    color: #cccccc;
+    position: relative;
+    z-index: 2;
+}
+
+/* Success Status - Orange Theme */
+.status-success {
+    border-left: 6px solid var(--primary-color);
+    background: linear-gradient(135deg, rgba(255, 96, 38, 0.1), var(--card-color));
+}
+
+.status-success .status-icon {
+    color: var(--primary-color);
+    text-shadow: 0 0 20px rgba(255, 96, 38, 0.5);
+}
+
+.status-success .status-title {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.status-success .status-message {
+    color: #e6e6e6;
+}
+
+/* Pending Status - Yellow/Orange Theme */
+.status-pending {
+    border-left: 6px solid var(--secondary-color);
+    background: linear-gradient(135deg, rgba(255, 172, 51, 0.1), var(--card-color));
+}
+
+.status-pending .status-icon {
+    color: var(--secondary-color);
+    animation: pulseGlow 2s infinite;
+    text-shadow: 0 0 20px rgba(255, 172, 51, 0.5);
+}
+
+.status-pending .status-title {
+    color: var(--secondary-color);
+}
+
+.status-pending .status-message {
+    color: #e6e6e6;
+}
+
+/* Error Status - Red with Orange Accent */
+.status-error {
+    border-left: 6px solid #ef4444;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), var(--card-color));
+}
+
+.status-error .status-icon {
+    color: #ef4444;
+    text-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+.status-error .status-title {
+    color: #ff6b6b;
+}
+
+.status-error .status-message {
+    color: #e6e6e6;
+}
+
+/* Download Button - Orange Theme */
+.download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    text-decoration: none;
+    padding: 16px 32px;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(255, 96, 38, 0.3);
+    position: relative;
+    z-index: 2;
+    border: none;
+    cursor: pointer;
+}
+
+.download-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 35px rgba(255, 96, 38, 0.5);
+    text-decoration: none;
+    color: white;
+}
+
+.download-btn i {
+    font-size: 1.2rem;
+}
+
+/* Secondary Actions - Dark Theme */
+.secondary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+    position: relative;
+    z-index: 2;
+}
+
+.secondary-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    text-decoration: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.secondary-btn:hover {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: white;
+    box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
+}
+
+/* Enhanced Pulse Animation with Glow */
+@keyframes pulseGlow {
+    0% { 
+        opacity: 1; 
+        text-shadow: 0 0 20px rgba(255, 172, 51, 0.5);
+    }
+    50% { 
+        opacity: 0.6; 
+        text-shadow: 0 0 30px rgba(255, 172, 51, 0.8);
+        transform: scale(1.05);
+    }
+    100% { 
+        opacity: 1; 
+        text-shadow: 0 0 20px rgba(255, 172, 51, 0.5);
+    }
+}
+
+/* Certificate Details - Dark Theme */
+.certificate-details {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 96, 38, 0.2);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    text-align: left;
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 2;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.detail-value {
+    color: #cccccc;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* Add gradient text effect for certificate ID */
+.detail-row:first-child .detail-value {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 600;
+}
+
+/* Status indicator with glow effect */
+.detail-row:last-child .detail-value {
+    color: var(--primary-color);
+    text-shadow: 0 0 10px rgba(255, 96, 38, 0.5);
+}
+
+/* Enhanced hover effects */
+.status-success:hover {
+    box-shadow: 0 25px 50px rgba(255, 96, 38, 0.2);
+}
+
+.status-pending:hover {
+    box-shadow: 0 25px 50px rgba(255, 172, 51, 0.2);
+}
+
+.status-error:hover {
+    box-shadow: 0 25px 50px rgba(239, 68, 68, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .status-card {
+        padding: 30px 20px;
+    }
+
+    .status-icon {
+        font-size: 3rem;
+    }
+
+    .status-title {
+        font-size: 1.5rem;
+    }
+
+    .status-message {
+        font-size: 1rem;
+    }
+
+    .secondary-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .secondary-btn {
+        width: 100%;
+        max-width: 250px;
+        justify-content: center;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .certificate-details {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .status-card {
+        padding: 25px 15px;
+    }
+
+    .status-icon {
+        font-size: 2.5rem;
+    }
+
+    .status-title {
+        font-size: 1.3rem;
+    }
+
+    .download-btn {
+        padding: 14px 28px;
+        font-size: 1rem;
+    }
+
+    .secondary-btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+
 {% endblock %}
 
 {% block body %}
@@ -654,7 +995,8 @@
         </div>
         <h1 class="hero-title">Verify Your Achievement</h1>
         <p class="hero-subtitle">
-            Enter your certificate ID below to instantly verify the authenticity of your #AngaarHai event
+            Enter your certificate ID below to instantly verify the authenticity of your <span class="hero-title"
+                style="font-size: 25px;">Angaari</span> event
             certificate
         </p>
 
@@ -686,15 +1028,100 @@
         </div>
     </section>
 
-    {% if status == "approved" %}
-    <p class="success-msg">✅ Certificate is valid and approved.</p>
-    <a href="{% url 'download_certificate' certificate_obj.certificate_id %}" class="download-btn">
-        Download Certificate
-    </a>
-    {% elif status == "pending" %}
-    <p class="pending-msg">⏳ Certificate found but pending approval.</p>
-    {% elif status == "not_found" %}
-    <p class="error-msg">❌ Certificate not found.</p>
+    <!-- Status Section - Replace the existing status conditional block -->
+    {% if status %}
+    <section class="status-section">
+        {% if status == "approved" %}
+        <div class="status-card status-success">
+            <i class="fas fa-check-circle status-icon"></i>
+            <h3 class="status-title">Certificate Verified!</h3>
+            <p class="status-message">
+                Your certificate is valid and has been approved. You can now download your official certificate.
+            </p>
+
+            <!-- Certificate Details -->
+            <div class="certificate-details">
+                <div class="detail-row">
+                    <span class="detail-label">Certificate ID:</span>
+                    <span class="detail-value">{{ certificate_obj.certificate_id }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Event:</span>
+                    <span class="detail-value">{{ certificate_obj.event.name|default:"Angaari Event" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Timeline:</span>
+                    <span class="detail-value">{{ certificate_obj.event.start_date|date:"F d, Y" }} - 
+                        {{ certificate_obj.event.end_date|date:"F d, Y" }}</span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value">✅ Approved</span>
+                </div>
+            </div>
+
+            <a href="{% url 'download_certificate' certificate_obj.certificate_id %}" class="download-btn">
+                <i class="fas fa-download"></i>
+                <span>Download Certificate</span>
+            </a>
+
+            <div class="secondary-actions">
+                <a href="#" class="secondary-btn">
+                    <i class="fas fa-share-alt"></i>
+                    Share Certificate
+                </a>
+                <a href="#" class="secondary-btn">
+                    <i class="fas fa-eye"></i>
+                    Preview Certificate
+                </a>
+            </div>
+        </div>
+
+        {% elif status == "pending" %}
+        <div class="status-card status-pending">
+            <i class="fas fa-clock status-icon"></i>
+            <h3 class="status-title">Verification Pending</h3>
+            <p class="status-message">
+                Your certificate has been found but is currently pending approval. Please check back later or contact
+                support if this takes longer than expected.
+            </p>
+
+            <div class="secondary-actions">
+                <a href="mailto:support@angaari.com" class="secondary-btn">
+                    <i class="fas fa-envelope"></i>
+                    Contact Support
+                </a>
+                <a href="#" class="secondary-btn">
+                    <i class="fas fa-info-circle"></i>
+                    Learn More
+                </a>
+            </div>
+        </div>
+
+        {% elif status == "not_found" %}
+        <div class="status-card status-error">
+            <i class="fas fa-exclamation-triangle status-icon"></i>
+            <h3 class="status-title">Certificate Not Found</h3>
+            <p class="status-message">
+                We couldn't find a certificate with the provided ID. Please double-check your certificate ID and try
+                again.
+            </p>
+
+            <div class="secondary-actions">
+                <a href="{% url 'verify_certificate' %}" class="secondary-btn">
+                    <i class="fas fa-redo"></i>
+                    Try Again
+                </a>
+            
+                <a href="mailto:theangaarbatch@gmail.com" class="secondary-btn">
+                    <i class="fas fa-envelope"></i>
+                    Contact Support
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </section>
     {% endif %}
 
 
