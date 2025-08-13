@@ -22,6 +22,12 @@ def about(request):
 def our_team(request):
     return render(request, "home/team.html")
 
+def privacy_policy(request):
+    return render(request, "home/privacy_policy.html")
+
+def terms_of_service(request):
+    return render(request, "home/terms_of_service.html")
+
 # ======================== ARTICLES ========================
 
 def articles(request):
