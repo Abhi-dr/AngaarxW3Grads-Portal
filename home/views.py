@@ -7,6 +7,9 @@ from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models import Count
 from practice.models import Batch, Submission, Question
+from django.contrib import messages
+
+
 from administration.models import Achievement
 
 
@@ -200,14 +203,49 @@ from django.http import HttpResponse, Http404
 from django.conf import settings
 from django.template.loader import render_to_string
 from io import BytesIO
+from django.core.cache import cache
+from django.views.decorators.http import require_http_methods
 from xhtml2pdf import pisa
+from django_ratelimit.decorators import ratelimit
 from student.event_models import Certificate
 
+def get_client_ip(request):
+    """Get the client's IP address"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+def check_rate_limit(request):
+    """Check if the user has exceeded rate limits"""
+    ip_address = get_client_ip(request)
+    cache_key = f"cert_verify_rate_limit_{ip_address}"
+    
+    # Get current count
+    current_count = cache.get(cache_key, 0)
+    
+    # Rate limit: 10 requests per hour per IP
+    if current_count >= 10:
+        return False
+    
+    # Increment counter
+    cache.set(cache_key, current_count + 1, 60)  # 1 hour timeout
+    return True
+
+@require_http_methods(["GET", "POST"])
+@ratelimit(key='ip', rate='10/m', method='POST', block=False)
 def verify_certificate(request):
     certificate_obj = None
     status = None
 
     if request.method == "POST":
+
+        if not check_rate_limit(request):
+            messages.warning(request, f"Too many requests from your end. Try again later.")
+            return redirect('verify_certificate')
+
         cert_id = request.POST.get("certificate_id", "").strip().upper()
         if cert_id:
             try:
@@ -219,10 +257,12 @@ def verify_certificate(request):
             except Certificate.DoesNotExist:
                 status = "not_found"
 
-    return render(request, "home/verify_my_certificate.html", {
-        "certificate_obj": certificate_obj,
-        "status": status
-    })
+        return render(request, "home/verify_my_certificate.html", {
+            "certificate_obj": certificate_obj,
+            "status": status
+        })
+    
+    return render(request, "home/verify_my_certificate.html")
 
 
 from django.template import Context, Template

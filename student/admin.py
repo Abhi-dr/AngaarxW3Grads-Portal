@@ -1,6 +1,14 @@
 from django.contrib import admin
 from .models import Notification, Anonymous_Message, Feedback, AIQuestion, CourseRegistration, CourseSheet
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest, TeamInvite
+from .event_models import Event, Certificate, CertificateTemplate
+
+from django.contrib import admin
+from import_export.admin import ImportMixin
+from import_export import resources, fields
+from import_export.results import RowResult
+from accounts.models import Student
+from import_export.widgets import ForeignKeyWidget
 
 
 @admin.register(Notification)
@@ -189,15 +197,45 @@ class CertificateTemplateAdmin(admin.ModelAdmin):
     search_fields = ("name",)
     ordering = ("-created_at",)
 
+class CertificateImportResource(resources.ModelResource):
+    email = fields.Field(column_name="email")
+
+    class Meta:
+        model = Certificate
+        import_id_fields = []  # We won't match existing certs by ID
+        fields = ("email",)    # Only importing email column
+        skip_unchanged = True
+        report_skipped = True
+
+    def before_import_row(self, row, **kwargs):
+        email = row.get("email", "").strip().lower()
+        if not email:
+            raise Exception("Missing email field")
+
+        try:
+            student = Student.objects.get(email__iexact=email)
+        except Student.DoesNotExist:
+            # Skip row if student not found
+            row["skip_reason"] = "Student not found"
+            return
+
+        event = Event.objects.latest("start_date")
+        template_version = CertificateTemplate.objects.latest("created_at")
+
+        # Create cert if it doesn't exist
+        Certificate.objects.get_or_create(
+            event=event,
+            student=student,
+            defaults={
+                "approved": True,
+                "template_version": template_version
+            }
+        )
+
 
 @admin.register(Certificate)
-class CertificateAdmin(ImportExportModelAdmin):
+class CertificateImportAdmin(ImportMixin, admin.ModelAdmin):
+    resource_class = CertificateImportResource
     list_display = ("certificate_id", "student", "event", "approved", "issued_date")
+    search_fields = ("certificate_id", "student__first_name", "student__last_name", "student__email")
     list_filter = ("approved", "event")
-    search_fields = ("certificate_id", "student__full_name", "event__name")
-    actions = ["approve_certificates"]
-
-    def approve_certificates(self, request, queryset):
-        updated = queryset.update(approved=True)
-        self.message_user(request, f"{updated} certificates approved.")
-    approve_certificates.short_description = "Mark selected certificates as approved"

@@ -51,7 +51,7 @@ Student | My Profile
 
 <div class="container">
 
-  <div class="row mt-n4 justify-content-center">
+  <!-- <div class="row mt-n4 justify-content-center">
     <div class="row text-center justify-content-center">
       
       <div class="col-3 d-flex">
@@ -97,13 +97,16 @@ Student | My Profile
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <div class="row">
     <div class="col-lg-4">
       <div class="card mb-2">
         <div class="card-body text-center">
           <img src="{{ user.profile_pic.url }}" alt="avatar" class="rounded-circle img-fluid" style="width: 150px;" />
+          <h4 class="my-3">
+            Student ID: {{ user.id }}
+          </h4>
           <h5 class="my-3">
             {{ user.first_name }} {{ user.last_name }}
           </h5>
