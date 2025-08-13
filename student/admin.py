@@ -219,7 +219,10 @@ class CertificateImportResource(resources.ModelResource):
             row["skip_reason"] = "Student not found"
             return
 
-        event = Event.objects.latest("start_date")
+        event = Event.objects.get(code=row.get("event_code", "").strip())
+        if not event:
+            row["skip_reason"] = "Event not found"
+            return
         template_version = CertificateTemplate.objects.latest("created_at")
 
         # Create cert if it doesn't exist
