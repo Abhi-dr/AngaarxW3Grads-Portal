@@ -7,6 +7,9 @@ from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models import Count
 from practice.models import Batch, Submission, Question
+from django.contrib import messages
+
+
 from administration.models import Achievement
 
 
@@ -195,5 +198,115 @@ def fetch_top_performers(request):
 
 # ======================================= CERTIFICATE ================================
 
+from django.shortcuts import render
+from django.http import HttpResponse, Http404
+from django.conf import settings
+from django.template.loader import render_to_string
+from io import BytesIO
+from django.core.cache import cache
+from django.views.decorators.http import require_http_methods
+from xhtml2pdf import pisa
+from django_ratelimit.decorators import ratelimit
+from student.event_models import Certificate
+
+def get_client_ip(request):
+    """Get the client's IP address"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+def check_rate_limit(request):
+    """Check if the user has exceeded rate limits"""
+    ip_address = get_client_ip(request)
+    cache_key = f"cert_verify_rate_limit_{ip_address}"
+    
+    # Get current count
+    current_count = cache.get(cache_key, 0)
+    
+    # Rate limit: 10 requests per hour per IP
+    if current_count >= 10:
+        return False
+    
+    # Increment counter
+    cache.set(cache_key, current_count + 1, 60)  # 1 hour timeout
+    return True
+
+@require_http_methods(["GET", "POST"])
+@ratelimit(key='ip', rate='10/m', method='POST', block=False)
 def verify_certificate(request):
-    return render(request, 'home/verify_my_certificate.html')
+    certificate_obj = None
+    status = None
+
+    if request.method == "POST":
+
+        if not check_rate_limit(request):
+            messages.warning(request, f"Too many requests from your end. Try again later.")
+            return redirect('verify_certificate')
+
+        cert_id = request.POST.get("certificate_id", "").strip().upper()
+        if cert_id:
+            try:
+                certificate_obj = Certificate.objects.select_related("event", "student").get(certificate_id=cert_id)
+                if certificate_obj.approved:
+                    status = "approved"
+                else:
+                    status = "pending"
+            except Certificate.DoesNotExist:
+                status = "not_found"
+
+        return render(request, "home/verify_my_certificate.html", {
+            "certificate_obj": certificate_obj,
+            "status": status
+        })
+    
+    return render(request, "home/verify_my_certificate.html")
+
+
+from django.template import Context, Template
+
+from weasyprint import HTML
+from django.template import Context, Template
+from django.http import HttpResponse, Http404
+from io import BytesIO
+
+def download_certificate(request, cert_id):
+    try:
+        certificate_obj = Certificate.objects.select_related(
+            "event", "student", "template_version"
+        ).get(certificate_id=cert_id, approved=True)
+    except Certificate.DoesNotExist:
+        raise Http404("Certificate not found or not approved.")
+
+    template_obj = Template(certificate_obj.template_version.html_template)
+    html_content = template_obj.render(Context({
+        "student": certificate_obj.student,
+        "event": certificate_obj.event,
+        "issued_date": certificate_obj.issued_date.strftime("%B %d, %Y"),
+        "certificate_id": certificate_obj.certificate_id,
+    }))
+
+    base_url = settings.STATIC_ROOT  # or your static folder path
+
+    pdf_bytes = HTML(string=html_content, base_url=base_url).write_pdf()
+
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{certificate_obj.certificate_id}.pdf"'
+    return response
+
+
+def link_callback(uri, rel):
+    """Ensures static/media file paths work in xhtml2pdf."""
+    import os
+    from django.contrib.staticfiles import finders
+    if uri.startswith(settings.MEDIA_URL):
+        path = os.path.join(settings.MEDIA_ROOT, uri.replace(settings.MEDIA_URL, ""))
+    elif uri.startswith(settings.STATIC_URL):
+        path = finders.find(uri.replace(settings.STATIC_URL, ""))
+    else:
+        return uri
+    if not os.path.isfile(path):
+        raise Exception(f"Media URI must start with {settings.STATIC_URL} or {settings.MEDIA_URL}")
+    return path

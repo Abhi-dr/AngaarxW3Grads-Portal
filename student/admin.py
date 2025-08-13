@@ -1,6 +1,14 @@
 from django.contrib import admin
 from .models import Notification, Anonymous_Message, Feedback, AIQuestion, CourseRegistration, CourseSheet
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest, TeamInvite
+from .event_models import Event, Certificate, CertificateTemplate
+
+from django.contrib import admin
+from import_export.admin import ImportMixin
+from import_export import resources, fields
+from import_export.results import RowResult
+from accounts.models import Student
+from import_export.widgets import ForeignKeyWidget
 
 
 @admin.register(Notification)
@@ -159,157 +167,6 @@ class AssignmentAdmin(admin.ModelAdmin):
         )
     mark_as_archived.short_description = "Mark selected assignments as archived"
 
-
-# @admin.register(AssignmentSubmission)
-# class AssignmentSubmissionAdmin(admin.ModelAdmin):
-#     list_display = [
-#         'assignment', 'get_student_name', 'status', 
-#         'score_display', 'submitted_at', 'late_status', 'graded_status'
-#     ]
-#     list_filter = [
-#         'status', 'submitted_at', 'graded_at',
-#         ('assignment', admin.RelatedOnlyFieldListFilter),
-#         ('student', admin.RelatedOnlyFieldListFilter)
-#     ]
-#     search_fields = [
-#         'assignment__title', 'student__username', 
-#         'student__first_name', 'student__last_name'
-#     ]
-#     readonly_fields = [
-#         'submitted_at', 'graded_at', 'late_status', 'penalty_display',
-#         'final_score_display', 'submission_preview'
-#     ]
-#     list_editable = ['status']
-#     list_per_page = 25
-#     date_hierarchy = 'submitted_at'
-    
-
-#     def get_assignment_title(self, obj):
-#         """Display assignment title with link"""
-#         url = reverse('admin:student_assignment_change', args=[obj.assignment.pk])
-#         return format_html('<a href="{}">{}</a>', url, obj.assignment.title)
-#     get_assignment_title.short_description = 'Assignment'
-#     get_assignment_title.admin_order_field = 'assignment__title'
-    
-#     def get_student_name(self, obj):
-#         """Display student name with link"""
-#         student = obj.student
-#         full_name = f"{student.first_name} {student.last_name}".strip()
-#         display_name = full_name if full_name else student.username
-        
-#         # Assuming student is in accounts app
-#         url = reverse('admin:accounts_student_change', args=[student.pk])
-#         return format_html('<a href="{}">{}</a>', url, display_name)
-#     get_student_name.short_description = 'Student'
-#     get_student_name.admin_order_field = 'student__username'
-    
-#     def score_display(self, obj):
-#         """Display score with max score"""
-#         if obj.score is not None:
-#             max_score = obj.assignment.max_score
-#             percentage = (obj.score / max_score * 100) if max_score > 0 else 0
-#             color = 'green' if percentage >= 70 else 'orange' if percentage >= 50 else 'red'
-#             return format_html(
-#                 '<span style="color: {};">{}/{} ({}%)</span>',
-#                 color, obj.score, max_score, round(percentage, 1)
-#             )
-#         return "Not graded"
-#     score_display.short_description = 'Score'
-    
-#     def late_status(self, obj):
-#         """Display if submission is late"""
-#         if obj.is_late:
-#             days = obj.days_late
-#             return format_html(
-#                 '<span style="color: red;">Late by {} day{}</span>',
-#                 days, 's' if days != 1 else ''
-#             )
-#         return format_html('<span style="color: green;">On time</span>')
-#     late_status.short_description = 'Late Status'
-    
-#     def graded_status(self, obj):
-#         """Display grading status"""
-#         if obj.graded_at:
-#             return format_html('<span style="color: green;">Graded</span>')
-#         return format_html('<span style="color: orange;">Pending</span>')
-#     graded_status.short_description = 'Graded'
-    
-#     def penalty_display(self, obj):
-#         """Display penalty percentage"""
-#         penalty = obj.penalty_applied
-#         if penalty > 0:
-#             return f"{penalty}% penalty applied"
-#         return "No penalty"
-#     penalty_display.short_description = 'Penalty'
-    
-#     def final_score_display(self, obj):
-#         """Display final score after penalty"""
-#         final_score = obj.final_score
-#         if final_score is not None:
-#             return f"{final_score}/{obj.assignment.max_score}"
-#         return "Not calculated"
-#     final_score_display.short_description = 'Final Score'
-    
-#     def submission_preview(self, obj):
-#         """Preview submission content based on type"""
-#         content = obj.get_submission_content()
-#         if not content:
-#             return "No content"
-        
-#         assignment_type = obj.assignment.assignment_type
-        
-#         if assignment_type == 'text':
-#             preview = str(content)[:100]
-#             return f"{preview}..." if len(str(content)) > 100 else preview
-#         elif assignment_type == 'code':
-#             preview = str(content)[:100]
-#             return format_html('<pre>{}</pre>', f"{preview}..." if len(str(content)) > 100 else preview)
-#         elif assignment_type == 'link':
-#             return format_html('<a href="{}" target="_blank">{}</a>', content, content)
-#         elif assignment_type == 'file':
-#             if content:
-#                 return format_html('<a href="{}" target="_blank">View File</a>', content.url)
-#         elif assignment_type == 'image':
-#             if content:
-#                 return format_html('<img src="{}" style="max-width: 100px; max-height: 100px;" />', content.url)
-        
-#         return "Content available"
-#     submission_preview.short_description = 'Preview'
-    
-#     def get_queryset(self, request):
-#         return super().get_queryset(request).select_related(
-#             'assignment', 'student', 'assignment__content_type'
-#         )
-    
-#     actions = ['accept_submissions', 'reject_submissions', 'mark_needs_revision']
-    
-#     def accept_submissions(self, request, queryset):
-#         updated = queryset.update(status='accepted', graded_at=timezone.now())
-#         self.message_user(
-#             request,
-#             f'{updated} submissions accepted.',
-#             messages.SUCCESS
-#         )
-#     accept_submissions.short_description = "Accept selected submissions"
-    
-#     def reject_submissions(self, request, queryset):
-#         updated = queryset.update(status='rejected', graded_at=timezone.now())
-#         self.message_user(
-#             request,
-#             f'{updated} submissions rejected.',
-#             messages.SUCCESS
-#         )
-#     reject_submissions.short_description = "Reject selected submissions"
-    
-#     def mark_needs_revision(self, request, queryset):
-#         updated = queryset.update(status='needs_revision')
-#         self.message_user(
-#             request,
-#             f'{updated} submissions marked as needing revision.',
-#             messages.SUCCESS
-#         )
-#     mark_needs_revision.short_description = "Mark as needs revision"
-
 @admin.register(AssignmentSubmission)
 class AssignmentSubmissionAdmin(admin.ModelAdmin):
     list_display = ('assignment', 'student', "status")
@@ -320,3 +177,65 @@ class AssignmentSubmissionAdmin(admin.ModelAdmin):
 admin.site.site_header = "Course Management System"
 admin.site.site_title = "CMS Admin"
 admin.site.index_title = "Welcome to Course Management System"
+
+
+# ================================== CERTIFICATE MANAGEMENT ==================================
+
+from import_export.admin import ImportExportModelAdmin
+from .event_models import Event, Certificate, CertificateTemplate
+
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ("name", "code", "start_date")
+    search_fields = ("name", "code")
+
+
+@admin.register(CertificateTemplate)
+class CertificateTemplateAdmin(admin.ModelAdmin):
+    list_display = ("name", "created_at")
+    search_fields = ("name",)
+    ordering = ("-created_at",)
+
+class CertificateImportResource(resources.ModelResource):
+    email = fields.Field(column_name="email")
+
+    class Meta:
+        model = Certificate
+        import_id_fields = []  # We won't match existing certs by ID
+        fields = ("email",)    # Only importing email column
+        skip_unchanged = True
+        report_skipped = True
+
+    def before_import_row(self, row, **kwargs):
+        email = row.get("email", "").strip().lower()
+        if not email:
+            raise Exception("Missing email field")
+
+        try:
+            student = Student.objects.get(email__iexact=email)
+        except Student.DoesNotExist:
+            # Skip row if student not found
+            row["skip_reason"] = "Student not found"
+            return
+
+        event = Event.objects.latest("start_date")
+        template_version = CertificateTemplate.objects.latest("created_at")
+
+        # Create cert if it doesn't exist
+        Certificate.objects.get_or_create(
+            event=event,
+            student=student,
+            defaults={
+                "approved": True,
+                "template_version": template_version
+            }
+        )
+
+
+@admin.register(Certificate)
+class CertificateImportAdmin(ImportMixin, admin.ModelAdmin):
+    resource_class = CertificateImportResource
+    list_display = ("certificate_id", "student", "event", "approved", "issued_date")
+    search_fields = ("certificate_id", "student__first_name", "student__last_name", "student__email")
+    list_filter = ("approved", "event")

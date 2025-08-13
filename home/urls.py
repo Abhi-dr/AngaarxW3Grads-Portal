@@ -33,4 +33,5 @@ urlpatterns += [
 
 urlpatterns += [
     path("verify-my-certificate/", views.verify_certificate, name="verify_certificate"),
+    path("download-certificate/<str:cert_id>/", views.download_certificate, name="download_certificate"),
 ]
