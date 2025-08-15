@@ -550,7 +550,7 @@ active
     .faq-accordion {
         display: flex;
         flex-direction: column;
-        
+
     }
 
     .faq-item {
@@ -606,7 +606,7 @@ active
         line-height: 1.6;
     }
 
-    .faq-question.active + .faq-answer {
+    .faq-question.active+.faq-answer {
         max-height: 300px;
     }
 
@@ -685,220 +685,36 @@ active
 
 
     <div id="registrations-tab" class="tab-content active">
+
+        <!-- add a div to display student's certificates -->
         <div class="section-header">
-            <h3 class="section-title">My F.L.A.M.E.S Registrations</h3>
+            <h3 class="section-title">My Certificates</h3>
         </div>
 
-        {% if registrations %}
-        {% for registration in registrations %}
-        <div class="flames-card">
-            <div class="flames-header">
-                <!-- <div class="flames-icon" style="background-color: rgba({{ registration.course.icon_color }}, 0.1);">
-                    <i class="{{ registration.course.icon_class }}"
-                        style="color: {{ registration.course.icon_color }};"></i>
-                </div> -->
-                <div>
-                    <h4 class="flames-title">{{ registration.course.title }}</h4>
-                    <p class="flames-subtitle">{{ registration.course.subtitle }}</p>
-                </div>
-                <span class="flames-status status-{{ registration.status|lower }}">Registration
-                    {{ registration.status }}</span>
-                <!-- <a href="{% url 'student_view_registration' registration.course.slug %}"
-                    class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a> -->
-
-                <a href="{% url 'flames_my_course' registration.course.slug %}"
-                    class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
-
-                {% if registration.status == 'Pending' %}
-
-                <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button" data-registration-id="{{ registration.id }}">
-                    Pay Now
-                </a>
-
-                {% endif %}
-            </div>
-            <div class="flames-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="flames-info">
-                            <div class="info-label">Registered On</div>
-                            <div class="info-value">{{ registration.created_at|date:"F d, Y" }}</div>
-                        </div>
-
-                        {% if registration.admin_notes %}
-                        <div class="flames-info">
-                            <div class="info-label">Admin Notes</div>
-                            <div class="info-value">{{ registration.admin_notes }}</div>
-                        </div>
-                        {% endif %}
+        <div class="row">
+            {% for certificate in my_certificates %}
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">ID: <strong>{{ certificate.certificate_id }}</strong></h5>
+                        <p class="card-text">Of <strong>{{ certificate.event.name }}</strong></p>
+                        <a href="{% url 'student_view_certificate' certificate.id %}" class="btn btn-primary">View
+                                Certificate</a>
                     </div>
-                    <div class="col-md-6">
-                        <div class="flames-info">
-                            <div class="info-label">Registration Mode</div>
-                            <div class="info-value">{{ registration.get_registration_mode_display }}</div>
-                        </div>
-                    </div>
-                </div>
-
-                {% if registration.team %}
-
-                <div class="flames-team">
-                    <h5 class="team-title"><i class="fas fa-users"></i> Team Members</h5>
-
-                    {% for member in registration.team.members.all %}
-
-                    <div class="team-member">
-
-                        <div class="member-icon">
-                            <img src="{{ member.member.profile_pic.url }}" alt="{{ member.full_name }}"
-                                class="rounded-circle" width="30" height="30">
-                        </div>
-                        <div>
-                            <div>{{ member.member.first_name }} {{ member.member.last_name }}</div>
-                            <small>{{ member.member.email }}</small>
-                        </div>
-
-                        {% if member.is_leader %}
-                        <span class="team-leader-badge">Team Leader</span>
-                        {% endif %}
-
-                    </div>
-
-                    {% empty %}
-                    <p>No team members found. Please contact support.</p>
-                    {% endfor %}
-
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="flames-footer">
-                <div class="price-info">
-                    {% if registration.registration_mode == 'TEAM' %}
-                    <span class="original-price">₹{{ registration.original_price }} × 5 = ₹
-                        {{
-                        registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price
-                        }}</span>
-                    <span class="final-price">₹{{ registration.payable_amount }} (after team discount)</span>
-                    <span class="discount-badge">Team Discount: ₹499 × 5 = ₹2,495</span>
-                    {% elif registration.original_price != registration.discounted_price %}
-                    <span class="original-price">₹{{ registration.original_price }}</span>
-                    <span class="final-price">₹{{ registration.discounted_price }}</span>
-                    <span class="discount-badge">Discount Applied</span>
-                    {% else %}
-                    <span class="final-price">₹{{ registration.original_price }}</span>
-                    {% endif %}
-                </div>
-
-                {% if registration.team %}
-
-                <span class="discount-badge fs-2">
-                    Team Registration (5 members) - ₹2,495 discount
-                </span>
-
-
-
-                {% elif registration.referral_code %}
-                <span class="discount-badge fs-2">
-                    Referred By: {{ registration.referral_code.alumni.name }}🔥
-                </span>
-
-                {% endif %}
-
-
-            </div>
-
-            {% if not registration.payment_id and registration.status == 'Pending' %}
-            <div class="m-2 justify-center text-center">
-                <a id="reg-{{ registration.id }}" class="payment-button btn w-50"
-                    data-registration-id="{{ registration.id }}">
-                    Complete My Registration🔥
-                </a>
-            </div>
-
-            {% else %}
-
-            <div class="m-2 justify-center text-center">
-                <a class=" btn w-50" href="{% url 'flames_my_course' registration.course.slug %}">
-                    My Sessions🔥
-                </a>
-            </div>
-
-            {% endif %}
-
-        </div>
-        {% endfor %}
-
-        {% else %}
-
-        <div class="no-registrations">
-            <i class="fas fa-clipboard-list"></i>
-            <h4>No Registrations Found</h4>
-            <p>You haven't registered for any F.L.A.M.E.S programs yet.</p>
-            <button class="tab-button btn-primary" data-tab="available" style="border-radius: 4px;">Explore Available
-                Programs</button>
-        </div>
-
-        {% endif %}
-    </div>
-
-    <hr>
-
-    <!-- =============================== AVAILABLE COURSES ================================= -->
-
-    <div id="available-tab" class="tab-content active">
-        <div class="section-header">
-            <h3 class="section-title">Available F.L.A.M.E.S Programs</h3>
-        </div>
-
-        <div class="course-grid">
-            {% for course in available_courses %}
-            <div class="course-card">
-                <div class="course-header">
-                    <!-- <div class="course-icon" style="background-color: rgba({{ course.icon_color }}, 0.1);">
-                        <i class="{{ course.icon_class }}" style="color: {{ course.icon_color }};"></i>
-                    </div> -->
-                    <div>
-                        <h4 class="flames-title">{{ course.title }}</h4>
-                        <p class="flames-subtitle">{{ course.subtitle }}</p>
-                    </div>
-                </div>
-                <div class="course-body">
-
-                    <div class="course-learning-points">
-                        <strong>What You'll Learn:</strong>
-                        <ul>
-                            {% for point in course.get_learning_points|slice:":3" %}
-                            <li>{{ point }}</li>
-                            {% endfor %}
-                            {% if course.get_learning_points|length > 3 %}
-                            <li>And more...</li>
-                            {% endif %}
-                        </ul>
-                    </div>
-                </div>
-                <div class="course-footer">
-                    <div class="price-info">
-                        {% if course.discount_price %}
-                        <span class="original-price">₹{{ course.price }}</span>
-                        <span class="final-price">₹{{ course.discount_price }}</span>
-                        {% else %}
-                        <span class="final-price">₹{{ course.price }}</span>
-                        {% endif %}
-                    </div>
-                    <div>
-                        <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline">Details</a>
-                        <a href="{% url 'student_flames_register' course.slug %}"
-                            class="btn btn-sm btn-primary">Register</a>
+                    <div class="card-footer">
+                        <small class="text-muted">Issued on
+                            {{ certificate.issued_date|date:"F d, Y" }}</small>
                     </div>
                 </div>
             </div>
             {% empty %}
             <div class="col-12">
                 <div class="no-registrations">
-                    <i class="fas -calendar-times"></i>
-                    <h4>No Programs Available</h4>
-                    <p>There are currently no F.L.A.M.E.S programs available for registration.</p>
+                    <i class="fas fa-certificate"></i>
+                    <h4>No Certificates Found</h4>
+                    <p>You haven't earned any certificates yet.</p>
+                    <button class="tab-button btn-primary" data-tab="available" style="border-radius: 4px;">Explore
+                        Available Programs</button>
                 </div>
             </div>
             {% endfor %}
@@ -907,48 +723,233 @@ active
 
     <hr>
 
-
-    <!-- FAQ Section -->
-    <div class="section-header mt-4">
-        <h3 class="section-title">Frequently Asked Questions</h3>
+    <div class="section-header">
+        <h3 class="section-title">My F.L.A.M.E.S Registrations</h3>
     </div>
 
-    <div class="mb-4">
-        <div class="faq-accordion">
-            <!-- FAQ Item 1 -->
-            <div class="faq-item mb-3">
-                <div class="faq-question">
-                    <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and LPU?</span>
-                    <i class="fas fa-chevron-down faq-icon"></i>
+    {% if registrations %}
+    {% for registration in registrations %}
+    <div class="flames-card">
+        <div class="flames-header">
+            <!-- <div class="flames-icon" style="background-color: rgba({{ registration.course.icon_color }}, 0.1);">
+                    <i class="{{ registration.course.icon_class }}"
+                        style="color: {{ registration.course.icon_color }};"></i>
+                </div> -->
+            <div>
+                <h4 class="flames-title">{{ registration.course.title }}</h4>
+                <p class="flames-subtitle">{{ registration.course.subtitle }}</p>
+            </div>
+            <span class="flames-status status-{{ registration.status|lower }}">Registration
+                {{ registration.status }}</span>
+            <!-- <a href="{% url 'student_view_registration' registration.course.slug %}"
+                    class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a> -->
+
+            <a href="{% url 'flames_my_course' registration.course.slug %}"
+                class="btn btn-sm mx-2 rounded-3 btn-primary">View More</a>
+
+            {% if registration.status == 'Pending' %}
+
+            <a class="btn btn-sm mx-2 rounded-3 px-3 payment-button" data-registration-id="{{ registration.id }}">
+                Pay Now
+            </a>
+
+            {% endif %}
+        </div>
+        <div class="flames-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="flames-info">
+                        <div class="info-label">Registered On</div>
+                        <div class="info-value">{{ registration.created_at|date:"F d, Y" }}</div>
+                    </div>
+
+                    {% if registration.admin_notes %}
+                    <div class="flames-info">
+                        <div class="info-label">Admin Notes</div>
+                        <div class="info-value">{{ registration.admin_notes }}</div>
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="faq-answer">
-                    <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities do accept the FLAMES 25 course certificate. So it's not just a cool flex — it's officially recognized too! 😉</p>
+                <div class="col-md-6">
+                    <div class="flames-info">
+                        <div class="info-label">Registration Mode</div>
+                        <div class="info-value">{{ registration.get_registration_mode_display }}</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- FAQ Item 2 -->
-            <div class="faq-item mb-3">
-                <div class="faq-question">
-                    <span>Do I need prior experience to join FLAMES?</span>
-                    <i class="fas fa-chevron-down faq-icon"></i>
+            {% if registration.team %}
+
+            <div class="flames-team">
+                <h5 class="team-title"><i class="fas fa-users"></i> Team Members</h5>
+
+                {% for member in registration.team.members.all %}
+
+                <div class="team-member">
+
+                    <div class="member-icon">
+                        <img src="{{ member.member.profile_pic.url }}" alt="{{ member.full_name }}"
+                            class="rounded-circle" width="30" height="30">
+                    </div>
+                    <div>
+                        <div>{{ member.member.first_name }} {{ member.member.last_name }}</div>
+                        <small>{{ member.member.email }}</small>
+                    </div>
+
+                    {% if member.is_leader %}
+                    <span class="team-leader-badge">Team Leader</span>
+                    {% endif %}
+
                 </div>
-                <div class="faq-answer">
-                    <p>Not really! 🔥 Anyone can join. But since it's made mainly for students going into 3rd year, it's better if you know a little bit of HTML, CSS, and JavaScript. It'll make things easier for you!</p>
-                </div>
+
+                {% empty %}
+                <p>No team members found. Please contact support.</p>
+                {% endfor %}
+
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="flames-footer">
+            <div class="price-info">
+                {% if registration.registration_mode == 'TEAM' %}
+                <span class="original-price">₹{{ registration.original_price }} × 5 = ₹
+                    {{
+                    registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price|add:registration.original_price
+                    }}</span>
+                <span class="final-price">₹{{ registration.payable_amount }} (after team discount)</span>
+                <span class="discount-badge">Team Discount: ₹499 × 5 = ₹2,495</span>
+                {% elif registration.original_price != registration.discounted_price %}
+                <span class="original-price">₹{{ registration.original_price }}</span>
+                <span class="final-price">₹{{ registration.discounted_price }}</span>
+                <span class="discount-badge">Discount Applied</span>
+                {% else %}
+                <span class="final-price">₹{{ registration.original_price }}</span>
+                {% endif %}
             </div>
 
-            <!-- FAQ Item 3 -->
-            <div class="faq-item mb-3">
-                <div class="faq-question">
-                    <span>How does team registration work?</span>
-                    <i class="fas fa-chevron-down faq-icon"></i>
+            {% if registration.team %}
+
+            <span class="discount-badge fs-2">
+                Team Registration (5 members) - ₹2,495 discount
+            </span>
+
+
+
+            {% elif registration.referral_code %}
+            <span class="discount-badge fs-2">
+                Referred By: {{ registration.referral_code.alumni.name }}🔥
+            </span>
+
+            {% endif %}
+
+
+        </div>
+
+        {% if not registration.payment_id and registration.status == 'Pending' %}
+        <div class="m-2 justify-center text-center">
+            <a id="reg-{{ registration.id }}" class="payment-button btn w-50"
+                data-registration-id="{{ registration.id }}">
+                Complete My Registration🔥
+            </a>
+        </div>
+
+        {% else %}
+
+        <div class="m-2 justify-center text-center">
+            <a class=" btn w-50" href="{% url 'flames_my_course' registration.course.slug %}">
+                My Sessions🔥
+            </a>
+        </div>
+
+        {% endif %}
+
+    </div>
+    {% endfor %}
+
+    {% else %}
+
+    <div class="no-registrations">
+        <i class="fas fa-clipboard-list"></i>
+        <h4>No Registrations Found</h4>
+        <p>You haven't registered for any F.L.A.M.E.S programs yet.</p>
+        <button class="tab-button btn-primary" data-tab="available" style="border-radius: 4px;">Explore Available
+            Programs</button>
+    </div>
+
+    {% endif %}
+</div>
+
+<hr>
+
+<!-- =============================== AVAILABLE COURSES ================================= -->
+
+{% comment %}
+
+<div id="available-tab" class="tab-content active">
+    <div class="section-header">
+        <h3 class="section-title">Available F.L.A.M.E.S Programs</h3>
+    </div>
+
+    <div class="course-grid">
+        {% for course in available_courses %}
+        <div class="course-card">
+            <div class="course-header">
+                <!-- <div class="course-icon" style="background-color: rgba({{ course.icon_color }}, 0.1);">
+                        <i class="{{ course.icon_class }}" style="color: {{ course.icon_color }};"></i>
+                    </div> -->
+                <div>
+                    <h4 class="flames-title">{{ course.title }}</h4>
+                    <p class="flames-subtitle">{{ course.subtitle }}</p>
                 </div>
-                <div class="faq-answer">
-                    <p>Team registration allows you to register a group of people at a special discounted rate. When you select "Team Registration" during enrollment, enter your team member's usernames and done! The pricing is calculated as (course price * 5) - (499 * 5), giving everyone a substantial discount!</p>
+            </div>
+            <div class="course-body">
+
+                <div class="course-learning-points">
+                    <strong>What You'll Learn:</strong>
+                    <ul>
+                        {% for point in course.get_learning_points|slice:":3" %}
+                        <li>{{ point }}</li>
+                        {% endfor %}
+                        {% if course.get_learning_points|length > 3 %}
+                        <li>And more...</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            <div class="course-footer">
+                <div class="price-info">
+                    {% if course.discount_price %}
+                    <span class="original-price">₹{{ course.price }}</span>
+                    <span class="final-price">₹{{ course.discount_price }}</span>
+                    {% else %}
+                    <span class="final-price">₹{{ course.price }}</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <a href="{% url 'course_detail' course.slug %}" class="btn btn-sm btn-outline">Details</a>
+                    <a href="{% url 'student_flames_register' course.slug %}"
+                        class="btn btn-sm btn-primary">Register</a>
                 </div>
             </div>
         </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="no-registrations">
+                <i class="fas -calendar-times"></i>
+                <h4>No Programs Available</h4>
+                <p>There are currently no F.L.A.M.E.S programs available for registration.</p>
+            </div>
+        </div>
+        {% endfor %}
     </div>
+</div>
+
+{% endcomment %}
+
+
+
+
 </div>
 
 
@@ -960,7 +961,7 @@ active
         const faqQuestions = document.querySelectorAll('.faq-question');
 
         faqQuestions.forEach(question => {
-            question.addEventListener('click', function() {
+            question.addEventListener('click', function () {
                 this.classList.toggle('active');
 
                 // Get the answer element (next sibling)

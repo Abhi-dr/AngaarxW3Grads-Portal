@@ -3,6 +3,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
 from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember, Session
+from .event_models import Event, CertificateTemplate, Certificate
+from django.template.loader import get_template
+from weasyprint import HTML
+from django.http import HttpResponse
 
 # ======================================= FLAMES MAIN PAGE ================================
 
@@ -48,11 +52,14 @@ def student_flames(request):
         registered_course_ids.add(reg.course_id)
     
     available_courses = FlamesCourse.objects.filter(is_active=True).exclude(id__in=registered_course_ids)
+
+    my_certificates = Certificate.objects.filter(student=request.user).select_related('event')
     
     parameters = {
         'registrations': registrations,
         'available_courses': available_courses,
-        'active_tab': 'flames'
+        'active_tab': 'flames',
+        'my_certificates': my_certificates,
     }
     
     return render(request, 'student/flames/flames.html', parameters)
@@ -159,15 +166,48 @@ def my_course(request, slug):
     return render(request, 'student/flames/my_course.html', parameters)
 
 
+# ========================================= VIEW CERTIFICATE =====================================
+
+# @login_required(login_url='login')
+# def view_certificate(request, id):
+    # certificate = get_object_or_404(Certificate, id=id, student=request.user)
+    
+    # # Check if the certificate is associated with an event
+    # if not certificate.event:
+    #     messages.error(request, "This certificate is not valid or does not exist.")
+    #     return redirect('student_flames')
+    
+    # # Render the certificate template
+    # template = get_template('student/flames/certificate_template.html')
+    # context = {
+    #     'certificate': certificate,
+    #     'event': certificate.event,
+    #     'student': request.user,
+    # }
+    
+    # html_content = template.render(context)
+    
+    # # Generate PDF from HTML content
+    # pdf_file = HTML(string=html_content).write_pdf()
+    
+    # response = HttpResponse(pdf_file, content_type='application/pdf')
+    # response['Content-Disposition'] = f'attachment; filename="{certificate.certificate_id}.pdf"'
+    
+    # return response
 
 
 
+@login_required(login_url='login')
+def view_certificate(request, id):
+    certificate = get_object_or_404(Certificate, id=id, student=request.user)
+    
+    parameters = {
+        'certificate': certificate,
+        'event': certificate.event,
+        'student': request.user,
+    }
 
-
-
-
-
-
+    return render(request, 'student/flames/view_certificate.html', parameters)
 
 
 

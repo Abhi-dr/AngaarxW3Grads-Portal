@@ -1,0 +1,31 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block summer_active %}
+active
+{% endblock %}
+
+{% block title %}The Angaar Batch | Summers {% endblock %}
+
+{% block extra_css %}
+
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+
+    {% include "student/flames/certificate_template.html" %}
+
+    
+
+{% endblock %}
