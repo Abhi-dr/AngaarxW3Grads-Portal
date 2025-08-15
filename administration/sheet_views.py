@@ -662,6 +662,7 @@ def download_leaderboard_excel(request, slug):
         leaderboard.append({
             'Student ID': user_id,
             'Student Name': f"{user.first_name} {user.last_name}",
+            'Email': user.email,  # <-- ADD THIS LINE
             'Total Score': total_score,
             'Earliest Submission': earliest_submission_naive,
             'Solved Problems': solved_problems,
