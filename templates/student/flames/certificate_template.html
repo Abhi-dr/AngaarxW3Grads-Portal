@@ -361,6 +361,17 @@
             filter: brightness(1.2) contrast(1.05);
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 320 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cg stroke='%23FF5C1B' stroke-width='1.5'%3E%3Cpath d='M300 20 L180 40 L250 150 L120 100 L160 260 L20 180' fill='none' /%3E%3Cline x1='180' y1='40' x2='160' y2='260' /%3E%3Cline x1='250' y1='150' x2='20' y2='180' /%3E%3Ccircle cx='300' cy='20' r='3' fill='%23FF5C1B' /%3E%3Ccircle cx='250' cy='150' r='3' fill='%23FF5C1B' /%3E%3Ccircle cx='160' cy='260' r='3' fill='%23FF5C1B' /%3E%3Ccircle cx='20' cy='180' r='3' fill='%23FF5C1B' /%3E%3C/g%3E%3C/svg%3E");
         }
+
+        /* Add this to your CSS */
+.certificate-container.download-mode {
+    width: 1153px !important;
+    height: 880px !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 60px 80px !important;
+}
     </style>
 </head>
 
@@ -448,6 +459,8 @@
             try {
                 const certificate = document.getElementById('certificate');
 
+                        certificate.classList.add('download-mode');
+
                 // Wait for fonts to load
                 await document.fonts.ready;
 
@@ -464,6 +477,8 @@
                     logging: false,
                     foreignObjectRendering: false,
                 });
+
+                        certificate.classList.remove('download-mode');
 
                 // Create download link
                 const link = document.createElement('a');
