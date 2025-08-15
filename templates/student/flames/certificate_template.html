@@ -93,7 +93,7 @@
         .certificate-container {
 
             width: 100% !important;
-            height: 850px;
+            height: 880px;
             max-height: 125vh;
 
             z-index: 1;
@@ -389,7 +389,7 @@
         <div class="certificate-content">
             <h1 class="main-heading">Certificate of Completion</h1>
 
-            <p class="sub-heading">This certifies that</p>
+            <p class="sub-heading">This certificate is proudly presented to</p>
 
             <div class="recipient-name">
                 {{ student.first_name }} {{ student.last_name }}
@@ -398,6 +398,9 @@
             <p class="certificate-body">
                 {{ certificate.event.description }}<br>
             </p>
+
+            <h6 style="font-size: 20px;">Certificate ID: {{ certificate.certificate_id }}</h6>
+
         </div>
 
         <!-- Footer with three signatures -->
@@ -451,7 +454,7 @@
                     allowTaint: true,
                     backgroundColor: '#ffffff',
                     width: 1153, // Fixed A4 landscape width
-                    height: 860, // Fixed A4 landscape height
+                    height: 880, // Fixed A4 landscape height
                     scrollX: 0,
                     scrollY: 0,
                     logging: false,
