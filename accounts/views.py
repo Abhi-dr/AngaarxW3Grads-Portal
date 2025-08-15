@@ -125,12 +125,13 @@ def register(request):
                 new_user.set_password(password)
                 new_user.save()
 
+                print(f"New user created: {new_user.username} with ID: {new_user.id}")
+
                 send_welcome_mail(email, first_name)
 
+                auth.login(request, new_user, backend='django.contrib.auth.backends.ModelBackend')
+                
                 messages.success(request, "Account created successfully! Aaja Ab🔥")
-
-                # Auto-login user after registration (optional)
-                default_login(request, new_user)
 
                 return redirect(next_url if next_url else "student")
 
@@ -147,11 +148,6 @@ def register(request):
 def logout(request):
      auth.logout(request)
      return redirect("home")
-
-
-# accounts/views.py
-
-# ... keep all your existing imports and views ...
 
 # ==============================================================================
 # NEW VIEW FOR HANDLING GOOGLE LOGIN FOR STUDENTS

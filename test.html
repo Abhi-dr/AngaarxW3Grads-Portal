@@ -2,402 +2,494 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Login - The Angaar Batch</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Register</title>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;500;600;700&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;500;600;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <style>
-        :root {
-            --bg: #070507;
-            --accent1: #ff4f0f;
-            ;
-            --accent2: #ff6a00;
-            --muted: #bfc8d6;
-            --glass-border: rgba(255, 69, 0, 0.12);
-            --max-width: 1200px;
-            --header-h: 72px;
-        }
+  <style>
+    :root {
+      --bg: #070507;
+      --accent1: #ff4f0f;
+      ;
+      --accent2: #ff6a00;
+      --muted: #bfc8d6;
+      --glass-border: rgba(255, 69, 0, 0.12);
+      --max-width: 1200px;
+      --header-h: 72px;
+    }
 
-        * {
-            box-sizing: border-box
-        }
+    * {
+      box-sizing: border-box
+    }
 
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            background: linear-gradient(180deg, #050405 0%, #0b0505 60%);
-            color: #fff;
-            font-family: 'Poppins', sans-serif;
-        }
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: linear-gradient(180deg, #050405 0%, #0b0505 60%);
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+    }
 
-        /* Background wrapper */
-        #bg-wrap {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-        }
+    /* Background wrapper */
+    #bg-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
 
-        #bg-wrap canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
+    #bg-wrap canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
 
-        .pattern-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            opacity: 0.04;
-            background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(180deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 40px 40px, 40px 40px;
-            mix-blend-mode: overlay;
-            pointer-events: none;
-        }
+    .pattern-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      opacity: 0.04;
+      background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px), linear-gradient(180deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 40px 40px, 40px 40px;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+    }
 
-        /* Header */
-        header {
-            position: fixed;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: var(--header-h);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 14px 4%;
-            z-index: 12;
-            backdrop-filter: blur(6px);
-            background: linear-gradient(180deg, rgba(10, 10, 10, 0.55), rgba(10, 10, 10, 0.25));
-            border-bottom: 1px solid rgba(255, 69, 0, 0.06);
-        }
+    /* Header */
+    header {
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 4%;
+      z-index: 12;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(10, 10, 10, 0.55), rgba(10, 10, 10, 0.25));
+      border-bottom: 1px solid rgba(255, 69, 0, 0.06);
+    }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 900;
-            color: var(--accent2);
-            font-family: 'Montserrat', sans-serif
-        }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      color: var(--accent2);
+      font-family: 'Montserrat', sans-serif
+    }
 
-        .badge {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            background: linear-gradient(45deg, var(--accent1), var(--accent2));
-            box-shadow: 0 6px 22px rgba(255, 106, 0, 0.14);
-        }
+    .badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(45deg, var(--accent1), var(--accent2));
+      box-shadow: 0 6px 22px rgba(255, 106, 0, 0.14);
+    }
 
-        nav.desktop-links {
-            display: flex;
-            gap: 18px;
-            align-items: center;
-        }
+    nav.desktop-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
 
-        nav.desktop-links a {
-            color: var(--muted);
-            text-decoration: none;
-            font-weight: 600;
-        }
+    nav.desktop-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+    }
 
-        .cta {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+    .cta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-        .btn {
-            border-radius: 10px;
-            padding: 8px 12px;
-            border: none;
-            cursor: pointer;
-            font-weight: 700;
-            background: transparent;
-            color: var(--muted);
-            border: 1px solid rgba(255, 255, 255, 0.04);
-        }
+    .btn {
+      border-radius: 10px;
+      padding: 8px 12px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
 
-        .btn.primary {
-            background: linear-gradient(90deg, var(--accent1), var(--accent2));
-            color: #fff;
-            box-shadow: 0 8px 30px rgba(255, 90, 30, 0.12);
-        }
+    .btn.primary {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      color: #fff;
+      box-shadow: 0 8px 30px rgba(255, 90, 30, 0.12);
+    }
 
-        /* Main area - placed above canvases */
-        .wrap {
-            position: relative;
-            z-index: 10;
-            max-width: var(--max-width);
-            margin: 0 auto;
-            padding: calc(var(--header-h) + 48px) 24px 80px;
-            display: grid;
-            grid-template-columns: 1fr 420px;
-            gap: 32px;
-            align-items: start;
-            min-height: calc(100vh - var(--header-h));
-        }
+    /* Main area - placed above canvases */
+    .wrap {
+      position: relative;
+      z-index: 10;
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: calc(var(--header-h) + 48px) 24px 80px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 32px;
+      align-items: start;
+      min-height: calc(100vh - var(--header-h));
+    }
 
-        /* Hero */
-        .hero {
-            padding: 8px 8px;
-        }
+    /* Hero */
+    .hero {
+      padding: 8px 8px;
+    }
 
-        h1.hero-title {
-            font-family: 'Montserrat', sans-serif;
-            font-size: clamp(1.8rem, 5vw, 3.8rem);
-            line-height: 1.02;
-            margin: 6px 0 14px;
-            background: linear-gradient(90deg, var(--accent1), var(--accent2));
-            -webkit-background-clip: text;
-            color: transparent;
-        }
+    .kicker {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255, 69, 0, 0.12);
+      color: var(--accent2);
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
 
-        p.lead {
-            color: var(--muted);
-            font-size: 1rem;
-            max-width: 56ch;
-            margin-bottom: 18px;
-        }
+    h1.hero-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(1.8rem, 5vw, 3.8rem);
+      line-height: 1.02;
+      margin: 6px 0 14px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
 
-        /* Card */
-        .card {
-            background: linear-gradient(180deg, rgba(14, 14, 14, 0.94), rgba(22, 14, 14, 0.86));
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid var(--glass-border);
-            box-shadow: 0 10px 40px rgba(10, 6, 6, 0.6);
-            backdrop-filter: blur(10px);
-        }
+    p.lead {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 56ch;
+      margin-bottom: 18px;
+    }
 
-        .title {
-            font-family: 'Montserrat', sans-serif;
-            color: var(--accent2);
-            font-size: 1.25rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 6px;
-        }
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+    }
 
-        .subtitle {
-            color: var(--muted);
-            margin-bottom: 12px;
-            text-align: center;
-            font-size: .95rem;
-        }
+    /* Card */
+    .card {
+      background: linear-gradient(180deg, rgba(14, 14, 14, 0.94), rgba(22, 14, 14, 0.86));
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 40px rgba(10, 6, 6, 0.6);
+      backdrop-filter: blur(10px);
+    }
 
-        .form-group {
-            margin-bottom: 16px;
-        }
+    /* MODIFIED: Title style to match screenshot */
+    .title {
+      font-family: 'Montserrat', sans-serif;
+      color: var(--accent2);
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 6px;
+    }
 
-        label {
-            display: block;
-            color: #ccd6df;
-            font-size: .86rem;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 12px;
+      text-align: center;
+      font-size: .95rem;
+    }
 
-        input {
-            width: 100%;
-            height: 44px;
-            padding: 10px 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
-            background: rgba(10, 10, 10, 0.6);
-            color: #fff;
-            font-size: .95rem;
-            outline: none;
-            transition: box-shadow .18s, border-color .18s, transform .12s;
-        }
+    /* MODIFIED: Added margin-bottom for spacing */
+    .form-group {
+      margin-bottom: 16px;
+    }
 
-        input:focus {
-            border-color: rgba(255, 106, 0, 0.9);
-            box-shadow: 0 6px 20px rgba(255, 90, 30, 0.08);
-            transform: translateY(-2px);
-        }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
-        .submit {
-            width: 100%;
-            padding: 12px;
-            border-radius: 12px;
-            font-weight: 800;
-            background: linear-gradient(90deg, var(--accent1), var(--accent2));
-            border: none;
-            cursor: pointer;
-            color: #fff;
-            box-shadow: 0 10px 30px rgba(255, 90, 30, 0.24), 0 0 16px rgba(255, 90, 30, 0.12);
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
-        }
+    label {
+      display: block;
+      color: #ccd6df;
+      font-size: .86rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
 
-        .submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 36px rgba(255, 90, 30, 0.3), 0 0 20px rgba(255, 90, 30, 0.18);
-        }
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      background: rgba(10, 10, 10, 0.6);
+      color: #fff;
+      font-size: .95rem;
+      outline: none;
+      transition: box-shadow .18s, border-color .18s, transform .12s;
+    }
 
-        .submit:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: rgba(255, 106, 0, 0.9);
+      box-shadow: 0 6px 20px rgba(255, 90, 30, 0.08);
+      transform: translateY(-2px);
+    }
 
-        .small {
-            font-size: .86rem;
-            color: var(--muted);
-            text-align: center;
-            margin-top: 16px;
-        }
+    .form-input {
+      height: 44px;
+    }
 
-        .small a {
-            text-decoration: none;
-            font-weight: 600;
-        }
+    textarea.form-input {
+      min-height: 88px;
+      resize: vertical;
+      padding-top: 8px;
+    }
 
-        /* Modal */
-        .modal {
-            position: fixed;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%) scale(.98);
-            background: rgba(6, 6, 6, 0.95);
-            padding: 18px 22px;
-            border-radius: 12px;
-            border: 2px solid var(--glass-border);
-            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
-            z-index: 40;
-            opacity: 0;
-            visibility: hidden;
-            transition: all .22s;
-            text-align: center;
-        }
+    .checkbox-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 10px 0 16px;
+    }
 
-        .modal.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translate(-50%, -50%) scale(1);
-        }
+    .submit {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      border: none;
+      cursor: pointer;
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(255, 90, 30, 0.24), 0 0 16px rgba(255, 90, 30, 0.12);
+      /* Enhanced glow effect */
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-top: 10px;
+      /* Added margin for spacing */
+    }
 
-        /* Responsive */
-        @media (max-width:1000px) {
-            .wrap {
-                grid-template-columns: 1fr;
-                padding: calc(var(--header-h) + 40px) 18px 60px;
-            }
+    .submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 36px rgba(255, 90, 30, 0.3), 0 0 20px rgba(255, 90, 30, 0.18);
+    }
 
-            .card {
-                max-width: 760px;
-                margin: 0 auto;
-            }
+    .submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
 
-            nav.desktop-links {
-                display: none;
-            }
-        }
+    .small {
+      font-size: .86rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 16px;
+    }
 
-        @media (max-width:520px) {
-            h1.hero-title {
-                font-size: 2rem;
-            }
-        }
+    .small a {
+      text-decoration: none;
+      font-weight: 600;
+    }
 
-        /* reveal helper */
-        .reveal {
-            opacity: 0;
-            transform: translateY(12px);
-            transition: opacity .55s ease, transform .55s ease;
-        }
+    /* Modal */
+    .modal {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%) scale(.98);
+      background: rgba(6, 6, 6, 0.95);
+      padding: 18px 22px;
+      border-radius: 12px;
+      border: 2px solid var(--glass-border);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: all .22s;
+      text-align: center;
+    }
 
-        .reveal.show {
-            opacity: 1;
-            transform: none;
-        }
+    .modal.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translate(-50%, -50%) scale(1);
+    }
 
-        /* accessibility focus */
-        a:focus,
-        button:focus,
-        input:focus {
-            outline: 3px solid rgba(255, 106, 0, 0.12);
-            outline-offset: 3px;
-        }
-    </style>
+    /* Responsive */
+    @media (max-width:1000px) {
+      .wrap {
+        grid-template-columns: 1fr;
+        padding: calc(var(--header-h) + 40px) 18px 60px;
+      }
+
+      .card {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+
+      nav.desktop-links {
+        display: none;
+      }
+    }
+
+    @media (max-width:520px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      h1.hero-title {
+        font-size: 2rem;
+      }
+
+      .kicker {
+        font-size: .86rem;
+      }
+    }
+
+    /* reveal helper */
+    .reveal {
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity .55s ease, transform .55s ease;
+    }
+
+    .reveal.show {
+      opacity: 1;
+      transform: none;
+    }
+
+    /* accessibility focus */
+    a:focus,
+    button:focus,
+    input:focus {
+      outline: 3px solid rgba(255, 106, 0, 0.12);
+      outline-offset: 3px;
+    }
+  </style>
 </head>
 
 <body>
-    <div id="bg-wrap" aria-hidden="true">
-        <canvas id="fire-canvas"></canvas>
-        <div class="pattern-overlay"></div>
+  <div id="bg-wrap" aria-hidden="true">
+    <canvas id="fire-canvas"></canvas>
+    <div class="pattern-overlay"></div>
+  </div>
+
+  <header role="banner">
+    <div class="logo">
+      <div class="badge">🔥</div>The Angaar Batch
     </div>
-
-    <header role="banner">
-        <div class="logo">
-            <div class="badge">🔥</div>The Angaar Batch
-        </div>
-        <nav class="desktop-links" role="navigation" aria-label="Primary">
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#courses">Courses</a>
-            <a href="#contact">Contact</a>
-        </nav>
-        <div class="cta">
-            <button class="btn">Login</button>
-            <button class="btn primary">Register</button>
-        </div>
-    </header>
-
-    <main id="home" class="wrap" role="main">
-        <section class="hero">
-            <h1 class="hero-title reveal">WELCOME BACK, ANGAARI</h1>
-            <p class="lead reveal">Ready to pick up where you left off? Login to continue your journey from curiosity to
-                mastery.</p>
-        </section>
-
-        <aside class="card reveal" id="loginCard" aria-labelledby="loginTitle">
-            <div class="title" id="loginTitle">Login to your account</div>
-            <div class="subtitle">Chal dikha de angaar</div>
-
-            <form id="loginForm" novalidate>
-                <div class="form-group">
-                    <label for="username">Username</label>
-                    <input id="username" name="username" type="text" placeholder="Enter your username..." required>
-                </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input id="password" name="password" type="password" placeholder="Enter your password..." required>
-                </div>
-
-                <button type="submit" class="submit">Login</button>
-
-                <div class="small">Not an <a href="#register" style="color:var(--accent2)">Angaari</a> yet? <a
-                        href="#register" style="color:var(--muted)">Register</a></div>
-            </form>
-        </aside>
-    </main>
-
-    <div id="modal" class="modal" role="status" aria-hidden="true" aria-live="polite">
-        <h3 style="margin:0 0 8px">✅ Login Successful!</h3>
-        <p style="margin:0 0 12px;color:var(--muted)">Welcome back! Redirecting you to your dashboard...</p>
-        <button onclick="closeModal()" class="btn primary" style="padding:8px 12px">Close</button>
+    <nav class="desktop-links" role="navigation" aria-label="Primary">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#courses">Courses</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="cta">
+      <button class="btn">Login</button>
+      <button class="btn primary">Register</button>
     </div>
+  </header>
 
-    <footer
-        style="padding:36px 6%;text-align:center;color:var(--muted);border-top:1px solid rgba(255,255,255,0.03);margin-top:48px;position:relative;z-index:10">
-        &copy; <span id="year"></span> The Angaar Batch · Powered by W3grads
-    </footer>
+  <main id="home" class="wrap" role="main">
+    <section class="hero">
+      <h1 class="hero-title reveal">IGNITE YOUR CODING JOURNEY</h1>
+      <p class="lead reveal">Join a community that turns curiosity into mastery handson projects, mentorled sessions,
+        interview practice and placement guidance.</p>
+      <div class="hero-cta reveal">
+        <button class="btn primary">Join The Batch 🔥</button>
+      </div>
+      <div style="margin-top:14px" class="reveal">
+        <span
+          style="display:inline-block;padding:8px 12px;background:rgba(255,255,255,0.02);border-radius:10px;margin-right:8px;color:var(--muted)">🚀
+          20000+ Graduates</span>
+        <span
+          style="display:inline-block;padding:8px 12px;background:rgba(255,255,255,0.02);border-radius:10px;color:var(--muted)">🏆
+          Placement-Ready</span>
+      </div>
+    </section>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <aside class="card reveal" id="registrationCard" aria-labelledby="regTitle">
+      <div class="title" id="regTitle">Create your account</div>
+      <div class="subtitle">Seekhna Hai, Seekh! Jeetna Hai, Jeet!</div>
 
-    <script id="vertexShader" type="x-shader/x-vertex">
+      <form id="registrationForm" novalidate>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input id="username" class="form-input" name="username" type="text" placeholder="Enter your username"
+            required>
+        </div>
+
+        <div class="form-row form-group">
+          <div class="form-group">
+            <label for="firstName">First Name</label>
+            <input id="firstName" class="form-input" name="firstName" type="text" placeholder="Enter your First name..."
+              required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name</label>
+            <input id="lastName" class="form-input" name="lastName" type="text" placeholder="Enter your Last name..."
+              required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input id="email" class="form-input" name="email" type="email" placeholder="Enter your Email here..."
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" class="form-input" name="password" type="password" placeholder="Enter your Password..."
+            required>
+        </div>
+
+        <div class="form-group">
+          <label for="confirmPassword">Confirm Password</label>
+          <input id="confirmPassword" class="form-input" name="confirmPassword" type="password"
+            placeholder="Enter the same password again..." required>
+        </div>
+
+        <button type="submit" class="submit">Register</button>
+
+        <div class="small">Already an <a href="#login" style="color:var(--accent2)">Angaari</a>? <a href="#login"
+            style="color:var(--muted)">Login</a></div>
+      </form>
+    </aside>
+  </main>
+
+  <div id="modal" class="modal" role="status" aria-hidden="true" aria-live="polite">
+    <h3 style="margin:0 0 8px">🔥 Welcome to The Angaar Batch!</h3>
+    <p style="margin:0 0 12px;color:var(--muted)">Your coding journey has been ignited. Check your inbox for next steps.
+    </p>
+    <button onclick="closeModal()" class="btn primary" style="padding:8px 12px">Close</button>
+  </div>
+
+  <footer
+    style="padding:36px 6%;text-align:center;color:var(--muted);border-top:1px solid rgba(255,255,255,0.03);margin-top:48px;position:relative;z-index:10">
+    &copy; <span id="year"></span> The Angaar Batch · Powered by W3grads
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script id="vertexShader" type="x-shader/x-vertex">
     varying vec2 vUv;
     void main() {
       vUv = uv;
@@ -405,16 +497,20 @@
     }
   </script>
 
-    <script id="fragmentShader" type="x-shader/x-fragment">
+  <script id="fragmentShader" type="x-shader/x-fragment">
+    // Volumetric Fire Shader by The Book of Shaders
+    // Adapted for Three.js
     uniform vec3 color1;
     uniform vec3 color2;
     uniform float time;
     varying vec2 vUv;
 
+    // 2D Random function
     float random (vec2 st) {
         return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
     }
 
+    // 2D Noise function
     float noise (vec2 st) {
         vec2 i = floor(st);
         vec2 f = fract(st);
@@ -426,9 +522,11 @@
         return mix(a, b, u.x) + (c - a)* u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
     }
 
+    // Fractional Brownian Motion
     float fbm(vec2 st) {
         float value = 0.0;
         float amplitude = 0.5;
+        float frequency = 0.0;
         for (int i = 0; i < 6; i++) {
             value += amplitude * noise(st);
             st *= 2.0;
@@ -439,155 +537,193 @@
 
     void main() {
         vec2 st = vUv;
-        st.y *= 2.0;
+        st.y *= 2.0; // stretch the effect vertically
         
+        // Animate the noise over time
         float T = time * 0.4;
         vec2 q = vec2(fbm(st + T * 0.01), fbm(st + vec2(1.0)));
         vec2 r = vec2(fbm(st + q * 2.0 + T * 0.1), fbm(st + q * 1.5 + T * 0.05));
         
         float f = fbm(st + r);
         
+        // Shape the fire with a smoothstep curve
         float fireShape = 1.0 - smoothstep(0.1, 1.0, st.y);
         f *= fireShape;
         
+        // Mix colors based on the noise value
         vec3 color = mix(color1, color2, clamp((f*f)*4.0, 0.0, 1.0));
         
+        // Final color output, with alpha based on intensity
         gl_FragColor = vec4(color, f * f * f * 2.5);
     }
   </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const modal = document.getElementById('modal');
-            const form = document.getElementById('loginForm');
-            const yearSpan = document.getElementById('year');
-            yearSpan.textContent = new Date().getFullYear();
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Retain existing form/modal/reveal logic
+      const modal = document.getElementById('modal');
+      const form = document.getElementById('registrationForm');
+      const yearSpan = document.getElementById('year');
+      yearSpan.textContent = new Date().getFullYear();
 
-            // ===============================================================
-            // THREE.JS FIRE IMPLEMENTATION (Unchanged)
-            // ===============================================================
-            let scene, camera, renderer, fireMesh, clock;
+      // ===============================================================
+      // NEW: THREE.JS FIRE IMPLEMENTATION
+      // ===============================================================
+      let scene, camera, renderer, fireMesh, clock;
 
-            function init3D() {
-                const canvas = document.getElementById('fire-canvas');
-                scene = new THREE.Scene();
-                clock = new THREE.Clock();
-                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                camera.position.z = 2.5;
-                renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-                onWindowResize();
-                const fireGeometry = new THREE.PlaneGeometry(10, 5, 32, 32);
-                const fireMaterial = new THREE.ShaderMaterial({
-                    uniforms: {
-                        time: { value: 0.0 },
-                        color1: { value: new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--accent1')) },
-                        color2: { value: new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--accent2')) },
-                    },
-                    vertexShader: document.getElementById('vertexShader').textContent,
-                    fragmentShader: document.getElementById('fragmentShader').textContent,
-                    transparent: true,
-                    blending: THREE.AdditiveBlending,
-                    depthWrite: false
-                });
-                fireMesh = new THREE.Mesh(fireGeometry, fireMaterial);
-                scene.add(fireMesh);
-                window.addEventListener('resize', onWindowResize);
-                document.addEventListener('pointermove', onPointerMove);
-                animate();
-            }
+      function init3D() {
+        const canvas = document.getElementById('fire-canvas');
+        scene = new THREE.Scene();
+        clock = new THREE.Clock();
 
-            function onWindowResize() {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
+        // Camera setup
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 2.5;
 
-            function onPointerMove(event) {
-                if (fireMesh) {
-                    const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-                    const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
-                    camera.rotation.y = (mouseX * 0.1 - camera.rotation.y) * 0.05;
-                    camera.rotation.x = (mouseY * 0.1 - camera.rotation.x) * 0.05;
-                }
-            }
+        // Renderer setup
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        onWindowResize(); // Set initial size
 
-            let rafId;
-            function animate() {
-                const elapsedTime = clock.getElapsedTime();
-                fireMesh.material.uniforms.time.value = elapsedTime;
-                renderer.render(scene, camera);
-                rafId = requestAnimationFrame(animate);
-            }
+        // Fire geometry and material
+        const fireGeometry = new THREE.PlaneGeometry(10, 5, 32, 32);
+        const fireMaterial = new THREE.ShaderMaterial({
+          uniforms: {
+            time: { value: 0.0 },
+            // Using your site's brand colors
+            color1: { value: new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--accent1')) },
+            color2: { value: new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue('--accent2')) },
+          },
+          vertexShader: document.getElementById('vertexShader').textContent,
+          fragmentShader: document.getElementById('fragmentShader').textContent,
+          transparent: true,
+          blending: THREE.AdditiveBlending, // Makes the fire glow
+          depthWrite: false
+        });
 
-            document.addEventListener('visibilitychange', () => {
-                if (document.hidden) {
-                    cancelAnimationFrame(rafId);
-                } else {
-                    animate();
-                }
-            });
+        fireMesh = new THREE.Mesh(fireGeometry, fireMaterial);
+        scene.add(fireMesh);
 
-            init3D();
+        // Event Listeners
+        window.addEventListener('resize', onWindowResize);
+        document.addEventListener('pointermove', onPointerMove);
 
-            // ===============================================================
-            // PAGE LOGIC (MODIFIED FOR USERNAME LOGIN)
-            // ===============================================================
+        animate();
+      }
 
-            // IntersectionObserver reveal
-            const reveals = document.querySelectorAll('.reveal');
-            const io = new IntersectionObserver((entries) => {
-                entries.forEach(ent => {
-                    if (ent.isIntersecting) {
-                        ent.target.classList.add('show');
-                        io.unobserve(ent.target);
-                    }
-                });
-            }, { threshold: 0.12 });
-            reveals.forEach(el => io.observe(el));
+      function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      }
 
-            // Form validation & submission simulation
-            form.addEventListener('submit', (ev) => {
-                ev.preventDefault();
-                const username = form.username.value.trim();
-                const password = form.password.value;
+      // Enhanced parallax effect by rotating the camera
+      function onPointerMove(event) {
+        if (fireMesh) {
+          const mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+          const mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+          // Smooth rotation using GSAP-like easing
+          camera.rotation.y = (mouseX * 0.1 - camera.rotation.y) * 0.05;
+          camera.rotation.x = (mouseY * 0.1 - camera.rotation.x) * 0.05;
+        }
+      }
 
-                if (!username || !password) {
-                    alert('Please fill in both username and password.');
-                    return;
-                }
+      let rafId;
+      function animate() {
+        const elapsedTime = clock.getElapsedTime();
+        fireMesh.material.uniforms.time.value = elapsedTime;
+        renderer.render(scene, camera);
+        rafId = requestAnimationFrame(animate);
+      }
 
-                const submitBtn = form.querySelector('.submit');
-                submitBtn.disabled = true;
-                submitBtn.innerHTML = 'LOGGING IN...';
+      // Pause animation when tab is not visible
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          cancelAnimationFrame(rafId);
+        } else {
+          animate();
+        }
+      });
 
-                setTimeout(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = 'Login';
-                    form.reset();
-                    showModal();
-                }, 1200);
-            });
+      init3D();
 
-            function showModal() {
-                modal.classList.add('show');
-                modal.setAttribute('aria-hidden', 'false');
-                setTimeout(closeModal, 4000);
-            }
-            window.closeModal = function () {
-                modal.classList.remove('show');
-                modal.setAttribute('aria-hidden', 'true');
-            };
+      // ===============================================================
+      // EXISTING PAGE LOGIC (MODIFIED)
+      // ===============================================================
 
-            // Focus on the first input field when a primary button is clicked
-            document.querySelectorAll('.btn.primary').forEach(b => {
-                b.addEventListener('click', () => {
-                    const firstInput = document.getElementById('username');
-                    if (firstInput) firstInput.focus();
-                });
-            });
-        }); // DOMContentLoaded
-    </script>
+      // IntersectionObserver reveal
+      const reveals = document.querySelectorAll('.reveal');
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(ent => {
+          if (ent.isIntersecting) {
+            ent.target.classList.add('show');
+            io.unobserve(ent.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      reveals.forEach(el => io.observe(el));
+
+      // Form validation & submission simulation
+      function isEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+      // REMOVED isPhone function as it's no longer used
+
+      form.addEventListener('submit', (ev) => {
+        ev.preventDefault();
+        const firstName = form.firstName.value.trim();
+        const lastName = form.lastName.value.trim();
+        const username = form.username.value.trim();
+        const email = form.email.value.trim();
+        const password = form.password.value;
+        const confirmPassword = form.confirmPassword.value;
+        // REMOVED phone, course, and terms variables
+
+        // MODIFIED validation check
+        if (!firstName || !lastName || !username || !email || !password || !confirmPassword) {
+          alert('Please fill all required fields.');
+          return;
+        }
+
+        if (password !== confirmPassword) {
+          alert('Passwords do not match. Please try again.');
+          return;
+        }
+
+        if (!isEmail(email)) { alert('Please enter a valid email.'); return; }
+        // REMOVED phone validation
+
+        const submitBtn = form.querySelector('.submit');
+        submitBtn.disabled = true;
+        // MODIFIED button text during submission to match the original button
+        submitBtn.innerHTML = 'REGISTERING...';
+
+        setTimeout(() => {
+          submitBtn.disabled = false;
+          // MODIFIED button text after submission
+          submitBtn.innerHTML = 'Register';
+          form.reset();
+          showModal();
+        }, 1200);
+      });
+
+      function showModal() {
+        modal.classList.add('show');
+        modal.setAttribute('aria-hidden', 'false');
+        setTimeout(closeModal, 3000);
+      }
+      window.closeModal = function () {
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden', 'true');
+      };
+
+      document.querySelectorAll('.btn.primary').forEach(b => {
+        b.addEventListener('click', () => {
+          const first = document.getElementById('firstName');
+          if (first) first.focus();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+    }); // DOMContentLoaded
+  </script>
 </body>
 
 </html>
