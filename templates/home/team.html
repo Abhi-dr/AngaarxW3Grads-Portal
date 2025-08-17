@@ -7,322 +7,10 @@ Our Team | Angaar
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/team.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css">
 
-<style>
-
-    body{
-        background-color: #0d0d0d;
-
-    }
-
-    /* Team Page Container */
-    .team-page-container {
-        position: relative;
-        padding: 80px 0;
-        overflow: hidden;
-    }
-
-    /* Background Elements */
-    .team-bg-gradient {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background:
-            radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
-            radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    .team-bg-particles {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    /* Team Header */
-    .team-header {
-        position: relative;
-        text-align: center;
-        margin-bottom: 60px;
-        z-index: 1;
-    }
-
-    .team-title {
-        font-size: 3.5rem;
-        font-weight: 800;
-        margin-bottom: 20px;
-        background: linear-gradient(135deg, #ff6026, #ff9a56);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        position: relative;
-        display: inline-block;
-    }
-
-    .team-title::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 4px;
-        background: linear-gradient(90deg, #ff6026, #ff9a56);
-        border-radius: 2px;
-    }
-
-    .team-subtitle {
-        font-size: 1.2rem;
-        max-width: 700px;
-        margin: 0 auto;
-        color: #aaa;
-        line-height: 1.6;
-    }
-
-    /* Team Grid */
-    .team-grid {
-        display: grid;
-        justify-content: center;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 30px;
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Founders Row */
-    .founders-row {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 30px;
-        margin-bottom: 50px;
-        position: relative;
-        z-index: 1;
-    }
-
-    .founders-row .team-card {
-        width: 280px;
-        flex-grow: 0;
-        flex-shrink: 0;
-    }
-
-    /* Team Card */
-    .team-card {
-        position: relative;
-        background: rgba(30, 30, 30, 0.5);
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        transition: all 0.4s ease;
-        transform-style: preserve-3d;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .team-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 35px rgba(255, 96, 38, 0.2);
-    }
-
-    .team-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(255, 96, 38, 0.1) 0%, transparent 100%);
-        z-index: 1;
-        opacity: 0;
-        transition: opacity 0.4s ease;
-    }
-
-    .team-card:hover::before {
-        opacity: 1;
-    }
-
-    .team-img-wrapper {
-        position: relative;
-        padding-top: 20px;
-        text-align: center;
-        z-index: 2;
-    }
-
-    .team-img {
-        width: 85%;
-        border-radius: 12px;
-        transition: all 0.4s ease;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .team-card:hover .team-img {
-        transform: scale(1.05);
-        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
-    }
-
-    .team-card-content {
-        padding: 20px;
-        position: relative;
-        z-index: 2;
-        text-align: center;
-    }
-
-    .team-name {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 8px;
-        color: #fff;
-        position: relative;
-        display: inline-block;
-    }
-
-    .team-name::after {
-        content: '';
-        position: absolute;
-        bottom: -5px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #ff6026, #ff9a56);
-        transition: width 0.3s ease;
-    }
-
-    .team-card:hover .team-name::after {
-        width: 100%;
-    }
-
-    .team-position {
-        font-size: 1rem;
-        color: #ff6026;
-        margin-bottom: 15px;
-        font-weight: 500;
-    }
-
-    .team-social {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 15px;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.4s ease;
-    }
-
-    .team-card:hover .team-social {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .social-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: 16px;
-        transition: all 0.3s ease;
-    }
-
-    .social-icon:hover {
-        background: #ff6026;
-        transform: translateY(-5px);
-    }
-
-    /* Team Categories */
-    .team-categories {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 40px;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    .category-btn {
-        padding: 8px 20px;
-        background: rgba(30, 30, 30, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 30px;
-        color: #aaa;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(5px);
-    }
-
-    .category-btn.active,
-    .category-btn:hover {
-        background: linear-gradient(135deg, #ff6026, #ff9a56);
-        color: #fff;
-        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
-    }
-
-    /* Responsive Styles */
-    @media (max-width: 1200px) {
-        .team-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-        }
-        
-        .founders-row .team-card {
-            width: 250px;
-        }
-    }
-
-    @media (max-width: 768px) {
-        .team-title {
-            font-size: 2.5rem;
-        }
-
-        .team-grid {
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-        }
-        
-        .founders-row {
-            gap: 20px;
-        }
-        
-        .founders-row .team-card {
-            width: 220px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .team-page-container {
-            padding: 60px 0;
-        }
-
-        .team-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            max-width: 450px;
-            margin: 0 auto;
-        }
-        
-        .founders-row {
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .founders-row .team-card {
-            width: 280px;
-        }
-
-        .team-title {
-            font-size: 2rem;
-        }
-    }
-</style>
 {% endblock %}
 
 {% block body %}
@@ -337,13 +25,6 @@ Our Team | Angaar
                 education and empowering the next generation of tech professionals.</p>
         </div>
 
-        <!-- <div class="team-categories" data-aos="fade-up" data-aos-delay="200">
-            <div class="category-btn active" data-filter="all">All</div>
-            <div class="category-btn" data-filter="founder">Founders</div>
-            <div class="category-btn" data-filter="technical">Technical</div>
-            <div class="category-btn" data-filter="design">Design</div>
-        </div> -->
-
         <!-- Founders Row -->
         <div class="founders-row" data-aos="fade-up">
             <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="100">
@@ -354,29 +35,32 @@ Our Team | Angaar
                     <h3 class="team-name">Naman Sharma</h3>
                     <p class="team-position">Founder and Educator</p>
                     <div class="team-social">
-                        <a href="https://www.linkedin.com/in/namansharma1412" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        <a href="https://www.linkedin.com/in/namansharma1412" class="social-icon"><i
+                                class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
 
             <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="200">
                 <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="{% static 'img/home/dk.png' %}"
-                        alt="DK">
+                    <img class="team-img" src="{% static 'img/home/dk.png' %}" alt="DK">
                 </div>
                 <div class="team-card-content">
                     <h3 class="team-name">Divyanshu Khandelwal</h3>
                     <p class="team-position">Co-Founder and Educator</p>
                     <div class="team-social">
-                        <a href="https://www.linkedin.com/in/divyanshu-khandelwal-dkoder" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://www.instagram.com/iamblackorder/" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        <a href="https://www.linkedin.com/in/divyanshu-khandelwal-dkoder" class="social-icon"><i
+                                class="fab fa-linkedin-in"></i></a>
+                        <a href="https://www.instagram.com/iamblackorder/" class="social-icon"><i
+                                class="fab fa-instagram"></i></a>
+
+                        <!-- <a href="https://www.instagram.com/iamblackorder/" class="social-icon"><i
+                                class="fa-solid fa-envelope"></i></a>
+                        <a href="https://www.instagram.com/iamblackorder/" class="social-icon"><i
+                                class="fa-solid fa-phone"></i></a> -->
                     </div>
                 </div>
+
             </div>
 
             <div class="team-card" data-category="founder" data-aos="fade-up" data-aos-delay="300">
@@ -389,158 +73,223 @@ Our Team | Angaar
                     <h3 class="team-name">Piyush Khandelwal</h3>
                     <p class="team-position">Advisor and Director @W3Grads</p>
                     <div class="team-social">
-                        <a href="https://www.linkedin.com/in/piyush-khandelwal-5a9b9718" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                        <a href="https://www.linkedin.com/in/piyush-khandelwal-5a9b9718" class="social-icon"><i
+                                class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Rest of Team in Grid -->
-
-        <div class="team-grid">
-            <div class="team-card" data-category="design" data-aos="fade-up" data-aos-delay="100">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="{% static 'img/home/gauri.png' %}"
-                        alt="-">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Gaurika Dhingra</h3>
-                    <p class="team-position">Operations Team</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/gaurika-dhingra/" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
-                    </div>
-                </div>
+        <!--============================= Core Members Section =======================-->
+        <section class="hierarchical-container" data-aos="fade-up">
+            <div class="role-heading">
+                <h3>Core Members</h3>
             </div>
-
-            <div class="team-card" data-category="design" data-aos="fade-up" data-aos-delay="200">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="{% static 'img/home/nistha.jpeg' %}"
-                        alt="Nistha Bhura">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Nistha Bhura</h3>
-                    <p class="team-position">Outreach Manager</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/nistha-bhura-67aa54257" target="_blank" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-behance"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+            <div class="members-grid">
+                <div class="base-card outreach-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="circular-img-wrapper">
+                        <img class="circular-img" src="{% static 'img/home/gauri.png' %}" alt="Gaurika Dhingra">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="team-name member-name">Gaurika Dhingra</h3>
+                        <p class="team-position member-position">Operations Team</p>
+                        <div class="team-social">
+                            <a href="https://www.linkedin.com/in/gaurika-dhingra/" class="social-icon"><i
+                                    class="fab fa-linkedin-in"></i></a>
+                        </div>
                     </div>
                 </div>
+
+                <div class="base-card outreach-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="circular-img-wrapper">
+                        <img class="circular-img" src="{% static 'img/home/nistha.jpeg' %}" alt="Nistha Bhura">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="team-name member-name">Nistha Bhura</h3>
+                        <p class="team-position member-position">Outreach Manager</p>
+                        <div class="team-social member-social">
+                            <a href="https://www.linkedin.com/in/nistha-bhura-67aa54257" target="_blank"
+                                class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="base-card outreach-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="circular-img-wrapper">
+                        <img class="circular-img" src="{% static 'img/home/mukund.jpeg' %}" alt="mukund">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="team-name member-name">Mukund Johari</h3>
+                        <p class="team-position member-position">Operations Co-ordinator</p>
+                        <div class="team-social member-social">
+                            <a href="www.linkedin.com/in/mukund-johari" target="_blank" class="social-icon"><i
+                                    class="fab fa-linkedin-in"></i></a>
+
+                            <a href="mailto:mukundjohari@gmail.com" class="social-icon"><i class="fa-solid fa-envelope"></i></a>
+
+                        </div>
+                    </div>
+                </div>
+
             </div>
+        </section>
 
-            <div class="team-card" data-category="technical" data-aos="fade-up" data-aos-delay="300">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQGzRz0uCzlJWQ/profile-displayphoto-shrink_400_400/B56ZRAdNPXHIAk-/0/1736248187102?e=1747267200&v=beta&t=gxla4LY0jzX2_7YUtsfAe9WYEPoppSQw8FJAQmqSW9s"
-                        alt="Adwait Patel">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Adwait Patel</h3>
-                    <p class="team-position">Core Technical Team</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/adp-pythondev" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
-                    </div>
-                </div>
+        <!--=============================== Outreach Associates Section ===============================-->
+        <section class="hierarchical-container" data-aos="fade-up">
+            <div class="role-heading">
+                <h3>Outreach Associates</h3>
             </div>
+            <div class="members-grid">
+                <div class="base-card outreach-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="circular-img-wrapper">
+                        <img class="circular-img" src="{% static 'img/home/shubh.jpeg' %}" alt="Shubh Verma">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="team-name member-name">Shubh Verma</h3>
+                        <p class="team-position member-position">Outreach Associate</p>
+                        <div class="team-social member-social">
+                            <a href="https://www.linkedin.com/in/shubh-verma-431ba827a" class="social-icon">
+                                <i class="fab fa-linkedin-in"></i></a>
 
-            <div class="team-card" data-category="technical" data-aos="fade-up" data-aos-delay="400">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D4E03AQHECQIZzTZdCg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1713275914043?e=1747267200&v=beta&t=L-ge91Qwk0xEBOlnTuyaYdPl0pKTs_b4xL7FdVAf0TQ"
-                        alt="Shashank Upadhyay">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Shashank Upadhyay</h3>
-                    <p class="team-position">Core Technical Team</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/shubhcoder0269" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
+                            <a href="mailto:shubhverma099@gmail.com" class="social-icon"><i
+                                    class="fa-solid fa-envelope"></i></a>
+                        </div>
                     </div>
                 </div>
+
+                <div class="base-card outreach-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="circular-img-wrapper">
+                        <img class="circular-img" src="{% static 'img/home/deepanshu.jpeg' %}" alt="Nistha Bhura">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="team-name member-name">Deepanshu Kashyap</h3>
+                        <p class="team-position member-position">Outreach Associate</p>
+                        <div class="team-social member-social">
+                            <a href="https://www.linkedin.com/in/deepanshu-kashyap-433455f" target="_blank"
+                                class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="mailto:medeepanshukashyap@gmail.com" class="social-icon"><i
+                                    class="fa-solid fa-envelope"></i></a>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="base-card outreach-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="circular-img-wrapper">
+                        <img class="circular-img" src="{% static 'img/home/devshukla.jpeg' %}" alt="Nistha Bhura">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="team-name member-name">Dev Shukla</h3>
+                        <p class="team-position member-position">Outreach Associate</p>
+                        <div class="team-social member-social">
+                            <a href="https://www.linkedin.com/in/dev-shukla-704522326" target="_blank"
+                                class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="mailto:devs44236@gmail.com" class="social-icon"><i
+                                    class="fa-solid fa-envelope"></i></a>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="base-card outreach-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="circular-img-wrapper">
+                        <img class="circular-img" src="{% static 'img/home/anurodh.jpeg' %}" alt="Nistha Bhura">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="team-name member-name">Anurodh Mishra</h3>
+                        <p class="team-position member-position">Outreach Associate</p>
+                        <div class="team-social member-social">
+                            <a href="https://www.linkedin.com/in/anurodh-mishra-105707323" target="_blank"
+                                class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="mailto:anurodhmishra1619@gmail.com" class="social-icon"><i
+                                    class="fa-solid fa-envelope"></i></a>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="base-card outreach-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="circular-img-wrapper">
+                        <img class="circular-img" src="{% static 'img/home/akhil.jpeg' %}" alt="Nistha Bhura">
+                    </div>
+                    <div class="card-content">
+                        <h3 class="team-name member-name">Akhil Pratap Singh</h3>
+                        <p class="team-position member-position">Outreach Associate</p>
+                        <div class="team-social member-social">
+                            <a href="https://www.linkedin.com/in/akhil-pratap-singh-1a63b6326" target="_blank"
+                                class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                            <a href="mailto:akhilpratap2365@gmail.com" class="social-icon"><i
+                                    class="fa-solid fa-envelope"></i></a>
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </section>
+
+        <!--=============================== Campus Ambassadors Section ===============================-->
+        <!-- <section class="hierarchical-container" data-aos="fade-up">
+            <div id="open-ambassadors-btn" class="role-heading">
+                <h3>Campus Ambassadors</h3>
+            </div>
+        </section> -->
+
+        <!--=============================== Contributors Section ===============================-->
+        <!-- <section class="hierarchical-container" data-aos="fade-up">
+            <div id="open-contributors-btn" class="role-heading">
+                <h3>Contributors</h3>
+            </div>
+        </section> -->
+    </div>
+</div>
+
+<!-- Ambassadors Modal -->
+<div id="ambassadors-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Campus Ambassadors</h2>
+            <span class="close" onclick="closeModal('ambassadors-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="ambassadors-grid" class="modal-grid">
+                <!-- Content will be populated by JavaScript -->
             </div>
         </div>
+    </div>
+</div>
 
-        {% comment %}
-        <div class="team-grid">
-            <div class="team-card" data-category="design" data-aos="fade-up" data-aos-delay="100">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQFA3Q0axXNkxQ/profile-displayphoto-shrink_400_400/B56ZQYuQ7jH0Ak-/0/1735581569302?e=1747267200&v=beta&t=nU-jjZFN8JWjszDRSb-DS4xlI51kdyR1UgfYSxV8R-g"
-                        alt="Nandini">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Nandini</h3>
-                    <p class="team-position">Video Editing Team</p>
-                    <div class="team-social">
-                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="team-card" data-category="design" data-aos="fade-up" data-aos-delay="200">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQHNkZy8pXwVJA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1718273999260?e=1747267200&v=beta&t=kTRp7uu_umxDgyzg5zqkaY6vglPEVEPrzQTlssnTG-I"
-                        alt="Ishaan Khan">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Ishaan Khan</h3>
-                    <p class="team-position">Design Team</p>
-                    <div class="team-social">
-                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-behance"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="team-card" data-category="technical" data-aos="fade-up" data-aos-delay="300">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D5603AQGzRz0uCzlJWQ/profile-displayphoto-shrink_400_400/B56ZRAdNPXHIAk-/0/1736248187102?e=1747267200&v=beta&t=gxla4LY0jzX2_7YUtsfAe9WYEPoppSQw8FJAQmqSW9s"
-                        alt="Adwait Patel">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Adwait Patel</h3>
-                    <p class="team-position">Core Technical Team</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/adp-pythondev" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
-                    </div>
-                </div>
-            </div>
-
-            <div class="team-card" data-category="technical" data-aos="fade-up" data-aos-delay="400">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/v2/D4E03AQHECQIZzTZdCg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1713275914043?e=1747267200&v=beta&t=L-ge91Qwk0xEBOlnTuyaYdPl0pKTs_b4xL7FdVAf0TQ"
-                        alt="Shashank Upadhyay">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Shashank Upadhyay</h3>
-                    <p class="team-position">Core Technical Team</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/shubhcoder0269" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <!-- <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
-                        <a href="#" class="social-icon"><i class="fas fa-envelope"></i></a> -->
-                    </div>
-                </div>
+<!-- Contributors Modal -->
+<div id="contributors-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Contributors</h2>
+            <span class="close" onclick="closeModal('contributors-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="contributors-grid" class="modal-grid">
+                <!-- Content will be populated by JavaScript -->
             </div>
         </div>
+    </div>
+</div>
 
-        {% endcomment %}
+<!-- Contributor Details Modal -->
+<div id="contributor-details-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="contributor-name"></h2>
+            <span class="close" onclick="closeModal('contributor-details-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="contributor-details">
+                <img id="contributor-image" src="" alt="Contributor">
+                <div class="role" id="contributor-role"></div>
+                <div class="contribution" id="contributor-contribution"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -665,7 +414,166 @@ Our Team | Angaar
             "retina_detect": true
         });
 
-        // Team filtering functionality
+        // Add parallax effect to team section
+        window.addEventListener('scroll', function () {
+            const scrollPosition = window.pageYOffset;
+            const teamSection = document.querySelector('.team-page-container');
+            if (teamSection) {
+                teamSection.style.backgroundPosition = `center ${scrollPosition * 0.05}px`;
+            }
+        });
+
+        // Team data
+        const campusAmbassadors = [
+            { name: 'Aarav Sharma', college: 'IIT Bombay', image: 'https://i.pravatar.cc/150?img=1' },
+            { name: 'Priya Patel', college: 'NIT Trichy', image: 'https://i.pravatar.cc/150?img=5' },
+            { name: 'Rohan Gupta', college: 'BITS Pilani', image: 'https://i.pravatar.cc/150?img=3' },
+            { name: 'Sneha Reddy', college: 'VIT Vellore', image: 'https://i.pravatar.cc/150?img=8' },
+            { name: 'Vikram Singh', college: 'DTU', image: 'https://i.pravatar.cc/150?img=11' },
+            { name: 'Ananya Iyer', college: 'IIIT Hyderabad', image: 'https://i.pravatar.cc/150?img=12' },
+            { name: 'Siddharth Kumar', college: 'Manipal University', image: 'https://i.pravatar.cc/150?img=15' },
+            { name: 'Diya Mehta', college: 'SRM University', image: 'https://i.pravatar.cc/150?img=20' },
+        ];
+
+        const contributors = [
+            {
+                id: 1,
+                name: 'Amit Kumar',
+                role: 'Frontend Developer',
+                image: 'https://i.pravatar.cc/150?img=51',
+                contribution: 'Developed the responsive UI components for the team page and implemented the dynamic modal system with improved user experience and accessibility features.'
+            },
+            {
+                id: 2,
+                name: 'Bhavna Choudhary',
+                role: 'UI/UX Designer',
+                image: 'https://i.pravatar.cc/150?img=45',
+                contribution: 'Designed the fiery theme, card layouts, and overall user experience, ensuring a cohesive and modern look that reflects the Angaar brand identity.'
+            },
+            {
+                id: 3,
+                name: 'Chirag Jain',
+                role: 'Backend Developer',
+                image: 'https://i.pravatar.cc/150?img=53',
+                contribution: 'Worked on the initial server setup and API integrations for fetching dynamic content, ensuring robust data management and seamless integration.'
+            },
+            {
+                id: 4,
+                name: 'Deepika Verma',
+                role: 'DevOps Engineer',
+                image: 'https://i.pravatar.cc/150?img=35',
+                contribution: 'Managed the deployment pipeline and optimized the website for performance and scalability, implementing best practices for continuous integration and delivery.'
+            },
+            {
+                id: 5,
+                name: 'Rahul Sharma',
+                role: 'Quality Assurance',
+                image: 'https://i.pravatar.cc/150?img=60',
+                contribution: 'Conducted comprehensive testing across multiple devices and browsers, ensuring cross-platform compatibility and identifying potential user experience issues.'
+            },
+            {
+                id: 6,
+                name: 'Kavya Patel',
+                role: 'Content Writer',
+                image: 'https://i.pravatar.cc/150?img=25',
+                contribution: 'Created engaging content for the team profiles and descriptions, maintaining consistency with the brand voice and ensuring clear communication of team values.'
+            }
+        ];
+
+        // Modal functions
+        window.openModal = function (modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        };
+
+        window.closeModal = function (modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            document.body.style.overflow = '';
+        };
+
+        // Create grid cards
+        function createGridCard(person, type) {
+            const isContributor = type === 'contributor';
+            const card = document.createElement('div');
+            card.className = 'grid-card';
+
+            if (isContributor) {
+                card.setAttribute('data-contributor-id', person.id);
+                card.style.cursor = 'pointer';
+                card.addEventListener('click', () => showContributorDetails(person));
+            }
+
+            card.innerHTML = `
+                <img src="${person.image}" alt="${person.name}">
+                <h4>${person.name}</h4>
+                <p>${isContributor ? person.role : person.college}</p>
+            `;
+
+            // Add animation delay
+            card.style.animationDelay = `${Math.random() * 0.5}s`;
+
+            return card;
+        }
+
+        // Show contributor details
+        function showContributorDetails(contributor) {
+            document.getElementById('contributor-name').textContent = contributor.name;
+            document.getElementById('contributor-image').src = contributor.image;
+            document.getElementById('contributor-role').textContent = contributor.role;
+            document.getElementById('contributor-contribution').textContent = contributor.contribution;
+
+            closeModal('contributors-modal');
+            setTimeout(() => {
+                openModal('contributor-details-modal');
+            }, 200);
+        }
+
+        // Populate grids
+        function populateGrid(gridId, data, type) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+
+            data.forEach((item, index) => {
+                const card = createGridCard(item, type);
+                card.style.animationDelay = `${index * 0.1}s`;
+                grid.appendChild(card);
+            });
+        }
+
+        // Open ambassadors modal
+        document.getElementById('open-ambassadors-btn').addEventListener('click', function () {
+            populateGrid('ambassadors-grid', campusAmbassadors, 'ambassador');
+            openModal('ambassadors-modal');
+        });
+
+        // Open contributors modal
+        document.getElementById('open-contributors-btn').addEventListener('click', function () {
+            populateGrid('contributors-grid', contributors, 'contributor');
+            openModal('contributors-modal');
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function (event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        });
+
+        // ESC key to close modal
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (modal.style.display === 'block') {
+                        modal.style.display = 'none';
+                    }
+                });
+                document.body.style.overflow = '';
+            }
+        });
+
+        // Team filtering functionality (preserved from original)
         const categoryBtns = document.querySelectorAll('.category-btn');
         const teamCards = document.querySelectorAll('.team-card');
 
@@ -695,15 +603,6 @@ Our Team | Angaar
                     }
                 });
             });
-        });
-
-        // Add parallax effect to team section
-        window.addEventListener('scroll', function () {
-            const scrollPosition = window.pageYOffset;
-            const teamSection = document.querySelector('.team-page-container');
-            if (teamSection) {
-                teamSection.style.backgroundPosition = `center ${scrollPosition * 0.05}px`;
-            }
         });
     });
 </script>
