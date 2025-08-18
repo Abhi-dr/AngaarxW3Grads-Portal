@@ -10,6 +10,24 @@ active
 Dashboard | My Courses
 {% endblock %}
 
+{% block extra_css %}
+
+<style>
+    .transition-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .card-header[aria-expanded="true"] .transition-icon {
+        transform: rotate(180deg);
+    }
+    
+    .collapse {
+        transition: height 0.35s ease;
+    }
+</style>
+
+{% endblock %}
+
 {% block body %}
 
 <div class="container-fluid">
@@ -24,109 +42,110 @@ Dashboard | My Courses
     {% endfor %}
 
     <!-- ===============================================================================================-->
-    <!-- ============================================ JOVAC ============================================-->
+    <!-- ============================================ JOVAC ARCHIVED ===================================-->
     <!-- ===============================================================================================-->
 
-    <div class="card">
-        <div class="card-body">
-            <h3 class="heading">
-                <span class="fw-semibold">J O V A C 🔥</span>
-                <span class="fs-4"> | Angaar x W3Grads
-                </span>
-            </h3>
-        </div>
-    </div>
-
-    <!-- =========================================== APPROVED JOVAC COURSES =========================== -->
-
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-
-        {% for course in approved_courses %}
-
-        <div class="col-md-3">
-            <h5 class="card-title fw-semibold mb-0"></h5>
-            <div class="card">
-                <a href="{% url 'student_jovac' course.slug %}">
-                    <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="JOVAC Thumbnail" />
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            {{ course.name }}🔥
-                        </h5>
-                        By: <p class="card-text text-success fs-2 mb-2">
-                             {{ course.get_instructor_names }}
-                        </p>
-      
-                        <a href="{% url 'student_jovac' course.slug %}" class="btn btn-outline-secondary w-100">View More</a>
-                    </div>
-                </a>
+    <div class="card mb-4">
+        <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#jovacArchiveSection" aria-expanded="false" aria-controls="jovacArchiveSection">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="heading">
+                    <span class="fw-semibold">J O V A C 📁</span>
+                    <span class="fs-4 text-muted"> | Archived Courses
+                    </span>
+                    <small class="badge bg-secondary ms-2">Archived</small>
+                </h3>
+                
+                <i class="fas fa-chevron-down transition-icon" id="jovacToggleIcon"></i>
             </div>
         </div>
+        
+        <div class="collapse" id="jovacArchiveSection">
+            <div class="card-body">
+                <!-- =========================================== APPROVED JOVAC COURSES =========================== -->
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    {% for course in approved_courses %}
+                    <div class="col-md-3">
+                        <h5 class="card-title fw-semibold mb-0"></h5>
+                        <div class="card position-relative">
+                            <!-- Archived overlay -->
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-secondary">Archived</span>
+                            </div>
+                            <a href="{% url 'student_jovac' course.slug %}" class="text-decoration-none">
+                                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="JOVAC Thumbnail" style="opacity: 0.8;" />
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">
+                                        {{ course.name }}📁
+                                    </h5>
+                                    By: <p class="card-text text-muted fs-6 mb-2">
+                                         {{ course.get_instructor_names }}
+                                    </p>
+          
+                                    <a href="{% url 'student_jovac' course.slug %}" class="btn btn-outline-secondary w-100">View Archive</a>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
 
-        {% endfor %}
+                    <!-- ====================================== PENDING JOVAC ======================================== -->
+                    {% for course in pending_courses %}
+                    <div class="col-md-3">
+                        <div class="card position-relative">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-secondary">Archived</span>
+                            </div>
+                            <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                            <div class="card-body">
+                                <h5 class="card-title text-muted">{{ course.name }}📁</h5>
+                                By: <p class="card-text text-muted fs-6 mb-2">
+                                         {{ course.get_instructor_names }}
+                                    </p>
+                                <button class="btn btn-outline-secondary w-100" disabled>Was Requested</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
 
-    </div>
+                    <!-- ====================================== REJECTED JOVAC ======================================== -->
+                    {% for course in rejected_courses %}
+                    <div class="col-md-3">
+                        <div class="card position-relative">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-secondary">Archived</span>
+                            </div>
+                            <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                            <div class="card-body">
+                                <h5 class="card-title text-muted">{{ course.name }}📁</h5>
+                                <button class="btn btn-outline-secondary w-100" disabled>Was Rejected</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
 
-    <!-- ====================================== PENDING JOVAC ======================================== -->
-
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-
-
-        {% for course in pending_courses %}
-
-        <div class="col-md-3">
-            <div class="card">
-                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" />
-                <div class="card-body">
-                    <h5 class="card-title">{{ course.name }}🔥</h5>
-
-                    By: <p class="card-text text-success fs-2 mb-2">
-                             {{ course.get_instructor_names }}
-                        </p>
-                    <button class="btn btn-outline-warning w-100" disabled>Requested</button>
+                    <!-- ====================================== ALL OTHER JOVAC ======================================== -->
+                    {% for course in other_courses %}
+                    <div class="col-md-3">
+                        <div class="card position-relative">
+                            <div class="position-absolute top-0 end-0 m-2">
+                                <span class="badge bg-secondary">Archived</span>
+                            </div>
+                            <a href="#" class="text-decoration-none">
+                                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                                <div class="card-body">
+                                    <h5 class="card-title text-muted">{{ course.name }}📁</h5>
+                                     By: <p class="card-text text-muted fs-6 mb-2">
+                                         {{ course.get_instructor_names }}
+                                    </p>
+                                    <button class="btn btn-outline-secondary w-100" disabled>No Longer Available</button>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
-
-        {% endfor %}
-
-        <!-- ====================================== REJECTED JOVAC ======================================== -->
-
-        {% for course in rejected_courses %}
-
-        <div class="col-md-3">
-            <div class="card">
-                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" />
-                <div class="card-body">
-                    <h5 class="card-title">{{ course.name }}🔥</h5>
-                    <button class="btn btn-danger w-100" disabled>Rejected</button>
-                </div>
-            </div>
-        </div>
-
-        {% endfor %}
-
-        <!-- ====================================== ALL OTHER JOVAC ======================================== -->
-
-        {% for course in other_courses %}
-        <div class="col-md-3">
-            <div class="card">
-                <a href="#">
-                    <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" />
-                    <div class="card-body">
-                        <h5 class="card-title">{{ course.name }}🔥</h5>
-
-                         By: <p class="card-text text-success fs-2 mb-2">
-                             {{ course.get_instructor_names }}
-                        </p>
-
-                        <a href="{% url 'student_enroll_jovac' course.slug %}" class="btn btn-success w-100">Enroll
-                            Now</a>
-
-                    </div>
-                </a>
-            </div>
-        </div>
-        {% endfor %}
     </div>
 
     <!-- ===============================================================================================-->
@@ -144,8 +163,6 @@ Dashboard | My Courses
         </div>
         {% endif %}
     </div>
-
-
 
     <!-- ======================== COURSE CODE ====================== -->
 
@@ -178,7 +195,6 @@ Dashboard | My Courses
 
     </div>
 
-
     <!-- ======================== ALL BATCH DATA TABLE ====================== -->
 
     <div class="card">
@@ -196,11 +212,9 @@ Dashboard | My Courses
         {% endif %}
     </div>
 
-
     <!-- ======================== COURSE CODE ====================== -->
 
     <div class="row row-cols-1 row-cols-md-3 g-4">
-
 
         {% for batch in pending_batches %}
 
@@ -264,7 +278,6 @@ Dashboard | My Courses
         {% endfor %}
     </div>
 
-
     <!-- Enrollment Modal -->
     <div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -288,6 +301,7 @@ Dashboard | My Courses
     </div>
 </div>
 
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const enrollButtons = document.querySelectorAll(".enroll-btn");
@@ -295,6 +309,17 @@ Dashboard | My Courses
         const modalBatchId = document.getElementById("modalBatchId");
         const extraFieldsContainer = document.getElementById("extraFieldsContainer");
         const enrollForm = document.getElementById("enrollForm");
+
+        // Handle JOVAC archive section toggle
+        const jovacToggle = document.querySelector('[data-bs-target="#jovacArchiveSection"]');
+        const jovacIcon = document.getElementById('jovacToggleIcon');
+        
+        if (jovacToggle) {
+            jovacToggle.addEventListener('click', function() {
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                jovacIcon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
+            });
+        }
 
         enrollButtons.forEach(button => {
             button.addEventListener("click", function () {
@@ -335,6 +360,5 @@ Dashboard | My Courses
     });
 
 </script>
-
 
 {% endblock %}
