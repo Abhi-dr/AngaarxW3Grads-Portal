@@ -104,23 +104,10 @@ def enroll_batch(request, id):
         for field in batch.required_fields:
             extra_data[field] = request.POST.get(field, "")
 
-    EnrollmentRequest.objects.create(student=student, batch=batch, additional_data=extra_data)
+    EnrollmentRequest.objects.create(student=student, batch=batch, additional_data=extra_data,  status="Accepted")
 
-    # Send WebSocket update using Redis Channel Layer
-    channel_layer = get_channel_layer()
-    
-    async_to_sync(channel_layer.group_send)(
-        "enrollment_requests",
-        {
-            "type": "send_enrollment_update",
-            "message": "A new enrollment request has been submitted!"
-        }
-    )
-
-    messages.success(request, "Your enrollment request has been submitted!")
-    return redirect('my_batches')
-
-
+    messages.success(request, "You have successfully enrolled in the batch!")
+    return redirect('batch', slug=batch.slug)
 
     
 # ========================================= BATCH =========================================
