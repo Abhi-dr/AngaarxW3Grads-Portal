@@ -69,15 +69,15 @@ Dashboard | My Courses
                         <div class="card position-relative">
                             <!-- Archived overlay -->
                             <div class="position-absolute top-0 end-0 m-2">
-                                <span class="badge bg-secondary">Archived</span>
+                                <span class="badge bg-dark">Archived</span>
                             </div>
                             <a href="{% url 'student_jovac' course.slug %}" class="text-decoration-none">
                                 <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="JOVAC Thumbnail" style="opacity: 0.8;" />
                                 <div class="card-body">
-                                    <h5 class="card-title text-muted">
+                                    <h5 class="">
                                         {{ course.name }}📁
                                     </h5>
-                                    By: <p class="card-text text-muted fs-6 mb-2">
+                                    By: <p class="card-text">
                                          {{ course.get_instructor_names }}
                                     </p>
           
