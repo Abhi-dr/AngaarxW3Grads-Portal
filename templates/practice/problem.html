@@ -287,7 +287,7 @@
             <li class="breadcrumb-item"><a href="{% url 'practice' %}">Practice</a></li>
             <li class="breadcrumb-item">
                 {% for sheet in question.sheets.all %}
-                <a href="{% url 'sheet' sheet.slug %}">{{ sheet.name }}</a>{% if not forloop.last %}, {% endif %}
+                <a href="{% url 'my_sheet' sheet.slug %}">{{ sheet.name }}</a>{% if not forloop.last %}, {% endif %}
                 {% endfor %}
             </li>
 

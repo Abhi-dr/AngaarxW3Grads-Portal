@@ -79,6 +79,12 @@ class EnrollmentRequest(models.Model):
 
 
 class Sheet(models.Model):
+
+    SHEET_TYPES = [
+        ("Coding", "Coding"),
+        ("MCQ", "MCQ"),
+    ]
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     
@@ -93,6 +99,9 @@ class Sheet(models.Model):
     
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
+
+    sheet_type = models.CharField(max_length=20, choices=SHEET_TYPES, default="Coding")
+
     
     # Field to check if the sheet will be treated as a STORYLINE
     is_sequential = models.BooleanField(default=False)
@@ -149,26 +158,30 @@ class Sheet(models.Model):
         verbose_name_plural = 'Sheets'
         
     def get_total_questions(self):
-        return self.questions.filter(is_approved=True).count()
+        if self.sheet_type == "Coding":
+            return self.questions.filter(is_approved=True).count()
+        return self.mcq_questions.filter(is_approved=True).count()
     
     def get_solved_questions(self, student):
-        return Submission.objects.filter(
-            user=student,
-            question__in=self.questions.all(),
-            status='Accepted'
-        ).values('question').distinct().count()
+        if self.sheet_type == "Coding":
+            return Submission.objects.filter(
+                user=student,
+                question__in=self.questions.all(),
+                status='Accepted'
+            ).values('question').distinct().count()
+        # return MCQSubmission.objects.filter(
+        #     student=student,
+        #     question__in=self.mcq_questions.all(),
+        #     is_correct=True
+        # ).count()
         
     def get_progress(self, student):
-        total_questions = self.questions.count()
-        completed_questions = Submission.objects.filter(
-            user=student,
-            question__in=self.questions.all(),
-            status='Accepted'
-        ).values('question').distinct().count()
+        total = self.get_total_questions()
+        solved = self.get_solved_questions(student)
 
-        if total_questions == 0:
+        if total == 0:
             return 0
-        return (completed_questions / total_questions) * 100
+        return (solved / total) * 100
         
     def save(self, *args, **kwargs):
         
@@ -532,3 +545,54 @@ class RecommendedQuestions(models.Model):
     link = models.URLField()
     platform = models.CharField(max_length=50, choices=platform_choices)
     
+
+# ============================== MCQ Question ================================
+
+class MCQQuestion(models.Model):
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, related_name="mcq_questions")
+
+    question_text = models.TextField()
+    
+    option_a = models.CharField(max_length=255)
+    option_b = models.CharField(max_length=255)
+    option_c = models.CharField(max_length=255)
+    option_d = models.CharField(max_length=255)
+
+    correct_option = models.CharField(
+        max_length=1,
+        choices=[('A','A'),('B','B'),('C','C'),('D','D')]
+    )
+
+    explanation = models.TextField(blank=True, null=True)
+
+    tags = models.CharField(max_length=255, blank=True, null=True)  # Comma-separated tags
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    difficulty_level = models.CharField(
+        max_length=50,
+        choices=[("Easy","Easy"),("Medium","Medium"),("Hard","Hard")],
+        default="Easy"
+    )
+
+    is_approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"MCQ: {self.question_text[:50]}..."
+
+
+# ============================== MCQ Submission ==============================
+
+class MCQSubmission(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="mcq_submissions")
+    question = models.ForeignKey(MCQQuestion, on_delete=models.CASCADE, related_name="submissions")
+
+    selected_option = models.CharField(max_length=1, choices=[('A','A'),('B','B'),('C','C'),('D','D')])
+    is_correct = models.BooleanField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'question')
+
+    def __str__(self):
+        return f"{self.student} → {self.question} ({'✔️' if self.is_correct else '❌'})"
+

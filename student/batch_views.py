@@ -9,6 +9,8 @@ from django.http import JsonResponse
 
 from django.core.paginator import Paginator
 
+from django.db.models import Count, Min, Max
+
 from accounts.models import Student
 from student.models import Notification, Course
 from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest
@@ -74,22 +76,6 @@ def my_batches(request):
 
 # ========================================= ENROLL BATCH ========================================
 
-# @login_required(login_url="login")
-# def enroll_batch(request, id):
-#     student = request.user.student
-#     batch = get_object_or_404(Batch, id=id)
-    
-#     # Check if the student is already enrolled or has a pending request
-#     if not EnrollmentRequest.objects.filter(student=student, batch=batch).exists():
-#         EnrollmentRequest.objects.create(student=student, batch=batch)
-#         messages.success(request, "Your enrollment request has been submitted!")
-#     else:
-#         messages.warning(request, "You have already requested to join this batch.")
-    
-#     return redirect('my_batches')
-
-
-
 @login_required(login_url="login")
 def enroll_batch(request, id):
     student = request.user.student
@@ -126,18 +112,18 @@ def batch(request, slug):
     sheets = Sheet.objects.filter(batches=batch, is_approved=True).order_by('-id')
     
     # PROGRESS OF ALL THE QUESTION SOLVED BY THE STUDENT
-    total_questions = 0
-    solved_questions = 0
-    for sheet in sheets:
-        total_questions += sheet.questions.count()
-        solved_questions += sheet.get_solved_questions(student)
+    # total_questions = 0
+    # solved_questions = 0
+    # for sheet in sheets:
+    #     total_questions += sheet.questions.count()
+    #     solved_questions += sheet.get_solved_questions(student)
     
-    if total_questions == 0:
-        progress = 0
-    else:
-        progress = (solved_questions / total_questions) * 100
+    # if total_questions == 0:
+    #     progress = 0
+    # else:
+    #     progress = (solved_questions / total_questions) * 100
     
-    questions_left = total_questions - solved_questions
+    # questions_left = total_questions - solved_questions
         
     # today's batch pod
     pod = batch.get_today_pod_for_batch()
@@ -147,9 +133,9 @@ def batch(request, slug):
         "batch": batch,
         "sheets": sheets,
         "pod": pod,
-        "progress": int(progress),
-        "solved_questions": solved_questions,
-        "questions_left": questions_left,
+        # "progress": int(progress),
+        # "solved_questions": solved_questions,
+        # "questions_left": questions_left,
         "notifications": notifications
     }
     
@@ -160,17 +146,50 @@ def batch(request, slug):
 @login_required(login_url="login")
 def my_sheet(request, slug):
     
-    sheet = get_object_or_404(Sheet, slug=slug)
+    sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
+    
+    enabled_questions = sheet.get_enabled_questions_for_user(request.user.student)
+    
+    user_submissions = {
+        submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=enabled_questions)
+        }
     
     if not sheet.is_enabled:
         messages.info(request, "This sheet is not enabled.")
-        return redirect('batch' , slug=sheet.batches.first().slug)
-    
+        return redirect('practice')
+
     parameters = {
-        "sheet": sheet
-    }
+        "sheet": sheet,
+        "enabled_questions": enabled_questions,
+        "user_submissions": user_submissions,  # Pass the submissions to the template
+    }   
     
     return render(request, 'student/batch/my_sheet.html', parameters)
+
+# ============================== SHEET VIEW =========================
+
+@login_required(login_url="login")
+def sheet(request, slug):
+        
+    sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
+    
+    enabled_questions = sheet.get_enabled_questions_for_user(request.user.student)
+    
+    user_submissions = {
+        submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=enabled_questions)
+        }
+    
+    if not sheet.is_enabled:
+        messages.info(request, "This sheet is not enabled.")
+        return redirect('practice')
+
+    parameters = {
+        "sheet": sheet,
+        "enabled_questions": enabled_questions,
+        "user_submissions": user_submissions,  # Pass the submissions to the template
+    }   
+    
+    return render(request, "practice/sheet.html", parameters)
 
 
 # ========================================= SHEET PROGRESS ===================================
@@ -228,7 +247,6 @@ def student_batch_leaderboard(request, slug):
     return render(request, "student/batch/leaderboard.html", parameters)
 
 # ==================================== FETCH LEADERBOARD ======================
-from django.db.models import Count, Min, Max
 
 def student_fetch_batch_leaderboard(request, slug):    
     

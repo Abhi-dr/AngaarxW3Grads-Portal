@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django import forms
 
-from .models import Sheet, Question, TestCase, Submission, POD, Streak, Batch, EnrollmentRequest, DriverCode
+from .models import Sheet, Question, TestCase, Submission, POD, Streak, Batch, EnrollmentRequest, DriverCode, MCQQuestion, MCQSubmission
 
 
 # ==================================== SHEET ====================================
@@ -101,3 +101,25 @@ class EnrollmentRequestAdmin(admin.ModelAdmin):
 class BatchAdmin(admin.ModelAdmin):
     
     list_display = ['name', 'description']
+
+# ==================================== MCQ QUESTION ====================================
+
+@admin.register(MCQQuestion)
+class MCQQuestionAdmin(admin.ModelAdmin):
+    list_display = ['question_text', 'difficulty_level', "is_approved"]
+    search_fields = ['question_text']
+    list_per_page = 30
+    list_filter = ['difficulty_level']
+    ordering = ['-id']
+    list_editable = ["is_approved"]
+
+
+# ==================================== MCQ SUBMISSION ====================================
+
+@admin.register(MCQSubmission)
+class MCQSubmissionAdmin(admin.ModelAdmin):
+    list_display = ['question', 'submitted_at']
+    search_fields = ['user__username', 'question__question_text', 'status']
+    list_per_page = 30
+    list_filter = ['question']
+    ordering = ['-submitted_at']

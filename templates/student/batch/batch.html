@@ -28,7 +28,11 @@ active
 
     @keyframes css-progress {
         to {
-            --progress-value: {{progress}}
+            --progress-value: {
+                    {
+                    progress
+                }
+            }
 
             ;
         }
@@ -152,6 +156,15 @@ active
     }
 </style>
 
+<style>
+    #card-bg {
+        background-image: url("{{ batch.thumbnail.url }}");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        height: 30vh;
+    }
+</style>
 
 {% endblock %}
 
@@ -183,17 +196,6 @@ active
 
     <!--  Row 1 -->
     <div class="row">
-
-        <style>
-            #card-bg {
-                background-image: url("{{ batch.thumbnail.url }}");
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-                height: 30vh;
-            }
-        </style>
-
         <div class="col-lg-4">
             <div class="row">
                 <div class="col-lg-12">
@@ -365,7 +367,8 @@ active
             <h3 class="heading">
                 <span class="fw-semibold">Ongoing Sheets 🔥</span>
             </h3>
-            <a href="{% url 'student_batch_leaderboard' batch.slug %}" class="btn btn-outline-secondary w-25 ms-auto">Leaderboard 📈</a>
+            <a href="{% url 'student_batch_leaderboard' batch.slug %}"
+                class="btn btn-outline-secondary w-25 ms-auto">Leaderboard 📈</a>
         </div>
     </div>
 
@@ -378,7 +381,7 @@ active
             <div class="card">
 
                 {% if sheet.is_enabled %}
-                <a href="{% url 'sheet' sheet.slug %}">
+                <a href="{% url 'my_sheet' sheet.slug %}">
                     {% endif %}
                     <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
                     <div class="card-body">
@@ -393,7 +396,7 @@ active
                         </p> -->
 
                         {% if sheet.is_enabled %}
-                        <a href="{% url 'sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue
+                        <a href="{% url 'my_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue
                             Solving</a>
                         {% else %}
                         <a href="#" class="btn btn-outline-light-danger w-100 disabled">Currently Unavailable</a>
@@ -409,8 +412,5 @@ active
 
 
 </div>
-
-
-
 
 {% endblock %}

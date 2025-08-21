@@ -101,6 +101,8 @@ urlpatterns += [
     path("batch_leaderboard_api/<slug:slug>", batch_views.student_fetch_batch_leaderboard, name="student_fetch_batch_leaderboard"),
     
     # Slug-based URLs last
+        # path("<slug:slug>/", views.sheet , name="sheet"),
+
     path("sheet/<slug:slug>/", batch_views.my_sheet, name="my_sheet"),
     path("<slug:slug>/leaderboard", batch_views.student_batch_leaderboard, name="student_batch_leaderboard"),
     path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
