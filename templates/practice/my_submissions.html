@@ -231,51 +231,91 @@ active
 
 <script>
     var viewCodeModal = document.getElementById('viewCodeModal');
-    viewCodeModal.addEventListener('show.bs.modal', function (event) {
-        var button = event.relatedTarget;
-        var code = button.getAttribute('data-code');  // Get the code from the button
+var codeEditor; // Store editor reference globally
 
-        var editor = ace.edit("code-view-editor");
-        editor.setTheme("ace/theme/twilight");
-        editor.session.setMode("ace/mode/python");  // Change to the mode of your preferred language
-        editor.setValue(code, 1);  // Set the code into the editor and move cursor to the end
+// Function to update editor theme based on current theme
+function updateCodeViewerTheme() {
+    if (codeEditor) {
+        const currentTheme = localStorage.getItem("theme");
+        const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        
+        if (isDark) {
+            codeEditor.setTheme("ace/theme/twilight");
+        } else {
+            codeEditor.setTheme("ace/theme/chrome");
+        }
+    }
+}
 
-        // Make the editor read-only and hide the cursor
-        editor.setOptions({
-            readOnly: true,
-            highlightActiveLine: false,
-            highlightGutterLine: false,
-            enableBasicAutocompletion: true,
-            enableSnippets: true,
-            enableLiveAutocompletion: true
-        });
+viewCodeModal.addEventListener('show.bs.modal', function (event) {
+    var button = event.relatedTarget;
+    var code = button.getAttribute('data-code');  // Get the code from the button
 
+    codeEditor = ace.edit("code-view-editor");
+    
+    // Set initial theme based on current theme
+    updateCodeViewerTheme();
+    
+    codeEditor.session.setMode("ace/mode/python");  // Change to the mode of your preferred language
+    codeEditor.setValue(code, 1);  // Set the code into the editor and move cursor to the end
 
-
-        editor.renderer.$cursorLayer.element.style.display = "none";  // Hide the cursor
+    // Make the editor read-only and hide the cursor
+    codeEditor.setOptions({
+        readOnly: true,
+        highlightActiveLine: false,
+        highlightGutterLine: false,
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true
     });
 
-    function copyToClipboard() {
-        var editor = ace.edit("code-view-editor");
-        var code = editor.getValue();
-        navigator.clipboard.writeText(code).then(function () {
-            copybtn = document.getElementById('copybtn');
-            copybtn.innerHTML = 'Copied!';
-            copybtn.classList.remove('btn-success');
-            copybtn.classList.add('btn-info');
-            setTimeout(() => {
-                copybtn.innerHTML = 'Copy';
-                copybtn.classList.remove('btn-info');
-                copybtn.classList.add('btn-success');
-            }, 2000);
-        }, function (err) {
-            alert('Failed to copy code to clipboard');
-        });
+    codeEditor.renderer.$cursorLayer.element.style.display = "none";  // Hide the cursor
+});
+
+// Listen for theme changes using MutationObserver
+const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
+            updateCodeViewerTheme();
+        }
+    });
+});
+
+// Start observing the document element for attribute changes
+observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-bs-theme']
+});
+
+// Also listen for storage events in case theme is changed in another tab
+window.addEventListener('storage', function(e) {
+    if (e.key === 'theme') {
+        updateCodeViewerTheme();
     }
+});
 
+// Listen for custom theme change events (if your theme switcher dispatches them)
+document.addEventListener('themeChanged', function() {
+    updateCodeViewerTheme();
+});
+
+function copyToClipboard() {
+    var editor = ace.edit("code-view-editor");
+    var code = editor.getValue();
+    navigator.clipboard.writeText(code).then(function () {
+        copybtn = document.getElementById('copybtn');
+        copybtn.innerHTML = 'Copied!';
+        copybtn.classList.remove('btn-success');
+        copybtn.classList.add('btn-info');
+        setTimeout(() => {
+            copybtn.innerHTML = 'Copy';
+            copybtn.classList.remove('btn-info');
+            copybtn.classList.add('btn-success');
+        }, 2000);
+    }, function (err) {
+        alert('Failed to copy code to clipboard');
+    });
+}
 </script>
-
-
-
 
 {% endblock %}

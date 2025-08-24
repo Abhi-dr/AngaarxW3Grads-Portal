@@ -684,162 +684,194 @@
 
     <script>
         $(document).ready(function () {
-            const editor = ace.edit("editor");
-            const languageSelect = $("#language");
-            const questionId = "{{ question.id }}"; // Django template to dynamically get the question ID
-            const DRAFT_STORAGE_KEY = "draft_code_data";
-            const AUTO_SAVE_DELAY = 2000; // Throttle auto-save to every 2 seconds
-            let autoSaveTimeout; // To handle throttling
+    const editor = ace.edit("editor");
+    const languageSelect = $("#language");
+    const questionId = "{{ question.id }}"; // Django template to dynamically get the question ID
+    const DRAFT_STORAGE_KEY = "draft_code_data";
+    const AUTO_SAVE_DELAY = 2000; // Throttle auto-save to every 2 seconds
+    let autoSaveTimeout; // To handle throttling
 
-            const saveButton = $("#save-draft-btn");
-            const restoreButton = $("#restore-draft-btn");
-            const resetButton = $("#reset-draft-btn");
-            const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
+    const saveButton = $("#save-draft-btn");
+    const restoreButton = $("#restore-draft-btn");
+    const resetButton = $("#reset-draft-btn");
+    const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
 
-            // Define supported languages
-            const topLanguages = [
-                { id: 62, name: "Java", mode: "java" },
-                { id: 71, name: "Python", mode: "python" },
-                { id: 50, name: "C", mode: "c_cpp" },
-                { id: 54, name: "C++", mode: "c_cpp" }
-            ];
+    // Define supported languages
+    const topLanguages = [
+        { id: 62, name: "Java", mode: "java" },
+        { id: 71, name: "Python", mode: "python" },
+        { id: 50, name: "C", mode: "c_cpp" },
+        { id: 54, name: "C++", mode: "c_cpp" }
+    ];
 
-            // Initialize ACE editor settings
-            function initializeEditor() {
-                let theme = localStorage.getItem("theme");
-                editor.setTheme(theme === "dark" ? "ace/theme/twilight" : "ace/theme/chrome");
-                editor.setOptions({
-                    enableSnippets: true,
-                    cursorStyle: "smooth",
-                    enableAutoIndent: true,
-                    showFoldWidgets: true, // Ensure fold widgets are visible in the gutter
+    // Function to update editor theme based on current theme
+    function updateEditorTheme() {
+        const currentTheme = localStorage.getItem("theme");
+        const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        
+        if (isDark) {
+            editor.setTheme("ace/theme/twilight");
+        } else {
+            editor.setTheme("ace/theme/chrome");
+        }
+    }
 
-                });
-                updateEditorMode(languageSelect.val());
-            }
-
-            function updateEditorMode(languageId) {
-                const selectedLanguage = topLanguages.find(lang => lang.id == languageId);
-                if (selectedLanguage) {
-                    editor.session.setMode(`ace/mode/${selectedLanguage.mode}`);
-                }
-
-            }
-
-            function getDraftKey() {
-                const selectedLanguage = languageSelect.val();
-                return `${DRAFT_STORAGE_KEY}_${questionId}_${selectedLanguage}`;
-            }
-
-            function saveDraft() {
-                const currentCode = editor.getValue();
-                const draftKey = getDraftKey();
-
-                updateSaveButtonText("saving");
-                setTimeout(() => {
-                    localStorage.setItem(draftKey, currentCode);
-                    console.log("Draft saved for key:", draftKey);
-                    updateSaveButtonText("saved");
-                }, 500);
-            }
-
-            function updateSaveButtonText(status) {
-                if (status === "saving") {
-                    saveButton.text("Saving...").prop("disabled", true);
-                } else if (status === "saved") {
-                    saveButton.text("Saved").prop("disabled", true);
-                    setTimeout(() => saveButton.text("Save as Draft").prop("disabled", false), 2500);
-                }
-            }
-
-            function restoreDraft() {
-                const draftKey = getDraftKey();
-                const savedCode = localStorage.getItem(draftKey);
-
-                if (savedCode) {
-                    editor.setValue(savedCode, -1);
-                    alert("Draft restored successfully!");
-                } else {
-                    fetchDriverCode(languageSelect.val());
-                    alert("No saved draft found for this question and language.");
-                }
-            }
-
-            function resetDraft() {
-
-                const choice = confirm("Are you sure you want to reset the draft to the original driver code?");
-                if (!choice) {
-                    return;
-                }
-
-                const draftKey = getDraftKey();
-                localStorage.removeItem(draftKey);
-                fetchDriverCode(languageSelect.val());
-                alert("Draft has been reset to the original driver code!");
-            }
-
-            function fetchDriverCode(languageId) {
-                const url = baseUrl.replace("/0", `/${languageId}`);
-                fetch(url)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            editor.setValue(data.code, -1);
-                            // editor.session.foldAll();
-
-                        } else {
-                            editor.setValue("// Driver code not found for this language", -1);
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error fetching driver code:", error);
-                        editor.setValue("// Error fetching driver code", -1);
-                    });
-            }
-
-            function autoSaveCode() {
-                clearTimeout(autoSaveTimeout);
-                autoSaveTimeout = setTimeout(() => saveDraft(), AUTO_SAVE_DELAY);
-            }
-
-            // Event Handlers
-            saveButton.click(saveDraft);
-            restoreButton.click(restoreDraft);
-            resetButton.click(resetDraft);
-
-            languageSelect.change(function () {
-                const selectedLanguageId = $(this).val();
-                updateEditorMode(selectedLanguageId);
-                fetchDriverCode(selectedLanguageId);
-            });
-
-
-            $(document).keydown(function (event) {
-                if (event.ctrlKey && event.key === "s") {
-                    event.preventDefault();
-                    saveDraft();
-                } else if (event.ctrlKey && event.key === "Enter") {
-                    event.preventDefault();
-                    $("#submit-btn").click();
-                    $("#testCaseResults").empty().scrollIntoView({ behavior: 'smooth' });
-                } else if (event.altKey && event.key === "Enter") {
-                    event.preventDefault();
-                    $("#run-btn").click();
-                    $("#testCaseResults").scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-
-            // Populate language dropdown
-            topLanguages.forEach(language => {
-                languageSelect.append(
-                    `<option value="${language.id}">${language.name}</option>`
-                );
-            });
-
-            // Initialize editor and load the first driver code
-            initializeEditor();
-            fetchDriverCode(languageSelect.val());
+    // Initialize ACE editor settings
+    function initializeEditor() {
+        updateEditorTheme(); // Use dynamic theme function instead of static check
+        editor.setOptions({
+            enableSnippets: true,
+            cursorStyle: "smooth",
+            enableAutoIndent: true,
+            showFoldWidgets: true, // Ensure fold widgets are visible in the gutter
         });
+        updateEditorMode(languageSelect.val());
+    }
+
+    function updateEditorMode(languageId) {
+        const selectedLanguage = topLanguages.find(lang => lang.id == languageId);
+        if (selectedLanguage) {
+            editor.session.setMode(`ace/mode/${selectedLanguage.mode}`);
+        }
+    }
+
+    function getDraftKey() {
+        const selectedLanguage = languageSelect.val();
+        return `${DRAFT_STORAGE_KEY}_${questionId}_${selectedLanguage}`;
+    }
+
+    function saveDraft() {
+        const currentCode = editor.getValue();
+        const draftKey = getDraftKey();
+
+        updateSaveButtonText("saving");
+        setTimeout(() => {
+            localStorage.setItem(draftKey, currentCode);
+            console.log("Draft saved for key:", draftKey);
+            updateSaveButtonText("saved");
+        }, 500);
+    }
+
+    function updateSaveButtonText(status) {
+        if (status === "saving") {
+            saveButton.text("Saving...").prop("disabled", true);
+        } else if (status === "saved") {
+            saveButton.text("Saved").prop("disabled", true);
+            setTimeout(() => saveButton.text("Save as Draft").prop("disabled", false), 2500);
+        }
+    }
+
+    function restoreDraft() {
+        const draftKey = getDraftKey();
+        const savedCode = localStorage.getItem(draftKey);
+
+        if (savedCode) {
+            editor.setValue(savedCode, -1);
+            alert("Draft restored successfully!");
+        } else {
+            fetchDriverCode(languageSelect.val());
+            alert("No saved draft found for this question and language.");
+        }
+    }
+
+    function resetDraft() {
+        const choice = confirm("Are you sure you want to reset the draft to the original driver code?");
+        if (!choice) {
+            return;
+        }
+
+        const draftKey = getDraftKey();
+        localStorage.removeItem(draftKey);
+        fetchDriverCode(languageSelect.val());
+        alert("Draft has been reset to the original driver code!");
+    }
+
+    function fetchDriverCode(languageId) {
+        const url = baseUrl.replace("/0", `/${languageId}`);
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    editor.setValue(data.code, -1);
+                } else {
+                    editor.setValue("// Driver code not found for this language", -1);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching driver code:", error);
+                editor.setValue("// Error fetching driver code", -1);
+            });
+    }
+
+    function autoSaveCode() {
+        clearTimeout(autoSaveTimeout);
+        autoSaveTimeout = setTimeout(() => saveDraft(), AUTO_SAVE_DELAY);
+    }
+
+    // Event Handlers
+    saveButton.click(saveDraft);
+    restoreButton.click(restoreDraft);
+    resetButton.click(resetDraft);
+
+    languageSelect.change(function () {
+        const selectedLanguageId = $(this).val();
+        updateEditorMode(selectedLanguageId);
+        fetchDriverCode(selectedLanguageId);
+    });
+
+    $(document).keydown(function (event) {
+        if (event.ctrlKey && event.key === "s") {
+            event.preventDefault();
+            saveDraft();
+        } else if (event.ctrlKey && event.key === "Enter") {
+            event.preventDefault();
+            $("#submit-btn").click();
+            $("#testCaseResults").empty().scrollIntoView({ behavior: 'smooth' });
+        } else if (event.altKey && event.key === "Enter") {
+            event.preventDefault();
+            $("#run-btn").click();
+            $("#testCaseResults").scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+    // Listen for theme changes using MutationObserver
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
+                updateEditorTheme();
+            }
+        });
+    });
+
+    // Start observing the document element for attribute changes
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-bs-theme']
+    });
+
+    // Also listen for storage events in case theme is changed in another tab
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'theme') {
+            updateEditorTheme();
+        }
+    });
+
+    // Listen for custom theme change events (if your theme switcher dispatches them)
+    document.addEventListener('themeChanged', function() {
+        updateEditorTheme();
+    });
+
+    // Populate language dropdown
+    topLanguages.forEach(language => {
+        languageSelect.append(
+            `<option value="${language.id}">${language.name}</option>`
+        );
+    });
+
+    // Initialize editor and load the first driver code
+    initializeEditor();
+    fetchDriverCode(languageSelect.val());
+});
     </script>
 
     <!-- ===================================== SUBMIT FUNCTION ================================================ -->

@@ -25,8 +25,6 @@ def user_context_processor(request):
             elif hasattr(request.user, 'administrator'):
                 user_type = 'administrator'
                 user_object = request.user.administrator
-                
-            
 
         except (Student.DoesNotExist, Instructor.DoesNotExist, Administrator.DoesNotExist):
             pass

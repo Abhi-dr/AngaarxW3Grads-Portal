@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-Student -> Playground
+Student | Coding Playground
 {% endblock %}
 
 {% block extra_css %}
@@ -117,154 +117,189 @@ Student -> Playground
 
 <script>
     $(document).ready(function () {
-        const editor = ace.edit("editor");
-        const languageSelect = $("#language");
+    const editor = ace.edit("editor");
+    const languageSelect = $("#language");
 
-        const topLanguages = [
-            { id: 71, name: "Python" },
-            { id: 50, name: "C" },
-            { id: 54, name: "C++" },
-            { id: 62, name: "Java" }
-        ];
+    const topLanguages = [
+        { id: 71, name: "Python" },
+        { id: 50, name: "C" },
+        { id: 54, name: "C++" },
+        { id: 62, name: "Java" }
+    ];
 
-        const defaultCode = {
-            71: "# Chal beta hoja shuru... Krde mera naam roshan 🔥\n",
-            50: `#include <stdio.h>\n\nint main() {\n\t// Write your C code here\n\treturn 0;\n}`,
-            54: `#include <iostream>\nusing namespace std;\n\nint main() {\n\t// Write your C++ code here\n\treturn 0;\n}`,
-            62: `public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}`
-        };
+    const defaultCode = {
+        71: "# Chal beta hoja shuru... Krde mera naam roshan 🔥\n",
+        50: `#include <stdio.h>\n\nint main() {\n\t// Write your C code here\n\treturn 0;\n}`,
+        54: `#include <iostream>\nusing namespace std;\n\nint main() {\n\t// Write your C++ code here\n\treturn 0;\n}`,
+        62: `public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}`
+    };
 
-        function setEditorContent(languageId) {
-            if (defaultCode[languageId]) {
-                editor.setValue(defaultCode[languageId], -1);
-            } else {
-                editor.setValue("// Start coding...", -1);
-            }
-        }
-
-        $.ajax({
-            url: "https://theangaarbatch.in/judge0/languages",
-            type: "GET",
-            success: function (response) {
-                topLanguages.forEach(function (language) {
-                    languageSelect.append(
-                        `<option value="${language.id}">${language.name}</option>`
-                    );
-                });
-
-                let otherLanguages = response.filter(function (language) {
-                    return !topLanguages.some(topLang => topLang.id === language.id);
-                });
-                otherLanguages.sort((a, b) => a.name.localeCompare(b.name));
-
-                otherLanguages.forEach(function (language) {
-                    languageSelect.append(
-                        `<option value="${language.id}">${language.name}</option>`
-                    );
-                });
-
-                let initialLanguageId = languageSelect.val();
-                setEditorContent(initialLanguageId);
-            },
-            error: function (xhr, status, error) {
-                alert("Error fetching languages: " + error);
-            }
-        });
-
-        languageSelect.change(function () {
-            let selectedLanguageId = $(this).val();
-            setEditorContent(selectedLanguageId);
-            $("#output").addClass("d-none");
-            $("#output pre").text("");
-        });
-
-        const theme = localStorage.getItem("theme");
-        if (theme == "dark") {
+    // Function to update editor theme based on current theme
+    function updateEditorTheme() {
+        const currentTheme = localStorage.getItem("theme");
+        const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        
+        if (isDark) {
             editor.setTheme("ace/theme/twilight");
         } else {
             editor.setTheme("ace/theme/chrome");
         }
+    }
 
-        editor.session.setMode("ace/mode/python");
-        editor.setOptions({
-            enableBasicAutocompletion: true,
-            enableSnippets: true,
-            enableLiveAutocompletion: true,
-            cursorStyle: "smooth",
-            enableEmmet: true,
-        });
+    function setEditorContent(languageId) {
+        if (defaultCode[languageId]) {
+            editor.setValue(defaultCode[languageId], -1);
+        } else {
+            editor.setValue("// Start coding...", -1);
+        }
+    }
 
-        $("#language").change(function () {
-            let selectedLanguage = $(this).val();
-            if (selectedLanguage == 71) {
-                editor.session.setMode("ace/mode/python");
-            } else if (selectedLanguage == 50) {
-                editor.session.setMode("ace/mode/c_cpp");
-            } else if (selectedLanguage == 54) {
-                editor.session.setMode("ace/mode/c_cpp");
-            } else if (selectedLanguage == 62) {
-                editor.session.setMode("ace/mode/java");
-            }
-        });
-
-        $(document).keydown(function (event) {
-            if ((event.ctrlKey || event.altKey) && event.key === "Enter") {
-                event.preventDefault();
-                document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
-                $("#submit-btn").click();
-            }
-        });
-
-        $("#codeForm").off("submit").submit(function (event) {
-            event.preventDefault();
-            $("#output").addClass("d-none");
-            const submit_btn = $("#submit-btn");
-            submit_btn.prop("disabled", true);
-            submit_btn.text("Submitting...");
-
-            let languageId = $("#language").val();
-            let sourceCode = editor.getValue();
-            let inputText = $("#inputText").val();  // Get the input data
-
-            $.ajax({
-                url: "{% url 'execute_code' %}",
-                type: "POST",
-                data: {
-                    language_id: languageId,
-                    source_code: sourceCode,
-                    input_data: inputText,  // Include the input data in the request
-                    csrfmiddlewaretoken: "{{ csrf_token }}"
-                },
-                success: function (response) {
-                    submit_btn.prop("disabled", false);
-                    submit_btn.text("Submit");
-                    $("#output").removeClass("d-none");
-
-                    if (response.error) {
-                        const outputDiv = $("#output pre");
-                        outputDiv.text(response.error);
-                    } else {
-                        $("#output pre").text(response.output);
-                    }
-
-                    document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
-                    document.getElementById("op-div").scrollIntoView(false);
-                },
-                error: function (xhr, status, error) {
-                    alert("Error from AJAX: " + error);
-                    submit_btn.prop("disabled", false);
-                    submit_btn.text("Submit");
-                }
+    $.ajax({
+        url: "https://theangaarbatch.in/judge0/languages",
+        type: "GET",
+        success: function (response) {
+            topLanguages.forEach(function (language) {
+                languageSelect.append(
+                    `<option value="${language.id}">${language.name}</option>`
+                );
             });
-        });
 
-        $("#inputForm").off("submit").submit(function (event) {
-            event.preventDefault();
-            const inputText = $("#inputText").val();
-            console.log("Input received: " + inputText);
-            $("#inputModal").modal('hide');
+            let otherLanguages = response.filter(function (language) {
+                return !topLanguages.some(topLang => topLang.id === language.id);
+            });
+            otherLanguages.sort((a, b) => a.name.localeCompare(b.name));
+
+            otherLanguages.forEach(function (language) {
+                languageSelect.append(
+                    `<option value="${language.id}">${language.name}</option>`
+                );
+            });
+
+            let initialLanguageId = languageSelect.val();
+            setEditorContent(initialLanguageId);
+        },
+        error: function (xhr, status, error) {
+            alert("Error fetching languages: " + error);
+        }
+    });
+
+    languageSelect.change(function () {
+        let selectedLanguageId = $(this).val();
+        setEditorContent(selectedLanguageId);
+        $("#output").addClass("d-none");
+        $("#output pre").text("");
+    });
+
+    // Set initial theme
+    updateEditorTheme();
+
+    editor.session.setMode("ace/mode/python");
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableSnippets: true,
+        enableLiveAutocompletion: true,
+        cursorStyle: "smooth",
+        enableEmmet: true,
+    });
+
+    $("#language").change(function () {
+        let selectedLanguage = $(this).val();
+        if (selectedLanguage == 71) {
+            editor.session.setMode("ace/mode/python");
+        } else if (selectedLanguage == 50) {
+            editor.session.setMode("ace/mode/c_cpp");
+        } else if (selectedLanguage == 54) {
+            editor.session.setMode("ace/mode/c_cpp");
+        } else if (selectedLanguage == 62) {
+            editor.session.setMode("ace/mode/java");
+        }
+    });
+
+    // Listen for theme changes using MutationObserver
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
+                updateEditorTheme();
+            }
         });
     });
+
+    // Start observing the document element for attribute changes
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-bs-theme']
+    });
+
+    // Also listen for storage events in case theme is changed in another tab
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'theme') {
+            updateEditorTheme();
+        }
+    });
+
+    // Listen for custom theme change events (if your theme switcher dispatches them)
+    document.addEventListener('themeChanged', function() {
+        updateEditorTheme();
+    });
+
+    $(document).keydown(function (event) {
+        if ((event.ctrlKey || event.altKey) && event.key === "Enter") {
+            event.preventDefault();
+            document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
+            $("#submit-btn").click();
+        }
+    });
+
+    $("#codeForm").off("submit").submit(function (event) {
+        event.preventDefault();
+        $("#output").addClass("d-none");
+        const submit_btn = $("#submit-btn");
+        submit_btn.prop("disabled", true);
+        submit_btn.text("Submitting...");
+
+        let languageId = $("#language").val();
+        let sourceCode = editor.getValue();
+        let inputText = $("#inputText").val();
+
+        $.ajax({
+            url: "{% url 'execute_code' %}",
+            type: "POST",
+            data: {
+                language_id: languageId,
+                source_code: sourceCode,
+                input_data: inputText,
+                csrfmiddlewaretoken: "{{ csrf_token }}"
+            },
+            success: function (response) {
+                submit_btn.prop("disabled", false);
+                submit_btn.text("Submit");
+                $("#output").removeClass("d-none");
+
+                if (response.error) {
+                    const outputDiv = $("#output pre");
+                    outputDiv.text(response.error);
+                } else {
+                    $("#output pre").text(response.output);
+                }
+
+                document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
+                document.getElementById("op-div").scrollIntoView(false);
+            },
+            error: function (xhr, status, error) {
+                alert("Error from AJAX: " + error);
+                submit_btn.prop("disabled", false);
+                submit_btn.text("Submit");
+            }
+        });
+    });
+
+    $("#inputForm").off("submit").submit(function (event) {
+        event.preventDefault();
+        const inputText = $("#inputText").val();
+        console.log("Input received: " + inputText);
+        $("#inputModal").modal('hide');
+    });
+});
 </script>
 {% endblock %}
 {% endblock %}
