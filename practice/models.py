@@ -124,23 +124,41 @@ class Sheet(models.Model):
         
         # Get all questions sorted by their custom order or default order
         questions = self.get_ordered_questions()
-        solved_questions = Submission.objects.filter(
-            user=user,
-            question__in=questions,
-            status='Accepted'
-        ).values('question').distinct()  # Get questions solved by the user
 
-        # Enable only the solved questions and the first unsolved question
-        enabled_questions = questions[:len(solved_questions) + 1]
+        if self.sheet_type == "MCQ":
+            solved_questions = MCQSubmission.objects.filter(
+                student=user,
+                question__in=questions,
+                is_correct=True
+            ).values('question').distinct()  # Get questions solved by the user
 
-        return enabled_questions
+            enabled_questions = questions[:len(solved_questions) + 1]
+            return enabled_questions
+
+        else:
+
+            solved_questions = Submission.objects.filter(
+                user=user,
+                question__in=questions,
+                status='Accepted'
+            ).values('question').distinct()  # Get questions solved by the user
+
+            # Enable only the solved questions and the first unsolved question
+            enabled_questions = questions[:len(solved_questions) + 1]
+
+            return enabled_questions
     
     def get_ordered_questions(self):
-        # Get questions in the custom order
-        questions = list(self.questions.filter(is_approved=True))
-        if self.custom_order:
-            questions.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
-        return questions
+
+        if self.sheet_type == "MCQ":
+            questions = list(self.mcq_questions.all())
+            return questions
+        else:
+            questions = list(self.questions.filter(is_approved=True))
+            
+            if self.custom_order:
+                questions.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
+            return questions
     
     def get_next_question(self, current_question):
         questions = self.get_ordered_questions()
@@ -574,10 +592,47 @@ class MCQQuestion(models.Model):
         default="Easy"
     )
 
+    slug = models.SlugField(unique=True, blank=True, null=True)
+
     is_approved = models.BooleanField(default=False)
 
     def __str__(self):
         return f"MCQ: {self.question_text[:50]}..."
+
+    def get_difficulty_level_color(self):
+        color_map = {
+            'Easy': 'success',
+            'Medium': 'warning', 
+            'Hard': 'danger'
+        }
+        return color_map.get(self.difficulty_level, 'secondary')
+
+
+    def save(self, *args, **kwargs):
+
+        if not self.slug:
+            text = ""
+        
+            for word in self.question_text.split():
+                if word.isalnum():
+                    text += word + "-"
+                else:
+                    word = ''.join(e for e in word if e.isalnum())
+                    text += word + "-"
+            
+            # Generate base slug
+            base_slug = text.lower().strip("-")
+            slug = base_slug
+
+            # Check for uniqueness
+            counter = 1
+            while MCQQuestion.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+        super().save(*args, **kwargs)
+        
 
 
 # ============================== MCQ Submission ==============================

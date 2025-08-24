@@ -13,7 +13,7 @@ from django.db.models import Count, Min, Max
 
 from accounts.models import Student
 from student.models import Notification, Course
-from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest
+from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest, MCQQuestion, MCQSubmission
 
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
@@ -149,10 +149,19 @@ def my_sheet(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
     
     enabled_questions = sheet.get_enabled_questions_for_user(request.user.student)
-    
-    user_submissions = {
-        submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=enabled_questions)
+
+    if sheet.sheet_type == "MCQ":
+
+        user_submissions = {
+            submission.mcq_question.id: submission for submission in MCQSubmission.objects.filter(student=request.user, question__in=enabled_questions)
         }
+
+    else:
+
+        user_submissions = {
+            submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=enabled_questions)
+            }
+
     
     if not sheet.is_enabled:
         messages.info(request, "This sheet is not enabled.")
@@ -165,32 +174,6 @@ def my_sheet(request, slug):
     }   
     
     return render(request, 'student/batch/my_sheet.html', parameters)
-
-# ============================== SHEET VIEW =========================
-
-@login_required(login_url="login")
-def sheet(request, slug):
-        
-    sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
-    
-    enabled_questions = sheet.get_enabled_questions_for_user(request.user.student)
-    
-    user_submissions = {
-        submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=enabled_questions)
-        }
-    
-    if not sheet.is_enabled:
-        messages.info(request, "This sheet is not enabled.")
-        return redirect('practice')
-
-    parameters = {
-        "sheet": sheet,
-        "enabled_questions": enabled_questions,
-        "user_submissions": user_submissions,  # Pass the submissions to the template
-    }   
-    
-    return render(request, "practice/sheet.html", parameters)
-
 
 # ========================================= SHEET PROGRESS ===================================
 

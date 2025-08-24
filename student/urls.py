@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views
+from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views, mcq_views
 
 urlpatterns = [
     path("", views.dashboard, name="student"),
@@ -106,6 +106,18 @@ urlpatterns += [
     path("sheet/<slug:slug>/", batch_views.my_sheet, name="my_sheet"),
     path("<slug:slug>/leaderboard", batch_views.student_batch_leaderboard, name="student_batch_leaderboard"),
     path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
+]
+
+urlpatterns += [
+    # urls.py
+    path('sheet/<slug:sheet_slug>/<slug:slug>/', mcq_views.mcq_question_view, name='mcq_question'),
+    
+    path('mcq/<slug:slug>/submit/', mcq_views.submit_mcq_answer, name='submit_mcq_answer'),
+    path('mcq/<slug:slug>/submissions/', mcq_views.mcq_submissions, name='mcq_submissions'),
+    path('mcq/<slug:slug>/recommended/', mcq_views.fetch_recommended_mcq_questions, name='fetch_recommended_mcq_questions'),
+    path('mcq/next/<int:sheet_id>/<int:question_id>/', mcq_views.render_next_mcq_question_in_sheet, name='render_next_mcq_question_in_sheet'),
+    path('mcq/leaderboard/<slug:slug>/', mcq_views.mcq_leaderboard, name='mcq_leaderboard'),
+    path('mcq/progress/<slug:slug>/', mcq_views.mcq_sheet_progress, name='mcq_sheet_progress'),
 ]
 
 # ============================== JOVAC WORK ==============================
