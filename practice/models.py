@@ -49,6 +49,9 @@ class Batch(models.Model):
     def get_today_pod_for_batch(self):
         return self.pods.filter(date=datetime.now().date()).first()
 
+    def get_total_enrollments(self):
+        return self.enrollment_requests.filter(status='Accepted').count()
+
 
 # ============================== ENROLLMENT REQUEST =========================
 
