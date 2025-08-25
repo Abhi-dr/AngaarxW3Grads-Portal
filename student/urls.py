@@ -108,17 +108,18 @@ urlpatterns += [
     path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
 ]
 
+# ============================== MCQ WORK ==============================
+
 urlpatterns += [
     # urls.py
     path('sheet/<slug:sheet_slug>/<slug:slug>/', mcq_views.mcq_question_view, name='mcq_question'),
-    
+
     path('mcq/<slug:slug>/submit/', mcq_views.submit_mcq_answer, name='submit_mcq_answer'),
-    path('mcq/<slug:slug>/submissions/', mcq_views.mcq_submissions, name='mcq_submissions'),
-    path('mcq/<slug:slug>/recommended/', mcq_views.fetch_recommended_mcq_questions, name='fetch_recommended_mcq_questions'),
     path('mcq/next/<int:sheet_id>/<int:question_id>/', mcq_views.render_next_mcq_question_in_sheet, name='render_next_mcq_question_in_sheet'),
-    path('mcq/leaderboard/<slug:slug>/', mcq_views.mcq_leaderboard, name='mcq_leaderboard'),
-    path('mcq/progress/<slug:slug>/', mcq_views.mcq_sheet_progress, name='mcq_sheet_progress'),
 ]
+    # path('mcq/leaderboard/<slug:slug>/', mcq_views.mcq_leaderboard, name='mcq_leaderboard'),
+    # path('mcq/progress/<slug:slug>/', mcq_views.mcq_sheet_progress, name='mcq_sheet_progress'),
+    # path('mcq/<slug:slug>/recommended/', mcq_views.fetch_recommended_mcq_questions, name='fetch_recommended_mcq_questions'),
 
 # ============================== JOVAC WORK ==============================
 

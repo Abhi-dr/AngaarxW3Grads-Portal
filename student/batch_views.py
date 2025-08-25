@@ -153,7 +153,7 @@ def my_sheet(request, slug):
     if sheet.sheet_type == "MCQ":
 
         user_submissions = {
-            submission.mcq_question.id: submission for submission in MCQSubmission.objects.filter(student=request.user, question__in=enabled_questions)
+            submission.question.id: submission for submission in MCQSubmission.objects.filter(student=request.user, question__in=enabled_questions)
         }
 
     else:

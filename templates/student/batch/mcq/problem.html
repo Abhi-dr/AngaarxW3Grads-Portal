@@ -329,12 +329,7 @@ active
                         <b>Sheet:</b> <i>{{ mcq_question.sheet.name }}</i>
                     </span>
                 </div>
-                <div class="col-md-6">
-                    <div class="d-flex justify-content-end">
-                        <a id="view-submission" href="{% url 'mcq_submissions' mcq_question.slug %}"
-                            class="btn btn-outline-success">View Submissions</a>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -356,19 +351,17 @@ active
             </div>
         </div>
 
-        {% comment %}
         {% if mcq_question.tags %}
         <div class="card-body mb-n7">
             <h6 class="card-title">Tags:</h6>
             <div class="tags-container">
-                {% for tag in mcq_question.tags.split:',' %}
-                <span class="badge bg-secondary me-1">{{ tag|strip }}</span>
+                {% for tag in tag_list %}
+                <span class="badge bg-secondary me-1">{{ tag }}</span>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
 
-        {% endcomment %}
 
         <!-- Options Section -->
         <div class="card-body">
@@ -423,7 +416,7 @@ active
         </div>
 
         <!-- ======================= RECOMMENDED QUESTIONS ========================= -->
-        <div class="card-footer d-sm-flex justify-content-between align-items-center">
+        <!-- <div class="card-footer d-sm-flex justify-content-between align-items-center">
             <div class="card-footer-link mb-sm-0">
                 <h5 class="mb-3">
                     <strong>Recommended Questions</strong>
@@ -436,7 +429,7 @@ active
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 
     <!-- Success Modal -->
@@ -530,6 +523,7 @@ active
             submitBtn.prop('disabled', true);
             submitBtn.html('<span class="spinner-border spinner-border-sm" role="status"></span> Submitting...');
 
+            console.log(selectedOption);
             // Submit answer
             fetch("{% url 'submit_mcq_answer' mcq_question.slug %}", {
                 method: 'POST',
@@ -595,10 +589,10 @@ active
     });
 
     // Recommended questions (similar to coding problems)
-    document.addEventListener("DOMContentLoaded", function () {
+    /* document.addEventListener("DOMContentLoaded", function () {
         const recommendedSection = document.getElementById("recommended-questions");
 
-        fetch("{% url 'fetch_recommended_mcq_questions' mcq_question.slug %}", {
+        fetch("", {
             method: 'GET',
             headers: { 'X-CSRFToken': '{{ csrf_token }}' }
         })
@@ -623,7 +617,7 @@ active
                 console.error("Error fetching recommended questions:", error);
                 recommendedSection.innerHTML = `<span class="text-muted">Failed to load recommendations</span>`;
             });
-    });
+    }); */
 </script>
 
 {% endblock %}
