@@ -119,6 +119,13 @@ active
                                     Title 📚
                                 </h6>
                             </th>
+
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Tags 🏷️
+                                </h6>
+                            </th>
+
                             <th class="border-bottom-0" style="text-align: center;">
                                 <h6 class="fw-semibold mb-0">
                                     Level 📊
@@ -130,6 +137,7 @@ active
                                     Status🚦
                                 </h6>
                             </th> -->
+
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
                                     Link 🔗
@@ -154,8 +162,19 @@ active
                             </td>
                             <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-1 text-wrap" style="width: 100%;"
-                                    title="{{ question.question_text }}">{{ question.question_text|truncatewords:10 }}</h6>
+                                    title="{{ question.question_text }}">{{ question.question_text|truncatewords:10 }}
+                                </h6>
                             </td>
+
+                            <td class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-1 text-wrap"
+                                    title="{{ question.tag_list|join:', ' }}">
+                                    {% for tag in question.tag_list %}
+                                    <span class="badge bg-primary me-1">{{ tag }}</span>
+                                    {% endfor %}
+                                </h6>
+                            </td>
+
                             <td class="border-bottom-0" style="text-align: center;">
                                 <h6 class="fw-semibold mb-0 fs-4">
                                     <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
@@ -163,6 +182,8 @@ active
                                     </span>
                                 </h6>
                             </td>
+
+
 
                             <!-- <td class="border-bottom-0" style="text-align: center;">
                                 {% if user_submissions|get_item:question.id %}
@@ -206,7 +227,7 @@ active
 
     {% else %}
 
-     <!-- ================================= CODING QUESTIONS TABLE ================================== -->
+    <!-- ================================= CODING QUESTIONS TABLE ================================== -->
 
     <div class="card w-100">
         <div class="card-body p-4">
@@ -292,7 +313,8 @@ active
                             <td class="border-bottom-0" style="text-align: center;">
                                 {% if user_submissions|get_item:question.id %}
                                 {% with submission=user_submissions|get_item:question.id %}
-                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">{{ submission.status }}</span>
+                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">{{
+                                    submission.status }}</span>
                                 <br><a href="{% url 'my_submissions' question.slug %}"
                                     class=" mt-1 btn btn-sm btn-outline-warning">View Submissions</a>
                                 {% endwith %}

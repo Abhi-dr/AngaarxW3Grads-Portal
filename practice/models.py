@@ -607,6 +607,11 @@ class MCQQuestion(models.Model):
         }
         return color_map.get(self.difficulty_level, 'secondary')
 
+    def tag_list(self):
+        if self.tags:
+            return [tag.strip() for tag in self.tags.split(",")]
+        return []
+
 
     def save(self, *args, **kwargs):
 
