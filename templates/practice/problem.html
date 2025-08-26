@@ -280,6 +280,47 @@ active
     }
 </style>
 
+<style>
+    .figure {
+        /* Core styling */
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.55rem;
+        margin-left: 2%;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+        /* --- New Additions --- */
+        max-width: 320px;
+        /* Set a maximum width for the card */
+        width: 96%;
+        /* Ensure it's responsive within the max-width */
+        display: flex;
+        /* Better control over internal alignment */
+        flex-direction: column;
+        height: 100%;
+        /* Make cards in the same row equal height */
+    }
+
+    .figure:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .figure .figure-caption {
+        text-align: center;
+        margin-top: auto;
+        /* Pushes caption to the bottom in equal-height cards */
+    }
+
+    /* --- Dark Mode Support --- */
+    [data-bs-theme="dark"] .figure {
+        background-color: #2c3034;
+        border-color: #495057;
+    }
+</style>
+
 {% endblock %} {% block body %}
 
 <div class="container-fluid">
@@ -366,6 +407,27 @@ active
         </div>
 
         {% endautoescape %}
+
+
+        {% if question.images.all %}
+        <div class="row g-4">
+            {% for img in question.images.all %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <figure class="figure h-100">
+                    <img src="{{ img.image.url }}" class="figure-img img-fluid rounded question-image-thumbnail"
+                        alt="{{ img.caption|default:'Question image' }}" data-bs-toggle="modal"
+                        data-bs-target="#image-viewer-modal" data-src="{{ img.image.url }}"
+                        data-caption="{{ img.caption|default:'' }}">
+
+                    {% if img.caption %}
+                    <figcaption class="figure-caption text-center">{{ img.caption }}</figcaption>
+                    {% endif %}
+                </figure>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
 
         {% if question.input_format %}
 
@@ -643,6 +705,24 @@ active
             </div>
 
 
+            <!-- =========================== IMAGE PREVIEW MODAL =================== -->
+
+            <div class="modal fade" id="image-viewer-modal" tabindex="-1" aria-labelledby="imageViewerModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageViewerModalLabel">Image Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="" id="modalImage" class="img-fluid rounded" alt="Enlarged question image">
+                            <p class="mt-2" id="modalCaption"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ========================================================================================== -->
 
         </div>
@@ -679,7 +759,6 @@ active
                 });
         });
     </script>
-
 
 
     <!-- ===================================== EDITOR SETTINGS ================================================ -->
@@ -838,6 +917,21 @@ active
                 );
             });
 
+
+            $('#image-viewer-modal').on('show.bs.modal', function (event) {
+                const triggerElement = $(event.relatedTarget);
+                const imgSrc = triggerElement.data('src');
+                const imgCaption = triggerElement.data('caption');
+                const modal = $(this);
+                modal.find('#modalImage').attr('src', imgSrc);
+                const captionElement = modal.find('#modalCaption');
+                if (imgCaption) {
+                    captionElement.text(imgCaption).show();
+                } else {
+                    captionElement.hide();
+                }
+            });
+
             // Initialize editor and load the first driver code
             initializeEditor();
             fetchDriverCode(languageSelect.val());
@@ -933,7 +1027,7 @@ active
 
             // Setup for API requests
             const judge0_url = `https://theangaarbatch.in/judge0/submissions/${token}?base64_encoded=true`;
-            
+
             // Use different endpoints for run_code and submit_code
             let get_result_url;
             if (is_run_code) {
@@ -1264,25 +1358,25 @@ active
                 // Create summary header - different for run_code vs submit_code
                 const summaryDiv = document.createElement('div');
                 summaryDiv.classList.add('mb-4');
-                
+
                 if (data.is_run_code) {
                     // Create badge display for individual test cases
                     let badgesHTML = '';
-                    
+
                     // Generate passed test case badges
                     const passedBadges = data.test_case_results
-                        .map((result, index) => result.status === "Passed" || result.passed === true ? 
+                        .map((result, index) => result.status === "Passed" || result.passed === true ?
                             `<span class="badge bg-success me-1 mb-1">Test Case ${index + 1}</span>` : '')
                         .filter(badge => badge !== '')
                         .join('');
-                    
+
                     // Generate failed test case badges
                     const failedBadges = data.test_case_results
-                        .map((result, index) => result.status !== "Passed" && !result.passed ? 
+                        .map((result, index) => result.status !== "Passed" && !result.passed ?
                             `<span class="badge bg-danger me-1 mb-1">Test Case ${index + 1}</span>` : '')
                         .filter(badge => badge !== '')
                         .join('');
-                    
+
                     // Add badge groups if there are any badges
                     if (passedBadges) {
                         badgesHTML += `<div class="mt-2"><strong>Passed:</strong> ${passedBadges}</div>`;
@@ -1290,7 +1384,7 @@ active
                     if (failedBadges) {
                         badgesHTML += `<div class="mt-2"><strong>Failed:</strong> ${failedBadges}</div>`;
                     }
-                    
+
                     // For Run Code, show a simple summary that doesn't draw too much attention
                     summaryDiv.innerHTML = `
                         <div class="bg-light rounded p-3 border">
@@ -1343,16 +1437,16 @@ active
                     allResultsHeader.textContent = 'Sample Test Cases Results:';
                     allResultsHeader.classList.add('mt-3', 'mb-3');
                     testCaseResultsDiv.appendChild(allResultsHeader);
-                    
+
                     // Display all test cases for run_code
                     data.test_case_results.forEach((result, index) => {
                         const isPassed = result.status === "Passed" || result.passed === true;
                         displayTestCaseResult(result, index, testCaseResultsDiv, isPassed);
                     });
-                    
+
                     return; // Exit after displaying all test cases
                 }
-                
+
                 // If we got here, this is submit code mode
                 // If all tests passed, don't show individual test cases
                 if (passedTests === totalTests) {
@@ -1370,7 +1464,7 @@ active
                     if (result.status === "Passed") {
                         return; // Skip passed test cases
                     }
-                    
+
                     displayTestCaseResult(result, index, testCaseResultsDiv, false);
                 });
 
@@ -1440,24 +1534,24 @@ active
 
             const summaryDiv = document.createElement('div');
             summaryDiv.classList.add('alert', data.is_all_test_cases_passed ? 'alert-success' : 'alert-warning', 'mb-3');
-            
+
             // Create badge display for individual test cases
             let badgesHTML = '';
             if (data.test_case_results && data.is_run_code) {
                 // Generate passed test case badges
                 const passedBadges = data.test_case_results
-                    .map((result, index) => result.passed || result.status === "Passed" ? 
+                    .map((result, index) => result.passed || result.status === "Passed" ?
                         `<span class="badge bg-success me-1 mb-1">Test Case ${index + 1}</span>` : '')
                     .filter(badge => badge !== '')
                     .join('');
-                
+
                 // Generate failed test case badges
                 const failedBadges = data.test_case_results
-                    .map((result, index) => !result.passed && result.status !== "Passed" ? 
+                    .map((result, index) => !result.passed && result.status !== "Passed" ?
                         `<span class="badge bg-danger me-1 mb-1">Test Case ${index + 1}</span>` : '')
                     .filter(badge => badge !== '')
                     .join('');
-                
+
                 // Add badge groups if there are any badges
                 if (passedBadges) {
                     badgesHTML += `<div class="mt-2"><strong>Passed:</strong> ${passedBadges}</div>`;
@@ -1466,7 +1560,7 @@ active
                     badgesHTML += `<div class="mt-2"><strong>Failed:</strong> ${failedBadges}</div>`;
                 }
             }
-            
+
             summaryDiv.innerHTML = `
                 <div>
                     <div class="d-flex justify-content-between align-items-center">
@@ -1600,7 +1694,7 @@ active
                     <div class="spinner-border text-primary me-3" role="status"></div>
                     <h4 class="mb-0">Running code on sample test cases...</h4>
                 </div>`;
-            
+
             outputDiv.classList.remove('d-none'); // Show the output div
             outputDiv.scrollIntoView({ behavior: 'smooth' });
 
@@ -1611,15 +1705,15 @@ active
             };
 
             // Use async/await pattern for better error handling
-            (async function() {
+            (async function () {
                 try {
                     // Create AbortController for timeout
                     const controller = new AbortController();
                     const signal = controller.signal;
-                    
+
                     // Set a timeout
                     const timeout = setTimeout(() => controller.abort(), 60000); // 1-minute timeout
-                    
+
                     try {
                         // Send the request to get a token
                         const response = await fetch("{% url 'run_code' question.slug %}", {
@@ -1656,7 +1750,7 @@ active
                     }
                 } catch (error) {
                     console.error('Error running code:', error);
-                    
+
                     // Check if it's an abort error
                     if (error.name === 'AbortError') {
                         outputDiv.innerHTML = `

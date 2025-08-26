@@ -412,23 +412,23 @@ active
         </div>
 
         {% if mcq_question.images.all %}
-<div class="row g-4">
-    {% for img in mcq_question.images.all %}
-    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-        <figure class="figure h-100">
-            <img src="{{ img.image.url }}" class="figure-img img-fluid rounded question-image-thumbnail"
-                alt="{{ img.caption|default:'Question image' }}" data-bs-toggle="modal"
-                data-bs-target="#image-viewer-modal" data-src="{{ img.image.url }}"
-                data-caption="{{ img.caption|default:'' }}">
+        <div class="row g-4">
+            {% for img in mcq_question.images.all %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <figure class="figure h-100">
+                    <img src="{{ img.image.url }}" class="figure-img img-fluid rounded question-image-thumbnail"
+                        alt="{{ img.caption|default:'Question image' }}" data-bs-toggle="modal"
+                        data-bs-target="#image-viewer-modal" data-src="{{ img.image.url }}"
+                        data-caption="{{ img.caption|default:'' }}">
 
-            {% if img.caption %}
-            <figcaption class="figure-caption text-center">{{ img.caption }}</figcaption>
-            {% endif %}
-        </figure>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
+                    {% if img.caption %}
+                    <figcaption class="figure-caption text-center">{{ img.caption }}</figcaption>
+                    {% endif %}
+                </figure>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         {% if mcq_question.tags %}
         <div class="card-body mb-n7">

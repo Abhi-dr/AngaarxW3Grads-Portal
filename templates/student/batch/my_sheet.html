@@ -313,8 +313,8 @@ active
                             <td class="border-bottom-0" style="text-align: center;">
                                 {% if user_submissions|get_item:question.id %}
                                 {% with submission=user_submissions|get_item:question.id %}
-                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">{{
-                                    submission.status }}</span>
+                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">
+                                    {{ submission.status }}</span>
                                 <br><a href="{% url 'my_submissions' question.slug %}"
                                     class=" mt-1 btn btn-sm btn-outline-warning">View Submissions</a>
                                 {% endwith %}
