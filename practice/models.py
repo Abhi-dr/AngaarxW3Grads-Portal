@@ -155,6 +155,8 @@ class Sheet(models.Model):
 
         if self.sheet_type == "MCQ":
             questions = list(self.mcq_questions.all())
+            if self.custom_order:
+                questions.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
             return questions
         else:
             questions = list(self.questions.filter(is_approved=True))

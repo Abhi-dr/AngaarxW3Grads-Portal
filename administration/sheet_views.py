@@ -13,7 +13,7 @@ from django.db import transaction
 from django.urls import reverse
 
 from accounts.models import Student, Administrator
-from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest, RecommendedQuestions, TestCase, DriverCode
+from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest, RecommendedQuestions, TestCase, DriverCode, MCQQuestion, MCQSubmission
 
 # ========================= SHEET WORK ==========================
 
@@ -161,8 +161,8 @@ def sheet(request, slug):
     
     administrator = Administrator.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
-    questions = sheet.get_ordered_questions()
-    
+
+    questions = sheet.get_ordered_questions()    
     
     parameters = {
         "administrator": administrator,

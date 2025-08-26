@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views
+from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views, mcq_views
 
 urlpatterns = [
     path("", views.index, name="administration"),
@@ -164,6 +164,20 @@ urlpatterns += [
     # ====================================== ENABLE / DISABLE SHEET ===================================
     
     path('sheet/<slug:slug>/toggle-status/', sheet_views.toggle_sheet_status, name='toggle_sheet_status'),
+
+]
+
+# ========================= MCQ WORK ==========================
+
+urlpatterns += [
+    path('sheet/<slug:sheet_slug>/add-new-mcq/', mcq_views.administrator_add_new_mcq_question, name='administrator_add_new_mcq_question'),
+    path('mcq-question/<int:question_id>/edit/', mcq_views.administrator_edit_mcq_question, name='administrator_edit_mcq_question'),
+    path('mcq-question/<int:question_id>/delete/', mcq_views.delete_mcq_question, name='delete_mcq_question'),
+
+    path('sheet/<slug:sheet_slug>/<slug:question_slug>/submissions/', mcq_views.administrator_view_mcq_submissions, name='administrator_view_mcq_submissions'),
+
+
+
 
 ]
 
