@@ -26,33 +26,35 @@ def sheets(request):
 
 # ========================= ADD SHEET ==========================
 
+
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
 def add_sheet(request):
-    
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = get_object_or_404(Administrator, id=request.user.id)
     batches = Batch.objects.all()
     
     if request.method == "POST":
-        
         name = request.POST.get('name')
-        batches = request.POST.getlist('batches')
+        batch_ids = request.POST.getlist('batches')
         thumbnail = request.FILES.get('thumbnail')
         is_sequential = 'is_sequential' in request.POST
         
+        # Get the new sheet_type value from the form
+        sheet_type = request.POST.get('sheet_type')
+        
+        # Create the sheet object with all necessary fields
         sheet = Sheet.objects.create(
             name=name,
             thumbnail=thumbnail,
             is_sequential=is_sequential,
+            sheet_type=sheet_type  # Add the sheet type here
         )
         
-        for batch in batches:
-            batch = Batch.objects.get(id=batch)
-            sheet.batches.add(batch)
+        # More efficient way to add many-to-many relationships
+        if batch_ids:
+            sheet.batches.set(batch_ids)
             
-        sheet.save()
-        
         messages.success(request, "Sheet added successfully!")
         return redirect('administrator_sheet', slug=sheet.slug)
     
@@ -63,35 +65,35 @@ def add_sheet(request):
     
     return render(request, 'administration/sheet/add_sheet.html', parameters)
 
-
 # ========================= EDIT SHEET ==========================
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
 def edit_sheet(request, slug):
-    
-    administrator = Administrator.objects.get(id=request.user.id)
-    sheet = Sheet.objects.get(slug=slug)
+    administrator = get_object_or_404(Administrator, id=request.user.id)
+    sheet = get_object_or_404(Sheet, slug=slug)
     batches = Batch.objects.all()
     
     if request.method == "POST":
-        
         name = request.POST.get('name')
-        batches = request.POST.getlist('batches')
+        batch_ids = request.POST.getlist('batches')
         thumbnail = request.FILES.get('thumbnail')
         is_sequential = 'is_sequential' in request.POST
         
+        # Get the sheet_type value from the form
+        sheet_type = request.POST.get('sheet_type')
+        
+        # Update the sheet object
         sheet.name = name        
         sheet.is_sequential = is_sequential
-        sheet.batches.clear()
+        sheet.sheet_type = sheet_type # Update the sheet type here
         
         if thumbnail:
             sheet.thumbnail = thumbnail
-        
-        for batch in batches:
-            batch = Batch.objects.get(id=batch)
-            sheet.batches.add(batch)
+            
+        # More efficient way to update many-to-many relationships
+        sheet.batches.set(batch_ids)
             
         sheet.save()
         
@@ -101,7 +103,7 @@ def edit_sheet(request, slug):
     parameters = {
         "administrator": administrator,
         "sheet": sheet,
-        "selected_batch_ids": [batch.id for batch in sheet.batches.all()],
+        "selected_batch_ids": list(sheet.batches.values_list('id', flat=True)),
         "batches": batches
     }
     

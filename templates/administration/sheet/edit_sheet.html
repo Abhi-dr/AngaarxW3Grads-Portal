@@ -51,7 +51,17 @@ active
                                 </div>
                             </div>
 
-
+                            <div class="mb-3">
+                                <label for="sheet_type" class="form-label">Sheet Type</label>
+                                <select class="form-select form-control" name="sheet_type" id="sheet_type" required>
+                                    <option value="Coding" {% if sheet.sheet_type == 'Coding' %}selected{% endif %}>
+                                        Coding Problems
+                                    </option>
+                                    <option value="MCQ" {% if sheet.sheet_type == 'MCQ' %}selected{% endif %}>
+                                        Multiple Choice Questions
+                                    </option>
+                                </select>
+                            </div>
                             <div class="mb-3">
                                 <label for="job_title" class="form-label">Name
                                     <div class="star">*</div>
@@ -103,7 +113,6 @@ active
 
         </form>
 
-        <!-- Cropper Modal -->
         <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -132,7 +141,6 @@ active
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 
-<!--Crop js-->
 <script>
     $(document).ready(function () {
         let cropper;

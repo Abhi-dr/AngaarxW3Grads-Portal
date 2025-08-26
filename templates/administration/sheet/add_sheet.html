@@ -40,6 +40,13 @@ active
                         </div>
 
                         <div class="mb-3">
+                            <label for="sheet_type" class="form-label">Sheet Type</label>
+                            <select class="form-select form-control" name="sheet_type" id="sheet_type" required>
+                                <option value="Coding">Coding Type</option>
+                                <option value="MCQ">MCQ Type</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="job_title" class="form-label">Name</label>
                             <input type="text" class="form-control" id="question_title" name="name"
                                 placeholder="Name goes here..." required>
@@ -62,10 +69,9 @@ active
                         </div>
                     </div>
                 </div>
+            </form>
         </div>
-        </form>
 
-        <!-- Cropper Modal -->
         <div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -85,16 +91,13 @@ active
                 </div>
             </div>
         </div>
-
     </div>
-
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
 
-<!--Crop js-->
 <script>
     $(document).ready(function () {
         let cropper;
