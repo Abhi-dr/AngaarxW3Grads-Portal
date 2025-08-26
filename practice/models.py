@@ -1,6 +1,10 @@
 from django.db import models
 from datetime import datetime, timedelta
 from django.utils.timezone import now
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericRelation
 
 from accounts.models import Student, Instructor
 
@@ -49,6 +53,9 @@ class Batch(models.Model):
     def get_today_pod_for_batch(self):
         return self.pods.filter(date=datetime.now().date()).first()
 
+    def get_total_enrollments(self):
+        return self.enrollment_requests.filter(status='Accepted').count()
+
 
 # ============================== ENROLLMENT REQUEST =========================
 
@@ -79,6 +86,12 @@ class EnrollmentRequest(models.Model):
 
 
 class Sheet(models.Model):
+
+    SHEET_TYPES = [
+        ("Coding", "Coding"),
+        ("MCQ", "MCQ"),
+    ]
+
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     
@@ -93,6 +106,9 @@ class Sheet(models.Model):
     
     start_time = models.DateTimeField(null=True, blank=True)
     end_time = models.DateTimeField(null=True, blank=True)
+
+    sheet_type = models.CharField(max_length=20, choices=SHEET_TYPES, default="Coding")
+
     
     # Field to check if the sheet will be treated as a STORYLINE
     is_sequential = models.BooleanField(default=False)
@@ -115,23 +131,43 @@ class Sheet(models.Model):
         
         # Get all questions sorted by their custom order or default order
         questions = self.get_ordered_questions()
-        solved_questions = Submission.objects.filter(
-            user=user,
-            question__in=questions,
-            status='Accepted'
-        ).values('question').distinct()  # Get questions solved by the user
 
-        # Enable only the solved questions and the first unsolved question
-        enabled_questions = questions[:len(solved_questions) + 1]
+        if self.sheet_type == "MCQ":
+            solved_questions = MCQSubmission.objects.filter(
+                student=user,
+                question__in=questions,
+                is_correct=True
+            ).values('question').distinct()  # Get questions solved by the user
 
-        return enabled_questions
+            enabled_questions = questions[:len(solved_questions) + 1]
+            return enabled_questions
+
+        else:
+
+            solved_questions = Submission.objects.filter(
+                user=user,
+                question__in=questions,
+                status='Accepted'
+            ).values('question').distinct()  # Get questions solved by the user
+
+            # Enable only the solved questions and the first unsolved question
+            enabled_questions = questions[:len(solved_questions) + 1]
+
+            return enabled_questions
     
     def get_ordered_questions(self):
-        # Get questions in the custom order
-        questions = list(self.questions.filter(is_approved=True))
-        if self.custom_order:
-            questions.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
-        return questions
+
+        if self.sheet_type == "MCQ":
+            questions = list(self.mcq_questions.all())
+            if self.custom_order:
+                questions.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
+            return questions
+        else:
+            questions = list(self.questions.filter(is_approved=True))
+            
+            if self.custom_order:
+                questions.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
+            return questions
     
     def get_next_question(self, current_question):
         questions = self.get_ordered_questions()
@@ -149,26 +185,30 @@ class Sheet(models.Model):
         verbose_name_plural = 'Sheets'
         
     def get_total_questions(self):
-        return self.questions.filter(is_approved=True).count()
+        if self.sheet_type == "Coding":
+            return self.questions.filter(is_approved=True).count()
+        return self.mcq_questions.filter(is_approved=True).count()
     
     def get_solved_questions(self, student):
-        return Submission.objects.filter(
-            user=student,
-            question__in=self.questions.all(),
-            status='Accepted'
-        ).values('question').distinct().count()
+        if self.sheet_type == "Coding":
+            return Submission.objects.filter(
+                user=student,
+                question__in=self.questions.all(),
+                status='Accepted'
+            ).values('question').distinct().count()
+        # return MCQSubmission.objects.filter(
+        #     student=student,
+        #     question__in=self.mcq_questions.all(),
+        #     is_correct=True
+        # ).count()
         
     def get_progress(self, student):
-        total_questions = self.questions.count()
-        completed_questions = Submission.objects.filter(
-            user=student,
-            question__in=self.questions.all(),
-            status='Accepted'
-        ).values('question').distinct().count()
+        total = self.get_total_questions()
+        solved = self.get_solved_questions(student)
 
-        if total_questions == 0:
+        if total == 0:
             return 0
-        return (completed_questions / total_questions) * 100
+        return (solved / total) * 100
         
     def save(self, *args, **kwargs):
         
@@ -195,7 +235,33 @@ class Sheet(models.Model):
             self.slug = slug
         
         super(Sheet, self).save(*args, **kwargs)
-        
+
+
+# ============================== QUESTION IMAGE MODEL ========================
+
+class QuestionImage(models.Model):
+    image = models.ImageField(upload_to='question_images/')
+
+    caption = models.CharField(max_length=255, blank=True, null=True)
+
+    # Fields for the Generic Foreign Key relationship
+    # This points to the model (e.g., 'MCQQuestion')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    
+    # This stores the primary key of the specific question instance
+    object_id = models.PositiveIntegerField()
+    
+    # This creates the generic relationship from the two fields above
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    # Optional: to control the display order of multiple images
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order'] # Order images by the 'order' field by default
+
+    def __str__(self):
+        return f"Image for {self.content_object}"
 
 # ============================== QUESTION MODEL =============================
 
@@ -228,6 +294,9 @@ class Question(models.Model):
     position = models.PositiveIntegerField(default=0)
     
     hint = models.TextField(blank=True, null=True)
+
+    images = GenericRelation(QuestionImage, blank=True, null=True)
+
     
     slug = models.SlugField(blank=True, null=True)
     
@@ -532,3 +601,101 @@ class RecommendedQuestions(models.Model):
     link = models.URLField()
     platform = models.CharField(max_length=50, choices=platform_choices)
     
+
+# ============================== MCQ Question ================================
+
+class MCQQuestion(models.Model):
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, related_name="mcq_questions")
+
+    question_text = models.TextField()
+
+    images = GenericRelation(QuestionImage, blank=True, null=True)
+
+    
+    option_a = models.CharField(max_length=255)
+    option_b = models.CharField(max_length=255)
+    option_c = models.CharField(max_length=255)
+    option_d = models.CharField(max_length=255)
+
+    correct_option = models.CharField(
+        max_length=1,
+        choices=[('A','A'),('B','B'),('C','C'),('D','D')]
+    )
+
+    explanation = models.TextField(blank=True, null=True)
+
+
+
+    tags = models.CharField(max_length=255, blank=True, null=True)  # Comma-separated tags
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    difficulty_level = models.CharField(
+        max_length=50,
+        choices=[("Easy","Easy"),("Medium","Medium"),("Hard","Hard")],
+        default="Easy"
+    )
+
+    slug = models.SlugField(unique=True, blank=True, null=True)
+
+    is_approved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"MCQ: {self.question_text[:50]}..."
+
+    def get_difficulty_level_color(self):
+        color_map = {
+            'Easy': 'success',
+            'Medium': 'warning', 
+            'Hard': 'danger'
+        }
+        return color_map.get(self.difficulty_level, 'secondary')
+
+    def tag_list(self):
+        if self.tags:
+            return [tag.strip() for tag in self.tags.split(",")]
+        return []
+
+
+    def save(self, *args, **kwargs):
+
+        if not self.slug:
+            text = ""
+        
+            for word in self.question_text.split():
+                if word.isalnum():
+                    text += word + "-"
+                else:
+                    word = ''.join(e for e in word if e.isalnum())
+                    text += word + "-"
+            
+            # Generate base slug
+            base_slug = text.lower().strip("-")
+            slug = base_slug
+
+            # Check for uniqueness
+            counter = 1
+            while MCQQuestion.objects.filter(slug=slug).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+        super().save(*args, **kwargs)
+        
+
+
+# ============================== MCQ Submission ==============================
+
+class MCQSubmission(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="mcq_submissions")
+    question = models.ForeignKey(MCQQuestion, on_delete=models.CASCADE, related_name="submissions")
+
+    selected_option = models.CharField(max_length=1, choices=[('A','A'),('B','B'),('C','C'),('D','D')])
+    is_correct = models.BooleanField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'question')
+
+    def __str__(self):
+        return f"{self.student} → {self.question} ({'✔️' if self.is_correct else '❌'})"
+

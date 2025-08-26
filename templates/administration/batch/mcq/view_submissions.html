@@ -1,0 +1,236 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Submissions: {{ mcq_question.question_text|truncatechars:40 }}
+{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<style>
+    .answer-option {
+        padding: 10px;
+        margin: 5px 0;
+        border-radius: 5px;
+        border: 1px solid #dee2e6;
+    }
+
+    .correct-answer {
+        background-color: #e8f5e9;
+        border-color: #4caf50;
+    }
+
+    .incorrect-answer {
+        background-color: #ffebee;
+        border-color: #f44336;
+    }
+
+    [data-bs-theme="dark"] .correct-answer {
+        background-color: #1b5e20;
+    }
+
+    [data-bs-theme="dark"] .incorrect-answer {
+        background-color: #b71c1c;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-3">Submissions for: <span class="text-primary">
+                {{ mcq_question.question_text }}</span></h5>
+            <p>Sheet: <a href="{% url 'administrator_sheet' mcq_question.sheet.slug %}">
+                {{ mcq_question.sheet.name }}</a></p>
+        </div>
+    </div>
+
+    <div class="card w-100 mb-4">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">📊 Statistics</h5>
+            <div class="row text-center">
+                <div class="col-md-3">
+                    <h3 class="text-primary">{{ total_attempts }}</h3>
+                    <p class="mb-0">Total Attempts</p>
+                </div>
+                <div class="col-md-3">
+                    <h3 class="text-success">{{ correct_attempts }}</h3>
+                    <p class="mb-0">Correct Answers</p>
+                </div>
+                <div class="col-md-3">
+                    <h3 class="text-info">{{ accuracy }}%</h3>
+                    <p class="mb-0">Accuracy</p>
+                </div>
+                <div class="col-md-3">
+                    <h3 class="text-warning">{{ submissions.object_list|length }}</h3>
+                    <p class="mb-0">Showing on this Page</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">All Submissions 📋</h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="fs-4">
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">#</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Student</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Status</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Score</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Selected</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Submitted At</h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Details</h6>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for submission in submissions %}
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ submissions.start_index|add:forloop.counter0 }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ submission.student.get_full_name }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                {% if submission.is_correct %}
+                                <span class="badge bg-success">Correct</span>
+                                {% else %}
+                                <span class="badge bg-danger">Incorrect</span>
+                                {% endif %}
+                            </td>
+                            <td class="border-bottom-0">
+                                {% if submission.is_correct %}
+                                <span class="badge bg-success">1</span>
+                                {% else %}
+                                <span class="badge bg-danger">0</span>
+                                {% endif %}
+                            </td>
+                            <td class="border-bottom-0"><span class="badge bg-info">
+                                {{ submission.selected_option }}</span></td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-normal mb-0">{{ submission.submitted_at|date:"d M Y, h:i A" }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#viewAnswerModal" data-selected="{{ submission.selected_option }}"
+                                    data-correct="{{ mcq_question.correct_option }}"
+                                    data-options='{{ options_json|safe }}'
+                                    data-is-correct="{{ submission.is_correct|yesno:'true,false' }}"
+                                    data-explanation="{{ mcq_question.explanation|default:'No explanation provided.' }}">
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No submissions for this question yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if submissions.has_other_pages %}
+            <nav aria-label="Submissions pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if submissions.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page=1">&laquo; First</a></li>
+                    <li class="page-item"><a class="page-link"
+                            href="?page={{ submissions.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+
+                    <li class="page-item active"><span class="page-link">{{ submissions.number }} of {{
+                            submissions.paginator.num_pages }}</span></li>
+
+                    {% if submissions.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ submissions.next_page_number }}">Next</a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="?page={{ submissions.paginator.num_pages }}">Last
+                            &raquo;</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="viewAnswerModal" tabindex="-1" aria-labelledby="viewAnswerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewAnswerModalLabel">Answer Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="answer-options-container" class="mb-4"></div>
+                <div class="alert" id="explanation-container">
+                    <h6 class="fw-bold">Explanation:</h6>
+                    <p id="explanation-text" class="mb-0"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const viewAnswerModal = document.getElementById('viewAnswerModal');
+        viewAnswerModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const selectedOpt = button.getAttribute('data-selected');
+            const correctOpt = button.getAttribute('data-correct');
+            const options = JSON.parse(button.getAttribute('data-options'));
+            const explanation = button.getAttribute('data-explanation');
+
+            const optionsContainer = document.getElementById('answer-options-container');
+            optionsContainer.innerHTML = ''; // Clear previous content
+
+            options.forEach((optionText, index) => {
+                const optionLetter = String.fromCharCode(65 + index); // A, B, C, D
+                const div = document.createElement('div');
+                div.className = 'answer-option p-3 mb-2';
+
+                let icon = '';
+                // Highlight correct answer and incorrect user selection
+                if (optionLetter === correctOpt) {
+                    div.classList.add('correct-answer');
+                    icon = '<i class="fas fa-check-circle text-success me-2"></i>';
+                }
+                if (optionLetter === selectedOpt && selectedOpt !== correctOpt) {
+                    div.classList.add('incorrect-answer');
+                    icon = '<i class="fas fa-times-circle text-danger me-2"></i>';
+                }
+
+                div.innerHTML = `${icon}<strong>${optionLetter}.</strong> ${optionText}`;
+                optionsContainer.appendChild(div);
+            });
+
+            document.getElementById('explanation-text').innerText = explanation;
+        });
+    });
+</script>
+{% endblock %}

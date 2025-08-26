@@ -12,40 +12,17 @@ active
 {% block body %}
 
 <div class="container-fluid">
-    {% for message in messages %}
-
-    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-        <strong>{{ message.tag }}</strong> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    {% endfor %}
-
-    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item pe-auto">
-                <a href="{% url 'administrator_sheet' sheet.slug %}">{{ sheet.name }}</a>
-            </li>
-
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">Add Question</li>
-        </ol>
-    </nav>
-
-
     <div class="card">
         <div class="card-body">
             <h5 class="card-title fw-semibold mb-0">Add Question to {{ sheet.name }}</i> </h5>
-
         </div>
         <div class="container px-4">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <hr class="mt-0">
                 <div class="row">
                     <div class="w-100 mt-n4">
-
                         <div class="card-body h-100">
 
                             <div class="mb-3">
@@ -73,6 +50,25 @@ active
                                     placeholder="Description here..." required></textarea>
                             </div>
 
+                            <hr class="my-4">
+                            <h6 class="card-title fw-semibold mb-3">Upload Images (Optional)</h6>
+                            <div id="image-form-container">
+                                <div class="row image-form mb-3 align-items-center">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Image File</label>
+                                        <input type="file" name="images" class="form-control">
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label">Caption</label>
+                                        <input type="text" name="captions" class="form-control" placeholder="Optional caption">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-danger btn-sm mt-4 remove-image-form">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" id="add-image-form" class="btn btn-info btn-sm mb-4">Add Another Image</button>
+                            <hr class="my-4">
                             <div class="mb-3">
                                 <label for="job_title" class="form-label">Input Format
                                     <div class="star">*</div>
@@ -105,22 +101,20 @@ active
                                 <textarea class="form-control" id="question_description" name="hint" rows="3"
                                     placeholder="Hint here..."></textarea>
                             </div>
-
-
-                            <div>
+                        </div>
+                    </div>
+                </div>
+                <div>
                                 <div class="mb-3 rounded border border-white p-3">
-                                    <!-- ========== RECOMMENDED QUESTIONS SECTION ===========-->
                                     <label>Recommended Questions <small>(optional)</small></label>
                                     <div id="recommended-questions-container">
 
                                     </div>
 
-                                    <!-- Add More Questions Button -->
                                     <button type="button" class="btn btn-outline-primary mt-2 w-100" id="add-question-btn">Add
                                         Similar
                                         Questions</button>
 
-                                    <!-- Hidden input to store recommended questions data -->
                                     <input type="hidden" id="recommended-questions-data" name="recommended_questions"
                                         value="[]">
                                 </div>
@@ -133,7 +127,6 @@ active
                                 </label>
                                 <select class="form-select form-control" name="difficulty_level" id="assignment_type"
                                     required>
-                                    <!-- <option value="" selected disabled>Select Level</option> -->
                                     <option value="Easy">Easy</option>
                                     <option value="Medium">Medium</option>
                                     <option value="Hard">Hard</option>
@@ -147,107 +140,42 @@ active
                                         Question</button>
                                 </div>
                             </div>
-                        </div>
-
-                    </div>
-
-                </div>
             </form>
-
         </div>
     </div>
 </div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const questionsContainer = document.getElementById("recommended-questions-container");
-        const addQuestionBtn = document.getElementById("add-question-btn");
-        const recommendedQuestionsInput = document.getElementById("recommended-questions-data");
-        const form = document.querySelector("form");
-
-        let recommendedQuestions = [];  // Store recommended questions
-
-        // Function to create a recommended question group
-        function createRecommendedQuestion(index, title = "", platform = "LeetCode", link = "") {
-            let newQuestionGroup = document.createElement("div");
-            newQuestionGroup.classList.add("recommended-question-group", "row", "rounded", "border", "border-white", "p-3", "m-3");
-            newQuestionGroup.dataset.index = index;
-
-            newQuestionGroup.innerHTML = `
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label class="form-label">Title</label>
-                        <input type="text" class="form-control recommended-title" placeholder="Title here..." value="${title}">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label class="form-label">Platform</label>
-                        <select class="form-select recommended-platform">
-                            <option class="text-black" value="LeetCode" ${platform === "LeetCode" ? "selected" : ""}>LeetCode</option>
-                            <option class="text-black" value="GeeksForGeeks" ${platform === "GeeksForGeeks" ? "selected" : ""}>GeeksForGeeks</option>
-                            <option class="text-black" value="HackerRank" ${platform === "HackerRank" ? "selected" : ""}>HackerRank</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label class="form-label">Link</label>
-                        <input type="text" class="form-control recommended-link" placeholder="Link here..." value="${link}">
-                    </div>
-                </div>
-                <div class="">
-                    <button type="button" class="btn btn-danger remove-question-btn w-100">Remove</button>
-                </div>
-            `;
-
-            // Attach event listener to remove button
-            newQuestionGroup.querySelector(".remove-question-btn").addEventListener("click", function () {
-                recommendedQuestions.splice(index, 1);  // Remove from array
-                renderQuestions();  // Re-render the list
-            });
-
-            // Update values on change
-            newQuestionGroup.querySelector(".recommended-title").addEventListener("input", function () {
-                recommendedQuestions[index].title = this.value;
-            });
-            newQuestionGroup.querySelector(".recommended-platform").addEventListener("change", function () {
-                recommendedQuestions[index].platform = this.value;
-            });
-            newQuestionGroup.querySelector(".recommended-link").addEventListener("input", function () {
-                recommendedQuestions[index].link = this.value;
-            });
-
-            return newQuestionGroup;
-        }
-
-        // Function to render recommended questions dynamically
-        function renderQuestions() {
-            questionsContainer.innerHTML = "";  // Clear container
-            recommendedQuestions.forEach((rq, index) => {
-                questionsContainer.appendChild(createRecommendedQuestion(index, rq.title, rq.platform, rq.link));
-            });
-        }
-
-        // Add new recommended question on button click
-        addQuestionBtn.addEventListener("click", function () {
-            recommendedQuestions.push({ title: "", platform: "LeetCode", link: "" });
-            renderQuestions();
-        });
-
-        // Handle form submission
-        form.addEventListener("submit", function (event) {
-            event.preventDefault();  // Prevent default form submission
-
-            // Update the hidden input field before sending
-            recommendedQuestionsInput.value = JSON.stringify(recommendedQuestions);
-
-            form.submit();  // Submit the form
-        });
-
-        // Initial render
-        renderQuestions();
-    });
+    // ... existing recommended questions script ...
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('image-form-container');
+    const addBtn = document.getElementById('add-image-form');
+
+    // Function to add a new form
+    addBtn.addEventListener('click', function () {
+        const newForm = container.children[0].cloneNode(true);
+        // Clear the values of the cloned inputs
+        newForm.querySelector('input[type="file"]').value = '';
+        newForm.querySelector('input[type="text"]').value = '';
+        container.appendChild(newForm);
+    });
+
+    // Function to remove a form (event delegation)
+    container.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-image-form')) {
+            // Do not remove the last form
+            if (container.children.length > 1) {
+                e.target.closest('.image-form').remove();
+            } else {
+                alert("At least one image form must be present.");
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

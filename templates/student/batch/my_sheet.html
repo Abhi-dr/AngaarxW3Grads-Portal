@@ -4,7 +4,7 @@
 
 
 {% block title %}
-{{ sheet.name }} Problem Set
+{{ sheet.name }}
 {% endblock %}
 
 {% block my_batches_active %}
@@ -46,21 +46,11 @@ active
     <div class="card">
         <div class="card-body">
             <h3 class="heading">
-                <span class="fw-semibold">{{ sheet.name }} Problems</span>
-                <span class="fs-4">
-
-                    <div id="sheet-progress" class="mt-3 mb-n3" data-sheet-id="{{ sheet.id }}">
-                        <div class="progress">
-                            <div id="progress-bar" class="progress-bar bg-success text-black" role="progressbar"
-                                style="width: 0%;" aria-valuemin="0" aria-valuemax="100">
-                                0% Completed
-                            </div>
-                        </div>
-                    </div>
-
-                </span>
+                <span class="fw-semibold">{{ sheet.name }}</span>
+                <span class="fs-4"> | 🔥Isi Me To Angaar Hai🔥</span>
             </h3>
         </div>
+
     </div>
 
     {% for message in messages %}
@@ -74,25 +64,177 @@ active
 
     <!-- ========================== SEARCH BAR ==================================== -->
 
-    <div class="card w-100">
+    <!-- <div class="card w-100">
         <div class="card-body p-4">
             <h5 class="card-title fw-semibold mb-4">Search Question 🔍</h5>
-            <form onsubmit="event.preventDefault();">
+            <form method="post">
+
+                {% csrf_token %}
+
                 <div class="input-group">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Search by ID, Topic or Course"
-                        oninput="searchQuestions()" />
-                    <button type="button" class="btn btn-outline-danger" onclick="clearSearch()">Clear</button>
+
+                    {% if query %}
+
+                    <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query" value="{{ query }}">
+
+                        {% else %}
+
+                        <input type="text" class="form-control" placeholder="Search by ID, Topic or Course"
+                        aria-label="Search by Topic or Id" aria-describedby="button-addon2" name="query">
+
+                        {% endif %}
+
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    make a button to clear the search 
+                    <button class="btn btn-outline-danger">Clear</button>
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 
-    <!-- =================================  QUESTIONS TABLE ================================== -->
+    <!-- ================================= MCQ QUESTIONS TABLE ================================== -->
+
+    {% if sheet.sheet_type == "MCQ" %}
 
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4" id="questionHeading">QUESTIONS 🔥
+            <h5 class="card-title fw-semibold mb-4">MCQ QUESTIONS 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
+            </h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class=" fs-4">
 
+                        <tr>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    #
+                                </h6>
+                            </th>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Title 📚
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Tags 🏷️
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Level 📊
+                                </h6>
+                            </th>
+
+                            <!-- <th class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0">
+                                    Status🚦
+                                </h6>
+                            </th> -->
+
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Link 🔗
+                                </h6>
+                            </th>
+                            <!-- <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th> -->
+
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <!-- style="background-color: rgba(66, 66, 66, 0.639);" -->
+                        {% for question in sheet.get_ordered_questions %}
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1 text-wrap" style="width: 100%;"
+                                    title="{{ question.question_text }}">{{ question.question_text|truncatewords:10 }}
+                                </h6>
+                            </td>
+
+                            <td class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-1 text-wrap"
+                                    title="{{ question.tag_list|join:', ' }}">
+                                    {% for tag in question.tag_list %}
+                                    <span class="badge bg-primary me-1">{{ tag }}</span>
+                                    {% endfor %}
+                                </h6>
+                            </td>
+
+                            <td class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0 fs-4">
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
+                                </h6>
+                            </td>
+
+
+
+                            <!-- <td class="border-bottom-0" style="text-align: center;">
+                                {% if user_submissions|get_item:question.id %}
+                                {% with submission=user_submissions|get_item:question.id %}
+                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">{{ submission.status }}</span>
+                                <br><a href="{% url 'my_submissions' question.slug %}"
+                                    class=" mt-1 btn btn-sm btn-outline-warning">View Submissions</a>
+                                {% endwith %}
+                                {% else %}
+                                <p>Not Attempted</p>
+                                {% endif %}
+                            </td> -->
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+
+                                    {% if question in enabled_questions %}
+
+                                    <a href="{% url 'mcq_question' sheet.slug question.slug %}" class="btn btn-dark">
+                                        Try Now🔥
+                                    </a>
+
+                                    {% else %}
+
+                                    <button class="btn btn-dark" disabled>
+                                        LOCKED🔒
+                                    </button>
+
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    {% else %}
+
+    <!-- ================================= CODING QUESTIONS TABLE ================================== -->
+
+    <div class="card w-100">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">QUESTIONS 🔥
+                {% if query %}
+                <span class="fs-6"> | Search Results for "{{ query }}"</span>
+                {% endif %}
             </h5>
             <div class="table-responsive">
                 <table class="table text-nowrap mb-0 align-middle">
@@ -131,14 +273,75 @@ active
                                     Practice Link 🔗
                                 </h6>
                             </th>
+                            <!-- <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Action#2
+                                </h6>
+                            </th> -->
 
                         </tr>
                     </thead>
 
-                    <tbody id="questionTableBody">
+                    <tbody>
 
+                        <!-- style="background-color: rgba(66, 66, 66, 0.639);" -->
+                        {% for question in sheet.get_ordered_questions %}
+                        <tr>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
+                            </td>
+                            <td class="border-bottom-0">
+                                <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" style="width: 100%;"
+                                    data-bs-toggle="modal" data-bs-target="#questionModal"
+                                    data-title="{{ question.title }}" data-description="{{ question.description }}"
+                                    title="{{ question.title }}">{{ question.title }}</h6>
+                            </td>
+                            <td class="border-bottom-0" style="text-align: center;">
+                                <h6 class="fw-semibold mb-0 fs-4">
+                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                                        {{ question.difficulty_level }}
+                                    </span>
+                                </h6>
+                            </td>
+                            <td class="border-bottom-0" style="text-align: center;">
+                                {% if question.youtube_link %}
+                                <i class="fa fa-youtube-play"></i>
+                                {% else %}
+                                <p>Coming Soon...</p>
+                                {% endif %}
+                            </td>
+                            <td class="border-bottom-0" style="text-align: center;">
+                                {% if user_submissions|get_item:question.id %}
+                                {% with submission=user_submissions|get_item:question.id %}
+                                <span class="badge bg-{{ submission.status|get_status_color }} text-color">
+                                    {{ submission.status }}</span>
+                                <br><a href="{% url 'my_submissions' question.slug %}"
+                                    class=" mt-1 btn btn-sm btn-outline-warning">View Submissions</a>
+                                {% endwith %}
+                                {% else %}
+                                <p>Not Attempted</p>
+                                {% endif %}
+                            </td>
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
 
+                                    {% if question in enabled_questions %}
 
+                                    <a href="{% url 'problem' question.slug %}" class="btn btn-dark">
+                                        Try Now🔥
+                                    </a>
+
+                                    {% else %}
+
+                                    <button class="btn btn-dark" disabled>
+                                        LOCKED🔒
+                                    </button>
+
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
 
 
@@ -149,10 +352,29 @@ active
     </div>
 
 
+    {% endif %}
+
 </div>
 
+<div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-semibold" id="questionModalLabel">Question Title...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="questionDescription">Description...</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
 
 <!-- Script to dynamically set modal content -->
 <script>
@@ -171,95 +393,63 @@ active
     });
 </script>
 
-
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        fetchQuestions();  // Load all questions initially
+        // Function to fetch the active sheet timer
+        function fetchActiveSheetTimer() {
+            fetch("{% url 'get_active_sheet_timer' %}")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.start_time && data.end_time) {
+                        const startTime = new Date(data.start_time).getTime();
+                        const endTime = new Date(data.end_time).getTime();
+                        const sheetName = data.sheetName;
+                        const sheetSlug = data.sheetSlug;
+
+
+
+                        const badge = document.getElementById('sheet-link');
+
+                        // Function to update the timer
+                        function updateTimer() {
+                            const now = new Date().getTime();
+                            const timer = document.getElementById('active-sheet-timer');
+
+                            if (now < startTime) {
+                                const diff = startTime - now;
+                                const minutes = Math.floor(diff / 60000);
+                                const seconds = Math.floor((diff % 60000) / 1000);
+                                timer.innerText = `${sheetName} will be enabled in: ${minutes}m ${seconds}s`;
+                            } else if (now >= startTime && now <= endTime) {
+                                const diff = endTime - now;
+                                const minutes = Math.floor(diff / 60000);
+                                const seconds = Math.floor((diff % 60000) / 1000);
+                                timer.innerText = `${sheetName}: Active for: ${minutes}m ${seconds}s`;
+                                badge.href = "{% url 'my_sheet' 0 %}".replace('0', sheetSlug);
+                                badge.classList.remove('pe-none');
+
+                            } else {
+                                timerElement.textContent = "Expired";
+                                clearInterval(timerInterval);
+                            }
+                        }
+
+                        // Initial call to update the timer and then every second
+                        const timerInterval = setInterval(updateTimer, 1000);
+                        updateTimer();
+                    } else {
+                        document.getElementById('active-sheet-timer').innerText = "";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching sheet timer:', error);
+                });
+        }
+
+        // Fetch the timer on page load
+        fetchActiveSheetTimer();
     });
-
-
-    function searchQuestions() {
-        const query = document.getElementById("searchInput").value;
-        fetch("{% url 'fetch_sheet_questions' sheet.id %}")
-            .then(response => response.json())
-            .then(data => {
-                displayQuestions(data.questions);
-                const heading = document.getElementById("questionHeading");
-                if (query) {
-                    heading.innerHTML = `QUESTIONS 🔥 <span class="fs-6"> | Search Results for "${query}"</span>`;
-                } else {
-                    heading.innerHTML = "QUESTIONS 🔥";
-                }
-            })
-            .catch(error => console.error("Error fetching questions:", error));
-    }
-
-    function clearSearch() {
-        document.getElementById("searchInput").value = "";
-        fetchQuestions();  // Reload all questions after clearing
-    }
-
-    function fetchQuestions() {
-        fetch("{% url 'fetch_sheet_questions' sheet.id %}")
-            .then(response => response.json())
-            .then(data => {
-                displayQuestions(data.questions);
-            })
-            .catch(error => console.error("Error fetching questions:", error));
-    }
-
-
-    function displayQuestions(questions) {
-        const questionTableBody = document.getElementById("questionTableBody");
-        questionTableBody.innerHTML = "";  // Clear existing rows
-
-        questions.forEach((question, index) => {
-            const row = document.createElement("tr");
-
-            const questionSlug = question.slug;
-
-            const url = "{% url 'problem' 0 %}".replace("0", questionSlug);
-            const buttonHtml = `<td><a href="${url}" class="btn btn-dark">Try Now🔥</a></td>`;
-
-            row.innerHTML = `
-                <td>${index + 1}</td>
-                <td>
-                    <h6 class="fw-semibold mb-1 text-wrap cursor-pointer" data-bs-toggle="modal" data-bs-target="#questionModal" title="${question.title}">${question.title}</h6>
-                </td>
-                <td style="text-align: center;">
-                    <span class="badge bg-${question.difficulty_color}">${question.difficulty_level}</span>
-                </td>
-                <td style="text-align: center;">
-                    ${question.youtube_link ? '<i class="fa fa-youtube-play"></i>' : '<p>Coming Soon...</p>'}
-                </td>
-                <td style="text-align: center;">
-                    <span class="badge bg-${question.color}">${question.status}</span>
-                </td>
-            `;
-
-            row.innerHTML += buttonHtml;
-
-
-            questionTableBody.appendChild(row);
-        });
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        const sheetId = document.getElementById("sheet-progress").getAttribute("data-sheet-id");
-
-        fetch("{% url 'sheet_progress' sheet.id %}")
-            .then(response => response.json())
-            .then(data => {
-                const progressBar = document.getElementById("progress-bar");
-                progressBar.style.width = `${data.progress}%`;
-                progressBar.innerText = `${data.progress}% Completed`;
-            })
-            .catch(error => console.error("Error fetching progress:", error));
-    });
-
 </script>
-
-
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>

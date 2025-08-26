@@ -4,6 +4,7 @@
 Practice
 {% endblock %}
 
+
 {% block body %}
 
 <div class="container-fluid">
@@ -38,7 +39,7 @@ Practice
             <div class="card">
 
                 {% if sheet.is_enabled %}
-                <a href="{% url 'sheet' sheet.slug %}">
+                <a href="{% url 'my_sheet' sheet.slug %}">
                 {% endif %}
                     <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
                     <div class="card-body">
@@ -53,7 +54,7 @@ Practice
                         </p> -->
                         
                         {% if sheet.is_enabled %}
-                        <a href="{% url 'sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue Solving</a>
+                        <a href="{% url 'my_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue Solving</a>
                         {% else %}
                         <a href="#" class="btn btn-dark w-100 disabled">Wait {{ student.first_name }}</a>
                         {% endif %}

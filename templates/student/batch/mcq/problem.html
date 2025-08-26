@@ -1,0 +1,719 @@
+{% extends "student/base.html" %}
+{% load static %}
+{% block title %}Q: {{ mcq_question.question_text|truncatewords:5 }}{% endblock %}
+{% block my_batches_active %}
+active
+{% endblock %}
+
+{% block extra_css %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    h3.question {
+        font-family: "Roboto", sans-serif;
+        font-size: 24px;
+        text-align: center;
+        font-weight: 100;
+    }
+
+    .text-color {
+        font-size: 75%;
+        color: rgb(46, 46, 46);
+        font-weight: 500;
+    }
+
+    code {
+        font-size: 110%;
+    }
+
+    pre {
+        font-size: 110%;
+    }
+
+    .option-container {
+        margin: 15px 0;
+        transition: all 0.2s ease;
+    }
+
+    .option-card {
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .option-card:hover {
+        border-color: #007bff;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .option-card.selected {
+        border-color: #007bff;
+        background-color: #e7f3ff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    }
+
+    .option-card.correct {
+        border-color: #28a745;
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .option-card.incorrect {
+        border-color: #dc3545;
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .option-card.disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .option-letter {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #6c757d;
+        color: white;
+        text-align: center;
+        line-height: 30px;
+        font-weight: bold;
+        margin-right: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .option-card.selected .option-letter {
+        background-color: #007bff;
+    }
+
+    .option-card.correct .option-letter {
+        background-color: #28a745;
+    }
+
+    .option-card.incorrect .option-letter {
+        background-color: #dc3545;
+    }
+
+    .explanation-container {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        border-radius: 0 8px 8px 0;
+        display: none;
+    }
+
+    .explanation-container.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    [data-bs-theme="dark"] {
+        .option-card {
+            background-color: #2c2c2c;
+            border-color: #444;
+            color: #ddd;
+        }
+
+        .option-card:hover {
+            border-color: #007bff;
+            background-color: #3c3c3c;
+        }
+
+        .option-card.selected {
+            background-color: #1a3a5c;
+        }
+
+        .explanation-container {
+            background-color: #2c2c2c;
+            color: #ddd;
+        }
+    }
+
+    @media (max-width: 768px) {
+        #view-submission {
+            margin-top: 5%;
+            width: 100%;
+        }
+    }
+
+    /*============== SUCCESS MODAL ============ */
+    .modal-dialog {
+        transform: scale(0.8);
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .modal.fade.show .modal-dialog {
+        transform: scale(1);
+    }
+
+    #trophy-svg {
+        animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    #nextQuestionBtn {
+        background-color: #00c853;
+        color: white;
+        border: none;
+        transition: background-color 0.3s ease-in-out, transform 0.2s;
+    }
+
+    #nextQuestionBtn:hover {
+        background-color: #00e676;
+        transform: scale(1.05);
+    }
+
+    .badge-capsule {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        white-space: nowrap;
+        margin-bottom: 0.5rem;
+        text-wrap: auto;
+    }
+
+    .badge-capsule img {
+        vertical-align: middle;
+    }
+</style>
+
+<style>
+    /* General Styles */
+    .card {
+        transition: all 0.3s ease-in-out;
+    }
+
+    /* Dark Mode */
+    body[data-theme='dark'] .card {
+        background-color: #2c2c2c;
+        color: #ddd;
+        border-color: #444;
+    }
+
+    body[data-theme='dark'] .card-header {
+        background-color: #3c3c3c;
+        color: #ddd;
+    }
+
+    body[data-theme='dark'] .btn-outline-primary {
+        color: #ddd;
+        border-color: #888;
+    }
+
+    body[data-theme='dark'] .btn-outline-primary:hover {
+        background-color: #444;
+        border-color: #666;
+    }
+</style>
+
+<style>
+    .figure {
+        /* Core styling */
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.55rem;
+        margin-left: 2%;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+        /* --- New Additions --- */
+        max-width: 320px;
+        /* Set a maximum width for the card */
+        width: 96%;
+        /* Ensure it's responsive within the max-width */
+        display: flex;
+        /* Better control over internal alignment */
+        flex-direction: column;
+        height: 100%;
+        /* Make cards in the same row equal height */
+    }
+
+    .figure:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .figure .figure-caption {
+        text-align: center;
+        margin-top: auto;
+        /* Pushes caption to the bottom in equal-height cards */
+    }
+
+    /* --- Dark Mode Support --- */
+    [data-bs-theme="dark"] .figure {
+        background-color: #2c3034;
+        border-color: #495057;
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
+
+<!-- Modal css -->
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
+
+    .modal-box {
+        position: fixed;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 380px;
+        width: 100%;
+        padding: 30px 20px;
+        border-radius: 24px;
+        background-color: #fff;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    section.active .modal-box {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .modal-box i {
+        font-size: 70px;
+        color: #4070f4;
+    }
+
+    .modal-box h2 {
+        margin-top: 20px;
+        font-size: 25px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .modal-box h3 {
+        font-size: 16px;
+        font-weight: 400;
+        color: #333;
+        text-align: center;
+    }
+
+    .modal-box .buttons {
+        margin-top: 25px;
+    }
+
+    .modal-box button {
+        font-size: 14px;
+        padding: 6px 12px;
+        margin: 0 10px;
+    }
+</style>
+
+<style>
+    /* ... (all your existing styles) ... */
+
+    /* Add this for the clickable image thumbnail */
+    .question-image-thumbnail {
+        cursor: pointer;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .question-image-thumbnail:hover {
+        opacity: 0.8;
+    }
+
+    /* Styling for the image inside the modal */
+    #modalImage {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'practice' %}">Practice</a></li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'my_sheet' mcq_question.sheet.slug %}">{{ mcq_question.sheet.name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">{{ mcq_question.question_text|truncatewords:5 }}</li>
+        </ol>
+    </nav>
+
+    {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="card-title fw-semibold">MCQ Question</h5>
+                    <span class="d-inline-flex">
+                        <b>Sheet:</b> <i>{{ mcq_question.sheet.name }}</i>
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="card" id="card-title-2">
+        <div class="card-header">
+            <h6 class="card-title">
+                <strong>Level: </strong>
+                <span class="badge bg-{{ mcq_question.get_difficulty_level_color }} text-color">
+                    {{ mcq_question.difficulty_level }}
+                </span>
+            </h6>
+        </div>
+
+        <div class="card-body mb-n7">
+            <h6 class="card-title">Question:</h6>
+            <div class="question-text">
+                {{ mcq_question.question_text|linebreaks }}
+            </div>
+        </div>
+
+        {% if mcq_question.images.all %}
+        <div class="row g-4">
+            {% for img in mcq_question.images.all %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <figure class="figure h-100">
+                    <img src="{{ img.image.url }}" class="figure-img img-fluid rounded question-image-thumbnail"
+                        alt="{{ img.caption|default:'Question image' }}" data-bs-toggle="modal"
+                        data-bs-target="#image-viewer-modal" data-src="{{ img.image.url }}"
+                        data-caption="{{ img.caption|default:'' }}">
+
+                    {% if img.caption %}
+                    <figcaption class="figure-caption text-center">{{ img.caption }}</figcaption>
+                    {% endif %}
+                </figure>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if mcq_question.tags %}
+        <div class="card-body mb-n7">
+            <h6 class="card-title">Tags:</h6>
+            <div class="tags-container">
+                {% for tag in tag_list %}
+                <span class="badge bg-secondary me-1">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+
+        <!-- Options Section -->
+        <div class="card-body">
+            <h6 class="card-title mb-4">Choose the correct answer:</h6>
+
+            <form id="mcqForm">
+                {% csrf_token %}
+                <input type="hidden" id="selected_option" name="selected_option">
+
+                <div class="option-container">
+                    <div class="option-card" data-option="A">
+                        <span class="option-letter">A</span>
+                        {{ mcq_question.option_a }}
+                    </div>
+                </div>
+
+                <div class="option-container">
+                    <div class="option-card" data-option="B">
+                        <span class="option-letter">B</span>
+                        {{ mcq_question.option_b }}
+                    </div>
+                </div>
+
+                <div class="option-container">
+                    <div class="option-card" data-option="C">
+                        <span class="option-letter">C</span>
+                        {{ mcq_question.option_c }}
+                    </div>
+                </div>
+
+                <div class="option-container">
+                    <div class="option-card" data-option="D">
+                        <span class="option-letter">D</span>
+                        {{ mcq_question.option_d }}
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submit-answer">
+                        <i class="fas fa-check-circle me-2"></i>Submit Answer
+                    </button>
+                </div>
+            </form>
+
+            <!-- Explanation Section -->
+            {% if mcq_question.explanation %}
+            <div class="explanation-container" id="explanation">
+                <h6><i class="fas fa-lightbulb me-2"></i>Explanation:</h6>
+                <p>{{ mcq_question.explanation|linebreaks }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ======================= RECOMMENDED QUESTIONS ========================= -->
+        <!-- <div class="card-footer d-sm-flex justify-content-between align-items-center">
+            <div class="card-footer-link mb-sm-0">
+                <h5 class="mb-3">
+                    <strong>Recommended Questions</strong>
+                </h5>
+                <div class="recommended-section d-flex mb-2">
+                    <div id="recommended-questions">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
+    </div>
+
+    <div class="modal fade" id="success-modal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content"
+                style="background-color: #1e1e2f; color: #e0e0e0; border: 2px solid #fe7d14; border-radius: 15px;">
+                <div class="modal-header"
+                    style="border-bottom: 1px solid #fe7d14; text-align: center; justify-content: center;">
+                    <h5 class="modal-title" id="successModalLabel" style="font-weight: bold; color: #fe7d14;">
+                        🎉 Correct Answer! 🎉
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <svg version="1.1" id="trophy-svg" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.00 512.00" xml:space="preserve"
+                        width="87px" height="87px" fill="#000000" stroke="#000000">
+                    </svg>
+                    <p style="font-size: 1.2rem;" id="result-message">
+                        Well done! You got it right.
+                    </p>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #fe7d14; justify-content: center;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    {% if sheet %}
+                    <a href="{% url 'render_next_mcq_question_in_sheet' mcq_question.sheet.id mcq_question.id %}"
+                        class="btn btn-success" id="nextQuestionBtn">Next Question</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="image-viewer-modal" tabindex="-1" aria-labelledby="imageViewerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageViewerModalLabel">Image Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="modalImage" class="img-fluid rounded" alt="Enlarged question image">
+                    <p class="mt-2" id="modalCaption"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Confetti Script -->
+<script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
+
+<!-- MCQ Question Script -->
+<script>
+    $(document).ready(function () {
+        let selectedOption = null;
+        let submitted = false;
+
+        // Option selection
+        $('.option-card').click(function () {
+            if (submitted) return;
+
+            // Remove previous selection
+            $('.option-card').removeClass('selected');
+
+            // Add selection to clicked option
+            $(this).addClass('selected');
+
+            // Store selected option
+            selectedOption = $(this).data('option');
+            $('#selected_option').val(selectedOption);
+        });
+
+        // Form submission
+        $('#mcqForm').submit(function (e) {
+            e.preventDefault();
+
+            if (!selectedOption) {
+                alert('Please select an option before submitting.');
+                return;
+            }
+
+            if (submitted) return;
+
+            const submitBtn = $('#submit-answer');
+            submitBtn.prop('disabled', true);
+            submitBtn.html('<span class="spinner-border spinner-border-sm" role="status"></span> Submitting...');
+
+            console.log(selectedOption);
+            // Submit answer
+            fetch("{% url 'submit_mcq_answer' mcq_question.slug %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    selected_option: selectedOption
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    submitted = true;
+
+                    // Disable all options
+                    $('.option-card').addClass('disabled');
+
+                    // Show correct/incorrect styling
+                    $('.option-card').each(function () {
+                        const option = $(this).data('option');
+                        if (option === data.correct_option) {
+                            $(this).addClass('correct');
+                        } else if (option === selectedOption && !data.is_correct) {
+                            $(this).addClass('incorrect');
+                        }
+                    });
+
+                    // Show explanation
+                    if ($('#explanation').length) {
+                        $('#explanation').addClass('show');
+                    }
+
+                    // Update submit button
+                    if (data.is_correct) {
+                        submitBtn.removeClass('btn-primary').addClass('btn-success');
+                        submitBtn.html('<i class="fas fa-check me-2"></i>Correct!');
+
+                        // Show success modal and confetti
+                        showSuccessModal();
+                    } else {
+                        submitBtn.removeClass('btn-primary').addClass('btn-danger');
+                        submitBtn.html('<i class="fas fa-times me-2"></i>Incorrect');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    submitBtn.prop('disabled', false);
+                    submitBtn.html('<i class="fas fa-check-circle me-2"></i>Submit Answer');
+                    alert('An error occurred. Please try again.');
+                });
+        });
+
+        function showSuccessModal() {
+            // Start confetti
+            confetti.start();
+            setTimeout(() => confetti.stop(), 3000);
+
+            // Show modal
+            const successModal = new bootstrap.Modal(document.getElementById('success-modal'));
+            successModal.show();
+        }
+
+        // ======================= REFINED SCRIPT FOR THE IMAGE MODAL =========================
+        $('#image-viewer-modal').on('show.bs.modal', function (event) {
+            // Get the element that triggered the modal (the clicked image)
+            const triggerElement = $(event.relatedTarget);
+
+            // Extract info from data-* attributes using jQuery's .data() method
+            const imgSrc = triggerElement.data('src');
+            const imgCaption = triggerElement.data('caption');
+
+            // Find elements within the modal and update them
+            const modal = $(this);
+            modal.find('#modalImage').attr('src', imgSrc);
+
+            const captionElement = modal.find('#modalCaption');
+            if (imgCaption) {
+                captionElement.text(imgCaption).show();
+            } else {
+                captionElement.hide();
+            }
+        });
+
+    });
+
+    // Recommended questions (similar to coding problems)
+    /* document.addEventListener("DOMContentLoaded", function () {
+        const recommendedSection = document.getElementById("recommended-questions");
+
+        fetch("", {
+            method: 'GET',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                recommendedSection.innerHTML = "";
+
+                if (data.questions.length > 0) {
+                    data.questions.forEach(q => {
+                        let questionBadge = `
+                    <a href="/practice/mcq/${q.slug}/" class="badge-capsule bg-primary text-white me-2">
+                        <i class="fas fa-question-circle me-1"></i>
+                        ${q.question_text.substring(0, 50)}${q.question_text.length > 50 ? '...' : ''}
+                    </a>`;
+                        recommendedSection.innerHTML += questionBadge;
+                    });
+                } else {
+                    recommendedSection.innerHTML = `<span class="text-muted">No recommended questions yet</span>`;
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching recommended questions:", error);
+                recommendedSection.innerHTML = `<span class="text-muted">Failed to load recommendations</span>`;
+            });
+    }); */
+</script>
+
+{% endblock %}

@@ -37,7 +37,7 @@ active
 
         </div>
         <div class="container px-4">
-            <form method="POST">
+            <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <hr class="mt-0">
@@ -91,8 +91,6 @@ active
                                         </label>
                                         <textarea class="form-control" id="job_title" name="description" rows="5"
                                             required>{{ question.description }}</textarea>
-                                        <!-- <iframe frameBorder="0" height="450px"
-                                            src="https://onecompiler.com/embed/html?theme=dark" width="100%"></iframe> -->
                                     </div>
                                 </div>
 
@@ -128,8 +126,52 @@ active
                                     <textarea class="form-control" id="question_description" name="hint" rows="3"
                                         placeholder="Hint here...">{{ question.hint }}</textarea>
                                 </div>
+                                
+                                <hr class="my-4">
+                                <h6 class="card-title fw-semibold mb-3">Manage Existing Images</h6>
+                                {% if question.images.all %}
+                                    {% for image in question.images.all %}
+                                    <div class="row align-items-center mb-3">
+                                        <div class="col-md-2">
+                                            <img src="{{ image.image.url }}" alt="Thumbnail" class="img-thumbnail" width="100">
+                                        </div>
+                                        <div class="col-md-7">
+                                            <label for="caption_{{ image.id }}" class="form-label">Caption</label>
+                                            <input type="text" name="caption_{{ image.id }}" id="caption_{{ image.id }}" class="form-control" value="{{ image.caption|default_if_none:'' }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-check mt-4">
+                                                <input class="form-check-input" type="checkbox" name="delete_images" value="{{ image.id }}" id="delete_{{ image.id }}">
+                                                <label class="form-check-label text-danger" for="delete_{{ image.id }}">
+                                                    Delete Image
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="text-muted">No images have been uploaded for this question.</p>
+                                {% endif %}
 
-
+                                <hr class="my-2">
+                                <h6 class="card-title fw-semibold my-3">Upload New Images</h6>
+                                <div id="image-form-container">
+                                    <div class="row image-form mb-3 align-items-center">
+                                        <div class="col-md-6">
+                                            <label class="form-label">New Image File</label>
+                                            <input type="file" name="new_images" class="form-control">
+                                        </div>
+                                        <div class="col-md-5">
+                                             <label class="form-label">New Caption</label>
+                                            <input type="text" name="new_captions" class="form-control" placeholder="Optional caption">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-danger btn-sm mt-4 remove-image-form">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="button" id="add-image-form" class="btn btn-info btn-sm mb-4">Add Another Image</button>
+                                <hr class="my-4">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="mb-3">
@@ -138,11 +180,9 @@ active
                                             </label>
                                             <select class="form-select form-control" name="difficulty_level"
                                                 id="assignment_type" required>
-                                                <!-- <option value="" selected disabled>Select Level</option> -->
-                                                <option value="Easy">Easy</option>
-                                                <option value="Medium">Medium</option>
-                                                <option value="Hard">Hard</option>
-
+                                                <option value="Easy" {% if question.difficulty_level == 'Easy' %}selected{% endif %}>Easy</option>
+                                                <option value="Medium" {% if question.difficulty_level == 'Medium' %}selected{% endif %}>Medium</option>
+                                                <option value="Hard" {% if question.difficulty_level == 'Hard' %}selected{% endif %}>Hard</option>
                                             </select>
                                         </div>
                                     </div>
@@ -158,33 +198,23 @@ active
                                             </select>
                                         </div>
                                     </div>
-
-
-
-
                                 </div>
 
                                 <div class="mb-3">
-                                    <!-- Hidden input to track recommended questions -->
-                                    <!-- Pre set similar questions list from JS -->
-                                    
-                                </div>
+                                    </div>
 
                                 <div>
                                     <div class="mb-3 rounded border border-white p-3">
                                         <input type="hidden" id="recommended-questions-data" name="recommended_questions"
                                         value="[]">
 
-                                    <!-- Recommended Questions Section -->
                                     <label>Recommended Questions <small>(optional)</small></label>
                                     <div id="recommended-questions-container"></div>
 
-                                    <!-- Add More Questions Button -->
                                     <button type="button" class="btn btn-outline-primary m-2 w-100" id="add-question-btn">+
                                         Add Another</button>
                                     </div>
                                 </div>
-
 
                                 <div class="row">
                                     <div class="col-md-6">
@@ -209,31 +239,7 @@ active
                                                 name="memory_limit" placeholder="Memory limit here..." required>
                                         </div>
                                     </div>
-
-
                                 </div>
-
-                                <div>
-
-                                </div>
-
-                                <!-- <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="job_type" class="form-label">For & By</label>
-                                            <input type="text" class="form-control" id="job_type"
-                                                value="{{ course.name|title }} by {{ instructor.first_name }}" disabled>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="deadline" class="form-label">Created At</label>
-                                            <input type="text" class="form-control" id="deadline"
-                                                value="{% now 'l, F j, Y g:i A' %}" disabled>
-                                        </div>
-                                    </div>
-                                </div> -->
 
                                 <div>
                                     <div class="col-md-12">
@@ -242,18 +248,17 @@ active
                                     </div>
                                 </div>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
+            </form>
         </div>
-        </form>
     </div>
 </div>
 
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const questionsContainer = document.getElementById("recommended-questions-container");
@@ -345,6 +350,34 @@ active
             form.submit();  // Submit the form
         });
     });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('image-form-container');
+    const addBtn = document.getElementById('add-image-form');
+
+    // Function to add a new form
+    addBtn.addEventListener('click', function () {
+        const newForm = container.children[0].cloneNode(true);
+        // Clear the values of the cloned inputs
+        newForm.querySelector('input[type="file"]').value = '';
+        newForm.querySelector('input[type="text"]').value = '';
+        container.appendChild(newForm);
+    });
+
+    // Function to remove a form (event delegation)
+    container.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-image-form')) {
+            // Do not remove the last form
+            if (container.children.length > 1) {
+                e.target.closest('.image-form').remove();
+            } else {
+                alert("At least one new image form must be present.");
+            }
+        }
+    });
+});
 </script>
 
 {% endblock %}

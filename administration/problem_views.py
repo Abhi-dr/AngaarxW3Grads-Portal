@@ -12,7 +12,7 @@ from django.utils.safestring import mark_safe
 
 from django.views.decorators.csrf import csrf_exempt
 
-from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode, RecommendedQuestions
+from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode, RecommendedQuestions, MCQQuestion, QuestionImage
 from django.views.decorators.cache import cache_control
 from angaar_hai.custom_decorators import admin_required
 
@@ -183,81 +183,85 @@ def delete_question(request, id):
 @admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_question(request, id):
-    administrator = Administrator.objects.get(id=request.user.id)
-    question = Question.objects.get(id=id)
+    administrator = get_object_or_404(Administrator, id=request.user.id)
+    question = get_object_or_404(Question, id=id)
     sheets = Sheet.objects.all().order_by('-id')
-
     recommended_questions = list(RecommendedQuestions.objects.filter(question=question).values("id", "title", "platform", "link"))
     
     if request.method == 'POST':
-        # Extract form data
-        sheet = request.POST.getlist('sheet')
-        title = request.POST.get('title')
-        scenario = request.POST.get('scenario')
-        description = request.POST.get('description')
-        input_format = request.POST.get('input_format')
-        output_format = request.POST.get('output_format')
-        constraints = request.POST.get('constraints')
-        hint = request.POST.get('hint')
-        difficulty_level = request.POST.get('difficulty_level')
-        position = request.POST.get('position')
-        cpu_time_limit = request.POST.get('cpu_time_limit')
-        memory_limit = request.POST.get('memory_limit')
-
-        description = convert_backticks_to_code(description)
-
-        # Update question details
-        question.title = title
-        question.description = description
-        question.scenario = scenario
-        question.input_format = input_format
-        question.output_format = output_format
-        question.constraints = constraints
-        question.hint = hint
-        question.difficulty_level = difficulty_level
-        question.position = position
-        question.cpu_time_limit = float(cpu_time_limit)
-        question.memory_limit = int(memory_limit)
+        # 1. Update main question fields
+        question.title = request.POST.get('title')
+        question.description = request.POST.get('description')
+        question.scenario = request.POST.get('scenario')
+        question.input_format = request.POST.get('input_format')
+        question.output_format = request.POST.get('output_format')
+        question.constraints = request.POST.get('constraints')
+        question.hint = request.POST.get('hint')
+        question.difficulty_level = request.POST.get('difficulty_level')
+        question.position = request.POST.get('position')
+        question.cpu_time_limit = float(request.POST.get('cpu_time_limit'))
+        question.memory_limit = int(request.POST.get('memory_limit'))
         question.save()
 
-        # Update sheets
-        question.sheets.clear()
-        for sheet_id in sheet:
-            sheet = Sheet.objects.get(id=sheet_id)
-            question.sheets.add(sheet)
+        # 2. Handle image deletions
+        delete_ids = request.POST.getlist('delete_images')
+        if delete_ids:
+            QuestionImage.objects.filter(id__in=delete_ids).delete()
+            messages.info(request, f'Successfully deleted {len(delete_ids)} image(s).')
 
-        # Handle recommended questions
+        # 3. Handle caption updates for existing images
+        # We iterate over the remaining images after potential deletions
+        for image in question.images.all():
+            new_caption = request.POST.get(f'caption_{image.id}')
+            if new_caption is not None and image.caption != new_caption:
+                image.caption = new_caption
+                image.save()
+
+        # 4. Handle new image uploads
+        new_images = request.FILES.getlist('new_images')
+        new_captions = request.POST.getlist('new_captions')
+        for image_file, caption_text in zip(new_images, new_captions):
+            if image_file:
+                QuestionImage.objects.create(
+                    image=image_file,
+                    caption=caption_text,
+                    content_object=question
+                )
+
+        # 5. Update sheets relationship (using .set() is more efficient)
+        sheet_ids = request.POST.getlist('sheet')
+        question.sheets.set(sheet_ids)
+
+        # 6. Handle recommended questions (your existing logic)
         try:
             recommended_data = json.loads(request.POST.get("recommended_questions", "{}"))
             updated_questions = recommended_data.get("updated", [])
             deleted_questions = recommended_data.get("deleted", [])
 
-            # Delete removed questions
             if deleted_questions:
                 RecommendedQuestions.objects.filter(id__in=deleted_questions).delete()
 
-            # Update or add new recommended questions
             for rq in updated_questions:
-                if "id" in rq and rq["id"]:  # Update existing
+                if "id" in rq and rq["id"]:
                     rec_q = RecommendedQuestions.objects.get(id=rq["id"])
                     rec_q.title = rq["title"]
                     rec_q.platform = rq["platform"]
                     rec_q.link = rq["link"]
                     rec_q.save()
-                else:  # Add new
+                elif rq.get("title") and rq.get("link"): # Ensure new items have data
                     RecommendedQuestions.objects.create(
                         question=question,
                         title=rq["title"],
                         platform=rq["platform"],
                         link=rq["link"]
                     )
-
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid JSON data"}, status=400)
+            messages.error(request, "There was an error processing recommended questions.")
 
         messages.success(request, 'Problem updated successfully')
         return redirect('edit_question', id=question.id)
     
+    # This logic is for GET requests to pre-process text for display
     if question.scenario:
         question.scenario = convert_code_to_backticks(question.scenario)
     question.description = convert_code_to_backticks(question.description)
@@ -271,8 +275,6 @@ def edit_question(request, id):
     }
 
     return render(request, 'administration/practice/edit_question.html', parameters)
-
-
 # ======================================== QUESTION REQUESTS ======================================
 
 @login_required(login_url='login')

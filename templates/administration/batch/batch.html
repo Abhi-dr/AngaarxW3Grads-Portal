@@ -166,7 +166,11 @@ active
             <h3 class="heading">
                 <span class="fw-semibold">{{ batch.name }} 🔥</span>
                 <span class="fs-4"> | Angaar x W3Grads
+                    <h4 class="float-end">
+                        Total Enrollments: <span class="badge bg-dark fs-5">{{ batch.get_total_enrollments }}</span> 
+                    </h3>
                 </span>
+                
             </h3>
         </div>
 
@@ -183,7 +187,6 @@ active
     </div>
 
 
-    <!--============================================ BATCH POD =================================== -->
 
 
 
@@ -252,9 +255,19 @@ active
 
                                             {% if sheet.is_enabled %}
                                             <span class="text-success">Enabled</span>
+
+                                            {% if sheet.is_approved %}
+                                            <span class="badge bg-dark text-success m-1">Approved</span>
+                                            {% else %}
+                                            <span class="badge bg-dark text-warning m-1">Pending Approval</span>
+                                            {% endif %}
+
                                             {% else %}
                                             <span class="text-danger">Disabled</span>
                                             {% endif %}
+
+                                            <br>
+
                                             <a href="{% url 'administrator_sheet' sheet.slug %}"
                                                 class="btn btn-outline-secondary w-100">View More</a>
                                         </div>

@@ -1,0 +1,155 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Edit MCQ Question | {{ question.sheet.name }}
+{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-4">Edit MCQ Question in <span class="text-primary">{{ question.sheet.name }}</span></h5>
+            
+            <form method="post" action="" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="question_text" class="form-label">Question Text</label>
+                    <textarea class="form-control" id="question_text" name="question_text" rows="4" required>{{ question.question_text }}</textarea>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="option_a" class="form-label">Option A</label>
+                        <input type="text" class="form-control" id="option_a" name="option_a" value="{{ question.option_a }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="option_b" class="form-label">Option B</label>
+                        <input type="text" class="form-control" id="option_b" name="option_b" value="{{ question.option_b }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="option_c" class="form-label">Option C</label>
+                        <input type="text" class="form-control" id="option_c" name="option_c" value="{{ question.option_c }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="option_d" class="form-label">Option D</label>
+                        <input type="text" class="form-control" id="option_d" name="option_d" value="{{ question.option_d }}" required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="correct_option" class="form-label">Correct Option</label>
+                        <select class="form-select" id="correct_option" name="correct_option" required>
+                            <option value="A" {% if question.correct_option == 'A' %}selected{% endif %}>A</option>
+                            <option value="B" {% if question.correct_option == 'B' %}selected{% endif %}>B</option>
+                            <option value="C" {% if question.correct_option == 'C' %}selected{% endif %}>C</option>
+                            <option value="D" {% if question.correct_option == 'D' %}selected{% endif %}>D</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="difficulty_level" class="form-label">Difficulty Level</label>
+                        <select class="form-select" id="difficulty_level" name="difficulty_level" required>
+                            <option value="Easy" {% if question.difficulty_level == 'Easy' %}selected{% endif %}>Easy</option>
+                            <option value="Medium" {% if question.difficulty_level == 'Medium' %}selected{% endif %}>Medium</option>
+                            <option value="Hard" {% if question.difficulty_level == 'Hard' %}selected{% endif %}>Hard</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="explanation" class="form-label">Explanation (Optional)</label>
+                    <textarea class="form-control" id="explanation" name="explanation" rows="3">{{ question.explanation|default_if_none:'' }}</textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label for="tags" class="form-label">Tags (Optional)</label>
+                    <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g., python, basics, loops" value="{{ question.tags|default_if_none:'' }}">
+                    <div class="form-text">Enter tags separated by a comma.</div>
+                </div>
+
+                <hr class="my-4">
+
+                <h6 class="card-title fw-semibold mb-3">Manage Existing Images</h6>
+                {% if question.images.all %}
+                    {% for image in question.images.all %}
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-2">
+                            <img src="{{ image.image.url }}" alt="Thumbnail" class="img-thumbnail" width="100">
+                        </div>
+                        <div class="col-md-7">
+                            <label for="caption_{{ image.id }}" class="form-label">Caption</label>
+                            <input type="text" name="caption_{{ image.id }}" id="caption_{{ image.id }}" class="form-control" value="{{ image.caption|default_if_none:'' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check mt-4">
+                                <input class="form-check-input" type="checkbox" name="delete_images" value="{{ image.id }}" id="delete_{{ image.id }}">
+                                <label class="form-check-label text-danger" for="delete_{{ image.id }}">
+                                    Delete Image
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No images have been uploaded for this question.</p>
+                {% endif %}
+
+                <hr class="my-4">
+
+                <h6 class="card-title fw-semibold mb-3">Upload New Images</h6>
+                <div id="image-form-container">
+                    <div class="row image-form mb-3 align-items-center">
+                        <div class="col-md-6">
+                            <label class="form-label">New Image File</label>
+                            <input type="file" name="new_images" class="form-control">
+                        </div>
+                        <div class="col-md-5">
+                             <label class="form-label">New Caption</label>
+                            <input type="text" name="new_captions" class="form-control" placeholder="Optional caption">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-danger btn-sm mt-4 remove-image-form">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="add-image-form" class="btn btn-info btn-sm mb-4">Add Another Image</button>
+
+                <hr class="my-4">
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{% url 'administrator_sheet' question.sheet.slug %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('image-form-container');
+    const addBtn = document.getElementById('add-image-form');
+
+    addBtn.addEventListener('click', function () {
+        const newForm = container.children[0].cloneNode(true);
+        newForm.querySelector('input[type="file"]').value = '';
+        newForm.querySelector('input[type="text"]').value = '';
+        container.appendChild(newForm);
+    });
+
+    container.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-image-form')) {
+            if (container.children.length > 1) {
+                e.target.closest('.image-form').remove();
+            } else {
+                alert("At least one new image form must be present.");
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

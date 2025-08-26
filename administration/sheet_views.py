@@ -13,7 +13,7 @@ from django.db import transaction
 from django.urls import reverse
 
 from accounts.models import Student, Administrator
-from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest, RecommendedQuestions, TestCase, DriverCode
+from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest, RecommendedQuestions, TestCase, DriverCode, MCQQuestion, MCQSubmission, QuestionImage
 
 # ========================= SHEET WORK ==========================
 
@@ -161,8 +161,8 @@ def sheet(request, slug):
     
     administrator = Administrator.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
-    questions = sheet.get_ordered_questions()
-    
+
+    questions = sheet.get_ordered_questions()    
     
     parameters = {
         "administrator": administrator,
@@ -238,6 +238,20 @@ def add_new_question(request, slug):
             is_approved=True
         )
 
+        # ==> ADD THIS BLOCK TO HANDLE IMAGE UPLOADS <==
+        images = request.FILES.getlist('images')
+        captions = request.POST.getlist('captions')
+
+        # Use zip to pair each image with its corresponding caption
+        for image, caption in zip(images, captions):
+            # We only create an image record if a file was actually uploaded
+            if image:
+                QuestionImage.objects.create(
+                    image=image,
+                    caption=caption,
+                    content_object=question  # This links the image to the new coding question
+                )
+
         # Link question to sheet
         sheet.questions.add(question)
 
@@ -246,7 +260,7 @@ def add_new_question(request, slug):
             recommended_questions_data = json.loads(request.POST.get("recommended_questions", "[]"))
 
             for rq in recommended_questions_data:
-                if rq["title"] and rq["platform"] and rq["link"]:  # Ensure valid input
+                if rq["title"] and rq["platform"] and rq["link"]:
                     RecommendedQuestions.objects.create(
                         question=question,
                         title=rq["title"],
@@ -255,9 +269,11 @@ def add_new_question(request, slug):
                     )
 
         except json.JSONDecodeError:
-            return JsonResponse({"success": False, "message": "Invalid JSON data"}, status=400)
+            # It's better to handle the error gracefully
+            messages.error(request, "There was an error processing recommended questions.")
+            # Continue without returning, or handle as you see fit
 
-        messages.success(request, "Question added successfully!")
+        messages.success(request, "Question and images added successfully!")
         return redirect('administrator_sheet', slug=sheet.slug)
 
     parameters = {
@@ -266,6 +282,7 @@ def add_new_question(request, slug):
     }
 
     return render(request, 'administration/sheet/add_new_question.html', parameters)
+
 
 # ========================= ADD NEW QUESTION TO SHEET USING JSON ==========================
 
