@@ -283,16 +283,13 @@ active
 <style>
     .figure {
         /* Core styling */
-        border: 1px solid #dee2e6;
         border-radius: 0.375rem;
-        padding: 0.55rem;
+        padding: 0.25rem;
         margin-left: 2%;
-        background-color: #f8f9fa;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
 
         /* --- New Additions --- */
-        max-width: 320px;
+        max-width: 420px;
         /* Set a maximum width for the card */
         width: 96%;
         /* Ensure it's responsive within the max-width */
@@ -314,11 +311,7 @@ active
         /* Pushes caption to the bottom in equal-height cards */
     }
 
-    /* --- Dark Mode Support --- */
-    [data-bs-theme="dark"] .figure {
-        background-color: #2c3034;
-        border-color: #495057;
-    }
+\   
 </style>
 
 {% endblock %} {% block body %}
@@ -410,7 +403,7 @@ active
 
 
         {% if question.images.all %}
-        <div class="row g-4">
+        <div class="row g-4 justify-content-center">
             {% for img in question.images.all %}
             <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                 <figure class="figure h-100">
