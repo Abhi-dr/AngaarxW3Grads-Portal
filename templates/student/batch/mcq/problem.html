@@ -235,6 +235,47 @@ active
     }
 </style>
 
+<style>
+    .figure {
+        /* Core styling */
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.55rem;
+        margin-left: 2%;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+
+        /* --- New Additions --- */
+        max-width: 320px;
+        /* Set a maximum width for the card */
+        width: 96%;
+        /* Ensure it's responsive within the max-width */
+        display: flex;
+        /* Better control over internal alignment */
+        flex-direction: column;
+        height: 100%;
+        /* Make cards in the same row equal height */
+    }
+
+    .figure:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .figure .figure-caption {
+        text-align: center;
+        margin-top: auto;
+        /* Pushes caption to the bottom in equal-height cards */
+    }
+
+    /* --- Dark Mode Support --- */
+    [data-bs-theme="dark"] .figure {
+        background-color: #2c3034;
+        border-color: #495057;
+    }
+</style>
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
 
 <!-- Modal css -->
@@ -297,6 +338,25 @@ active
     }
 </style>
 
+<style>
+    /* ... (all your existing styles) ... */
+
+    /* Add this for the clickable image thumbnail */
+    .question-image-thumbnail {
+        cursor: pointer;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .question-image-thumbnail:hover {
+        opacity: 0.8;
+    }
+
+    /* Styling for the image inside the modal */
+    #modalImage {
+        max-width: 100%;
+        height: auto;
+    }
+</style>
 {% endblock %}
 
 {% block body %}
@@ -329,7 +389,7 @@ active
                         <b>Sheet:</b> <i>{{ mcq_question.sheet.name }}</i>
                     </span>
                 </div>
-                
+
             </div>
         </div>
     </div>
@@ -350,6 +410,25 @@ active
                 {{ mcq_question.question_text|linebreaks }}
             </div>
         </div>
+
+        {% if mcq_question.images.all %}
+<div class="row g-4">
+    {% for img in mcq_question.images.all %}
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <figure class="figure h-100">
+            <img src="{{ img.image.url }}" class="figure-img img-fluid rounded question-image-thumbnail"
+                alt="{{ img.caption|default:'Question image' }}" data-bs-toggle="modal"
+                data-bs-target="#image-viewer-modal" data-src="{{ img.image.url }}"
+                data-caption="{{ img.caption|default:'' }}">
+
+            {% if img.caption %}
+            <figcaption class="figure-caption text-center">{{ img.caption }}</figcaption>
+            {% endif %}
+        </figure>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
         {% if mcq_question.tags %}
         <div class="card-body mb-n7">
@@ -432,7 +511,6 @@ active
         </div> -->
     </div>
 
-    <!-- Success Modal -->
     <div class="modal fade" id="success-modal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content"
@@ -444,28 +522,9 @@ active
                     </h5>
                 </div>
                 <div class="modal-body text-center">
-                    <!-- Trophy SVG -->
                     <svg version="1.1" id="trophy-svg" xmlns="http://www.w3.org/2000/svg"
                         xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.00 512.00" xml:space="preserve"
                         width="87px" height="87px" fill="#000000" stroke="#000000">
-                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier">
-                            <path style="fill:#ECF0F1;"
-                                d="M369.059,52.352v153.537c0,14.104-3.141,27.6-7.329,40.049v0.01 c-16.753,42.384-57.426,72.497-105.474,72.497c-47.975,0-88.98-30.018-105.157-72.298c-0.031-0.063-0.117-0.136-0.138-0.199 c-2.974-7.779-5.095-15.978-6.257-24.469c-0.346-2.544-0.463-5.11-0.641-7.706c-0.178-2.607-0.117-5.235-0.117-7.884V52.352H369.059 z">
-                            </path>
-                            <rect x="229.813" y="319.869" style="fill:#ff9742;" width="52.352" height="76.434"></rect>
-                            <path style="fill:#ECF0F1;"
-                                d="M329.283,448.654H182.698v-20.581c0-17.546,14.224-31.771,31.771-31.771h83.043 c17.546,0,31.771,14.224,31.771,31.771v20.581H329.283z">
-                            </path>
-                            <g>
-                                <path style="fill:#ff9742;"
-                                    d="M371.164,501.006H140.816v-20.581c0-17.546,14.224-31.771,31.771-31.771h166.806 c17.546,0,31.771,14.224,31.771,31.771v20.581H371.164z">
-                                </path>
-                                <rect x="143.433" y="9.566" style="fill:#ff9742;" width="225.112" height="41.881">
-                                </rect>
-                            </g>
-                        </g>
                     </svg>
                     <p style="font-size: 1.2rem;" id="result-message">
                         Well done! You got it right.
@@ -477,6 +536,21 @@ active
                     <a href="{% url 'render_next_mcq_question_in_sheet' mcq_question.sheet.id mcq_question.id %}"
                         class="btn btn-success" id="nextQuestionBtn">Next Question</a>
                     {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="image-viewer-modal" tabindex="-1" aria-labelledby="imageViewerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageViewerModalLabel">Image Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="modalImage" class="img-fluid rounded" alt="Enlarged question image">
+                    <p class="mt-2" id="modalCaption"></p>
                 </div>
             </div>
         </div>
@@ -586,6 +660,28 @@ active
             const successModal = new bootstrap.Modal(document.getElementById('success-modal'));
             successModal.show();
         }
+
+        // ======================= REFINED SCRIPT FOR THE IMAGE MODAL =========================
+        $('#image-viewer-modal').on('show.bs.modal', function (event) {
+            // Get the element that triggered the modal (the clicked image)
+            const triggerElement = $(event.relatedTarget);
+
+            // Extract info from data-* attributes using jQuery's .data() method
+            const imgSrc = triggerElement.data('src');
+            const imgCaption = triggerElement.data('caption');
+
+            // Find elements within the modal and update them
+            const modal = $(this);
+            modal.find('#modalImage').attr('src', imgSrc);
+
+            const captionElement = modal.find('#modalCaption');
+            if (imgCaption) {
+                captionElement.text(imgCaption).show();
+            } else {
+                captionElement.hide();
+            }
+        });
+
     });
 
     // Recommended questions (similar to coding problems)

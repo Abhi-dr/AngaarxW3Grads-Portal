@@ -1,6 +1,10 @@
 from django.db import models
 from datetime import datetime, timedelta
 from django.utils.timezone import now
+from django.db import models
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericRelation
 
 from accounts.models import Student, Instructor
 
@@ -231,7 +235,33 @@ class Sheet(models.Model):
             self.slug = slug
         
         super(Sheet, self).save(*args, **kwargs)
-        
+
+
+# ============================== QUESTION IMAGE MODEL ========================
+
+class QuestionImage(models.Model):
+    image = models.ImageField(upload_to='question_images/')
+
+    caption = models.CharField(max_length=255, blank=True, null=True)
+
+    # Fields for the Generic Foreign Key relationship
+    # This points to the model (e.g., 'MCQQuestion')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    
+    # This stores the primary key of the specific question instance
+    object_id = models.PositiveIntegerField()
+    
+    # This creates the generic relationship from the two fields above
+    content_object = GenericForeignKey('content_type', 'object_id')
+
+    # Optional: to control the display order of multiple images
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order'] # Order images by the 'order' field by default
+
+    def __str__(self):
+        return f"Image for {self.content_object}"
 
 # ============================== QUESTION MODEL =============================
 
@@ -264,6 +294,9 @@ class Question(models.Model):
     position = models.PositiveIntegerField(default=0)
     
     hint = models.TextField(blank=True, null=True)
+
+    images = GenericRelation(QuestionImage, blank=True, null=True)
+
     
     slug = models.SlugField(blank=True, null=True)
     
@@ -575,6 +608,9 @@ class MCQQuestion(models.Model):
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, related_name="mcq_questions")
 
     question_text = models.TextField()
+
+    images = GenericRelation(QuestionImage, blank=True, null=True)
+
     
     option_a = models.CharField(max_length=255)
     option_b = models.CharField(max_length=255)
@@ -587,6 +623,8 @@ class MCQQuestion(models.Model):
     )
 
     explanation = models.TextField(blank=True, null=True)
+
+
 
     tags = models.CharField(max_length=255, blank=True, null=True)  # Comma-separated tags
     created_at = models.DateTimeField(auto_now_add=True)

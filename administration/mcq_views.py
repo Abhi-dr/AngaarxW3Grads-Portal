@@ -3,26 +3,19 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from practice.models import Sheet, MCQQuestion, MCQSubmission
+from practice.models import Sheet, MCQQuestion, MCQSubmission, QuestionImage
 from django.core.paginator import Paginator
-
 
 
 @login_required(login_url='login')
 def administrator_add_new_mcq_question(request, sheet_slug):
-    """
-    View to add a new MCQ Question to a sheet.
-    """
     sheet = get_object_or_404(Sheet, slug=sheet_slug)
 
-    # Ensure the sheet is an MCQ type sheet
     if sheet.sheet_type != "MCQ":
         messages.error(request, 'This is not an MCQ sheet.')
-        # Assuming you have a URL named 'administrator_sheet_detail'
-        return redirect('administrator_sheet_detail', slug=sheet.slug)
+        return redirect('administrator_sheet', slug=sheet.slug)
 
     if request.method == 'POST':
-        # Retrieve data from the form
         question_text = request.POST.get('question_text')
         option_a = request.POST.get('option_a')
         option_b = request.POST.get('option_b')
@@ -33,13 +26,12 @@ def administrator_add_new_mcq_question(request, sheet_slug):
         tags = request.POST.get('tags')
         difficulty_level = request.POST.get('difficulty_level')
 
-        # Basic validation to ensure required fields are not empty
         if not all([question_text, option_a, option_b, option_c, option_d, correct_option, difficulty_level]):
             messages.error(request, 'Please fill out all required fields.')
             return render(request, 'administration/batch/mcq/add_mcq_question.html', {'sheet': sheet})
 
-        # Create and save the new MCQQuestion instance
-        MCQQuestion.objects.create(
+        # Create the question first
+        new_mcq_question = MCQQuestion.objects.create(
             sheet=sheet,
             question_text=question_text,
             option_a=option_a,
@@ -50,11 +42,24 @@ def administrator_add_new_mcq_question(request, sheet_slug):
             explanation=explanation,
             tags=tags,
             difficulty_level=difficulty_level,
-            is_approved=True  # Automatically approve questions added by an admin
+            is_approved=True
         )
 
-        messages.success(request, 'New MCQ question was added successfully!')
-        # Redirect back to the sheet detail page
+        # ==> HANDLE IMAGE UPLOADS <==
+        images = request.FILES.getlist('images')
+        captions = request.POST.getlist('captions')
+
+        # Use zip to pair each image with its corresponding caption
+        for image, caption in zip(images, captions):
+            # We only create an image record if a file was actually uploaded
+            if image:
+                QuestionImage.objects.create(
+                    image=image,
+                    caption=caption,
+                    content_object=new_mcq_question  # This links the image to the question
+                )
+        
+        messages.success(request, 'New MCQ question and its images were added successfully!')
         return redirect('administrator_sheet', slug=sheet.slug)
 
     context = {
@@ -62,16 +67,15 @@ def administrator_add_new_mcq_question(request, sheet_slug):
     }
     return render(request, 'administration/batch/mcq/add_mcq_question.html', context)
 
+
 # ============================= EDIT MCQ QUESTION =============================
 
 @login_required(login_url='login')
 def administrator_edit_mcq_question(request, question_id):
-
     question = get_object_or_404(MCQQuestion, id=question_id)
 
-    # If the form is submitted (POST request)
     if request.method == 'POST':
-        # Update the question object's fields with the new data from the form
+        # 1. Update the main question text fields
         question.question_text = request.POST.get('question_text')
         question.option_a = request.POST.get('option_a')
         question.option_b = request.POST.get('option_b')
@@ -81,20 +85,40 @@ def administrator_edit_mcq_question(request, question_id):
         question.difficulty_level = request.POST.get('difficulty_level')
         question.explanation = request.POST.get('explanation')
         question.tags = request.POST.get('tags')
+        question.save() # Save text changes first
 
-        # Save the updated object to the database
-        question.save()
+        # 2. Handle image deletions
+        delete_ids = request.POST.getlist('delete_images')
+        if delete_ids:
+            QuestionImage.objects.filter(id__in=delete_ids).delete()
+            messages.info(request, f'Successfully deleted {len(delete_ids)} image(s).')
 
-        # Add a success message and redirect back to the sheet detail page
+        # 3. Handle caption updates for existing images
+        for image in question.images.all():
+            new_caption = request.POST.get(f'caption_{image.id}')
+            if new_caption is not None and image.caption != new_caption:
+                image.caption = new_caption
+                image.save()
+
+        # 4. Handle new image uploads
+        new_images = request.FILES.getlist('new_images')
+        new_captions = request.POST.getlist('new_captions')
+
+        for image_file, caption_text in zip(new_images, new_captions):
+            if image_file:
+                QuestionImage.objects.create(
+                    image=image_file,
+                    caption=caption_text,
+                    content_object=question
+                )
+
         messages.success(request, 'The MCQ question has been updated successfully!')
         return redirect('administrator_sheet', slug=question.sheet.slug)
 
-    # If it's a GET request, just display the form pre-filled with the question's data
     context = {
         'question': question
     }
     return render(request, 'administration/batch/mcq/edit_mcq_question.html', context)
-
 
 # ============================= DELETE MCQ QUESTION =============================
 

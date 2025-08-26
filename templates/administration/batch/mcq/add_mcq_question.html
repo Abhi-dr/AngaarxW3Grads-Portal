@@ -15,7 +15,7 @@ active
         <div class="card-body">
             <h5 class="card-title fw-semibold mb-4">Add a New MCQ Question to <span class="text-primary">{{ sheet.name }}</span></h5>
             
-            <form method="post" action="">
+            <form method="post" action="" enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <div class="mb-3">
@@ -72,6 +72,28 @@ active
                     <input type="text" class="form-control" id="tags" name="tags" placeholder="e.g., python, basics, loops">
                     <div class="form-text">Enter tags separated by a comma.</div>
                 </div>
+                
+                <hr class="my-4">
+
+                <h6 class="card-title fw-semibold mb-3">Upload Images (Optional)</h6>
+                <div id="image-form-container">
+                    <div class="row image-form mb-3 align-items-center">
+                        <div class="col-md-6">
+                            <label class="form-label">Image File</label>
+                            <input type="file" name="images" class="form-control">
+                        </div>
+                        <div class="col-md-5">
+                             <label class="form-label">Caption</label>
+                            <input type="text" name="captions" class="form-control" placeholder="Optional caption">
+                        </div>
+                        <div class="col-md-1">
+                            <button type="button" class="btn btn-danger btn-sm mt-4 remove-image-form">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="add-image-form" class="btn btn-info btn-sm mb-4">Add Another Image</button>
+
+                <hr class="my-4">
 
                 <button type="submit" class="btn btn-primary">Add Question</button>
                 <a href="{% url 'administrator_sheet' sheet.slug %}" class="btn btn-secondary">Cancel</a>
@@ -79,4 +101,33 @@ active
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('image-form-container');
+    const addBtn = document.getElementById('add-image-form');
+
+    // Function to add a new form
+    addBtn.addEventListener('click', function () {
+        const newForm = container.children[0].cloneNode(true);
+        // Clear the values of the cloned inputs
+        newForm.querySelector('input[type="file"]').value = '';
+        newForm.querySelector('input[type="text"]').value = '';
+        container.appendChild(newForm);
+    });
+
+    // Function to remove a form (event delegation)
+    container.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-image-form')) {
+            // Do not remove the last form
+            if (container.children.length > 1) {
+                e.target.closest('.image-form').remove();
+            } else {
+                alert("At least one image form must be present.");
+            }
+        }
+    });
+});
+</script>
+
 {% endblock %}
