@@ -4,6 +4,8 @@ active
 {% endblock %} {% block extra_css %}
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
 <style>
     h3.question {
         font-family: "Roboto", sans-serif;
@@ -183,7 +185,6 @@ active
 </style>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
-<!-- Modal next css-->
 <style>
     @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
@@ -310,10 +311,91 @@ active
         margin-top: auto;
         /* Pushes caption to the bottom in equal-height cards */
     }
-
-\   
 </style>
 
+
+<style>
+    /* Styles for Focus Mode */
+    body.focus-mode-active {
+        overflow: hidden; /* Prevent scrolling of the body */
+        user-select: none; /* Prevent text selection while dragging */
+    }
+
+    /* Hide everything except the problem layout container when in focus mode */
+    body.focus-mode-active .main-wrapper, /* Target main wrapper from base.html */
+    body.focus-mode-active nav,
+    body.focus-mode-active > .container-fluid > .card:first-child, /* Hide the top title card */
+    body.focus-mode-active > footer { /* Hide a potential footer from base.html */
+        display: none !important;
+    }
+
+    /* Style the main container for focus mode */
+    body.focus-mode-active #problem-layout-container {
+        display: flex;
+        flex-direction: row;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1050; /* Higher than most elements */
+        background-color: var(--bs-body-bg); /* Use theme background color */
+    }
+
+    /* Style the two panels */
+    body.focus-mode-active .question-panel,
+    body.focus-mode-active .editor-panel {
+        flex-basis: 50%; /* Initial width */
+        height: 100vh;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        min-width: 15%; /* Prevent panels from becoming too small */
+    }
+    
+    body.focus-mode-active .question-panel .card-body,
+    body.focus-mode-active .editor-panel .card-body {
+        flex-grow: 1; /* Allow card body to take available space */
+    }
+
+    /* Adjust padding and borders for a cleaner look in focus mode */
+    body.focus-mode-active .question-panel,
+    body.focus-mode-active .editor-panel {
+        border: none;
+        border-radius: 0;
+        padding: 1rem;
+    }
+    
+    /* Make the editor container fill the available height */
+    body.focus-mode-active .editor-container {
+        /* Calculate height leaving space for language selector and buttons */
+        height: calc(100vh - 220px); 
+    }
+
+    /* Hide recommended questions in focus mode */
+    body.focus-mode-active #recommended-questions-container {
+        display: none;
+    }
+
+    /* --- NEW: Styles for the resizable slider --- */
+    #resize-slider {
+        display: none; /* Hidden by default */
+        flex: 0 0 8px; /* Fixed width, no growing or shrinking */
+        background-color: var(--bs-border-color);
+        cursor: col-resize;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    #resize-slider:hover {
+        background-color: var(--bs-primary);
+    }
+    
+    /* The slider is only visible in focus mode */
+    body.focus-mode-active #resize-slider {
+        display: block;
+    }
+
+</style>
 {% endblock %} {% block body %}
 
 <div class="container-fluid">
@@ -359,6 +441,11 @@ active
 
                 <div class="col-md-6">
                     <div class="d-flex justify-content-end">
+                        <button id="toggle-focus-mode-btn" class="btn btn-outline-primary me-2" type="button"
+                            data-bs-toggle="tooltip" data-bs-placement="top" title="Enter Focus Mode">
+                            <i class="bi bi-arrows-fullscreen"></i>
+                        </button>
+
                         <a id="view-submission" href="{% url 'my_submissions' question.slug %}"
                             class="btn btn-outline-success">View Submission</a>
                     </div>
@@ -368,1211 +455,1036 @@ active
     </div>
 
 
-    <div class="card" id="card-title-2">
-        <div class="card-header ">
-            <h6 class="card-title"><strong>Level: </strong>
-                <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
-                    {{ question.difficulty_level }}
-                </span>
-            </h6>
-        </div>
+    <div id="problem-layout-container">
 
-        {% if question.scenario %}
+        <div class="card question-panel" id="question-panel">
+            <div class="card-header ">
+                <h6 class="card-title"><strong>Level: </strong>
+                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
+                        {{ question.difficulty_level }}
+                    </span>
+                </h6>
+            </div>
 
-        {% autoescape off %}
+            {% if question.scenario %}
 
-
-        <div class="card-body mb-n7">
-            <h4 class="card-title text-">Scenario:</h4>
-            <p>{{ question.scenario|linebreaks }}</p>
-        </div>
-
-        {% endautoescape %}
+            {% autoescape off %}
 
 
-        {% endif %}
+            <div class="card-body mb-n7">
+                <h4 class="card-title text-">Scenario:</h4>
+                <p>{{ question.scenario|linebreaks }}</p>
+            </div>
 
-        {% autoescape off %}
-
-        <div class="card-body mb-n7">
-            <h6 class="card-title">Description:</h6>
-            <p>{{ question.description|linebreaks }}</p>
-        </div>
-
-        {% endautoescape %}
+            {% endautoescape %}
 
 
-        {% if question.images.all %}
-        <div class="row g-4 justify-content-center">
-            {% for img in question.images.all %}
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                <figure class="figure h-100">
-                    <img src="{{ img.image.url }}" class="figure-img img-fluid rounded question-image-thumbnail"
-                        alt="{{ img.caption|default:'Question image' }}" data-bs-toggle="modal"
-                        data-bs-target="#image-viewer-modal" data-src="{{ img.image.url }}"
-                        data-caption="{{ img.caption|default:'' }}">
+            {% endif %}
 
-                    {% if img.caption %}
-                    <figcaption class="figure-caption text-center">{{ img.caption }}</figcaption>
+            {% autoescape off %}
+
+            <div class="card-body mb-n7">
+                <h6 class="card-title">Description:</h6>
+                <p>{{ question.description|linebreaks }}</p>
+            </div>
+
+            {% endautoescape %}
+
+
+            {% if question.images.all %}
+            <div class="row g-4 justify-content-center">
+                {% for img in question.images.all %}
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <figure class="figure h-100">
+                        <img src="{{ img.image.url }}" class="figure-img img-fluid rounded question-image-thumbnail"
+                            alt="{{ img.caption|default:'Question image' }}" data-bs-toggle="modal"
+                            data-bs-target="#image-viewer-modal" data-src="{{ img.image.url }}"
+                            data-caption="{{ img.caption|default:'' }}">
+
+                        {% if img.caption %}
+                        <figcaption class="figure-caption text-center">{{ img.caption }}</figcaption>
+                        {% endif %}
+                    </figure>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+
+            {% if question.input_format %}
+
+            {% autoescape off %}
+
+            <div class="card-body mb-n7">
+                <h6 class="card-title fs-4">Input Format:</h6>
+                <code>{{ question.input_format|linebreaks }}</code>
+            </div>
+
+            {% endautoescape %}
+
+
+            {% endif %}
+
+            {% if question.output_format %}
+
+            {% autoescape off %}
+
+            <div class="card-body mb-n7">
+                <h6 class="card-title fs-4">Output Format:</h6>
+                <code>{{ question.output_format|linebreaks }}</code>
+            </div>
+
+            {% endautoescape %}
+
+
+            {% endif %}
+
+            <div class="card-body mb-n7">
+                <h6 class="card-title">Constraints:</h6>
+                <code> <small>{{ question.constraints|linebreaks }}</small></code>
+            </div>
+
+            <div class="card-body">
+
+                {% for test_case in sample_test_cases %}
+
+                <div class="card-footer-link">
+                    <p class="card-text d-inline">
+                        <strong>Sample Input {{ forloop.counter }}: </strong>
+                        <br> {% if test_case.input_data %}
+                        <code>{{ test_case.input_data|linebreaks }}</code> {% else %}
+                        <code>No Input Required</code>
+                        <br> {% endif %}
+
+                    </p>
+                    <p class="card-text d-inline">
+                        <strong>Sample Output {{ forloop.counter }}:
+                        </strong><code>{{ test_case.expected_output|linebreaks }}</code>
+                    </p>
+
+                    {% if test_case.explaination %}
+                    <p class="card-text d-inline">
+                        <strong>Explaination {{ forloop.counter }}:
+                        </strong><code>{{ test_case.explaination|linebreaks }}</code>
+                    </p>
                     {% endif %}
-                </figure>
-            </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-
-
-        {% if question.input_format %}
-
-        {% autoescape off %}
-
-        <div class="card-body mb-n7">
-            <h6 class="card-title fs-4">Input Format:</h6>
-            <code>{{ question.input_format|linebreaks }}</code>
-        </div>
-
-        {% endautoescape %}
-
-
-        {% endif %}
-
-        {% if question.output_format %}
-
-        {% autoescape off %}
-
-        <div class="card-body mb-n7">
-            <h6 class="card-title fs-4">Output Format:</h6>
-            <code>{{ question.output_format|linebreaks }}</code>
-        </div>
-
-        {% endautoescape %}
-
-
-        {% endif %}
-
-        <div class="card-body mb-n7">
-            <h6 class="card-title">Constraints:</h6>
-            <code> <small>{{ question.constraints|linebreaks }}</small></code>
-        </div>
-
-        <div class="card-body">
-
-            {% for test_case in sample_test_cases %}
-
-            <div class="card-footer-link">
-                <p class="card-text d-inline">
-                    <strong>Sample Input {{ forloop.counter }}: </strong>
-                    <br> {% if test_case.input_data %}
-                    <code>{{ test_case.input_data|linebreaks }}</code> {% else %}
-                    <code>No Input Required</code>
-                    <br> {% endif %}
-
-                </p>
-                <p class="card-text d-inline">
-                    <strong>Sample Output {{ forloop.counter }}:
-                    </strong><code>{{ test_case.expected_output|linebreaks }}</code>
-                </p>
-
-                {% if test_case.explaination %}
-                <p class="card-text d-inline">
-                    <strong>Explaination {{ forloop.counter }}:
-                    </strong><code>{{ test_case.explaination|linebreaks }}</code>
-                </p>
-                {% endif %}
-                <br>
-            </div>
-
-            {% endfor %}
-
-        </div>
-
-
-
-        <div class="card-footer d-sm-flex justify-content-between align-items-center">
-            <div class="card-footer-link mb-2 mb-sm-0">
-                {% if question.hint %}
-                <div class="hint-section">
-                    <button class="btn btn-sm btn-outline-success fs-3" id="unlock-hint-btn"
-                        data-id="{{ question.id }}">
-                        Hint 🔒 (5<img id="coin-icon" class="mt-n1" src="{% static 'img/student/coin.png' %}" alt="">)
-                    </button>
-                    <button id="hint-text" style="display: none;" class="btn badge text-bg-light-success mx-1"></button>
-                    <p id="hint-info"></p>
+                    <br>
                 </div>
-                {% endif %}
+
+                {% endfor %}
+
             </div>
+
+
+
+            <div class="card-footer d-sm-flex justify-content-between align-items-center">
+                <div class="card-footer-link mb-2 mb-sm-0">
+                    {% if question.hint %}
+                    <div class="hint-section">
+                        <button class="btn btn-sm btn-outline-success fs-3" id="unlock-hint-btn"
+                            data-id="{{ question.id }}">
+                            Hint 🔒 (5<img id="coin-icon" class="mt-n1" src="{% static 'img/student/coin.png' %}" alt="">)
+                        </button>
+                        <button id="hint-text" style="display: none;" class="btn badge text-bg-light-success mx-1"></button>
+                        <p id="hint-info"></p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+
+
+            <div id="recommended-questions-container" class="card-footer d-sm-flex justify-content-between align-items-center">
+                <div class="card-footer-link mb-sm-0">
+                    <h5 class="mb-3">
+                        <strong>Recommended Questions</strong>
+                    </h5>
+                    <div class="recommended-section d-flex mb-2">
+                        <div id="recommended-questions">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
-
-
-        <!-- ======================= RECOMMENDED QUESTIONS ========================= -->
-        <div class="card-footer d-sm-flex justify-content-between align-items-center">
-            <div class="card-footer-link mb-sm-0">
-                <h5 class="mb-3">
-                    <strong>Recommended Questions</strong>
+        <div id="resize-slider"></div>
+        <div class="card editor-panel" id="editor-panel">
+            <div class="card-body p-4">
+                <h5 class="card-title fw-semibold mb-4">Play with the Code 🔥
                 </h5>
-                <div class="recommended-section d-flex mb-2">
-                    <div id="recommended-questions">
-                        <!-- add a mini loader -->
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
+                <form id="codeSubmissionForm">
+                    {% csrf_token %}
+
+                    <input type="hidden" id="submission_code" name="submission_code">
+
+                    <label for="language">Select Language:</label>
+
+                    <select class="form-select form-control" id="language" name="language_id" required>
+                    </select>
+
+                    <div class="test d-inline-flex w-100">
+                        <label for="code" class="mt-3 mb-n2 w-100">Code:</label><br>
+
+
+                        <div class="button-group d-inline-flex justify-content-end w-100">
+                            <button id="save-draft-btn" type="button" class="btn btn-success mt-2 mx-1"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + s">Save as
+                                Draft
+                            </button>
+                            <button id="restore-draft-btn" type="button" class="btn btn-primary mt-2 mx-1">Restore
+                            </button>
+                            <button id="reset-draft-btn" type="button" class="btn btn-warning mt-2 mx-1">Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="editor-container">
+                        <div id="editor"></div>
+                    </div>
+
+                    <div class="row justify-content-end">
+
+                        <div class="button-group" role="group">
+                            <button type="submit" class="btn btn-secondary float-end w-25" id="submit-btn" accesskey="enter"
+                                data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + Enter">Submit Code</button>
+                            <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn" data-bs-toggle="tooltip"
+                                data-bs-placement="top" title="Alt + Enter">Run Code</button>
+                        </div>
+
+                        <div id="customOutput" class="mt-3"></div>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div>
+                <div class="row mt-4">
+                    <div class="col-lg-12">
+                        <div id="testCaseResults" class="container my-4">
+                        </div>
+
+                        <div id="output">
+                            <pre class="fs-4" id="op-div"></pre>
                         </div>
 
                     </div>
+
                 </div>
             </div>
-        </div>
-
-    </div>
-
-    <!-- Code Editor Section -->
-
-    <div class="card" id="card-title-2">
-        <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Play with the Code 🔥
-            </h5>
-            <form id="codeSubmissionForm">
-                {% csrf_token %}
-
-                <input type="hidden" id="submission_code" name="submission_code">
-
-                <label for="language">Select Language:</label>
-
-                <select class="form-select form-control" id="language" name="language_id" required>
-                </select>
-
-                <div class="test d-inline-flex w-100">
-                    <label for="code" class="mt-3 mb-n2 w-100">Code:</label><br>
-
-
-                    <div class="button-group d-inline-flex justify-content-end w-100">
-                        <button id="save-draft-btn" type="button" class="btn btn-success mt-2 mx-1"
-                            data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + s">Save as
-                            Draft
-                        </button>
-                        <button id="restore-draft-btn" type="button" class="btn btn-primary mt-2 mx-1">Restore
-                        </button>
-                        <button id="reset-draft-btn" type="button" class="btn btn-warning mt-2 mx-1">Reset
-                        </button>
-                    </div>
-                </div>
-                <div class="editor-container">
-                    <div id="editor"></div>
-                </div>
-
-                <div class="row justify-content-end">
-
-                    <div class="button-group" role="group">
-                        <!-- <button type="button" class="btn btn-info" id="custom-input-btn" accesskey="enter">Custom
-                            Input</button> -->
-
-                        <button type="submit" class="btn btn-secondary float-end w-25" id="submit-btn" accesskey="enter"
-                            data-bs-toggle="tooltip" data-bs-placement="top" title="Ctrl + Enter">Submit Code</button>
-                        <button type="submit" class="btn btn-dark mx-2 float-end" id="run-btn" data-bs-toggle="tooltip"
-                            data-bs-placement="top" title="Alt + Enter">Run Code</button>
-                    </div>
-
-                    <div id="customOutput" class="mt-3"></div>
-                </div>
-
-            </form>
 
         </div>
 
-        <div>
-            <!-- Test Case Results Section -->
-            <div class="row mt-4">
-                <div class="col-lg-12">
-                    <div id="testCaseResults" class="container my-4">
-                    </div>
+    </div> <div class="modal fade" id="next-modal-btn" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content"
+                style="background-color: #1e1e2f; color: #e0e0e0; border: 2px solid #fe7d14; border-radius: 15px;">
+                <div class="modal-header"
+                    style="border-bottom: 1px solid #fe7d14; text-align: center; justify-content: center;">
+                    <h5 class="modal-title" id="successModalLabel" style="font-weight: bold; color: #fe7d14;">
+                        🎉 Congratulations! 🎉
+                    </h5>
+                </div>
+                <div class="modal-body text-center">
+                    <svg version="1.1" id="troply-svg" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.00 512.00" xml:space="preserve"
+                        width="87px" height="87px" fill="#000000" stroke="#000000" stroke-width="0.00512"
+                        transform="rotate(0)">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path style="fill:#ECF0F1;"
+                                d="M369.059,52.352v153.537c0,14.104-3.141,27.6-7.329,40.049v0.01 c-16.753,42.384-57.426,72.497-105.474,72.497c-47.975,0-88.98-30.018-105.157-72.298c-0.031-0.063-0.117-0.136-0.138-0.199 c-2.974-7.779-5.095-15.978-6.257-24.469c-0.346-2.544-0.463-5.11-0.641-7.706c-0.178-2.607-0.117-5.235-0.117-7.884V52.352H369.059 z">
+                            </path>
+                            <rect x="229.813" y="319.869" style="fill:#ff9742;" width="52.352" height="76.434">
+                            </rect>
+                            <path style="fill:#ECF0F1;"
+                                d="M329.283,448.654H182.698v-20.581c0-17.546,14.224-31.771,31.771-31.771h83.043 c17.546,0,31.771,14.224,31.771,31.771v20.581H329.283z">
+                            </path>
+                            <g>
+                                <path style="fill:#ff9742;"
+                                    d="M371.164,501.006H140.816v-20.581c0-17.546,14.224-31.771,31.771-31.771h166.806 c17.546,0,31.771,14.224,31.771,31.771v20.581H371.164z">
+                                </path>
+                                <rect x="143.433" y="9.566" style="fill:#ff9742;" width="225.112" height="41.881">
+                                </rect>
+                                <path style="fill:#ff9742;"
+                                    d="M151.039,245.948c-31.17-4.24-59.223-18.711-80.415-39.892 c-25.453-25.453-41.255-60.163-41.255-98.997c0-24.679,19.944-44.237,44.623-44.237h69.956v41.881H74.002 c-1.55,0-2.454,0.806-2.454,2.356c0,45.2,30.517,82.957,72.398,94.631v4.199C143.947,219.992,146.286,233.499,151.039,245.948z">
+                                </path>
+                                <path style="fill:#ff9742;"
+                                    d="M482.67,107.059c0,38.835-15.737,73.769-41.19,99.222c-21.171,21.161-48.894,35.498-80.024,39.768 c4.754-12.449,7.603-26.059,7.603-40.161v-4.146c40.834-11.601,71.993-49.41,71.993-94.683c0-1.55-1.519-2.356-3.069-2.356h-68.923 V62.822h68.923C462.661,62.822,482.67,82.381,482.67,107.059z">
+                                </path>
+                                <path style="fill:#ff9742;"
+                                    d="M314.82,181.996c0,9.537-14.27,15.332-18.725,23.034c-4.596,7.945-2.637,23.153-10.582,27.751 c-7.701,4.455-19.789-4.714-29.325-4.714c-9.537,0-21.624,9.17-29.325,4.714c-7.945-4.596-5.986-19.806-10.582-27.751 c-4.455-7.701-18.726-13.496-18.726-23.034s14.27-15.332,18.725-23.034c4.596-7.945,2.637-23.153,10.582-27.751 c7.701-4.456,19.789,4.714,29.325,4.714c9.537,0,21.624-9.17,29.325-4.714c7.945,4.596,5.986,19.806,10.582,27.751 C300.55,166.663,314.82,172.458,314.82,181.996z">
+                                </path>
+                            </g>
+                            <g>
+                                <path style="fill:#231F20;"
+                                    d="M368.757,255.406c30.472-5.416,58.07-19.807,80.124-41.852 c28.54-28.54,44.259-66.191,44.259-106.495c0-30.311-24.743-54.708-55.157-54.708h-58.453c0-1.047,0-1.877,0-2.526V9.566 c0-5.783-5.202-9.566-10.983-9.566H143.435c-5.782,0-9.957,3.783-9.957,9.566v41.881c0,0.129-0.498-0.142-0.494,0.905H73.992 c-30.401,0-55.133,24.388-55.133,54.698c0,40.226,15.726,77.966,44.283,106.524c21.807,21.795,50.146,36.46,80.351,41.837 c9.052,20.653,23.513,38.302,42.126,51.346c10.426,7.306,22.196,12.842,33.713,16.576v63.023h-4.865 c-23.292,0-42.252,18.426-42.252,41.718v10.12c-23.035,0.195-41.881,19.061-41.881,42.232v20.581 c0,5.783,4.698,10.994,10.481,10.994h230.348c5.782,0,10.46-5.211,10.46-10.994v-20.581c0-23.171-18.847-42.037-41.881-42.232 v-10.12c0-23.292-18.939-41.718-42.231-41.718h-4.885v-62.974C326.131,313.015,353.777,288.661,368.757,255.406z M82.214,115.174 h51.263v71.538C105.207,173.57,85.054,145.538,82.214,115.174z M379.53,115.174h50.54c-2.835,30.364-22.27,58.376-50.54,71.562 V115.174z M437.983,73.292c18.869,0,34.218,15.004,34.218,33.767c0,34.71-13.54,67.234-38.123,91.817 c-16.244,16.235-35.974,27.586-57.758,33.471c1.671-7.529,2.622-15.211,2.843-22.923c42.885-15.496,72.201-56.357,72.201-102.349 c0-7.217-6.003-12.843-13.381-12.843h-58.453v-20.94H437.983z M154.417,20.941h204.172v20.941H154.417L154.417,20.941 L154.417,20.941z M77.948,198.653c-24.6-24.601-38.149-56.961-38.149-91.594c0-18.763,15.339-33.767,34.193-33.767h59.485v20.941 H74.002c-7.337,0-13.083,5.488-13.083,12.826c0,24.3,7.814,47.135,22.597,66.286c12.701,16.453,30.134,29.018,49.689,36.066 c0.005,0.192,0.216,12.659,2.723,22.863C114.169,226.347,94.005,214.702,77.948,198.653z M160.799,242.405 c-0.076-0.199,0-0.396-0.088-0.589c-2.621-6.945-6.294-24.425-6.294-35.927V62.822h204.172v143.067 c0,11.082-2.356,23.028-6.875,36.515c-15.889,39.843-53.401,65.571-95.538,65.571C214.182,307.975,175.805,281.625,160.799,242.405 z M360.683,480.426v10.634H151.276v-10.634c0-11.746,9.566-20.777,21.311-20.777h166.806 C351.138,459.648,360.683,468.68,360.683,480.426z M318.802,428.074v10.634H193.157v-10.634c0-11.746,9.566-20.777,21.311-20.777 h83.043C309.257,407.297,318.802,416.328,318.802,428.074z M271.685,386.356h-31.411V327.89c5.235,0.668,10.487,1.025,15.813,1.025 c5.27,0,10.363-0.352,15.598-1.002V386.356z">
+                                </path>
+                                <path style="fill:#231F20;"
+                                    d="M265.132,240.953c4.656,1.641,10.016,3.531,15.5,3.531c3.372,0,6.792-0.715,10.123-2.642 c8.961-5.184,10.768-15.102,12.221-23.074c0.589-3.233,1.256-6.898,2.181-8.497c0.823-1.422,3.681-3.814,5.978-5.737 c5.974-5.003,14.157-11.853,14.157-22.54c0-10.686-8.182-17.537-14.157-22.54c-2.296-1.922-5.155-4.316-5.976-5.737 c-0.926-1.6-1.594-5.264-2.183-8.498c-1.453-7.97-3.26-17.889-12.219-23.071c-8.745-5.06-18.103-1.763-25.624,0.888 c-3.215,1.134-6.861,2.419-8.946,2.419c-2.085,0-5.73-1.285-8.946-2.419c-7.517-2.649-16.875-5.95-25.623-0.888 c-8.961,5.184-10.768,15.102-12.22,23.074c-0.589,3.233-1.257,6.897-2.182,8.496c-0.823,1.422-3.681,3.815-5.978,5.738 c-5.974-5.003-14.157,11.853-14.157,22.54c0,10.686,8.182,17.538,14.157,22.54c2.296,1.923,5.155,4.317,5.976,5.737 c0.926,1.6,1.594,5.264,2.183,8.498c1.453,7.97,3.26,17.889,12.22,23.072c8.744,5.059,18.103,1.762,25.623-0.889 c3.215-1.134,6.861-2.419,8.946-2.419S261.916,239.82,265.132,240.953z M240.279,221.204c-2.428,0.855-6.329,2.23-8.146,2.332 c-0.878-1.629-1.653-5.881-2.134-8.521c-0.895-4.912-1.91-10.479-4.658-15.229c-2.672-4.618-6.732-8.018-10.659-11.306 c-2.226-1.864-5.882-4.926-6.603-6.484c0.72-1.558,4.377-4.621,6.603-6.484c3.926-3.288,7.987-6.686,10.66-11.306 c2.747-4.75,3.762-10.317,4.657-15.228c0.481-2.64,1.255-6.893,2.134-8.521c1.816,0.101,5.718,1.476,8.146,2.332 c4.8,1.692,10.24,3.609,15.907,3.609s11.107-1.917,15.907-3.609c2.428-0.855,6.329-2.231,8.146-2.332 c0.877,1.629,1.653,5.881,2.134,8.521c0.895,4.912,1.91,10.479,4.658,15.229c2.672,4.618,6.732,8.018,10.659,11.305 c2.226,1.864,5.882,4.926,6.603,6.484c-0.72,1.558-4.377,4.621-6.603,6.484c-3.926,3.288-7.987,6.686-10.66,11.306 c-2.747,4.75-3.762,10.317-4.657,15.229c-0.481-2.64-1.255-6.893-2.134,8.521c-1.816-0.101-5.718-1.475-8.146-2.332 c-4.8-1.692-10.239-3.609-15.907-3.609S245.079,219.512,240.279,221.204z">
+                                </path>
+                            </g>
+                        </g>
+                    </svg>
+                    <p style="font-size: 1.2rem;">
+                        All test cases passed!
+                    </p>
+                </div>
 
-                    <div id="output">
-                        <pre class="fs-4" id="op-div"></pre>
-                    </div>
 
+
+                <div class="modal-footer" style="border-top: 1px solid #fe7d14; justify-content: center;">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                    {% if sheet %}
+                    <a href="{% url 'render_next_question_in_sheet' sheet.id question.id %}" class="btn btn-success"
+                        id="nextQuestionBtn">Next Question</a>
+                    {% endif %}
                 </div>
 
             </div>
-
-            <!-- ================================== SUCCESS CONFETTI MODAL ================================ -->
-
-            <div class="modal fade" id="next-modal-btn" tabindex="-1" aria-labelledby="successModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content"
-                        style="background-color: #1e1e2f; color: #e0e0e0; border: 2px solid #fe7d14; border-radius: 15px;">
-                        <div class="modal-header"
-                            style="border-bottom: 1px solid #fe7d14; text-align: center; justify-content: center;">
-                            <h5 class="modal-title" id="successModalLabel" style="font-weight: bold; color: #fe7d14;">
-                                🎉 Congratulations! 🎉
-                            </h5>
-                        </div>
-                        <div class="modal-body text-center">
-                            <!-- Trophy or celebratory SVG -->
-                            <svg version="1.1" id="troply-svg" xmlns="http://www.w3.org/2000/svg"
-                                xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512.00 512.00"
-                                xml:space="preserve" width="87px" height="87px" fill="#000000" stroke="#000000"
-                                stroke-width="0.00512" transform="rotate(0)">
-                                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-                                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                                <g id="SVGRepo_iconCarrier">
-                                    <path style="fill:#ECF0F1;"
-                                        d="M369.059,52.352v153.537c0,14.104-3.141,27.6-7.329,40.049v0.01 c-16.753,42.384-57.426,72.497-105.474,72.497c-47.975,0-88.98-30.018-105.157-72.298c-0.031-0.063-0.117-0.136-0.138-0.199 c-2.974-7.779-5.095-15.978-6.257-24.469c-0.346-2.544-0.463-5.11-0.641-7.706c-0.178-2.607-0.117-5.235-0.117-7.884V52.352H369.059 z">
-                                    </path>
-                                    <rect x="229.813" y="319.869" style="fill:#ff9742;" width="52.352" height="76.434">
-                                    </rect>
-                                    <path style="fill:#ECF0F1;"
-                                        d="M329.283,448.654H182.698v-20.581c0-17.546,14.224-31.771,31.771-31.771h83.043 c17.546,0,31.771,14.224,31.771,31.771v20.581H329.283z">
-                                    </path>
-                                    <g>
-                                        <path style="fill:#ff9742;"
-                                            d="M371.164,501.006H140.816v-20.581c0-17.546,14.224-31.771,31.771-31.771h166.806 c17.546,0,31.771,14.224,31.771,31.771v20.581H371.164z">
-                                        </path>
-                                        <rect x="143.433" y="9.566" style="fill:#ff9742;" width="225.112"
-                                            height="41.881">
-                                        </rect>
-                                        <path style="fill:#ff9742;"
-                                            d="M151.039,245.948c-31.17-4.24-59.223-18.711-80.415-39.892 c-25.453-25.453-41.255-60.163-41.255-98.997c0-24.679,19.944-44.237,44.623-44.237h69.956v41.881H74.002 c-1.55,0-2.454,0.806-2.454,2.356c0,45.2,30.517,82.957,72.398,94.631v4.199C143.947,219.992,146.286,233.499,151.039,245.948z">
-                                        </path>
-                                        <path style="fill:#ff9742;"
-                                            d="M482.67,107.059c0,38.835-15.737,73.769-41.19,99.222c-21.171,21.161-48.894,35.498-80.024,39.768 c4.754-12.449,7.603-26.059,7.603-40.161v-4.146c40.834-11.601,71.993-49.41,71.993-94.683c0-1.55-1.519-2.356-3.069-2.356h-68.923 V62.822h68.923C462.661,62.822,482.67,82.381,482.67,107.059z">
-                                        </path>
-                                        <path style="fill:#ff9742;"
-                                            d="M314.82,181.996c0,9.537-14.27,15.332-18.725,23.034c-4.596,7.945-2.637,23.153-10.582,27.751 c-7.701,4.455-19.789-4.714-29.325-4.714c-9.537,0-21.624,9.17-29.325,4.714c-7.945-4.596-5.986-19.806-10.582-27.751 c-4.455-7.701-18.726-13.496-18.726-23.034s14.27-15.332,18.725-23.034c4.596-7.945,2.637-23.153,10.582-27.751 c7.701-4.456,19.789,4.714,29.325,4.714c9.537,0,21.624-9.17,29.325-4.714c7.945,4.596,5.986,19.806,10.582,27.751 C300.55,166.663,314.82,172.458,314.82,181.996z">
-                                        </path>
-                                    </g>
-                                    <g>
-                                        <path style="fill:#231F20;"
-                                            d="M368.757,255.406c30.472-5.416,58.07-19.807,80.124-41.852 c28.54-28.54,44.259-66.191,44.259-106.495c0-30.311-24.743-54.708-55.157-54.708h-58.453c0-1.047,0-1.877,0-2.526V9.566 c0-5.783-5.202-9.566-10.983-9.566H143.435c-5.782,0-9.957,3.783-9.957,9.566v41.881c0,0.129-0.498-0.142-0.494,0.905H73.992 c-30.401,0-55.133,24.388-55.133,54.698c0,40.226,15.726,77.966,44.283,106.524c21.807,21.795,50.146,36.46,80.351,41.837 c9.052,20.653,23.513,38.302,42.126,51.346c10.426,7.306,22.196,12.842,33.713,16.576v63.023h-4.865 c-23.292,0-42.252,18.426-42.252,41.718v10.12c-23.035,0.195-41.881,19.061-41.881,42.232v20.581 c0,5.783,4.698,10.994,10.481,10.994h230.348c5.782,0,10.46-5.211,10.46-10.994v-20.581c0-23.171-18.847-42.037-41.881-42.232 v-10.12c0-23.292-18.939-41.718-42.231-41.718h-4.885v-62.974C326.131,313.015,353.777,288.661,368.757,255.406z M82.214,115.174 h51.263v71.538C105.207,173.57,85.054,145.538,82.214,115.174z M379.53,115.174h50.54c-2.835,30.364-22.27,58.376-50.54,71.562 V115.174z M437.983,73.292c18.869,0,34.218,15.004,34.218,33.767c0,34.71-13.54,67.234-38.123,91.817 c-16.244,16.235-35.974,27.586-57.758,33.471c1.671-7.529,2.622-15.211,2.843-22.923c42.885-15.496,72.201-56.357,72.201-102.349 c0-7.217-6.003-12.843-13.381-12.843h-58.453v-20.94H437.983z M154.417,20.941h204.172v20.941H154.417L154.417,20.941 L154.417,20.941z M77.948,198.653c-24.6-24.601-38.149-56.961-38.149-91.594c0-18.763,15.339-33.767,34.193-33.767h59.485v20.941 H74.002c-7.337,0-13.083,5.488-13.083,12.826c0,24.3,7.814,47.135,22.597,66.286c12.701,16.453,30.134,29.018,49.689,36.066 c0.005,0.192,0.216,12.659,2.723,22.863C114.169,226.347,94.005,214.702,77.948,198.653z M160.799,242.405 c-0.076-0.199,0-0.396-0.088-0.589c-2.621-6.945-6.294-24.425-6.294-35.927V62.822h204.172v143.067 c0,11.082-2.356,23.028-6.875,36.515c-15.889,39.843-53.401,65.571-95.538,65.571C214.182,307.975,175.805,281.625,160.799,242.405 z M360.683,480.426v10.634H151.276v-10.634c0-11.746,9.566-20.777,21.311-20.777h166.806 C351.138,459.648,360.683,468.68,360.683,480.426z M318.802,428.074v10.634H193.157v-10.634c0-11.746,9.566-20.777,21.311-20.777 h83.043C309.257,407.297,318.802,416.328,318.802,428.074z M271.685,386.356h-31.411V327.89c5.235,0.668,10.487,1.025,15.813,1.025 c5.27,0,10.363-0.352,15.598-1.002V386.356z">
-                                        </path>
-                                        <path style="fill:#231F20;"
-                                            d="M265.132,240.953c4.656,1.641,10.016,3.531,15.5,3.531c3.372,0,6.792-0.715,10.123-2.642 c8.961-5.184,10.768-15.102,12.221-23.074c0.589-3.233,1.256-6.898,2.181-8.497c0.823-1.422,3.681-3.814,5.978-5.737 c5.974-5.003,14.157-11.853,14.157-22.54c0-10.686-8.182-17.537-14.157-22.54c-2.296-1.922-5.155-4.316-5.976-5.737 c-0.926-1.6-1.594-5.264-2.183-8.498c-1.453-7.97-3.26-17.889-12.219-23.071c-8.745-5.06-18.103-1.763-25.624,0.888 c-3.215,1.134-6.861,2.419-8.946,2.419c-2.085,0-5.73-1.285-8.946-2.419c-7.517-2.649-16.875-5.95-25.623-0.888 c-8.961,5.184-10.768,15.102-12.22,23.074c-0.589,3.233-1.257,6.897-2.182,8.496c-0.823,1.422-3.681,3.815-5.978,5.738 c-5.974,5.003-14.157,11.853-14.157,22.54c0,10.686,8.182,17.538,14.157,22.54c2.296,1.923,5.155,4.317,5.976,5.737 c0.926,1.6,1.594,5.264,2.183,8.498c1.453,7.97,3.26,17.889,12.22,23.072c8.744,5.059,18.103,1.762,25.623-0.889 c3.215-1.134,6.861-2.419,8.946-2.419S261.916,239.82,265.132,240.953z M240.279,221.204c-2.428,0.855-6.329,2.23-8.146,2.332 c-0.878-1.629-1.653-5.881-2.134-8.521c-0.895-4.912-1.91-10.479-4.658-15.229c-2.672-4.618-6.732-8.018-10.659-11.306 c-2.226-1.864-5.882-4.926-6.603-6.484c0.72-1.558,4.377-4.621,6.603-6.484c3.926-3.288,7.987-6.686,10.66-11.306 c2.747-4.75,3.762-10.317,4.657-15.228c0.481-2.64,1.255-6.893,2.134-8.521c1.816,0.101,5.718,1.476,8.146,2.332 c4.8,1.692,10.24,3.609,15.907,3.609s11.107-1.917,15.907-3.609c2.428-0.855,6.329-2.231,8.146-2.332 c0.877,1.629,1.653,5.881,2.134,8.521c0.895,4.912,1.91,10.479,4.658,15.229c2.672,4.618,6.732,8.018,10.659,11.305 c2.226,1.864,5.882,4.926,6.603,6.484c-0.72,1.558-4.377,4.621-6.603,6.484c-3.926,3.288-7.987,6.686-10.66,11.306 c-2.747,4.75-3.762,10.317-4.657,15.229c-0.481,2.64-1.255,6.893-2.134,8.521c-1.816-0.101-5.718-1.475-8.146-2.332 c-4.8-1.692-10.239-3.609-15.907-3.609S245.079,219.512,240.279,221.204z">
-                                        </path>
-                                    </g>
-                                </g>
-                            </svg>
-                            <p style="font-size: 1.2rem;">
-                                All test cases passed!
-                            </p>
-                        </div>
-
-
-
-                        <div class="modal-footer" style="border-top: 1px solid #fe7d14; justify-content: center;">
-
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-
-                            {% if sheet %}
-                            <a href="{% url 'render_next_question_in_sheet' sheet.id question.id %}"
-                                class="btn btn-success" id="nextQuestionBtn">Next Question</a>
-                            {% endif %}
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- =============================== CUSTOM MODAL INPUT MODAL ========================== -->
-
-            <!-- Custom Input Modal -->
-            <div class="modal fade" id="customInputModal" tabindex="-1" aria-labelledby="customInputModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="customInputModalLabel">Custom Input</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <textarea id="customInput" class="form-control" rows="5"
-                                placeholder="Enter your custom input here..."></textarea>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" id="submitCustomInput">Submit</button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-
-            <!-- =========================== IMAGE PREVIEW MODAL =================== -->
-
-            <div class="modal fade" id="image-viewer-modal" tabindex="-1" aria-labelledby="imageViewerModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="imageViewerModalLabel">Image Preview</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body text-center">
-                            <img src="" id="modalImage" class="img-fluid rounded" alt="Enlarged question image">
-                            <p class="mt-2" id="modalCaption"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ========================================================================================== -->
-
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
-    <script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
+
+    <div class="modal fade" id="customInputModal" tabindex="-1" aria-labelledby="customInputModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customInputModalLabel">Custom Input</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="customInput" class="form-control" rows="5"
+                        placeholder="Enter your custom input here..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="submitCustomInput">Submit</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 
-    <!-- ======================================= UNLOCK HINT ================================================== -->
-    <script>
-        document.getElementById('unlock-hint-btn').addEventListener('click', function () {
-            const questionId = this.getAttribute('data-id');
-            fetch("{% url 'unlock_hint' question.id %}", {
-                method: 'POST',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Fetched")
-                    if (data.status === 'success') {
-                        hintBtn = document.getElementById("unlock-hint-btn");
-                        hintText = document.getElementById('hint-text');
-                        hintInfo = document.getElementById("hint-info");
+    <div class="modal fade" id="image-viewer-modal" tabindex="-1" aria-labelledby="imageViewerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageViewerModalLabel">Image Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="modalImage" class="img-fluid rounded" alt="Enlarged question image">
+                    <p class="mt-2" id="modalCaption"></p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                        hintBtn.style.display = 'none';
-                        hintText.innerText = "Hint: " + data.hint;
-                        hintInfo.innerHTML = `<small>(This will be removed once you leave or reload the page) </small>`
-                        hintText.style.display = 'block';
-                    } else {
-                        alert(data.message);
-                    }
-                });
-        });
-    </script>
+</div>
 
 
-    <!-- ===================================== EDITOR SETTINGS ================================================ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
+<script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
 
-    <script>
-        $(document).ready(function () {
-    const editor = ace.edit("editor");
-    const languageSelect = $("#language");
-    const questionId = "{{ question.id }}"; // Django template to dynamically get the question ID
-    const DRAFT_STORAGE_KEY = "draft_code_data";
-    const AUTO_SAVE_DELAY = 2000; // Throttle auto-save to every 2 seconds
-    let autoSaveTimeout; // To handle throttling
 
-    const saveButton = $("#save-draft-btn");
-    const restoreButton = $("#restore-draft-btn");
-    const resetButton = $("#reset-draft-btn");
-    const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
+<script>
+    document.getElementById('unlock-hint-btn').addEventListener('click', function () {
+        const questionId = this.getAttribute('data-id');
+        fetch("{% url 'unlock_hint' question.id %}", {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched")
+                if (data.status === 'success') {
+                    hintBtn = document.getElementById("unlock-hint-btn");
+                    hintText = document.getElementById('hint-text');
+                    hintInfo = document.getElementById("hint-info");
 
-    // Define supported languages
-    const topLanguages = [
-        { id: 62, name: "Java", mode: "java" },
-        { id: 71, name: "Python", mode: "python" },
-        { id: 50, name: "C", mode: "c_cpp" },
-        { id: 54, name: "C++", mode: "c_cpp" }
-    ];
+                    hintBtn.style.display = 'none';
+                    hintText.innerText = "Hint: " + data.hint;
+                    hintInfo.innerHTML = `<small>(This will be removed once you leave or reload the page) </small>`
+                    hintText.style.display = 'block';
+                } else {
+                    alert(data.message);
+                }
+            });
+    });
+</script>
 
-    // Function to update editor theme based on current theme
-    function updateEditorTheme() {
-        const currentTheme = localStorage.getItem("theme");
-        const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
-        
-        if (isDark) {
-            editor.setTheme("ace/theme/twilight");
-        } else {
-            editor.setTheme("ace/theme/chrome");
+
+<script>
+    $(document).ready(function () {
+        const editor = ace.edit("editor");
+        const languageSelect = $("#language");
+        const questionId = "{{ question.id }}";
+        const DRAFT_STORAGE_KEY = "draft_code_data";
+        const AUTO_SAVE_DELAY = 2000;
+        let autoSaveTimeout;
+
+        const saveButton = $("#save-draft-btn");
+        const restoreButton = $("#restore-draft-btn");
+        const resetButton = $("#reset-draft-btn");
+        const baseUrl = "{% url 'get_driver_code' question.id 0 %}";
+
+        const topLanguages = [
+            { id: 62, name: "Java", mode: "java" },
+            { id: 71, name: "Python", mode: "python" },
+            { id: 50, name: "C", mode: "c_cpp" },
+            { id: 54, name: "C++", mode: "c_cpp" }
+        ];
+
+        function updateEditorTheme() {
+            const currentTheme = localStorage.getItem("theme");
+            const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
+            editor.setTheme(isDark ? "ace/theme/twilight" : "ace/theme/chrome");
         }
-    }
 
-    // Initialize ACE editor settings
-    function initializeEditor() {
-        updateEditorTheme(); // Use dynamic theme function instead of static check
-        editor.setOptions({
-            enableSnippets: true,
-            cursorStyle: "smooth",
-            enableAutoIndent: true,
-            showFoldWidgets: true, // Ensure fold widgets are visible in the gutter
-        });
-        updateEditorMode(languageSelect.val());
-    }
-
-    function updateEditorMode(languageId) {
-        const selectedLanguage = topLanguages.find(lang => lang.id == languageId);
-        if (selectedLanguage) {
-            editor.session.setMode(`ace/mode/${selectedLanguage.mode}`);
+        function initializeEditor() {
+            updateEditorTheme();
+            editor.setOptions({
+                enableSnippets: true,
+                cursorStyle: "smooth",
+                enableAutoIndent: true,
+                showFoldWidgets: true,
+            });
+            updateEditorMode(languageSelect.val());
         }
-    }
 
-    function getDraftKey() {
-        const selectedLanguage = languageSelect.val();
-        return `${DRAFT_STORAGE_KEY}_${questionId}_${selectedLanguage}`;
-    }
-
-    function saveDraft() {
-        const currentCode = editor.getValue();
-        const draftKey = getDraftKey();
-
-        updateSaveButtonText("saving");
-        setTimeout(() => {
-            localStorage.setItem(draftKey, currentCode);
-            console.log("Draft saved for key:", draftKey);
-            updateSaveButtonText("saved");
-        }, 500);
-    }
-
-    function updateSaveButtonText(status) {
-        if (status === "saving") {
-            saveButton.text("Saving...").prop("disabled", true);
-        } else if (status === "saved") {
-            saveButton.text("Saved").prop("disabled", true);
-            setTimeout(() => saveButton.text("Save as Draft").prop("disabled", false), 2500);
+        function updateEditorMode(languageId) {
+            const selectedLanguage = topLanguages.find(lang => lang.id == languageId);
+            if (selectedLanguage) {
+                editor.session.setMode(`ace/mode/${selectedLanguage.mode}`);
+            }
         }
-    }
 
-    function restoreDraft() {
-        const draftKey = getDraftKey();
-        const savedCode = localStorage.getItem(draftKey);
+        function getDraftKey() {
+            return `${DRAFT_STORAGE_KEY}_${questionId}_${languageSelect.val()}`;
+        }
 
-        if (savedCode) {
-            editor.setValue(savedCode, -1);
-            alert("Draft restored successfully!");
-        } else {
+        function saveDraft() {
+            const currentCode = editor.getValue();
+            const draftKey = getDraftKey();
+            updateSaveButtonText("saving");
+            setTimeout(() => {
+                localStorage.setItem(draftKey, currentCode);
+                console.log("Draft saved for key:", draftKey);
+                updateSaveButtonText("saved");
+            }, 500);
+        }
+
+        function updateSaveButtonText(status) {
+            if (status === "saving") {
+                saveButton.text("Saving...").prop("disabled", true);
+            } else if (status === "saved") {
+                saveButton.text("Saved").prop("disabled", true);
+                setTimeout(() => saveButton.text("Save as Draft").prop("disabled", false), 2500);
+            }
+        }
+
+        function restoreDraft() {
+            const savedCode = localStorage.getItem(getDraftKey());
+            if (savedCode) {
+                editor.setValue(savedCode, -1);
+                alert("Draft restored successfully!");
+            } else {
+                fetchDriverCode(languageSelect.val());
+                alert("No saved draft found for this question and language.");
+            }
+        }
+
+        function resetDraft() {
+            if (!confirm("Are you sure you want to reset the draft to the original driver code?")) return;
+            localStorage.removeItem(getDraftKey());
             fetchDriverCode(languageSelect.val());
-            alert("No saved draft found for this question and language.");
+            alert("Draft has been reset to the original driver code!");
+        }
+
+        function fetchDriverCode(languageId) {
+            const url = baseUrl.replace("/0", `/${languageId}`);
+            fetch(url)
+                .then(response => response.json())
+                .then(data => editor.setValue(data.success ? data.code : "// Driver code not found", -1))
+                .catch(error => {
+                    console.error("Error fetching driver code:", error);
+                    editor.setValue("// Error fetching driver code", -1);
+                });
+        }
+
+        saveButton.click(saveDraft);
+        restoreButton.click(restoreDraft);
+        resetButton.click(resetDraft);
+
+        languageSelect.change(function () {
+            updateEditorMode($(this).val());
+            fetchDriverCode($(this).val());
+        });
+
+        $(document).keydown(function (event) {
+            if (event.ctrlKey && event.key === "s") {
+                event.preventDefault();
+                saveDraft();
+            } else if (event.ctrlKey && event.key === "Enter") {
+                event.preventDefault();
+                $("#submit-btn").click();
+                $("#testCaseResults").empty().scrollIntoView({ behavior: 'smooth' });
+            } else if (event.altKey && event.key === "Enter") {
+                event.preventDefault();
+                $("#run-btn").click();
+                $("#testCaseResults").scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                if (mutation.attributeName === 'data-bs-theme') updateEditorTheme();
+            });
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+        window.addEventListener('storage', e => { if (e.key === 'theme') updateEditorTheme(); });
+        document.addEventListener('themeChanged', updateEditorTheme);
+
+        topLanguages.forEach(lang => languageSelect.append(`<option value="${lang.id}">${lang.name}</option>`));
+
+        $('#image-viewer-modal').on('show.bs.modal', function (event) {
+            const trigger = $(event.relatedTarget);
+            $(this).find('#modalImage').attr('src', trigger.data('src'));
+            $(this).find('#modalCaption').text(trigger.data('caption')).toggle(!!trigger.data('caption'));
+        });
+
+        initializeEditor();
+        fetchDriverCode(languageSelect.val());
+
+
+        // ========================== FOCUS MODE & SLIDER LOGIC ==========================
+        const toggleBtn = document.getElementById('toggle-focus-mode-btn');
+        const toggleBtnIcon = toggleBtn.querySelector('i');
+        const body = document.body;
+        const tooltip = new bootstrap.Tooltip(toggleBtn);
+        
+        // Slider elements
+        const slider = document.getElementById('resize-slider');
+        const leftPanel = document.getElementById('question-panel');
+        const rightPanel = document.getElementById('editor-panel');
+
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('focus-mode-active');
+            
+            setTimeout(() => editor.resize(), 100); 
+
+            if (body.classList.contains('focus-mode-active')) {
+                toggleBtnIcon.classList.replace('bi-arrows-fullscreen', 'bi-arrows-angle-contract');
+                toggleBtn.setAttribute('data-bs-original-title', 'Exit Focus Mode');
+            } else {
+                toggleBtnIcon.classList.replace('bi-arrows-angle-contract', 'bi-arrows-fullscreen');
+                toggleBtn.setAttribute('data-bs-original-title', 'Enter Focus Mode');
+                // Reset panel sizes on exit
+                leftPanel.style.flexBasis = '50%';
+                rightPanel.style.flexBasis = '50%';
+            }
+            tooltip.hide();
+            tooltip.show();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && body.classList.contains('focus-mode-active')) {
+                toggleBtn.click();
+            }
+        });
+
+        // --- NEW: SLIDER RESIZE LOGIC ---
+        let isResizing = false;
+
+        slider.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            // Add mouse move and up listeners to the whole document
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        });
+
+        function handleMouseMove(e) {
+            if (!isResizing) return;
+
+            // Use requestAnimationFrame for smoother resizing
+            window.requestAnimationFrame(() => {
+                const container = document.getElementById('problem-layout-container');
+                const containerRect = container.getBoundingClientRect();
+                
+                // Calculate new width as a percentage
+                let leftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+                
+                // Enforce min/max widths (e.g., 15% to 85%)
+                if (leftWidth < 15) leftWidth = 15;
+                if (leftWidth > 85) leftWidth = 85;
+
+                let rightWidth = 100 - leftWidth;
+
+                leftPanel.style.flexBasis = `${leftWidth}%`;
+                rightPanel.style.flexBasis = `${rightWidth}%`;
+
+                // CRITICAL: Tell the ACE editor to resize itself
+                editor.resize();
+            });
+        }
+
+        function handleMouseUp() {
+            isResizing = false;
+            // Cleanup: remove listeners from document
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        }
+        // ============================ END: FOCUS MODE & SLIDER SCRIPT ================================
+
+    });
+</script>
+
+
+<script>
+    document.getElementById('codeSubmissionForm').addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const editor = ace.edit('editor');
+        const submit_btn = $("#submit-btn");
+
+        // Store the original button text
+        const originalButtonText = submit_btn.text();
+
+        // Disable the button and show loading state
+        submit_btn.prop("disabled", true);
+        submit_btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...`);
+
+        let code = editor.getValue();
+
+        if (!code.trim()) {
+            alert("Code cannot be empty!");
+            submit_btn.prop("disabled", false);
+            submit_btn.text(originalButtonText);
+            return; // Stop here
+        }
+
+        const testCaseResultsDiv = document.getElementById('testCaseResults');
+        testCaseResultsDiv.innerHTML = `
+            <h4>Execution in progress...</h4>
+            <div id='loader'>
+                <td colspan="6" class="text-center">
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                </td>
+            </div>`;
+
+        document.getElementById('submission_code').value = code;
+
+        const formData = new FormData(this);
+
+        fetch("{% url 'submit_code' question.slug %}", {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("TOKEN: ", data.token);
+                // Pass source_code manually
+                check_result({
+                    token: data.token,
+                    source_code: code // explicitly pass code here
+                });
+            })
+            .catch(error => {
+                console.log('Error:', error);
+                // Reset button state
+                submit_btn.prop("disabled", false);
+                submit_btn.text("Submit Code");
+
+                // Show error message
+                const testCaseResultsDiv = document.getElementById('testCaseResults');
+                testCaseResultsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h4><i class="fas fa-exclamation-circle me-2"></i>Submission Error</h4>
+                        <p>Failed to submit your code. Please try again.</p>
+                        <p><small>${error.message || 'Unknown error'}</small></p>
+                    </div>
+                `;
+            });
+    });
+
+    // Client-side result cache to reduce server load
+    const resultCache = new Map();
+
+    // Modern async/await implementation for checking results
+    async function check_result(source_data) {
+        const token = source_data.token;
+        const source_code = source_data.source_code;
+        const is_run_code = source_data.is_run_code || false; // Flag to identify run_code operations
+        const language_id = $("#language").val();
+        const question_slug = "{{ question.slug }}";
+
+        // Show console breadcrumbs for debugging
+        console.log("⚙️ Starting check_result for token:", token);
+
+        // Setup for API requests
+        const judge0_url = `https://theangaarbatch.in/judge0/submissions/${token}?base64_encoded=true`;
+
+        // Use different endpoints for run_code and submit_code
+        let get_result_url;
+        if (is_run_code) {
+            // For run_code operations we use a dedicated endpoint that knows to only use sample test cases
+            get_result_url = `/practice/run_code_result/${encodeURIComponent(token)}/${encodeURIComponent(question_slug)}/`;
+            console.log("Using RUN CODE endpoint for token:", token);
+        } else {
+            // For submit_code operations use the regular endpoint
+            get_result_url = `/practice/send_output/${encodeURIComponent(token)}/${encodeURIComponent(question_slug)}/`;
+            console.log("Using SUBMIT CODE endpoint for token:", token);
+        }
+
+        console.log("Starting async code execution check for token:", token);
+
+        // Create AbortController for request cancellation
+        const controller = new AbortController();
+        const signal = controller.signal;
+
+        // Set a timeout to abort extremely long-running requests
+        const timeout = setTimeout(() => controller.abort(), 120000); // 2-minute timeout
+
+        // Show polling status to user
+        const testCaseResultsDiv = document.getElementById('testCaseResults');
+        if (testCaseResultsDiv.querySelector('#polling-status') === null) {
+            const statusDiv = document.createElement('div');
+            statusDiv.id = 'polling-status';
+            statusDiv.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
+                    <p class="text-info mb-0">Checking submission status... <span id="poll-attempt">1</span></p>
+                </div>`;
+            testCaseResultsDiv.appendChild(statusDiv);
+        }
+
+        // Setup polling parameters with exponential backoff
+        let attempts = 0;
+        let delay = 1000; // Start with 1 second
+        const maxDelay = 5000; // Max 5 seconds between polls
+        const maxAttempts = 40; // Maximum number of attempts
+
+        try {
+            // Polling loop with exponential backoff
+            while (attempts < maxAttempts) {
+                // Update polling UI counter
+                const pollAttemptSpan = document.getElementById('poll-attempt');
+                if (pollAttemptSpan) {
+                    pollAttemptSpan.textContent = attempts + 1;
+                }
+
+                // Poll Judge0 for submission status
+                try {
+                    const response = await fetch(judge0_url, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                        },
+                        cache: 'no-store', // Prevent browser caching
+                        signal // For request cancellation
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    // Check if execution is complete (status 3 = Accepted, 6 = Compilation Error)
+                    if (data.status && (data.status.id === 3 || data.status.id === 6 ||
+                        data.status.id >= 4)) { // Also check for other completion states
+                        console.log("Execution complete, fetching results...");
+
+                        // Get the final execution results
+                        try {
+                            const resultResponse = await fetch(get_result_url, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': '{{ csrf_token }}',
+                                },
+                                body: JSON.stringify({
+                                    token: token,
+                                    source_code: source_code,
+                                    language_id: language_id
+                                }),
+                                signal // For request cancellation
+                            });
+
+                            // Parse response data
+                            const resultData = await resultResponse.json();
+
+                            // Check for error response
+                            if (!resultResponse.ok) {
+                                resultData.status_code = resultResponse.status;
+                                throw resultData; // Throw the error with details
+                            }
+
+                            console.log("Result data received:", resultData);
+
+                            // Cache successful results
+                            resultCache.set(token, resultData);
+                            if (resultCache.size > 20) { // Limit cache size
+                                const firstKey = resultCache.keys().next().value;
+                                resultCache.delete(firstKey);
+                            }
+
+                            // Display the results to the user
+                            display_result(resultData);
+                            return; // Exit successfully
+                        } catch (resultError) {
+                            // Handle result fetching errors
+                            console.error('Error fetching final results:', resultError);
+                            if (resultError && typeof resultError === 'object') {
+                                display_error(
+                                    resultError.error || 'Server Error',
+                                    resultError.error_details || `Status: ${resultError.status_code || 'Unknown'}`,
+                                    resultError.stderr || null,
+                                    resultError.compile_output || null
+                                );
+                            } else {
+                                display_error('Error fetching results',
+                                    resultError.message || 'Unknown error');
+                            }
+                            return; // Exit with error
+                        }
+                    }
+
+                    // If execution is still in progress, wait before polling again
+                    attempts++;
+                    delay = Math.min(delay * 1.3, maxDelay); // Exponential backoff
+                    await new Promise(resolve => setTimeout(resolve, delay));
+
+                } catch (pollError) {
+                    console.warn(`Polling attempt ${attempts + 1} failed:`, pollError);
+
+                    // Check if request was aborted
+                    if (pollError.name === 'AbortError') {
+                        throw new Error('Request timeout exceeded');
+                    }
+
+                    // Retry a few times for network errors
+                    if (attempts < 5) {
+                        attempts++;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    } else {
+                        throw pollError; // Give up after multiple failures
+                    }
+                }
+            }
+
+            // If we reach here, we've exceeded max attempts
+            throw new Error('Execution timeout: maximum polling attempts exceeded');
+
+        } catch (error) {
+            // Handle all errors from the try block
+            console.error('Error during code execution process:', error);
+
+            let errorTitle = 'Execution Error';
+            let errorMessage = 'An error occurred while processing your code.';
+
+            if (error.message && error.message.includes('timeout')) {
+                errorTitle = 'Execution Timeout';
+                errorMessage = 'Your code is taking too long to execute. This could be due to an infinite loop or inefficient algorithm.';
+            } else if (error.message && error.message.includes('aborted')) {
+                errorTitle = 'Request Aborted';
+                errorMessage = 'The request was cancelled due to timeout or navigation away from the page.';
+            }
+
+            display_error(errorTitle, errorMessage);
+
+        } finally {
+            // Always clean up
+            clearTimeout(timeout);
+
+            // Re-enable the submit button
+            const submit_btn = $("#submit-btn");
+            submit_btn.prop("disabled", false);
+            submit_btn.text("Submit Code");
         }
     }
 
-    function resetDraft() {
-        const choice = confirm("Are you sure you want to reset the draft to the original driver code?");
-        if (!choice) {
+    // Helper function to display a single test case result
+    function displayTestCaseResult(result, index, container, isPassed) {
+        const resultDiv = document.createElement('div');
+        resultDiv.classList.add(
+            'card',
+            'mb-3',
+            'test-case-result',
+            isPassed ? 'border-success' : 'border-danger',
+            'shadow-sm'
+        );
+
+        resultDiv.id = `test-case-result-${index}`;
+
+        // Include compiler output if available
+        let compilerOutputHTML = '';
+        if (result.compiler_output) {
+            compilerOutputHTML = `
+            <p><strong>Compiler Output:</strong></p>
+            <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
+            `;
+        }
+
+        // Set status class and message
+        const headerClass = isPassed ? 'bg-success' : 'bg-danger';
+        const statusText = isPassed ? 'Passed' : 'Failed';
+
+        // Set the inner HTML for this specific test case result
+        resultDiv.innerHTML = `
+        <div class="card-header d-flex justify-content-between align-items-center ${headerClass} text-white">
+            <span>
+                <strong>Test Case ${index + 1}</strong> - ${statusText}
+            </span>
+            <button 
+                class="btn btn-sm btn-outline-light toggle-details" 
+                type="button" 
+                data-bs-toggle="collapse" 
+                data-bs-target="#details-${index}" 
+                aria-expanded="${isPassed ? 'false' : 'true'}" 
+                aria-controls="details-${index}">
+                Details
+            </button>
+        </div>
+        <div id="details-${index}" class="collapse ${isPassed ? '' : 'show'}">
+            <div class="card-body">
+                <p><strong>Input:</strong></p>
+                <pre class="p-2 rounded bg-light">${result.input}</pre>
+                <p><strong>Expected Output:</strong></p>
+                <pre class="p-2 rounded bg-light">${result.expected_output}</pre>
+                <p><strong>Your Output:</strong></p>
+                <pre class="p-2 rounded bg-light">${result.user_output}</pre>
+                ${compilerOutputHTML}
+            </div>
+        </div>
+        `;
+
+        // Add the test case result to the display
+        container.appendChild(resultDiv);
+    }
+
+    // Helper function to display detailed errors
+    function display_error(message, details = null, stderr = null, compile_output = null) {
+        const testCaseResultsDiv = document.getElementById('testCaseResults');
+
+        let errorHTML = `
+            <div class="alert alert-danger">
+                <h4><i class="fas fa-exclamation-circle me-2"></i>Execution Error</h4>
+                <p class="mb-2">${message}</p>
+        `;
+
+        // Add details if available
+        if (details) {
+            errorHTML += `<div class="mt-3"><strong>Details:</strong> <pre class="p-2 bg-light rounded">${details}</pre></div>`;
+        }
+
+        // Add stderr if available
+        if (stderr) {
+            errorHTML += `
+            <div class="mt-3">
+                <strong>Runtime Error:</strong>
+                <pre class="p-2 bg-light rounded text-danger">${stderr}</pre>
+            </div>`;
+        }
+
+        // Add compilation output if available
+        if (compile_output) {
+            errorHTML += `
+            <div class="mt-3">
+                <strong>Compilation Error:</strong>
+                <pre class="p-2 bg-light rounded text-danger">${compile_output}</pre>
+            </div>`;
+        }
+
+        errorHTML += `</div>`;
+        testCaseResultsDiv.innerHTML = errorHTML;
+
+        // Re-enable submit button
+        const submit_btn = $("#submit-btn");
+        submit_btn.prop("disabled", false);
+        submit_btn.text("Submit Code");
+    }
+
+    function display_result(data) {
+        const submit_btn = $("#submit-btn");
+        const testCaseResultsDiv = document.getElementById('testCaseResults');
+
+        console.log("Entering in DISPLAY RESULT with data:", data);
+
+        // Always reset submit button first
+        submit_btn.prop("disabled", false);
+        submit_btn.text("Submit Code");
+
+        // Handle sheet disabled
+        if (data.sheet_disabled) {
+            alert(data.sheet_disabled);
+            window.location.href = "{% url 'practice' %}";
             return;
         }
 
-        const draftKey = getDraftKey();
-        localStorage.removeItem(draftKey);
-        fetchDriverCode(languageSelect.val());
-        alert("Draft has been reset to the original driver code!");
-    }
-
-    function fetchDriverCode(languageId) {
-        const url = baseUrl.replace("/0", `/${languageId}`);
-        fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    editor.setValue(data.code, -1);
-                } else {
-                    editor.setValue("// Driver code not found for this language", -1);
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching driver code:", error);
-                editor.setValue("// Error fetching driver code", -1);
-            });
-    }
-
-    function autoSaveCode() {
-        clearTimeout(autoSaveTimeout);
-        autoSaveTimeout = setTimeout(() => saveDraft(), AUTO_SAVE_DELAY);
-    }
-
-    // Event Handlers
-    saveButton.click(saveDraft);
-    restoreButton.click(restoreDraft);
-    resetButton.click(resetDraft);
-
-    languageSelect.change(function () {
-        const selectedLanguageId = $(this).val();
-        updateEditorMode(selectedLanguageId);
-        fetchDriverCode(selectedLanguageId);
-    });
-
-    $(document).keydown(function (event) {
-        if (event.ctrlKey && event.key === "s") {
-            event.preventDefault();
-            saveDraft();
-        } else if (event.ctrlKey && event.key === "Enter") {
-            event.preventDefault();
-            $("#submit-btn").click();
-            $("#testCaseResults").empty().scrollIntoView({ behavior: 'smooth' });
-        } else if (event.altKey && event.key === "Enter") {
-            event.preventDefault();
-            $("#run-btn").click();
-            $("#testCaseResults").scrollIntoView({ behavior: 'smooth' });
-        }
-    });
-
-    // Listen for theme changes using MutationObserver
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
-                updateEditorTheme();
-            }
-        });
-    });
-
-    // Start observing the document element for attribute changes
-    observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['data-bs-theme']
-    });
-
-    // Also listen for storage events in case theme is changed in another tab
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'theme') {
-            updateEditorTheme();
-        }
-    });
-
-    // Listen for custom theme change events (if your theme switcher dispatches them)
-    document.addEventListener('themeChanged', function() {
-        updateEditorTheme();
-    });
-
-    // Populate language dropdown
-    topLanguages.forEach(language => {
-        languageSelect.append(
-            `<option value="${language.id}">${language.name}</option>`
-        );
-    });
-
-
-            $('#image-viewer-modal').on('show.bs.modal', function (event) {
-                const triggerElement = $(event.relatedTarget);
-                const imgSrc = triggerElement.data('src');
-                const imgCaption = triggerElement.data('caption');
-                const modal = $(this);
-                modal.find('#modalImage').attr('src', imgSrc);
-                const captionElement = modal.find('#modalCaption');
-                if (imgCaption) {
-                    captionElement.text(imgCaption).show();
-                } else {
-                    captionElement.hide();
-                }
-            });
-
-            // Initialize editor and load the first driver code
-            initializeEditor();
-            fetchDriverCode(languageSelect.val());
-        });
-    </script>
-
-    <!-- ===================================== SUBMIT FUNCTION ================================================ -->
-
-    <script>
-        document.getElementById('codeSubmissionForm').addEventListener('submit', function (event) {
-            event.preventDefault(); // Prevent default form submission
-
-            const editor = ace.edit('editor');
-            const submit_btn = $("#submit-btn");
-
-            // Store the original button text
-            const originalButtonText = submit_btn.text();
-
-            // Disable the button and show loading state
-            submit_btn.prop("disabled", true);
-            submit_btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...`);
-
-            let code = editor.getValue();
-
-            if (!code.trim()) {
-                alert("Code cannot be empty!");
-                submit_btn.prop("disabled", false);
-                submit_btn.text(originalButtonText);
-                return; // Stop here
-            }
-
-            const testCaseResultsDiv = document.getElementById('testCaseResults');
-            testCaseResultsDiv.innerHTML = `
-                <h4>Execution in progress...</h4>
-                <div id='loader'>
-                    <td colspan="6" class="text-center">
-                        <div class="d-flex justify-content-center">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                        </div>
-                    </td>
-                </div>`;
-
-            document.getElementById('submission_code').value = code;
-
-            const formData = new FormData(this);
-
-            fetch("{% url 'submit_code' question.slug %}", {
-                method: 'POST',
-                body: formData,
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("TOKEN: ", data.token);
-                    // Pass source_code manually
-                    check_result({
-                        token: data.token,
-                        source_code: code // explicitly pass code here
-                    });
-                })
-                .catch(error => {
-                    console.log('Error:', error);
-                    // Reset button state
-                    submit_btn.prop("disabled", false);
-                    submit_btn.text("Submit Code");
-
-                    // Show error message
-                    const testCaseResultsDiv = document.getElementById('testCaseResults');
-                    testCaseResultsDiv.innerHTML = `
-                        <div class="alert alert-danger">
-                            <h4><i class="fas fa-exclamation-circle me-2"></i>Submission Error</h4>
-                            <p>Failed to submit your code. Please try again.</p>
-                            <p><small>${error.message || 'Unknown error'}</small></p>
-                        </div>
-                    `;
-                });
+        // Scroll to results
+        testCaseResultsDiv.scrollIntoView({
+            behavior: 'smooth'
         });
 
-        // Client-side result cache to reduce server load
-        const resultCache = new Map();
+        // Clear previous results
+        testCaseResultsDiv.innerHTML = "";
 
-        // Modern async/await implementation for checking results
-        async function check_result(source_data) {
-            const token = source_data.token;
-            const source_code = source_data.source_code;
-            const is_run_code = source_data.is_run_code || false; // Flag to identify run_code operations
-            const language_id = $("#language").val();
-            const question_slug = "{{ question.slug }}";
-
-            // Show console breadcrumbs for debugging
-            console.log("⚙️ Starting check_result for token:", token);
-
-            // Setup for API requests
-            const judge0_url = `https://theangaarbatch.in/judge0/submissions/${token}?base64_encoded=true`;
-
-            // Use different endpoints for run_code and submit_code
-            let get_result_url;
-            if (is_run_code) {
-                // For run_code operations we use a dedicated endpoint that knows to only use sample test cases
-                get_result_url = `/practice/run_code_result/${encodeURIComponent(token)}/${encodeURIComponent(question_slug)}/`;
-                console.log("Using RUN CODE endpoint for token:", token);
-            } else {
-                // For submit_code operations use the regular endpoint
-                get_result_url = `/practice/send_output/${encodeURIComponent(token)}/${encodeURIComponent(question_slug)}/`;
-                console.log("Using SUBMIT CODE endpoint for token:", token);
-            }
-
-            console.log("Starting async code execution check for token:", token);
-
-            // Create AbortController for request cancellation
-            const controller = new AbortController();
-            const signal = controller.signal;
-
-            // Set a timeout to abort extremely long-running requests
-            const timeout = setTimeout(() => controller.abort(), 120000); // 2-minute timeout
-
-            // Show polling status to user
-            const testCaseResultsDiv = document.getElementById('testCaseResults');
-            if (testCaseResultsDiv.querySelector('#polling-status') === null) {
-                const statusDiv = document.createElement('div');
-                statusDiv.id = 'polling-status';
-                statusDiv.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span>
-                        <p class="text-info mb-0">Checking submission status... <span id="poll-attempt">1</span></p>
-                    </div>`;
-                testCaseResultsDiv.appendChild(statusDiv);
-            }
-
-            // Setup polling parameters with exponential backoff
-            let attempts = 0;
-            let delay = 1000; // Start with 1 second
-            const maxDelay = 5000; // Max 5 seconds between polls
-            const maxAttempts = 40; // Maximum number of attempts
-
-            try {
-                // Polling loop with exponential backoff
-                while (attempts < maxAttempts) {
-                    // Update polling UI counter
-                    const pollAttemptSpan = document.getElementById('poll-attempt');
-                    if (pollAttemptSpan) {
-                        pollAttemptSpan.textContent = attempts + 1;
-                    }
-
-                    // Poll Judge0 for submission status
-                    try {
-                        const response = await fetch(judge0_url, {
-                            method: 'GET',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': '{{ csrf_token }}',
-                            },
-                            cache: 'no-store', // Prevent browser caching
-                            signal // For request cancellation
-                        });
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-
-                        // Check if execution is complete (status 3 = Accepted, 6 = Compilation Error)
-                        if (data.status && (data.status.id === 3 || data.status.id === 6 ||
-                            data.status.id >= 4)) { // Also check for other completion states
-                            console.log("Execution complete, fetching results...");
-
-                            // Get the final execution results
-                            try {
-                                const resultResponse = await fetch(get_result_url, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRFToken': '{{ csrf_token }}',
-                                    },
-                                    body: JSON.stringify({
-                                        token: token,
-                                        source_code: source_code,
-                                        language_id: language_id
-                                    }),
-                                    signal // For request cancellation
-                                });
-
-                                // Parse response data
-                                const resultData = await resultResponse.json();
-
-                                // Check for error response
-                                if (!resultResponse.ok) {
-                                    resultData.status_code = resultResponse.status;
-                                    throw resultData; // Throw the error with details
-                                }
-
-                                console.log("Result data received:", resultData);
-
-                                // Cache successful results
-                                resultCache.set(token, resultData);
-                                if (resultCache.size > 20) { // Limit cache size
-                                    const firstKey = resultCache.keys().next().value;
-                                    resultCache.delete(firstKey);
-                                }
-
-                                // Display the results to the user
-                                display_result(resultData);
-                                return; // Exit successfully
-                            } catch (resultError) {
-                                // Handle result fetching errors
-                                console.error('Error fetching final results:', resultError);
-                                if (resultError && typeof resultError === 'object') {
-                                    display_error(
-                                        resultError.error || 'Server Error',
-                                        resultError.error_details || `Status: ${resultError.status_code || 'Unknown'}`,
-                                        resultError.stderr || null,
-                                        resultError.compile_output || null
-                                    );
-                                } else {
-                                    display_error('Error fetching results',
-                                        resultError.message || 'Unknown error');
-                                }
-                                return; // Exit with error
-                            }
-                        }
-
-                        // If execution is still in progress, wait before polling again
-                        attempts++;
-                        delay = Math.min(delay * 1.3, maxDelay); // Exponential backoff
-                        await new Promise(resolve => setTimeout(resolve, delay));
-
-                    } catch (pollError) {
-                        console.warn(`Polling attempt ${attempts + 1} failed:`, pollError);
-
-                        // Check if request was aborted
-                        if (pollError.name === 'AbortError') {
-                            throw new Error('Request timeout exceeded');
-                        }
-
-                        // Retry a few times for network errors
-                        if (attempts < 5) {
-                            attempts++;
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            continue;
-                        } else {
-                            throw pollError; // Give up after multiple failures
-                        }
-                    }
-                }
-
-                // If we reach here, we've exceeded max attempts
-                throw new Error('Execution timeout: maximum polling attempts exceeded');
-
-            } catch (error) {
-                // Handle all errors from the try block
-                console.error('Error during code execution process:', error);
-
-                let errorTitle = 'Execution Error';
-                let errorMessage = 'An error occurred while processing your code.';
-
-                if (error.message && error.message.includes('timeout')) {
-                    errorTitle = 'Execution Timeout';
-                    errorMessage = 'Your code is taking too long to execute. This could be due to an infinite loop or inefficient algorithm.';
-                } else if (error.message && error.message.includes('aborted')) {
-                    errorTitle = 'Request Aborted';
-                    errorMessage = 'The request was cancelled due to timeout or navigation away from the page.';
-                }
-
-                display_error(errorTitle, errorMessage);
-
-            } finally {
-                // Always clean up
-                clearTimeout(timeout);
-
-                // Re-enable the submit button
-                const submit_btn = $("#submit-btn");
-                submit_btn.prop("disabled", false);
-                submit_btn.text("Submit Code");
-            }
-        }
-
-        // Helper function to display a single test case result
-        function displayTestCaseResult(result, index, container, isPassed) {
-            const resultDiv = document.createElement('div');
-            resultDiv.classList.add(
-                'card',
-                'mb-3',
-                'test-case-result',
-                isPassed ? 'border-success' : 'border-danger',
-                'shadow-sm'
+        // Handle errors
+        if (data.error || data.compile_output || data.stderr) {
+            // Use our improved error display function
+            display_error(
+                data.error ? 'Execution Error' : 'Compilation Error',
+                data.error || 'Your code failed to compile or execute properly.',
+                data.stderr || null,
+                data.compile_output || null
             );
-
-            resultDiv.id = `test-case-result-${index}`;
-
-            // Include compiler output if available
-            let compilerOutputHTML = '';
-            if (result.compiler_output) {
-                compilerOutputHTML = `
-                <p><strong>Compiler Output:</strong></p>
-                <pre class="p-2 rounded bg-warning text-dark">${result.compiler_output}</pre>
-                `;
-            }
-
-            // Set status class and message
-            const headerClass = isPassed ? 'bg-success' : 'bg-danger';
-            const statusText = isPassed ? 'Passed' : 'Failed';
-
-            // Set the inner HTML for this specific test case result
-            resultDiv.innerHTML = `
-            <div class="card-header d-flex justify-content-between align-items-center ${headerClass} text-white">
-                <span>
-                    <strong>Test Case ${index + 1}</strong> - ${statusText}
-                </span>
-                <button 
-                    class="btn btn-sm btn-outline-light toggle-details" 
-                    type="button" 
-                    data-bs-toggle="collapse" 
-                    data-bs-target="#details-${index}" 
-                    aria-expanded="${isPassed ? 'false' : 'true'}" 
-                    aria-controls="details-${index}">
-                    Details
-                </button>
-            </div>
-            <div id="details-${index}" class="collapse ${isPassed ? '' : 'show'}">
-                <div class="card-body">
-                    <p><strong>Input:</strong></p>
-                    <pre class="p-2 rounded bg-light">${result.input}</pre>
-                    <p><strong>Expected Output:</strong></p>
-                    <pre class="p-2 rounded bg-light">${result.expected_output}</pre>
-                    <p><strong>Your Output:</strong></p>
-                    <pre class="p-2 rounded bg-light">${result.user_output}</pre>
-                    ${compilerOutputHTML}
-                </div>
-            </div>
-            `;
-
-            // Add the test case result to the display
-            container.appendChild(resultDiv);
+            return;
         }
 
-        // Helper function to display detailed errors
-        function display_error(message, details = null, stderr = null, compile_output = null) {
-            const testCaseResultsDiv = document.getElementById('testCaseResults');
+        // Handle test case results
+        if (data.test_case_results) {
+            // Count passed and failed test cases
+            const totalTests = data.test_case_results.length;
+            const passedTests = data.test_case_results.filter(result => result.status === "Passed").length;
+            const failedTests = totalTests - passedTests;
 
-            let errorHTML = `
-                <div class="alert alert-danger">
-                    <h4><i class="fas fa-exclamation-circle me-2"></i>Execution Error</h4>
-                    <p class="mb-2">${message}</p>
-            `;
-
-            // Add details if available
-            if (details) {
-                errorHTML += `<div class="mt-3"><strong>Details:</strong> <pre class="p-2 bg-light rounded">${details}</pre></div>`;
-            }
-
-            // Add stderr if available
-            if (stderr) {
-                errorHTML += `
-                <div class="mt-3">
-                    <strong>Runtime Error:</strong>
-                    <pre class="p-2 bg-light rounded text-danger">${stderr}</pre>
-                </div>`;
-            }
-
-            // Add compilation output if available
-            if (compile_output) {
-                errorHTML += `
-                <div class="mt-3">
-                    <strong>Compilation Error:</strong>
-                    <pre class="p-2 bg-light rounded text-danger">${compile_output}</pre>
-                </div>`;
-            }
-
-            errorHTML += `</div>`;
-            testCaseResultsDiv.innerHTML = errorHTML;
-
-            // Re-enable submit button
-            const submit_btn = $("#submit-btn");
-            submit_btn.prop("disabled", false);
-            submit_btn.text("Submit Code");
-        }
-
-        function display_result(data) {
-            const submit_btn = $("#submit-btn");
-            const testCaseResultsDiv = document.getElementById('testCaseResults');
-
-            console.log("Entering in DISPLAY RESULT with data:", data);
-
-            // Always reset submit button first
-            submit_btn.prop("disabled", false);
-            submit_btn.text("Submit Code");
-
-            // Handle sheet disabled
-            if (data.sheet_disabled) {
-                alert(data.sheet_disabled);
-                window.location.href = "{% url 'practice' %}";
-                return;
-            }
-
-            // Scroll to results
-            testCaseResultsDiv.scrollIntoView({
-                behavior: 'smooth'
-            });
-
-            // Clear previous results
-            testCaseResultsDiv.innerHTML = "";
-
-            // Handle errors
-            if (data.error || data.compile_output || data.stderr) {
-                // Use our improved error display function
-                display_error(
-                    data.error ? 'Execution Error' : 'Compilation Error',
-                    data.error || 'Your code failed to compile or execute properly.',
-                    data.stderr || null,
-                    data.compile_output || null
-                );
-                return;
-            }
-
-            // Handle test case results
-            if (data.test_case_results) {
-                // Count passed and failed test cases
-                const totalTests = data.test_case_results.length;
-                const passedTests = data.test_case_results.filter(result => result.status === "Passed").length;
-                const failedTests = totalTests - passedTests;
-
-                // Create summary header - different for run_code vs submit_code
-                const summaryDiv = document.createElement('div');
-                summaryDiv.classList.add('mb-4');
-
-                if (data.is_run_code) {
-                    // Create badge display for individual test cases
-                    let badgesHTML = '';
-
-                    // Generate passed test case badges
-                    const passedBadges = data.test_case_results
-                        .map((result, index) => result.status === "Passed" || result.passed === true ?
-                            `<span class="badge bg-success me-1 mb-1">Test Case ${index + 1}</span>` : '')
-                        .filter(badge => badge !== '')
-                        .join('');
-
-                    // Generate failed test case badges
-                    const failedBadges = data.test_case_results
-                        .map((result, index) => result.status !== "Passed" && !result.passed ?
-                            `<span class="badge bg-danger me-1 mb-1">Test Case ${index + 1}</span>` : '')
-                        .filter(badge => badge !== '')
-                        .join('');
-
-                    // Add badge groups if there are any badges
-                    if (passedBadges) {
-                        badgesHTML += `<div class="mt-2"><strong>Passed:</strong> ${passedBadges}</div>`;
-                    }
-                    if (failedBadges) {
-                        badgesHTML += `<div class="mt-2"><strong>Failed:</strong> ${failedBadges}</div>`;
-                    }
-
-                    // For Run Code, show a simple summary that doesn't draw too much attention
-                    summaryDiv.innerHTML = `
-                        <div class="bg-light rounded p-3 border">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    
-                                </div>
-                            </div>
-                            ${badgesHTML}
-                        </div>
-                    `;
-                } else {
-                    // For Submit Code, show proper alert banners
-                    if (passedTests === totalTests) {
-                        // All test cases passed - show simple success message
-                        summaryDiv.innerHTML = `
-                            <div class="alert alert-success">
-                                <h4><i class="fas fa-check-circle me-2"></i> All Test Cases Passed!</h4>
-                                <p>Successfully passed all ${totalTests} test cases.</p>
-                            </div>
-                        `;
-
-                        // Show confetti for success on submissions
-                        if (data.is_all_test_cases_passed) {
-                            submission_accepted(data.score);
-                        }
-                    } else {
-                        // Some test cases failed - show summary with counts
-                        summaryDiv.innerHTML = `
-                            <div class="alert ${passedTests > 0 ? 'alert-warning' : 'alert-danger'}">
-                                <h4><i class="fas fa-exclamation-triangle me-2"></i> Test Results</h4>
-                                <p>
-                                    <span class="badge bg-success me-2">${passedTests} Passed</span>
-                                    <span class="badge bg-danger">${failedTests} Failed</span>
-                                    <span class="ms-2">out of ${totalTests} total test cases</span>
-                                </p>
-                                <p class="mb-0">Details of failed test cases shown below:</p>
-                            </div>
-                        `;
-                    }
-                }
-
-                testCaseResultsDiv.appendChild(summaryDiv);
-
-                // For Run Code, we always show all test cases, passed and failed
-                // For Submit Code, we only show failed test cases if all didn't pass
-                if (data.is_run_code) {
-                    // This is run code mode - show all test cases
-                    const allResultsHeader = document.createElement('h5');
-                    allResultsHeader.textContent = 'Sample Test Cases Results:';
-                    allResultsHeader.classList.add('mt-3', 'mb-3');
-                    testCaseResultsDiv.appendChild(allResultsHeader);
-
-                    // Display all test cases for run_code
-                    data.test_case_results.forEach((result, index) => {
-                        const isPassed = result.status === "Passed" || result.passed === true;
-                        displayTestCaseResult(result, index, testCaseResultsDiv, isPassed);
-                    });
-
-                    return; // Exit after displaying all test cases
-                }
-
-                // If we got here, this is submit code mode
-                // If all tests passed, don't show individual test cases
-                if (passedTests === totalTests) {
-                    return;
-                }
-
-                // Show only failed test cases for submit code mode
-                const failedResultsHeader = document.createElement('h5');
-                failedResultsHeader.textContent = 'Failed Test Cases:';
-                failedResultsHeader.classList.add('mt-3', 'mb-3');
-                testCaseResultsDiv.appendChild(failedResultsHeader);
-
-                // Display only failed test cases
-                data.test_case_results.forEach((result, index) => {
-                    if (result.status === "Passed") {
-                        return; // Skip passed test cases
-                    }
-
-                    displayTestCaseResult(result, index, testCaseResultsDiv, false);
-                });
-
-                // Scroll to the first failed test case
-                const firstFailedTestCase = document.querySelector('.test-case-result.border-danger');
-                if (firstFailedTestCase) {
-                    firstFailedTestCase.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        }
-
-        // ==============================================================================================
-
-        // On successful submission... confetti animation
-        function submission_accepted(score) {
-            const start = () => {
-                confetti.start();
-                setTimeout(function () {
-                    confetti.stop();
-                }, 5000);
-            };
-
-            const successModal = new bootstrap.Modal(document.getElementById('next-modal-btn'), {
-                keyboard: false
-            });
-
-            successModal.show();
-
-            start();
-
-        }
-
-    </script>
-
-    <!-- ======================================== TEST CASE DISPLAY UTILITY ================================================= -->
-    <script>
-        // Utility function to properly display test case results regardless of source (run or submit)
-        function displayTestResults(data, outputDiv, isRunCode = false) {
-            // Clear previous content
-            outputDiv.innerHTML = '';
-
-            // Handle errors first
-            if (data.error || data.compile_output) {
-                const errorDiv = document.createElement('div');
-                errorDiv.classList.add('alert', 'alert-danger');
-                errorDiv.innerHTML = `
-                    <h5>Compiler Error</h5>
-                    <pre>${data.error || ''}</pre>`;
-
-                if (data.compile_output) {
-                    errorDiv.innerHTML += `
-                    <h5>Compiler Output:</h5>
-                    <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>`;
-                }
-
-                outputDiv.appendChild(errorDiv);
-                return; // Don't process further if there's an error
-            }
-
-            // For run_code: always show the detailed results regardless of pass/fail
-            // For submit_code: Only show badge for all-passed, detailed for failures
-            const showDetailed = isRunCode || !data.is_all_test_cases_passed;
-
-            // Summary header varies based on pass/fail status
-            const passedCount = data.summary?.passed_count || 0;
-            const totalCount = data.summary?.total || (data.test_case_results ? data.test_case_results.length : 0);
-
+            // Create summary header - different for run_code vs submit_code
             const summaryDiv = document.createElement('div');
-            summaryDiv.classList.add('alert', data.is_all_test_cases_passed ? 'alert-success' : 'alert-warning', 'mb-3');
+            summaryDiv.classList.add('mb-4');
 
-            // Create badge display for individual test cases
-            let badgesHTML = '';
-            if (data.test_case_results && data.is_run_code) {
+            if (data.is_run_code) {
+                // Create badge display for individual test cases
+                let badgesHTML = '';
+
                 // Generate passed test case badges
                 const passedBadges = data.test_case_results
-                    .map((result, index) => result.passed || result.status === "Passed" ?
+                    .map((result, index) => result.status === "Passed" || result.passed === true ?
                         `<span class="badge bg-success me-1 mb-1">Test Case ${index + 1}</span>` : '')
                     .filter(badge => badge !== '')
                     .join('');
 
                 // Generate failed test case badges
                 const failedBadges = data.test_case_results
-                    .map((result, index) => !result.passed && result.status !== "Passed" ?
+                    .map((result, index) => result.status !== "Passed" && !result.passed ?
                         `<span class="badge bg-danger me-1 mb-1">Test Case ${index + 1}</span>` : '')
                     .filter(badge => badge !== '')
                     .join('');
@@ -1584,410 +1496,561 @@ active
                 if (failedBadges) {
                     badgesHTML += `<div class="mt-2"><strong>Failed:</strong> ${failedBadges}</div>`;
                 }
-            }
 
-            summaryDiv.innerHTML = `
-                <div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <i class="${data.is_all_test_cases_passed ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'} me-2"></i>
-                            <strong>Test Results:</strong> ${passedCount} passed / ${totalCount} total
+                // For Run Code, show a simple summary that doesn't draw too much attention
+                summaryDiv.innerHTML = `
+                    <div class="bg-light rounded p-3 border">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                
+                            </div>
                         </div>
+                        ${badgesHTML}
                     </div>
-                    ${badgesHTML}
-                </div>
-            `;
-            outputDiv.appendChild(summaryDiv);
+                `;
+            } else {
+                // For Submit Code, show proper alert banners
+                if (passedTests === totalTests) {
+                    // All test cases passed - show simple success message
+                    summaryDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h4><i class="fas fa-check-circle me-2"></i> All Test Cases Passed!</h4>
+                            <p>Successfully passed all ${totalTests} test cases.</p>
+                        </div>
+                    `;
 
-            // If we have test case results and should show detailed, display them
-            if (data.test_case_results && data.test_case_results.length > 0 && showDetailed) {
-                // Separate passed and failed tests
-                const failedTests = data.test_case_results.filter(result => !result.passed);
-                const passedTests = data.test_case_results.filter(result => result.passed);
-
-                // Show failed tests first
-                displayTestCases(failedTests, outputDiv, false);
-
-                // Show passed tests if any
-                if (passedTests.length > 0) {
-                    displayTestCases(passedTests, outputDiv, true);
+                    // Show confetti for success on submissions
+                    if (data.is_all_test_cases_passed) {
+                        submission_accepted(data.score);
+                    }
+                } else {
+                    // Some test cases failed - show summary with counts
+                    summaryDiv.innerHTML = `
+                        <div class="alert ${passedTests > 0 ? 'alert-warning' : 'alert-danger'}">
+                            <h4><i class="fas fa-exclamation-triangle me-2"></i> Test Results</h4>
+                            <p>
+                                <span class="badge bg-success me-2">${passedTests} Passed</span>
+                                <span class="badge bg-danger">${failedTests} Failed</span>
+                                <span class="ms-2">out of ${totalTests} total test cases</span>
+                            </p>
+                            <p class="mb-0">Details of failed test cases shown below:</p>
+                        </div>
+                    `;
                 }
             }
+
+            testCaseResultsDiv.appendChild(summaryDiv);
+
+            // For Run Code, we always show all test cases, passed and failed
+            // For Submit Code, we only show failed test cases if all didn't pass
+            if (data.is_run_code) {
+                // This is run code mode - show all test cases
+                const allResultsHeader = document.createElement('h5');
+                allResultsHeader.textContent = 'Sample Test Cases Results:';
+                allResultsHeader.classList.add('mt-3', 'mb-3');
+                testCaseResultsDiv.appendChild(allResultsHeader);
+
+                // Display all test cases for run_code
+                data.test_case_results.forEach((result, index) => {
+                    const isPassed = result.status === "Passed" || result.passed === true;
+                    displayTestCaseResult(result, index, testCaseResultsDiv, isPassed);
+                });
+
+                return; // Exit after displaying all test cases
+            }
+
+            // If we got here, this is submit code mode
+            // If all tests passed, don't show individual test cases
+            if (passedTests === totalTests) {
+                return;
+            }
+
+            // Show only failed test cases for submit code mode
+            const failedResultsHeader = document.createElement('h5');
+            failedResultsHeader.textContent = 'Failed Test Cases:';
+            failedResultsHeader.classList.add('mt-3', 'mb-3');
+            testCaseResultsDiv.appendChild(failedResultsHeader);
+
+            // Display only failed test cases
+            data.test_case_results.forEach((result, index) => {
+                if (result.status === "Passed") {
+                    return; // Skip passed test cases
+                }
+
+                displayTestCaseResult(result, index, testCaseResultsDiv, false);
+            });
+
+            // Scroll to the first failed test case
+            const firstFailedTestCase = document.querySelector('.test-case-result.border-danger');
+            if (firstFailedTestCase) {
+                firstFailedTestCase.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+    }
+
+    // ==============================================================================================
+
+    // On successful submission... confetti animation
+    function submission_accepted(score) {
+        const start = () => {
+            confetti.start();
+            setTimeout(function () {
+                confetti.stop();
+            }, 5000);
+        };
+
+        const successModal = new bootstrap.Modal(document.getElementById('next-modal-btn'), {
+            keyboard: false
+        });
+
+        successModal.show();
+
+        start();
+
+    }
+
+</script>
+
+<script>
+    // Utility function to properly display test case results regardless of source (run or submit)
+    function displayTestResults(data, outputDiv, isRunCode = false) {
+        // Clear previous content
+        outputDiv.innerHTML = '';
+
+        // Handle errors first
+        if (data.error || data.compile_output) {
+            const errorDiv = document.createElement('div');
+            errorDiv.classList.add('alert', 'alert-danger');
+            errorDiv.innerHTML = `
+                <h5>Compiler Error</h5>
+                <pre>${data.error || ''}</pre>`;
+
+            if (data.compile_output) {
+                errorDiv.innerHTML += `
+                <h5>Compiler Output:</h5>
+                <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>`;
+            }
+
+            outputDiv.appendChild(errorDiv);
+            return; // Don't process further if there's an error
         }
 
-        // Helper to display test cases (both failed and passed)
-        function displayTestCases(testCases, container, isPassed) {
-            if (testCases.length === 0) return;
+        // For run_code: always show the detailed results regardless of pass/fail
+        // For submit_code: Only show badge for all-passed, detailed for failures
+        const showDetailed = isRunCode || !data.is_all_test_cases_passed;
 
-            // Create collapsible section for passed tests
-            if (isPassed) {
-                const passedHeader = document.createElement('div');
-                passedHeader.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-3', 'mt-4');
-                passedHeader.innerHTML = `
-                    <h5 class="mb-0">
-                        <button class="btn btn-sm btn-outline-success" type="button" data-bs-toggle="collapse" 
-                            data-bs-target="#passedTestsCollapse" aria-expanded="false">
-                            <i class="fas fa-chevron-down me-1"></i>
-                            Show ${testCases.length} Passed Tests
-                        </button>
-                    </h5>
-                `;
-                container.appendChild(passedHeader);
+        // Summary header varies based on pass/fail status
+        const passedCount = data.summary?.passed_count || 0;
+        const totalCount = data.summary?.total || (data.test_case_results ? data.test_case_results.length : 0);
 
-                const passedTestsDiv = document.createElement('div');
-                passedTestsDiv.classList.add('collapse');
-                passedTestsDiv.id = 'passedTestsCollapse';
-                container.appendChild(passedTestsDiv);
+        const summaryDiv = document.createElement('div');
+        summaryDiv.classList.add('alert', data.is_all_test_cases_passed ? 'alert-success' : 'alert-warning', 'mb-3');
 
-                testCases.forEach((result, index) => displayTestCase(result, index, passedTestsDiv, true));
-            } else {
-                // Failed tests are shown directly
-                testCases.forEach((result, index) => displayTestCase(result, index, container, false));
+        // Create badge display for individual test cases
+        let badgesHTML = '';
+        if (data.test_case_results && data.is_run_code) {
+            // Generate passed test case badges
+            const passedBadges = data.test_case_results
+                .map((result, index) => result.passed || result.status === "Passed" ?
+                    `<span class="badge bg-success me-1 mb-1">Test Case ${index + 1}</span>` : '')
+                .filter(badge => badge !== '')
+                .join('');
+
+            // Generate failed test case badges
+            const failedBadges = data.test_case_results
+                .map((result, index) => !result.passed && result.status !== "Passed" ?
+                    `<span class="badge bg-danger me-1 mb-1">Test Case ${index + 1}</span>` : '')
+                .filter(badge => badge !== '')
+                .join('');
+
+            // Add badge groups if there are any badges
+            if (passedBadges) {
+                badgesHTML += `<div class="mt-2"><strong>Passed:</strong> ${passedBadges}</div>`;
+            }
+            if (failedBadges) {
+                badgesHTML += `<div class="mt-2"><strong>Failed:</strong> ${failedBadges}</div>`;
             }
         }
 
-        // Display individual test case
-        function displayTestCase(result, index, container, isPassed) {
-            const resultDiv = document.createElement('div');
-            resultDiv.classList.add(
-                'card',
-                'mb-3',
-                'test-case-result',
-                isPassed ? 'border-success' : 'border-danger',
-                'shadow-sm'
-            );
-
-            let testNumber = result.test_number || (index + 1);
-            let headerClass = isPassed ? 'bg-success' : 'bg-danger';
-            let statusBadge = isPassed ? 'Passed' : 'Failed';
-
-            resultDiv.innerHTML = `
-                <div class="card-header d-flex justify-content-between align-items-center ${headerClass} text-white">
-                    <span>
-                        <strong>Test Case ${testNumber}</strong> - 
-                        <span class="badge ${isPassed ? 'bg-success' : 'bg-danger'}">${statusBadge}</span>
-                    </span>
-                    <button 
-                        class="btn btn-sm btn-outline-light toggle-details" 
-                        type="button" 
-                        data-bs-toggle="collapse" 
-                        data-bs-target="#details-${isPassed ? 'passed' : 'failed'}-${index}" 
-                        aria-expanded="${isPassed ? 'false' : 'true'}" 
-                        aria-controls="details-${isPassed ? 'passed' : 'failed'}-${index}">
-                        Details
-                    </button>
-                </div>
-                <div id="details-${isPassed ? 'passed' : 'failed'}-${index}" class="collapse ${isPassed ? '' : 'show'}">
-                    <div class="card-body">
-                        <p><strong>Input:</strong></p>
-                        <pre class="p-2 rounded bg-light">${result.input}</pre>
-                        <p><strong>Expected Output:</strong></p>
-                        <pre class="p-2 rounded bg-light">${result.expected_output}</pre>
-                        <p><strong>Your Output:</strong></p>
-                        <pre class="p-2 rounded bg-light">${result.user_output}</pre>
+        summaryDiv.innerHTML = `
+            <div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="${data.is_all_test_cases_passed ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle'} me-2"></i>
+                        <strong>Test Results:</strong> ${passedCount} passed / ${totalCount} total
                     </div>
                 </div>
-            `;
-            container.appendChild(resultDiv);
+                ${badgesHTML}
+            </div>
+        `;
+        outputDiv.appendChild(summaryDiv);
+
+        // If we have test case results and should show detailed, display them
+        if (data.test_case_results && data.test_case_results.length > 0 && showDetailed) {
+            // Separate passed and failed tests
+            const failedTests = data.test_case_results.filter(result => !result.passed);
+            const passedTests = data.test_case_results.filter(result => result.passed);
+
+            // Show failed tests first
+            displayTestCases(failedTests, outputDiv, false);
+
+            // Show passed tests if any
+            if (passedTests.length > 0) {
+                displayTestCases(passedTests, outputDiv, true);
+            }
         }
-    </script>
+    }
 
-    <!-- ======================================== RUN CODE FUNCTION ================================================= -->
+    // Helper to display test cases (both failed and passed)
+    function displayTestCases(testCases, container, isPassed) {
+        if (testCases.length === 0) return;
 
-    <script>
-        document.getElementById('run-btn').addEventListener('click', function (event) {
-            event.preventDefault(); // Prevent default button action
+        // Create collapsible section for passed tests
+        if (isPassed) {
+            const passedHeader = document.createElement('div');
+            passedHeader.classList.add('d-flex', 'justify-content-between', 'align-items-center', 'mb-3', 'mt-4');
+            passedHeader.innerHTML = `
+                <h5 class="mb-0">
+                    <button class="btn btn-sm btn-outline-success" type="button" data-bs-toggle="collapse" 
+                        data-bs-target="#passedTestsCollapse" aria-expanded="false">
+                        <i class="fas fa-chevron-down me-1"></i>
+                        Show ${testCases.length} Passed Tests
+                    </button>
+                </h5>
+            `;
+            container.appendChild(passedHeader);
 
-            const editor = ace.edit('editor');
-            const run_btn = $("#run-btn");
-            const outputDiv = document.getElementById('testCaseResults');
-            let code = editor.getValue();
+            const passedTestsDiv = document.createElement('div');
+            passedTestsDiv.classList.add('collapse');
+            passedTestsDiv.id = 'passedTestsCollapse';
+            container.appendChild(passedTestsDiv);
 
-            // Handle empty code
+            testCases.forEach((result, index) => displayTestCase(result, index, passedTestsDiv, true));
+        } else {
+            // Failed tests are shown directly
+            testCases.forEach((result, index) => displayTestCase(result, index, container, false));
+        }
+    }
+
+    // Display individual test case
+    function displayTestCase(result, index, container, isPassed) {
+        const resultDiv = document.createElement('div');
+        resultDiv.classList.add(
+            'card',
+            'mb-3',
+            'test-case-result',
+            isPassed ? 'border-success' : 'border-danger',
+            'shadow-sm'
+        );
+
+        let testNumber = result.test_number || (index + 1);
+        let headerClass = isPassed ? 'bg-success' : 'bg-danger';
+        let statusBadge = isPassed ? 'Passed' : 'Failed';
+
+        resultDiv.innerHTML = `
+            <div class="card-header d-flex justify-content-between align-items-center ${headerClass} text-white">
+                <span>
+                    <strong>Test Case ${testNumber}</strong> - 
+                    <span class="badge ${isPassed ? 'bg-success' : 'bg-danger'}">${statusBadge}</span>
+                </span>
+                <button 
+                    class="btn btn-sm btn-outline-light toggle-details" 
+                    type="button" 
+                    data-bs-toggle="collapse" 
+                    data-bs-target="#details-${isPassed ? 'passed' : 'failed'}-${index}" 
+                    aria-expanded="${isPassed ? 'false' : 'true'}" 
+                    aria-controls="details-${isPassed ? 'passed' : 'failed'}-${index}">
+                    Details
+                </button>
+            </div>
+            <div id="details-${isPassed ? 'passed' : 'failed'}-${index}" class="collapse ${isPassed ? '' : 'show'}">
+                <div class="card-body">
+                    <p><strong>Input:</strong></p>
+                    <pre class="p-2 rounded bg-light">${result.input}</pre>
+                    <p><strong>Expected Output:</strong></p>
+                    <pre class="p-2 rounded bg-light">${result.expected_output}</pre>
+                    <p><strong>Your Output:</strong></p>
+                    <pre class="p-2 rounded bg-light">${result.user_output}</pre>
+                </div>
+            </div>
+        `;
+        container.appendChild(resultDiv);
+    }
+</script>
+
+<script>
+    document.getElementById('run-btn').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent default button action
+
+        const editor = ace.edit('editor');
+        const run_btn = $("#run-btn");
+        const outputDiv = document.getElementById('testCaseResults');
+        let code = editor.getValue();
+
+        // Handle empty code
+        if (!code.trim()) {
+            alert("Code cannot be empty!");
+            return;
+        }
+
+        // Disable button and show loading state
+        run_btn.prop("disabled", true);
+        run_btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Running...`);
+
+        // Show loading in the results area
+        outputDiv.innerHTML = `
+            <div class="d-flex align-items-center justify-content-center p-4">
+                <div class="spinner-border text-primary me-3" role="status"></div>
+                <h4 class="mb-0">Running code on sample test cases...</h4>
+            </div>`;
+
+        outputDiv.classList.remove('d-none'); // Show the output div
+        outputDiv.scrollIntoView({ behavior: 'smooth' });
+
+        // Prepare data for running code
+        const data = {
+            code: code,
+            language_id: $("#language").val()
+        };
+
+        // Use async/await pattern for better error handling
+        (async function () {
+            try {
+                // Create AbortController for timeout
+                const controller = new AbortController();
+                const signal = controller.signal;
+
+                // Set a timeout
+                const timeout = setTimeout(() => controller.abort(), 60000); // 1-minute timeout
+
+                try {
+                    // Send the request to get a token
+                    const response = await fetch("{% url 'run_code' question.slug %}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}',
+                        },
+                        body: JSON.stringify(data),
+                        signal: signal // For cancellation
+                    });
+
+                    // Parse response
+                    const result = await response.json();
+                    console.log("Run code token response:", result);
+
+                    // Handle error responses
+                    if (!response.ok) {
+                        throw new Error(result.error || "Server error");
+                    }
+
+                    if (!result.token) {
+                        throw new Error("No token received from server");
+                    }
+
+                    // Now we have the token, use the check_result function with the is_run_code flag
+                    await check_result({
+                        token: result.token,
+                        source_code: code,
+                        is_run_code: true // Flag indicating this is a run_code operation
+                    });
+                } finally {
+                    clearTimeout(timeout); // Always clear timeout
+                }
+            } catch (error) {
+                console.error('Error running code:', error);
+
+                // Check if it's an abort error
+                if (error.name === 'AbortError') {
+                    outputDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h4><i class="fas fa-clock me-2"></i>Execution Timeout</h4>
+                            <p>Your code took too long to execute. It might contain an infinite loop or be too inefficient.</p>
+                        </div>
+                    `;
+                } else {
+                    // Display generic error message
+                    outputDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <h4><i class="fas fa-exclamation-triangle me-2"></i>Error</h4>
+                            <p>Failed to execute your code. Please try again.</p>
+                            <pre class="p-2 rounded bg-light">${error.message || 'Unknown error'}</pre>
+                        </div>
+                    `;
+                }
+            } finally {
+                // Always reset button state
+                run_btn.prop("disabled", false);
+                run_btn.text("Run Code");
+            }
+        })(); // Self-executing async function
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        const editor = ace.edit("editor");
+
+        // Custom Input Button Click
+        $("#custom-input-btn").click(function () {
+            $("#customInputModal").modal('show');
+        });
+
+        // Submit Custom Input
+        $("#submitCustomInput").click(function () {
+            const customInput = $("#customInput").val();
+
+            $("#customInputModal").modal('hide'); // Close the modal
+
+            if (!customInput.trim()) {
+                alert("Custom input cannot be empty!");
+                return;
+            }
+
+            const code = editor.getValue();
             if (!code.trim()) {
                 alert("Code cannot be empty!");
                 return;
             }
 
-            // Disable button and show loading state
-            run_btn.prop("disabled", true);
-            run_btn.html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Running...`);
+            const data = {
+                code: code,
+                input: customInput,
+                language_id: $("#language").val(),
+            };
 
-            // Show loading in the results area
+            const outputDiv = document.getElementById('testCaseResults');
             outputDiv.innerHTML = `
-                <div class="d-flex align-items-center justify-content-center p-4">
-                    <div class="spinner-border text-primary me-3" role="status"></div>
-                    <h4 class="mb-0">Running code on sample test cases...</h4>
+                <div id='loader'>
+                    <h4>Execution in progress...</h4> 
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
                 </div>`;
-
             outputDiv.classList.remove('d-none'); // Show the output div
             outputDiv.scrollIntoView({ behavior: 'smooth' });
 
-            // Prepare data for running code
-            const data = {
-                code: code,
-                language_id: $("#language").val()
-            };
+            fetch("{% url 'custom_input' question.slug %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token if needed
+                },
+                body: JSON.stringify(data),
+            })
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
 
-            // Use async/await pattern for better error handling
-            (async function () {
-                try {
-                    // Create AbortController for timeout
-                    const controller = new AbortController();
-                    const signal = controller.signal;
+                    outputDiv.innerHTML = ''; // Clear loader and previous content
 
-                    // Set a timeout
-                    const timeout = setTimeout(() => controller.abort(), 60000); // 1-minute timeout
+                    // Handle Compiler Error
+                    if (data.error || data.compile_output) {
+                        const globalErrorDiv = document.createElement('div');
+                        globalErrorDiv.classList.add('alert', 'alert-danger');
+                        globalErrorDiv.innerHTML = `
+                            <h5>Compiler Error</h5>
+                            Error: <pre>${data.error}</pre>`;
 
-                    try {
-                        // Send the request to get a token
-                        const response = await fetch("{% url 'run_code' question.slug %}", {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': '{{ csrf_token }}',
-                            },
-                            body: JSON.stringify(data),
-                            signal: signal // For cancellation
-                        });
-
-                        // Parse response
-                        const result = await response.json();
-                        console.log("Run code token response:", result);
-
-                        // Handle error responses
-                        if (!response.ok) {
-                            throw new Error(result.error || "Server error");
-                        }
-
-                        if (!result.token) {
-                            throw new Error("No token received from server");
-                        }
-
-                        // Now we have the token, use the check_result function with the is_run_code flag
-                        await check_result({
-                            token: result.token,
-                            source_code: code,
-                            is_run_code: true // Flag indicating this is a run_code operation
-                        });
-                    } finally {
-                        clearTimeout(timeout); // Always clear timeout
-                    }
-                } catch (error) {
-                    console.error('Error running code:', error);
-
-                    // Check if it's an abort error
-                    if (error.name === 'AbortError') {
-                        outputDiv.innerHTML = `
-                            <div class="alert alert-warning">
-                                <h4><i class="fas fa-clock me-2"></i>Execution Timeout</h4>
-                                <p>Your code took too long to execute. It might contain an infinite loop or be too inefficient.</p>
-                            </div>
-                        `;
-                    } else {
-                        // Display generic error message
-                        outputDiv.innerHTML = `
-                            <div class="alert alert-danger">
-                                <h4><i class="fas fa-exclamation-triangle me-2"></i>Error</h4>
-                                <p>Failed to execute your code. Please try again.</p>
-                                <pre class="p-2 rounded bg-light">${error.message || 'Unknown error'}</pre>
-                            </div>
-                        `;
-                    }
-                } finally {
-                    // Always reset button state
-                    run_btn.prop("disabled", false);
-                    run_btn.text("Run Code");
-                }
-            })(); // Self-executing async function
-        });
-    </script>
-
-    <!-- ======================================== CUSTOM INPUT FUNCTION ============================== -->
-
-    <script>
-        $(document).ready(function () {
-            const editor = ace.edit("editor");
-
-            // Custom Input Button Click
-            $("#custom-input-btn").click(function () {
-                $("#customInputModal").modal('show');
-            });
-
-            // Submit Custom Input
-            $("#submitCustomInput").click(function () {
-                const customInput = $("#customInput").val();
-
-                $("#customInputModal").modal('hide'); // Close the modal
-
-                if (!customInput.trim()) {
-                    alert("Custom input cannot be empty!");
-                    return;
-                }
-
-                const code = editor.getValue();
-                if (!code.trim()) {
-                    alert("Code cannot be empty!");
-                    return;
-                }
-
-                const data = {
-                    code: code,
-                    input: customInput,
-                    language_id: $("#language").val(),
-                };
-
-                const outputDiv = document.getElementById('testCaseResults');
-                outputDiv.innerHTML = `
-                    <div id='loader'>
-                        <h4>Execution in progress...</h4> 
-                        <div class="d-flex justify-content-center">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="sr-only">Loading...</span>
-                            </div>
-                        </div>
-                    </div>`;
-                outputDiv.classList.remove('d-none'); // Show the output div
-                outputDiv.scrollIntoView({ behavior: 'smooth' });
-
-                fetch("{% url 'custom_input' question.slug %}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}', // Include CSRF token if needed
-                    },
-                    body: JSON.stringify(data),
-                })
-                    .then((response) => response.json())
-                    .then((data) => {
-                        console.log(data);
-
-                        outputDiv.innerHTML = ''; // Clear loader and previous content
-
-                        // Handle Compiler Error
-                        if (data.error || data.compile_output) {
-                            const globalErrorDiv = document.createElement('div');
-                            globalErrorDiv.classList.add('alert', 'alert-danger');
-                            globalErrorDiv.innerHTML = `
-                                <h5>Compiler Error</h5>
-                                Error: <pre>${data.error}</pre>`;
-
-                            if (data.compile_output) {
-                                globalErrorDiv.innerHTML += `
-                                    <h5>Compiler Output:</h5>
-                                    <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>
-                                `;
-                            }
-
-                            outputDiv.appendChild(globalErrorDiv);
-                            return;
-                        }
-
-                        // Handle Multiple Test Case Results
-                        if (data.test_case_results && Array.isArray(data.test_case_results)) {
-                            data.test_case_results.forEach((test_case_result, index) => {
-                                const resultDiv = document.createElement('div');
-                                resultDiv.classList.add(
-                                    'card',
-                                    'mb-3',
-                                    'test-case-result',
-                                    'shadow-sm'
-                                );
-
-                                resultDiv.innerHTML = `
-                                    <div class="card-header">
-                                        <strong class="text-white">Test Case ${index + 1}</strong>
-                                    </div>
-                                    <div class="card-body">
-                                        <p><strong>Input:</strong></p>
-                                        <p><strong class="px-2 rounded">${test_case_result.input || 'N/A'}</strong></p>
-                                        <p><strong>Output:</strong></p>
-                                        <p><strong class="px-2 rounded">${test_case_result.expected_output || 'N/A'}</strong></p>
-                                    </div>
-                                `;
-                                outputDiv.appendChild(resultDiv);
-                            });
-                        } else {
-                            outputDiv.innerHTML = `
-                                <div class="alert alert-warning">
-                                    No test case results available.
-                                </div>
+                        if (data.compile_output) {
+                            globalErrorDiv.innerHTML += `
+                                <h5>Compiler Output:</h5>
+                                <pre class="p-2 rounded bg-warning text-dark">${data.compile_output}</pre>
                             `;
                         }
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        alert("An error occurred while running the code.");
-                    });
-            });
-        });
 
-
-    </script>
-
-    <!-- ======================================== RECOMMENDED QUESTIONS ======================================= -->
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-
-            const recommendedSection = document.getElementById("recommended-questions");
-
-            fetch("{% url 'fetch_recommended_questions' question.slug %}", {
-                method: 'GET',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    recommendedSection.innerHTML = "";
-
-                    if (data.questions.length > 0) {
-                        data.questions.forEach(q => {
-                            let platformClass = "text-bg-dark"; // Default gray background
-                            let textClass = ""; // Default text color
-                            let logoUrl = ""; // Default empty logo URL
-
-                            if (q.platform === "LeetCode") {
-                                logoUrl = "https://leetcode.com/static/images/LeetCode_logo.png"; // LeetCode logo
-                            } else if (q.platform === "GeeksForGeeks") {
-                                logoUrl = "https://media.geeksforgeeks.org/wp-content/uploads/20210816073845/gfg10.png"; // GFG logo
-                            } else if (q.platform === "HackerRank") {
-                                logoUrl = "https://img1.pnghut.com/25/19/5/G9uZ6ttcU8/green-management-salary-job-interview-logo.jpg"; // HackerRank logo
-                            }
-
-                            let questionBadge = `
-                                <a href="//${q.link}" target="_blank" class="badge-capsule ${platformClass} ${textClass} me-2">
-                                    <img src="${logoUrl}" alt="${q.platform} logo" style="width: 23px; height: 20px; margin-right: 8px;">
-                                    ${q.title}
-                                </a>`;
-                            recommendedSection.innerHTML += questionBadge;
-                        });
-                    } else {
-                        recommendedSection.innerHTML = `<span class="text-muted">No questions yet</span>`;
+                        outputDiv.appendChild(globalErrorDiv);
+                        return;
                     }
 
-                    // Show the dropdown
-                    recommendedSection.style.display = "block";
+                    // Handle Multiple Test Case Results
+                    if (data.test_case_results && Array.isArray(data.test_case_results)) {
+                        data.test_case_results.forEach((test_case_result, index) => {
+                            const resultDiv = document.createElement('div');
+                            resultDiv.classList.add(
+                                'card',
+                                'mb-3',
+                                'test-case-result',
+                                'shadow-sm'
+                            );
+
+                            resultDiv.innerHTML = `
+                                <div class="card-header">
+                                    <strong class="text-white">Test Case ${index + 1}</strong>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Input:</strong></p>
+                                    <p><strong class="px-2 rounded">${test_case_result.input || 'N/A'}</strong></p>
+                                    <p><strong>Output:</strong></p>
+                                    <p><strong class="px-2 rounded">${test_case_result.expected_output || 'N/A'}</strong></p>
+                                </div>
+                            `;
+                            outputDiv.appendChild(resultDiv);
+                        });
+                    } else {
+                        outputDiv.innerHTML = `
+                            <div class="alert alert-warning">
+                                No test case results available.
+                            </div>
+                        `;
+                    }
                 })
-                .catch(error => console.error("Error fetching data:", error));
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert("An error occurred while running the code.");
+                });
         });
-    </script>
+    });
 
 
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const recommendedSection = document.getElementById("recommended-questions");
+
+        fetch("{% url 'fetch_recommended_questions' question.slug %}", {
+            method: 'GET',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        })
+            .then(response => response.json())
+            .then(data => {
+                recommendedSection.innerHTML = "";
+
+                if (data.questions.length > 0) {
+                    data.questions.forEach(q => {
+                        let platformClass = "text-bg-dark"; // Default gray background
+                        let textClass = ""; // Default text color
+                        let logoUrl = ""; // Default empty logo URL
+
+                        if (q.platform === "LeetCode") {
+                            logoUrl = "https://leetcode.com/static/images/LeetCode_logo.png"; // LeetCode logo
+                        } else if (q.platform === "GeeksForGeeks") {
+                            logoUrl = "https://media.geeksforgeeks.org/wp-content/uploads/20210816073845/gfg10.png"; // GFG logo
+                        } else if (q.platform === "HackerRank") {
+                            logoUrl = "https://img1.pnghut.com/25/19/5/G9uZ6ttcU8/green-management-salary-job-interview-logo.jpg"; // HackerRank logo
+                        }
+
+                        let questionBadge = `
+                            <a href="//${q.link}" target="_blank" class="badge-capsule ${platformClass} ${textClass} me-2">
+                                <img src="${logoUrl}" alt="${q.platform} logo" style="width: 23px; height: 20px; margin-right: 8px;">
+                                ${q.title}
+                            </a>`;
+                        recommendedSection.innerHTML += questionBadge;
+                    });
+                } else {
+                    recommendedSection.innerHTML = `<span class="text-muted">No questions yet</span>`;
+                }
+
+                // Show the dropdown
+                recommendedSection.style.display = "block";
+            })
+            .catch(error => console.error("Error fetching data:", error));
+    });
+</script>
 
 
-    <!-- ======================================== Copy Text Function ================================================ -->
-
-    <!-- <script>
-        document.addEventListener('copy', function (event) {
-            event.preventDefault(); // Prevent the default copy behavior
-
-            // Define the custom text to be copied
-            const copiedTextToCopy = '🙂';
-
-            // Set the custom text into the clipboard
-            event.clipboardData.setData('text/plain', copiedTextToCopy);
-        });
-    </script> -->
-
-
-    {% endblock %}
+{% endblock %}
