@@ -53,6 +53,412 @@ Student | Coding Playground
             color: white;
         }
     }
+
+    /* Presentation Mode Styles */
+    .presentation-mode {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: #1a1a1a;
+        color: #ffffff;
+        z-index: 9999;
+        overflow: hidden;
+        display: none;
+    }
+
+    .presentation-mode.active {
+        display: block;
+    }
+
+    .presentation-mode .presentation-header {
+        padding: 5px 30px;
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        border-bottom: 2px solid #4a5568;
+        flex-shrink: 0;
+    }
+
+    .presentation-mode .presentation-title {
+        font-size: 24px;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .presentation-mode .presentation-controls {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .presentation-mode .language-selector-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .presentation-mode .language-selector-header label {
+        font-size: 16px;
+        font-weight: 500;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .presentation-mode .language-selector-header select {
+        font-size: 16px;
+        padding: 8px 15px;
+        border: 2px solid #4a5568;
+        border-radius: 6px;
+        background: #2d3748;
+        color: white;
+        min-width: 120px;
+    }
+
+    .presentation-mode .language-selector-header select:focus {
+        outline: none;
+        border-color: #63b3ed;
+        box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
+    }
+
+    /* Font Size Controls */
+    .presentation-mode .font-size-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #2d3748;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: 2px solid #4a5568;
+    }
+
+    .presentation-mode .font-size-controls label {
+        font-size: 14px;
+        font-weight: 500;
+        margin: 0;
+        white-space: nowrap;
+    }
+
+    .presentation-mode .font-size-slider {
+        width: 80px;
+        height: 4px;
+        border-radius: 2px;
+        background: #4a5568;
+        outline: none;
+        -webkit-appearance: none;
+    }
+
+    .presentation-mode .font-size-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #63b3ed;
+        cursor: pointer;
+    }
+
+    .presentation-mode .font-size-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #63b3ed;
+        cursor: pointer;
+        border: none;
+    }
+
+    .presentation-mode .font-size-display {
+        font-size: 12px;
+        color: #cbd5e0;
+        min-width: 25px;
+        text-align: center;
+    }
+
+    .presentation-mode .presentation-body {
+        height: calc(100vh - 90px);
+        display: flex;
+        gap: 0;
+        padding: 0;
+        background: #1a1a1a;
+        position: relative;
+    }
+
+    .presentation-mode .presentation-left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #1e1e1e;
+        border-right: 3px solid #4a5568;
+        min-width: 200px;
+        transition: flex 0.1s ease;
+    }
+
+    .presentation-mode .presentation-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #1e1e1e;
+        min-width: 200px;
+        transition: flex 0.1s ease;
+    }
+
+    /* Resizer */
+    .presentation-mode .resizer {
+        width: 6px;
+        background: #4a5568;
+        cursor: ew-resize;
+        position: relative;
+        flex-shrink: 0;
+        transition: background-color 0.2s ease;
+    }
+
+    .presentation-mode .resizer:hover {
+        background: #63b3ed;
+    }
+
+    .presentation-mode .resizer:active {
+        background: #4299e1;
+    }
+
+    .presentation-mode .resizer::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 2px;
+        height: 30px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 1px;
+    }
+
+    .presentation-mode .code-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .presentation-mode .code-header {
+        background: #2d3748;
+        padding: 12px 20px;
+        border-radius: 8px 8px 0 0;
+        border-bottom: 2px solid #4a5568;
+        margin-bottom: 0;
+    }
+
+    .presentation-mode .code-header h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .presentation-mode .editor-container {
+        flex: 1;
+        margin: 0;
+        position: relative;
+        border: 2px solid #4a5568;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+    }
+
+    .presentation-mode #editorPresentation {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        height: 100%;
+        width: 100%;
+    }
+
+    .presentation-mode .controls-section {
+        padding: 5px 20px;
+        background: #2d3748;
+        border-top: 2px solid #4a5568;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .presentation-mode .controls-section button {
+        font-size: 16px;
+        padding: 5px 24px;
+        border: none;
+        border-radius: 6px;
+        background: #38a169;
+        color: white;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        flex: 1;
+    }
+
+    .presentation-mode .controls-section button:hover {
+        background: #48bb78;
+        transform: translateY(-1px);
+    }
+
+    .presentation-mode .controls-section button:disabled {
+        background: #4a5568;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .presentation-mode .input-section {
+        flex-shrink: 0;
+    }
+
+    .presentation-mode .input-section label {
+        color: #cbd5e0;
+        font-weight: 500;
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    .presentation-mode .input-section textarea {
+        width: 100%;
+        font-size: 14px;
+        resize: vertical;
+        height: 60px;
+        background: #2d3748;
+        border: 2px solid #4a5568;
+        border-radius: 6px;
+        color: white;
+        padding: 10px;
+    }
+
+    .presentation-mode .input-section textarea:focus {
+        outline: none;
+        border-color: #63b3ed;
+        box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
+    }
+
+    .presentation-mode .output-section {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .presentation-mode .output-header {
+        background: #2d3748;
+        padding: 12px 20px;
+        border-radius: 8px 8px 0 0;
+        border: 2px solid #4a5568;
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+
+    .presentation-mode .output-header h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #ffffff;
+    }
+
+    .presentation-mode .output-content {
+        flex: 1;
+        border: 2px solid #4a5568;
+        border-top: none;
+        border-radius: 0 0 8px 8px;
+        background: #1a202c;
+        overflow: auto;
+    }
+
+    .presentation-mode .output-content pre {
+        padding: 20px;
+        margin: 0;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        height: 100%;
+        color: #e2e8f0;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        line-height: 1.5;
+    }
+
+    .exit-presentation {
+        background: rgba(220, 53, 69, 0.9);
+        border: 1px solid #dc3545;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .exit-presentation:hover {
+        background: #dc3545;
+    }
+
+    .presentation-toggle {
+        background: var(--bs-success);
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        margin-left: 10px;
+    }
+
+    .presentation-toggle:hover {
+        background: var(--bs-success);
+        opacity: 0.9;
+        transform: translateY(-1px);
+    }
+
+    /* Dark mode support for presentation */
+    [data-bs-theme="dark"] .presentation-mode {
+        background: var(--bs-dark);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .presentation-mode .output-header {
+        background: var(--bs-secondary);
+        color: var(--bs-body-color);
+    }
+
+    [data-bs-theme="dark"] .presentation-mode .output-content {
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
+    }
+
+    /* Auto-save indicator */
+    .save-indicator {
+        font-size: 12px;
+        color: var(--bs-success);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        margin-left: 10px;
+    }
+
+    .save-indicator.show {
+        opacity: 1;
+    }
+
+    .save-indicator.saving {
+        color: var(--bs-warning);
+        opacity: 1;
+    }
+
+    /* Prevent text selection during resize */
+    .presentation-mode.resizing {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+
+    .presentation-mode.resizing * {
+        cursor: ew-resize !important;
+    }
 </style>
 {% endblock %}
 
@@ -67,7 +473,16 @@ Student | Coding Playground
 
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Play with the Code 🔥</h5>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title fw-semibold mb-0">Play with the Code 🔥</h5>
+                <div class="d-flex align-items-center">
+                    <span class="save-indicator" id="saveIndicator">●</span>
+                    <button type="button" class="presentation-toggle" id="presentationToggle">
+                        📺 Presentation Mode
+                    </button>
+                </div>
+            </div>
+            
             <form id="codeForm">
                 {% csrf_token %}
                 <label for="language">Select Language:</label>
@@ -111,6 +526,60 @@ Student | Coding Playground
     </div>
 </div>
 
+<!-- Presentation Mode -->
+<div class="presentation-mode" id="presentationMode">
+    <div class="presentation-header">
+        <h2 class="presentation-title">Coding Playground - Presentation Mode</h2>
+        <div class="presentation-controls">
+            <div class="font-size-controls">
+                <label for="fontSizeSlider">Font:</label>
+                <input type="range" id="fontSizeSlider" class="font-size-slider" min="10" max="32" value="16">
+                <span class="font-size-display" id="fontSizeDisplay">16px</span>
+            </div>
+            <div class="language-selector-header">
+                <label for="languagePresentation">Language:</label>
+                <select class="form-select" id="languagePresentation" name="language" required></select>
+            </div>
+            <span class="save-indicator" id="saveIndicatorPresentation">●</span>
+            <button class="exit-presentation" id="exitPresentation">✕ Exit</button>
+        </div>
+    </div>
+    
+    <div class="presentation-body">
+        <div class="presentation-left" id="presentationLeft">
+            <div class="code-section">
+                <div class="code-header">
+                    <h4>📝 Code Editor</h4>
+                </div>
+                <div class="editor-container">
+                    <div id="editorPresentation"></div>
+                </div>
+            </div>
+            
+            <div class="controls-section">
+                <button type="button" id="submitBtnPresentation">▶ Run Code</button>
+                <div class="input-section">
+                    <label for="inputTextPresentation">Input:</label>
+                    <textarea id="inputTextPresentation" placeholder="Enter inputs here..."></textarea>
+                </div>
+            </div>
+        </div>
+        
+        <div class="resizer" id="resizer"></div>
+        
+        <div class="presentation-right" id="presentationRight">
+            <div class="output-section">
+                <div class="output-header">
+                    <h4>🖥️ Output</h4>
+                </div>
+                <div class="output-content">
+                    <pre id="outputPresentation">Run your code to see the output here...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% block myjs %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ace.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.5.3/ext-language_tools.js"></script>
@@ -118,7 +587,23 @@ Student | Coding Playground
 <script>
     $(document).ready(function () {
     const editor = ace.edit("editor");
+    const editorPresentation = ace.edit("editorPresentation");
     const languageSelect = $("#language");
+    const languagePresentationSelect = $("#languagePresentation");
+    
+    // Auto-save functionality
+    let saveTimeout;
+    let lastSavedCode = '';
+    let lastSavedLanguage = '';
+    let lastSavedInput = '';
+    let lastSavedFontSize = 16;
+    let lastSavedPanelSizes = { left: 50, right: 50 };
+
+    // Resizer functionality
+    let isResizing = false;
+    let startX = 0;
+    let startLeftWidth = 0;
+    let startRightWidth = 0;
 
     const topLanguages = [
         { id: 71, name: "Python" },
@@ -134,88 +619,395 @@ Student | Coding Playground
         62: `public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}`
     };
 
-    // Function to update editor theme based on current theme
+    // Font size functionality
+    function updateFontSize(size) {
+        const fontSize = parseInt(size);
+        $("#fontSizeDisplay").text(fontSize + "px");
+        
+        // Update editor font size
+        editorPresentation.setFontSize(fontSize);
+        
+        // Update output font size
+        $("#outputPresentation").css("font-size", fontSize + "px");
+        
+        lastSavedFontSize = fontSize;
+        scheduleAutoSave();
+    }
+
+    // Panel resizing functionality
+    function initializeResizer() {
+        const resizer = document.getElementById('resizer');
+        const leftPanel = document.getElementById('presentationLeft');
+        const rightPanel = document.getElementById('presentationRight');
+        const presentationMode = document.getElementById('presentationMode');
+
+        resizer.addEventListener('mousedown', function(e) {
+            isResizing = true;
+            startX = e.clientX;
+            
+            const leftRect = leftPanel.getBoundingClientRect();
+            const rightRect = rightPanel.getBoundingClientRect();
+            startLeftWidth = leftRect.width;
+            startRightWidth = rightRect.width;
+            
+            presentationMode.classList.add('resizing');
+            
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isResizing) return;
+
+            const deltaX = e.clientX - startX;
+            const containerWidth = leftPanel.parentElement.offsetWidth - 6; // Subtract resizer width
+            
+            let newLeftWidth = startLeftWidth + deltaX;
+            let newRightWidth = startRightWidth - deltaX;
+            
+            // Set minimum widths
+            const minWidth = 200;
+            if (newLeftWidth < minWidth) {
+                newLeftWidth = minWidth;
+                newRightWidth = containerWidth - minWidth;
+            } else if (newRightWidth < minWidth) {
+                newRightWidth = minWidth;
+                newLeftWidth = containerWidth - minWidth;
+            }
+            
+            // Calculate flex values
+            const leftFlex = (newLeftWidth / containerWidth) * 100;
+            const rightFlex = (newRightWidth / containerWidth) * 100;
+            
+            leftPanel.style.flex = leftFlex;
+            rightPanel.style.flex = rightFlex;
+            
+            // Save panel sizes
+            lastSavedPanelSizes = { left: leftFlex, right: rightFlex };
+        });
+
+        document.addEventListener('mouseup', function() {
+            if (isResizing) {
+                isResizing = false;
+                presentationMode.classList.remove('resizing');
+                scheduleAutoSave();
+            }
+        });
+    }
+
+    // Auto-save functions
+    function showSaveIndicator(status) {
+        const indicators = [document.getElementById('saveIndicator'), document.getElementById('saveIndicatorPresentation')];
+        indicators.forEach(indicator => {
+            if (indicator) {
+                indicator.className = 'save-indicator';
+                if (status === 'saving') {
+                    indicator.className += ' saving show';
+                    indicator.textContent = '⏳';
+                    indicator.title = 'Saving...';
+                } else if (status === 'saved') {
+                    indicator.className += ' show';
+                    indicator.textContent = '✓';
+                    indicator.title = 'Auto-saved';
+                    setTimeout(() => {
+                        indicator.className = 'save-indicator';
+                    }, 2000);
+                }
+            }
+        });
+    }
+
+    function autoSave() {
+        const currentCode = editor.getValue();
+        const currentLanguage = languageSelect.val();
+        const currentInput = $("#inputText").val();
+        
+        if (currentCode !== lastSavedCode || currentLanguage !== lastSavedLanguage || 
+            currentInput !== lastSavedInput || lastSavedFontSize !== parseInt($("#fontSizeSlider").val())) {
+            
+            showSaveIndicator('saving');
+            
+            const saveData = {
+                code: currentCode,
+                language: currentLanguage,
+                input: currentInput,
+                fontSize: lastSavedFontSize,
+                panelSizes: lastSavedPanelSizes,
+                timestamp: Date.now()
+            };
+            
+            try {
+                localStorage.setItem('codingPlayground_autoSave', JSON.stringify(saveData));
+                lastSavedCode = currentCode;
+                lastSavedLanguage = currentLanguage;
+                lastSavedInput = currentInput;
+                
+                setTimeout(() => showSaveIndicator('saved'), 500);
+            } catch (error) {
+                console.warn('Failed to auto-save to localStorage:', error);
+            }
+        }
+    }
+
+    function loadAutoSavedData() {
+        try {
+            const savedData = localStorage.getItem('codingPlayground_autoSave');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                return data;
+            }
+        } catch (error) {
+            console.warn('Failed to load auto-saved data:', error);
+        }
+        return null;
+    }
+
+    function scheduleAutoSave() {
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(autoSave, 2000); // Save after 2 seconds of inactivity
+    }
+
+    // Force dark theme for presentation mode
     function updateEditorTheme() {
         const currentTheme = localStorage.getItem("theme");
         const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
         
-        if (isDark) {
-            editor.setTheme("ace/theme/twilight");
-        } else {
-            editor.setTheme("ace/theme/chrome");
+        const theme = isDark ? "ace/theme/twilight" : "ace/theme/chrome";
+        editor.setTheme(theme);
+        
+        // Always use dark theme for presentation mode
+        editorPresentation.setTheme("ace/theme/twilight");
+    }
+
+    function setEditorContent(languageId, customCode = null) {
+        const code = customCode || defaultCode[languageId] || "// Start coding...";
+        editor.setValue(code, -1);
+        editorPresentation.setValue(code, -1);
+    }
+
+    function syncEditors() {
+        const mainCode = editor.getValue();
+        const mainLanguage = languageSelect.val();
+        const mainInput = $("#inputText").val();
+        
+        editorPresentation.setValue(mainCode, -1);
+        languagePresentationSelect.val(mainLanguage);
+        $("#inputTextPresentation").val(mainInput);
+        
+        // Update syntax highlighting for presentation editor
+        updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
+    }
+
+    function updateSyntaxHighlighting(selectElement, editorInstance) {
+        const selectedLanguage = selectElement.val();
+        if (selectedLanguage == 71) {
+            editorInstance.session.setMode("ace/mode/python");
+        } else if (selectedLanguage == 50 || selectedLanguage == 54) {
+            editorInstance.session.setMode("ace/mode/c_cpp");
+        } else if (selectedLanguage == 62) {
+            editorInstance.session.setMode("ace/mode/java");
         }
     }
 
-    function setEditorContent(languageId) {
-        if (defaultCode[languageId]) {
-            editor.setValue(defaultCode[languageId], -1);
-        } else {
-            editor.setValue("// Start coding...", -1);
-        }
-    }
-
+    // Initialize languages
     $.ajax({
         url: "https://theangaarbatch.in/judge0/languages",
         type: "GET",
         success: function (response) {
-            topLanguages.forEach(function (language) {
-                languageSelect.append(
-                    `<option value="${language.id}">${language.name}</option>`
-                );
+            // Populate both language selectors
+            [languageSelect, languagePresentationSelect].forEach(select => {
+                topLanguages.forEach(function (language) {
+                    select.append(`<option value="${language.id}">${language.name}</option>`);
+                });
+
+                let otherLanguages = response.filter(function (language) {
+                    return !topLanguages.some(topLang => topLang.id === language.id);
+                });
+                otherLanguages.sort((a, b) => a.name.localeCompare(b.name));
+
+                otherLanguages.forEach(function (language) {
+                    select.append(`<option value="${language.id}">${language.name}</option>`);
+                });
             });
 
-            let otherLanguages = response.filter(function (language) {
-                return !topLanguages.some(topLang => topLang.id === language.id);
-            });
-            otherLanguages.sort((a, b) => a.name.localeCompare(b.name));
-
-            otherLanguages.forEach(function (language) {
-                languageSelect.append(
-                    `<option value="${language.id}">${language.name}</option>`
-                );
-            });
-
-            let initialLanguageId = languageSelect.val();
-            setEditorContent(initialLanguageId);
+            // Load auto-saved data
+            const savedData = loadAutoSavedData();
+            if (savedData) {
+                languageSelect.val(savedData.language);
+                languagePresentationSelect.val(savedData.language);
+                setEditorContent(savedData.language, savedData.code);
+                $("#inputText").val(savedData.input);
+                $("#inputTextPresentation").val(savedData.input);
+                
+                // Restore font size
+                if (savedData.fontSize) {
+                    $("#fontSizeSlider").val(savedData.fontSize);
+                    updateFontSize(savedData.fontSize);
+                }
+                
+                // Restore panel sizes
+                if (savedData.panelSizes) {
+                    lastSavedPanelSizes = savedData.panelSizes;
+                    $("#presentationLeft").css('flex', savedData.panelSizes.left);
+                    $("#presentationRight").css('flex', savedData.panelSizes.right);
+                }
+                
+                updateSyntaxHighlighting(languageSelect, editor);
+                updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
+            } else {
+                let initialLanguageId = languageSelect.val();
+                setEditorContent(initialLanguageId);
+                updateSyntaxHighlighting(languageSelect, editor);
+                updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
+                updateFontSize(16); // Set default font size
+            }
         },
         error: function (xhr, status, error) {
             alert("Error fetching languages: " + error);
         }
     });
 
-    languageSelect.change(function () {
-        let selectedLanguageId = $(this).val();
-        setEditorContent(selectedLanguageId);
-        $("#output").addClass("d-none");
-        $("#output pre").text("");
+    // Setup editors
+    [editor, editorPresentation].forEach(editorInstance => {
+        editorInstance.session.setMode("ace/mode/python");
+        editorInstance.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            cursorStyle: "smooth",
+            enableEmmet: true,
+        });
     });
 
     // Set initial theme
     updateEditorTheme();
 
-    editor.session.setMode("ace/mode/python");
-    editor.setOptions({
-        enableBasicAutocompletion: true,
-        enableSnippets: true,
-        enableLiveAutocompletion: true,
-        cursorStyle: "smooth",
-        enableEmmet: true,
+    // Initialize resizer
+    initializeResizer();
+
+    // Font size slider event
+    $("#fontSizeSlider").on('input', function() {
+        updateFontSize($(this).val());
     });
 
-    $("#language").change(function () {
-        let selectedLanguage = $(this).val();
-        if (selectedLanguage == 71) {
-            editor.session.setMode("ace/mode/python");
-        } else if (selectedLanguage == 50) {
-            editor.session.setMode("ace/mode/c_cpp");
-        } else if (selectedLanguage == 54) {
-            editor.session.setMode("ace/mode/c_cpp");
-        } else if (selectedLanguage == 62) {
-            editor.session.setMode("ace/mode/java");
+    // Language change handlers
+    languageSelect.change(function () {
+        let selectedLanguageId = $(this).val();
+        languagePresentationSelect.val(selectedLanguageId);
+        setEditorContent(selectedLanguageId);
+        updateSyntaxHighlighting($(this), editor);
+        updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
+        $("#output").addClass("d-none");
+        $("#output pre").text("");
+        scheduleAutoSave();
+    });
+
+    languagePresentationSelect.change(function () {
+        let selectedLanguageId = $(this).val();
+        languageSelect.val(selectedLanguageId);
+        setEditorContent(selectedLanguageId);
+        updateSyntaxHighlighting($(this), editorPresentation);
+        updateSyntaxHighlighting(languageSelect, editor);
+        $("#outputPresentation").text("Run your code to see the output here...");
+        scheduleAutoSave();
+    });
+
+    // Auto-save on editor changes
+    editor.on('change', scheduleAutoSave);
+    $("#inputText").on('input', scheduleAutoSave);
+    $("#inputTextPresentation").on('input', function() {
+        $("#inputText").val($(this).val());
+        scheduleAutoSave();
+    });
+
+    // Sync presentation editor changes back to main editor
+    editorPresentation.on('change', function() {
+        editor.setValue(editorPresentation.getValue(), -1);
+        scheduleAutoSave();
+    });
+
+    // Presentation mode controls
+    $("#presentationToggle").click(function() {
+        syncEditors();
+        $("#presentationMode").addClass("active");
+        $("body").css("overflow", "hidden");
+        
+        // Apply saved settings
+        const savedData = loadAutoSavedData();
+        if (savedData) {
+            if (savedData.fontSize) {
+                $("#fontSizeSlider").val(savedData.fontSize);
+                updateFontSize(savedData.fontSize);
+            }
+            if (savedData.panelSizes) {
+                $("#presentationLeft").css('flex', savedData.panelSizes.left);
+                $("#presentationRight").css('flex', savedData.panelSizes.right);
+            }
+        }
+        
+        // Refresh editor layout
+        setTimeout(() => {
+            editorPresentation.resize();
+        }, 100);
+    });
+
+    $("#exitPresentation").click(function() {
+        // Sync back any changes made in presentation mode
+        editor.setValue(editorPresentation.getValue(), -1);
+        languageSelect.val(languagePresentationSelect.val());
+        $("#inputText").val($("#inputTextPresentation").val());
+        
+        $("#presentationMode").removeClass("active");
+        $("body").css("overflow", "auto");
+        scheduleAutoSave();
+    });
+
+    // Keyboard shortcuts
+    $(document).keydown(function (event) {
+        // Ctrl/Alt + Enter to run code
+        if ((event.ctrlKey || event.altKey) && event.key === "Enter") {
+            event.preventDefault();
+            if ($("#presentationMode").hasClass("active")) {
+                $("#submitBtnPresentation").click();
+            } else {
+                document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
+                $("#submit-btn").click();
+            }
+        }
+        
+        // F11 or Ctrl+Shift+P for presentation mode
+        if (event.key === "F11" || (event.ctrlKey && event.shiftKey && event.key === "P")) {
+            event.preventDefault();
+            if ($("#presentationMode").hasClass("active")) {
+                $("#exitPresentation").click();
+            } else {
+                $("#presentationToggle").click();
+            }
+        }
+        
+        // Escape to exit presentation mode
+        if (event.key === "Escape" && $("#presentationMode").hasClass("active")) {
+            $("#exitPresentation").click();
+        }
+
+        // Ctrl + Plus/Minus for font size (only in presentation mode)
+        if ($("#presentationMode").hasClass("active") && event.ctrlKey) {
+            if (event.key === "+" || event.key === "=") {
+                event.preventDefault();
+                const currentSize = parseInt($("#fontSizeSlider").val());
+                const newSize = Math.min(32, currentSize + 1);
+                $("#fontSizeSlider").val(newSize);
+                updateFontSize(newSize);
+            } else if (event.key === "-") {
+                event.preventDefault();
+                const currentSize = parseInt($("#fontSizeSlider").val());
+                const newSize = Math.max(10, currentSize - 1);
+                $("#fontSizeSlider").val(newSize);
+                updateFontSize(newSize);
+            }
         }
     });
 
-    // Listen for theme changes using MutationObserver
+    // Theme change listeners
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
@@ -224,42 +1016,42 @@ Student | Coding Playground
         });
     });
 
-    // Start observing the document element for attribute changes
     observer.observe(document.documentElement, {
         attributes: true,
         attributeFilter: ['data-bs-theme']
     });
 
-    // Also listen for storage events in case theme is changed in another tab
     window.addEventListener('storage', function(e) {
         if (e.key === 'theme') {
             updateEditorTheme();
         }
     });
 
-    // Listen for custom theme change events (if your theme switcher dispatches them)
     document.addEventListener('themeChanged', function() {
         updateEditorTheme();
     });
 
-    $(document).keydown(function (event) {
-        if ((event.ctrlKey || event.altKey) && event.key === "Enter") {
-            event.preventDefault();
-            document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
-            $("#submit-btn").click();
+    // Window resize handler for presentation mode
+    window.addEventListener('resize', function() {
+        if ($("#presentationMode").hasClass("active")) {
+            setTimeout(() => {
+                editorPresentation.resize();
+            }, 100);
         }
     });
 
-    $("#codeForm").off("submit").submit(function (event) {
-        event.preventDefault();
-        $("#output").addClass("d-none");
-        const submit_btn = $("#submit-btn");
-        submit_btn.prop("disabled", true);
-        submit_btn.text("Submitting...");
+    // Code execution functions
+    function executeCode(isPresentation = false) {
+        const submitBtn = isPresentation ? $("#submitBtnPresentation") : $("#submit-btn");
+        const outputElement = isPresentation ? $("#outputPresentation") : $("#output pre");
+        const languageId = isPresentation ? languagePresentationSelect.val() : $("#language").val();
+        const sourceCode = isPresentation ? editorPresentation.getValue() : editor.getValue();
+        const inputText = isPresentation ? $("#inputTextPresentation").val() : $("#inputText").val();
 
-        let languageId = $("#language").val();
-        let sourceCode = editor.getValue();
-        let inputText = $("#inputText").val();
+        if (!isPresentation) $("#output").addClass("d-none");
+        
+        submitBtn.prop("disabled", true);
+        submitBtn.text(isPresentation ? "⏳ Running..." : "Submitting...");
 
         $.ajax({
             url: "{% url 'execute_code' %}",
@@ -271,26 +1063,38 @@ Student | Coding Playground
                 csrfmiddlewaretoken: "{{ csrf_token }}"
             },
             success: function (response) {
-                submit_btn.prop("disabled", false);
-                submit_btn.text("Submit");
-                $("#output").removeClass("d-none");
+                submitBtn.prop("disabled", false);
+                submitBtn.text(isPresentation ? "▶ Run Code" : "Submit");
+                
+                if (!isPresentation) $("#output").removeClass("d-none");
 
                 if (response.error) {
-                    const outputDiv = $("#output pre");
-                    outputDiv.text(response.error);
+                    outputElement.text(response.error);
                 } else {
-                    $("#output pre").text(response.output);
+                    outputElement.text(response.output);
                 }
 
-                document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
-                document.getElementById("op-div").scrollIntoView(false);
+                if (!isPresentation) {
+                    document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
+                    document.getElementById("op-div").scrollIntoView(false);
+                }
             },
             error: function (xhr, status, error) {
                 alert("Error from AJAX: " + error);
-                submit_btn.prop("disabled", false);
-                submit_btn.text("Submit");
+                submitBtn.prop("disabled", false);
+                submitBtn.text(isPresentation ? "▶ Run Code" : "Submit");
             }
         });
+    }
+
+    // Form submissions
+    $("#codeForm").off("submit").submit(function (event) {
+        event.preventDefault();
+        executeCode(false);
+    });
+
+    $("#submitBtnPresentation").click(function() {
+        executeCode(true);
     });
 
     $("#inputForm").off("submit").submit(function (event) {
@@ -298,7 +1102,16 @@ Student | Coding Playground
         const inputText = $("#inputText").val();
         console.log("Input received: " + inputText);
         $("#inputModal").modal('hide');
+        scheduleAutoSave();
     });
+
+    // Save before page unload
+    window.addEventListener('beforeunload', function() {
+        autoSave();
+    });
+
+    // Initialize default font size
+    updateFontSize(16);
 });
 </script>
 {% endblock %}
