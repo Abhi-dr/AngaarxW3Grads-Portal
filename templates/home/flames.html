@@ -2,601 +2,497 @@
 {% load static %}
 
 {% block title %}
-F.L.A.M.E.S🔥 | Angaar
+FLAMES '25 | The Angaar Batch
 {% endblock %}
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/flames.css' %}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
-    body {
-        background-color: #0d0d0d;
-
-    }
-
-    /* Team Page Container */
-    .team-page-container {
-        position: relative;
-        padding: 80px 0;
-        overflow: hidden;
-    }
-
-    /* Background Elements */
-    .team-bg-gradient {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background:
-            radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
-            radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    .team-bg-particles {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 0;
-        pointer-events: none;
-    }
-
-    /* Team Header */
-    .team-header {
-        position: relative;
-        text-align: center;
-        margin-bottom: 60px;
-        z-index: 1;
-    }
-
-    .team-title {
-        font-size: 3.5rem;
-        font-weight: 800;
-        margin-bottom: 20px;
-        background: linear-gradient(135deg, #ff6026, #ff9a56);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        position: relative;
-        display: inline-block;
-    }
-
-    .team-title::after {
-        content: '';
-        position: absolute;
-        bottom: -10px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 80px;
-        height: 4px;
-        background: linear-gradient(90deg, #ff6026, #ff9a56);
-        border-radius: 2px;
-    }
-
-    .team-subtitle {
-        font-size: 1.2rem;
-        max-width: 700px;
+    /* Testimonial Slider Styles - FIXED */
+    .testimonial-slider-container {
+        max-width: 100%;
         margin: 0 auto;
-        color: #aaa;
-        line-height: 1.6;
+        overflow: hidden;
+        padding: 20px 0;
+        /* Added for better visual appearance with a mask */
+        -webkit-mask-image: linear-gradient(to right,
+                transparent,
+                black 20%,
+                black 80%,
+                transparent);
+        mask-image: linear-gradient(to right,
+                transparent,
+                black 20%,
+                black 80%,
+                transparent);
     }
 
-    /* Team Grid */
-    .team-grid {
-        display: grid;
-        justify-content: center;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 30px;
-        position: relative;
-        z-index: 1;
-    }
-
-    /* Founders Row */
-    .founders-row {
+    .testimonial-slider {
         display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
+        /* The animation now correctly calculates the distance to move */
+        animation: slideTestimonials 30s linear infinite;
         gap: 30px;
-        margin-bottom: 50px;
-        position: relative;
-        z-index: 1;
+        width: fit-content;
+        /* Ensure the slider itself has a width based on its content */
     }
 
-    .founders-row .team-card {
-        width: 280px;
-        flex-grow: 0;
+    .testimonial-slider:hover {
+        animation-play-state: paused;
+    }
+
+    .feedback-card {
+        /* Increased min-width for better desktop view */
+        width: 350px;
         flex-shrink: 0;
     }
 
-    /* Team Card */
-    .team-card {
-        position: relative;
-        background: rgba(30, 30, 30, 0.5);
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        transition: all 0.4s ease;
-        transform-style: preserve-3d;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    .team-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 15px 35px rgba(255, 96, 38, 0.2);
-    }
-
-    .team-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, rgba(255, 96, 38, 0.1) 0%, transparent 100%);
-        z-index: 1;
-        opacity: 0;
-        transition: opacity 0.4s ease;
-    }
-
-    .team-card:hover::before {
-        opacity: 1;
-    }
-
-    .team-img-wrapper {
-        position: relative;
-        padding-top: 20px;
-        text-align: center;
-        z-index: 2;
-    }
-
-    .team-img {
-        width: 85%;
-        border-radius: 12px;
-        transition: all 0.4s ease;
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-    }
-
-    .team-card:hover .team-img {
-        transform: scale(1.05);
-        box-shadow: 0 15px 25px rgba(0, 0, 0, 0.25);
-    }
-
-    .team-card-content {
-        padding: 20px;
-        position: relative;
-        z-index: 2;
-        text-align: center;
-    }
-
-    .team-name {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 8px;
-        color: #fff;
-        position: relative;
-        display: inline-block;
-    }
-
-    .team-name::after {
-        content: '';
-        position: absolute;
-        bottom: -5px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: linear-gradient(90deg, #ff6026, #ff9a56);
-        transition: width 0.3s ease;
-    }
-
-    .team-card:hover .team-name::after {
-        width: 100%;
-    }
-
-    .team-position {
-        font-size: 1rem;
-        color: #ff6026;
-        margin-bottom: 15px;
-        font-weight: 500;
-    }
-
-    .team-social {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 15px;
-        opacity: 0;
-        transform: translateY(20px);
-        transition: all 0.4s ease;
-    }
-
-    .team-card:hover .team-social {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    .social-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.1);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: 16px;
-        transition: all 0.3s ease;
-    }
-
-    .social-icon:hover {
-        background: #ff6026;
-        transform: translateY(-5px);
-    }
-
-    /* Team Categories */
-    .team-categories {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 40px;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-
-    .category-btn {
-        padding: 8px 20px;
-        background: rgba(30, 30, 30, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 30px;
-        color: #aaa;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        backdrop-filter: blur(5px);
-    }
-
-    .category-btn.active,
-    .category-btn:hover {
-        background: linear-gradient(135deg, #ff6026, #ff9a56);
-        color: #fff;
-        box-shadow: 0 5px 15px rgba(255, 96, 38, 0.3);
-    }
-
-    /* Responsive Styles */
-    @media (max-width: 1200px) {
-        .team-grid {
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    /* Keyframe animation corrected for a seamless loop */
+    @keyframes slideTestimonials {
+        0% {
+            transform: translateX(0);
         }
 
-        .founders-row .team-card {
-            width: 250px;
+        100% {
+            /* This calculation moves the slider by the exact width of the 5 original cards.
+            (350px card width + 30px gap) * 5 cards = 1900px
+            */
+            transform: translateX(calc(-380px * 5));
         }
     }
 
+    /* Responsive Design */
     @media (max-width: 768px) {
-        .team-title {
-            font-size: 2.5rem;
+        .feedback-card {
+            width: 320px;
         }
 
-        .team-grid {
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
+        /* Adjust animation for mobile view if necessary, although the above calculation is robust */
+        .testimonial-slider {
+            animation-duration: 40s;
         }
-
-        .founders-row {
-            gap: 20px;
-        }
-
-        .founders-row .team-card {
-            width: 220px;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .team-page-container {
-            padding: 22% 0;
-        }
-
-        .team-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            max-width: 450px;
-            margin: 0 auto;
-        }
-
-        .founders-row {
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .founders-row .team-card {
-            width: 280px;
-        }
-
-        .team-title {
-            font-size: 2rem;
-        }
-    }
-
-
-    /* FAQ Styles */
-    .faq-accordion {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .faq-item {
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .faq-item:hover {
-        border-color: rgba(255, 96, 38, 0.3);
-    }
-
-    .faq-question {
-        padding: 20px;
-        background-color: rgba(0, 0, 0, 0.3);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .faq-question span {
-        font-weight: 600;
-        font-size: 17px;
-        color: #fff;
-    }
-
-    .faq-icon {
-        color: #ff6026;
-        font-size: 14px;
-        transition: transform 0.3s ease;
-    }
-
-    .faq-question.active .faq-icon {
-        transform: rotate(180deg);
-    }
-
-    .faq-answer {
-        padding: 0;
-        max-height: 0;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .faq-answer p {
-        margin: 0;
-        padding: 20px;
-        color: #aaa;
-        line-height: 1.6;
-    }
-
-    .faq-question.active+.faq-answer {
-        max-height: 500px;
-        padding: 0;
     }
 </style>
+
 {% endblock %}
 
 {% block body %}
-<div class="team-page-container">
-    <div class="team-bg-gradient"></div>
-    <div class="team-bg-particles" id="particles-js"></div>
-
-    <div class="container mt-4">
-        <div class="team-header" data-aos="fade-up" data-aos-duration="1000">
-            <h1 class="team-title">FLAMES '25 <i class="fas fa-fire"></i>
-            </h1>
-        </div>
-    </div>
+<div class="showcase-page-container">
+    <div class="showcase-bg-particles" id="particles-js"></div>
 
     <div class="container">
+        <div class="showcase-header mt-4" data-aos="fade-up" data-aos-duration="1000">
+            <h1 class="showcase-title">FLAMES '25 <i class="fas fa-fire"></i></h1>
+            <p class="showcase-subtitle">
+                A journey of learning, innovation, and excellence that ignited the passion for technology in hundreds of
+                students.
+            </p>
+            <div class="event-status-banner" data-aos="zoom-in" data-aos-delay="200">
+                <i class="fas fa-certificate"></i>
+                <a href="{% url 'verify_certificate' %}" class="text-white">
+                    Verify Your Certificate
+                </a>
+            </div>
+        </div>
 
-        <div class="skills-cards"
-            style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; margin-bottom: 40px;">
+        <div class="stats-grid" data-aos="fade-up" data-aos-duration="1000">
+            <div class="stat-card">
+                <div class="stat-number">400+</div>
+                <div class="stat-label">Students Enrolled</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">40+</div>
+                <div class="stat-label">Projects Completed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Completion Rate</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">4.8/5</div>
+                <div class="stat-label">Average Rating</div>
+            </div>
+        </div>
 
-            {% for course in courses %}
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">Student Testimonials <i class="fas fa-comments"></i></h2>
+            <p class="section-description">
+                Hear what our amazing students have to say about their FLAMES '25 experience.
+            </p>
+        </div>
 
-            <div class="skills-card"
-                style="flex: 0 0 calc(50% - 15px); min-width: 300px; background-color: rgba(255, 255, 255, 0.03); border-radius: 15px; padding: 30px; position: relative; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); overflow: hidden;">
-                <div class="skill-glow"
-                    style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, rgba(255,96,38,0.1) 0%, rgba(255,96,38,0) 70%); z-index: 0;">
-                </div>
-
-
-                <div style="display: flex; align-items: center; margin-bottom: 25px; position: relative; z-index: 1;">
-                    <div class="skill-icon"
-                        style="width: 60px; height: 60px; border-radius: 12px; background-color: rgba(255,96,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 20px;">
-                        <i class="{{ course.icon_class }}" style="font-size: 36px; color: {{ course.icon_color }};"></i>
+        <div class="testimonial-slider-container" data-aos="fade-up" data-aos-duration="800">
+            <div class="testimonial-slider" id="testimonialSlider">
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        FLAMES '25 was a game-changer for me! The hands-on approach and expert mentorship helped me
+                        build projects I never thought I could create.
                     </div>
-                    <div>
-                        <h3 style="margin: 0 0 5px; color: white; font-size: 24px; font-weight: 700;">{{ course.title }}
-                        </h3>
-                        <p style="margin: 0; color: #aaa; font-size: 16px;">{{ course.subtitle }}</p>
-                    </div>
-                </div>
-
-                <div class="skill-progress" style="position: relative; z-index: 1;">
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #aaa; font-size: 14px;">By:</span>
-                        <span style="color: white; font-weight: 600; font-size: 14px;">{{ course.get_all_instructors }}🔥</span>
-                    </div>
-                </div>
-
-                <div class="skills-outcomes"
-                    style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 20px; margin-bottom: 25px; position: relative; z-index: 1;">
-                    <h4 style="color: white; font-size: 16px; margin: 0 0 15px; font-weight: 600;">What You'll Learn:
-                    </h4>
-                    <ul style="margin: 0; padding: 0 0 0 20px; color: #aaa; font-size: 14px; line-height: 1.6;">
-                        {% for point in course.get_learning_points %}
-
-                        <li style="margin-bottom: 7px;">{{ point }}</li>
-
-                        {% endfor %}
-                    </ul>
-
-                    <!-- Price Section -->
-                    <div style="text-align: right; position: relative; z-index: 1;">
-
-
-                        {% if course.discount_price %}
-                        <div style="display: flex; justify-content: flex-end; align-items: baseline;">
-                            <span
-                                style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">
-                                ₹{{ course.price }}</span>
-                            <span style="color: #ff6026; font-size: 18px; font-weight: 700;">
-                                ₹{{ course.discount_price }}</span>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">AK</div>
+                        <div class="feedback-details">
+                            <h4>Arjun Kumar</h4>
+                            <p>Computer Science, 3rd Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
                         </div>
-                        <div style="color: #2ecc71; font-size: 12px; font-weight: 600; margin-top: 3px;">
-                            {% widthratio course.discount_price course.price 100 as discount_percent %}
-                            {{ discount_percent|add:"-100"|cut:"-" }}% OFF
+                    </div>
+                </div>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        The community support in FLAMES was incredible. Even as a beginner, I felt welcomed and
+                        supported throughout the journey. My project got recognized!
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">PS</div>
+                        <div class="feedback-details">
+                            <h4>Priya Sharma</h4>
+                            <p>Information Technology, 2nd Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
                         </div>
-                        {% else %}
-                        <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹
-                            UNAFFORDABLE</span>
-                        {% endif %}
-
-
-                        <!-- <div style="display: flex; justify-content: flex-end; align-items: baseline;">
-                        <span style="color: #aaa; font-size: 14px; text-decoration: line-through; margin-right: 10px;">₹ UNAFFORDABLE</span>
-                        <span style="color: #ff6026; font-size: 16px; font-weight: 600;">₹ Less than you expect... (coming soon)</span>
-                    </div> -->
+                    </div>
+                </div>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        FLAMES '25 didn't just teach me technical skills, it taught me how to think like a developer.
+                        The real-world projects and industry insights were invaluable.
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">RG</div>
+                        <div class="feedback-details">
+                            <h4>Rohit Gupta</h4>
+                            <p>Software Engineering, 3rd Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        The mentors were amazing! They guided us through every step and made complex concepts easy to
+                        understand. I built my first full-stack application here!
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">NK</div>
+                        <div class="feedback-details">
+                            <h4>Neha Kapoor</h4>
+                            <p>Computer Applications, 1st Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        The best investment I made in my career! FLAMES '25 not only taught me coding but also helped me
+                        build confidence. I landed my first internship because of it!
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">AM</div>
+                        <div class="feedback-details">
+                            <h4>Aditya Mishra</h4>
+                            <p>Computer Science, 3rd Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div style="display: flex; justify-content: space-between; gap: 10px;">
-                    <a href="{% url 'home_course_detail' course.slug %}" class="skills-details-btn"
-                        style="flex: 1; background: rgba(255, 255, 255, 0.05); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; text-align: center; text-decoration: none;">
-                        Details
-                    </a>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        FLAMES '25 was a game-changer for me! The hands-on approach and expert mentorship helped me
+                        build projects I never thought I could create.
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">AK</div>
+                        <div class="feedback-details">
+                            <h4>Arjun Kumar</h4>
+                            <p>Computer Science, 3rd Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        The community support in FLAMES was incredible. Even as a beginner, I felt welcomed and
+                        supported throughout the journey. My project got recognized!
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">PS</div>
+                        <div class="feedback-details">
+                            <h4>Priya Sharma</h4>
+                            <p>Information Technology, 2nd Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        FLAMES '25 didn't just teach me technical skills, it taught me how to think like a developer.
+                        The real-world projects and industry insights were invaluable.
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">RG</div>
+                        <div class="feedback-details">
+                            <h4>Rohit Gupta</h4>
+                            <p>Software Engineering, 3rd Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        The mentors were amazing! They guided us through every step and made complex concepts easy to
+                        understand. I built my first full-stack application here!
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">NK</div>
+                        <div class="feedback-details">
+                            <h4>Neha Kapoor</h4>
+                            <p>Computer Applications, 1st Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="feedback-card">
+                    <div class="feedback-content">
+                        The best investment I made in my career! FLAMES '25 not only taught me coding but also helped me
+                        build confidence. I landed my first internship because of it!
+                    </div>
+                    <div class="feedback-author">
+                        <div class="feedback-avatar">AM</div>
+                        <div class="feedback-details">
+                            <h4>Aditya Mishra</h4>
+                            <p>Computer Science, 3rd Year</p>
+                            <div class="rating-stars">
+                                <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                                    class="fas fa-star"></i><i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'student_flames_register' course.slug %}" class="skills-join-btn"
-                        style="flex: 1; background: {{ course.button_color }}; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                        Enroll Now
-                    </a>
+        <div class="d-flex float-end text-white mt-n4" style="font-style: italic;">
+            And 390+ more happy students 🔥...
+        </div>
 
-                    {% else %}
+        <div class="section-header" data-aos="fade-up">
+            <h2 class="section-title">Outstanding Projects <i class="fas fa-code"></i></h2>
+            <p class="section-description">
+                Discover the amazing projects our students built during FLAMES '25 - from web applications to innovative
+                solutions.
+            </p>
+        </div>
 
-                    <a href="{% url 'flames_register' course.slug %}" class="skills-join-btn"
-                        style="flex: 1; background: {{ course.button_color }}; color: white; border: none; padding: 12px 0; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: all 0.3s ease; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-                        Register Now
-                    </a>
-
-                    {% endif %}
+        <div class="projects-grid" data-aos="fade-up" data-aos-duration="800">
+            <div class="project-card">
+                <div class="project-image">
+                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                        alt="E-commerce Platform">
+                    <div class="project-overlay">
+                        <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> Code
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-external-link-alt"></i> Live
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3 class="project-title">EcoStore - Sustainable Shopping</h3>
+                    <p class="project-description">
+                        A full-stack e-commerce platform promoting eco-friendly products with advanced filtering and
+                        secure payment integration.
+                    </p>
+                    <div class="project-tech">
+                        <span class="tech-tag">React.js</span>
+                        <span class="tech-tag">Node.js</span>
+                        <span class="tech-tag">MongoDB</span>
+                        <span class="tech-tag">Stripe</span>
+                    </div>
+                    <div class="project-student">
+                        <strong>Created by:</strong> Ananya Verma, CSE 3rd Year
+                    </div>
                 </div>
             </div>
 
-            {% endfor %}
+            <div class="project-card">
+                <div class="project-image">
+                    <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                        alt="Task Management App">
+                    <div class="project-overlay">
+                        <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> Code
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-external-link-alt"></i> Demo
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3 class="project-title">StudySync - Collaborative Learning</h3>
+                    <p class="project-description">
+                        A collaborative platform for students to share notes, create study groups, and track academic
+                        progress with real-time chat.
+                    </p>
+                    <div class="project-tech">
+                        <span class="tech-tag">Vue.js</span>
+                        <span class="tech-tag">Django</span>
+                        <span class="tech-tag">PostgreSQL</span>
+                        <span class="tech-tag">WebSocket</span>
+                    </div>
+                    <div class="project-student">
+                        <strong>Created by:</strong> Karthik Raj, IT 2nd Year
+                    </div>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-image">
+                    <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+                        alt="Portfolio Website">
+                    <div class="project-overlay">
+                        <div class="project-links">
+                            <a href="#" class="project-link">
+                                <i class="fab fa-github"></i> Code
+                            </a>
+                            <a href="#" class="project-link">
+                                <i class="fas fa-external-link-alt"></i> Visit
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-content">
+                    <h3 class="project-title">SmartFinance - Budget Tracker</h3>
+                    <p class="project-description">
+                        An intelligent personal finance app with expense categorization, budget planning, and financial
+                        insights using data visualization.
+                    </p>
+                    <div class="project-tech">
+                        <span class="tech-tag">Angular</span>
+                        <span class="tech-tag">Spring Boot</span>
+                        <span class="tech-tag">MySQL</span>
+                        <span class="tech-tag">Chart.js</span>
+                    </div>
+                    <div class="project-student">
+                        <strong>Created by:</strong> Sneha Patel, CSE 3rd Year
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="container mt-4">
-        <div class="team-header" data-aos="fade-up" data-aos-duration="1000">
-            <h1 class="team-title">FAQs <i class="fas fa-fire"></i>
-            </h1>
-        </div>
-    </div>
-    <div style="background-color: rgba(0, 0, 0, 0.2); border-radius: 10px; padding: 25px;">
-        <div class="faq-accordion">
-            <!-- FAQ Item 1 -->
-            <div class="faq-item">
-                <div class="faq-question">
-                    <span>Wait... is the FLAMES 25 certificate actually accepted by universities like GLA and
-                        LPU?</span>
-                    <i class="fas fa-chevron-down faq-icon"></i>
-                </div>
-                <div class="faq-answer">
-                    <p>Yup, you read that right!🔥 Both GLA and LPU and all other reputed colleges and universities do
-                        accept the FLAMES 25 course certificate. So
-                        it’s not just a cool flex — it’s officially recognized too! 😉</p>
-                </div>
-            </div>
-
-            <!-- FAQ Item 2 -->
-            <div class="faq-item">
-                <div class="faq-question">
-                    <span>Do I need prior experience to join this FLAME?</span>
-                    <i class="fas fa-chevron-down faq-icon"></i>
-                </div>
-                <div class="faq-answer">
-                    <p>Not really! 🔥 Anyone can join. But since it’s made mainly for students going into 3rd year,
-                        it’s better if you know a little bit of HTML, CSS, and JavaScript. It’ll make things easier
-                        for you!</p>
-                </div>
-            </div>
-
-            <!-- FAQ Item 3 -->
-            <div class="faq-item">
-                <div class="faq-question">
-                    <span>How does team registration work?</span>
-                    <i class="fas fa-chevron-down faq-icon"></i>
-                </div>
-                <div class="faq-answer">
-                    <p>Team registration allows you to register a group of people at a special discounted rate. When
-                        you
-                        select "Team Registration" during enrollment, enter your team member's usernames and done!.
-                        The pricing
-                        is
-                        calculated as (course price * 5) - (499 * 5), giving everyone a substantial discount!</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
-<!-- Particle.js for background effects -->
+<div id="modal1" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Opening Ceremony - FLAMES '25</h3>
+            <span class="close-modal" onclick="closeModal('modal1')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Opening Ceremony">
+            <p style="color: #aaa; margin-top: 15px;">The grand opening of FLAMES '25 with over 500 enthusiastic
+                students ready to embark on their learning journey.</p>
+        </div>
+    </div>
+</div>
+
+<div id="modal2" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Interactive Workshop Sessions</h3>
+            <span class="close-modal" onclick="closeModal('modal2')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Workshop Session">
+            <p style="color: #aaa; margin-top: 15px;">Students actively participating in hands-on coding workshops with
+                expert mentors guiding them through complex concepts.</p>
+        </div>
+    </div>
+</div>
+
+<div id="modal3" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Team Collaboration</h3>
+            <span class="close-modal" onclick="closeModal('modal3')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <img src="https://images.unsplash.com/photo-1515187029135-18ee286d815b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Team Collaboration">
+            <p style="color: #aaa; margin-top: 15px;">Students working together on collaborative projects, sharing ideas
+                and building innovative solutions as a team.</p>
+        </div>
+    </div>
+</div>
+
+<div id="modal4" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Final Presentations</h3>
+            <span class="close-modal" onclick="closeModal('modal4')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                alt="Final Presentations">
+            <p style="color: #aaa; margin-top: 15px;">The culminating moment where students presented their completed
+                projects, showcasing their skills and creativity.</p>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-<!-- AOS Library for scroll animations -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
 <script>
-
-    // FAQ accordion functionality
-    const faqQuestions = document.querySelectorAll('.faq-question');
-
-    faqQuestions.forEach(question => {
-        question.addEventListener('click', function () {
-            this.classList.toggle('active');
-
-            // Get the answer element (next sibling)
-            const answer = this.nextElementSibling;
-
-            // Toggle the answer visibility
-            if (this.classList.contains('active')) {
-                answer.style.maxHeight = answer.scrollHeight + 'px';
-            } else {
-                answer.style.maxHeight = '0';
-            }
-        });
-    });
-
-
-    // Initialize AOS animations
     document.addEventListener('DOMContentLoaded', function () {
+        // Initialize AOS animations
         AOS.init({
             duration: 800,
             easing: 'ease-in-out',
-            once: false
+            once: true,
+            offset: 100
         });
 
         // Initialize particles.js
         particlesJS('particles-js', {
             "particles": {
                 "number": {
-                    "value": 100,
+                    "value": 80,
                     "density": {
                         "enable": true,
                         "value_area": 800
@@ -610,18 +506,15 @@ F.L.A.M.E.S🔥 | Angaar
                     "stroke": {
                         "width": 0,
                         "color": "#000000"
-                    },
-                    "polygon": {
-                        "nb_sides": 5
                     }
                 },
                 "opacity": {
-                    "value": 0.3,
+                    "value": 0.2,
                     "random": true,
                     "anim": {
                         "enable": true,
                         "speed": 1,
-                        "opacity_min": 0.1,
+                        "opacity_min": 0.05,
                         "sync": false
                     }
                 },
@@ -639,7 +532,7 @@ F.L.A.M.E.S🔥 | Angaar
                     "enable": true,
                     "distance": 150,
                     "color": "#ff6026",
-                    "opacity": 0.2,
+                    "opacity": 0.15,
                     "width": 1
                 },
                 "move": {
@@ -649,12 +542,7 @@ F.L.A.M.E.S🔥 | Angaar
                     "random": true,
                     "straight": false,
                     "out_mode": "out",
-                    "bounce": false,
-                    "attract": {
-                        "enable": false,
-                        "rotateX": 600,
-                        "rotateY": 1200
-                    }
+                    "bounce": false
                 }
             },
             "interactivity": {
@@ -674,160 +562,146 @@ F.L.A.M.E.S🔥 | Angaar
                     "grab": {
                         "distance": 140,
                         "line_linked": {
-                            "opacity": 0.5
+                            "opacity": 0.4
                         }
-                    },
-                    "bubble": {
-                        "distance": 400,
-                        "size": 40,
-                        "duration": 2,
-                        "opacity": 8,
-                        "speed": 3
-                    },
-                    "repulse": {
-                        "distance": 200,
-                        "duration": 0.4
                     },
                     "push": {
                         "particles_nb": 4
-                    },
-                    "remove": {
-                        "particles_nb": 2
                     }
                 }
             },
             "retina_detect": true
         });
 
-        // Registration Modal functionality
-        const registerButtons = document.querySelectorAll('.skills-join-btn');
-        registerButtons.forEach(btn => {
-            btn.addEventListener('click', function () {
-                const courseId = this.getAttribute('data-course-id');
-                const courseTitle = this.getAttribute('data-course-title');
-                document.getElementById('modalCourseName').textContent = courseTitle;
-                document.getElementById('course_id').value = courseId;
-                document.getElementById('registrationModal').style.display = 'block';
+        // The broken testimonial slider JS has been removed.
+        // The animation is now handled purely by CSS for better performance and reliability.
+    });
+
+    // Modal Functions
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    }
+
+    // Close modal when clicking outside of it
+    window.onclick = function (event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (modal.style.display === 'block') {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
             });
+        }
+    });
+
+    // Smooth scrolling for internal links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add loading effect for project links
+    document.querySelectorAll('.project-link').forEach(link => {
+        link.addEventListener('click', function (e) {
+            e.preventDefault();
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                alert('This would open: ' + this.href + '\n(Demo mode - replace with actual project links)');
+            }, 1500);
+        });
+    });
+
+    // Add hover effects for cards
+    const cards = document.querySelectorAll('.project-card, .stat-card');
+
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function () {
+            this.style.transform = 'translateY(-8px) scale(1.02)';
+            this.style.transition = 'transform 0.3s ease';
         });
 
-        // Form submission
-        /* document.getElementById('registrationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
-            
-            // Show loading state
-            const submitBtn = document.getElementById('submitRegistration');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Processing...';
-            submitBtn.disabled = true;
-            
-            fetch('', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert(data.message);
-                    closeModal();
-                    document.getElementById('registrationForm').reset();
+        card.addEventListener('mouseleave', function () {
+            this.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+
+    // Animate stats on scroll
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const statsObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumberEl = entry.target.querySelector('.stat-number');
+                const finalNumberText = statNumberEl.textContent;
+
+                const isPercentage = finalNumberText.includes('%');
+                const isRating = finalNumberText.includes('/');
+
+                let targetValue;
+                if (isPercentage) {
+                    targetValue = parseInt(finalNumberText);
+                } else if (isRating) {
+                    targetValue = parseFloat(finalNumberText);
                 } else {
-                    alert('Error: ' + data.message);
+                    targetValue = parseInt(finalNumberText.replace('+', ''));
                 }
-            })
-            .catch(error => {
-                alert('An error occurred. Please try again.');
-                console.error('Error:', error);
-            })
-            .finally(() => {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            });
-        }); */
-    });
 
-    // Close modal function
-    function closeModal() {
-        document.getElementById('registrationModal').style.display = 'none';
-    }
+                let current = 0;
+                const increment = isRating ? 0.1 : Math.ceil(targetValue / 50);
 
-    // Close modal if clicked outside
-    window.onclick = function (event) {
-        const modal = document.getElementById('registrationModal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    }
-
-    // Handle referral code validation and price display
-    document.getElementById('referral_code').addEventListener('blur', function () {
-        const referralCode = this.value.trim();
-        const courseId = document.getElementById('course_id').value;
-        const registrationMode = document.getElementById('registration_mode').value;
-
-        if (referralCode) {
-            // Fetch to validate referral code
-            fetch(`{% url "validate_referral" %}?code=${referralCode}&course_id=${courseId}&registration_mode=${registrationMode}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const messageElement = document.getElementById('referral_message');
-                    const priceDisplay = document.getElementById('price_display');
-                    const originalPriceElement = document.querySelector('.original-price');
-                    const discountedPriceElement = document.querySelector('.discounted-price');
-
-                    if (data.status === 'success') {
-                        messageElement.textContent = 'Valid referral code! Discount applied.';
-                        messageElement.style.color = '#38cb89';
-
-                        // Display price information
-                        priceDisplay.style.display = 'block';
-                        originalPriceElement.textContent = `Original Price: ₹${data.original_price}`;
-                        discountedPriceElement.textContent = `Discounted Price: ₹${data.discounted_price}`;
-                    } else {
-                        messageElement.textContent = data.message || 'Invalid referral code.';
-                        messageElement.style.color = '#f24e1e';
-                        priceDisplay.style.display = 'none';
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= targetValue) {
+                        current = targetValue;
+                        clearInterval(timer);
                     }
-                })
-                .catch(error => {
-                    console.error('Error validating referral code:', error);
-                    document.getElementById('referral_message').textContent = 'Error validating code. Please try again.';
-                    document.getElementById('referral_message').style.color = '#f24e1e';
-                });
-        } else {
-            document.getElementById('referral_message').textContent = '';
-            document.getElementById('price_display').style.display = 'none';
-        }
+
+                    if (isPercentage) {
+                        statNumberEl.textContent = Math.floor(current) + '%';
+                    } else if (isRating) {
+                        statNumberEl.textContent = current.toFixed(1) + '/5';
+                    } else {
+                        statNumberEl.textContent = Math.floor(current) + '+';
+                    }
+                }, 40);
+
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    document.querySelectorAll('.stat-card').forEach(card => {
+        statsObserver.observe(card);
     });
-
-    // Toggle referral field based on registration mode
-    function toggleReferralFields() {
-        const registrationMode = document.getElementById('registration_mode').value;
-        const referralGroup = document.getElementById('referral_code_group');
-        const referralInput = document.getElementById('referral_code');
-        const referralMessage = document.getElementById('referral_message');
-
-        // Reset values
-        referralInput.value = '';
-        referralMessage.textContent = '';
-        document.getElementById('price_display').style.display = 'none';
-
-        if (registrationMode === 'TEAM') {
-            referralGroup.querySelector('label').textContent = 'Team Referral Code';
-        } else {
-            referralGroup.querySelector('label').textContent = 'Alumni Referral Code (Optional)';
-        }
-    }
 </script>
+
 {% endblock %}
