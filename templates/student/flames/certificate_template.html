@@ -125,11 +125,22 @@
             z-index: 10;
         }
 
+
         .top-left-logo-img {
             width: 100%;
             height: auto;
             object-fit: contain;
             display: block;
+        }
+
+        .top-left-logo-img-2 {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            position: absolute;
+            /* Position it below the first logo */
+            left: 150px;
         }
 
         .top-right-logo {
@@ -363,15 +374,15 @@
         }
 
         /* Add this to your CSS */
-.certificate-container.download-mode {
-    width: 1153px !important;
-    height: 880px !important;
-    max-width: none !important;
-    max-height: none !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    padding: 60px 80px !important;
-}
+        .certificate-container.download-mode {
+            width: 1153px !important;
+            height: 880px !important;
+            max-width: none !important;
+            max-height: none !important;
+            min-width: 0 !important;
+            min-height: 0 !important;
+            padding: 60px 80px !important;
+        }
     </style>
 </head>
 
@@ -393,9 +404,27 @@
         <div class="mesh-right"></div>
 
         <!-- Header with logos in top corners -->
+
+        {% if event.name != "AI Tool Mastery Workshop @GTBIT" %}
+
         <div class="top-left-logo">
             <img src="{% static 'img/home/w3logo.png' %}" alt="Logo" class="top-left-logo-img">
         </div>
+
+        {% else %}
+
+        <div class="top-left-logo">
+            <img src="{% static 'img/student/enliven_logo.jpeg' %}" alt="Logo" style="width: 70%;"
+                class="top-left-logo-img">
+        </div>
+
+        <div class="top-left-logo">
+            <img src="{% static 'img/student/gtbit_logo.jpeg' %}" alt="Logo" style="width: 57%;"
+                class="top-left-logo-img-2">
+        </div>
+
+        {% endif %}
+
         <div class="top-right-logo">
             <img src="{% static 'img/home/angaar_logo.jpg' %}" alt="Logo" class="top-right-logo-img">
         </div>
@@ -418,6 +447,7 @@
 
         </div>
 
+        {% if event.name != "AI Tool Mastery Workshop @GTBIT" %}
         <!-- Footer with three signatures -->
         <div class="certificate-footer">
             <div class="signature-block">
@@ -443,6 +473,35 @@
                 <div class="signature-title">Co-founder (The Angaar Batch)</div>
             </div>
         </div>
+
+        {% else %}
+
+        <div class="certificate-footer">
+            <div class="signature-block">
+                <img src="{% static 'img/student/gagandeep_sign.jpeg' %}" alt="Signature"
+                    style="width: 100px; height: auto;">
+                <div class="signature-line"></div>
+                <div class="signature-name">Dr Gagandeep kaur</div>
+                <div class="signature-title">Event Co-ordinator</div>
+            </div>
+
+            <div class="signature-block">
+                <img src="{% static 'img/student/japneet_sign.jpeg' %}" alt="Signature"
+                    style="width: 90px; height: auto;">
+                <div class="signature-line"></div>
+                <div class="signature-name">Japneet Singh</div>
+                <div class="signature-title">President (Enliven)</div>
+            </div>
+
+            <div class="signature-block">
+                <img src="{% static 'img/student/dk_sign.jpeg' %}" alt="Signature" style="width: 100px; height: auto;">
+                <div class="signature-line"></div>
+                <div class="signature-name">Divyanshu Khandelwal</div>
+                <div class="signature-title">Co-founder (The Angaar Batch)</div>
+            </div>
+        </div>
+
+        {% endif %}
     </div>
 
 
@@ -459,7 +518,7 @@
             try {
                 const certificate = document.getElementById('certificate');
 
-                        certificate.classList.add('download-mode');
+                certificate.classList.add('download-mode');
 
                 // Wait for fonts to load
                 await document.fonts.ready;
@@ -478,7 +537,7 @@
                     foreignObjectRendering: false,
                 });
 
-                        certificate.classList.remove('download-mode');
+                certificate.classList.remove('download-mode');
 
                 // Create download link
                 const link = document.createElement('a');
