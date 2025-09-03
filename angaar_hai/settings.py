@@ -75,6 +75,7 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 
     'allauth.account.middleware.AccountMiddleware',
+    'angaar_hai.middleware.MaintenanceModeMiddleware',
 
     
 ]

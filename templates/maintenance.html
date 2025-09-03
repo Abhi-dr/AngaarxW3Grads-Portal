@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚧 The Angaar Batch - Under Maintenance</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto+Mono:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #121212 50%, #1a1a1a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ff5722;
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+            opacity: 0.3;
+        }
+
+        .particle:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+            animation-duration: 6s;
+        }
+
+        .particle:nth-child(2) {
+            left: 20%;
+            animation-delay: 1s;
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(3) {
+            left: 30%;
+            animation-delay: 2s;
+            animation-duration: 7s;
+        }
+
+        .particle:nth-child(4) {
+            left: 40%;
+            animation-delay: 0.5s;
+            animation-duration: 9s;
+        }
+
+        .particle:nth-child(5) {
+            left: 50%;
+            animation-delay: 1.5s;
+            animation-duration: 5s;
+        }
+
+        .particle:nth-child(6) {
+            left: 60%;
+            animation-delay: 2.5s;
+            animation-duration: 8s;
+        }
+
+        .particle:nth-child(7) {
+            left: 70%;
+            animation-delay: 3s;
+            animation-duration: 6s;
+        }
+
+        .particle:nth-child(8) {
+            left: 80%;
+            animation-delay: 4s;
+            animation-duration: 7s;
+        }
+
+        .particle:nth-child(9) {
+            left: 90%;
+            animation-delay: 5s;
+            animation-duration: 9s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            90% {
+                opacity: 0.3;
+            }
+
+            100% {
+                transform: translateY(-100vh) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            text-align: center;
+            max-width: 800px;
+            padding: 2rem;
+            animation: fadeInUp 1s ease-out;
+            z-index: 1;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 700;
+            color: #ff5722;
+            margin-bottom: 1rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 10px #ff5722, 0 0 20px #ff5722, 0 0 30px #ff5722;
+            }
+
+            to {
+                text-shadow: 0 0 20px #ff5722, 0 0 30px #ff5722, 0 0 40px #ff5722;
+            }
+        }
+
+        .main-heading {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            animation: slideInLeft 1s ease-out 0.3s both;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .subheading {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: #bbbbbb;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            animation: slideInRight 1s ease-out 0.6s both;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .loader-container {
+            margin: 3rem 0;
+            animation: fadeIn 1s ease-out 0.9s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .terminal-loader {
+            background: #1a1a1a;
+            border: 2px solid #ff5722;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem auto;
+            max-width: 400px;
+            font-family: 'Roboto Mono', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            color: #ff5722;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 0.3rem;
+            margin-right: 1rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red {
+            background: #ff5f56;
+        }
+
+        .dot.yellow {
+            background: #ffbd2e;
+        }
+
+        .dot.green {
+            background: #27ca3f;
+        }
+
+        .terminal-content {
+            font-size: 0.9rem;
+            color: #00ff41;
+        }
+
+        .typing-animation {
+            overflow: hidden;
+            border-right: 2px solid #00ff41;
+            white-space: nowrap;
+            animation: typing 3s steps(40, end) infinite, blink 0.75s step-end infinite;
+        }
+
+        @keyframes typing {
+
+            0%,
+            100% {
+                width: 0;
+            }
+
+            50% {
+                width: 100%;
+            }
+        }
+
+        @keyframes blink {
+
+            from,
+            to {
+                border-color: transparent;
+            }
+
+            50% {
+                border-color: #00ff41;
+            }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 87, 34, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff5722;
+            animation: spin 1s ease-in-out infinite;
+            margin: 1rem;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .eta-section {
+            background: rgba(255, 87, 34, 0.1);
+            border: 1px solid #ff5722;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+        }
+
+        .eta-time {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: #ff5722;
+            font-weight: 600;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .patience-note {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: #bbbbbb;
+            margin: 2rem 0;
+            line-height: 1.6;
+            animation: fadeIn 1s ease-out 1.2s both;
+        }
+
+        .fire-emoji {
+            display: inline-block;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-10px);
+            }
+
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .footer {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            color: #888;
+            font-size: 0.9rem;
+            animation: fadeIn 1s ease-out 1.5s both;
+        }
+
+        .footer a {
+            color: #ff5722;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #ff7043;
+            text-decoration: underline;
+        }
+
+        .code-snippet {
+            font-family: 'Roboto Mono', monospace;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #f0f6fc;
+            overflow-x: auto;
+        }
+
+        .code-comment {
+            color: #7d8590;
+        }
+
+        .code-keyword {
+            color: #ff7b72;
+        }
+
+        .code-string {
+            color: #a5d6ff;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .terminal-loader {
+                margin: 1rem auto;
+                padding: 1rem;
+            }
+
+            .eta-section {
+                padding: 1rem;
+                margin: 1.5rem 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-heading {
+                font-size: 2rem;
+            }
+
+            .terminal-loader {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Hover effects for interactive elements */
+        .terminal-loader:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 87, 34, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .eta-section:hover {
+            background: rgba(255, 87, 34, 0.15);
+            transition: background 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated background particles -->
+    <div class="bg-animation">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="container">
+        <div class="logo">The Angaar Batch</div>
+
+        <h1 class="main-heading">🚧 Site Under Maintenance</h1>
+
+        <p class="subheading">
+            The Angaar Batch platform is currently undergoing updates to bring you a better experience.
+        </p>
+
+        <div class="loader-container">
+            <div class="terminal-loader">
+                <div class="terminal-header">
+                    <div class="terminal-dots">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <span>~/the-angaar-batch/maintenance</span>
+                </div>
+                <div class="terminal-content">
+                    <div class="typing-animation">$ deploying updates...</div>
+                </div>
+            </div>
+
+            <div class="spinner"></div>
+        </div>
+
+        <div class="code-snippet">
+            <span class="code-comment">// Current Status</span>
+            <span class="code-keyword">const</span> maintenanceStatus = {
+            <span class="code-string">"status"</span>: <span class="code-string">"in_progress"</span>,
+            <span class="code-string">"progress"</span>: <span class="code-string">"75%"</span>,
+            <span class="code-string">"eta"</span>: <span class="code-string">"6 PM IST"</span>
+            };
+        </div>
+
+        <div class="eta-section">
+            <h3>Expected Back Online By:</h3>
+            <div class="eta-time">6 PM IST</div>
+        </div>
+
+        <p class="patience-note">
+            We appreciate your patience. In the meantime, keep the code fire burning. <span class="fire-emoji">🔥</span>
+        </p>
+
+        <div class="footer">
+            <p>Having issues? <a href="mailto:team@theangaarbatch.in">Contact: team@theangaarbatch.in</a></p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">© 2025 The Angaar Batch. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>

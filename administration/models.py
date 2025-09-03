@@ -12,3 +12,22 @@ class Achievement(models.Model):
     def __str__(self):
         return f"{self.student.username} - {self.title}"
 
+
+class SiteSettings(models.Model):
+    maintenance_mode = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "Site Settings"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # Always keep the ID as 1 (singleton)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_instance(cls):
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+    class Meta:
+        verbose_name = "Site Settings"
+        verbose_name_plural = "Site Settings"
