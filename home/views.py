@@ -241,7 +241,6 @@ def check_rate_limit(request):
     return True
 
 @require_http_methods(["GET", "POST"])
-@ratelimit(key='ip', rate='10/m', method='POST', block=False)
 def verify_certificate(request):
     certificate_obj = None
     status = None
