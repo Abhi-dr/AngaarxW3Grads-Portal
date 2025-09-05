@@ -25,6 +25,14 @@ class Event(models.Model):
         help_text="Date when the event ends. Used for certificate validity."
     )
     description = models.TextField(blank=True)
+    
+    certificate_template = models.ForeignKey(
+        'CertificateTemplate',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Template used for certificates issued for this event. If not set, uses default template."
+    )
 
     class Meta:
         ordering = ["-start_date"]
@@ -60,11 +68,6 @@ class Certificate(models.Model):
     student = models.ForeignKey(Student, on_delete=models.PROTECT, related_name="certificates")
     issued_date = models.DateField(default=timezone.now)
     approved = models.BooleanField(default=False)
-    template_version = models.ForeignKey(
-        CertificateTemplate,
-        on_delete=models.PROTECT,
-        help_text="Template used for rendering this certificate."
-    )
 
     class Meta:
         unique_together = ("event", "student")
@@ -86,10 +89,17 @@ class Certificate(models.Model):
 
 def generate_pdf(self):
     """Render certificate as a PDF in memory using WeasyPrint."""
-    template = get_template_from_db(self.template_version.html_template)
+    # Get template from event instead of certificate
+    if self.event.certificate_template and self.event.certificate_template.html_template:
+        template = get_template_from_db(self.event.certificate_template.html_template)
+    else:
+        # Fallback to default template
+        template = get_template('student/flames/certificate_template.html')
+    
     context = {
         "student": self.student,
         "event": self.event,
+        "certificate": self,
         "issued_date": self.issued_date.strftime("%B %d, %Y"),
         "certificate_id": self.certificate_id,
     }

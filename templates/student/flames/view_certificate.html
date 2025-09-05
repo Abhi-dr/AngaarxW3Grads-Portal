@@ -23,8 +23,13 @@ active
 
     {% endfor %}
 
-
-    {% include "student/flames/certificate_template.html" %}
+    {% if custom_template_content %}
+        <!-- Render the dynamic template from database -->
+        {{ custom_template_content|safe }}
+    {% else %}
+        <!-- Fallback to default template -->
+        {% include "student/flames/certificate_template.html" %}
+    {% endif %}
 
     
 

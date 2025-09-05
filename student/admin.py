@@ -187,8 +187,22 @@ from .event_models import Event, Certificate, CertificateTemplate
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "start_date")
+    list_display = ("name", "code", "start_date", "certificate_template")
     search_fields = ("name", "code")
+    list_filter = ("start_date", "certificate_template")
+    
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'code', 'description')
+        }),
+        ('Dates', {
+            'fields': ('start_date', 'end_date'),
+        }),
+        ('Certificate Template', {
+            'fields': ('certificate_template',),
+            'description': 'Select the template to use for certificates issued for this event.'
+        }),
+    )
 
 
 @admin.register(CertificateTemplate)
@@ -196,6 +210,27 @@ class CertificateTemplateAdmin(admin.ModelAdmin):
     list_display = ("name", "created_at")
     search_fields = ("name",)
     ordering = ("-created_at",)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('name',)
+        }),
+        ('Template Content', {
+            'fields': ('html_template',),
+            'classes': ('wide',),
+            'description': 'HTML template with Django template variables like {{ student.first_name }}, {{ event.name }}, etc.'
+        }),
+    )
+    
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        # Make the html_template field use a textarea widget
+        form.base_fields['html_template'].widget.attrs.update({
+            'rows': 20,
+            'cols': 100,
+            'style': 'font-family: monospace;'
+        })
+        return form
 
 class CertificateImportResource(resources.ModelResource):
     email = fields.Field(column_name="email")
@@ -242,3 +277,16 @@ class CertificateImportAdmin(ImportMixin, admin.ModelAdmin):
     list_display = ("certificate_id", "student", "event", "approved", "issued_date")
     search_fields = ("certificate_id", "student__first_name", "student__last_name", "student__email")
     list_filter = ("approved", "event")
+    
+    fieldsets = (
+        (None, {
+            'fields': ('event', 'student', 'approved')
+        }),
+        ('Generated Fields', {
+            'fields': ('certificate_id', 'issued_date'),
+            'classes': ('collapse',),
+            'description': 'These fields are automatically generated.'
+        }),
+    )
+    
+    readonly_fields = ('certificate_id', 'issued_date')

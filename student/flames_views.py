@@ -5,6 +5,7 @@ from django.conf import settings
 from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeamMember, Session
 from .event_models import Event, CertificateTemplate, Certificate
 from django.template.loader import get_template
+from django.template import engines, Template, Context
 from weasyprint import HTML
 from django.http import HttpResponse
 
@@ -201,11 +202,31 @@ def my_course(request, slug):
 def view_certificate(request, id):
     certificate = get_object_or_404(Certificate, id=id, student=request.user)
     
-    parameters = {
-        'certificate': certificate,
-        'event': certificate.event,
-        'student': request.user,
-    }
+    # Check if event has a custom template
+    if certificate.event.certificate_template and certificate.event.certificate_template.html_template:
+        # Render the custom template from database
+        template = Template(certificate.event.certificate_template.html_template)
+        context = Context({
+            'certificate': certificate,
+            'event': certificate.event,
+            'student': request.user,
+        })
+        rendered_content = template.render(context)
+        
+        parameters = {
+            'certificate': certificate,
+            'event': certificate.event,
+            'student': request.user,
+            'custom_template_content': rendered_content,
+        }
+    else:
+        # Use default template
+        parameters = {
+            'certificate': certificate,
+            'event': certificate.event,
+            'student': request.user,
+            'custom_template_content': None,
+        }
 
     return render(request, 'student/flames/view_certificate.html', parameters)
 
