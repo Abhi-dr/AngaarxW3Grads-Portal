@@ -258,15 +258,14 @@ class CertificateImportResource(resources.ModelResource):
         if not event:
             row["skip_reason"] = "Event not found"
             return
-        template_version = CertificateTemplate.objects.latest("created_at")
 
         # Create cert if it doesn't exist
+        # Template is now associated with the event, not individual certificates
         Certificate.objects.get_or_create(
             event=event,
             student=student,
             defaults={
                 "approved": True,
-                "template_version": template_version
             }
         )
 
