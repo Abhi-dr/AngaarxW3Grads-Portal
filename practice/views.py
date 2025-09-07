@@ -20,19 +20,19 @@ from django.views.decorators.cache import cache_control
 
 from .models import Sheet, Question, TestCase, Submission, DriverCode, Streak
 
-@login_required(login_url="login")
-def practice(request):
+# @login_required(login_url="login")
+# def practice(request):
     
-    sheets = Sheet.objects.filter(is_approved=True)
+#     sheets = Sheet.objects.filter(is_approved=True)
     
-    # fetch only those sheets which are not a part of any batch
-    sheets = [sheet for sheet in sheets if not sheet.batches.exists()]
+#     # fetch only those sheets which are not a part of any batch
+#     sheets = [sheet for sheet in sheets if not sheet.batches.exists()]
     
-    parameters = {
-        "sheets": sheets
-    }
+#     parameters = {
+#         "sheets": sheets
+#     }
     
-    return render(request, "practice/practice.html", parameters)
+#     return render(request, "practice/practice.html", parameters)
 
 # ============================== SHEET VIEW =========================
 
@@ -49,7 +49,7 @@ def sheet(request, slug):
     
     if not sheet.is_enabled:
         messages.info(request, "This sheet is not enabled.")
-        return redirect('practice')
+        return redirect('sheet', slug=sheet.slug)
 
     parameters = {
         "sheet": sheet,

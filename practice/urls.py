@@ -5,7 +5,7 @@ from . import views, execution_views
 
 
 urlpatterns = [
-    path("", views.practice , name="practice"),
+    # path("", views.practice , name="practice"),
     
     # path("<slug:slug>/", views.sheet , name="sheet"),
     path("playground", views.playground, name="playground"),
