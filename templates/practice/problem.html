@@ -402,7 +402,6 @@ active
 
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'practice' %}">Practice</a></li>
             <li class="breadcrumb-item">
                 {% for sheet in question.sheets.all %}
                 <a href="{% url 'my_sheet' sheet.slug %}">{{ sheet.name }}</a>{% if not forloop.last %}, {% endif %}
@@ -1436,7 +1435,7 @@ active
         // Handle sheet disabled
         if (data.sheet_disabled) {
             alert(data.sheet_disabled);
-            window.location.href = "{% url 'practice' %}";
+            window.location.href = "{% url 'my_sheet' sheet.slug %}";
             return;
         }
 
