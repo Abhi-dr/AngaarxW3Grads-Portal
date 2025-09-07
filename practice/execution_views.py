@@ -232,7 +232,7 @@ def problem(request, slug):
     except Exception as e:
         print(f"Error loading problem page: {e}")
         messages.error(request, f"Error loading problem: {str(e)}")
-        return redirect('practice')
+        return redirect('sheet', slug=sheet.slug if sheet else 'problem_set')
 
 # ============================================ UPDATE COINS ===============================================
 
