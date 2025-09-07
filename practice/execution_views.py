@@ -210,7 +210,7 @@ def problem(request, slug):
             # Check if the question is enabled for the user
             if question not in enabled_questions:
                 messages.info(request, "Beta jb tu paida nhi hua tha tb m URL se khelta tha. Mehnt kr 🙂")
-                return redirect('sheet', slug=sheet.slug)
+                return redirect('my_sheet', slug=sheet.slug)
                 
         # Process markdown in problem statement
         if question.scenario:
@@ -232,7 +232,7 @@ def problem(request, slug):
     except Exception as e:
         print(f"Error loading problem page: {e}")
         messages.error(request, f"Error loading problem: {str(e)}")
-        return redirect('sheet', slug=sheet.slug if sheet else 'problem_set')
+        return redirect('my_sheet', slug=sheet.slug if sheet else 'problem_set')
 
 # ============================================ UPDATE COINS ===============================================
 
