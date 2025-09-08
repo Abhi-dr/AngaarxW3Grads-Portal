@@ -606,12 +606,6 @@ Test Code | {{ question.title }}
                 console.log("TOKEN: ", data.token);
 
 
-                if (data.sheet_disabled) {
-                    alert(data.sheet_disabled);
-                    // rediret to practice page
-                    window.location.href = "{% url 'practice' %}";
-                }
-
                 clearInterval(countdownInterval); // Clear the interval
                 submit_btn.prop("disabled", false);
                 submit_btn.text("Submit Code");

@@ -1071,7 +1071,7 @@ def render_next_question_in_sheet(request, sheet_id, question_id):
 
     if current_question not in sheet.questions.all():
         messages.error(request, "This question is not a part of the sheet.")
-        return redirect('sheet', slug=sheet.slug)
+        return redirect('my_sheet', slug=sheet.slug)
 
     # Get the next question in the sheet
     next_question = sheet.get_next_question(current_question)
@@ -1079,6 +1079,10 @@ def render_next_question_in_sheet(request, sheet_id, question_id):
     if next_question:
         # Render the next question
         return redirect('problem', slug=next_question.slug)
+
+    else:
+        messages.success(request, "You have completed all questions in this sheet.")
+        return redirect('my_sheet', slug=sheet.slug)
 
 
 # =================================================
