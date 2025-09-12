@@ -167,13 +167,49 @@ def add_question(request):
 @staff_member_required(login_url='login')
 @admin_required
 def delete_question(request, id):
+    try:
+        with transaction.atomic():
+            question = get_object_or_404(Question, id=id)
+            
+            # Store sheet slug before deletion for redirect
+            sheet_slug = question.sheets.first().slug if question.sheets.exists() else ''
+            
+            # Handle protected foreign key constraints
+            # Delete recommended questions first (they have PROTECT constraint)
+            RecommendedQuestions.objects.filter(question=question).delete()
+            
+            # Clear many-to-many relationships before deletion
+            question.sheets.clear()
+            
+            # Delete related objects that might cause issues
+            # TestCases, DriverCodes, Submissions will be deleted via CASCADE
+            # but we can be explicit for clarity
+            question.test_cases.all().delete()
+            question.driver_codes.all().delete()
+            question.submissions.all().delete()
+            question.solutions.all().delete()
+            question.pods.all().delete()
+            
+            # Delete question images (Generic relation)
+            question.images.all().delete()
+            
+            # Finally delete the question
+            question.delete()
+            
+            messages.success(request, 'Problem deleted successfully')
+            
+    except Question.DoesNotExist:
+        messages.error(request, 'Question not found')
+        return redirect('administrator_problems')
+    except Exception as e:
+        messages.error(request, f'Error deleting question: {str(e)}')
+        return redirect('administrator_problems')
     
-    question = Question.objects.get(id=id)
-    
-    question.delete()
-    
-    messages.success(request, 'Problem deleted successfully')
-    return redirect('administrator_problems')
+    # Redirect to sheet if available, otherwise to problems page
+    if sheet_slug:
+        return redirect('administrator_sheet', slug=sheet_slug)
+    else:
+        return redirect('administrator_problems')
 
 
 # ======================================== EDIT PROBLEM ======================================
