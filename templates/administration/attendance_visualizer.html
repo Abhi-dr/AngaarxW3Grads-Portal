@@ -1,0 +1,1553 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}
+Administration | Attendance Visualizer
+{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-center">
+            <h3 class="heading mb-0">
+                <span class="fw-semibold">Attendance Visualizer &nbsp; 🖥️</span>
+            </h3>
+            <button type="button" class="btn btn-outline-info ms-auto" onclick="showSheetsHelp()">
+                <i class="fas fa-question-circle"></i> Setup Help
+            </button>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">📊 Import Attendance Data</h5>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="importMode" id="sheetsMode" autocomplete="off" checked>
+                    <label class="btn btn-outline-success" for="sheetsMode">
+                        <i class="fab fa-google"></i>  Sheets
+                    </label>
+                    <input type="radio" class="btn-check" name="importMode" id="fileMode" autocomplete="off">
+                    <label class="btn btn-outline-primary" for="fileMode">
+                        <i class="fas fa-upload"></i> File Upload
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="fileUploadSection">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="excelFile" class="form-label">Select Excel/CSV File</label>
+                                <input type="file" class="form-control" id="excelFile" name="excel_file"
+                                    accept=".xlsx,.xls,.csv" required>
+                                <div class="form-text">
+                                    Expected columns: Sr. No, Name, Roll Number, Phone Number, Email, and date columns
+                                    with P/A values.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-primary d-block w-100 mb-2">
+                                    <i class="fas fa-upload"></i> Upload & Process
+                                </button>
+                                <a href="{% url 'download_sample_attendance_excel' %}"
+                                    class="btn btn-outline-success d-block w-100">
+                                    <i class="fas fa-download"></i> Download Sample Excel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="googleSheetsSection">
+                <form id="sheetsForm">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="sheetsUrl" class="form-label">Google Sheets URL</label>
+                                <input type="url" class="form-control" id="sheetsUrl" name="sheets_url"
+                                    placeholder="https://docs.google.com/spreadsheets/d/your-sheet-id/edit#gid=0"
+                                    required>
+                                <div class="form-text">
+                                    <strong>Setup Instructions:</strong><br>
+                                    1. Make your Google Sheet public (Share → Anyone with the link can view)<br>
+                                    2. Copy the full URL from your browser<br>
+                                    3. Ensure same column format: Sr. No, Name, Roll Number, Phone Number, Email, and
+                                    date columns
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">&nbsp;</label>
+                                <button type="submit" class="btn btn-success d-block w-100 mb-2">
+                                    <i class="fab fa-google"></i> Fetch from Google Sheets
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="loadingIndicator" class="text-center d-none">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2" id="loadingText">Processing file...</p>
+                <div class="progress mt-2 d-none" id="loadingProgress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="statisticsSection" class="d-none">
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 id="totalStudents">0</h4>
+                                <p class="mb-0">Total Students</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-users fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 id="totalPresent">0</h4>
+                                <p class="mb-0">Total Present</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-check-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-danger text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 id="totalAbsent">0</h4>
+                                <p class="mb-0">Total Absent</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-times-circle fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h4 id="overallPercentage">0%</h4>
+                                <p class="mb-0">Overall Attendance</p>
+                            </div>
+                            <div class="align-self-center">
+                                <i class="fas fa-chart-pie fa-2x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="filtersSection" class="card mb-4 d-none">
+        <div class="card-header">
+            <h5 class="mb-0">🔍 Filters</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="studentFilter" class="form-label">Search Student</label>
+                        <input type="text" class="form-control" id="studentFilter"
+                            placeholder="Enter student name or roll number">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="dateFilter" class="form-label">Select Date</label>
+                        <select class="form-select" id="dateFilter">
+                            <option value="">All Dates</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="statusFilter" class="form-label">Attendance Status</label>
+                        <select class="form-select" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="present">Present Only</option>
+                            <option value="absent">Absent Only</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label for="percentageFilter" class="form-label">Attendance %</label>
+                        <select class="form-select" id="percentageFilter">
+                            <option value="">All Percentages</option>
+                            <option value="90-100">90% - 100%</option>
+                            <option value="75-89">75% - 89%</option>
+                            <option value="60-74">60% - 74%</option>
+                            <option value="0-59">Below 60%</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="attendanceRange" class="form-label">Attendance Range: <span id="rangeValue">0% -
+                                100%</span></label>
+                        <div class="d-flex align-items-center">
+                            <input type="range" class="form-range me-2" id="minRange" min="0" max="100" value="0">
+                            <input type="range" class="form-range" id="maxRange" min="0" max="100" value="100">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="sortBy" class="form-label">Sort By</label>
+                        <select class="form-select" id="sortBy">
+                            <option value="name">Name (A-Z)</option>
+                            <option value="name_desc">Name (Z-A)</option>
+                            <option value="attendance_asc">Attendance (Low to High)</option>
+                            <option value="attendance_desc">Attendance (High to Low)</option>
+                            <option value="present_days">Most Present Days</option>
+                            <option value="absent_days">Most Absent Days</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="showCount" class="form-label">Show Results</label>
+                        <select class="form-select" id="showCount">
+                            <option value="10">10 per page</option>
+                            <option value="25">25 per page</option>
+                            <option value="50">50 per page</option>
+                            <option value="100">100 per page</option>
+                            <option value="all">Show All</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <button type="button" class="btn btn-secondary" id="clearFilters">
+                        <i class="fas fa-eraser"></i> Clear Filters
+                    </button>
+                    <button type="button" class="btn btn-success" id="exportData">
+                        <i class="fas fa-download"></i> Export Filtered Data
+                    </button>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary" id="bulkEmail" disabled>
+                            <i class="fas fa-envelope"></i> Email Selected
+                        </button>
+                        <button type="button" class="btn btn-outline-warning" id="bulkAlert" disabled>
+                            <i class="fas fa-exclamation-triangle"></i> Alert Low Attendance
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="insightsSection" class="d-none mb-4">
+        <div class="card">
+            <div class="card-header" id="insightsCardHeader">
+                <h5 class="mb-0">
+                    <button
+                        class="btn btn-link text-decoration-none text-start w-100 d-flex justify-content-between align-items-center p-0 text-body"
+                        type="button" data-bs-toggle="collapse" data-bs-target="#collapseInsightsBody"
+                        aria-expanded="false" aria-controls="collapseInsightsBody" id="insightsToggleBtn">
+                        <span><i class="fas fa-chart-line"></i> Attendance Insights & Analytics</span>
+                        <i class="fas fa-chevron-right" id="insightsChevron"></i>
+                    </button>
+                </h5>
+            </div>
+            <div id="collapseInsightsBody" class="collapse" aria-labelledby="insightsCardHeader">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-body">Best Performing Student</h6>
+                                    <div id="bestStudent">
+                                        <strong class="text-success">-</strong>
+                                        <small class="d-block text-muted">-</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-body">Needs Attention</h6>
+                                    <div id="worstStudent">
+                                        <strong class="text-danger">-</strong>
+                                        <small class="d-block text-muted">-</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-body">Best Attendance Day</h6>
+                                    <div id="bestDay">
+                                        <strong class="text-success">-</strong>
+                                        <small class="d-block text-muted">-</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title text-body">Lowest Attendance Day</h6>
+                                    <div id="worstDay">
+                                        <strong class="text-danger">-</strong>
+                                        <small class="d-block text-muted">-</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">Class Performance Summary</h6>
+                                    <div id="performanceSummary">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-body">Excellent (90%+):</small>
+                                                <strong id="excellentCount" class="text-success">-</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-body">Good (75-89%):</small>
+                                                <strong id="goodCount" class="text-info">-</strong>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-body">Average (60-74%):</small>
+                                                <strong id="averageCount" class="text-warning">-</strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-body">Poor (<60%):</small>
+                                                <strong id="poorCount" class="text-danger">-</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-body">
+                                    <h6 class="card-title text-warning">Attendance Trends</h6>
+                                    <div id="trendAnalysis">
+                                        <div><small class="text-body">Average Class Attendance:</small> <strong
+                                                id="avgAttendance" class="text-primary">-</strong></div>
+                                        <div><small class="text-body">Most Consistent Student:</small> <strong
+                                                id="mostConsistent" class="text-success">-</strong></div>
+                                        <div><small class="text-body">Students Below 75%:</small> <strong
+                                                id="belowThreshold" class="text-danger">-</strong></div>
+                                        <div><small class="text-body">Perfect Attendance:</small> <strong
+                                                id="perfectAttendance" class="text-success">-</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="visualizationSection" class="d-none">
+        <ul class="nav nav-tabs" id="visualizationTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="student-tab" data-bs-toggle="tab" data-bs-target="#student-view"
+                    type="button" role="tab">
+                    <i class="fas fa-user-graduate"></i> Student View
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="date-tab" data-bs-toggle="tab" data-bs-target="#date-view" type="button"
+                    role="tab">
+                    <i class="fas fa-calendar-alt"></i> Date View
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="chart-tab" data-bs-toggle="tab" data-bs-target="#chart-view" type="button"
+                    role="tab">
+                    <i class="fas fa-chart-bar"></i> Charts
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="visualizationTabContent">
+            <div class="tab-pane fade show active" id="student-view" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" class="form-check-input" id="selectAll"></th>
+                                <th>Sr. No</th>
+                                <th>Name</th>
+                                <th>Roll Number</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Present Days</th>
+                                <th>Absent Days</th>
+                                <th>Total Days</th>
+                                <th>Attendance %</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody">
+                            <tr class="text-center" id="noDataRow">
+                                <td colspan="12" class="py-4">
+                                    <i class="fas fa-upload fa-2x text-muted mb-3"></i>
+                                    <p class="text-muted">Upload an Excel file to view attendance data</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="date-view" role="tabpanel">
+                <div class="table-responsive">
+                    <table class="table" id="dateTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Total Students</th>
+                                <th>Present</th>
+                                <th>Absent</th>
+                                <th>Attendance %</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dateTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="chart-view" role="tabpanel">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Attendance Trend</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="attendanceTrendChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Student Performance Distribution</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="performanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Daily Attendance Comparison</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="dailyComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Top 10 Students by Attendance</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="topStudentsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Attendance Heatmap</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="attendanceHeatmap" style="height: 400px; overflow-x: auto;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="studentDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Student Attendance Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="studentDetailContent">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    let attendanceData = null;
+    let filteredData = null;
+
+    // Mode toggle functionality
+    document.getElementById('fileMode').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('fileUploadSection').classList.remove('d-none');
+            document.getElementById('googleSheetsSection').classList.add('d-none');
+        }
+    });
+
+    document.getElementById('sheetsMode').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('fileUploadSection').classList.add('d-none');
+            document.getElementById('googleSheetsSection').classList.remove('d-none');
+        }
+    });
+
+    // File upload form submission
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const fileInput = document.getElementById('excelFile');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select a file');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('excel_file', file);
+
+        // Show loading indicator
+        document.getElementById('loadingIndicator').classList.remove('d-none');
+        document.getElementById('loadingText').textContent = 'Processing file...';
+
+        fetch('{% url "process_attendance_excel" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingIndicator').classList.add('d-none');
+
+                if (data.success) {
+                    attendanceData = data;
+                    filteredData = attendanceData.students;
+                    displayData();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingIndicator').classList.add('d-none');
+                alert('Error uploading file: ' + error);
+            });
+    });
+
+    // Google Sheets form submission
+    document.getElementById('sheetsForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const sheetsUrl = document.getElementById('sheetsUrl').value;
+
+        if (!sheetsUrl) {
+            alert('Please enter a Google Sheets URL');
+            return;
+        }
+
+        // Show loading indicator
+        document.getElementById('loadingIndicator').classList.remove('d-none');
+        document.getElementById('loadingText').textContent = 'Fetching data from Google Sheets...';
+
+        const formData = new FormData();
+        formData.append('sheets_url', sheetsUrl);
+
+        fetch('{% url "process_google_sheets" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingIndicator').classList.add('d-none');
+
+                if (data.success) {
+                    attendanceData = data;
+                    filteredData = attendanceData.students;
+                    displayData();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingIndicator').classList.add('d-none');
+                alert('Error fetching from Google Sheets: ' + error);
+            });
+    });
+
+
+    // Help function for Google Sheets setup
+    function showSheetsHelp() {
+        const helpModal = `
+        <div class="modal fade" id="sheetsHelpModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Google Sheets Setup Guide</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>Step 1: Make your Google Sheet public</h6>
+                                <ol>
+                                    <li>Open your Google Sheet</li>
+                                    <li>Click the "Share" button (top right)</li>
+                                    <li>Click "Change to anyone with the link"</li>
+                                    <li>Set permission to "Viewer"</li>
+                                    <li>Click "Done"</li>
+                                </ol>
+                                
+                                <h6>Step 2: Copy the URL</h6>
+                                <ol>
+                                    <li>Copy the full URL from your browser address bar</li>
+                                    <li>It should look like: <code>https://docs.google.com/spreadsheets/d/1ABC...XYZ/edit#gid=0</code></li>
+                                </ol>
+                                
+                                <h6>Step 3: Ensure correct format</h6>
+                                <p>Your sheet should have these columns in order:</p>
+                                <ul>
+                                    <li><strong>Sr. No</strong> - Serial number</li>
+                                    <li><strong>Name</strong> - Student name</li>
+                                    <li><strong>Roll Number</strong> - Student roll number</li>
+                                    <li><strong>Phone Number</strong> - Contact number</li>
+                                    <li><strong>Email</strong> - Email address</li>
+                                    <li><strong>Date columns</strong> - Each date as column header with P/A values</li>
+                                </ul>
+                                
+                                <div class="alert alert-info">
+                                    <strong>Note:</strong> The system will automatically refresh data from your Google Sheet each time you click "Fetch from Google Sheets".
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+        // Remove existing modal if any
+        const existingModal = document.getElementById('sheetsHelpModal');
+        if (existingModal) {
+            existingModal.remove();
+        }
+
+        // Add modal to body
+        document.body.insertAdjacentHTML('beforeend', helpModal);
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('sheetsHelpModal'));
+        modal.show();
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Show Google Sheets section by default
+        document.getElementById('fileUploadSection').classList.add('d-none');
+        document.getElementById('googleSheetsSection').classList.remove('d-none');
+    });
+
+    function displayData() {
+        // Show sections
+        document.getElementById('statisticsSection').classList.remove('d-none');
+        document.getElementById('filtersSection').classList.remove('d-none');
+        document.getElementById('visualizationSection').classList.remove('d-none');
+        document.getElementById('insightsSection').classList.remove('d-none');
+
+        // Update statistics and display data
+        updateStatistics();
+        updateInsights();
+        populateDateFilter();
+        displayStudentTable();
+        displayDateTable();
+        createCharts();
+    }
+
+    function updateStatistics() {
+        document.getElementById('totalStudents').textContent = attendanceData.statistics.total_students;
+        document.getElementById('totalPresent').textContent = attendanceData.statistics.total_present;
+        document.getElementById('totalAbsent').textContent = attendanceData.statistics.total_absent;
+        document.getElementById('overallPercentage').textContent = attendanceData.statistics.overall_percentage + '%';
+    }
+
+    function updateInsights() {
+        // Calculate student performance metrics
+        const studentsWithStats = attendanceData.students.map(student => {
+            const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+            const totalDays = Object.values(student.attendance).length;
+            const percentage = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
+
+            // Calculate consistency (standard deviation of daily attendance)
+            const dailyAttendance = attendanceData.date_columns.map(date => {
+                const att = student.attendance[date];
+                return att && att.present ? 1 : 0;
+            });
+            const mean = dailyAttendance.reduce((a, b) => a + b, 0) / dailyAttendance.length;
+            const variance = dailyAttendance.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / dailyAttendance.length;
+            const consistency = Math.sqrt(variance);
+
+            return {
+                ...student,
+                percentage: percentage,
+                presentDays: presentDays,
+                totalDays: totalDays,
+                consistency: consistency
+            };
+        });
+
+        // Best and worst performing students
+        const sortedByPerformance = [...studentsWithStats].sort((a, b) => b.percentage - a.percentage);
+        const bestStudent = sortedByPerformance[0];
+        const worstStudent = sortedByPerformance[sortedByPerformance.length - 1];
+
+        document.getElementById('bestStudent').innerHTML = `
+        <strong class="text-success">${bestStudent.name}</strong>
+        <small class="d-block text-muted">${bestStudent.percentage.toFixed(1)}%</small>
+    `;
+
+        document.getElementById('worstStudent').innerHTML = `
+        <strong class="text-danger">${worstStudent.name}</strong>
+        <small class="d-block text-muted">${worstStudent.percentage.toFixed(1)}%</small>
+    `;
+
+        // Best and worst attendance days
+        const dateStats = Object.entries(attendanceData.date_stats).map(([date, stats]) => ({
+            date: date,
+            percentage: (stats.present / stats.total) * 100
+        }));
+
+        const sortedByDate = [...dateStats].sort((a, b) => b.percentage - a.percentage);
+        const bestDay = sortedByDate[0];
+        const worstDay = sortedByDate[sortedByDate.length - 1];
+
+        document.getElementById('bestDay').innerHTML = `
+        <strong class="text-success">${bestDay.date}</strong>
+        <small class="d-block text-muted">${bestDay.percentage.toFixed(1)}%</small>
+    `;
+
+        document.getElementById('worstDay').innerHTML = `
+        <strong class="text-danger">${worstDay.date}</strong>
+        <small class="d-block text-muted">${worstDay.percentage.toFixed(1)}%</small>
+    `;
+
+        // Performance distribution
+        let excellent = 0, good = 0, average = 0, poor = 0;
+        studentsWithStats.forEach(student => {
+            if (student.percentage >= 90) excellent++;
+            else if (student.percentage >= 75) good++;
+            else if (student.percentage >= 60) average++;
+            else poor++;
+        });
+
+        document.getElementById('excellentCount').textContent = excellent;
+        document.getElementById('goodCount').textContent = good;
+        document.getElementById('averageCount').textContent = average;
+        document.getElementById('poorCount').textContent = poor;
+
+        // Trend analysis
+        const avgAttendance = studentsWithStats.reduce((sum, student) => sum + student.percentage, 0) / studentsWithStats.length;
+        const mostConsistent = [...studentsWithStats].sort((a, b) => a.consistency - b.consistency)[0];
+        const belowThreshold = studentsWithStats.filter(student => student.percentage < 75).length;
+        const perfectAttendance = studentsWithStats.filter(student => student.percentage === 100).length;
+
+        document.getElementById('avgAttendance').textContent = avgAttendance.toFixed(1) + '%';
+        document.getElementById('mostConsistent').textContent = mostConsistent.name;
+        document.getElementById('belowThreshold').textContent = belowThreshold;
+        document.getElementById('perfectAttendance').textContent = perfectAttendance;
+    }
+
+    function populateDateFilter() {
+        const dateFilter = document.getElementById('dateFilter');
+        dateFilter.innerHTML = '<option value="">All Dates</option>';
+
+        attendanceData.date_columns.forEach(date => {
+            const option = document.createElement('option');
+            option.value = date;
+            option.textContent = date;
+            dateFilter.appendChild(option);
+        });
+    }
+
+    function displayStudentTable() {
+        const tbody = document.getElementById('studentTableBody');
+
+        // Remove no data row if it exists
+        const noDataRow = document.getElementById('noDataRow');
+        if (noDataRow) {
+            noDataRow.remove();
+        }
+
+        tbody.innerHTML = '';
+
+        if (!filteredData || filteredData.length === 0) {
+            tbody.innerHTML = `
+            <tr class="text-center">
+                <td colspan="12" class="py-4">
+                    <i class="fas fa-search fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">No students match the current filters</p>
+                </td>
+            </tr>
+        `;
+            return;
+        }
+
+        // Show loading for large datasets
+        if (filteredData.length > 500) {
+            tbody.innerHTML = `
+                <tr class="text-center">
+                    <td colspan="12" class="py-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="text-muted mt-2">Processing ${filteredData.length} records...</p>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // Use setTimeout to prevent UI blocking for large datasets
+        setTimeout(() => {
+            // Apply sorting
+            const sortBy = document.getElementById('sortBy').value;
+            const sortedData = [...filteredData].sort((a, b) => {
+                const aPresent = Object.values(a.attendance).filter(att => att.present).length;
+                const aAbsent = Object.values(a.attendance).filter(att => att.absent).length;
+                const aTotal = aPresent + aAbsent;
+                const aPercentage = aTotal > 0 ? (aPresent / aTotal) * 100 : 0;
+
+                const bPresent = Object.values(b.attendance).filter(att => att.present).length;
+                const bAbsent = Object.values(b.attendance).filter(att => att.absent).length;
+                const bTotal = bPresent + bAbsent;
+                const bPercentage = bTotal > 0 ? (bPresent / bTotal) * 100 : 0;
+
+                switch (sortBy) {
+                    case 'name': return a.name.localeCompare(b.name);
+                    case 'name_desc': return b.name.localeCompare(a.name);
+                    case 'attendance_asc': return aPercentage - bPercentage;
+                    case 'attendance_desc': return bPercentage - aPercentage;
+                    case 'present_days': return bPresent - aPresent;
+                    case 'absent_days': return bAbsent - aAbsent;
+                    default: return 0;
+                }
+            });
+
+            // Apply pagination - limit display for performance
+            const showCount = document.getElementById('showCount').value;
+            let displayData;
+            if (showCount === 'all' && sortedData.length > 1000) {
+                // For very large datasets, limit to 1000 even if "all" is selected
+                displayData = sortedData.slice(0, 1000);
+                console.warn(`Dataset too large (${sortedData.length} records). Showing first 1000 records.`);
+            } else {
+                displayData = showCount === 'all' ? sortedData : sortedData.slice(0, parseInt(showCount));
+            }
+
+            // Clear loading message
+            tbody.innerHTML = '';
+
+            // Use document fragment for better performance
+            const fragment = document.createDocumentFragment();
+
+            displayData.forEach((student, index) => {
+                const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+                const absentDays = Object.values(student.attendance).filter(att => att.absent).length;
+                const totalDays = presentDays + absentDays;
+                const percentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0;
+
+                // Determine status
+                let status = 'Good';
+                let statusClass = 'success';
+                if (percentage < 60) {
+                    status = 'Critical';
+                    statusClass = 'danger';
+                } else if (percentage < 75) {
+                    status = 'Warning';
+                    statusClass = 'warning';
+                }
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                <td><input type="checkbox" class="form-check-input student-checkbox" data-student-index="${index}"></td>
+                <td>${student.sr_no || '-'}</td>
+                <td>${student.name || '-'}</td>
+                <td>${student.roll_number || '-'}</td>
+                <td>${student.phone_number || '-'}</td>
+                <td>${student.email || '-'}</td>
+                <td><span class="badge bg-success">${presentDays}</span></td>
+                <td><span class="badge bg-danger">${absentDays}</span></td>
+                <td><span class="badge bg-secondary">${totalDays}</span></td>
+                <td>
+                    <span class="badge ${percentage >= 75 ? 'bg-success' : percentage >= 60 ? 'bg-warning' : 'bg-danger'}">
+                        ${percentage}%
+                    </span>
+                </td>
+                <td><span class="badge bg-${statusClass}">${status}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="showStudentDetails(${index})">
+                        <i class="fas fa-eye"></i> Details
+                    </button>
+                </td>
+            `;
+                fragment.appendChild(row);
+            });
+
+            tbody.appendChild(fragment);
+
+            // Show warning for large datasets
+            if (sortedData.length > 1000 && showCount === 'all') {
+                const warningRow = document.createElement('tr');
+                warningRow.innerHTML = `
+                    <td colspan="12" class="text-center py-2 bg-warning bg-opacity-10">
+                        <small class="text-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Showing first 1000 of ${sortedData.length} records for performance. Use filters to narrow results.
+                        </small>
+                    </td>
+                `;
+                tbody.appendChild(warningRow);
+            }
+
+            // Update bulk action buttons
+            updateBulkActionButtons();
+        }, filteredData.length > 500 ? 100 : 0);
+    }
+
+    function displayDateTable() {
+        const tbody = document.getElementById('dateTableBody');
+        tbody.innerHTML = '';
+
+        Object.entries(attendanceData.date_stats).forEach(([date, stats]) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${date}</td>
+            <td><span class="badge bg-success">${stats.present}</span></td>
+            <td><span class="badge bg-danger">${stats.absent}</span></td>
+            <td>${stats.total}</td>
+            <td>
+                <span class="badge ${stats.attendance_percentage >= 75 ? 'bg-success' : stats.attendance_percentage >= 60 ? 'bg-warning' : 'bg-danger'}">
+                    ${stats.attendance_percentage}%
+                </span>
+            </td>
+        `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function createCharts() {
+        createAttendanceTrendChart();
+        createPerformanceChart();
+        createDailyComparisonChart();
+        createTopStudentsChart();
+        createAttendanceHeatmap();
+    }
+
+    function createAttendanceTrendChart() {
+        const ctx = document.getElementById('attendanceTrendChart').getContext('2d');
+
+        const dates = attendanceData.date_columns;
+        const attendancePercentages = dates.map(date => {
+            const stats = attendanceData.date_stats[date];
+            return stats ? ((stats.present / stats.total) * 100).toFixed(2) : 0;
+        });
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Attendance %',
+                    data: attendancePercentages,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Daily Attendance Trend'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function (value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function createPerformanceChart() {
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+
+        let excellent = 0, good = 0, average = 0, poor = 0;
+
+        attendanceData.students.forEach(student => {
+            const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+            const totalDays = Object.values(student.attendance).length;
+            const percentage = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
+
+            if (percentage >= 90) excellent++;
+            else if (percentage >= 75) good++;
+            else if (percentage >= 60) average++;
+            else poor++;
+        });
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Excellent (90%+)', 'Good (75-89%)', 'Average (60-74%)', 'Poor (<60%)'],
+                datasets: [{
+                    data: [excellent, good, average, poor],
+                    backgroundColor: [
+                        '#28a745',
+                        '#17a2b8',
+                        '#ffc107',
+                        '#dc3545'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Student Performance Distribution'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    function createDailyComparisonChart() {
+        const ctx = document.getElementById('dailyComparisonChart').getContext('2d');
+
+        const dates = attendanceData.date_columns;
+        const presentData = dates.map(date => {
+            const stats = attendanceData.date_stats[date];
+            return stats ? stats.present : 0;
+        });
+        const absentData = dates.map(date => {
+            const stats = attendanceData.date_stats[date];
+            return stats ? stats.absent : 0;
+        });
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Present',
+                    data: presentData,
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Absent',
+                    data: absentData,
+                    backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Daily Present vs Absent Comparison'
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function createTopStudentsChart() {
+        const ctx = document.getElementById('topStudentsChart').getContext('2d');
+
+        // Calculate attendance percentages and sort
+        const studentsWithPercentage = attendanceData.students.map(student => {
+            const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+            const totalDays = Object.values(student.attendance).length;
+            const percentage = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
+            return {
+                name: student.name,
+                percentage: percentage
+            };
+        }).sort((a, b) => b.percentage - a.percentage).slice(0, 10);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: studentsWithPercentage.map(s => s.name),
+                datasets: [{
+                    label: 'Attendance %',
+                    data: studentsWithPercentage.map(s => s.percentage.toFixed(2)),
+                    backgroundColor: studentsWithPercentage.map(s =>
+                        s.percentage >= 90 ? '#28a745' :
+                            s.percentage >= 75 ? '#17a2b8' :
+                                s.percentage >= 60 ? '#ffc107' : '#dc3545'
+                    ),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top 10 Students by Attendance'
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function (value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function createAttendanceHeatmap() {
+        const heatmapContainer = document.getElementById('attendanceHeatmap');
+
+        // For large datasets, show a simplified message
+        if (attendanceData.students.length > 200) {
+            heatmapContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-table fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">Heatmap disabled for datasets with more than 200 students for performance reasons.</p>
+                    <p class="text-muted">Use filters to reduce the dataset size or export data for detailed analysis.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Show loading for medium datasets
+        if (attendanceData.students.length > 50) {
+            heatmapContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-2">Generating heatmap...</p>
+                </div>
+            `;
+        }
+
+        setTimeout(() => {
+            // Create heatmap table
+            let heatmapHTML = '<table class="table table-sm table-bordered">';
+            heatmapHTML += '<thead><tr><th>Student</th>';
+
+            // Add date headers
+            attendanceData.date_columns.forEach(date => {
+                heatmapHTML += `<th class="text-center" style="min-width: 50px;">${date}</th>`;
+            });
+            heatmapHTML += '</tr></thead><tbody>';
+
+            // Add student rows
+            attendanceData.students.forEach(student => {
+                heatmapHTML += `<tr><td><strong>${student.name}</strong></td>`;
+
+                attendanceData.date_columns.forEach(date => {
+                    const attendance = student.attendance[date];
+                    let cellClass = 'table-secondary';
+                    let cellContent = '-';
+
+                    if (attendance) {
+                        if (attendance.present) {
+                            cellClass = 'table-success';
+                            cellContent = 'P';
+                        } else if (attendance.absent) {
+                            cellClass = 'table-danger';
+                            cellContent = 'A';
+                        }
+                    }
+
+                    heatmapHTML += `<td class="${cellClass} text-center"><strong>${cellContent}</strong></td>`;
+                });
+
+                heatmapHTML += '</tr>';
+            });
+
+            heatmapHTML += '</tbody></table>';
+            heatmapContainer.innerHTML = heatmapHTML;
+        }, attendanceData.students.length > 50 ? 100 : 0);
+    }
+
+    function showStudentDetails(index) {
+        const student = filteredData[index];
+        const modal = new bootstrap.Modal(document.getElementById('studentDetailModal'));
+
+
+        let detailsHTML = `
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Name:</strong> ${student.name}<br>
+                <strong>Roll Number:</strong> ${student.roll_number}<br>
+                <strong>Phone:</strong> ${student.phone_number}
+            </div>
+            <div class="col-md-6">
+                <strong>Email:</strong> ${student.email}
+            </div>
+        </div>
+        <h6>Date-wise Attendance:</h6>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+        Object.entries(student.attendance).forEach(([date, att]) => {
+            const statusClass = att.present ? 'success' : att.absent ? 'danger' : 'secondary';
+            const statusText = att.present ? 'Present' : att.absent ? 'Absent' : 'N/A';
+
+            detailsHTML += `
+            <tr>
+                <td>${date}</td>
+                <td><span class="badge bg-${statusClass}">${statusText}</span></td>
+            </tr>
+        `;
+        });
+
+        detailsHTML += '</tbody></table></div>';
+
+        document.getElementById('studentDetailContent').innerHTML = detailsHTML;
+        modal.show();
+    }
+
+    // Filter functionality
+    document.getElementById('studentFilter').addEventListener('input', applyFilters);
+    document.getElementById('dateFilter').addEventListener('change', applyFilters);
+    document.getElementById('statusFilter').addEventListener('change', applyFilters);
+    document.getElementById('percentageFilter').addEventListener('change', applyFilters);
+    document.getElementById('sortBy').addEventListener('change', applyFilters);
+    document.getElementById('showCount').addEventListener('change', applyFilters);
+
+    // Range slider functionality
+    document.getElementById('minRange').addEventListener('input', function () {
+        const minVal = parseInt(this.value);
+        const maxVal = parseInt(document.getElementById('maxRange').value);
+        if (minVal > maxVal) {
+            document.getElementById('maxRange').value = minVal;
+        }
+        updateRangeValue();
+        applyFilters();
+    });
+
+    document.getElementById('maxRange').addEventListener('input', function () {
+        const maxVal = parseInt(this.value);
+        const minVal = parseInt(document.getElementById('minRange').value);
+        if (maxVal < minVal) {
+            document.getElementById('minRange').value = maxVal;
+        }
+        updateRangeValue();
+        applyFilters();
+    });
+
+    function updateRangeValue() {
+        const minVal = document.getElementById('minRange').value;
+        const maxVal = document.getElementById('maxRange').value;
+        document.getElementById('rangeValue').textContent = `${minVal}% - ${maxVal}%`;
+    }
+
+    function applyFilters() {
+        const studentFilter = document.getElementById('studentFilter').value.toLowerCase();
+        const dateFilter = document.getElementById('dateFilter').value;
+        const statusFilter = document.getElementById('statusFilter').value;
+        const percentageFilter = document.getElementById('percentageFilter').value;
+        const minRange = parseInt(document.getElementById('minRange').value);
+        const maxRange = parseInt(document.getElementById('maxRange').value);
+
+        filteredData = attendanceData.students.filter(student => {
+            // Student name/roll number filter
+            if (studentFilter && !student.name.toLowerCase().includes(studentFilter) &&
+                !student.roll_number.toLowerCase().includes(studentFilter)) {
+                return false;
+            }
+
+            // Date filter (if specific date selected, check if student was present/absent on that date)
+            if (dateFilter && student.attendance[dateFilter]) {
+                if (statusFilter === 'present' && !student.attendance[dateFilter].present) return false;
+                if (statusFilter === 'absent' && !student.attendance[dateFilter].absent) return false;
+            }
+
+            // Calculate attendance percentage
+            const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+            const totalDays = Object.values(student.attendance).length;
+            const percentage = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
+
+            // Percentage filter (dropdown)
+            if (percentageFilter) {
+                const [min, max] = percentageFilter.split('-').map(Number);
+                if (percentage < min || percentage > max) return false;
+            }
+
+            // Range filter (sliders)
+            if (percentage < minRange || percentage > maxRange) return false;
+
+            return true;
+        });
+
+        displayStudentTable();
+        updateStatistics();
+    }
+
+    // Clear filters
+    document.getElementById('clearFilters').addEventListener('click', function () {
+        document.getElementById('studentFilter').value = '';
+        document.getElementById('dateFilter').value = '';
+        document.getElementById('statusFilter').value = '';
+        document.getElementById('percentageFilter').value = '';
+        document.getElementById('sortBy').value = 'name';
+        document.getElementById('showCount').value = '25';
+        document.getElementById('minRange').value = '0';
+        document.getElementById('maxRange').value = '100';
+        updateRangeValue();
+
+        if (attendanceData) {
+            filteredData = attendanceData.students;
+            displayStudentTable();
+            updateStatistics();
+        }
+    });
+
+    // Bulk action functionality
+    function updateBulkActionButtons() {
+        const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+        const bulkEmailBtn = document.getElementById('bulkEmail');
+        const bulkAlertBtn = document.getElementById('bulkAlert');
+
+        if (checkboxes.length > 0) {
+            bulkEmailBtn.disabled = false;
+            bulkAlertBtn.disabled = false;
+        } else {
+            bulkEmailBtn.disabled = true;
+            bulkAlertBtn.disabled = true;
+        }
+    }
+
+    // Add event listeners for checkboxes
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('student-checkbox')) {
+            updateBulkActionButtons();
+        }
+    });
+
+    // Select all checkbox functionality
+    document.addEventListener('change', function (e) {
+        if (e.target.id === 'selectAll') {
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = e.target.checked;
+            });
+            updateBulkActionButtons();
+        }
+    });
+
+    // Bulk email functionality
+    document.getElementById('bulkEmail').addEventListener('click', function () {
+        const selectedStudents = getSelectedStudents();
+        if (selectedStudents.length === 0) return;
+
+        const emails = selectedStudents.map(student => student.email).join(';');
+        const subject = 'Attendance Update';
+        const body = 'Dear Student,\n\nThis is regarding your attendance record.\n\nBest regards,\nAdministration';
+
+        window.location.href = `mailto:${emails}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    });
+
+    // Bulk alert functionality
+    document.getElementById('bulkAlert').addEventListener('click', function () {
+        const selectedStudents = getSelectedStudents();
+        const lowAttendanceStudents = selectedStudents.filter(student => {
+            const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+            const totalDays = Object.values(student.attendance).length;
+            const percentage = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
+            return percentage < 75;
+        });
+
+        if (lowAttendanceStudents.length === 0) {
+            alert('No students with low attendance selected.');
+            return;
+        }
+
+        const names = lowAttendanceStudents.map(student => student.name).join(', ');
+        alert(`Low attendance alert sent to: ${names}`);
+    });
+
+    function getSelectedStudents() {
+        const checkboxes = document.querySelectorAll('.student-checkbox:checked');
+        const selectedStudents = [];
+
+        checkboxes.forEach(checkbox => {
+            const index = parseInt(checkbox.dataset.studentIndex);
+            if (filteredData[index]) {
+                selectedStudents.push(filteredData[index]);
+            }
+        });
+
+        return selectedStudents;
+    }
+
+    // Export functionality
+    document.getElementById('exportData').addEventListener('click', function () {
+        if (!filteredData) return;
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Sr. No,Name,Roll Number,Phone,Email,Present Days,Absent Days,Attendance %\n";
+
+        filteredData.forEach(student => {
+            const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+            const absentDays = Object.values(student.attendance).filter(att => att.absent).length;
+            const totalDays = presentDays + absentDays;
+            const percentage = totalDays > 0 ? ((presentDays / totalDays) * 100).toFixed(2) : 0;
+
+            csvContent += `${student.sr_no},"${student.name}",${student.roll_number},${student.phone_number},"${student.email}",${presentDays},${absentDays},${percentage}%\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "filtered_attendance.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    // Collapse functionality for insights section - wait for DOM to be ready
+    document.addEventListener('DOMContentLoaded', function () {
+        const collapseElement = document.getElementById('collapseInsightsBody');
+        const chevronElement = document.getElementById('insightsChevron');
+
+        if (collapseElement && chevronElement) {
+            collapseElement.addEventListener('shown.bs.collapse', function () {
+                chevronElement.classList.remove('fa-chevron-right');
+                chevronElement.classList.add('fa-chevron-down');
+            });
+
+            collapseElement.addEventListener('hidden.bs.collapse', function () {
+                chevronElement.classList.remove('fa-chevron-down');
+                chevronElement.classList.add('fa-chevron-right');
+            });
+        }
+    });
+</script>
+
+{% endblock %}

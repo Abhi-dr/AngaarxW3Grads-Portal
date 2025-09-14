@@ -7,6 +7,11 @@ urlpatterns = [
     path("view_student_profile/<int:id>", views.view_student_profile, name="administration_view_student_profile"),
     path("fetch_view_student_profile/<int:id>", views.fetch_view_student_profile, name="fetch_view_student_profile"),
     
+    path("attendance_visualizer/", views.attendance_visualizer, name="attendance_visualizer"),
+    path('process_attendance_excel/', views.process_attendance_excel, name='process_attendance_excel'),
+    path('process_google_sheets/', views.process_google_sheets, name='process_google_sheets'),
+    path('download_sample_attendance_excel/', views.download_sample_attendance_excel, name='download_sample_attendance_excel'),
+
     # ========================= DATA WORK ============================
     
     path("all_students/", views.all_students, name="all_students"),
