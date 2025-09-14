@@ -267,9 +267,13 @@ Student | Home
                                             {% endif %}
                                         </a>
 
+                                        {% comment %}
+
                                         {% else %}
 
                                         <a id="random-question-generator1" href="{% url 'get_random_question' %}" onclick="return random_generator();" class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">Get a random question</a>
+
+                                    {% endcomment %}
 
                                         {% endif %}
                                     </div>
@@ -321,8 +325,7 @@ Student | Home
 
                                             {% if total_questions_solved_percentage == 100 %}
                                             <button class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">All Solved</button>
-                                            {% else %}
-                                            <a id="random-question-generator2" href="{% url 'get_random_question' %}" onclick="return random_generator2();" class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">Get a random question</a>
+                                           
                                             {% endif %}
                                         </div>
 
