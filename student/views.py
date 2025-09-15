@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 
 from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
-from practice.models import POD, Submission, Question, Sheet, Streak
+from practice.models import POD, Submission, Batch, Question, Sheet, Streak
 from home.models import Alumni, ReferralCode
 from django.db.models import Max, Sum
 
@@ -28,63 +28,114 @@ from django.db.models import Max, Sum
 
 @login_required(login_url="login")
 def dashboard(request):
-
-    # sessions = Session.objects.filter(course__in=request.user.student.courses.all(), is_completed=False)
-    # last_3_completed_sessions = [session for session in Session.objects.order_by("-session_time").filter(course__in=request.user.student.courses.all(), is_completed=True) if session.recorded_session_link is not None][:3]
     
     notifications = Notification.objects.filter(expiration_date__gt=timezone.now(), is_alert=True)
+    student = request.user.student
     
-    # total_assignments = Assignment.objects.filter(course__in=request.user.student.courses.all()).count()
-    # completed_assignments = AssignmentSubmission.objects.filter(student=request.user.student).count()
+    # Get enrolled batches for the student
+    enrolled_batches = Batch.objects.filter(
+        enrollment_requests__student=student,
+        enrollment_requests__status='Accepted'
+    )
     
-    # assignment_percentage = int((completed_assignments / total_assignments) * 100) if total_assignments != 0 else 0
+    # Get all sheets from enrolled batches
+    enrolled_sheets = Sheet.objects.filter(
+        batches__in=enrolled_batches,
+        is_approved=True,
+        is_enabled=True
+    ).distinct()
     
-    total_questions_solved = Submission.objects.filter(user=request.user.student).values('question').distinct().count()
+    # Calculate sheet statistics based on questions solved
+    total_questions_in_sheets = 0
+    total_questions_solved_in_sheets = 0
     
-    total_questions_solved_percentage = int((total_questions_solved / Question.objects.filter(is_approved=True).count()) * 100) if Question.objects.filter(is_approved=True).count() != 0 else 0
-    questions_left = Question.objects.filter(is_approved=True).count() - total_questions_solved
+    # Get next questions from enrolled sheets
+    next_questions = []
     
+    for sheet in enrolled_sheets:
+        # Get all enabled questions in this sheet
+        enabled_questions = sheet.get_enabled_questions_for_user(student)
+        sheet_total_questions = len(enabled_questions)
+        total_questions_in_sheets += sheet_total_questions
+        
+        if sheet.sheet_type == "MCQ":
+            # For MCQ sheets, count answered questions
+            from practice.models import MCQSubmission
+            answered_questions_count = MCQSubmission.objects.filter(
+                student=student,
+                question__in=enabled_questions
+            ).values('question').distinct().count()
+            total_questions_solved_in_sheets += answered_questions_count
+        else:
+            # For coding sheets, count solved questions
+            solved_questions_count = Submission.objects.filter(
+                user=student,
+                question__in=enabled_questions,
+                status='Accepted'
+            ).values('question').distinct().count()
+            total_questions_solved_in_sheets += solved_questions_count
+        
+        # Get next question from this sheet
+        if sheet.sheet_type == "MCQ":
+            # For MCQ sheets, find the first unanswered question
+            answered_questions = MCQSubmission.objects.filter(
+                student=student,
+                question__in=enabled_questions
+            ).values_list('question_id', flat=True)
+            
+            for question in enabled_questions:
+                if question.id not in answered_questions:
+                    next_questions.append({
+                        'question': question,
+                        'sheet': sheet,
+                        'type': 'MCQ'
+                    })
+                    break
+        else:
+            # For coding sheets, find the first unsolved question
+            solved_questions = Submission.objects.filter(
+                user=student,
+                question__in=enabled_questions,
+                status='Accepted'
+            ).values_list('question_id', flat=True)
+            
+            for question in enabled_questions:
+                if question.id not in solved_questions:
+                    next_questions.append({
+                        'question': question,
+                        'sheet': sheet,
+                        'type': 'Coding'
+                    })
+                    break
+    
+    # Calculate overall statistics based on questions
+    questions_completion_percentage = int((total_questions_solved_in_sheets / total_questions_in_sheets) * 100) if total_questions_in_sheets > 0 else 0
+    questions_left = total_questions_in_sheets - total_questions_solved_in_sheets
+    total_sheets = enrolled_sheets.count()
+    
+    # Get today's POD
     pod = POD.objects.filter(date=datetime.now().date()).first()
     
-    next_three_questions = (
-    Question.objects
-    .filter(is_approved=True)  # Only approved questions
-    .exclude(
-        id__in=Submission.objects
-        .filter(user=request.user.student)
-        .values('question')
-        .distinct()
-    )  # Exclude already attempted questions
-    .exclude(sheets__isnull=False)  # Exclude questions linked to any sheet
-    .order_by("?")[:3]  # Randomize and limit to 3 questions
-)
-
-    
+    # Check birthday
     is_birthday = False
-    if request.user.student.dob:
-    
-        if request.user.student.dob.day == timezone.now().day and request.user.student.dob.month == timezone.now().month:
+    if student.dob:
+        if student.dob.day == timezone.now().day and student.dob.month == timezone.now().month:
             is_birthday = True
-            
     
     parameters = {
         "notifications": notifications,
         "is_birthday": is_birthday,
-        "total_questions_solved": total_questions_solved,
-        "total_questions_solved_percentage": total_questions_solved_percentage,
+        "total_sheets": total_sheets,
+        "total_questions_in_sheets": total_questions_in_sheets,
+        "total_questions_solved_in_sheets": total_questions_solved_in_sheets,
+        "questions_completion_percentage": questions_completion_percentage,
         "questions_left": questions_left,
         "pod": pod,
-        "next_three_questions": next_three_questions,
-        
-        
-        # "sessions": sessions,
-        # "last_3_completed_sessions": last_3_completed_sessions,
-        # "completed_assignments": completed_assignments,
-        # "assignment_percentage": assignment_percentage,
-        # "left_assignments": total_assignments - completed_assignments,
+        "next_questions": next_questions[:3],  # Limit to 3 questions
+        "enrolled_sheets": enrolled_sheets,
     }
     
-        # check if the student's email is in the email list of Alumnis as well
+    # Check if the student's email is in the email list of Alumnis as well
     alumni = Alumni.objects.filter(email=request.user.email).first()
     if alumni:
         referral_code = ReferralCode.objects.filter(alumni=alumni).first()
