@@ -214,14 +214,25 @@ def batch(request, slug):
 
 def fetch_questions(request):
     query = request.GET.get("query", "")
+    batch_slug = request.GET.get("batch_slug", "")
     
-    questions = Question.objects.filter(
-        Q(title__icontains=query), 
-        pods__batch__isnull=True,
-        is_approved=True, 
-        parent_id=-1
-    ).distinct()
-    
+    if batch_slug:
+        # Get questions only from non-sequential sheets that belong to this specific batch
+        batch = get_object_or_404(Batch, slug=batch_slug)
+        questions = Question.objects.filter(
+            Q(title__icontains=query),
+            sheets__batches=batch,  # Only questions from sheets in this batch
+            sheets__is_sequential=False,  # Exclude questions from sequential sheets
+            is_approved=True, 
+            parent_id=-1
+        ).distinct()
+    else:
+        # Fallback to all approved questions if no batch specified
+        questions = Question.objects.filter(
+            Q(title__icontains=query), 
+            is_approved=True, 
+            parent_id=-1
+        ).distinct()
     
     question_list = [{"id": q.id, "title": q.title} for q in questions]
     return JsonResponse({"questions": question_list})

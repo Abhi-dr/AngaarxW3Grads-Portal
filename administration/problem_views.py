@@ -599,7 +599,11 @@ def driver_code(request, slug):
 def administrator_pod(request):
     administrator = Administrator.objects.get(id=request.user.id)
     
-    pods = POD.objects.filter(date__lte=datetime.date.today()).order_by('-date')
+    # Get all PODs with their associated batches
+    pods = POD.objects.select_related('question', 'batch').filter(
+        date__lte=datetime.date.today(),
+        batch__isnull=False  # Only show batch-specific PODs
+    ).order_by('-date')
     
     parameters = {
         "administrator": administrator,
@@ -609,53 +613,23 @@ def administrator_pod(request):
     return render(request, "administration/practice/administrator_pod.html", parameters)
 
 
-# =========================================== SET POD PAGE ================================
-
+# =========================================== REDIRECT TO BATCH POD ================================
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def set_pod(request):
-    
-    administrator = Administrator.objects.get(id=request.user.id)
-    questions = Question.objects.filter(pods__isnull=True)
-    
-    parameters = {
-        "administrator": administrator,
-        "questions": questions
-    }
-
-    return render(request, 'administration/practice/set_pod.html', parameters)
-
-
-# ================================================ SAVE POD ===================================
+    """Redirect to batch management for POD setting"""
+    messages.info(request, 'POD setting is now done per batch. Please select a batch to set POD.')
+    return redirect('administrator_batches')
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
-@cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def save_pod(request, id):
-    
-    date = request.POST.get('pod_date')
-    
-    
-    if date:
-        
-        question = Question.objects.get(id=id)
-        pod, created = POD.objects.get_or_create(question=question, date=date)
-                
-        if created:
-            messages.success(request, 'POD set successfully')
-        else:
-            messages.info(request, 'POD already exists for this date')
-            
-        return redirect('set_pod')
-    
-    else:
-        messages.error(request, 'Please select a date')
-            
-    return redirect('set_pod')
+    """Deprecated - PODs are now set per batch"""
+    messages.error(request, 'General POD setting is deprecated. Please set PODs per batch.')
+    return redirect('administrator_batches')
 
 
 # ================================================================================================

@@ -113,8 +113,13 @@ def dashboard(request):
     questions_left = total_questions_in_sheets - total_questions_solved_in_sheets
     total_sheets = enrolled_sheets.count()
     
-    # Get today's POD
-    pod = POD.objects.filter(date=datetime.now().date()).first()
+    # Get today's POD from enrolled batches
+    pod = None
+    if enrolled_batches.exists():
+        pod = POD.objects.filter(
+            batch__in=enrolled_batches,
+            date=datetime.now().date()
+        ).first()
     
     # Check birthday
     is_birthday = False

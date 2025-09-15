@@ -340,7 +340,7 @@ active
 
         // Function to fetch questions initially
         const fetchQuestions = () => {
-            fetch(`{% url 'administrator_fetch_pod_questions_for_batch' %}`)
+            fetch(`{% url 'administrator_fetch_pod_questions_for_batch' %}?batch_slug={{ batch.slug }}`)
                 .then(response => response.json())
                 .then(data => {
                     allQuestions = data.questions; // Store fetched questions

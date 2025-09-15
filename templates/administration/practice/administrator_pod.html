@@ -122,12 +122,11 @@ PODs🔥
                             </td>
                             <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ question.title }}">{{ pod.question.title|truncatechars:25 }}</h6>
+                                    title="{{ pod.question.title }}">{{ pod.question.title|truncatechars:25 }}</h6>
                                 
-                                {% for sheet in question.sheets.all %}
-                                <span style="font-weight: bold;"> {{ pod.question.sheet.name }} | 
-                                </span>
-                                {% endfor %}
+                                {% if pod.batch %}
+                                <span class="badge bg-info text-white">{{ pod.batch.name }}</span>
+                                {% endif %}
 
                             </td>
 
