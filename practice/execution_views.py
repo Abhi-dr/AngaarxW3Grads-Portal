@@ -201,7 +201,7 @@ def problem(request, slug):
 
         if sheet and not sheet.is_enabled:
             messages.info(request, "This question is in the sheet which is disabled now. Try Later.")
-            return redirect('problem_set')
+            return redirect('my_batches')
         
         if sheet and sheet.is_sequential:
             # Get all enabled questions for the user
@@ -232,7 +232,7 @@ def problem(request, slug):
     except Exception as e:
         print(f"Error loading problem page: {e}")
         messages.error(request, f"Error loading problem: {str(e)}")
-        return redirect('my_sheet', slug=sheet.slug if sheet else 'problem_set')
+        return redirect('my_sheet', slug=sheet.slug if sheet else 'my_batches')
 
 # ============================================ UPDATE COINS ===============================================
 

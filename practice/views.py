@@ -103,60 +103,6 @@ def my_submissions(request, slug):
     
     return render(request, 'practice/my_submissions.html', parameters)
 
-# ========================================== PROBLEM SET ==========================================
-
-@login_required(login_url="login")
-def problem_set(request):
-    
-    return render(request, 'practice/problem_set.html')
-
-
-@login_required(login_url="login")
-def fetch_questions(request):
-    query = request.GET.get("query", "").strip()
-    page_number = request.GET.get("page", 1)
-    cache_key = f"questions_{query}_page_{page_number}"
-    cached_data = cache.get(cache_key)
-
-    if cached_data:        
-        return JsonResponse(cached_data)
-
-    per_page = 10
-    questions = Question.objects.filter(is_approved=True, parent_id=-1, sheets__isnull=True)    
-
-
-    if query:
-        questions = questions.filter(
-            Q(title__icontains=query) | 
-            Q(slug__icontains=query) | 
-            Q(id__icontains=query)
-        )
-
-    paginator = Paginator(questions, per_page)
-    page = paginator.get_page(page_number)
-
-    data = {
-        "questions": [
-            {
-                "id": question.id,
-                "title": question.title,
-                "difficulty_level": question.difficulty_level,
-                "difficulty_color": question.get_difficulty_level_color(),
-                "youtube_link": question.youtube_link,
-                "slug": question.slug,
-                "status": question.get_user_status(request.user.student),
-                "color": question.get_status_color(request.user.student)
-            }
-            for question in page.object_list
-        ],
-        "has_next": page.has_next(),
-        "has_previous": page.has_previous(),
-        "total_pages": paginator.num_pages,
-        "current_page": page.number,
-    }
-
-    cache.set(cache_key, data, timeout=300)  # Cache for 5 minutes
-    return JsonResponse(data)
 
 
 # ====================================================================================================

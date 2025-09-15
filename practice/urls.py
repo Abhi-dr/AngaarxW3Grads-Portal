@@ -12,8 +12,6 @@ urlpatterns = [
     
     path("my_submissions/<slug:slug>/", views.my_submissions, name="my_submissions"),
     
-    path("problem_set", views.problem_set, name="problem_set"),
-    path("fetch_questions", views.fetch_questions, name="fetch_questions"),
 
     
     path("fetch_recommended_questions/<slug:slug>", views.fetch_recommended_questions, name="fetch_recommended_questions"),
