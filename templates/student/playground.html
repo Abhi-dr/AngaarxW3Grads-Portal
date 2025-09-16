@@ -459,6 +459,151 @@ Student | Coding Playground
     .presentation-mode.resizing * {
         cursor: ew-resize !important;
     }
+
+    /* Mobile Responsive Styles */
+    @media (max-width: 768px) {
+        .editor-container {
+            height: 45vh;
+            margin: 15px auto;
+        }
+
+        #editor {
+            font-size: 16px;
+        }
+
+        .mobile-controls {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bs-body-bg);
+            border-bottom: 2px solid var(--bs-border-color);
+            padding: 15px;
+            margin: -15px -15px 20px -15px;
+            border-radius: 0;
+        }
+
+        .mobile-run-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .mobile-run-btn {
+            font-size: 18px;
+            padding: 12px 20px;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .mobile-input-btn {
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+
+        .mobile-language-select {
+            margin-bottom: 10px;
+        }
+
+        .mobile-language-select select {
+            font-size: 16px;
+            padding: 10px;
+        }
+
+        .desktop-controls {
+            display: none;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .presentation-toggle {
+            font-size: 14px;
+            padding: 8px 16px;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+
+        #op-div {
+            font-size: 14px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    }
+
+    @media (min-width: 769px) {
+        .mobile-controls {
+            display: none;
+        }
+    }
+
+    /* Touch-friendly improvements */
+    @media (max-width: 768px) {
+        button, .btn {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        select, .form-select {
+            min-height: 44px;
+            font-size: 16px;
+        }
+
+        .modal-dialog {
+            margin: 10px;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        textarea {
+            font-size: 16px;
+            min-height: 120px;
+        }
+    }
+
+    /* Loading button styles */
+    .btn-loading {
+        position: relative;
+        pointer-events: none;
+    }
+
+    .btn-loading .btn-text {
+        opacity: 0;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid transparent;
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .mobile-run-btn.btn-loading::after {
+        width: 24px;
+        height: 24px;
+        margin-left: -12px;
+        margin-top: -12px;
+        border-width: 3px;
+    }
 </style>
 {% endblock %}
 
@@ -482,21 +627,45 @@ Student | Coding Playground
                     </button>
                 </div>
             </div>
+
+            <!-- Mobile Controls - Sticky at top -->
+            <div class="mobile-controls">
+                <div class="mobile-language-select">
+                    <label for="languageMobile" class="form-label fw-semibold">Select Language:</label>
+                    <select class="form-select" id="languageMobile" name="language" required></select>
+                </div>
+                <div class="mobile-run-section">
+                    <button type="button" class="btn btn-success mobile-run-btn" id="mobileRunBtn">
+                        <span class="btn-text">▶️ Run Code</span>
+                    </button>
+                    <button type="button" class="btn btn-outline-primary mobile-input-btn" data-bs-toggle="modal" data-bs-target="#inputModal">
+                        📝 Enter Inputs
+                    </button>
+                </div>
+            </div>
             
             <form id="codeForm">
                 {% csrf_token %}
-                <label for="language">Select Language:</label>
-                <select class="form-select form-control" id="language" name="language" required></select>
+                <div class="desktop-controls">
+                    <label for="language">Select Language:</label>
+                    <select class="form-select form-control" id="language" name="language" required></select>
+                </div>
                 <label for="code" class="mt-3 mb-n2">Code:</label><br>
                 <div class="editor-container">
                     <div id="editor"></div>
                 </div>
-                <button type="submit" class="btn btn-dark w-100" id="submit-btn" accesskey="enter">Submit</button>
+                <div class="desktop-controls">
+                    <button type="submit" class="btn btn-dark w-100" id="submit-btn" accesskey="enter">
+                        <span class="btn-text">Submit</span>
+                    </button>
+                </div>
             </form>
 
-            <button type="button" class="btn btn-primary mt-3 float-end" data-bs-toggle="modal" data-bs-target="#inputModal">
-                Enter Inputs
-            </button>
+            <div class="desktop-controls">
+                <button type="button" class="btn btn-primary mt-3 float-end" data-bs-toggle="modal" data-bs-target="#inputModal">
+                    Enter Inputs
+                </button>
+            </div>
 
             <div class="modal fade" id="inputModal" tabindex="-1" aria-labelledby="inputModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -813,8 +982,8 @@ Student | Coding Playground
         url: "https://theangaarbatch.in/judge0/languages",
         type: "GET",
         success: function (response) {
-            // Populate both language selectors
-            [languageSelect, languagePresentationSelect].forEach(select => {
+            // Populate all language selectors
+            [languageSelect, languagePresentationSelect, $("#languageMobile")].forEach(select => {
                 topLanguages.forEach(function (language) {
                     select.append(`<option value="${language.id}">${language.name}</option>`);
                 });
@@ -834,6 +1003,7 @@ Student | Coding Playground
             if (savedData) {
                 languageSelect.val(savedData.language);
                 languagePresentationSelect.val(savedData.language);
+                $("#languageMobile").val(savedData.language);
                 setEditorContent(savedData.language, savedData.code);
                 $("#inputText").val(savedData.input);
                 $("#inputTextPresentation").val(savedData.input);
@@ -854,8 +1024,12 @@ Student | Coding Playground
                 updateSyntaxHighlighting(languageSelect, editor);
                 updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
             } else {
-                let initialLanguageId = languageSelect.val();
-                setEditorContent(initialLanguageId);
+                // Set Python (71) as default language
+                const defaultLanguageId = 71;
+                languageSelect.val(defaultLanguageId);
+                languagePresentationSelect.val(defaultLanguageId);
+                $("#languageMobile").val(defaultLanguageId);
+                setEditorContent(defaultLanguageId);
                 updateSyntaxHighlighting(languageSelect, editor);
                 updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
                 updateFontSize(16); // Set default font size
@@ -890,15 +1064,24 @@ Student | Coding Playground
     });
 
     // Language change handlers
-    languageSelect.change(function () {
-        let selectedLanguageId = $(this).val();
+    function handleLanguageChange(selectedLanguageId) {
+        languageSelect.val(selectedLanguageId);
         languagePresentationSelect.val(selectedLanguageId);
+        $("#languageMobile").val(selectedLanguageId);
         setEditorContent(selectedLanguageId);
-        updateSyntaxHighlighting($(this), editor);
+        updateSyntaxHighlighting(languageSelect, editor);
         updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
         $("#output").addClass("d-none");
         $("#output pre").text("");
         scheduleAutoSave();
+    }
+
+    languageSelect.change(function () {
+        handleLanguageChange($(this).val());
+    });
+
+    $("#languageMobile").change(function () {
+        handleLanguageChange($(this).val());
     });
 
     languagePresentationSelect.change(function () {
@@ -1041,17 +1224,36 @@ Student | Coding Playground
     });
 
     // Code execution functions
-    function executeCode(isPresentation = false) {
-        const submitBtn = isPresentation ? $("#submitBtnPresentation") : $("#submit-btn");
+    function executeCode(isPresentation = false, isMobile = false) {
+        let submitBtn;
+        if (isPresentation) {
+            submitBtn = $("#submitBtnPresentation");
+        } else if (isMobile) {
+            submitBtn = $("#mobileRunBtn");
+        } else {
+            submitBtn = $("#submit-btn");
+        }
+        
         const outputElement = isPresentation ? $("#outputPresentation") : $("#output pre");
-        const languageId = isPresentation ? languagePresentationSelect.val() : $("#language").val();
+        const languageId = isPresentation ? languagePresentationSelect.val() : $("#language").val() || $("#languageMobile").val();
         const sourceCode = isPresentation ? editorPresentation.getValue() : editor.getValue();
         const inputText = isPresentation ? $("#inputTextPresentation").val() : $("#inputText").val();
 
         if (!isPresentation) $("#output").addClass("d-none");
         
+        // Add loading state
         submitBtn.prop("disabled", true);
-        submitBtn.text(isPresentation ? "⏳ Running..." : "Submitting...");
+        submitBtn.addClass("btn-loading");
+        
+        // Update button text based on context
+        const btnText = submitBtn.find('.btn-text');
+        if (isPresentation) {
+            btnText.text("⏳ Running...");
+        } else if (isMobile) {
+            btnText.text("🔄 Running...");
+        } else {
+            btnText.text("Executing...");
+        }
 
         $.ajax({
             url: "{% url 'execute_code' %}",
@@ -1063,8 +1265,18 @@ Student | Coding Playground
                 csrfmiddlewaretoken: "{{ csrf_token }}"
             },
             success: function (response) {
+                // Remove loading state
                 submitBtn.prop("disabled", false);
-                submitBtn.text(isPresentation ? "▶ Run Code" : "Submit");
+                submitBtn.removeClass("btn-loading");
+                
+                // Restore button text
+                if (isPresentation) {
+                    btnText.text("▶ Run Code");
+                } else if (isMobile) {
+                    btnText.text("▶️ Run Code");
+                } else {
+                    btnText.text("Submit");
+                }
                 
                 if (!isPresentation) $("#output").removeClass("d-none");
 
@@ -1081,8 +1293,19 @@ Student | Coding Playground
             },
             error: function (xhr, status, error) {
                 alert("Error from AJAX: " + error);
+                
+                // Remove loading state on error
                 submitBtn.prop("disabled", false);
-                submitBtn.text(isPresentation ? "▶ Run Code" : "Submit");
+                submitBtn.removeClass("btn-loading");
+                
+                // Restore button text
+                if (isPresentation) {
+                    btnText.text("▶ Run Code");
+                } else if (isMobile) {
+                    btnText.text("▶️ Run Code");
+                } else {
+                    btnText.text("Submit");
+                }
             }
         });
     }
@@ -1091,6 +1314,10 @@ Student | Coding Playground
     $("#codeForm").off("submit").submit(function (event) {
         event.preventDefault();
         executeCode(false);
+    });
+
+    $("#mobileRunBtn").click(function() {
+        executeCode(false, true);
     });
 
     $("#submitBtnPresentation").click(function() {
