@@ -111,19 +111,24 @@ def batch(request, slug):
     
     sheets = Sheet.objects.filter(batches=batch, is_approved=True).order_by('-id')
     
-    # PROGRESS OF ALL THE QUESTION SOLVED BY THE STUDENT
-    # total_questions = 0
-    # solved_questions = 0
-    # for sheet in sheets:
-    #     total_questions += sheet.questions.count()
-    #     solved_questions += sheet.get_solved_questions(student)
+    # PROGRESS OF ALL THE QUESTION SOLVED BY THE STUDENT (Updated Logic)
+    total_questions = 0
+    solved_questions = 0
     
-    # if total_questions == 0:
-    #     progress = 0
-    # else:
-    #     progress = (solved_questions / total_questions) * 100
+    # Count questions from non-sequential sheets only (accessible to all students)
+    for sheet in sheets:
+        total_questions += sheet.questions.filter(is_approved=True).count()
+        solved_questions += sheet.get_solved_questions(student)
     
-    # questions_left = total_questions - solved_questions
+    
+    if total_questions == 0:
+        progress = 0
+        total_questions_solved_percentage = 0
+    else:
+        progress = (solved_questions / total_questions) * 100
+        total_questions_solved_percentage = int(progress)
+    
+    questions_left = total_questions - solved_questions
         
     # today's batch pod
     pod = batch.get_today_pod_for_batch()
@@ -133,9 +138,10 @@ def batch(request, slug):
         "batch": batch,
         "sheets": sheets,
         "pod": pod,
-        # "progress": int(progress),
-        # "solved_questions": solved_questions,
-        # "questions_left": questions_left,
+        "progress": int(progress),
+        "solved_questions": solved_questions,
+        "questions_left": questions_left,
+        "total_questions_solved_percentage": total_questions_solved_percentage,
         "notifications": notifications
     }
     

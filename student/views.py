@@ -223,15 +223,25 @@ def new_message(request):
 def get_random_question(request):
     
     student = request.user.student
-    question = Question.objects.filter(is_approved=True).exclude(id__in=Submission.objects.filter(user=request.user.student).values('question').distinct()).exclude(sheets__isnull=False).order_by("?").first()
     
-    print(question)
+    # Updated logic: Only include questions from practice sheets (not part of any batch)
+    question = Question.objects.filter(
+        Q(sheets__batches__isnull=True),  # Questions in sheets that are not part of any batch (practice sheets)
+        is_approved=True,
+        parent_id=-1
+    ).exclude(
+        id__in=Submission.objects.filter(
+            user=request.user, 
+            verdict="Accepted"
+        ).values('question').distinct()
+    ).distinct().order_by("?").first()
+    
     if not question:
         messages.error(request, "No questions available!")
         return redirect("student")    
     
     try:
-        if question.is_solved_by_user(student) and question.is_solved_by_user(student):
+        if question.is_solved_by_user(student):
             return get_random_question(request)
     
     except RecursionError:
