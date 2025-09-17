@@ -3,6 +3,10 @@ from . import batch_views, views, doubt_solver, hackathon_views, flames_views, c
 
 urlpatterns = [
     path("", views.dashboard, name="student"),
+
+    path("my-certificates", views.my_certificates, name = "my_certificates"),
+    path("event/<int:id>/certificate", views.view_certificate, name="student_view_certificate"),
+
     
     # ========================= SESSION WORK =========================
     
@@ -41,10 +45,7 @@ urlpatterns += [
     path('summer-training/', flames_views.student_flames, name='student_flames'),
     
     path("summer-training/<slug:slug>/", flames_views.my_course, name="flames_my_course"),
-    path("course/<slug:slug>/registration", flames_views.view_registration, name="student_view_registration"),
-
-    path("course/<int:id>/certificate", flames_views.view_certificate, name="student_view_certificate"),
-    
+    path("course/<slug:slug>/registration", flames_views.view_registration, name="student_view_registration"),    
     
     # ---- REGISTRATION URLS ----
     path('course/<slug:slug>/', course_views.course_detail, name='course_detail'),

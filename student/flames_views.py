@@ -54,13 +54,11 @@ def student_flames(request):
     
     available_courses = FlamesCourse.objects.filter(is_active=True).exclude(id__in=registered_course_ids)
 
-    my_certificates = Certificate.objects.filter(student=request.user).select_related('event')
     
     parameters = {
         'registrations': registrations,
         'available_courses': available_courses,
         'active_tab': 'flames',
-        'my_certificates': my_certificates,
     }
     
     return render(request, 'student/flames/flames.html', parameters)
@@ -195,40 +193,6 @@ def my_course(request, slug):
     # response['Content-Disposition'] = f'attachment; filename="{certificate.certificate_id}.pdf"'
     
     # return response
-
-
-
-@login_required(login_url='login')
-def view_certificate(request, id):
-    certificate = get_object_or_404(Certificate, id=id, student=request.user)
-    
-    # Check if event has a custom template
-    if certificate.event.certificate_template and certificate.event.certificate_template.html_template:
-        # Render the custom template from database
-        template = Template(certificate.event.certificate_template.html_template)
-        context = Context({
-            'certificate': certificate,
-            'event': certificate.event,
-            'student': request.user,
-        })
-        rendered_content = template.render(context)
-        
-        parameters = {
-            'certificate': certificate,
-            'event': certificate.event,
-            'student': request.user,
-            'custom_template_content': rendered_content,
-        }
-    else:
-        # Use default template
-        parameters = {
-            'certificate': certificate,
-            'event': certificate.event,
-            'student': request.user,
-            'custom_template_content': None,
-        }
-
-    return render(request, 'student/flames/view_certificate.html', parameters)
 
 
 

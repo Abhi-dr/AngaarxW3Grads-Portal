@@ -1,0 +1,200 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block my_certificates_active %}
+active
+{% endblock %}
+
+{% block title %}The Angaar Batch | My Certificates {% endblock %}
+
+{% block extra_css %}
+<style>
+    .certificate-id {
+        cursor: pointer;
+        color: #007bff;
+        text-decoration: underline;
+        transition: color 0.2s;
+    }
+    
+    .certificate-id:hover {
+        color: #0056b3;
+    }
+    
+    .copy-message {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: #28a745;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        z-index: 1000;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: all 0.3s ease;
+    }
+    
+    .copy-message.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .copy-message i {
+        margin-right: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    {% endfor %}
+
+    <div class="container-fluid">
+
+        {% for message in messages %}
+
+        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+            <strong>{{ message.tag }}</strong> {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        {% endfor %}
+
+        <!-- Copy success message -->
+        <div id="copyMessage" class="copy-message">
+            <i class="fas fa-check-circle"></i>
+            Certificate ID copied to clipboard!
+        </div>
+
+        <!-- ===============================================================================================-->
+        <!-- ============================================ JOVAC ARCHIVED ===================================-->
+        <!-- ===============================================================================================-->
+
+        <div class="card mb-4">
+            <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">M Y &nbsp; C E R T I F I C A T E S 🔥</span>
+                <span class="fs-4"> | Angaar x W3Grads
+                </span>
+            </h3>
+        </div>
+        </div>
+
+        <div class="row">
+            {% for certificate in my_certificates %}
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Event: <strong>{{ certificate.event.name }}</strong></h5>
+                        <p class="card-text">
+                            Id: <strong>
+                                <span class="certificate-id" 
+                                      onclick="copyCertificateId('{{ certificate.certificate_id }}')" 
+                                      title="Click to copy certificate ID">
+                                    {{ certificate.certificate_id }}
+                                </span>
+                            </strong>
+                        </p>
+                        <a href="{% url 'student_view_certificate' certificate.id %}" class="btn btn-primary">View
+                            Certificate</a>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-muted">Issued on
+                            {{ certificate.issued_date|date:"F d, Y" }}</small>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="no-registrations">
+                    <i class="fas fa-certificate"></i>
+                    <h4>No Certificates Found</h4>
+                    <p>You haven't earned any certificates yet.</p>
+                    <button class="tab-button btn-primary" data-tab="available" style="border-radius: 4px;">Explore
+                        Available Programs</button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function copyCertificateId(certificateId) {
+            // Create a temporary text area element
+            const textArea = document.createElement('textarea');
+            textArea.value = certificateId;
+            document.body.appendChild(textArea);
+            
+            // Select and copy the text
+            textArea.select();
+            textArea.setSelectionRange(0, 99999); // For mobile devices
+            
+            try {
+                // Copy to clipboard
+                document.execCommand('copy');
+                
+                // Remove the temporary element
+                document.body.removeChild(textArea);
+                
+                // Show success message
+                showCopyMessage();
+                
+            } catch (err) {
+                // Fallback for modern browsers
+                navigator.clipboard.writeText(certificateId).then(function() {
+                    document.body.removeChild(textArea);
+                    showCopyMessage();
+                }).catch(function(err) {
+                    console.error('Could not copy text: ', err);
+                    document.body.removeChild(textArea);
+                    alert('Failed to copy certificate ID. Please try again.');
+                });
+            }
+        }
+        
+        function showCopyMessage() {
+            const message = document.getElementById('copyMessage');
+            message.classList.add('show');
+            
+            // Hide the message after 2 seconds
+            setTimeout(function() {
+                message.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Alternative modern approach using async/await (uncomment if you prefer this method)
+        /*
+        async function copyCertificateId(certificateId) {
+            try {
+                await navigator.clipboard.writeText(certificateId);
+                showCopyMessage();
+            } catch (err) {
+                // Fallback method
+                const textArea = document.createElement('textarea');
+                textArea.value = certificateId;
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showCopyMessage();
+                } catch (fallbackErr) {
+                    alert('Failed to copy certificate ID. Please try again.');
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        }
+        */
+    </script>
+
+{% endblock %}

@@ -10,8 +10,12 @@ from datetime import datetime, timedelta
 
 from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
+from .event_models import Event, CertificateTemplate, Certificate
 from practice.models import POD, Submission, Batch, Question, Sheet, Streak
 from home.models import Alumni, ReferralCode
+from django.template import engines, Template, Context
+from weasyprint import HTML
+from django.http import HttpResponse
 from django.db.models import Max, Sum
 
 # ========================================= DASHBOARD =========================================
@@ -535,3 +539,54 @@ def my_referrals(request):
     }
     
     return render(request, 'student/my_referrals.html', context)
+
+
+# ====================================== MY CERTIFICATES ================================
+
+@login_required(login_url="login")
+def my_certificates(request):
+
+    my_certificates = Certificate.objects.filter(student=request.user).select_related('event')
+
+    parameters = {
+        'my_certificates': my_certificates,
+    }
+
+    return render(request, "student/my_certificates.html", parameters)
+
+
+# ======================================= VIEW CERTIFICATE ==============================
+
+
+@login_required(login_url='login')
+def view_certificate(request, id):
+    certificate = get_object_or_404(Certificate, id=id, student=request.user)
+    
+    # Check if event has a custom template
+    if certificate.event.certificate_template and certificate.event.certificate_template.html_template:
+        # Render the custom template from database
+        template = Template(certificate.event.certificate_template.html_template)
+        context = Context({
+            'certificate': certificate,
+            'event': certificate.event,
+            'student': request.user,
+        })
+        rendered_content = template.render(context)
+        
+        parameters = {
+            'certificate': certificate,
+            'event': certificate.event,
+            'student': request.user,
+            'custom_template_content': rendered_content,
+        }
+    else:
+        # Use default template
+        parameters = {
+            'certificate': certificate,
+            'event': certificate.event,
+            'student': request.user,
+            'custom_template_content': None,
+        }
+
+    return render(request, 'student/view_certificate.html', parameters)
+

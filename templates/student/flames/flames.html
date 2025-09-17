@@ -683,46 +683,6 @@ active
 
     {% endfor %}
 
-
-    <div id="registrations-tab" class="tab-content active">
-
-        <!-- add a div to display student's certificates -->
-        <div class="section-header">
-            <h3 class="section-title">My Certificates</h3>
-        </div>
-
-        <div class="row">
-            {% for certificate in my_certificates %}
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">ID: <strong>{{ certificate.certificate_id }}</strong></h5>
-                        <p class="card-text">Of <strong>{{ certificate.event.name }}</strong></p>
-                        <a href="{% url 'student_view_certificate' certificate.id %}" class="btn btn-primary">View
-                                Certificate</a>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted">Issued on
-                            {{ certificate.issued_date|date:"F d, Y" }}</small>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <div class="col-12">
-                <div class="no-registrations">
-                    <i class="fas fa-certificate"></i>
-                    <h4>No Certificates Found</h4>
-                    <p>You haven't earned any certificates yet.</p>
-                    <button class="tab-button btn-primary" data-tab="available" style="border-radius: 4px;">Explore
-                        Available Programs</button>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <hr>
-
     <div class="section-header">
         <h3 class="section-title">My F.L.A.M.E.S Registrations</h3>
     </div>
