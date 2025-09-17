@@ -5,397 +5,10 @@ active
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-<style>
-    h3.question {
-        font-family: "Roboto", sans-serif;
-        font-size: 24px;
-        text-align: center;
-        font-weight: 100;
-    }
-
-    .text-color {
-        font-size: 75%;
-        color: rgb(46, 46, 46);
-        font-weight: 500;
-    }
-
-    .editor-container {
-        width: 100%;
-        height: 60vh;
-        margin: 20px auto;
-        position: relative;
-    }
-
-    code {
-        font-size: 110%;
-    }
-
-    pre {
-        font-size: 110%;
-    }
-
-    #editor {
-        position: absolute;
-        left: 0;
-        right: 0;
-        top: 0;
-        bottom: 0;
-        height: 100%;
-        width: 100%;
-        border-radius: 8px;
-        font-size: 20px;
-    }
-
-    .output-box {
-        background-color: #f8f9fa;
-        padding: 15px;
-        border: 1px solid #ddd;
-        height: 150px;
-        overflow-y: scroll;
-    }
-
-    .test-case-result {
-        margin-bottom: 10px;
-    }
-
-    .test-case-result.success {
-        color: green;
-    }
-
-    .test-case-result.failure {
-        color: red;
-    }
-
-    #language,
-    option {
-        color: rgb(19, 19, 19);
-    }
-
-    [data-bs-theme="dark"] {
-        #language {
-            color: white;
-        }
-
-        option {
-            color: black
-        }
-
-        #op-div {
-            color: white;
-        }
-    }
-
-    @media (max-width: 768px) {
-        #view-submission {
-            margin-top: 5%;
-            width: 100%;
-        }
-    }
-
-    /*============== SUCCESS MODAL ============ */
-
-    /* Modal animation */
-    .modal-dialog {
-        transform: scale(0.8);
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .modal.fade.show .modal-dialog {
-        transform: scale(1);
-        /* Pop-out effect */
-    }
-
-    /* SVG Trophy Animation */
-    #troply-svg {
-        animation: bounce 2s infinite;
-    }
-
-    @keyframes bounce {
-
-        0%,
-        100% {
-            transform: translateY(0);
-        }
-
-        50% {
-            transform: translateY(-10px);
-        }
-    }
-
-    /* Button Styling */
-    #nextQuestionBtn {
-        background-color: #00c853;
-        color: white;
-        border: none;
-        transition: background-color 0.3s ease-in-out, transform 0.2s;
-    }
-
-    #nextQuestionBtn:hover {
-        background-color: #00e676;
-        transform: scale(1.05);
-    }
-
-    .badge-capsule {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        border-radius: 50px;
-        white-space: nowrap;
-        margin-bottom: 0.5rem;
-        text-wrap: auto;
-        /* Add margin bottom for better spacing */
-    }
-
-    .badge-capsule img {
-        vertical-align: middle;
-        /* Align the image vertically with the text */
-    }
-</style>
-
-
-<style>
-    /* General Styles */
-
-    .card {
-        transition: all 0.3s ease-in-out;
-    }
-
-    /* Dark Mode */
-
-    body[data-theme='dark'] .card {
-        background-color: #2c2c2c;
-        color: #ddd;
-        border-color: #444;
-    }
-
-    body[data-theme='dark'] .card-header {
-        background-color: #3c3c3c;
-        color: #ddd;
-    }
-
-    body[data-theme='dark'] .btn-outline-primary {
-        color: #ddd;
-        border-color: #888;
-    }
-
-    body[data-theme='dark'] .btn-outline-primary:hover {
-        background-color: #444;
-        border-color: #666;
-    }
-</style>
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
-<style>
-    @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap");
 
-    button {
-        font-size: 18px;
-        font-weight: 400;
-        color: #fff;
-        padding: 14px 22px;
-        border: none;
-        background: #4070f4;
-        border-radius: 6px;
-        cursor: pointer;
-    }
+<link rel="stylesheet" href="{% static 'css/student/dashboard/problem.css' %}">
 
-    button:hover {
-        background-color: #265df2;
-    }
-
-    button.show-modal,
-    .modal-box {
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    section.active .show-modal {
-        display: none;
-    }
-
-    .overlay {
-        position: fixed;
-        height: 100%;
-        width: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    section.active .overlay {
-        opacity: 1;
-        pointer-events: auto;
-    }
-
-    .modal-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        max-width: 380px;
-        width: 100%;
-        padding: 30px 20px;
-        border-radius: 24px;
-        background-color: #fff;
-        opacity: 0;
-        pointer-events: none;
-        transition: all 0.3s ease;
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-
-    section.active .modal-box {
-        opacity: 1;
-        pointer-events: auto;
-        transform: translate(-50%, -50%) scale(1);
-    }
-
-    .modal-box i {
-        font-size: 70px;
-        color: #4070f4;
-    }
-
-    .modal-box h2 {
-        margin-top: 20px;
-        font-size: 25px;
-        font-weight: 500;
-        color: #333;
-    }
-
-    .modal-box h3 {
-        font-size: 16px;
-        font-weight: 400;
-        color: #333;
-        text-align: center;
-    }
-
-    .modal-box .buttons {
-        margin-top: 25px;
-    }
-
-    .modal-box button {
-        font-size: 14px;
-        padding: 6px 12px;
-        margin: 0 10px;
-    }
-</style>
-
-<style>
-    .figure {
-        /* Core styling */
-        border-radius: 0.375rem;
-        padding: 0.25rem;
-        margin-left: 2%;
-        transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
-
-        /* --- New Additions --- */
-        max-width: 420px;
-        /* Set a maximum width for the card */
-        width: 96%;
-        /* Ensure it's responsive within the max-width */
-        display: flex;
-        /* Better control over internal alignment */
-        flex-direction: column;
-        height: 100%;
-        /* Make cards in the same row equal height */
-    }
-
-    .figure:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .figure .figure-caption {
-        text-align: center;
-        margin-top: auto;
-        /* Pushes caption to the bottom in equal-height cards */
-    }
-</style>
-
-
-<style>
-    /* Styles for Focus Mode */
-    body.focus-mode-active {
-        overflow: hidden; /* Prevent scrolling of the body */
-        user-select: none; /* Prevent text selection while dragging */
-    }
-
-    /* Hide everything except the problem layout container when in focus mode */
-    body.focus-mode-active .main-wrapper, /* Target main wrapper from base.html */
-    body.focus-mode-active nav,
-    body.focus-mode-active > .container-fluid > .card:first-child, /* Hide the top title card */
-    body.focus-mode-active > footer { /* Hide a potential footer from base.html */
-        display: none !important;
-    }
-
-    /* Style the main container for focus mode */
-    body.focus-mode-active #problem-layout-container {
-        display: flex;
-        flex-direction: row;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 1050; /* Higher than most elements */
-        background-color: var(--bs-body-bg); /* Use theme background color */
-    }
-
-    /* Style the two panels */
-    body.focus-mode-active .question-panel,
-    body.focus-mode-active .editor-panel {
-        flex-basis: 50%; /* Initial width */
-        height: 100vh;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        min-width: 15%; /* Prevent panels from becoming too small */
-    }
-    
-    body.focus-mode-active .question-panel .card-body,
-    body.focus-mode-active .editor-panel .card-body {
-        flex-grow: 1; /* Allow card body to take available space */
-    }
-
-    /* Adjust padding and borders for a cleaner look in focus mode */
-    body.focus-mode-active .question-panel,
-    body.focus-mode-active .editor-panel {
-        border: none;
-        border-radius: 0;
-        padding: 1rem;
-    }
-    
-    /* Make the editor container fill the available height */
-    body.focus-mode-active .editor-container {
-        /* Calculate height leaving space for language selector and buttons */
-        height: calc(100vh - 220px); 
-    }
-
-    /* Hide recommended questions in focus mode */
-    body.focus-mode-active #recommended-questions-container {
-        display: none;
-    }
-
-    /* --- NEW: Styles for the resizable slider --- */
-    #resize-slider {
-        display: none; /* Hidden by default */
-        flex: 0 0 8px; /* Fixed width, no growing or shrinking */
-        background-color: var(--bs-border-color);
-        cursor: col-resize;
-        transition: background-color 0.2s ease-in-out;
-    }
-
-    #resize-slider:hover {
-        background-color: var(--bs-primary);
-    }
-    
-    /* The slider is only visible in focus mode */
-    body.focus-mode-active #resize-slider {
-        display: block;
-    }
-
-</style>
 {% endblock %} {% block body %}
 
 <div class="container-fluid">
@@ -846,6 +459,17 @@ active
             { id: 54, name: "C++", mode: "c_cpp" }
         ];
 
+        // Language preference storage
+        const LANGUAGE_PREFERENCE_KEY = "preferred_language_id";
+
+        function saveLanguagePreference(languageId) {
+            localStorage.setItem(LANGUAGE_PREFERENCE_KEY, languageId);
+        }
+
+        function getLanguagePreference() {
+            return localStorage.getItem(LANGUAGE_PREFERENCE_KEY) || 71; // Default to Python
+        }
+
         function updateEditorTheme() {
             const currentTheme = localStorage.getItem("theme");
             const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
@@ -928,8 +552,10 @@ active
         resetButton.click(resetDraft);
 
         languageSelect.change(function () {
-            updateEditorMode($(this).val());
-            fetchDriverCode($(this).val());
+            const selectedLanguageId = $(this).val();
+            updateEditorMode(selectedLanguageId);
+            fetchDriverCode(selectedLanguageId);
+            saveLanguagePreference(selectedLanguageId); // Save user's language preference
         });
 
         $(document).keydown(function (event) {
@@ -958,6 +584,10 @@ active
 
         topLanguages.forEach(lang => languageSelect.append(`<option value="${lang.id}">${lang.name}</option>`));
 
+        // Set user's preferred language on page load
+        const preferredLanguageId = getLanguagePreference();
+        languageSelect.val(preferredLanguageId);
+
         $('#image-viewer-modal').on('show.bs.modal', function (event) {
             const trigger = $(event.relatedTarget);
             $(this).find('#modalImage').attr('src', trigger.data('src'));
@@ -965,7 +595,7 @@ active
         });
 
         initializeEditor();
-        fetchDriverCode(languageSelect.val());
+        fetchDriverCode(preferredLanguageId); // Use preferred language instead of default
 
 
         // ========================== FOCUS MODE & SLIDER LOGIC ==========================

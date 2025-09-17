@@ -9,3 +9,20 @@
 
 
 # URL: locust -f load_test.py --host https://theangaarbatch.in
+
+
+a = input("Enter a number: ") # "5"
+b = input("Enter another number: ") # "h"
+
+print(type(a))
+
+# c = a * b # Text Replication
+
+# print(c)
+
+
+a = 10
+b = 20
+
+print(20)
+
