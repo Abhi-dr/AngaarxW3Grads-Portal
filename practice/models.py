@@ -196,11 +196,14 @@ class Sheet(models.Model):
                 question__in=self.questions.all(),
                 status='Accepted'
             ).values('question').distinct().count()
-        # return MCQSubmission.objects.filter(
-        #     student=student,
-        #     question__in=self.mcq_questions.all(),
-        #     is_correct=True
-        # ).count()
+        elif self.sheet_type == "MCQ":
+            return MCQSubmission.objects.filter(
+                student=student,
+                question__in=self.mcq_questions.all(),
+                is_correct=True
+            ).values('question').distinct().count()
+        else:
+            return 0
         
     def get_progress(self, student):
         total = self.get_total_questions()
@@ -657,28 +660,25 @@ class MCQQuestion(models.Model):
 
 
     def save(self, *args, **kwargs):
-
         if not self.slug:
-            text = ""
-        
-            for word in self.question_text.split():
-                if word.isalnum():
-                    text += word + "-"
-                else:
-                    word = ''.join(e for e in word if e.isalnum())
-                    text += word + "-"
+            from django.utils.text import slugify
+            import uuid
             
-            # Generate base slug
-            base_slug = text.lower().strip("-")
-            slug = base_slug
-
-            # Check for uniqueness
-            counter = 1
-            while MCQQuestion.objects.filter(slug=slug).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
-
-            self.slug = slug
+            # Take first 30 characters of question text for readability
+            question_preview = self.question_text[:30].strip()
+            base_slug = slugify(question_preview)
+            
+            # Add a short unique identifier to ensure uniqueness
+            unique_id = str(uuid.uuid4())[:8]
+            self.slug = f"{base_slug}-{unique_id}"
+            
+            # Ensure the slug doesn't exceed 50 characters (default SlugField max_length)
+            if len(self.slug) > 50:
+                # Truncate the base part and keep the unique identifier
+                max_base_length = 50 - 9  # 8 chars for UUID + 1 for hyphen
+                base_slug = base_slug[:max_base_length]
+                self.slug = f"{base_slug}-{unique_id}"
+        
         super().save(*args, **kwargs)
         
 

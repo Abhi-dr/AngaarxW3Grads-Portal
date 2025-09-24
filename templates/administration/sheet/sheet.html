@@ -939,7 +939,7 @@ active
             }
 
             // Send AJAX request
-            fetch('#', {
+            fetch('{% url "administrator_add_mcq_question_json" sheet.slug %}', {
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',

@@ -365,7 +365,6 @@ active
 
     <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'practice' %}">Practice</a></li>
             <li class="breadcrumb-item">
                 <a href="{% url 'my_sheet' mcq_question.sheet.slug %}">{{ mcq_question.sheet.name }}</a>
             </li>
@@ -481,6 +480,9 @@ active
                 <div class="text-center mt-4">
                     <button type="submit" class="btn btn-primary btn-lg" id="submit-answer">
                         <i class="fas fa-check-circle me-2"></i>Submit Answer
+                    </button>
+                    <button type="button" class="btn btn-warning btn-lg ms-3" id="retry-button" style="display: none;">
+                        <i class="fas fa-redo me-2"></i>Try Again
                     </button>
                 </div>
             </form>
@@ -641,6 +643,9 @@ active
                     } else {
                         submitBtn.removeClass('btn-primary').addClass('btn-danger');
                         submitBtn.html('<i class="fas fa-times me-2"></i>Incorrect');
+                        
+                        // Show retry button for wrong answers
+                        $('#retry-button').show();
                     }
                 })
                 .catch(error => {
@@ -649,6 +654,31 @@ active
                     submitBtn.html('<i class="fas fa-check-circle me-2"></i>Submit Answer');
                     alert('An error occurred. Please try again.');
                 });
+        });
+
+        // Retry button functionality
+        $('#retry-button').click(function() {
+            // Reset form state
+            submitted = false;
+            selectedOption = null;
+            
+            // Reset option cards
+            $('.option-card').removeClass('selected correct incorrect disabled');
+            
+            // Reset submit button
+            const submitBtn = $('#submit-answer');
+            submitBtn.prop('disabled', false);
+            submitBtn.removeClass('btn-success btn-danger').addClass('btn-primary');
+            submitBtn.html('<i class="fas fa-check-circle me-2"></i>Submit Answer');
+            
+            // Hide retry button
+            $(this).hide();
+            
+            // Hide explanation
+            $('#explanation').removeClass('show');
+            
+            // Clear selected option value
+            $('#selected_option').val('');
         });
 
         function showSuccessModal() {

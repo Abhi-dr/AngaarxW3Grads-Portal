@@ -3,6 +3,11 @@ import json
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+from django.urls import reverse
+from django.db import transaction
 from practice.models import Sheet, MCQQuestion, MCQSubmission, QuestionImage
 from django.core.paginator import Paginator
 
@@ -167,3 +172,106 @@ def administrator_view_mcq_submissions(request, sheet_slug, question_slug):
     }
     
     return render(request, 'administration/batch/mcq/view_submissions.html', context)
+
+# ============================= MCQ JSON IMPORT =============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@csrf_exempt
+def add_mcq_question_json(request, sheet_slug):
+    sheet = get_object_or_404(Sheet, slug=sheet_slug)
+    
+    if sheet.sheet_type != "MCQ":
+        return JsonResponse({
+            'status': 'error',
+            'message': 'This is not an MCQ sheet.'
+        })
+    
+    if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            json_data = request.POST.get("json_data")
+            data = json.loads(json_data)
+            
+            # Ensure data is a list
+            if not isinstance(data, list):
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'JSON data must be an array of MCQ questions.'
+                })
+            
+            if not data:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'No MCQ questions found in the JSON data.'
+                })
+            
+            # Validate each question
+            required_fields = ['question_text', 'option_a', 'option_b', 'option_c', 'option_d', 'correct_option', 'difficulty_level']
+            valid_difficulty_levels = ['Easy', 'Medium', 'Hard']
+            valid_correct_options = ['A', 'B', 'C', 'D']
+            
+            created_questions = []
+            
+            with transaction.atomic():
+                for i, question_data in enumerate(data):
+                    # Validate required fields
+                    for field in required_fields:
+                        if field not in question_data or not str(question_data[field]).strip():
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': f'Question {i+1}: Required field "{field}" is missing or empty.'
+                            })
+                    
+                    # Validate difficulty_level
+                    if question_data['difficulty_level'] not in valid_difficulty_levels:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Question {i+1}: Invalid difficulty level. Must be one of: {", ".join(valid_difficulty_levels)}'
+                        })
+                    
+                    # Validate correct_option
+                    correct_option = question_data['correct_option'].upper()
+                    if correct_option not in valid_correct_options:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Question {i+1}: Invalid correct option. Must be one of: A, B, C, D'
+                        })
+                    
+                    # Create the MCQ question
+                    mcq_question = MCQQuestion(
+                        sheet=sheet,
+                        question_text=question_data['question_text'].strip(),
+                        option_a=question_data['option_a'].strip(),
+                        option_b=question_data['option_b'].strip(),
+                        option_c=question_data['option_c'].strip(),
+                        option_d=question_data['option_d'].strip(),
+                        correct_option=correct_option,
+                        explanation=question_data.get('explanation', '').strip(),
+                        tags=question_data.get('tags', '').strip(),
+                        difficulty_level=question_data['difficulty_level'],
+                        is_approved=True
+                    )
+                    mcq_question.save()
+                    created_questions.append(mcq_question)
+            
+            return JsonResponse({
+                'status': 'success',
+                'message': f'Successfully imported {len(created_questions)} MCQ questions!',
+                'redirect_url': reverse('administrator_sheet', args=[sheet.slug])
+            })
+            
+        except json.JSONDecodeError:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Invalid JSON format. Please check your JSON data.'
+            })
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'An error occurred while importing questions: {str(e)}'
+            })
+    
+    return JsonResponse({
+        'status': 'error',
+        'message': 'Invalid request method.'
+    })

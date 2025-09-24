@@ -180,6 +180,8 @@ urlpatterns += [
     path('mcq-question/<int:question_id>/delete/', mcq_views.delete_mcq_question, name='delete_mcq_question'),
 
     path('sheet/<slug:sheet_slug>/<slug:question_slug>/submissions/', mcq_views.administrator_view_mcq_submissions, name='administrator_view_mcq_submissions'),
+    
+    path('sheet/<slug:sheet_slug>/add-mcq-json/', mcq_views.add_mcq_question_json, name='administrator_add_mcq_question_json'),
 
 
 
