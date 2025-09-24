@@ -133,7 +133,6 @@ def batch(request, slug):
     # today's batch pod
     pod = batch.get_today_pod_for_batch()
     
-    
     parameters = {
         "batch": batch,
         "sheets": sheets,

@@ -58,6 +58,9 @@ def execute_code(request):
             "stdin": encoded_input  # Add input data to the payload
         }
 
+        if language_id in ['50', '54']:  # C, C++, Java
+            data["compiler_options"] = "-lm"
+
         try:
             response = requests.post(f"{JUDGE0_URL}?base64_encoded=true", json=data, headers=HEADERS, timeout=10)
             response.raise_for_status()
