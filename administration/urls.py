@@ -182,6 +182,10 @@ urlpatterns += [
     path('sheet/<slug:sheet_slug>/<slug:question_slug>/submissions/', mcq_views.administrator_view_mcq_submissions, name='administrator_view_mcq_submissions'),
     
     path('sheet/<slug:sheet_slug>/add-mcq-json/', mcq_views.add_mcq_question_json, name='administrator_add_mcq_question_json'),
+    
+    path('test-mcq/<slug:question_slug>/', mcq_views.administrator_test_mcq, name='administrator_test_mcq'),
+    
+    path('test-mcq-next/<int:sheet_id>/<int:current_question_id>/', mcq_views.get_next_mcq_question_for_testing, name='administrator_next_test_mcq'),
 
 
 

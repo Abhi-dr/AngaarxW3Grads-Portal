@@ -275,3 +275,61 @@ def add_mcq_question_json(request, sheet_slug):
         'status': 'error',
         'message': 'Invalid request method.'
     })
+
+# ============================= TEST MCQ QUESTION =============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def administrator_test_mcq(request, question_slug):
+    """
+    Allows administrators to test MCQ questions before they go live.
+    Similar to the test_code functionality for coding questions.
+    """
+    mcq_question = get_object_or_404(MCQQuestion, slug=question_slug)
+    
+    # Get tag list for display
+    tag_list = mcq_question.tag_list() if mcq_question.tags else []
+    
+    context = {
+        'mcq_question': mcq_question,
+        'tag_list': tag_list,
+        'is_admin_test': True,  # Flag to indicate this is admin testing
+    }
+    
+    return render(request, 'administration/batch/mcq/test_mcq.html', context)
+
+# ============================= GET NEXT MCQ QUESTION FOR TESTING =============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def get_next_mcq_question_for_testing(request, sheet_id, current_question_id):
+    """
+    Get the next MCQ question in the sheet for administrator testing.
+    Similar to the student version but for admin testing purposes.
+    """
+    sheet = get_object_or_404(Sheet, id=sheet_id)
+    current_question = get_object_or_404(MCQQuestion, id=current_question_id)
+    
+    # Get all MCQ questions in this sheet, ordered by ID
+    all_questions = sheet.mcq_questions.filter(is_approved=True).order_by('id')
+    
+    # Find the current question's position
+    question_ids = list(all_questions.values_list('id', flat=True))
+    
+    try:
+        current_index = question_ids.index(int(current_question_id))
+        
+        # Check if there's a next question
+        if current_index + 1 < len(question_ids):
+            next_question_id = question_ids[current_index + 1]
+            next_question = MCQQuestion.objects.get(id=next_question_id)
+            return redirect('administrator_test_mcq', question_slug=next_question.slug)
+        else:
+            # No more questions, redirect back to sheet with success message
+            messages.success(request, 'You have completed testing all MCQ questions in this sheet!')
+            return redirect('administrator_sheet', slug=sheet.slug)
+            
+    except (ValueError, MCQQuestion.DoesNotExist):
+        # Current question not found or error, redirect to sheet
+        messages.error(request, 'Unable to find the next question.')
+        return redirect('administrator_sheet', slug=sheet.slug)

@@ -169,6 +169,11 @@ active
                                     Tags
                                 </h6>
                             </th>
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">
+                                    Test MCQ
+                                </h6>
+                            </th>
                             {% endif %}
 
                             <th class="border-bottom-0 justify-content-center">
@@ -328,6 +333,15 @@ active
                                 {% else %}
                                 <span class="text-muted">No tags</span>
                                 {% endif %}
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{% url 'administrator_test_mcq' question.slug %}"
+                                        class="btn btn-info text-blue float-end">
+                                        <i class="ti ti-play"></i>
+                                    </a>
+                                </div>
                             </td>
 
                             <td class="border-bottom-0">

@@ -1,0 +1,552 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}Test MCQ | {{ mcq_question.question_text|truncatewords:5 }}{% endblock %}
+
+{% block sheet_active %}
+active
+{% endblock %}
+
+{% block extra_css %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<style>
+    h3.question {
+        font-family: "Roboto", sans-serif;
+        font-size: 24px;
+        text-align: center;
+        font-weight: 100;
+    }
+
+    .text-color {
+        font-size: 75%;
+        color: rgb(46, 46, 46);
+        font-weight: 500;
+    }
+
+    code {
+        font-size: 110%;
+    }
+
+    pre {
+        font-size: 110%;
+    }
+
+    .option-container {
+        margin: 15px 0;
+        transition: all 0.2s ease;
+    }
+
+    .option-card {
+        border: 2px solid #dee2e6;
+        border-radius: 8px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #f8f9fa;
+    }
+
+    .option-card:hover {
+        border-color: #007bff;
+        box-shadow: 0 2px 8px rgba(0, 123, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .option-card.selected {
+        border-color: #007bff;
+        background-color: #e7f3ff;
+        box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    }
+
+    .option-card.correct {
+        border-color: #28a745;
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .option-card.incorrect {
+        border-color: #dc3545;
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .option-card.disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    .option-letter {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: #6c757d;
+        color: white;
+        text-align: center;
+        line-height: 30px;
+        font-weight: bold;
+        margin-right: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .option-card.selected .option-letter {
+        background-color: #007bff;
+    }
+
+    .option-card.correct .option-letter {
+        background-color: #28a745;
+    }
+
+    .option-card.incorrect .option-letter {
+        background-color: #dc3545;
+    }
+
+    .explanation-container {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-left: 4px solid #007bff;
+        border-radius: 0 8px 8px 0;
+        display: none;
+    }
+
+    .explanation-container.show {
+        display: block;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .admin-test-banner {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .figure {
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        padding: 0.55rem;
+        margin-left: 2%;
+        background-color: #f8f9fa;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+        max-width: 320px;
+        width: 96%;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    .figure:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .figure .figure-caption {
+        text-align: center;
+        margin-top: auto;
+    }
+
+    [data-bs-theme="dark"] .figure {
+        background-color: #2c3034;
+        border-color: #495057;
+    }
+
+    [data-bs-theme="dark"] {
+        .option-card {
+            background-color: #2c2c2c;
+            border-color: #444;
+            color: #ddd;
+        }
+
+        .option-card:hover {
+            border-color: #007bff;
+            background-color: #3c3c3c;
+        }
+
+        .option-card.selected {
+            background-color: #1a3a5c;
+        }
+
+        .explanation-container {
+            background-color: #2c2c2c;
+            color: #ddd;
+        }
+    }
+
+    .question-image-thumbnail {
+        cursor: pointer;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .question-image-thumbnail:hover {
+        opacity: 0.8;
+    }
+
+    #modalImage {
+        max-width: 100%;
+        height: auto;
+    }
+
+    #next-question-button {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+</style>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" />
+{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'administrator_sheet' mcq_question.sheet.slug %}">{{ mcq_question.sheet.name }}</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">Test MCQ: {{ mcq_question.question_text|truncatewords:5 }}</li>
+        </ol>
+    </nav>
+
+    <!-- Admin Test Banner -->
+    <div class="admin-test-banner">
+        <h5 class="mb-2"><i class="fas fa-flask me-2"></i>Administrator Testing Mode</h5>
+        <p class="mb-0">You are testing this MCQ question. This will not affect any statistics or submissions.</p>
+    </div>
+
+    {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="card-title fw-semibold">MCQ Question Test</h5>
+                    <span class="d-inline-flex">
+                        <b>Sheet:</b> <i>{{ mcq_question.sheet.name }}</i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" id="card-title-2">
+        <div class="card-header">
+            <h6 class="card-title">
+                <strong>Level: </strong>
+                <span class="badge bg-{{ mcq_question.get_difficulty_level_color }} text-color">
+                    {{ mcq_question.difficulty_level }}
+                </span>
+            </h6>
+        </div>
+
+        <div class="card-body mb-n7">
+            <h6 class="card-title">Question:</h6>
+            <div class="question-text">
+                {{ mcq_question.question_text|linebreaks }}
+            </div>
+        </div>
+
+        {% if mcq_question.images.all %}
+        <div class="row g-4">
+            {% for img in mcq_question.images.all %}
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <figure class="figure h-100">
+                    <img src="{{ img.image.url }}" class="figure-img img-fluid rounded question-image-thumbnail"
+                        alt="{{ img.caption|default:'Question image' }}" data-bs-toggle="modal"
+                        data-bs-target="#image-viewer-modal" data-src="{{ img.image.url }}"
+                        data-caption="{{ img.caption|default:'' }}">
+
+                    {% if img.caption %}
+                    <figcaption class="figure-caption text-center">{{ img.caption }}</figcaption>
+                    {% endif %}
+                </figure>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if mcq_question.tags %}
+        <div class="card-body mb-n7">
+            <h6 class="card-title">Tags:</h6>
+            <div class="tags-container">
+                {% for tag in tag_list %}
+                <span class="badge bg-secondary me-1">{{ tag }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Options Section -->
+        <div class="card-body">
+            <h6 class="card-title mb-4">Choose the correct answer:</h6>
+
+            <form id="mcqTestForm">
+                {% csrf_token %}
+                <input type="hidden" id="selected_option" name="selected_option">
+
+                <div class="option-container">
+                    <div class="option-card" data-option="A">
+                        <span class="option-letter">A</span>
+                        {{ mcq_question.option_a }}
+                    </div>
+                </div>
+
+                <div class="option-container">
+                    <div class="option-card" data-option="B">
+                        <span class="option-letter">B</span>
+                        {{ mcq_question.option_b }}
+                    </div>
+                </div>
+
+                <div class="option-container">
+                    <div class="option-card" data-option="C">
+                        <span class="option-letter">C</span>
+                        {{ mcq_question.option_c }}
+                    </div>
+                </div>
+
+                <div class="option-container">
+                    <div class="option-card" data-option="D">
+                        <span class="option-letter">D</span>
+                        {{ mcq_question.option_d }}
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg" id="submit-answer">
+                        <i class="fas fa-check-circle me-2"></i>Test Answer
+                    </button>
+                    <button type="button" class="btn btn-warning btn-lg ms-3" id="retry-button" style="display: none;">
+                        <i class="fas fa-redo me-2"></i>Try Again
+                    </button>
+
+                    <a href="{% url 'administrator_next_test_mcq' mcq_question.sheet.id mcq_question.id %}" 
+                       class="btn btn-success btn-lg ms-3" id="next-question-button" style="display: none;">
+                        <i class="fas fa-arrow-right me-2"></i>Next Question
+                    </a>
+                </div>
+            </form>
+
+            <!-- Explanation Section -->
+            {% if mcq_question.explanation %}
+            <div class="explanation-container" id="explanation">
+                <h6><i class="fas fa-lightbulb me-2"></i>Explanation:</h6>
+                <p>{{ mcq_question.explanation|linebreaks }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Admin Info Section -->
+            <div class="card mt-4" style="border-left: 4px solid #17a2b8;">
+                <div class="card-body">
+                    <h6 class="card-title text-info"><i class="fas fa-info-circle me-2"></i>Question Details</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Correct Answer:</strong> <span class="badge bg-success">{{ mcq_question.correct_option }}</span></p>
+                            <p><strong>Created:</strong> {{ mcq_question.created_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            
+                            <p><strong>Total Submissions:</strong> {{ mcq_question.submissions.count }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Viewer Modal -->
+    <div class="modal fade" id="image-viewer-modal" tabindex="-1" aria-labelledby="imageViewerModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageViewerModalLabel">Image Preview</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="" id="modalImage" class="img-fluid rounded" alt="Enlarged question image">
+                    <p class="mt-2" id="modalCaption"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- MCQ Test Script -->
+<script>
+    $(document).ready(function () {
+        let selectedOption = null;
+        let submitted = false;
+        const correctAnswer = '{{ mcq_question.correct_option }}';
+
+        // Option selection
+        $('.option-card').click(function () {
+            if (submitted) return;
+
+            // Remove previous selection
+            $('.option-card').removeClass('selected');
+
+            // Add selection to clicked option
+            $(this).addClass('selected');
+
+            // Store selected option
+            selectedOption = $(this).data('option');
+            $('#selected_option').val(selectedOption);
+        });
+
+        // Form submission (test mode - no actual submission to server)
+        $('#mcqTestForm').submit(function (e) {
+            e.preventDefault();
+
+            if (!selectedOption) {
+                alert('Please select an option before testing.');
+                return;
+            }
+
+            if (submitted) return;
+
+            testAnswer();
+        });
+
+
+        // Retry button functionality
+        $('#retry-button').click(function() {
+            resetForm();
+        });
+
+        function testAnswer() {
+            submitted = true;
+            const submitBtn = $('#submit-answer');
+            
+            // Disable all options
+            $('.option-card').addClass('disabled');
+
+            // Show correct/incorrect styling
+            $('.option-card').each(function () {
+                const option = $(this).data('option');
+                if (option === correctAnswer) {
+                    $(this).addClass('correct');
+                } else if (option === selectedOption && selectedOption !== correctAnswer) {
+                    $(this).addClass('incorrect');
+                }
+            });
+
+            // Show explanation
+            if ($('#explanation').length) {
+                $('#explanation').addClass('show');
+            }
+
+            // Update submit button
+            if (selectedOption === correctAnswer) {
+                submitBtn.removeClass('btn-primary').addClass('btn-success');
+                submitBtn.html('<i class="fas fa-check me-2"></i>Correct!');
+                
+                // Show next question button for correct answers
+                $('#next-question-button').show();
+                
+                // Show success message
+                showAlert('success', 'Correct! Well done. You can now move to the next question.');
+            } else {
+                submitBtn.removeClass('btn-primary').addClass('btn-danger');
+                submitBtn.html('<i class="fas fa-times me-2"></i>Incorrect');
+                
+                // Show retry button for wrong answers
+                $('#retry-button').show();
+                
+                // Show incorrect message
+                showAlert('danger', `Incorrect. The correct answer is ${correctAnswer}.`);
+            }
+        }
+
+        
+
+        function resetForm() {
+            // Reset form state
+            submitted = false;
+            selectedOption = null;
+            
+            // Reset option cards
+            $('.option-card').removeClass('selected correct incorrect disabled');
+            
+            // Reset submit button
+            const submitBtn = $('#submit-answer');
+            submitBtn.removeClass('btn-success btn-danger').addClass('btn-primary');
+            submitBtn.html('<i class="fas fa-check-circle me-2"></i>Test Answer');
+            
+            // Hide retry and next question buttons
+            $('#retry-button').hide();
+            $('#next-question-button').hide();
+            
+            // Hide explanation
+            $('#explanation').removeClass('show');
+            
+            // Clear selected option value
+            $('#selected_option').val('');
+
+            // Remove any alerts
+            $('.alert-dismissible').remove();
+        }
+
+        function showAlert(type, message) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            $('.container-fluid').prepend(alertHtml);
+        }
+
+        // Image modal functionality
+        $('#image-viewer-modal').on('show.bs.modal', function (event) {
+            const triggerElement = $(event.relatedTarget);
+            const imgSrc = triggerElement.data('src');
+            const imgCaption = triggerElement.data('caption');
+
+            const modal = $(this);
+            modal.find('#modalImage').attr('src', imgSrc);
+
+            const captionElement = modal.find('#modalCaption');
+            if (imgCaption) {
+                captionElement.text(imgCaption).show();
+            } else {
+                captionElement.hide();
+            }
+        });
+    });
+</script>
+
+{% endblock %}
