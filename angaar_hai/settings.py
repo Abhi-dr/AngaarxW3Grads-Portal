@@ -337,3 +337,5 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
+
+CSRF_COOKIE_HTTPONLY = True
