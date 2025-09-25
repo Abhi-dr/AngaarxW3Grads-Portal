@@ -1569,6 +1569,730 @@
         }
     }
 
+    /* ========================================================================== */
+    /* ========================= MOVING GALLERY SECTION ======================= */
+    /* ========================================================================== */
+
+    .gallery-section {
+        background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 50%, #0d0d0d 100%);
+        padding: 80px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .gallery-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 20% 50%, rgba(255, 96, 38, 0.05) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 50%, rgba(255, 79, 15, 0.05) 0%, transparent 50%);
+        z-index: 1;
+    }
+
+    .gallery-title {
+        text-align: center;
+        margin-bottom: 60px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .gallery-title h2 {
+        font-size: 3.5rem;
+        font-weight: 900;
+        background: linear-gradient(45deg, #ff6026, #ff9d45, #ffffff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .gallery-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.3rem;
+        font-weight: 300;
+        max-width: 600px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .gallery-container {
+        position: relative;
+        z-index: 2;
+        overflow: hidden;
+        margin: 0 auto;
+        max-width: 1400px;
+    }
+
+    .gallery-track {
+        display: flex;
+        animation: galleryMove 25s linear infinite;
+        gap: 20px;
+        width: calc(320px * 12 + 20px * 11); /* 12 items with gaps */
+    }
+
+    @keyframes galleryMove {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(calc(-320px * 6 - 20px * 5)); /* Move by 6 items */
+        }
+    }
+
+    .gallery-track-reverse {
+        animation: galleryMoveReverse 25s linear infinite;
+    }
+
+    @keyframes galleryMoveReverse {
+        0% {
+            transform: translateX(calc(-320px * 6 - 20px * 5));
+        }
+        100% {
+            transform: translateX(0);
+        }
+    }
+
+    .gallery-item {
+        flex: 0 0 320px;
+        height: 200px;
+        position: relative;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 96, 38, 0.1);
+    }
+
+
+    .gallery-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+
+    .gallery-floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .gallery-floating-icon {
+        position: absolute;
+        font-size: 24px;
+        color: rgba(255, 96, 38, 0.1);
+        animation: galleryFloat 8s ease-in-out infinite;
+    }
+
+    .gallery-icon-1 {
+        top: 15%;
+        left: 5%;
+        animation-delay: 0s;
+    }
+
+    .gallery-icon-2 {
+        top: 25%;
+        right: 8%;
+        animation-delay: 1s;
+    }
+
+    .gallery-icon-3 {
+        bottom: 30%;
+        left: 10%;
+        animation-delay: 2s;
+    }
+
+    .gallery-icon-4 {
+        bottom: 20%;
+        right: 12%;
+        animation-delay: 3s;
+    }
+
+    .gallery-icon-5 {
+        top: 50%;
+        left: 50%;
+        transform: translateX(-50%);
+        animation-delay: 1.5s;
+    }
+
+    @keyframes galleryFloat {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.1;
+        }
+        50% {
+            transform: translateY(-20px) rotate(10deg);
+            opacity: 0.3;
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .gallery-track {
+            width: calc(300px * 12 + 18px * 11);
+            gap: 18px;
+        }
+        
+        .gallery-item {
+            flex: 0 0 300px;
+            height: 190px;
+        }
+        
+        @keyframes galleryMove {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-300px * 6 - 18px * 5));
+            }
+        }
+        
+        @keyframes galleryMoveReverse {
+            0% {
+                transform: translateX(calc(-300px * 6 - 18px * 5));
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .gallery-section {
+            padding: 60px 0;
+        }
+        
+        .gallery-title h2 {
+            font-size: 2.5rem;
+        }
+        
+        .gallery-subtitle {
+            font-size: 1.1rem;
+            padding: 0 20px;
+        }
+        
+        .gallery-track {
+            width: calc(280px * 12 + 15px * 11);
+            gap: 15px;
+        }
+        
+        .gallery-item {
+            flex: 0 0 280px;
+            height: 170px;
+        }
+        
+        @keyframes galleryMove {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-280px * 6 - 15px * 5));
+            }
+        }
+        
+        @keyframes galleryMoveReverse {
+            0% {
+                transform: translateX(calc(-280px * 6 - 15px * 5));
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+        
+    }
+
+    @media (max-width: 480px) {
+        .gallery-title h2 {
+            font-size: 2rem;
+        }
+        
+        .gallery-track {
+            width: calc(260px * 12 + 12px * 11);
+            gap: 12px;
+        }
+        
+        .gallery-item {
+            flex: 0 0 260px;
+            height: 150px;
+        }
+        
+        @keyframes galleryMove {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-260px * 6 - 12px * 5));
+            }
+        }
+        
+        @keyframes galleryMoveReverse {
+            0% {
+                transform: translateX(calc(-260px * 6 - 12px * 5));
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+    }
+
+    /* ========================================================================== */
+    /* ========================= TESTIMONIALS SECTION ========================== */
+    /* ========================================================================== */
+
+    .testimonials-section {
+        background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 50%, #1a1a1a 100%);
+        padding: 100px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .testimonials-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 30% 20%, rgba(255, 96, 38, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 70% 80%, rgba(255, 79, 15, 0.06) 0%, transparent 50%);
+        z-index: 1;
+    }
+
+    .testimonials-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .testimonials-header {
+        text-align: center;
+        margin-bottom: 80px;
+    }
+
+    .testimonials-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #ff6026, #ff9d45);
+        color: white;
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(255, 96, 38, 0.3);
+    }
+
+    .testimonials-title {
+        font-size: 3.5rem;
+        font-weight: 900;
+        background: linear-gradient(45deg, #ffffff, #ff6026, #ff9d45);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 25px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+
+    .testimonials-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.3rem;
+        font-weight: 300;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .testimonials-carousel {
+        overflow: hidden;
+        margin-top: 60px;
+        position: relative;
+    }
+
+    .testimonials-track {
+        display: flex;
+        animation: testimonialsMove 35s linear infinite;
+        gap: 25px;
+        width: calc(500px * 12 + 25px * 11); /* 12 items with gaps */
+    }
+
+    .testimonials-track:hover {
+        animation-play-state: paused;
+    }
+
+    @keyframes testimonialsMove {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(calc(-500px * 6 - 25px * 5)); /* Move by 6 items */
+        }
+    }
+
+    .testimonial-card {
+        flex: 0 0 500px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 20px;
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        border: 1px solid rgba(255, 96, 38, 0.1);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        height: 200px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .testimonial-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(255, 96, 38, 0.2);
+        border-color: rgba(255, 96, 38, 0.3);
+    }
+
+    .testimonial-card::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(255, 96, 38, 0.1) 0%, transparent 70%);
+        border-radius: 50%;
+        z-index: 1;
+        transition: all 0.4s ease;
+    }
+
+    .testimonial-card:hover::before {
+        transform: scale(1.2);
+        opacity: 0.8;
+    }
+
+    .testimonial-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .testimonial-quote {
+        font-size: 2rem;
+        color: #ff6026;
+        margin-bottom: 10px;
+        opacity: 0.3;
+        line-height: 1;
+    }
+
+    .testimonial-text {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 15px;
+        font-style: italic;
+        position: relative;
+        flex: 1;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-top: auto;
+    }
+
+    .author-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6026, #ff9d45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: white;
+        text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(255, 96, 38, 0.3);
+        flex-shrink: 0;
+    }
+
+    .author-info {
+        flex: 1;
+    }
+
+    .author-info h4 {
+        color: white;
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 3px;
+    }
+
+    .author-role {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+    }
+
+    .author-rating {
+        display: flex;
+        gap: 3px;
+    }
+
+    .star {
+        color: #ff6026;
+        font-size: 0.9rem;
+    }
+
+    .testimonial-skills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-left: auto;
+        align-items: center;
+    }
+
+    .skill-badge {
+        background: rgba(255, 96, 38, 0.1);
+        color: #ff6026;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 96, 38, 0.2);
+        white-space: nowrap;
+    }
+
+    .testimonials-cta {
+        text-align: center;
+        margin-top: 80px;
+    }
+
+    .testimonials-btn {
+        display: inline-flex;
+        align-items: center;
+        background: linear-gradient(135deg, #ff6026, #ff9d45);
+        color: white;
+        padding: 18px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.1rem;
+        transition: all 0.4s ease;
+        box-shadow: 0 8px 25px rgba(255, 96, 38, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .testimonials-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(255, 96, 38, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .testimonials-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s ease;
+    }
+
+    .testimonials-btn:hover::before {
+        left: 100%;
+    }
+
+    .testimonials-btn i {
+        margin-left: 10px;
+        font-size: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .testimonials-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    .testimonials-floating-elements {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .testimonials-floating-icon {
+        position: absolute;
+        font-size: 20px;
+        color: rgba(255, 96, 38, 0.08);
+        opacity: 0.1;
+    }
+
+    .testimonials-icon-1 {
+        top: 10%;
+        left: 5%;
+    }
+
+    .testimonials-icon-2 {
+        top: 20%;
+        right: 8%;
+    }
+
+    .testimonials-icon-3 {
+        bottom: 25%;
+        left: 8%;
+    }
+
+    .testimonials-icon-4 {
+        bottom: 15%;
+        right: 10%;
+    }
+
+    .testimonials-icon-5 {
+        top: 60%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+        .testimonials-track {
+            width: calc(450px * 12 + 20px * 11);
+            gap: 20px;
+        }
+        
+        .testimonial-card {
+            flex: 0 0 450px;
+            height: 200px;
+        }
+        
+        @keyframes testimonialsMove {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-450px * 6 - 20px * 5));
+            }
+        }
+    }
+
+    @media (max-width: 768px) {
+        .testimonials-section {
+            padding: 80px 0;
+        }
+        
+        .testimonials-header {
+            margin-bottom: 60px;
+        }
+        
+        .testimonials-title {
+            font-size: 2.5rem;
+        }
+        
+        .testimonials-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .testimonials-track {
+            width: calc(400px * 12 + 18px * 11);
+            gap: 18px;
+        }
+        
+        .testimonial-card {
+            flex: 0 0 400px;
+            height: 180px;
+        }
+        
+        @keyframes testimonialsMove {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-400px * 6 - 18px * 5));
+            }
+        }
+        
+        .testimonial-card {
+            padding: 30px;
+        }
+        
+        .testimonial-text {
+            font-size: 1rem;
+        }
+        
+        .testimonials-cta {
+            margin-top: 60px;
+        }
+        
+        .testimonials-btn {
+            padding: 15px 35px;
+            font-size: 1rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .testimonials-container {
+            padding: 0 15px;
+        }
+        
+        .testimonials-title {
+            font-size: 2rem;
+        }
+        
+        .testimonials-track {
+            width: calc(350px * 12 + 15px * 11);
+            gap: 15px;
+        }
+        
+        .testimonial-card {
+            flex: 0 0 350px;
+            padding: 20px;
+            height: 160px;
+        }
+        
+        @keyframes testimonialsMove {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(calc(-350px * 6 - 15px * 5));
+            }
+        }
+        
+        .author-avatar {
+            width: 40px;
+            height: 40px;
+            font-size: 1rem;
+        }
+        
+        .author-info h4 {
+            font-size: 0.9rem;
+        }
+        
+        .testimonial-text {
+            font-size: 0.85rem;
+            -webkit-line-clamp: 3;
+        }
+    }
+
     /* Summer Training Showcase Styles */
     .summer-showcase {
         position: relative;
@@ -2454,19 +3178,520 @@
     </div>
 </section>
 
+<!-- ========================================================================== -->
+<!-- ========================= MOVING GALLERY SECTION ======================= -->
+<!-- ========================================================================== -->
 
-
-<section class="community-section">
-    <div class="community-container">
-        <img loading="lazy"
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/104b476fb485b563b5e293cfcc64bbba90a9d46532fa3405af251b3a0747f218?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-            class="background-image" alt="" />
-        <h2 class="community-title">THE ANGAAR BATCH COMMUNITY</h2>
-        <img loading="lazy"
-            src="https://cdn.builder.io/api/v1/image/assets/TEMP/4f70c42072e558a165fc1dda87356e06060103ac72ed5a981391bf256d191864?placeholderIfAbsent=true&apiKey=ebc487d486c346e190a1395c67c9a804"
-            class="community-logo" alt="Angaar Batch Community Logo" />
+<section class="gallery-section">
+    <div class="gallery-floating-elements">
+        <div class="gallery-floating-icon gallery-icon-1"><i class="fas fa-code"></i></div>
+        <div class="gallery-floating-icon gallery-icon-2"><i class="fas fa-laptop-code"></i></div>
+        <div class="gallery-floating-icon gallery-icon-3"><i class="fas fa-mobile-alt"></i></div>
+        <div class="gallery-floating-icon gallery-icon-4"><i class="fas fa-server"></i></div>
+        <div class="gallery-floating-icon gallery-icon-5"><i class="fas fa-database"></i></div>
+    </div>
+    
+    <div class="gallery-title">
+        <h2>Our Journey in Pictures</h2>
+        <p class="gallery-subtitle">Moments from our coding events, workshops, and community gatherings</p>
+    </div>
+    
+    <div class="gallery-container">
+        <div class="gallery-track">
+            <!-- Event 1: Coding Workshop -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop" alt="Coding Workshop" class="gallery-image">
+            </div>
+            
+            <!-- Event 2: Hackathon -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&h=400&fit=crop" alt="Hackathon Event" class="gallery-image">
+            </div>
+            
+            <!-- Event 3: Tech Talk -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop" alt="Tech Talk" class="gallery-image">
+            </div>
+            
+            <!-- Event 4: Community Meetup -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&h=400&fit=crop" alt="Community Meetup" class="gallery-image">
+            </div>
+            
+            <!-- Event 5: Project Demo Day -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop" alt="Project Demo Day" class="gallery-image">
+            </div>
+            
+            <!-- Event 6: Coding Competition -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop" alt="Coding Competition" class="gallery-image">
+            </div>
+            
+            <!-- Duplicate items for seamless loop -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=600&h=400&fit=crop" alt="Coding Workshop" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=600&h=400&fit=crop" alt="Hackathon Event" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=600&h=400&fit=crop" alt="Tech Talk" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&h=400&fit=crop" alt="Community Meetup" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&h=400&fit=crop" alt="Project Demo Day" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=600&h=400&fit=crop" alt="Coding Competition" class="gallery-image">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Second Gallery Row - Left to Right -->
+    <div class="gallery-container" style="margin-top: 30px;">
+        <div class="gallery-track gallery-track-reverse">
+            <!-- Event 7: Code Review Session -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=400&fit=crop" alt="Code Review Session" class="gallery-image">
+            </div>
+            
+            <!-- Event 8: Team Building -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop" alt="Team Building" class="gallery-image">
+            </div>
+            
+            <!-- Event 9: Alumni Meetup -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?w=600&h=400&fit=crop" alt="Alumni Meetup" class="gallery-image">
+            </div>
+            
+            <!-- Event 10: Workshop Series -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=400&fit=crop" alt="Workshop Series" class="gallery-image">
+            </div>
+            
+            <!-- Event 11: Networking Event -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&h=400&fit=crop" alt="Networking Event" class="gallery-image">
+            </div>
+            
+            <!-- Event 12: Graduation Ceremony -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9d1?w=600&h=400&fit=crop" alt="Graduation Ceremony" class="gallery-image">
+            </div>
+            
+            <!-- Duplicate items for seamless loop -->
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&h=400&fit=crop" alt="Code Review Session" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=400&fit=crop" alt="Team Building" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?w=600&h=400&fit=crop" alt="Alumni Meetup" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=600&h=400&fit=crop" alt="Workshop Series" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=600&h=400&fit=crop" alt="Networking Event" class="gallery-image">
+            </div>
+            
+            <div class="gallery-item">
+                <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9d1?w=600&h=400&fit=crop" alt="Graduation Ceremony" class="gallery-image">
+            </div>
+        </div>
     </div>
 </section>
+
+<!-- ========================================================================== -->
+<!-- ========================= TESTIMONIALS SECTION ========================== -->
+<!-- ========================================================================== -->
+
+<section class="testimonials-section">
+    <div class="testimonials-floating-elements">
+        <div class="testimonials-floating-icon testimonials-icon-1"><i class="fas fa-quote-left"></i></div>
+        <div class="testimonials-floating-icon testimonials-icon-2"><i class="fas fa-star"></i></div>
+        <div class="testimonials-floating-icon testimonials-icon-3"><i class="fas fa-heart"></i></div>
+        <div class="testimonials-floating-icon testimonials-icon-4"><i class="fas fa-thumbs-up"></i></div>
+        <div class="testimonials-floating-icon testimonials-icon-5"><i class="fas fa-fire"></i></div>
+    </div>
+    
+    <div class="testimonials-container">
+        <div class="testimonials-header">
+            <span class="testimonials-badge">Success Stories</span>
+            <h2 class="testimonials-title">What Our Students Say</h2>
+            <p class="testimonials-subtitle">Real stories from real students who transformed their careers with The Angaar Batch</p>
+        </div>
+        
+        <div class="testimonials-carousel">
+            <div class="testimonials-track">
+            <!-- Testimonial 1 -->
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">
+                        "The Angaar Batch completely transformed my coding journey! From knowing nothing about programming to landing my first job as a software developer. The mentors are incredible and the community support is unmatched. Best decision ever! 🔥"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">RK</div>
+                        <div class="author-info">
+                            <h4>Rahul Kumar</h4>
+                            <p class="author-role">Software Developer at TCS</p>
+                            <div class="author-rating">
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-skills">
+                        <span class="skill-badge">Python</span>
+                        <span class="skill-badge">Django</span>
+                        <span class="skill-badge">JavaScript</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Testimonial 2 -->
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">
+                        "I was struggling with C programming for months until I joined The Angaar Batch. The way they explain complex concepts with real-world examples is amazing. Now I'm confident in my coding skills and ready for any challenge!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">PS</div>
+                        <div class="author-info">
+                            <h4>Priya Sharma</h4>
+                            <p class="author-role">Computer Science Student</p>
+                            <div class="author-rating">
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-skills">
+                        <span class="skill-badge">C Programming</span>
+                        <span class="skill-badge">Data Structures</span>
+                        <span class="skill-badge">Algorithms</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Testimonial 3 -->
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">
+                        "The free classes are just the beginning! The quality of education and the passion of the instructors is incredible. I went from zero coding knowledge to building my own web applications. Highly recommend to anyone serious about coding!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">AJ</div>
+                        <div class="author-info">
+                            <h4>Amit Joshi</h4>
+                            <p class="author-role">Full Stack Developer</p>
+                            <div class="author-rating">
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-skills">
+                        <span class="skill-badge">React</span>
+                        <span class="skill-badge">Node.js</span>
+                        <span class="skill-badge">MongoDB</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Testimonial 4 -->
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">
+                        "What sets The Angaar Batch apart is their approach to teaching. They don't just teach syntax, they teach you how to think like a programmer. The community is so supportive and the mentors are always there to help. Pure Angaar! 🔥"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">SK</div>
+                        <div class="author-info">
+                            <h4>Sneha Kapoor</h4>
+                            <p class="author-role">Frontend Developer at Flipkart</p>
+                            <div class="author-rating">
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-skills">
+                        <span class="skill-badge">HTML/CSS</span>
+                        <span class="skill-badge">JavaScript</span>
+                        <span class="skill-badge">React</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Testimonial 5 -->
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">
+                        "I joined as a complete beginner and now I'm working as a Python developer! The step-by-step approach and practical projects helped me build a strong foundation. The Angaar Batch family is the best coding community out there!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">VG</div>
+                        <div class="author-info">
+                            <h4>Vikash Gupta</h4>
+                            <p class="author-role">Python Developer at Infosys</p>
+                            <div class="author-rating">
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-skills">
+                        <span class="skill-badge">Python</span>
+                        <span class="skill-badge">Flask</span>
+                        <span class="skill-badge">SQL</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Testimonial 6 -->
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <div class="testimonial-quote">"</div>
+                    <p class="testimonial-text">
+                        "The energy and enthusiasm of The Angaar Batch is contagious! They make learning fun and engaging. I never thought I could understand programming concepts so easily. Now I'm building my own projects and loving every moment of it!"
+                    </p>
+                    <div class="testimonial-author">
+                        <div class="author-avatar">MP</div>
+                        <div class="author-info">
+                            <h4>Meera Patel</h4>
+                            <p class="author-role">Web Developer</p>
+                            <div class="author-rating">
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                                <i class="fas fa-star star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-skills">
+                        <span class="skill-badge">HTML/CSS</span>
+                        <span class="skill-badge">JavaScript</span>
+                        <span class="skill-badge">Bootstrap</span>
+                    </div>
+                </div>
+            </div>
+                
+                <!-- Duplicate testimonials for seamless loop -->
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">
+                            "The Angaar Batch completely transformed my coding journey! From knowing nothing about programming to landing my first job as a software developer. The mentors are incredible and the community support is unmatched. Best decision ever! 🔥"
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">RK</div>
+                            <div class="author-info">
+                                <h4>Rahul Kumar</h4>
+                                <p class="author-role">Software Developer at TCS</p>
+                                <div class="author-rating">
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">Python</span>
+                            <span class="skill-badge">Django</span>
+                            <span class="skill-badge">JavaScript</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">
+                            "I was struggling with C programming for months until I joined The Angaar Batch. The way they explain complex concepts with real-world examples is amazing. Now I'm confident in my coding skills and ready for any challenge!"
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">PS</div>
+                            <div class="author-info">
+                                <h4>Priya Sharma</h4>
+                                <p class="author-role">Computer Science Student</p>
+                                <div class="author-rating">
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">C Programming</span>
+                            <span class="skill-badge">Data Structures</span>
+                            <span class="skill-badge">Algorithms</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">
+                            "The free classes are just the beginning! The quality of education and the passion of the instructors is incredible. I went from zero coding knowledge to building my own web applications. Highly recommend to anyone serious about coding!"
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">AJ</div>
+                            <div class="author-info">
+                                <h4>Amit Joshi</h4>
+                                <p class="author-role">Full Stack Developer</p>
+                                <div class="author-rating">
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">React</span>
+                            <span class="skill-badge">Node.js</span>
+                            <span class="skill-badge">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">
+                            "What sets The Angaar Batch apart is their approach to teaching. They don't just teach syntax, they teach you how to think like a programmer. The community is so supportive and the mentors are always there to help. Pure Angaar! 🔥"
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">SK</div>
+                            <div class="author-info">
+                                <h4>Sneha Kapoor</h4>
+                                <p class="author-role">Frontend Developer at Flipkart</p>
+                                <div class="author-rating">
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">HTML/CSS</span>
+                            <span class="skill-badge">JavaScript</span>
+                            <span class="skill-badge">React</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">
+                            "I joined as a complete beginner and now I'm working as a Python developer! The step-by-step approach and practical projects helped me build a strong foundation. The Angaar Batch family is the best coding community out there!"
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">VG</div>
+                            <div class="author-info">
+                                <h4>Vikash Gupta</h4>
+                                <p class="author-role">Python Developer at Infosys</p>
+                                <div class="author-rating">
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">Python</span>
+                            <span class="skill-badge">Flask</span>
+                            <span class="skill-badge">SQL</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <div class="testimonial-quote">"</div>
+                        <p class="testimonial-text">
+                            "The energy and enthusiasm of The Angaar Batch is contagious! They make learning fun and engaging. I never thought I could understand programming concepts so easily. Now I'm building my own projects and loving every moment of it!"
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar">MP</div>
+                            <div class="author-info">
+                                <h4>Meera Patel</h4>
+                                <p class="author-role">Web Developer</p>
+                                <div class="author-rating">
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                    <i class="fas fa-star star"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">HTML/CSS</span>
+                            <span class="skill-badge">JavaScript</span>
+                            <span class="skill-badge">Bootstrap</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="testimonials-cta">
+            <a href="{% url 'register' %}" class="testimonials-btn">
+                Join The Angaar Batch Today
+                <i class="fas fa-fire"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
 
 <!-- Success Stories from Free Classes -->
 
