@@ -21,9 +21,6 @@ urlpatterns = [
     # API Endpoints
     path('api/students', views.get_students_api, name='get_students_api'),
 
+    # Social authentication URLs (includes Google OAuth)
     path('social/', include('allauth.urls')),
-    
-    # 2. UPDATE THIS PATH: This path is for our custom handler view. 
-    # Let's keep it consistent with the 'social' prefix.
-    path('social/google/handler/', views.google_login_handler, name='google_login_handler'),
 ]

@@ -21,4 +21,7 @@ class AccountsConfig(AppConfig):
 
         # 3. Replace the original method with our new one
         SocialAccount.__str__ = patched_social_account_str
+        
+        # 4. Import and register signal handlers
+        from . import signals
 

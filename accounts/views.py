@@ -150,86 +150,9 @@ def logout(request):
      return redirect("home")
 
 # ==============================================================================
-# NEW VIEW FOR HANDLING GOOGLE LOGIN FOR STUDENTS
+# GOOGLE OAUTH IS NOW HANDLED VIA ALLAUTH SIGNALS IN signals.py
+# The custom handler has been removed to use proper OAuth flow
 # ==============================================================================
-@login_required
-def google_login_handler(request):
-    user = request.user
-
-    try:
-        # Security Check: If the logged-in user is already an Instructor or Admin, block them.
-        if hasattr(user, 'instructor') or hasattr(user, 'administrator'):
-            messages.error(request, "Google login is for students only. Please use your username and password.")
-            auth.logout(request)
-            return redirect('login')
-
-        # Check if user already has a student profile
-        try:
-            student = Student.objects.get(user_ptr=user)
-            created = False
-        except Student.DoesNotExist:
-            # Create new student profile
-            created = True
-            
-            # Generate unique username
-            base_username = (user.first_name or 'user').lower().strip()
-            if not base_username or base_username == '':
-                base_username = 'user'
-            
-            # Remove special characters and spaces from username
-            import re
-            base_username = re.sub(r'[^a-zA-Z0-9]', '', base_username)
-            if not base_username:
-                base_username = 'user'
-            
-            # Find a unique username
-            username = base_username
-            counter = 1
-            while (Student.objects.filter(username=username).exists() or 
-                   Instructor.objects.filter(username=username).exists() or 
-                   Administrator.objects.filter(username=username).exists()):
-                username = f"{base_username}{counter}"
-                counter += 1
-            
-            # Create the student with unique username
-            student = Student.objects.create(
-                user_ptr=user,
-                username=username,
-                first_name=user.first_name or 'Not Set',
-                last_name=user.last_name or 'Not Set',
-                email=user.email or 'Not Set',
-                mobile_number='-',
-                gender='Not Set',
-            )
-
-        # Re-authenticate the user to ensure proper session
-        user = student.user_ptr
-        auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-
-        if created:
-            # Send welcome email for new users
-            try:
-                if student.email and student.email != 'Not Set':
-                    send_welcome_mail(student.email, student.first_name)
-            except Exception as email_error:
-                print(f"Failed to send welcome email: {email_error}")
-                # Don't fail the login process if email fails
-            
-            # Success message for new signups
-            messages.success(request, f"Welcome to Angaar, {user.first_name}! Your student account is ready.")
-        else:
-            # Welcome back message for existing users
-            messages.success(request, f"Welcome back, {user.first_name}!")
-
-        # For both new and existing students, redirect to the student dashboard.
-        return redirect('student')
-
-    except Exception as e:
-        # Handle any unexpected errors
-        print(f"Error in Google login handler: {e}")
-        messages.error(request, "An error occurred during login. Please try again or contact support.")
-        auth.logout(request)
-        return redirect('login')
 
 # ====================== check username availability ====================
 

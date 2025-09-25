@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     
     'accounts.apps.AccountsConfig',
     'home.apps.HomeConfig',
@@ -53,7 +54,7 @@ INSTALLED_APPS = [
     "channels",
 
     'allauth',
-    'allauth.account',
+    'allauth.account', 
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
@@ -308,6 +309,7 @@ JUDGE0_CALLBACK_URL = "https://1b49f750e5d68e7a9c33c24612db101e.serveo.net/judge
 
 # =================== AllAuth Settings =========================
 
+
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
@@ -315,26 +317,45 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-LOGIN_REDIRECT_URL = '/accounts/social/google/handler/'
-SOCIALACCOUNT_LOGIN_ON_GET = True 
-SOCIALACCOUNT_LOGOUT_ON_GET = True
+# Custom adapters
+ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'accounts.adapters.CustomSocialAccountAdapter'
 
+# Login/Logout URLs
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/'
 
+# Account settings
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # Google handles email verification
+ACCOUNT_USERNAME_REQUIRED = False    # We generate usernames automatically
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
+ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
 
+# Social account settings - FIXED FOR SMOOTH OAUTH
+SOCIALACCOUNT_AUTO_SIGNUP = True
+SOCIALACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_LOGIN_ON_GET = True   # CHANGED: This eliminates the intermediate page
+SOCIALACCOUNT_STORE_TOKENS = False
+
+# Google OAuth Provider Configuration - REMOVE APP SECTION
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'APP': {
-            'client_id': os.getenv("GOOGLE_CLIENT_ID"),
-            'secret': os.getenv("GOOGLE_SECRET"),
-            'key': ''
-        },
         'SCOPE': [
             'profile',
             'email',
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
-        }
+        },
+        'OAUTH_PKCE_ENABLED': True,  # Better security
+        'FETCH_USERINFO': True,      # Get user info
+        # REMOVED APP SECTION - Using database SocialApp instead
     }
 }
 
