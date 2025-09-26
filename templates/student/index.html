@@ -652,7 +652,7 @@ Student | Home
                                 <td class="border-bottom-0 text-center">
                                     <div class="d-flex align-items-center gap-2">
                                         {% if item.type == 'MCQ' %}
-                                            <a href="{% url 'mcq_question' item.question.slug %}" target="_blank"
+                                            <a href="{% url 'mcq_question' item.sheet.slug item.question.slug %}" target="_blank"
                                                 class="btn btn-outline-danger">Solve MCQ 🔥
                                             </a>
                                         {% else %}
