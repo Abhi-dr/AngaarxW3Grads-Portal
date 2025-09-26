@@ -641,7 +641,14 @@ Student | Home
                                 <td class="border-bottom-0">
                                     <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
                                         title="{{ item.sheet.title }}">{{ item.sheet.title|truncatechars:15 }}</h6>
-                                    <span class="fw-normal">{{ item.question.title|truncatechars:25 }}</span>
+                                
+                                    <span class="fw-normal">
+                                        {% if item.type == 'MCQ' %}
+                                            {{ item.question.question_text|truncatechars:25 }}
+                                        {% else %}
+                                            {{ item.question.title|truncatechars:25 }}
+                                        {% endif %}
+                                    </span>
                                 </td>
                                 <td class="border-bottom-0">
                                     <span class="badge bg-{{ item.question.get_difficulty_level_color }} text-color">
