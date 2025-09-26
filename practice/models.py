@@ -532,33 +532,93 @@ class Streak(models.Model):
     user = models.ForeignKey(Student, on_delete=models.CASCADE)
     current_streak = models.PositiveIntegerField(default=1)  # Current streak of consecutive submissions
     last_submission_date = models.DateField(null=True, blank=True)
+    previous_streak = models.PositiveIntegerField(default=0)  # Streak before it was broken (for restore)
 
     def update_streak(self):
+        """
+        Update streak for any successful question submission (coding or MCQ).
+        This method is called whenever a user successfully solves any question.
+        """
         today = datetime.now().date()
         
-        # Check if the last submission was yesterday
-        if self.last_submission_date == today - timedelta(days=1):
+        # If this is the first submission ever
+        if self.last_submission_date is None:
+            self.current_streak = 1
+            self.last_submission_date = today
+            self.save()
+            return
+        
+        # If user already submitted today, don't update streak
+        if self.last_submission_date == today:
+            return
+        
+        # Calculate days since last submission
+        days_gap = (today - self.last_submission_date).days
+        
+        if days_gap == 1:
+            # Consecutive day - increment streak
             self.current_streak += 1
-        elif self.last_submission_date != today:
-            self.current_streak = 1  # Reset if it's not consecutive
+            self.previous_streak = 0  # Reset previous streak since we're continuing
+        elif days_gap == 2:
+            # Missed exactly 1 day - save current streak for restore and reset to 0
+            self.previous_streak = self.current_streak
+            self.current_streak = 0
+        else:
+            # Missed more than 1 day - reset to 1 (new streak starts)
+            self.previous_streak = 0
+            self.current_streak = 1
 
         self.last_submission_date = today
         self.save()
 
     def can_restore_streak(self):
+        """Check if user can restore their streak (missed exactly 1 day)"""
         today = datetime.now().date()
         return (
-            self.last_submission_date == today - timedelta(days=2)
-            and not self.restored_today
+            self.last_submission_date == today - timedelta(days=2) and 
+            self.current_streak == 0 and 
+            self.previous_streak > 0
         )
 
     def restore_streak(self):
-        """Restore the streak to the previous day."""
+        """
+        Restore the streak to what it was before missing exactly 1 day.
+        This continues the streak as if they never missed a day.
+        """
         if self.can_restore_streak():
-            self.last_submission_date = datetime.now().date()
+            today = datetime.now().date()
+            # Restore to the previous streak value + 1 (as if they solved yesterday)
+            self.current_streak = self.previous_streak + 1
+            self.previous_streak = 0  # Clear previous streak after restore
+            self.last_submission_date = today
             self.save()
             return True
         return False
+
+    @classmethod
+    def update_user_streak(cls, student):
+        """
+        Class method to update streak for any student.
+        This is the main method that should be called from views.
+        """
+        streak, created = cls.objects.get_or_create(user=student)
+        streak.update_streak()
+        return streak
+
+    @classmethod
+    def get_user_streak(cls, student):
+        """
+        Get or create streak object for a student.
+        """
+        streak, created = cls.objects.get_or_create(user=student)
+        return streak
+
+    def has_solved_today(self):
+        """
+        Check if user has solved any question today.
+        """
+        today = datetime.now().date()
+        return self.last_submission_date == today
 
     def __str__(self):
         return f"{self.user.username} - {self.current_streak} day streak"

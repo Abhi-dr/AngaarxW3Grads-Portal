@@ -260,11 +260,12 @@ def update_coin(user, score, question):
 # ============================================ UPDATE STREAKS =============================================
 
 def update_user_streak(user):
-    # Fetch or create the user's streak record
-    streak, created = Streak.objects.get_or_create(user=user)
-
-    # Update the streak
-    streak.update_streak()
+    """
+    Update user streak for successful coding question submission.
+    This function maintains backward compatibility while using the new unified system.
+    """
+    # Use the new class method from Streak model
+    Streak.update_user_streak(user)
 
 
 def run_code_result(request, token, slug):

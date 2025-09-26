@@ -13,7 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Min, Max
 from accounts.models import Student
 from student.models import Notification, Course
-from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest, MCQQuestion, MCQSubmission
+from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest, MCQQuestion, MCQSubmission, Streak
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 from django.db import transaction
@@ -160,6 +160,10 @@ def submit_mcq_answer(request, slug):
                 selected_option=selected_option,
                 is_correct=is_correct
             )
+        
+        # Update streak only for correct MCQ answers (similar to coding questions)
+        if is_correct:
+            Streak.update_user_streak(student)
     
     response_data = {
         'is_correct': is_correct,

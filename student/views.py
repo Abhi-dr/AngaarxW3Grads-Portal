@@ -458,30 +458,31 @@ def leveller(request):
 def restore_streak(request):
     if request.method == 'POST' and request.user.is_authenticated:
         student = request.user.student
-        streak = Streak.objects.filter(user=student).first()
+        streak = Streak.get_user_streak(student)
         
-        if not streak:
-            return JsonResponse({'status': 'error', 'message': 'No streak found for this user.'})
-        
-        today = datetime.now().date()
-        if streak.last_submission_date != today - timedelta(days=2):
-            return JsonResponse({'status': 'error', 'message': 'Streak cannot be restored.'})
+        # Check if streak can be restored using the model method
+        if not streak.can_restore_streak():
+            return JsonResponse({'status': 'error', 'message': 'Streak cannot be restored. You can only restore if you missed exactly 1 day.'})
         
         if student.coins >= 50:
             student.coins -= 50
             student.save()
             
-            # Store the previous streak value before resetting
-            previous_streak = streak.current_streak
-
-            # Restore the streak
-            streak.last_submission_date = today - timedelta(days=1)  # Set to yesterday
-            streak.current_streak = previous_streak + 1  # Increase streak by 1 (restoring it)
-            streak.save()
-            
-            return JsonResponse({'status': 'success', 'message': 'Streak restored successfully!'})
+            # Use the model's restore_streak method
+            if streak.restore_streak():
+                return JsonResponse({
+                    'status': 'success', 
+                    'message': 'Streak restored successfully!',
+                    'current_streak': streak.current_streak,
+                    'coins_remaining': student.coins
+                })
+            else:
+                # Refund coins if restore failed
+                student.coins += 50
+                student.save()
+                return JsonResponse({'status': 'error', 'message': 'Failed to restore streak.'})
         else:
-            return JsonResponse({'status': 'error', 'message': 'Not enough coins to restore streak.'})
+            return JsonResponse({'status': 'error', 'message': 'Not enough coins to restore streak. You need 50 coins.'})
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 

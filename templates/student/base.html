@@ -643,10 +643,10 @@
                                     {{ user.coins }}
                                 </button>
 
-                                <button id="streakbtn" type="button" class="btn badge text-bg-dark mx-1"
+                                <button id="streakbtn" type="button" class="btn badge {% if streak.current_streak == 0 %}text-bg-secondary{% else %}text-bg-dark{% endif %} mx-1"
                                     data-bs-toggle="modal" data-bs-target="#streakModal" data-bs-toggle="tooltip"
                                     title="Your Current Streaks🔥">
-                                    <span class="fire-emoji">🔥</span>{{ streak.current_streak }}
+                                    <span class="fire-emoji">{% if streak.current_streak == 0 %}💔{% else %}🔥{% endif %}</span>{{ streak.current_streak }}
                                 </button>
 
                                 {% if can_restore_streak %}
@@ -775,9 +775,23 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body">
-                    <h4 class="modal-title text-center">Your Current Streak: <strong>
-                            {{ streak.current_streak }}</strong> Days 🔥</h4>
-                    <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
+                    {% if streak.current_streak == 0 %}
+                        <h4 class="modal-title text-center text-warning">Your Streak is Broken 💔</h4>
+                        <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
+                        {% if can_restore_streak %}
+                            <div class="alert alert-info text-center">
+                                <strong>Good news!</strong> You can restore your streak for 50 Sparks since you missed exactly 1 day.
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning text-center">
+                                Your streak has been reset. Start solving questions to build a new streak!
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <h4 class="modal-title text-center">Your Current Streak: <strong>
+                                {{ streak.current_streak }}</strong> Days 🔥</h4>
+                        <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
+                    {% endif %}
                     <p class="text-center mt-3">Snapchat streaks are fun? Wait till you see what coding streaks can do!
                         Other streaks might give you a red or yellow heart, but these streaks give you something even
                         better: achievement, growth, and rewards!
@@ -820,29 +834,37 @@
     <script src="{% static 'js/dashboard/js/confetti.js' %}"></script>
 
     <script>
-        document.getElementById('restore-streak-btn').addEventListener('click', function () {
-            const choice = confirm("Are you sure you want to restore your streaks? It will use 50 Sparks!");
+        // Only add event listener if the restore streak button exists
+        const restoreBtn = document.getElementById('restore-streak-btn');
+        if (restoreBtn) {
+            restoreBtn.addEventListener('click', function () {
+                const choice = confirm("Are you sure you want to restore your streaks? It will use 50 Sparks!");
 
-            if (!choice) {
-                return false;
-            }
+                if (!choice) {
+                    return false;
+                }
 
-            fetch("{% url 'restore_streak' %}", {
-                method: 'POST',
-                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("data received");
-                    console.log(data);
-                    if (data.status === 'success') {
-                        alert(data.message);
-                        location.reload();
-                    } else {
-                        alert(data.message);
-                    }
-                });
-        });
+                fetch("{% url 'restore_streak' %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("data received");
+                        console.log(data);
+                        if (data.status === 'success') {
+                            alert(data.message + ' Your streak is now: ' + data.current_streak + ' days!');
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while restoring streak.');
+                    });
+            });
+        }
     </script>
 
     <script>

@@ -38,11 +38,11 @@ def streak_context(request):
     context = {}
     if request.user.is_authenticated:  # Ensure the user is logged in
         if hasattr(request.user, 'student'):  # Check if the user has a related 'Student' instance
-            streak = Streak.objects.filter(user=request.user.student).first()
-            if streak:
-                today = datetime.now().date()
-                context['streak'] = streak
-                context['can_restore_streak'] = streak.last_submission_date == today - timedelta(days=2)
+            # Use the new class method to get streak
+            streak = Streak.get_user_streak(request.user.student)
+            context['streak'] = streak
+            context['can_restore_streak'] = streak.can_restore_streak()
+            context['solved_today'] = streak.has_solved_today()
     return context
 
 # def student_context_processor(request):
