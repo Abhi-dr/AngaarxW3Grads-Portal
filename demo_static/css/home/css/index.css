@@ -1019,3 +1019,363 @@ ul {
     stroke-dashoffset: -134;
     stroke-width: 6;
 }
+
+/* WhatsApp Button Styles */
+    .whatsapp-container {
+        position: fixed;
+        right: 20px;
+        top: 15%;
+        z-index: 1000;
+    }
+
+    .whatsapp-main-btn {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #25D366;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .whatsapp-main-btn:hover {
+        transform: scale(1.1);
+        background-color: #128C7E;
+    }
+
+    .whatsapp-main-btn i {
+        font-size: 32px;
+        color: white;
+    }
+
+    .whatsapp-dialog {
+        position: absolute;
+        right: 75px;
+        top: 0;
+        width: 320px;
+        background-color: rgba(18, 18, 20, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        padding: 25px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .whatsapp-dialog.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .whatsapp-dialog-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 15px;
+    }
+
+    .whatsapp-dialog-header img {
+        width: 48px;
+        height: 48px;
+        margin-right: 15px;
+        border-radius: 50%;
+        border: 2px solid #ff6026;
+        padding: 2px;
+    }
+
+    .whatsapp-dialog-header h3 {
+        color: #ff6026;
+        margin: 0;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .whatsapp-dialog-content p {
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 20px;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    .whatsapp-group-btn {
+        display: flex;
+        align-items: center;
+        background: rgba(37, 211, 102, 0.1);
+        border: 1px solid rgba(37, 211, 102, 0.3);
+        border-radius: 12px;
+        padding: 14px 18px;
+        margin-bottom: 15px;
+        text-decoration: none;
+        color: white;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .whatsapp-group-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(37, 211, 102, 0.2) 0%, rgba(37, 211, 102, 0) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .whatsapp-group-btn:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(37, 211, 102, 0.2);
+        border-color: rgba(37, 211, 102, 0.5);
+    }
+
+    .whatsapp-group-btn:hover::before {
+        opacity: 1;
+    }
+
+    .whatsapp-group-btn i {
+        font-size: 28px;
+        margin-right: 15px;
+        color: #25D366;
+    }
+
+    .whatsapp-group-btn span {
+        font-weight: 600;
+        font-size: 16px;
+    }
+
+    .whatsapp-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        font-size: 18px;
+        color: rgba(255, 255, 255, 0.6);
+        cursor: pointer;
+        transition: color 0.2s ease, transform 0.2s ease;
+        height: 24px;
+        width: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .whatsapp-close:hover {
+        color: white;
+        transform: rotate(90deg);
+    }
+
+    .whatsapp-pulse {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: #25D366;
+        opacity: 0.6;
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 0.6;
+        }
+
+        70% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+    }
+
+     
+    /* New Professional Flame Button */
+    .flame-container {
+        position: fixed;
+        right: 25px;
+        top: 15%;
+        z-index: 1000;
+        filter: drop-shadow(0 10px 15px rgba(255, 87, 34, 0.3));
+    }
+
+    .flame-wrapper {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform-style: preserve-3d;
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .flame-wrapper:hover {
+        transform: scale(1.1) translateY(-8px);
+    }
+
+    .flame-wrapper:active {
+        transform: scale(0.95);
+    }
+
+    .flame-outer-ring {
+        position: absolute;
+        width: 75px;
+        height: 75px;
+        border-radius: 50%;
+        background: rgba(255, 87, 34, 0.1);
+        animation: pulse-ring 2s infinite;
+    }
+
+    .flame-ring {
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.8), rgba(255, 61, 0, 0.8));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+            0 6px 20px rgba(255, 87, 34, 0.4),
+            inset 0 2px 10px rgba(255, 255, 255, 0.3),
+            inset 0 -2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .flame-inner {
+        position: relative;
+        width: 70px;
+        height: 70px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #ff5722, #ff9800);
+        border-radius: 50%;
+        overflow: hidden;
+        box-shadow: inset 0 -2px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    .flame-icon {
+        position: relative;
+        z-index: 2;
+        margin-bottom: 2px;
+    }
+
+    .flame-icon i {
+        font-size: 30px;
+        color: white;
+        text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .flame-text {
+        position: relative;
+        z-index: 2;
+        color: white;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .flame-particle {
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        width: 40px;
+        height: 40px;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, rgba(255, 152, 0, 0) 70%);
+        transform: translateX(-50%);
+        border-radius: 50%;
+        filter: blur(5px);
+        animation: flame-particle 3s infinite;
+    }
+
+    .flame-particle:nth-child(2) {
+        width: 35px;
+        height: 35px;
+        animation-delay: 0.3s;
+        animation-duration: 2.7s;
+    }
+
+    .flame-particle:nth-child(3) {
+        width: 30px;
+        height: 30px;
+        animation-delay: 0.5s;
+        animation-duration: 2.5s;
+    }
+
+    .flame-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+        color: white;
+        font-size: 9px;
+        font-weight: 700;
+        padding: 3px 6px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        animation: pulse-badge 2s infinite;
+        z-index: 3;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes flame-particle {
+        0% {
+            opacity: 0.8;
+            transform: translateX(-50%) translateY(0) scale(1);
+        }
+
+        100% {
+            opacity: 0;
+            transform: translateX(-50%) translateY(-40px) scale(1.5);
+        }
+    }
+
+    @keyframes pulse-ring {
+        0% {
+            transform: scale(0.95);
+            opacity: 0.5;
+        }
+
+        50% {
+            opacity: 0.2;
+        }
+
+        100% {
+            transform: scale(1.1);
+            opacity: 0;
+        }
+    }
+
+    @keyframes pulse-badge {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
