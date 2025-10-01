@@ -7,8 +7,7 @@
 
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
-<link rel="stylesheet" href="{% static 'css/home/css/index2.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/index_merged_final.css' %}">
 <!-- Add Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -121,359 +120,335 @@
     </div>
 </section> -->
 
-  <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="hero-background"></div>
-        <div class="hero-particles">
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-background"></div>
+    <div class="hero-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="hero-container">
+        <div class="hero-badge">
+            <i class="fas fa-fire"></i> The Future of Coding Education
         </div>
 
-        <div class="hero-container">
-            <div class="hero-badge">
-                <i class="fas fa-fire"></i> The Future of Coding Education
+        <h1 class="hero-title">
+            Go Beyond the Code.<br>
+            Join The Angaar Batch.
+        </h1>
+
+        <p class="hero-subtitle">
+            Master in-demand tech skills through live online classes, exclusive industry events,
+            and hands-on workshops hosted right at your college.
+        </p>
+
+        <div class="hero-ctas">
+            <a href="#programs" class="primary-cta">
+                <i class="fas fa-rocket"></i> Explore Our Programs
+            </a>
+            <a href="#workshops" class="secondary-cta">
+                <i class="fas fa-university"></i> Bring a Workshop to Your College
+            </a>
+        </div>
+
+        <div class="social-proof-bar">
+            <p class="social-proof-title">Trusted by students from:</p>
+            <div class="partner-logos">
+                <img src="" alt="IIT Delhi" class="partner-logo">
+                <img src="" alt="NIT Kurukshetra" class="partner-logo">
+                <img src="" alt="DTU" class="partner-logo">
+                <img src="" alt="NSUT" class="partner-logo">
+                <img src="" alt="IIIT Delhi" class="partner-logo">
             </div>
+        </div>
+    </div>
+</section>
 
-            <h1 class="hero-title">
-                Go Beyond the Code.<br>
-                Join the Angaar Ecosystem.
-            </h1>
-
-            <p class="hero-subtitle">
-                Master in-demand tech skills through live online classes, exclusive industry events,
-                and hands-on workshops hosted right at your college.
+<!-- Angaar Programs Hub -->
+<section id="programs" class="programs-section">
+    <div class="programs-container">
+        <div class="section-header">
+            <span class="section-badge">Our Ecosystem</span>
+            <h2 class="section-title">The Angaar Programs</h2>
+            <p class="section-subtitle">
+                Three interconnected pillars that create the most comprehensive coding education experience
             </p>
-
-            <div class="hero-ctas">
-                <a href="#programs" class="primary-cta">
-                    <i class="fas fa-rocket"></i> Explore Our Programs
-                </a>
-                <a href="#workshops" class="secondary-cta">
-                    <i class="fas fa-university"></i> Bring a Workshop to Your College
-                </a>
-            </div>
-
-            <div class="social-proof-bar">
-                <p class="social-proof-title">Trusted by students from:</p>
-                <div class="partner-logos">
-                    <img src="https://via.placeholder.com/120x40/ff6026/ffffff?text=IIT+Delhi" alt="IIT Delhi"
-                        class="partner-logo">
-                    <img src="https://via.placeholder.com/120x40/ff6026/ffffff?text=NIT+Kurukshetra"
-                        alt="NIT Kurukshetra" class="partner-logo">
-                    <img src="https://via.placeholder.com/120x40/ff6026/ffffff?text=DTU" alt="DTU" class="partner-logo">
-                    <img src="https://via.placeholder.com/120x40/ff6026/ffffff?text=NSUT" alt="NSUT"
-                        class="partner-logo">
-                    <img src="https://via.placeholder.com/120x40/ff6026/ffffff?text=IIIT+Delhi" alt="IIIT Delhi"
-                        class="partner-logo">
-                </div>
-            </div>
         </div>
-    </section>
 
-    <!-- Angaar Programs Hub -->
-    <section id="programs" class="programs-section">
-        <div class="programs-container">
-            <div class="section-header">
-                <span class="section-badge">Our Ecosystem</span>
-                <h2 class="section-title">The Angaar Programs</h2>
-                <p class="section-subtitle">
-                    Three interconnected pillars that create the most comprehensive coding education experience
-                </p>
+        <div class="programs-tabs">
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="courses">
+                    <i class="fas fa-laptop-code"></i>
+                    Online Courses
+                </button>
+                <button class="tab-btn" data-tab="events">
+                    <i class="fas fa-calendar-alt"></i>
+                    Upcoming Events
+                </button>
+                <button class="tab-btn" data-tab="workshops">
+                    <i class="fas fa-university"></i>
+                    College Workshops
+                </button>
             </div>
 
-            <div class="programs-tabs">
-                <div class="tab-buttons">
-                    <button class="tab-btn active" data-tab="courses">
-                        <i class="fas fa-laptop-code"></i>
-                        Online Courses
-                    </button>
-                    <button class="tab-btn" data-tab="events">
-                        <i class="fas fa-calendar-alt"></i>
-                        Upcoming Events
-                    </button>
-                    <button class="tab-btn" data-tab="workshops">
-                        <i class="fas fa-university"></i>
-                        College Workshops
-                    </button>
+            <div class="tab-content">
+                <!-- Online Courses Tab -->
+                <div class="tab-pane active" id="courses">
+                    <div class="courses-filters">
+                        <button class="filter-btn active" data-filter="all">All Courses</button>
+                        <button class="filter-btn" data-filter="beginner">Beginner Friendly</button>
+                        <button class="filter-btn" data-filter="interview">Interview Prep</button>
+                        <button class="filter-btn" data-filter="fullstack">Full Stack</button>
+                    </div>
+
+                    <div class="courses-grid">
+                        <div class="course-card" data-category="beginner fullstack">
+                            <div class="course-image">
+                                <img src="" alt="Python Course">
+                                <div class="course-badge">Beginner Friendly</div>
+                            </div>
+                            <div class="course-content">
+                                <h3>Python Masterclass</h3>
+                                <p>Complete Python programming from basics to advanced concepts</p>
+                                <div class="course-meta">
+                                    <div class="instructor">
+                                        <img src="" alt="Instructor">
+                                        <span>Rahul Sharma</span>
+                                    </div>
+                                    <div class="rating">
+                                        <i class="fas fa-star"></i>
+                                        <span>4.9</span>
+                                    </div>
+                                </div>
+                                <div class="course-footer">
+                                    <span class="price">₹2,999</span>
+                                    <button class="course-cta">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="course-card" data-category="interview">
+                            <div class="course-image">
+                                <img src="" alt="DSA Course">
+                                <div class="course-badge">Interview Prep</div>
+                            </div>
+                            <div class="course-content">
+                                <h3>Data Structures & Algorithms</h3>
+                                <p>Master DSA concepts for technical interviews at top companies</p>
+                                <div class="course-meta">
+                                    <div class="instructor">
+                                        <img src="" alt="Instructor">
+                                        <span>Priya Singh</span>
+                                    </div>
+                                    <div class="rating">
+                                        <i class="fas fa-star"></i>
+                                        <span>4.8</span>
+                                    </div>
+                                </div>
+                                <div class="course-footer">
+                                    <span class="price">₹3,999</span>
+                                    <button class="course-cta">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="course-card" data-category="fullstack">
+                            <div class="course-image">
+                                <img src="" alt="Web Dev Course">
+                                <div class="course-badge">Full Stack</div>
+                            </div>
+                            <div class="course-content">
+                                <h3>Full Stack Web Development</h3>
+                                <p>Build modern web applications with React, Node.js, and MongoDB</p>
+                                <div class="course-meta">
+                                    <div class="instructor">
+                                        <img src="" alt="Instructor">
+                                        <span>Amit Kumar</span>
+                                    </div>
+                                    <div class="rating">
+                                        <i class="fas fa-star"></i>
+                                        <span>4.9</span>
+                                    </div>
+                                </div>
+                                <div class="course-footer">
+                                    <span class="price">₹4,999</span>
+                                    <button class="course-cta">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="tab-content">
-                    <!-- Online Courses Tab -->
-                    <div class="tab-pane active" id="courses">
-                        <div class="courses-filters">
-                            <button class="filter-btn active" data-filter="all">All Courses</button>
-                            <button class="filter-btn" data-filter="beginner">Beginner Friendly</button>
-                            <button class="filter-btn" data-filter="interview">Interview Prep</button>
-                            <button class="filter-btn" data-filter="fullstack">Full Stack</button>
+                <!-- Upcoming Events Tab -->
+                <div class="tab-pane" id="events">
+                    <div class="events-grid">
+                        <div class="event-card">
+                            <div class="event-image">
+                                <img src="" alt="Tech Talk">
+                                <div class="event-date">
+                                    <span class="day">28</span>
+                                    <span class="month">Sep</span>
+                                </div>
+                            </div>
+                            <div class="event-content">
+                                <div class="event-meta">
+                                    <span class="event-type">Tech Talk</span>
+                                    <span class="event-location">Online</span>
+                                </div>
+                                <h3>AI in Software Development</h3>
+                                <p>Explore how AI is revolutionizing the way we write and debug code</p>
+                                <div class="event-speaker">
+                                    <img src="" alt="Speaker">
+                                    <span>Dr. Sarah Johnson, Google AI</span>
+                                </div>
+                                <button class="event-cta">Register Now</button>
+                            </div>
                         </div>
 
-                        <div class="courses-grid">
-                            <div class="course-card" data-category="beginner fullstack">
-                                <div class="course-image">
-                                    <img src="https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400&h=250&fit=crop"
-                                        alt="Python Course">
-                                    <div class="course-badge">Beginner Friendly</div>
-                                </div>
-                                <div class="course-content">
-                                    <h3>Python Masterclass</h3>
-                                    <p>Complete Python programming from basics to advanced concepts</p>
-                                    <div class="course-meta">
-                                        <div class="instructor">
-                                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
-                                                alt="Instructor">
-                                            <span>Rahul Sharma</span>
-                                        </div>
-                                        <div class="rating">
-                                            <i class="fas fa-star"></i>
-                                            <span>4.9</span>
-                                        </div>
-                                    </div>
-                                    <div class="course-footer">
-                                        <span class="price">₹2,999</span>
-                                        <button class="course-cta">View Details</button>
-                                    </div>
+                        <div class="event-card">
+                            <div class="event-image">
+                                <img src="" alt="Hackathon">
+                                <div class="event-date">
+                                    <span class="day">05</span>
+                                    <span class="month">Oct</span>
                                 </div>
                             </div>
-
-                            <div class="course-card" data-category="interview">
-                                <div class="course-image">
-                                    <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=250&fit=crop"
-                                        alt="DSA Course">
-                                    <div class="course-badge">Interview Prep</div>
+                            <div class="event-content">
+                                <div class="event-meta">
+                                    <span class="event-type">Hackathon</span>
+                                    <span class="event-location">Delhi</span>
                                 </div>
-                                <div class="course-content">
-                                    <h3>Data Structures & Algorithms</h3>
-                                    <p>Master DSA concepts for technical interviews at top companies</p>
-                                    <div class="course-meta">
-                                        <div class="instructor">
-                                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face"
-                                                alt="Instructor">
-                                            <span>Priya Singh</span>
-                                        </div>
-                                        <div class="rating">
-                                            <i class="fas fa-star"></i>
-                                            <span>4.8</span>
-                                        </div>
-                                    </div>
-                                    <div class="course-footer">
-                                        <span class="price">₹3,999</span>
-                                        <button class="course-cta">View Details</button>
-                                    </div>
+                                <h3>Angaar Hackathon 2024</h3>
+                                <p>48-hour coding marathon with prizes worth ₹2 lakhs</p>
+                                <div class="event-speaker">
+                                    <img src="" alt="Organizer">
+                                    <span>Angaar Team</span>
                                 </div>
-                            </div>
-
-                            <div class="course-card" data-category="fullstack">
-                                <div class="course-image">
-                                    <img src="https://images.unsplash.com/photo-1593720213428-28a5b9e94613?w=400&h=250&fit=crop"
-                                        alt="Web Dev Course">
-                                    <div class="course-badge">Full Stack</div>
-                                </div>
-                                <div class="course-content">
-                                    <h3>Full Stack Web Development</h3>
-                                    <p>Build modern web applications with React, Node.js, and MongoDB</p>
-                                    <div class="course-meta">
-                                        <div class="instructor">
-                                            <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=40&h=40&fit=crop&crop=face"
-                                                alt="Instructor">
-                                            <span>Amit Kumar</span>
-                                        </div>
-                                        <div class="rating">
-                                            <i class="fas fa-star"></i>
-                                            <span>4.9</span>
-                                        </div>
-                                    </div>
-                                    <div class="course-footer">
-                                        <span class="price">₹4,999</span>
-                                        <button class="course-cta">View Details</button>
-                                    </div>
-                                </div>
+                                <button class="event-cta">Register Now</button>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Upcoming Events Tab -->
-                    <div class="tab-pane" id="events">
-                        <div class="events-grid">
-                            <div class="event-card">
-                                <div class="event-image">
-                                    <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=200&fit=crop"
-                                        alt="Tech Talk">
-                                    <div class="event-date">
-                                        <span class="day">28</span>
-                                        <span class="month">Sep</span>
-                                    </div>
-                                </div>
-                                <div class="event-content">
-                                    <div class="event-meta">
-                                        <span class="event-type">Tech Talk</span>
-                                        <span class="event-location">Online</span>
-                                    </div>
-                                    <h3>AI in Software Development</h3>
-                                    <p>Explore how AI is revolutionizing the way we write and debug code</p>
-                                    <div class="event-speaker">
-                                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=40&h=40&fit=crop&crop=face"
-                                            alt="Speaker">
-                                        <span>Dr. Sarah Johnson, Google AI</span>
-                                    </div>
-                                    <button class="event-cta">Register Now</button>
+                <!-- College Workshops Tab -->
+                <div class="tab-pane" id="workshops">
+                    <div class="workshops-grid">
+                        <div class="workshop-card">
+                            <div class="workshop-image">
+                                <img src="" alt="IIT Delhi Workshop">
+                                <div class="college-logo">
+                                    <img src="" alt="IIT Delhi">
                                 </div>
                             </div>
-
-                            <div class="event-card">
-                                <div class="event-image">
-                                    <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=200&fit=crop"
-                                        alt="Hackathon">
-                                    <div class="event-date">
-                                        <span class="day">05</span>
-                                        <span class="month">Oct</span>
-                                    </div>
+                            <div class="workshop-content">
+                                <h3>IIT Delhi</h3>
+                                <p class="workshop-title">Advanced Python Workshop</p>
+                                <p class="workshop-desc">Hands-on session on Python frameworks and real-world
+                                    applications</p>
+                                <div class="workshop-gallery">
+                                    <img src="" alt="Workshop 1">
+                                    <img src="" alt="Workshop 2">
+                                    <img src="" alt="Workshop 3">
+                                    <span class="more-photos">+12</span>
                                 </div>
-                                <div class="event-content">
-                                    <div class="event-meta">
-                                        <span class="event-type">Hackathon</span>
-                                        <span class="event-location">Delhi</span>
-                                    </div>
-                                    <h3>Angaar Hackathon 2024</h3>
-                                    <p>48-hour coding marathon with prizes worth ₹2 lakhs</p>
-                                    <div class="event-speaker">
-                                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face"
-                                            alt="Organizer">
-                                        <span>Angaar Team</span>
-                                    </div>
-                                    <button class="event-cta">Register Now</button>
+                                <div class="workshop-testimonial">
+                                    <p>"Amazing hands-on experience with industry experts!"</p>
+                                    <span>- Rahul, CSE Student</span>
                                 </div>
+                                <button class="workshop-cta">Request Workshop</button>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- College Workshops Tab -->
-                    <div class="tab-pane" id="workshops">
-                        <div class="workshops-grid">
-                            <div class="workshop-card">
-                                <div class="workshop-image">
-                                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&h=200&fit=crop"
-                                        alt="IIT Delhi Workshop">
-                                    <div class="college-logo">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=IIT"
-                                            alt="IIT Delhi">
-                                    </div>
-                                </div>
-                                <div class="workshop-content">
-                                    <h3>IIT Delhi</h3>
-                                    <p class="workshop-title">Advanced Python Workshop</p>
-                                    <p class="workshop-desc">Hands-on session on Python frameworks and real-world
-                                        applications</p>
-                                    <div class="workshop-gallery">
-                                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=60&h=60&fit=crop"
-                                            alt="Workshop 1">
-                                        <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=60&h=60&fit=crop"
-                                            alt="Workshop 2">
-                                        <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=60&h=60&fit=crop"
-                                            alt="Workshop 3">
-                                        <span class="more-photos">+12</span>
-                                    </div>
-                                    <div class="workshop-testimonial">
-                                        <p>"Amazing hands-on experience with industry experts!"</p>
-                                        <span>- Rahul, CSE Student</span>
-                                    </div>
-                                    <button class="workshop-cta">Request Workshop</button>
+                        <div class="workshop-card">
+                            <div class="workshop-image">
+                                <img src="" alt="NIT Workshop">
+                                <div class="college-logo">
+                                    <img src="" alt="NIT Kurukshetra">
                                 </div>
                             </div>
-
-                            <div class="workshop-card">
-                                <div class="workshop-image">
-                                    <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&h=200&fit=crop"
-                                        alt="NIT Workshop">
-                                    <div class="college-logo">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=NIT"
-                                            alt="NIT Kurukshetra">
-                                    </div>
+                            <div class="workshop-content">
+                                <h3>NIT Kurukshetra</h3>
+                                <p class="workshop-title">Web Development Bootcamp</p>
+                                <p class="workshop-desc">Complete MERN stack development in a weekend intensive</p>
+                                <div class="workshop-gallery">
+                                    <img src="" alt="Workshop 1">
+                                    <img src="" alt="Workshop 2">
+                                    <img src="" alt="Workshop 3">
+                                    <span class="more-photos">+8</span>
                                 </div>
-                                <div class="workshop-content">
-                                    <h3>NIT Kurukshetra</h3>
-                                    <p class="workshop-title">Web Development Bootcamp</p>
-                                    <p class="workshop-desc">Complete MERN stack development in a weekend intensive</p>
-                                    <div class="workshop-gallery">
-                                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=60&h=60&fit=crop"
-                                            alt="Workshop 1">
-                                        <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?w=60&h=60&fit=crop"
-                                            alt="Workshop 2">
-                                        <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=60&h=60&fit=crop"
-                                            alt="Workshop 3">
-                                        <span class="more-photos">+8</span>
-                                    </div>
-                                    <div class="workshop-testimonial">
-                                        <p>"Built my first full-stack app in just 2 days!"</p>
-                                        <span>- Priya, IT Student</span>
-                                    </div>
-                                    <button class="workshop-cta">Request Workshop</button>
+                                <div class="workshop-testimonial">
+                                    <p>"Built my first full-stack app in just 2 days!"</p>
+                                    <span>- Priya, IT Student</span>
                                 </div>
+                                <button class="workshop-cta">Request Workshop</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Code in Action Challenge -->
-    <section id="code-challenge" class="code-challenge-section">
-        <div class="code-challenge-container">
-            <div class="section-header">
-                <span class="section-badge">Try It Now</span>
-                <h2 class="section-title">Code in Action</h2>
-                <p class="section-subtitle">
-                    Experience our interactive learning environment. Solve this challenge and see the Angaar difference!
-                </p>
-            </div>
+<!-- Code in Action Challenge -->
+<section id="code-challenge" class="code-challenge-section">
+    <div class="code-challenge-container">
+        <div class="section-header">
+            <span class="section-badge">Try It Now</span>
+            <h2 class="section-title">Code in Action</h2>
+            <p class="section-subtitle">
+                Experience our interactive learning environment. Solve this challenge and see the Angaar difference!
+            </p>
+        </div>
 
-            <div class="code-challenge-content">
-                <div class="challenge-problem">
-                    <div class="problem-header">
-                        <h3><i class="fas fa-code"></i> Challenge: Palindrome Checker</h3>
-                        <div class="difficulty-badge">Beginner Friendly</div>
-                    </div>
-                    <div class="problem-description">
-                        <p>Write a Python function that checks if a given word is a palindrome (reads the same forwards
-                            and backwards).</p>
-                        <div class="problem-examples">
-                            <h4>Examples:</h4>
-                            <div class="example">
-                                <span class="input">Input: "radar"</span>
-                                <span class="output">Output: True</span>
-                            </div>
-                            <div class="example">
-                                <span class="input">Input: "hello"</span>
-                                <span class="output">Output: False</span>
-                            </div>
+        <div class="code-challenge-content">
+            <div class="challenge-problem">
+                <div class="problem-header">
+                    <h3><i class="fas fa-code"></i> Challenge: Palindrome Checker</h3>
+                    <div class="difficulty-badge">Beginner Friendly</div>
+                </div>
+                <div class="problem-description">
+                    <p>Write a Python function that checks if a given word is a palindrome (reads the same forwards
+                        and backwards).</p>
+                    <div class="problem-examples">
+                        <h4>Examples:</h4>
+                        <div class="example">
+                            <span class="input">Input: "radar"</span>
+                            <span class="output">Output: True</span>
+                        </div>
+                        <div class="example">
+                            <span class="input">Input: "hello"</span>
+                            <span class="output">Output: False</span>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="code-editor-container">
-                    <div class="editor-header">
-                        <div class="editor-tabs">
-                            <div class="editor-tab active">
-                                <i class="fab fa-python"></i>
-                                main.py
-                            </div>
-                        </div>
-                        <div class="editor-actions">
-                            <button class="run-btn" onclick="runCode()">
-                                <i class="fas fa-play"></i>
-                                Run Code
-                            </button>
+            <div class="code-editor-container">
+                <div class="editor-header">
+                    <div class="editor-tabs">
+                        <div class="editor-tab active">
+                            <i class="fab fa-python"></i>
+                            main.py
                         </div>
                     </div>
+                    <div class="editor-actions">
+                        <button class="run-btn" onclick="runCode()">
+                            <i class="fas fa-play"></i>
+                            Run Code
+                        </button>
+                    </div>
+                </div>
 
-                    <div class="code-editor" id="codeEditor">
-                        <textarea id="codeInput" spellcheck="false">def is_palindrome(word):
+                <div class="code-editor" id="codeEditor">
+                    <textarea id="codeInput" spellcheck="false">def is_palindrome(word):
     # Your code here
     # Hint: Compare the word with its reverse
     pass
@@ -483,429 +458,1924 @@ test_word = "radar"
 result = is_palindrome(test_word)
 print(f"'{test_word}' is palindrome: {result}")
 </textarea>
+                </div>
+
+                <div class="code-output">
+                    <div class="output-header">
+                        <i class="fas fa-terminal"></i>
+                        Output
+                    </div>
+                    <div class="output-content" id="outputContent">
+                        <div class="output-placeholder">
+                            <i class="fas fa-play-circle"></i>
+                            Click "Run Code" to see the output
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="challenge-success" id="challengeSuccess" style="display: none;">
+            <div class="success-animation">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <h3>🎉 Congratulations!</h3>
+            <p>You've successfully solved the challenge! Ready to learn more advanced concepts?</p>
+            <div class="success-actions">
+                <a href="#programs" class="success-cta primary">
+                    <i class="fas fa-rocket"></i>
+                    Explore Our Courses
+                </a>
+                <button class="success-cta secondary" onclick="resetChallenge()">
+                    <i class="fas fa-redo"></i>
+                    Try Another Challenge
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Interactive Map Section -->
+<section id="college-map" class="college-map-section">
+    <div class="college-map-container">
+        <div class="section-header">
+            <span class="section-badge">Our Reach</span>
+            <h2 class="section-title">Angaar Across India</h2>
+            <p class="section-subtitle">
+                Discover our growing network of partner colleges and the impact we're making across the country
+            </p>
+        </div>
+
+        <div class="map-container">
+            <!-- Interactive College Grid Map -->
+            <div class="colleges-grid-map">
+                <div class="map-header">
+                    <h3>Our Partner Colleges Across India</h3>
+                    <p>Click on any college to see detailed information</p>
+                </div>
+
+                <!-- College Cards Grid -->
+                <div class="colleges-interactive-grid">
+                    <!-- Delhi Region -->
+                    <div class="region-group">
+                        <h4 class="region-title">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Delhi NCR
+                        </h4>
+                        <div class="region-colleges">
+                            <div class="college-interactive-card" data-college="iit-delhi">
+                                <div class="college-card-mini">
+                                    <img src="" alt="IIT Delhi" class="college-mini-logo">
+                                    <div class="college-mini-info">
+                                        <h5>IIT Delhi</h5>
+                                        <span class="workshop-count">12 Workshops</span>
+                                    </div>
+                                    <div class="college-status active">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="college-interactive-card" data-college="dtu">
+                                <div class="college-card-mini">
+                                    <img src="" alt="DTU" class="college-mini-logo">
+                                    <div class="college-mini-info">
+                                        <h5>DTU</h5>
+                                        <span class="workshop-count">8 Workshops</span>
+                                    </div>
+                                    <div class="college-status active">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="college-interactive-card" data-college="nsut">
+                                <div class="college-card-mini">
+                                    <img src="" alt="NSUT" class="college-mini-logo">
+                                    <div class="college-mini-info">
+                                        <h5>NSUT</h5>
+                                        <span class="workshop-count">15 Workshops</span>
+                                    </div>
+                                    <div class="college-status active">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="code-output">
-                        <div class="output-header">
-                            <i class="fas fa-terminal"></i>
-                            Output
+                    <!-- Mumbai Region -->
+                    <div class="region-group">
+                        <h4 class="region-title">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Mumbai
+                        </h4>
+                        <div class="region-colleges">
+                            <div class="college-interactive-card" data-college="iit-bombay">
+                                <div class="college-card-mini">
+                                    <img src="" alt="IIT Bombay" class="college-mini-logo">
+                                    <div class="college-mini-info">
+                                        <h5>IIT Bombay</h5>
+                                        <span class="workshop-count">10 Workshops</span>
+                                    </div>
+                                    <div class="college-status active">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="output-content" id="outputContent">
-                            <div class="output-placeholder">
-                                <i class="fas fa-play-circle"></i>
-                                Click "Run Code" to see the output
+                    </div>
+
+                    <!-- Bangalore Region -->
+                    <div class="region-group">
+                        <h4 class="region-title">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Bangalore
+                        </h4>
+                        <div class="region-colleges">
+                            <div class="college-interactive-card" data-college="iisc-bangalore">
+                                <div class="college-card-mini">
+                                    <img src="" alt="IISc Bangalore" class="college-mini-logo">
+                                    <div class="college-mini-info">
+                                        <h5>IISc Bangalore</h5>
+                                        <span class="workshop-count">6 Workshops</span>
+                                    </div>
+                                    <div class="college-status active">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other Regions -->
+                    <div class="region-group">
+                        <h4 class="region-title">
+                            <i class="fas fa-map-marker-alt"></i>
+                            Other Cities
+                        </h4>
+                        <div class="region-colleges">
+                            <div class="college-interactive-card" data-college="nit-kurukshetra">
+                                <div class="college-card-mini">
+                                    <img src="" alt="NIT Kurukshetra" class="college-mini-logo">
+                                    <div class="college-mini-info">
+                                        <h5>NIT Kurukshetra</h5>
+                                        <span class="workshop-count">9 Workshops</span>
+                                    </div>
+                                    <div class="college-status active">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="college-interactive-card" data-college="iit-madras">
+                                <div class="college-card-mini">
+                                    <img src="" alt="IIT Madras" class="college-mini-logo">
+                                    <div class="college-mini-info">
+                                        <h5>IIT Madras</h5>
+                                        <span class="workshop-count">7 Workshops</span>
+                                    </div>
+                                    <div class="college-status active">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="college-interactive-card" data-college="iiit-hyderabad">
+                                <div class="college-card-mini">
+                                    <img src="" alt="IIIT Hyderabad" class="college-mini-logo">
+                                    <div class="college-mini-info">
+                                        <h5>IIIT Hyderabad</h5>
+                                        <span class="workshop-count">11 Workshops</span>
+                                    </div>
+                                    <div class="college-status active">
+                                        <i class="fas fa-circle"></i>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="challenge-success" id="challengeSuccess" style="display: none;">
-                <div class="success-animation">
-                    <i class="fas fa-trophy"></i>
+            <!-- College Info Cards -->
+            <div class="college-info-cards">
+                <!-- IIT Delhi -->
+                <div class="college-card" id="card-iit-delhi" style="display: none;">
+                    <div class="college-card-header">
+                        <img src="" alt="IIT Delhi" class="college-logo">
+                        <div class="college-info">
+                            <h3>IIT Delhi</h3>
+                            <p class="college-location">New Delhi, India</p>
+                        </div>
+                        <button class="close-card" onclick="closeCollegeCard()">×</button>
+                    </div>
+                    <div class="college-card-content">
+                        <div class="workshop-stats">
+                            <div class="stat">
+                                <span class="stat-number">12</span>
+                                <span class="stat-label">Workshops</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">500+</span>
+                                <span class="stat-label">Students</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">4.9</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                        </div>
+                        <div class="recent-workshops">
+                            <h4>Recent Workshops</h4>
+                            <div class="workshop-list">
+                                <div class="workshop-item">
+                                    <span class="workshop-name">Advanced Python</span>
+                                    <span class="workshop-date">Sep 2024</span>
+                                </div>
+                                <div class="workshop-item">
+                                    <span class="workshop-name">DSA Bootcamp</span>
+                                    <span class="workshop-date">Aug 2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="college-gallery">
+                            <img src="" alt="Workshop 1">
+                            <img src="" alt="Workshop 2">
+                            <img src="" alt="Workshop 3">
+                            <span class="more-photos">+15</span>
+                        </div>
+                        <div class="student-testimonial">
+                            <p>"The Python workshop was incredible! Learned so much in just 2 days."</p>
+                            <span>- Rahul, CSE Student</span>
+                        </div>
+                        <button class="request-workshop-btn">
+                            <i class="fas fa-calendar-plus"></i>
+                            Request Workshop
+                        </button>
+                    </div>
                 </div>
-                <h3>🎉 Congratulations!</h3>
-                <p>You've successfully solved the challenge! Ready to learn more advanced concepts?</p>
-                <div class="success-actions">
-                    <a href="#programs" class="success-cta primary">
-                        <i class="fas fa-rocket"></i>
-                        Explore Our Courses
-                    </a>
-                    <button class="success-cta secondary" onclick="resetChallenge()">
-                        <i class="fas fa-redo"></i>
-                        Try Another Challenge
+
+                <!-- DTU -->
+                <div class="college-card" id="card-dtu" style="display: none;">
+                    <div class="college-card-header">
+                        <img src="" alt="DTU" class="college-logo">
+                        <div class="college-info">
+                            <h3>Delhi Technological University</h3>
+                            <p class="college-location">Delhi, India</p>
+                        </div>
+                        <button class="close-card" onclick="closeCollegeCard()">×</button>
+                    </div>
+                    <div class="college-card-content">
+                        <div class="workshop-stats">
+                            <div class="stat">
+                                <span class="stat-number">8</span>
+                                <span class="stat-label">Workshops</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">350+</span>
+                                <span class="stat-label">Students</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">4.8</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                        </div>
+                        <div class="recent-workshops">
+                            <h4>Recent Workshops</h4>
+                            <div class="workshop-list">
+                                <div class="workshop-item">
+                                    <span class="workshop-name">Web Development</span>
+                                    <span class="workshop-date">Sep 2024</span>
+                                </div>
+                                <div class="workshop-item">
+                                    <span class="workshop-name">React Bootcamp</span>
+                                    <span class="workshop-date">Jul 2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="college-gallery">
+                            <img src="" alt="Workshop 1">
+                            <img src="" alt="Workshop 2">
+                            <img src="" alt="Workshop 3">
+                            <span class="more-photos">+10</span>
+                        </div>
+                        <div class="student-testimonial">
+                            <p>"Amazing hands-on experience with React. Built my first app!"</p>
+                            <span>- Priya, IT Student</span>
+                        </div>
+                        <button class="request-workshop-btn">
+                            <i class="fas fa-calendar-plus"></i>
+                            Request Workshop
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NIT Kurukshetra -->
+                <div class="college-card" id="card-nit-kurukshetra" style="display: none;">
+                    <div class="college-card-header">
+                        <img src="" alt="NIT Kurukshetra" class="college-logo">
+                        <div class="college-info">
+                            <h3>NIT Kurukshetra</h3>
+                            <p class="college-location">Haryana, India</p>
+                        </div>
+                        <button class="close-card" onclick="closeCollegeCard()">×</button>
+                    </div>
+                    <div class="college-card-content">
+                        <div class="workshop-stats">
+                            <div class="stat">
+                                <span class="stat-number">15</span>
+                                <span class="stat-label">Workshops</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">600+</span>
+                                <span class="stat-label">Students</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-number">4.9</span>
+                                <span class="stat-label">Rating</span>
+                            </div>
+                        </div>
+                        <div class="recent-workshops">
+                            <h4>Recent Workshops</h4>
+                            <div class="workshop-list">
+                                <div class="workshop-item">
+                                    <span class="workshop-name">Machine Learning</span>
+                                    <span class="workshop-date">Sep 2024</span>
+                                </div>
+                                <div class="workshop-item">
+                                    <span class="workshop-name">Data Science</span>
+                                    <span class="workshop-date">Aug 2024</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="college-gallery">
+                            <img src="" alt="Workshop 1">
+                            <img src="" alt="Workshop 2">
+                            <img src="" alt="Workshop 3">
+                            <span class="more-photos">+20</span>
+                        </div>
+                        <div class="student-testimonial">
+                            <p>"The ML workshop opened up a whole new world for me!"</p>
+                            <span>- Vikash, CSE Student</span>
+                        </div>
+                        <button class="request-workshop-btn">
+                            <i class="fas fa-calendar-plus"></i>
+                            Request Workshop
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Map Statistics -->
+        <div class="map-statistics">
+            <div class="map-stat">
+                <div class="stat-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+                <span class="stat-number" data-target="50">0</span>
+                <span class="stat-label">Partner Colleges</span>
+            </div>
+            <div class="map-stat">
+                <div class="stat-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <span class="stat-number" data-target="25">0</span>
+                <span class="stat-label">Cities Covered</span>
+            </div>
+            <div class="map-stat">
+                <div class="stat-icon">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <span class="stat-number" data-target="200">0</span>
+                <span class="stat-label">Workshops Conducted</span>
+            </div>
+            <div class="map-stat">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span class="stat-number" data-target="10000">0</span>
+                <span class="stat-label">Students Reached</span>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+
+<!-- Dynamic Testimonials Section -->
+<section id="testimonials" class="testimonials-section">
+    <div class="testimonials-container">
+        <div class="section-header">
+            <span class="section-badge">Student Voices</span>
+            <h2 class="section-title">What Our Students Say</h2>
+            <p class="section-subtitle">
+                Hear directly from our community members about their transformative journey with Angaar Batch
+            </p>
+        </div>
+
+        <div class="testimonials-carousel">
+            <div class="testimonials-track" id="testimonialsTrack">
+                <!-- Testimonial 1 -->
+                <div class="testimonial-card">
+                    <div class="testimonial-video">
+                        <img src="" alt="Rahul Kumar" class="testimonial-bg">
+                        <div class="video-overlay">
+                            <div class="play-button-large">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="video-duration">3:24</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "The Angaar Batch completely transformed my coding journey! From knowing nothing about
+                            programming to landing my first job as a software developer. The mentors are incredible
+                            and the community support is unmatched."
+                        </p>
+                        <div class="testimonial-author">
+                            <img src="" alt="Rahul Kumar" class="author-avatar">
+                            <div class="author-info">
+                                <h4>Rahul Kumar</h4>
+                                <p>Software Developer at TCS</p>
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="company-badge">
+                                <img src="" alt="TCS">
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">Python</span>
+                            <span class="skill-badge">Django</span>
+                            <span class="skill-badge">JavaScript</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="testimonial-card">
+                    <div class="testimonial-video">
+                        <img src="" alt="Priya Sharma" class="testimonial-bg">
+                        <div class="video-overlay">
+                            <div class="play-button-large">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="video-duration">2:47</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "I was struggling with C programming for months until I joined The Angaar Batch. The way
+                            they explain complex concepts with real-world examples is amazing. Now I'm confident in
+                            my coding skills!"
+                        </p>
+                        <div class="testimonial-author">
+                            <img src="" alt="Priya Sharma" class="author-avatar">
+                            <div class="author-info">
+                                <h4>Priya Sharma</h4>
+                                <p>Frontend Developer at Flipkart</p>
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="company-badge">
+                                <img src="" alt="Flipkart">
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">React</span>
+                            <span class="skill-badge">JavaScript</span>
+                            <span class="skill-badge">CSS</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card">
+                    <div class="testimonial-video">
+                        <img src="" alt="Vikash Gupta" class="testimonial-bg">
+                        <div class="video-overlay">
+                            <div class="play-button-large">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="video-duration">4:12</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "I joined as a complete beginner and now I'm working as a Python developer! The
+                            step-by-step approach and practical projects helped me build a strong foundation. The
+                            Angaar Batch family is the best!"
+                        </p>
+                        <div class="testimonial-author">
+                            <img src="" alt="Vikash Gupta" class="author-avatar">
+                            <div class="author-info">
+                                <h4>Vikash Gupta</h4>
+                                <p>Python Developer at Infosys</p>
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="company-badge">
+                                <img src="" alt="Infosys">
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">Python</span>
+                            <span class="skill-badge">Flask</span>
+                            <span class="skill-badge">SQL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 4 -->
+                <div class="testimonial-card">
+                    <div class="testimonial-video">
+                        <img src="" alt="Sneha Kapoor" class="testimonial-bg">
+                        <div class="video-overlay">
+                            <div class="play-button-large">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="video-duration">3:56</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "What sets The Angaar Batch apart is their approach to teaching. They don't just teach
+                            syntax, they teach you how to think like a programmer. The community is so supportive
+                            and the mentors are always there to help."
+                        </p>
+                        <div class="testimonial-author">
+                            <img src="" alt="Sneha Kapoor" class="author-avatar">
+                            <div class="author-info">
+                                <h4>Sneha Kapoor</h4>
+                                <p>Full Stack Developer at Amazon</p>
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="company-badge">
+                                <img src="" alt="Amazon">
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">React</span>
+                            <span class="skill-badge">Node.js</span>
+                            <span class="skill-badge">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 5 -->
+                <div class="testimonial-card">
+                    <div class="testimonial-video">
+                        <img src="" alt="Amit Joshi" class="testimonial-bg">
+                        <div class="video-overlay">
+                            <div class="play-button-large">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="video-duration">2:33</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "The free classes are just the beginning! The quality of education and the passion of
+                            the instructors is incredible. I went from zero coding knowledge to building my own web
+                            applications."
+                        </p>
+                        <div class="testimonial-author">
+                            <img src="" alt="Amit Joshi" class="author-avatar">
+                            <div class="author-info">
+                                <h4>Amit Joshi</h4>
+                                <p>Web Developer at Zomato</p>
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="company-badge">
+                                <img src="" alt="Zomato">
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">HTML/CSS</span>
+                            <span class="skill-badge">JavaScript</span>
+                            <span class="skill-badge">React</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 6 -->
+                <div class="testimonial-card">
+                    <div class="testimonial-video">
+                        <img src="" alt="Meera Patel" class="testimonial-bg">
+                        <div class="video-overlay">
+                            <div class="play-button-large">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="video-duration">3:18</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "The energy and enthusiasm of The Angaar Batch is contagious! They make learning fun and
+                            engaging. I never thought I could understand programming concepts so easily. Now I'm
+                            building my own projects!"
+                        </p>
+                        <div class="testimonial-author">
+                            <img src="" alt="Meera Patel" class="author-avatar">
+                            <div class="author-info">
+                                <h4>Meera Patel</h4>
+                                <p>Data Analyst at Microsoft</p>
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                            <div class="company-badge">
+                                <img src="" alt="Microsoft">
+                            </div>
+                        </div>
+                        <div class="testimonial-skills">
+                            <span class="skill-badge">Python</span>
+                            <span class="skill-badge">Data Science</span>
+                            <span class="skill-badge">ML</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Dots -->
+            <div class="testimonials-navigation">
+                <div class="nav-dots">
+                    <span class="dot active" data-slide="0"></span>
+                    <span class="dot" data-slide="1"></span>
+                    <span class="dot" data-slide="2"></span>
+                    <span class="dot" data-slide="3"></span>
+                    <span class="dot" data-slide="4"></span>
+                    <span class="dot" data-slide="5"></span>
+                </div>
+                <div class="nav-arrows">
+                    <button class="nav-arrow prev" onclick="changeTestimonial(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="nav-arrow next" onclick="changeTestimonial(1)">
+                        <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Interactive Map Section -->
-    <section id="college-map" class="college-map-section">
-        <div class="college-map-container">
-            <div class="section-header">
-                <span class="section-badge">Our Reach</span>
-                <h2 class="section-title">Angaar Across India</h2>
-                <p class="section-subtitle">
-                    Discover our growing network of partner colleges and the impact we're making across the country
-                </p>
+        <!-- Testimonials Stats -->
+        <div class="testimonials-stats">
+            <div class="stat-item">
+                <div class="stat-number" data-target="4.9">0</div>
+                <div class="stat-label">Average Rating</div>
             </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="2500">0</div>
+                <div class="stat-label">Happy Students</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="98">0</div>
+                <div class="stat-label">% Success Rate</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" data-target="150">0</div>
+                <div class="stat-label">Companies Hiring</div>
+            </div>
+        </div>
+    </div>
 
-            <div class="map-container">
-                <!-- Interactive College Grid Map -->
-                <div class="colleges-grid-map">
-                    <div class="map-header">
-                        <h3>Our Partner Colleges Across India</h3>
-                        <p>Click on any college to see detailed information</p>
-                    </div>
+    <!-- Floating Background Elements -->
+    <div class="testimonials-bg-elements">
+        <div class="floating-element element-1"><i class="fas fa-quote-left"></i></div>
+        <div class="floating-element element-2"><i class="fas fa-star"></i></div>
+        <div class="floating-element element-3"><i class="fas fa-heart"></i></div>
+        <div class="floating-element element-4"><i class="fas fa-thumbs-up"></i></div>
+        <div class="floating-element element-5"><i class="fas fa-fire"></i></div>
+    </div>
+</section>
 
-                    <!-- College Cards Grid -->
-                    <div class="colleges-interactive-grid">
-                        <!-- Delhi Region -->
-                        <div class="region-group">
-                            <h4 class="region-title">
-                                <i class="fas fa-map-marker-alt"></i>
-                                Delhi NCR
-                            </h4>
-                            <div class="region-colleges">
-                                <div class="college-interactive-card" data-college="iit-delhi">
-                                    <div class="college-card-mini">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=IIT"
-                                            alt="IIT Delhi" class="college-mini-logo">
-                                        <div class="college-mini-info">
-                                            <h5>IIT Delhi</h5>
-                                            <span class="workshop-count">12 Workshops</span>
-                                        </div>
-                                        <div class="college-status active">
-                                            <i class="fas fa-circle"></i>
-                                        </div>
-                                    </div>
-                                </div>
+<!-- Partnership Spotlight Section -->
+<section id="partnerships" class="partnerships-section">
+    <div class="partnerships-container">
+        <div class="section-header">
+            <span class="section-badge">Our Network</span>
+            <h2 class="section-title">Trusted by Leading Institutions</h2>
+            <p class="section-subtitle">
+                Building bridges between academia and industry through strategic partnerships
+            </p>
+        </div>
 
-                                <div class="college-interactive-card" data-college="dtu">
-                                    <div class="college-card-mini">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=DTU" alt="DTU"
-                                            class="college-mini-logo">
-                                        <div class="college-mini-info">
-                                            <h5>DTU</h5>
-                                            <span class="workshop-count">8 Workshops</span>
-                                        </div>
-                                        <div class="college-status active">
-                                            <i class="fas fa-circle"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="college-interactive-card" data-college="nsut">
-                                    <div class="college-card-mini">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=NSUT" alt="NSUT"
-                                            class="college-mini-logo">
-                                        <div class="college-mini-info">
-                                            <h5>NSUT</h5>
-                                            <span class="workshop-count">15 Workshops</span>
-                                        </div>
-                                        <div class="college-status active">
-                                            <i class="fas fa-circle"></i>
-                                        </div>
-                                    </div>
-                                </div>
+        <div class="partnerships-content">
+            <!-- Academic Partners -->
+            <div class="partner-category">
+                <h3 class="category-title">
+                    <i class="fas fa-university"></i>
+                    Academic Partners
+                </h3>
+                <div class="partners-grid">
+                    <div class="partner-card">
+                        <div class="partner-logo">
+                            <img src="" alt="IIT Delhi">
+                        </div>
+                        <div class="partner-info">
+                            <h4>IIT Delhi</h4>
+                            <p class="partnership-desc">Exclusive partner for advanced programming workshops since
+                                2023</p>
+                            <div class="partnership-stats">
+                                <span class="stat">15 Workshops</span>
+                                <span class="stat">500+ Students</span>
                             </div>
                         </div>
-
-                        <!-- Mumbai Region -->
-                        <div class="region-group">
-                            <h4 class="region-title">
-                                <i class="fas fa-map-marker-alt"></i>
-                                Mumbai
-                            </h4>
-                            <div class="region-colleges">
-                                <div class="college-interactive-card" data-college="iit-bombay">
-                                    <div class="college-card-mini">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=IITB"
-                                            alt="IIT Bombay" class="college-mini-logo">
-                                        <div class="college-mini-info">
-                                            <h5>IIT Bombay</h5>
-                                            <span class="workshop-count">10 Workshops</span>
-                                        </div>
-                                        <div class="college-status active">
-                                            <i class="fas fa-circle"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bangalore Region -->
-                        <div class="region-group">
-                            <h4 class="region-title">
-                                <i class="fas fa-map-marker-alt"></i>
-                                Bangalore
-                            </h4>
-                            <div class="region-colleges">
-                                <div class="college-interactive-card" data-college="iisc-bangalore">
-                                    <div class="college-card-mini">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=IISc"
-                                            alt="IISc Bangalore" class="college-mini-logo">
-                                        <div class="college-mini-info">
-                                            <h5>IISc Bangalore</h5>
-                                            <span class="workshop-count">6 Workshops</span>
-                                        </div>
-                                        <div class="college-status active">
-                                            <i class="fas fa-circle"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Other Regions -->
-                        <div class="region-group">
-                            <h4 class="region-title">
-                                <i class="fas fa-map-marker-alt"></i>
-                                Other Cities
-                            </h4>
-                            <div class="region-colleges">
-                                <div class="college-interactive-card" data-college="nit-kurukshetra">
-                                    <div class="college-card-mini">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=NITK"
-                                            alt="NIT Kurukshetra" class="college-mini-logo">
-                                        <div class="college-mini-info">
-                                            <h5>NIT Kurukshetra</h5>
-                                            <span class="workshop-count">9 Workshops</span>
-                                        </div>
-                                        <div class="college-status active">
-                                            <i class="fas fa-circle"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="college-interactive-card" data-college="iit-madras">
-                                    <div class="college-card-mini">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=IITM"
-                                            alt="IIT Madras" class="college-mini-logo">
-                                        <div class="college-mini-info">
-                                            <h5>IIT Madras</h5>
-                                            <span class="workshop-count">7 Workshops</span>
-                                        </div>
-                                        <div class="college-status active">
-                                            <i class="fas fa-circle"></i>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="college-interactive-card" data-college="iiit-hyderabad">
-                                    <div class="college-card-mini">
-                                        <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=IIITH"
-                                            alt="IIIT Hyderabad" class="college-mini-logo">
-                                        <div class="college-mini-info">
-                                            <h5>IIIT Hyderabad</h5>
-                                            <span class="workshop-count">11 Workshops</span>
-                                        </div>
-                                        <div class="college-status active">
-                                            <i class="fas fa-circle"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- College Info Cards -->
-                <div class="college-info-cards">
-                    <!-- IIT Delhi -->
-                    <div class="college-card" id="card-iit-delhi" style="display: none;">
-                        <div class="college-card-header">
-                            <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=IIT" alt="IIT Delhi"
-                                class="college-logo">
-                            <div class="college-info">
-                                <h3>IIT Delhi</h3>
-                                <p class="college-location">New Delhi, India</p>
-                            </div>
-                            <button class="close-card" onclick="closeCollegeCard()">×</button>
-                        </div>
-                        <div class="college-card-content">
-                            <div class="workshop-stats">
-                                <div class="stat">
-                                    <span class="stat-number">12</span>
-                                    <span class="stat-label">Workshops</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-number">500+</span>
-                                    <span class="stat-label">Students</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-number">4.9</span>
-                                    <span class="stat-label">Rating</span>
-                                </div>
-                            </div>
-                            <div class="recent-workshops">
-                                <h4>Recent Workshops</h4>
-                                <div class="workshop-list">
-                                    <div class="workshop-item">
-                                        <span class="workshop-name">Advanced Python</span>
-                                        <span class="workshop-date">Sep 2024</span>
-                                    </div>
-                                    <div class="workshop-item">
-                                        <span class="workshop-name">DSA Bootcamp</span>
-                                        <span class="workshop-date">Aug 2024</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="college-gallery">
-                                <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=80&h=60&fit=crop"
-                                    alt="Workshop 1">
-                                <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?w=80&h=60&fit=crop"
-                                    alt="Workshop 2">
-                                <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=80&h=60&fit=crop"
-                                    alt="Workshop 3">
-                                <span class="more-photos">+15</span>
-                            </div>
-                            <div class="student-testimonial">
-                                <p>"The Python workshop was incredible! Learned so much in just 2 days."</p>
-                                <span>- Rahul, CSE Student</span>
-                            </div>
-                            <button class="request-workshop-btn">
-                                <i class="fas fa-calendar-plus"></i>
-                                Request Workshop
-                            </button>
+                        <div class="partner-testimonial">
+                            <p>"Angaar's workshops have been instrumental in preparing our students for technical
+                                interviews."</p>
+                            <span>- Dr. Rajesh Kumar, HOD CSE</span>
                         </div>
                     </div>
 
-                    <!-- DTU -->
-                    <div class="college-card" id="card-dtu" style="display: none;">
-                        <div class="college-card-header">
-                            <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=DTU" alt="DTU"
-                                class="college-logo">
-                            <div class="college-info">
-                                <h3>Delhi Technological University</h3>
-                                <p class="college-location">Delhi, India</p>
-                            </div>
-                            <button class="close-card" onclick="closeCollegeCard()">×</button>
+                    <div class="partner-card">
+                        <div class="partner-logo">
+                            <img src="" alt="NIT Kurukshetra">
                         </div>
-                        <div class="college-card-content">
-                            <div class="workshop-stats">
-                                <div class="stat">
-                                    <span class="stat-number">8</span>
-                                    <span class="stat-label">Workshops</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-number">350+</span>
-                                    <span class="stat-label">Students</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-number">4.8</span>
-                                    <span class="stat-label">Rating</span>
-                                </div>
+                        <div class="partner-info">
+                            <h4>NIT Kurukshetra</h4>
+                            <p class="partnership-desc">Long-term collaboration for skill development programs</p>
+                            <div class="partnership-stats">
+                                <span class="stat">20 Workshops</span>
+                                <span class="stat">800+ Students</span>
                             </div>
-                            <div class="recent-workshops">
-                                <h4>Recent Workshops</h4>
-                                <div class="workshop-list">
-                                    <div class="workshop-item">
-                                        <span class="workshop-name">Web Development</span>
-                                        <span class="workshop-date">Sep 2024</span>
-                                    </div>
-                                    <div class="workshop-item">
-                                        <span class="workshop-name">React Bootcamp</span>
-                                        <span class="workshop-date">Jul 2024</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="college-gallery">
-                                <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=80&h=60&fit=crop"
-                                    alt="Workshop 1">
-                                <img src="https://images.unsplash.com/photo-1515169067868-5387ec356754?w=80&h=60&fit=crop"
-                                    alt="Workshop 2">
-                                <img src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=80&h=60&fit=crop"
-                                    alt="Workshop 3">
-                                <span class="more-photos">+10</span>
-                            </div>
-                            <div class="student-testimonial">
-                                <p>"Amazing hands-on experience with React. Built my first app!"</p>
-                                <span>- Priya, IT Student</span>
-                            </div>
-                            <button class="request-workshop-btn">
-                                <i class="fas fa-calendar-plus"></i>
-                                Request Workshop
-                            </button>
+                        </div>
+                        <div class="partner-testimonial">
+                            <p>"The quality of training and student engagement is exceptional."</p>
+                            <span>- Prof. Meera Singh, Training Head</span>
                         </div>
                     </div>
 
-                    <!-- NIT Kurukshetra -->
-                    <div class="college-card" id="card-nit-kurukshetra" style="display: none;">
-                        <div class="college-card-header">
-                            <img src="https://via.placeholder.com/60x60/ff6026/ffffff?text=NIT" alt="NIT Kurukshetra"
-                                class="college-logo">
-                            <div class="college-info">
-                                <h3>NIT Kurukshetra</h3>
-                                <p class="college-location">Haryana, India</p>
-                            </div>
-                            <button class="close-card" onclick="closeCollegeCard()">×</button>
+                    <div class="partner-card">
+                        <div class="partner-logo">
+                            <img src="" alt="DTU">
                         </div>
-                        <div class="college-card-content">
-                            <div class="workshop-stats">
-                                <div class="stat">
-                                    <span class="stat-number">15</span>
-                                    <span class="stat-label">Workshops</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-number">600+</span>
-                                    <span class="stat-label">Students</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="stat-number">4.9</span>
-                                    <span class="stat-label">Rating</span>
-                                </div>
+                        <div class="partner-info">
+                            <h4>Delhi Technological University</h4>
+                            <p class="partnership-desc">Strategic partner for industry-ready curriculum</p>
+                            <div class="partnership-stats">
+                                <span class="stat">12 Workshops</span>
+                                <span class="stat">400+ Students</span>
                             </div>
-                            <div class="recent-workshops">
-                                <h4>Recent Workshops</h4>
-                                <div class="workshop-list">
-                                    <div class="workshop-item">
-                                        <span class="workshop-name">Machine Learning</span>
-                                        <span class="workshop-date">Sep 2024</span>
-                                    </div>
-                                    <div class="workshop-item">
-                                        <span class="workshop-name">Data Science</span>
-                                        <span class="workshop-date">Aug 2024</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="college-gallery">
-                                <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=80&h=60&fit=crop"
-                                    alt="Workshop 1">
-                                <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=80&h=60&fit=crop"
-                                    alt="Workshop 2">
-                                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=80&h=60&fit=crop"
-                                    alt="Workshop 3">
-                                <span class="more-photos">+20</span>
-                            </div>
-                            <div class="student-testimonial">
-                                <p>"The ML workshop opened up a whole new world for me!"</p>
-                                <span>- Vikash, CSE Student</span>
-                            </div>
-                            <button class="request-workshop-btn">
-                                <i class="fas fa-calendar-plus"></i>
-                                Request Workshop
-                            </button>
+                        </div>
+                        <div class="partner-testimonial">
+                            <p>"Students show remarkable improvement in coding skills after Angaar sessions."</p>
+                            <span>- Dr. Amit Verma, Professor</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Map Statistics -->
-            <div class="map-statistics">
-                <div class="map-stat">
-                    <div class="stat-icon">
-                        <i class="fas fa-university"></i>
+            <!-- Industry Partners -->
+            <div class="partner-category">
+                <h3 class="category-title">
+                    <i class="fas fa-building"></i>
+                    Where Our Students Work
+                </h3>
+                <div class="industry-partners">
+                    <div class="company-logos">
+                        <div class="company-logo-item">
+                            <img src="" alt="TCS">
+                            <span class="placement-count">25+ Placements</span>
+                        </div>
+                        <div class="company-logo-item">
+                            <img src="" alt="Infosys">
+                            <span class="placement-count">18+ Placements</span>
+                        </div>
+                        <div class="company-logo-item">
+                            <img src="" alt="Wipro">
+                            <span class="placement-count">12+ Placements</span>
+                        </div>
+                        <div class="company-logo-item">
+                            <img src="" alt="Flipkart">
+                            <span class="placement-count">8+ Placements</span>
+                        </div>
+                        <div class="company-logo-item">
+                            <img src="" alt="Amazon">
+                            <span class="placement-count">6+ Placements</span>
+                        </div>
+                        <div class="company-logo-item">
+                            <img src="" alt="Microsoft">
+                            <span class="placement-count">4+ Placements</span>
+                        </div>
                     </div>
-                    <span class="stat-number" data-target="50">0</span>
-                    <span class="stat-label">Partner Colleges</span>
-                </div>
-                <div class="map-stat">
-                    <div class="stat-icon">
-                        <i class="fas fa-map-marker-alt"></i>
-                    </div>
-                    <span class="stat-number" data-target="25">0</span>
-                    <span class="stat-label">Cities Covered</span>
-                </div>
-                <div class="map-stat">
-                    <div class="stat-icon">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <span class="stat-number" data-target="200">0</span>
-                    <span class="stat-label">Workshops Conducted</span>
-                </div>
-                <div class="map-stat">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <span class="stat-number" data-target="10000">0</span>
-                    <span class="stat-label">Students Reached</span>
                 </div>
             </div>
         </div>
+
+        <div class="partnership-cta">
+            <div class="cta-content">
+                <h3>Want to Partner with Us?</h3>
+                <p>Join our growing network of educational institutions and help us shape the future of tech
+                    education</p>
+                <a href="#contact" class="partnership-btn">
+                    <i class="fas fa-handshake"></i>
+                    Become a Partner
+                </a>
+            </div>
         </div>
-    </section>
+    </div>
+</section>
+
+<!-- Moving Gallery Section -->
+<section id="gallery" class="gallery-section">
+    <div class="gallery-container">
+        <div class="section-header">
+            <span class="section-badge">Student Projects</span>
+            <h2 class="section-title">Built by Our Students</h2>
+            <p class="section-subtitle">
+                Explore amazing projects created by our students - from beginner apps to industry-level applications
+            </p>
+        </div>
+
+        <!-- First Gallery Row (Left to Right) -->
+        <div class="gallery-row">
+            <div class="gallery-track gallery-track-left">
+                <!-- Project 1 -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="E-commerce Platform">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>E-commerce Platform</h3>
+                        <p>Full-stack online shopping platform with payment integration</p>
+                        <div class="project-author">
+                            <img src="" alt="Rahul">
+                            <span>By Rahul Kumar</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">Node.js</span>
+                            <span class="tech-tag">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 2 -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Task Management App">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Task Management App</h3>
+                        <p>Collaborative project management tool with real-time updates</p>
+                        <div class="project-author">
+                            <img src="" alt="Priya">
+                            <span>By Priya Sharma</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Vue.js</span>
+                            <span class="tech-tag">Firebase</span>
+                            <span class="tech-tag">CSS3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 3 -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Weather Dashboard">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Weather Dashboard</h3>
+                        <p>Real-time weather app with beautiful data visualizations</p>
+                        <div class="project-author">
+                            <img src="" alt="Vikash">
+                            <span>By Vikash Gupta</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">JavaScript</span>
+                            <span class="tech-tag">API</span>
+                            <span class="tech-tag">Chart.js</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 4 -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Social Media Dashboard">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Social Media Dashboard</h3>
+                        <p>Analytics dashboard for social media management</p>
+                        <div class="project-author">
+                            <img src="" alt="Sneha">
+                            <span>By Sneha Kapoor</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Angular</span>
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">PostgreSQL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 5 -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Learning Management System">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Learning Management System</h3>
+                        <p>Complete LMS with course management and progress tracking</p>
+                        <div class="project-author">
+                            <img src="" alt="Amit">
+                            <span>By Amit Joshi</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Django</span>
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">MySQL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Project 6 -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Fitness Tracker">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Fitness Tracker</h3>
+                        <p>Mobile-first fitness app with workout plans and progress tracking</p>
+                        <div class="project-author">
+                            <img src="" alt="Meera">
+                            <span>By Meera Patel</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">React Native</span>
+                            <span class="tech-tag">Express</span>
+                            <span class="tech-tag">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duplicate for seamless loop -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="E-commerce Platform">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>E-commerce Platform</h3>
+                        <p>Full-stack online shopping platform with payment integration</p>
+                        <div class="project-author">
+                            <img src="" alt="Rahul">
+                            <span>By Rahul Kumar</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">Node.js</span>
+                            <span class="tech-tag">MongoDB</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Task Management App">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Task Management App</h3>
+                        <p>Collaborative project management tool with real-time updates</p>
+                        <div class="project-author">
+                            <img src="" alt="Priya">
+                            <span>By Priya Sharma</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Vue.js</span>
+                            <span class="tech-tag">Firebase</span>
+                            <span class="tech-tag">CSS3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Gallery Row (Right to Left) -->
+        <div class="gallery-row" style="margin-top: 30px;">
+            <div class="gallery-track gallery-track-right">
+                <!-- AI/ML Projects -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="AI Chatbot">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>AI Chatbot</h3>
+                        <p>Intelligent chatbot with natural language processing</p>
+                        <div class="project-author">
+                            <img src="" alt="Arjun">
+                            <span>By Arjun Singh</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">TensorFlow</span>
+                            <span class="tech-tag">NLP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Data Visualization">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Data Visualization Dashboard</h3>
+                        <p>Interactive dashboard for complex data analysis</p>
+                        <div class="project-author">
+                            <img src="" alt="Kavya">
+                            <span>By Kavya Reddy</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">D3.js</span>
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Pandas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Blockchain App">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Blockchain Voting System</h3>
+                        <p>Secure voting platform using blockchain technology</p>
+                        <div class="project-author">
+                            <img src="" alt="Rohan">
+                            <span>By Rohan Mehta</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Solidity</span>
+                            <span class="tech-tag">Web3.js</span>
+                            <span class="tech-tag">Ethereum</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Mobile Game">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Mobile Puzzle Game</h3>
+                        <p>Addictive puzzle game with multiplayer features</p>
+                        <div class="project-author">
+                            <img src="" alt="Ananya">
+                            <span>By Ananya Gupta</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Unity</span>
+                            <span class="tech-tag">C#</span>
+                            <span class="tech-tag">Firebase</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="IoT Dashboard">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>IoT Smart Home</h3>
+                        <p>Complete smart home automation system</p>
+                        <div class="project-author">
+                            <img src="" alt="Karan">
+                            <span>By Karan Patel</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Arduino</span>
+                            <span class="tech-tag">React</span>
+                            <span class="tech-tag">MQTT</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Cybersecurity Tool">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Security Scanner</h3>
+                        <p>Network vulnerability assessment tool</p>
+                        <div class="project-author">
+                            <img src="" alt="Harsh">
+                            <span>By Harsh Kumar</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Nmap</span>
+                            <span class="tech-tag">Kali Linux</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Duplicates for seamless loop -->
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="AI Chatbot">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>AI Chatbot</h3>
+                        <p>Intelligent chatbot with natural language processing</p>
+                        <div class="project-author">
+                            <img src="" alt="Arjun">
+                            <span>By Arjun Singh</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">TensorFlow</span>
+                            <span class="tech-tag">NLP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="project-card">
+                    <div class="project-image">
+                        <img src="" alt="Data Visualization">
+                        <div class="project-overlay">
+                            <div class="project-links">
+                                <a href="#" class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="#" class="project-link"><i class="fab fa-github"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3>Data Visualization Dashboard</h3>
+                        <p>Interactive dashboard for complex data analysis</p>
+                        <div class="project-author">
+                            <img src="" alt="Kavya">
+                            <span>By Kavya Reddy</span>
+                        </div>
+                        <div class="project-tech">
+                            <span class="tech-tag">D3.js</span>
+                            <span class="tech-tag">Python</span>
+                            <span class="tech-tag">Pandas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gallery CTA -->
+        <div class="gallery-cta">
+            <h3>Ready to Build Your Own Project?</h3>
+            <p>Join thousands of students who have transformed their ideas into reality</p>
+            <a href="#programs" class="gallery-btn">
+                <i class="fas fa-code"></i>
+                Start Building Today
+            </a>
+        </div>
+    </div>
+
+    <!-- Floating Background Icons -->
+    <div class="gallery-bg-elements">
+        <div class="floating-icon icon-1"><i class="fas fa-laptop-code"></i></div>
+        <div class="floating-icon icon-2"><i class="fas fa-mobile-alt"></i></div>
+        <div class="floating-icon icon-3"><i class="fas fa-server"></i></div>
+        <div class="floating-icon icon-4"><i class="fas fa-database"></i></div>
+        <div class="floating-icon icon-5"><i class="fas fa-cloud"></i></div>
+    </div>
+</section>
+
+<!-- Meet the Mentors Section -->
+<section id="mentors" class="mentors-section">
+    <div class="mentors-container">
+        <div class="section-header">
+            <span class="section-badge">Our Team</span>
+            <h2 class="section-title">Meet Your Mentors</h2>
+            <p class="section-subtitle">
+                Learn from industry experts who have shaped careers at top tech companies and are passionate about
+                your success
+            </p>
+        </div>
+
+        <div class="mentors-grid">
+            <!-- Lead Mentor -->
+
+
+            <!-- Mentor 2 -->
+            <div class="mentor-card">
+                <div class="mentor-image">
+                    <img src="" alt="Priya Gupta" class="mentor-photo">
+                    <div class="mentor-overlay">
+                        <div class="mentor-social">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        </div>
+                        <div class="mentor-badge">Python Expert</div>
+                    </div>
+                </div>
+                <div class="mentor-content">
+                    <h3>Priya Gupta</h3>
+                    <p class="mentor-role">Data Scientist at Netflix</p>
+                    <div class="mentor-experience">
+                        <span class="experience-badge">6+ Years</span>
+                        <span class="company-badge">Ex-Flipkart</span>
+                    </div>
+                    <p class="mentor-bio">
+                        Priya specializes in Python, Data Science, and Machine Learning. She has helped hundreds of
+                        students transition into tech roles with her practical approach to teaching.
+                    </p>
+                    <div class="mentor-specialties">
+                        <span class="specialty-tag">Python</span>
+                        <span class="specialty-tag">Data Science</span>
+                        <span class="specialty-tag">Machine Learning</span>
+                    </div>
+                    <div class="mentor-achievements">
+                        <div class="achievement">
+                            <i class="fas fa-trophy"></i>
+                            <span>Top 1% Python Instructor</span>
+                        </div>
+                        <div class="achievement">
+                            <i class="fas fa-users"></i>
+                            <span>500+ Students Placed</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Mentor 3 -->
+            <div class="mentor-card">
+                <div class="mentor-image">
+                    <img src="" alt="Vikash Kumar" class="mentor-photo">
+                    <div class="mentor-overlay">
+                        <div class="mentor-social">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-youtube"></i></a>
+                        </div>
+                        <div class="mentor-badge">Web Dev Guru</div>
+                    </div>
+                </div>
+                <div class="mentor-content">
+                    <h3>Vikash Kumar</h3>
+                    <p class="mentor-role">Frontend Architect at Zomato</p>
+                    <div class="mentor-experience">
+                        <span class="experience-badge">7+ Years</span>
+                        <span class="company-badge">Ex-Paytm</span>
+                    </div>
+                    <p class="mentor-bio">
+                        Vikash is our go-to expert for modern web development. His expertise in React, JavaScript,
+                        and UI/UX has helped students build amazing projects.
+                    </p>
+                    <div class="mentor-specialties">
+                        <span class="specialty-tag">React</span>
+                        <span class="specialty-tag">JavaScript</span>
+                        <span class="specialty-tag">UI/UX Design</span>
+                    </div>
+                    <div class="mentor-achievements">
+                        <div class="achievement">
+                            <i class="fas fa-code"></i>
+                            <span>Open Source Contributor</span>
+                        </div>
+                        <div class="achievement">
+                            <i class="fas fa-star"></i>
+                            <span>4.8/5 Student Rating</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mentor 4 -->
+            <div class="mentor-card">
+                <div class="mentor-image">
+                    <img src="" alt="Sneha Patel" class="mentor-photo">
+                    <div class="mentor-overlay">
+                        <div class="mentor-social">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-medium"></i></a>
+                        </div>
+                        <div class="mentor-badge">Backend Specialist</div>
+                    </div>
+                </div>
+                <div class="mentor-content">
+                    <h3>Sneha Patel</h3>
+                    <p class="mentor-role">Backend Engineer at Swiggy</p>
+                    <div class="mentor-experience">
+                        <span class="experience-badge">5+ Years</span>
+                        <span class="company-badge">Ex-Ola</span>
+                    </div>
+                    <p class="mentor-bio">
+                        Sneha brings deep expertise in backend development, databases, and system architecture.
+                        She's known for her clear explanations of complex concepts.
+                    </p>
+                    <div class="mentor-specialties">
+                        <span class="specialty-tag">Node.js</span>
+                        <span class="specialty-tag">Databases</span>
+                        <span class="specialty-tag">System Design</span>
+                    </div>
+                    <div class="mentor-achievements">
+                        <div class="achievement">
+                            <i class="fas fa-server"></i>
+                            <span>Scalable Systems Expert</span>
+                        </div>
+                        <div class="achievement">
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>300+ Students Trained</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mentor 5 -->
+            <div class="mentor-card">
+                <div class="mentor-image">
+                    <img src="" alt="Rohit Singh" class="mentor-photo">
+                    <div class="mentor-overlay">
+                        <div class="mentor-social">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-dev"></i></a>
+                        </div>
+                        <div class="mentor-badge">Mobile Expert</div>
+                    </div>
+                </div>
+                <div class="mentor-content">
+                    <h3>Rohit Singh</h3>
+                    <p class="mentor-role">Mobile Developer at PhonePe</p>
+                    <div class="mentor-experience">
+                        <span class="experience-badge">6+ Years</span>
+                        <span class="company-badge">Ex-Razorpay</span>
+                    </div>
+                    <p class="mentor-bio">
+                        Rohit specializes in mobile app development with React Native and Flutter. His hands-on
+                        approach helps students build production-ready mobile apps.
+                    </p>
+                    <div class="mentor-specialties">
+                        <span class="specialty-tag">React Native</span>
+                        <span class="specialty-tag">Flutter</span>
+                        <span class="specialty-tag">Mobile UI/UX</span>
+                    </div>
+                    <div class="mentor-achievements">
+                        <div class="achievement">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>50+ Apps Published</span>
+                        </div>
+                        <div class="achievement">
+                            <i class="fas fa-award"></i>
+                            <span>Google Developer Expert</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mentor 6 -->
+            <div class="mentor-card">
+                <div class="mentor-image">
+                    <img src="" alt="Kavya Reddy" class="mentor-photo">
+                    <div class="mentor-overlay">
+                        <div class="mentor-social">
+                            <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                            <a href="#" class="social-link"><i class="fab fa-kaggle"></i></a>
+                        </div>
+                        <div class="mentor-badge">AI/ML Expert</div>
+                    </div>
+                </div>
+                <div class="mentor-content">
+                    <h3>Kavya Reddy</h3>
+                    <p class="mentor-role">AI Engineer at OpenAI</p>
+                    <div class="mentor-experience">
+                        <span class="experience-badge">4+ Years</span>
+                        <span class="company-badge">Ex-Tesla</span>
+                    </div>
+                    <p class="mentor-bio">
+                        Kavya is our AI/ML specialist who makes complex algorithms simple to understand. She's
+                        passionate about democratizing AI education.
+                    </p>
+                    <div class="mentor-specialties">
+                        <span class="specialty-tag">Artificial Intelligence</span>
+                        <span class="specialty-tag">Deep Learning</span>
+                        <span class="specialty-tag">Computer Vision</span>
+                    </div>
+                    <div class="mentor-achievements">
+                        <div class="achievement">
+                            <i class="fas fa-brain"></i>
+                            <span>AI Research Papers</span>
+                        </div>
+                        <div class="achievement">
+                            <i class="fas fa-medal"></i>
+                            <span>Kaggle Grandmaster</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mentors CTA -->
+        <div class="mentors-cta">
+            <div class="cta-content">
+                <h3>Ready to Learn from the Best?</h3>
+                <p>Join our community and get personalized mentorship from industry experts who care about your
+                    success</p>
+                <div class="cta-features">
+                    <div class="feature">
+                        <i class="fas fa-video"></i>
+                        <span>1-on-1 Video Sessions</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-code-branch"></i>
+                        <span>Code Reviews</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-briefcase"></i>
+                        <span>Career Guidance</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-clock"></i>
+                        <span>24/7 Support</span>
+                    </div>
+                </div>
+                <a href="#programs" class="mentors-btn">
+                    <i class="fas fa-rocket"></i>
+                    Start Learning with Mentors
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Background Elements -->
+    <div class="mentors-bg-elements">
+        <div class="floating-mentor-icon icon-1"><i class="fas fa-chalkboard-teacher"></i></div>
+        <div class="floating-mentor-icon icon-2"><i class="fas fa-graduation-cap"></i></div>
+        <div class="floating-mentor-icon icon-3"><i class="fas fa-lightbulb"></i></div>
+        <div class="floating-mentor-icon icon-4"><i class="fas fa-handshake"></i></div>
+        <div class="floating-mentor-icon icon-5"><i class="fas fa-star"></i></div>
+    </div>
+</section>
+
+<!-- Angaar Pedagogy Section -->
+<section id="pedagogy" class="pedagogy-section">
+    <div class="pedagogy-container">
+        <div class="section-header">
+            <span class="section-badge">Our Approach</span>
+            <h2 class="section-title">The Angaar Pedagogy</h2>
+            <p class="section-subtitle">
+                Discover what makes learning at Angaar Batch different and more effective than traditional coding
+                education
+            </p>
+        </div>
+
+        <div class="pedagogy-principles">
+            <div class="principle-card">
+                <div class="principle-icon">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <div class="principle-content">
+                    <h3>Project-Based Learning</h3>
+                    <p>Learning isn't just theoretical at Angaar Batch. Every concept is immediately applied through
+                        real, portfolio-worthy projects that mirror industry challenges.</p>
+                    <div class="principle-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Build 5+ real-world projects</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Industry-standard workflows</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Portfolio-ready applications</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="principle-card">
+                <div class="principle-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="principle-content">
+                    <h3>Community-Driven Events</h3>
+                    <p>Learning is amplified through interaction with peers and industry experts at exclusive
+                        events, hackathons, and tech talks that expand your network.</p>
+                    <div class="principle-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Monthly tech talks & workshops</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Industry expert sessions</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Peer learning & networking</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="principle-card">
+                <div class="principle-icon">
+                    <i class="fas fa-hands-helping"></i>
+                </div>
+                <div class="principle-content">
+                    <h3>Real-World Application</h3>
+                    <p>Our on-campus workshops provide unique opportunities to apply skills in collaborative,
+                        hands-on environments, bridging theory and practice.</p>
+                    <div class="principle-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Hands-on campus workshops</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Collaborative problem solving</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Direct industry application</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pedagogy-comparison">
+            <h3>Traditional Learning vs. Angaar Approach</h3>
+            <div class="comparison-table">
+                <div class="comparison-row header">
+                    <div class="comparison-aspect">Aspect</div>
+                    <div class="traditional">Traditional Approach</div>
+                    <div class="angaar">Angaar Approach</div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-aspect">Learning Style</div>
+                    <div class="traditional">
+                        <i class="fas fa-times"></i>
+                        Passive consumption
+                    </div>
+                    <div class="angaar">
+                        <i class="fas fa-check"></i>
+                        Active, hands-on building
+                    </div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-aspect">Community</div>
+                    <div class="traditional">
+                        <i class="fas fa-times"></i>
+                        Isolated learning
+                    </div>
+                    <div class="angaar">
+                        <i class="fas fa-check"></i>
+                        Vibrant ecosystem
+                    </div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-aspect">Application</div>
+                    <div class="traditional">
+                        <i class="fas fa-times"></i>
+                        Theoretical concepts
+                    </div>
+                    <div class="angaar">
+                        <i class="fas fa-check"></i>
+                        Real-world projects
+                    </div>
+                </div>
+                <div class="comparison-row">
+                    <div class="comparison-aspect">Support</div>
+                    <div class="traditional">
+                        <i class="fas fa-times"></i>
+                        Limited mentorship
+                    </div>
+                    <div class="angaar">
+                        <i class="fas fa-check"></i>
+                        24/7 community support
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Community Hub Section -->
+<section id="community" class="community-section">
+    <div class="community-container">
+        <div class="section-header">
+            <span class="section-badge">Live Community</span>
+            <h2 class="section-title">The Angaar Community Hub</h2>
+            <p class="section-subtitle">
+                A glimpse into our vibrant, living ecosystem where learning never stops
+            </p>
+        </div>
+
+        <div class="community-grid">
+            <!-- Latest Blog Post -->
+            <div class="community-card blog-card">
+                <div class="card-header">
+                    <i class="fas fa-blog"></i>
+                    <h3>Latest from Our Blog</h3>
+                </div>
+                <div class="blog-content">
+                    <img src="" alt="Blog Post" class="blog-image">
+                    <div class="blog-info">
+                        <h4>10 Python Tips That Will Make You a Better Developer</h4>
+                        <p>Discover advanced Python techniques used by senior developers at top tech companies...
+                        </p>
+                        <div class="blog-meta">
+                            <span class="blog-date">2 days ago</span>
+                            <span class="blog-read-time">5 min read</span>
+                        </div>
+                        <a href="#" class="blog-link">Read More <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Workshop -->
+            <div class="community-card workshop-card">
+                <div class="card-header">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <h3>Recent Workshop Highlights</h3>
+                </div>
+                <div class="workshop-content">
+                    <div class="workshop-gallery">
+                        <img src="" alt="Workshop 1">
+                        <img src="" alt="Workshop 2">
+                        <img src="" alt="Workshop 3">
+                    </div>
+                    <div class="workshop-info">
+                        <h4>Machine Learning Workshop at IIT Delhi</h4>
+                        <p>200+ students learned ML fundamentals and built their first neural network</p>
+                        <div class="workshop-stats">
+                            <span class="stat">200+ Attendees</span>
+                            <span class="stat">4.9/5 Rating</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Webinar Recording -->
+            <div class="community-card webinar-card">
+                <div class="card-header">
+                    <i class="fas fa-video"></i>
+                    <h3>Latest Webinar</h3>
+                </div>
+                <div class="webinar-content">
+                    <div class="webinar-thumbnail">
+                        <img src="" alt="Webinar">
+                        <div class="play-overlay">
+                            <i class="fas fa-play"></i>
+                        </div>
+                        <div class="webinar-duration">45:32</div>
+                    </div>
+                    <div class="webinar-info">
+                        <h4>Career Transition: From Non-Tech to Software Developer</h4>
+                        <p>Industry expert shares proven strategies for breaking into tech</p>
+                        <div class="webinar-meta">
+                            <span class="webinar-views">1.2K views</span>
+                            <span class="webinar-date">1 week ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Problem of the Day -->
+            <div class="community-card potd-card">
+                <div class="card-header">
+                    <i class="fas fa-code"></i>
+                    <h3>Problem of the Day</h3>
+                </div>
+                <div class="potd-content">
+                    <div class="problem-info">
+                        <h4>Two Sum Problem</h4>
+                        <div class="problem-difficulty easy">Easy</div>
+                    </div>
+                    <p class="problem-description">
+                        Given an array of integers and a target sum, return indices of two numbers that add up to
+                        the target.
+                    </p>
+                    <div class="problem-stats">
+                        <span class="stat">
+                            <i class="fas fa-users"></i>
+                            156 solved today
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-clock"></i>
+                            Avg: 12 min
+                        </span>
+                    </div>
+                    <button class="solve-btn">
+                        <i class="fas fa-play"></i>
+                        Solve Now
+                    </button>
+                </div>
+            </div>
+
+            <!-- Community Stats -->
+            <div class="community-card stats-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Community Pulse</h3>
+                </div>
+                <div class="stats-content">
+                    <div class="live-stats">
+                        <div class="live-indicator">
+                            <div class="pulse-dot"></div>
+                            <span>Live Now</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">47</span>
+                            <span class="stat-label">Students Online</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">12</span>
+                            <span class="stat-label">Active Discussions</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">3</span>
+                            <span class="stat-label">Live Coding Sessions</span>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <h5>Recent Activity</h5>
+                        <div class="activity-item">
+                            <div class="activity-avatar">RK</div>
+                            <span>Rahul completed Python Basics</span>
+                            <span class="activity-time">2m ago</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-avatar">PS</div>
+                            <span>Priya solved Two Sum problem</span>
+                            <span class="activity-time">5m ago</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-avatar">VG</div>
+                            <span>Vikash joined React Workshop</span>
+                            <span class="activity-time">8m ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Join Community CTA -->
+
+        </div>
+        <div class="community-card cta-card mt-5">
+            <div class="cta-content">
+                <div class="cta-icon">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <h3>Ready to Join the Fire?</h3>
+                <p>Become part of India's most vibrant coding community and accelerate your tech journey</p>
+                <div class="cta-stats">
+                    <span>10,000+ Active Members</span>
+                    <span>500+ Success Stories</span>
+                    <span>24/7 Support</span>
+                </div>
+                <a href="#programs" class="join-community-btn">
+                    <i class="fas fa-rocket"></i>
+                    Join Angaar Batch Today
+                </a>
+            </div>
+        </div>
+    </div>
+
+</section>
 
 
 <!-- WhatsApp Floating Button with Dialog -->
@@ -1258,9 +2728,10 @@ print(f"'{test_word}' is palindrome: {result}")
     });
 </script>
 
+<!-- flames popuo (commented for now) -->
 <script>
     // Popup Logic
-    document.addEventListener('DOMContentLoaded', function () {
+    /* document.addEventListener('DOMContentLoaded', function () {
         // Show popup after a short delay when page loads
         setTimeout(function () {
             const flamesPopup = document.getElementById('flamesPopup');
@@ -1330,10 +2801,330 @@ print(f"'{test_word}' is palindrome: {result}")
 
         // Sync regularly
         setInterval(syncEnrollment, 30000);
+    }); */
+</script>
+
+<script>
+    // Smooth scrolling for navigation links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+
+
+    // Tab functionality
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-tab');
+
+            // Remove active class from all tabs and buttons
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+
+            // Add active class to clicked button and corresponding tab
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Course filtering
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.getAttribute('data-filter');
+
+            // Remove active class from all filter buttons
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Show/hide courses based on filter
+            document.querySelectorAll('.course-card').forEach(card => {
+                if (filter === 'all' || card.getAttribute('data-category').includes(filter)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Code Challenge Functionality
+    function runCode() {
+        const code = document.getElementById('codeInput').value;
+        const outputContent = document.getElementById('outputContent');
+
+        // Clear previous output
+        outputContent.innerHTML = '<div class="output-running"><i class="fas fa-spinner fa-spin"></i> Running code...</div>';
+
+        // Simulate code execution (in a real implementation, this would send to a backend)
+        setTimeout(() => {
+            try {
+                // Simple palindrome checker validation
+                if (code.includes('return word == word[::-1]') ||
+                    code.includes('return word.lower() == word.lower()[::-1]') ||
+                    (code.includes('word[::-1]') && code.includes('return'))) {
+
+                    outputContent.innerHTML = `
+                            <div style="color: #28a745;">✓ Code executed successfully!</div>
+                            <div style="margin-top: 10px;">
+                                <div>'radar' is palindrome: True</div>
+                                <div style="color: #28a745; margin-top: 10px;">🎉 Correct! Your solution works perfectly.</div>
+                            </div>
+                        `;
+
+                    // Show success modal after a short delay
+                    setTimeout(() => {
+                        document.getElementById('challengeSuccess').style.display = 'flex';
+                    }, 1500);
+
+                } else if (code.includes('pass') || code.trim().endsWith('pass')) {
+                    outputContent.innerHTML = `
+                            <div style="color: #ffc107;">⚠ Function not implemented</div>
+                            <div style="margin-top: 10px;">
+                                <div>'radar' is palindrome: None</div>
+                                <div style="color: #ffc107; margin-top: 10px;">💡 Hint: Try comparing the word with its reverse using word[::-1]</div>
+                            </div>
+                        `;
+                } else {
+                    outputContent.innerHTML = `
+                            <div style="color: #dc3545;">✗ Code has issues</div>
+                            <div style="margin-top: 10px;">
+                                <div>'radar' is palindrome: False</div>
+                                <div style="color: #dc3545; margin-top: 10px;">❌ Not quite right. Keep trying!</div>
+                            </div>
+                        `;
+                }
+            } catch (error) {
+                outputContent.innerHTML = `
+                        <div style="color: #dc3545;">Error: ${error.message}</div>
+                    `;
+            }
+        }, 1000);
+    }
+
+    function resetChallenge() {
+        document.getElementById('challengeSuccess').style.display = 'none';
+        document.getElementById('codeInput').value = `def is_palindrome(word):
+    # Your code here
+    # Hint: Compare the word with its reverse
+    pass
+
+# Test your function
+test_word = "radar"
+result = is_palindrome(test_word)
+print(f"'{test_word}' is palindrome: {result}")`;
+
+        document.getElementById('outputContent').innerHTML = `
+                <div class="output-placeholder">
+                    <i class="fas fa-play-circle"></i>
+                    Click "Run Code" to see the output
+                </div>
+            `;
+    }
+
+    // Add syntax highlighting effect to textarea
+    document.getElementById('codeInput').addEventListener('input', function () {
+        // Simple syntax highlighting could be added here
+        // For now, we'll just ensure proper formatting
+    });
+
+    // Interactive Map Functionality
+    document.querySelectorAll('.college-interactive-card').forEach(card => {
+        card.addEventListener('click', function () {
+            const collegeId = this.getAttribute('data-college');
+            showCollegeCard(collegeId);
+        });
+    });
+
+    function showCollegeCard(collegeId) {
+        // Hide all cards first
+        document.querySelectorAll('.college-card').forEach(card => {
+            card.style.display = 'none';
+        });
+
+        // Show the selected card
+        const targetCard = document.getElementById(`card-${collegeId}`);
+        if (targetCard) {
+            targetCard.style.display = 'block';
+        }
+    }
+
+    function closeCollegeCard() {
+        document.querySelectorAll('.college-card').forEach(card => {
+            card.style.display = 'none';
+        });
+    }
+
+    // Animated Counter for Map Statistics
+    function animateCounter(element, target, duration = 2000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+
+        function updateCounter() {
+            start += increment;
+            if (start < target) {
+                element.textContent = Math.floor(start);
+                requestAnimationFrame(updateCounter);
+            } else {
+                element.textContent = target;
+            }
+        }
+
+        updateCounter();
+    }
+
+    // Intersection Observer for Map Statistics Animation
+    const mapStatsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumbers = entry.target.querySelectorAll('.stat-number[data-target]');
+                statNumbers.forEach(stat => {
+                    const target = parseInt(stat.getAttribute('data-target'));
+                    animateCounter(stat, target);
+                    stat.removeAttribute('data-target'); // Prevent re-animation
+                });
+            }
+        });
+    }, { threshold: 0.5 });
+
+    // Testimonials Carousel Functionality
+    let currentTestimonial = 0;
+    const testimonials = document.querySelectorAll('.testimonial-card');
+    const totalTestimonials = testimonials.length;
+    const testimonialsTrack = document.getElementById('testimonialsTrack');
+    const dots = document.querySelectorAll('.dot');
+
+    function updateTestimonialDisplay() {
+        if (testimonialsTrack) {
+            testimonialsTrack.style.transform = `translateX(-${currentTestimonial * 100}%)`;
+
+            // Update dots
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentTestimonial);
+            });
+        }
+    }
+
+    function changeTestimonial(direction) {
+        currentTestimonial += direction;
+
+        if (currentTestimonial >= totalTestimonials) {
+            currentTestimonial = 0;
+        } else if (currentTestimonial < 0) {
+            currentTestimonial = totalTestimonials - 1;
+        }
+
+        updateTestimonialDisplay();
+    }
+
+    // Dot navigation
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => {
+            currentTestimonial = index;
+            updateTestimonialDisplay();
+        });
+    });
+
+    // Auto-play testimonials
+    setInterval(() => {
+        changeTestimonial(1);
+    }, 8000);
+
+    // Animated Counter for Testimonials Stats
+    const testimonialsStatsObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumbers = entry.target.querySelectorAll('.stat-number[data-target]');
+                statNumbers.forEach(stat => {
+                    const target = parseFloat(stat.getAttribute('data-target'));
+                    animateCounter(stat, target, 2000);
+                    stat.removeAttribute('data-target'); // Prevent re-animation
+                });
+            }
+        });
+    }, { threshold: 0.5 });
+
+    // Observe testimonials statistics section
+    const testimonialsStatsSection = document.querySelector('.testimonials-stats');
+    if (testimonialsStatsSection) {
+        testimonialsStatsObserver.observe(testimonialsStatsSection);
+    }
+
+    // Enhanced counter animation for decimal numbers
+    function animateCounter(element, target, duration = 2000) {
+        let start = 0;
+        const increment = target / (duration / 16);
+        const isDecimal = target % 1 !== 0;
+
+        function updateCounter() {
+            start += increment;
+            if (start < target) {
+                if (isDecimal) {
+                    element.textContent = start.toFixed(1);
+                } else {
+                    element.textContent = Math.floor(start);
+                }
+                requestAnimationFrame(updateCounter);
+            } else {
+                if (isDecimal) {
+                    element.textContent = target.toFixed(1);
+                } else {
+                    element.textContent = target;
+                }
+            }
+        }
+
+        updateCounter();
+    }
+
+    // Gallery pause on hover functionality is handled by CSS
+    // Additional interactivity can be added here if needed
+
+    // Smooth scroll enhancement for all anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+
+    // Add scroll-triggered animations for better UX
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const fadeInObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Apply fade-in animation to section headers
+    document.querySelectorAll('.section-header').forEach(header => {
+        header.style.opacity = '0';
+        header.style.transform = 'translateY(30px)';
+        header.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        fadeInObserver.observe(header);
     });
 </script>
 
-</body>
 
-</html>
 {% endblock %}
