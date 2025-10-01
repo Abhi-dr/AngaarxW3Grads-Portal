@@ -568,6 +568,15 @@ def leaderboard(request, slug):
 
 def sheet_leaderboard(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
+    
+    # Handle different sheet types
+    if sheet.sheet_type == 'MCQ':
+        return _get_mcq_leaderboard(sheet)
+    else:
+        return _get_coding_leaderboard(sheet)
+
+def _get_coding_leaderboard(sheet):
+    """Generate leaderboard for coding type sheets"""
     total_questions = sheet.questions.all()
 
     # Fetch all submissions for the sheet
@@ -620,10 +629,60 @@ def sheet_leaderboard(request, slug):
         })
 
     leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
-    
-    # i need the count of students solving how many questions
+    return JsonResponse({'leaderboard': leaderboard})
 
+def _get_mcq_leaderboard(sheet):
+    """Generate leaderboard for MCQ type sheets"""
+    total_questions = sheet.mcq_questions.all()
 
+    # Fetch all MCQ submissions for the sheet
+    submissions = MCQSubmission.objects.filter(
+        question__in=total_questions
+    )
+
+    # Dictionary to store scores for each user
+    user_scores = {}
+    for submission in submissions:
+        user_id = submission.student.id
+        question_id = submission.question.id
+
+        # Initialize user entry if not present
+        if user_id not in user_scores:
+            user_scores[user_id] = {
+                'total_score': 0,
+                'earliest_submission': submission.submitted_at,
+                'solved_questions': set(),
+                'correct_answers': set(),
+            }
+
+        # For MCQ, each correct answer gets 1 point
+        if submission.is_correct:
+            user_scores[user_id]['correct_answers'].add(question_id)
+            user_scores[user_id]['solved_questions'].add(question_id)
+
+        # Update earliest submission
+        user_scores[user_id]['earliest_submission'] = min(
+            user_scores[user_id]['earliest_submission'], submission.submitted_at
+        )
+
+    # Format leaderboard data
+    leaderboard = []
+    for user_id, data in user_scores.items():
+        user = Student.objects.get(id=user_id)
+        total_score = len(data['correct_answers'])  # Number of correct answers
+        solved_problems = len(data['solved_questions'])  # Total attempted
+
+        leaderboard.append({
+            'student': {
+                'id': user_id,
+                'name': f"{user.first_name} {user.last_name}",
+            },
+            'total_score': total_score,
+            'earliest_submission': data['earliest_submission'],
+            'solved_problems': solved_problems,
+        })
+
+    leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
     return JsonResponse({'leaderboard': leaderboard})
 
 # =========================================== DOWNLOAD LEADERBOARD =============================
@@ -634,6 +693,15 @@ from django.utils.timezone import make_naive
 @admin_required
 def download_leaderboard_excel(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
+    
+    # Handle different sheet types
+    if sheet.sheet_type == 'MCQ':
+        return _download_mcq_leaderboard_excel(sheet, slug)
+    else:
+        return _download_coding_leaderboard_excel(sheet, slug)
+
+def _download_coding_leaderboard_excel(sheet, slug):
+    """Generate Excel leaderboard for coding type sheets"""
     total_questions = sheet.questions.all()
 
     # Fetch all submissions for the sheet
@@ -681,7 +749,7 @@ def download_leaderboard_excel(request, slug):
         leaderboard.append({
             'Student ID': user_id,
             'Student Name': f"{user.first_name} {user.last_name}",
-            'Email': user.email,  # <-- ADD THIS LINE
+            'Email': user.email,
             'Total Score': total_score,
             'Earliest Submission': earliest_submission_naive,
             'Solved Problems': solved_problems,
@@ -698,6 +766,76 @@ def download_leaderboard_excel(request, slug):
 
     with pd.ExcelWriter(response, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name="Leaderboard")
+
+    return response
+
+def _download_mcq_leaderboard_excel(sheet, slug):
+    """Generate Excel leaderboard for MCQ type sheets"""
+    total_questions = sheet.mcq_questions.all()
+
+    # Fetch all MCQ submissions for the sheet
+    submissions = MCQSubmission.objects.filter(
+        question__in=total_questions
+    )
+
+    # Dictionary to store scores for each user
+    user_scores = {}
+    for submission in submissions:
+        user_id = submission.student.id
+        question_id = submission.question.id
+
+        # Initialize user entry if not present
+        if user_id not in user_scores:
+            user_scores[user_id] = {
+                'total_score': 0,
+                'earliest_submission': submission.submitted_at,
+                'solved_questions': set(),
+                'correct_answers': set(),
+            }
+
+        # For MCQ, each correct answer gets 1 point
+        if submission.is_correct:
+            user_scores[user_id]['correct_answers'].add(question_id)
+            user_scores[user_id]['solved_questions'].add(question_id)
+
+        # Update earliest submission
+        user_scores[user_id]['earliest_submission'] = min(
+            user_scores[user_id]['earliest_submission'], submission.submitted_at
+        )
+
+    # Format leaderboard data for DataFrame
+    leaderboard = []
+    for user_id, data in user_scores.items():
+        user = Student.objects.get(id=user_id)
+        total_score = len(data['correct_answers'])  # Number of correct answers
+        solved_problems = len(data['solved_questions'])  # Total attempted
+
+        # Convert timezone-aware datetime to naive
+        earliest_submission_naive = make_naive(data['earliest_submission'])
+
+        leaderboard.append({
+            'Student ID': user_id,
+            'Student Name': f"{user.first_name} {user.last_name}",
+            'Email': user.email,
+            'Total Score': total_score,
+            'Earliest Submission': earliest_submission_naive,
+            'Solved Problems': solved_problems,
+        })
+
+    # Sort by total score (descending) and earliest submission (ascending)
+    leaderboard.sort(key=lambda x: (-x['Total Score'], x['Earliest Submission']))
+
+    # Create a DataFrame from the leaderboard data
+    df = pd.DataFrame(leaderboard)
+
+    # Generate Excel file
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="mcq_leaderboard_{slug}.xlsx"'
+
+    with pd.ExcelWriter(response, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="MCQ Leaderboard")
 
     return response
 
