@@ -611,6 +611,9 @@ def _get_coding_leaderboard(sheet):
         # Track solved questions
         user_scores[user_id]['solved_questions'].add(question_id)
 
+    # Get additional batch fields
+    batch_fields, enrollment_data = _get_batch_enrollment_data(sheet, list(user_scores.keys()))
+
     # Format leaderboard data
     leaderboard = []
     for user_id, data in user_scores.items():
@@ -618,7 +621,7 @@ def _get_coding_leaderboard(sheet):
         total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
         solved_problems = len(data['solved_questions'])
 
-        leaderboard.append({
+        student_entry = {
             'student': {
                 'id': user_id,
                 'name': f"{user.first_name} {user.last_name}",
@@ -626,10 +629,19 @@ def _get_coding_leaderboard(sheet):
             'total_score': total_score,
             'earliest_submission': data['earliest_submission'],
             'solved_problems': solved_problems,
-        })
+        }
+        
+        # Add additional enrollment data
+        if user_id in enrollment_data:
+            student_entry['additional_data'] = enrollment_data[user_id]
+        
+        leaderboard.append(student_entry)
 
     leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
-    return JsonResponse({'leaderboard': leaderboard})
+    return JsonResponse({
+        'leaderboard': leaderboard,
+        'additional_fields': batch_fields
+    })
 
 def _get_mcq_leaderboard(sheet):
     """Generate leaderboard for MCQ type sheets"""
@@ -665,6 +677,9 @@ def _get_mcq_leaderboard(sheet):
             user_scores[user_id]['earliest_submission'], submission.submitted_at
         )
 
+    # Get additional batch fields
+    batch_fields, enrollment_data = _get_batch_enrollment_data(sheet, list(user_scores.keys()))
+
     # Format leaderboard data
     leaderboard = []
     for user_id, data in user_scores.items():
@@ -672,7 +687,7 @@ def _get_mcq_leaderboard(sheet):
         total_score = len(data['correct_answers'])  # Number of correct answers
         solved_problems = len(data['solved_questions'])  # Total attempted
 
-        leaderboard.append({
+        student_entry = {
             'student': {
                 'id': user_id,
                 'name': f"{user.first_name} {user.last_name}",
@@ -680,10 +695,19 @@ def _get_mcq_leaderboard(sheet):
             'total_score': total_score,
             'earliest_submission': data['earliest_submission'],
             'solved_problems': solved_problems,
-        })
+        }
+        
+        # Add additional enrollment data
+        if user_id in enrollment_data:
+            student_entry['additional_data'] = enrollment_data[user_id]
+        
+        leaderboard.append(student_entry)
 
     leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
-    return JsonResponse({'leaderboard': leaderboard})
+    return JsonResponse({
+        'leaderboard': leaderboard,
+        'additional_fields': batch_fields
+    })
 
 # =========================================== DOWNLOAD LEADERBOARD =============================
 import pandas as pd
@@ -699,6 +723,37 @@ def download_leaderboard_excel(request, slug):
         return _download_mcq_leaderboard_excel(sheet, slug)
     else:
         return _download_coding_leaderboard_excel(sheet, slug)
+
+def _get_batch_enrollment_data(sheet, user_ids):
+    """Get additional batch enrollment data for students"""
+    # Get all batches associated with this sheet
+    sheet_batches = sheet.batches.all()
+    
+    # Collect all required fields from all batches
+    all_required_fields = set()
+    for batch in sheet_batches:
+        if batch.required_fields:
+            all_required_fields.update(batch.required_fields)
+    
+    # Get enrollment data for all students in the leaderboard
+    enrollment_data = {}
+    if all_required_fields and user_ids:
+        enrollments = EnrollmentRequest.objects.filter(
+            student_id__in=user_ids,
+            batch__in=sheet_batches,
+            status='Accepted'
+        ).select_related('student', 'batch')
+        
+        for enrollment in enrollments:
+            user_id = enrollment.student.id
+            if user_id not in enrollment_data:
+                enrollment_data[user_id] = {}
+            
+            # Merge additional data from all enrollments
+            if enrollment.additional_data:
+                enrollment_data[user_id].update(enrollment.additional_data)
+    
+    return list(all_required_fields), enrollment_data
 
 def _download_coding_leaderboard_excel(sheet, slug):
     """Generate Excel leaderboard for coding type sheets"""
@@ -736,6 +791,9 @@ def _download_coding_leaderboard_excel(sheet, slug):
         # Track solved questions
         user_scores[user_id]['solved_questions'].add(question_id)
 
+    # Get additional batch fields
+    batch_fields, enrollment_data = _get_batch_enrollment_data(sheet, list(user_scores.keys()))
+
     # Format leaderboard data for DataFrame
     leaderboard = []
     for user_id, data in user_scores.items():
@@ -746,14 +804,24 @@ def _download_coding_leaderboard_excel(sheet, slug):
         # Convert timezone-aware datetime to naive
         earliest_submission_naive = make_naive(data['earliest_submission'])
 
-        leaderboard.append({
+        row_data = {
             'Student ID': user_id,
             'Student Name': f"{user.first_name} {user.last_name}",
             'Email': user.email,
             'Total Score': total_score,
             'Earliest Submission': earliest_submission_naive,
             'Solved Problems': solved_problems,
-        })
+        }
+        
+        # Add additional enrollment fields
+        if user_id in enrollment_data:
+            for field in batch_fields:
+                row_data[field] = enrollment_data[user_id].get(field, '')
+        else:
+            for field in batch_fields:
+                row_data[field] = ''
+        
+        leaderboard.append(row_data)
 
     # Create a DataFrame from the leaderboard data
     df = pd.DataFrame(leaderboard)
@@ -803,6 +871,9 @@ def _download_mcq_leaderboard_excel(sheet, slug):
             user_scores[user_id]['earliest_submission'], submission.submitted_at
         )
 
+    # Get additional batch fields
+    batch_fields, enrollment_data = _get_batch_enrollment_data(sheet, list(user_scores.keys()))
+
     # Format leaderboard data for DataFrame
     leaderboard = []
     for user_id, data in user_scores.items():
@@ -813,14 +884,24 @@ def _download_mcq_leaderboard_excel(sheet, slug):
         # Convert timezone-aware datetime to naive
         earliest_submission_naive = make_naive(data['earliest_submission'])
 
-        leaderboard.append({
+        row_data = {
             'Student ID': user_id,
             'Student Name': f"{user.first_name} {user.last_name}",
             'Email': user.email,
             'Total Score': total_score,
             'Earliest Submission': earliest_submission_naive,
             'Solved Problems': solved_problems,
-        })
+        }
+        
+        # Add additional enrollment fields
+        if user_id in enrollment_data:
+            for field in batch_fields:
+                row_data[field] = enrollment_data[user_id].get(field, '')
+        else:
+            for field in batch_fields:
+                row_data[field] = ''
+        
+        leaderboard.append(row_data)
 
     # Sort by total score (descending) and earliest submission (ascending)
     leaderboard.sort(key=lambda x: (-x['Total Score'], x['Earliest Submission']))

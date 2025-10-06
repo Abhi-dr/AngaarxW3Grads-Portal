@@ -84,8 +84,7 @@ active
             </h5>
             <div class="table-responsive">
                 <table class="table text-nowrap mb-0 align-middle">
-                    <thead class="text-dark fs-4">
-
+                    <thead class="text-dark fs-4" id="leaderboard-header">
                         <tr>
                             <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">
@@ -113,6 +112,7 @@ active
                                     Solved Problem
                                 </h6>
                             </th>
+                            <!-- Additional fields will be dynamically added here -->
                         </tr>
                     </thead>
                     <tbody id="leaderboard">
@@ -132,24 +132,55 @@ active
 
             leaderboardContainer.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center">
+                <td colspan="10" class="text-center">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                 </td>
             </tr>`
 
+            let additionalFields = [];
+
             async function fetchLeaderboard() {
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 console.log(data);
+                additionalFields = data.additional_fields || [];
+                updateTableHeaders();
                 renderLeaderboard(data.leaderboard);
+            }
+
+            function updateTableHeaders() {
+                const headerRow = document.querySelector('#leaderboard-header tr');
+                
+                // Remove any existing additional field headers
+                const existingAdditionalHeaders = headerRow.querySelectorAll('.additional-field-header');
+                existingAdditionalHeaders.forEach(header => header.remove());
+                
+                // Add new additional field headers
+                additionalFields.forEach(field => {
+                    const th = document.createElement('th');
+                    th.classList.add('border-bottom-0', 'additional-field-header');
+                    th.innerHTML = `<h6 class="fw-semibold mb-0">${field}</h6>`;
+                    headerRow.appendChild(th);
+                });
             }
 
             function renderLeaderboard(leaderboard) {
                 leaderboardContainer.innerHTML = '';
 
                 leaderboard.forEach((entry, index) => {
+                    // Build additional fields HTML
+                    let additionalFieldsHTML = '';
+                    additionalFields.forEach(field => {
+                        const value = entry.additional_data && entry.additional_data[field] ? entry.additional_data[field] : '-';
+                        additionalFieldsHTML += `
+                            <td class="border-bottom-0">
+                                <p class="fw-semibold mb-0">${value}</p>
+                            </td>
+                        `;
+                    });
+
                     const row = `
                     <tr>
                         <td class="border-bottom-0">
@@ -167,6 +198,7 @@ active
                         <td class="border-bottom-0">
                             <p class="fw-semibold mb-0">${entry.solved_problems}</p>
                         </td>
+                        ${additionalFieldsHTML}
                     </tr>
                 `;
                     leaderboardContainer.innerHTML += row;
@@ -177,6 +209,25 @@ active
         });
 
     </script>
+
+    <style>
+        /* Responsive table styling for additional fields */
+        @media (max-width: 768px) {
+            .table-responsive {
+                overflow-x: auto;
+            }
+            
+            .additional-field-header {
+                min-width: 120px;
+            }
+        }
+        
+        /* Style for additional field columns */
+        .additional-field-header h6 {
+            text-transform: capitalize;
+            color: #666;
+        }
+    </style>
 
 
 {% endblock %}
