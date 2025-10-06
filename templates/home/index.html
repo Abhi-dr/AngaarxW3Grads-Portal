@@ -160,12 +160,32 @@
 
         <div class="social-proof-bar">
             <p class="social-proof-title">Trusted by students from:</p>
-            <div class="partner-logos">
-                <img src="" alt="IIT Delhi" class="partner-logo">
-                <img src="" alt="NIT Kurukshetra" class="partner-logo">
-                <img src="" alt="DTU" class="partner-logo">
-                <img src="" alt="NSUT" class="partner-logo">
-                <img src="" alt="IIIT Delhi" class="partner-logo">
+            <div class="partner-logos-wrapper">
+                <div class="partner-logos">
+                    <div class="partner-item">
+                        <img src="{% static 'img/home/iitd.png' %}" alt="IIT Delhi" class="partner-logo">
+                        <span class="partner-name">IIT Delhi</span>
+                    </div>
+                    <div class="partner-item">
+                        <img src="{% static 'img/home/lpu.png' %}" alt="LPU" class="partner-logo">
+                        <span class="partner-name">LPU</span>
+                    </div>
+                    <div class="partner-item">
+                        <img src="{% static 'img/home/gtbit.png' %}" alt="GTBIT" class="partner-logo">
+                        <span class="partner-name">GTBIT</span>
+                    </div>
+                    <div class="partner-item">
+                        <img src="{% static 'img/home/gla.png' %}" alt="GLA" class="partner-logo">
+                        <span class="partner-name">GLA</span>
+                    </div>
+                    <div class="partner-item">
+                        <img src="{% static 'img/home/glb.jpg' %}" alt="GL Bajaj" class="partner-logo">
+                        <span class="partner-name">GL Bajaj</span>
+                    </div>
+                </div>
+            </div>
+            <div class="partner-more">
+                <span class="partner-more-text">and many more...</span>
             </div>
         </div>
     </div>
@@ -186,7 +206,7 @@
             <div class="tab-buttons">
                 <button class="tab-btn active" data-tab="courses">
                     <i class="fas fa-laptop-code"></i>
-                    Online Courses
+                    Free Online Classes
                 </button>
                 <button class="tab-btn" data-tab="events">
                     <i class="fas fa-calendar-alt"></i>
@@ -201,88 +221,60 @@
             <div class="tab-content">
                 <!-- Online Courses Tab -->
                 <div class="tab-pane active" id="courses">
-                    <div class="courses-filters">
-                        <button class="filter-btn active" data-filter="all">All Courses</button>
-                        <button class="filter-btn" data-filter="beginner">Beginner Friendly</button>
-                        <button class="filter-btn" data-filter="interview">Interview Prep</button>
-                        <button class="filter-btn" data-filter="fullstack">Full Stack</button>
-                    </div>
 
                     <div class="courses-grid">
-                        <div class="course-card" data-category="beginner fullstack">
+                        
+                        <div class="course-card">
                             <div class="course-image">
-                                <img src="" alt="Python Course">
-                                <div class="course-badge">Beginner Friendly</div>
+                                <img src="" alt="C Programming">
+                                <div class="course-badge">For Ultimate Beginners</div>
                             </div>
                             <div class="course-content">
-                                <h3>Python Masterclass</h3>
-                                <p>Complete Python programming from basics to advanced concepts</p>
+                                <h3>C Programming Free Classes</h3>
+                                <p>Complete C programming from ultimate basics to advanced level</p>
                                 <div class="course-meta">
                                     <div class="instructor">
                                         <img src="" alt="Instructor">
-                                        <span>Rahul Sharma</span>
+                                        <span>Naman Sharma</span>
                                     </div>
                                     <div class="rating">
-                                        <i class="fas fa-star"></i>
-                                        <span>4.9</span>
+                                        <span>Founder</span>
                                     </div>
                                 </div>
                                 <div class="course-footer">
-                                    <span class="price">₹2,999</span>
-                                    <button class="course-cta">View Details</button>
+                                    <span class="price">₹ <s><small>2,999</small></s> Your Curiosity</span>
+                                    <button class="course-cta">Join Now</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="course-card" data-category="interview">
+                        <div class="course-card">
                             <div class="course-image">
-                                <img src="" alt="DSA Course">
-                                <div class="course-badge">Interview Prep</div>
+                                <img src="https://theangaarbatch.in/media/batches/thumbnails/Gemini_Generated_Image_xh8nu9xh8nu9xh8n.png" alt="Python Programming">
+                                <div class="course-badge">For Ultimate Beginners</div>
                             </div>
                             <div class="course-content">
-                                <h3>Data Structures & Algorithms</h3>
-                                <p>Master DSA concepts for technical interviews at top companies</p>
+                                <h3>Python Programming Free Classes</h3>
+                                <p>Complete Python programming from ultimate basics to advanced level</p>
                                 <div class="course-meta">
                                     <div class="instructor">
                                         <img src="" alt="Instructor">
-                                        <span>Priya Singh</span>
+                                        <span>DK</span>
                                     </div>
                                     <div class="rating">
-                                        <i class="fas fa-star"></i>
-                                        <span>4.8</span>
+                                        <span>Co-founder</span>
                                     </div>
                                 </div>
                                 <div class="course-footer">
-                                    <span class="price">₹3,999</span>
-                                    <button class="course-cta">View Details</button>
+                                    <span class="price">₹ <s><small>2,999</small></s> Your Discipline</span>
+                                    <button class="course-cta">Join Now</button>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="course-card" data-category="fullstack">
-                            <div class="course-image">
-                                <img src="" alt="Web Dev Course">
-                                <div class="course-badge">Full Stack</div>
-                            </div>
-                            <div class="course-content">
-                                <h3>Full Stack Web Development</h3>
-                                <p>Build modern web applications with React, Node.js, and MongoDB</p>
-                                <div class="course-meta">
-                                    <div class="instructor">
-                                        <img src="" alt="Instructor">
-                                        <span>Amit Kumar</span>
-                                    </div>
-                                    <div class="rating">
-                                        <i class="fas fa-star"></i>
-                                        <span>4.9</span>
-                                    </div>
-                                </div>
-                                <div class="course-footer">
-                                    <span class="price">₹4,999</span>
-                                    <button class="course-cta">View Details</button>
-                                </div>
-                            </div>
-                        </div>
+                       
+
+                        
                     </div>
                 </div>
 
@@ -525,7 +517,7 @@ print(f"'{test_word}' is palindrome: {result}")
                         <div class="region-colleges">
                             <div class="college-interactive-card" data-college="iit-delhi">
                                 <div class="college-card-mini">
-                                    <img src="" alt="IIT Delhi" class="college-mini-logo">
+                                    <img src="{% static 'img/home/iitd.png' %}" alt="IIT Delhi" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>IIT Delhi</h5>
                                         <span class="workshop-count">12 Workshops</span>

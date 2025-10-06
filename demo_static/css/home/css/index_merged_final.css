@@ -1,11 +1,5 @@
 /* ========================================================================== */
-/* ===================== ANGAAR BATCH FINAL MERGED CSS ===================== */
-/* ========================================================================== */
-/* Hero Section: From index.css (IGNITE/TO LEARN sections) */
-/* Rest: From index2.css (Modern design with priority) */
-/* ========================================================================== */
-
-/* ========================= GLOBAL STYLES ================================== */
+/* ========================== ANGAAR BATCH FINAL CSS ======================== */
 /* ========================================================================== */
 
 :root {
@@ -577,6 +571,14 @@ ul {
     text-align: center;
 }
 
+.partner-logos-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
 .partner-logos {
     display: flex;
     justify-content: center;
@@ -585,30 +587,60 @@ ul {
     flex-wrap: wrap;
 }
 
-.partner-logo {
-    height: 45px;
-    opacity: 0.7;
-    transition: all 0.4s ease;
-    filter: grayscale(100%) brightness(1.2);
-    border-radius: 8px;
-    padding: 8px 12px;
-    background: rgba(255, 255, 255, 0.02);
+.partner-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
 }
 
-.partner-logo:hover {
-    opacity: 1;
-    filter: grayscale(0%) brightness(1);
-    transform: translateY(-3px) scale(1.05);
-    background: rgba(255, 96, 38, 0.1);
+.partner-item:hover {
+    transform: translateY(-5px);
     box-shadow: 0 10px 25px rgba(255, 96, 38, 0.2);
 }
 
-/* ========================================================================== */
-/* ========================= PROGRAMS SECTION =============================== */
-/* ========================================================================== */
+.partner-logo {
+    height: 75px;
+    transition: all 0.4s ease;
+    border-radius: 8px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+
+
+.partner-name {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.2;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.partner-more {
+    display: flex;
+    justify-content: end;
+    padding-left: 20px;
+}
+
+.partner-more-text {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-style: italic;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.partner-more:hover .partner-more-text {
+    color: #ff6026;
+}
 
 .programs-section {
-    padding: 120px 0;
+    padding: 50px 0;
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
     position: relative;
 }
@@ -2477,12 +2509,35 @@ button:active {
         margin: 0 10px;
     }
 
+    .partner-logos-wrapper {
+        flex-direction: column;
+        gap: 15px;
+    }
+
     .partner-logos {
-        gap: 25px;
+        gap: 20px;
+    }
+
+    .partner-item {
+        gap: 8px;
     }
 
     .partner-logo {
         height: 35px;
+    }
+
+    .partner-name {
+        font-size: 0.7rem;
+    }
+
+    .partner-more {
+        margin-left: 0;
+        padding-left: 0;
+        margin-top: 10px;
+    }
+
+    .partner-more-text {
+        font-size: 0.85rem;
     }
 
     .section-title {
