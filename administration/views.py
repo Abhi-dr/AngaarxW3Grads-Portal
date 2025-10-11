@@ -606,7 +606,6 @@ def edit_notification(request, id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def view_student_profile(request, id):
     parameters = {
         "student": Student.objects.get(id=id)
@@ -718,7 +717,6 @@ import io
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def attendance_visualizer(request):
     administrator = Administrator.objects.get(id=request.user.id)
     
@@ -731,7 +729,6 @@ def attendance_visualizer(request):
 @csrf_exempt
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def process_attendance_excel(request):
     if request.method == 'POST' and request.FILES.get('excel_file'):
         try:
@@ -828,7 +825,6 @@ def process_attendance_excel(request):
 @csrf_exempt
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
-@admin_required
 def process_google_sheets(request):
     """Process Google Sheets data for attendance visualization"""
     if request.method == 'POST':

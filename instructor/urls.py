@@ -13,6 +13,13 @@ urlpatterns = [
     path('upload_instructor_profile', views.upload_instructor_profile, name='upload_instructor_profile'),
     path("change_instructor_password", views.change_instructor_password, name="change_instructor_password"),
 
+    # ========================= ATTENDANCE VISUALIZER =========================
+
+    path("attendance_visualizer/", views.attendance_visualizer, name="instructor_attendance_visualizer"),
+    path("process_attendance_excel/", views.process_attendance_excel, name="instructor_process_attendance_excel"),
+    path("process_google_sheets/", views.process_google_sheets, name="instructor_process_google_sheets"),
+    path("download_sample_attendance_excel/", views.download_sample_attendance_excel, name="instructor_download_sample_attendance_excel"),
+
     # ============================ TEST CASES WORK ==========================
 
     path("test_cases/<slug:slug>/", sheet_views.test_cases, name="instructor_test_cases"),
