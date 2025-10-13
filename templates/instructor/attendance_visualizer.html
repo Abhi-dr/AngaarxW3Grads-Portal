@@ -569,13 +569,33 @@ Instructor | Attendance Visualizer
         displayStudentTable();
         displayDateTable();
         createCharts();
+        
+        // Initialize range sliders
+        updateRangeValue();
     }
 
     function updateStatistics() {
-        document.getElementById('totalStudents').textContent = attendanceData.statistics.total_students;
-        document.getElementById('totalPresent').textContent = attendanceData.statistics.total_present;
-        document.getElementById('totalAbsent').textContent = attendanceData.statistics.total_absent;
-        document.getElementById('overallPercentage').textContent = attendanceData.statistics.overall_percentage + '%';
+        if (!filteredData || !attendanceData) return;
+        
+        // Calculate statistics for filtered data
+        const totalStudents = filteredData.length;
+        let totalPresent = 0;
+        let totalAbsent = 0;
+        
+        filteredData.forEach(student => {
+            Object.values(student.attendance).forEach(attendance => {
+                if (attendance.present) totalPresent++;
+                if (attendance.absent) totalAbsent++;
+            });
+        });
+        
+        const overallPercentage = (totalPresent + totalAbsent) > 0 ? 
+            ((totalPresent / (totalPresent + totalAbsent)) * 100).toFixed(2) : 0;
+        
+        document.getElementById('totalStudents').textContent = totalStudents;
+        document.getElementById('totalPresent').textContent = totalPresent;
+        document.getElementById('totalAbsent').textContent = totalAbsent;
+        document.getElementById('overallPercentage').textContent = overallPercentage + '%';
     }
 
     function populateDateFilter() {
@@ -1072,10 +1092,25 @@ Instructor | Attendance Visualizer
                 return false;
             }
 
-            // Date filter (if specific date selected, check if student was present/absent on that date)
-            if (dateFilter && student.attendance[dateFilter]) {
-                if (statusFilter === 'present' && !student.attendance[dateFilter].present) return false;
-                if (statusFilter === 'absent' && !student.attendance[dateFilter].absent) return false;
+            // Status filter (present/absent)
+            if (statusFilter) {
+                if (dateFilter) {
+                    // If specific date selected, check status for that date
+                    if (student.attendance[dateFilter]) {
+                        if (statusFilter === 'present' && !student.attendance[dateFilter].present) return false;
+                        if (statusFilter === 'absent' && !student.attendance[dateFilter].absent) return false;
+                    } else {
+                        // If student has no record for selected date, filter them out
+                        return false;
+                    }
+                } else {
+                    // If no specific date, check overall status
+                    const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+                    const absentDays = Object.values(student.attendance).filter(att => att.absent).length;
+                    
+                    if (statusFilter === 'present' && presentDays === 0) return false;
+                    if (statusFilter === 'absent' && absentDays === 0) return false;
+                }
             }
 
             // Calculate attendance percentage
@@ -1106,7 +1141,7 @@ Instructor | Attendance Visualizer
         document.getElementById('statusFilter').value = '';
         document.getElementById('percentageFilter').value = '';
         document.getElementById('sortBy').value = 'name';
-        document.getElementById('showCount').value = '25';
+        document.getElementById('showCount').value = 'all';
         document.getElementById('minRange').value = '0';
         document.getElementById('maxRange').value = '100';
         updateRangeValue();
