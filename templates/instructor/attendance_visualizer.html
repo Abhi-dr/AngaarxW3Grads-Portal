@@ -14,13 +14,10 @@ Instructor | Attendance Visualizer
 
 <div class="container-fluid">
     <div class="card mb-4">
-        <div class="card-body d-flex align-items-center">
+        <div class="card-body">
             <h3 class="heading mb-0">
                 <span class="fw-semibold">Attendance Visualizer &nbsp; 🖥️</span>
             </h3>
-            <button type="button" class="btn btn-outline-info ms-auto" onclick="showSheetsHelp()">
-                <i class="fas fa-question-circle"></i> Setup Help
-            </button>
         </div>
     </div>
 
@@ -29,88 +26,97 @@ Instructor | Attendance Visualizer
             <div class="d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">📊 Import Attendance Data</h5>
                 <div class="btn-group" role="group">
-                    <input type="radio" class="btn-check" name="importMode" id="sheetsMode" autocomplete="off" checked>
+                    <input type="radio" class="btn-check" name="importMode" id="predefinedMode" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="predefinedMode">
+                        <i class="fas fa-list"></i> Predefined
+                    </label>
+                    <input type="radio" class="btn-check" name="importMode" id="sheetsMode" autocomplete="off">
                     <label class="btn btn-outline-success" for="sheetsMode">
-                        <i class="fab fa-google"></i>  Sheets
+                        <i class="fab fa-google"></i> Sheets URL
                     </label>
                     <input type="radio" class="btn-check" name="importMode" id="fileMode" autocomplete="off">
-                    <label class="btn btn-outline-primary" for="fileMode">
+                    <label class="btn btn-outline-info" for="fileMode">
                         <i class="fas fa-upload"></i> File Upload
                     </label>
                 </div>
             </div>
         </div>
         <div class="card-body">
-            <div id="fileUploadSection">
-                <form id="uploadForm" enctype="multipart/form-data">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="mb-3">
-                                <label for="excelFile" class="form-label">Select Excel/CSV File</label>
-                                <input type="file" class="form-control" id="excelFile" name="excel_file"
-                                    accept=".xlsx,.xls,.csv" required>
-                                <div class="form-text">
-                                    Expected columns: Sr. No, Name, Roll Number, Phone Number, Email, and date columns
-                                    with P/A values.
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">&nbsp;</label>
-                                <button type="submit" class="btn btn-primary d-block w-100 mb-2">
-                                    <i class="fas fa-upload"></i> Upload & Process
-                                </button>
-                                <a href="{% url 'instructor_download_sample_attendance_excel' %}"
-                                    class="btn btn-outline-success d-block w-100">
-                                    <i class="fas fa-download"></i> Download Sample Excel
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div id="googleSheetsSection">
-                <form id="sheetsForm">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="mb-3">
-                                <label for="sheetsUrl" class="form-label">Google Sheets URL</label>
-                                <input type="url" class="form-control" id="sheetsUrl" name="sheets_url"
-                                    placeholder="https://docs.google.com/spreadsheets/d/your-sheet-id/edit#gid=0"
-                                    required>
-                                <div class="form-text">
-                                    <strong>Setup Instructions:</strong><br>
-                                    1. Make your Google Sheet public (Share → Anyone with the link can view)<br>
-                                    2. Copy the full URL from your browser<br>
-                                    3. Ensure same column format: Sr. No, Name, Roll Number, Phone Number, Email, and
-                                    date columns
-                                </div>
-                            </div>
-                            
-                        </div>
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label">&nbsp;</label>
-                                <button type="submit" class="btn btn-success d-block w-100 mb-2">
-                                    <i class="fab fa-google"></i> Fetch from Google Sheets
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-
-            <div id="loadingIndicator" class="text-center d-none">
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="text-center d-none mb-4">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Loading...</span>
                 </div>
-                <p class="mt-2" id="loadingText">Processing file...</p>
-                <div class="progress mt-2 d-none" id="loadingProgress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
-                        style="width: 0%"></div>
+                <p class="mt-2" id="loadingText">Processing...</p>
+            </div>
+
+            <!-- Section 1: Predefined Sheets -->
+            <div id="predefinedSection" class="mb-4">
+                <h6 class="text-primary mb-3">
+                    <i class="fas fa-list"></i> 📋 Predefined Sheets
+                </h6>
+                <div class="row">
+                    <div class="col-md-12">
+                        <select class="form-select" id="predefinedSheetsDropdown">
+                            <option value="">Choose a predefined attendance sheet...</option>
+                        </select>
+                        <div class="form-text">
+                            Select from available predefined sheets - data will load automatically.
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- Section 2: Google Sheets URL -->
+            <div id="googleSheetsSection" class="mb-4 d-none">
+                <h6 class="text-success mb-3">
+                    <i class="fab fa-google"></i> 🔗 Google Sheets URL
+                </h6>
+                <form id="sheetsForm">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <input type="url" class="form-control" id="sheetsUrl" name="sheets_url"
+                                placeholder="https://docs.google.com/spreadsheets/d/your-sheet-id/edit#gid=0">
+                            <div class="form-text">
+                                Make your sheet public (Share → Anyone with the link) and paste the URL here.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fab fa-google"></i> Fetch Data
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Section 3: File Upload -->
+            <div id="fileUploadSection" class="mb-4 d-none">
+                <h6 class="text-info mb-3">
+                    <i class="fas fa-upload"></i> 📁 File Upload
+                </h6>
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="excelFile" name="excel_file"
+                                accept=".xlsx,.xls,.csv" required>
+                            <div class="form-text">
+                                Upload Excel/CSV with columns: Sr. No, Name, Roll Number, Phone, Email, date columns (P/A).
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-upload"></i> Upload & Process
+                            </button>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'instructor_download_sample_attendance_excel' %}"
+                                class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-download"></i> Sample File
+                            </a>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -255,7 +261,7 @@ Instructor | Attendance Visualizer
                             <option value="25">25 per page</option>
                             <option value="50">50 per page</option>
                             <option value="100">100 per page</option>
-                            <option value="all">Show All</option>
+                            <option value="all" selected>Show All</option>
                         </select>
                     </div>
                 </div>
@@ -378,6 +384,41 @@ Instructor | Attendance Visualizer
                         </div>
                     </div>
                 </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Daily Attendance Comparison</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="dailyComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Top 10 Students by Attendance</h6>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="topStudentsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6 class="mb-0">Attendance Heatmap</h6>
+                            </div>
+                            <div class="card-body">
+                                <div id="attendanceHeatmap" style="height: 400px; overflow-x: auto;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -402,19 +443,30 @@ Instructor | Attendance Visualizer
 <script>
     let attendanceData = null;
     let filteredData = null;
+    let predefinedSheets = [];
 
-    // Mode toggle functionality
-    document.getElementById('fileMode').addEventListener('change', function () {
+    // Tab switching functionality
+    document.getElementById('predefinedMode').addEventListener('change', function () {
         if (this.checked) {
-            document.getElementById('fileUploadSection').classList.remove('d-none');
+            document.getElementById('predefinedSection').classList.remove('d-none');
             document.getElementById('googleSheetsSection').classList.add('d-none');
+            document.getElementById('fileUploadSection').classList.add('d-none');
         }
     });
 
     document.getElementById('sheetsMode').addEventListener('change', function () {
         if (this.checked) {
-            document.getElementById('fileUploadSection').classList.add('d-none');
+            document.getElementById('predefinedSection').classList.add('d-none');
             document.getElementById('googleSheetsSection').classList.remove('d-none');
+            document.getElementById('fileUploadSection').classList.add('d-none');
+        }
+    });
+
+    document.getElementById('fileMode').addEventListener('change', function () {
+        if (this.checked) {
+            document.getElementById('predefinedSection').classList.add('d-none');
+            document.getElementById('googleSheetsSection').classList.add('d-none');
+            document.getElementById('fileUploadSection').classList.remove('d-none');
         }
     });
 
@@ -641,9 +693,9 @@ Instructor | Attendance Visualizer
             const row = document.createElement('tr');
             row.innerHTML = `
             <td>${date}</td>
+            <td>${stats.total}</td>
             <td><span class="badge bg-success">${stats.present}</span></td>
             <td><span class="badge bg-danger">${stats.absent}</span></td>
-            <td>${stats.total}</td>
             <td>
                 <span class="badge ${stats.attendance_percentage >= 75 ? 'bg-success' : stats.attendance_percentage >= 60 ? 'bg-warning' : 'bg-danger'}">
                     ${stats.attendance_percentage}%
@@ -657,6 +709,9 @@ Instructor | Attendance Visualizer
     function createCharts() {
         createAttendanceTrendChart();
         createPerformanceChart();
+        createDailyComparisonChart();
+        createTopStudentsChart();
+        createAttendanceHeatmap();
     }
 
     function createAttendanceTrendChart() {
@@ -747,6 +802,179 @@ Instructor | Attendance Visualizer
                 }
             }
         });
+    }
+
+    function createDailyComparisonChart() {
+        const ctx = document.getElementById('dailyComparisonChart').getContext('2d');
+
+        const dates = attendanceData.date_columns;
+        const presentData = dates.map(date => {
+            const stats = attendanceData.date_stats[date];
+            return stats ? stats.present : 0;
+        });
+        const absentData = dates.map(date => {
+            const stats = attendanceData.date_stats[date];
+            return stats ? stats.absent : 0;
+        });
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: 'Present',
+                    data: presentData,
+                    backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                }, {
+                    label: 'Absent',
+                    data: absentData,
+                    backgroundColor: 'rgba(220, 53, 69, 0.8)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Daily Present vs Absent Comparison'
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true
+                    },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function createTopStudentsChart() {
+        const ctx = document.getElementById('topStudentsChart').getContext('2d');
+
+        // Calculate attendance percentages and sort
+        const studentsWithPercentage = attendanceData.students.map(student => {
+            const presentDays = Object.values(student.attendance).filter(att => att.present).length;
+            const totalDays = Object.values(student.attendance).length;
+            const percentage = totalDays > 0 ? (presentDays / totalDays) * 100 : 0;
+            return {
+                name: student.name,
+                percentage: percentage
+            };
+        }).sort((a, b) => b.percentage - a.percentage).slice(0, 10);
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: studentsWithPercentage.map(s => s.name),
+                datasets: [{
+                    label: 'Attendance %',
+                    data: studentsWithPercentage.map(s => s.percentage.toFixed(2)),
+                    backgroundColor: studentsWithPercentage.map(s =>
+                        s.percentage >= 90 ? '#28a745' :
+                            s.percentage >= 75 ? '#17a2b8' :
+                                s.percentage >= 60 ? '#ffc107' : '#dc3545'
+                    ),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top 10 Students by Attendance'
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function (value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    function createAttendanceHeatmap() {
+        const heatmapContainer = document.getElementById('attendanceHeatmap');
+
+        // For large datasets, show a simplified message
+        if (attendanceData.students.length > 200) {
+            heatmapContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-table fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">Heatmap disabled for datasets with more than 200 students for performance reasons.</p>
+                    <p class="text-muted">Use filters to reduce the dataset size or export data for detailed analysis.</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Show loading for medium datasets
+        if (attendanceData.students.length > 50) {
+            heatmapContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-2">Generating heatmap...</p>
+                </div>
+            `;
+        }
+
+        setTimeout(() => {
+            // Create heatmap table
+            let heatmapHTML = '<table class="table table-sm table-bordered">';
+            heatmapHTML += '<thead><tr><th>Student</th>';
+
+            // Add date headers
+            attendanceData.date_columns.forEach(date => {
+                heatmapHTML += `<th class="text-center" style="min-width: 50px;">${date}</th>`;
+            });
+            heatmapHTML += '</tr></thead><tbody>';
+
+            // Add student rows
+            attendanceData.students.forEach(student => {
+                heatmapHTML += `<tr><td><strong>${student.name}</strong></td>`;
+
+                attendanceData.date_columns.forEach(date => {
+                    const attendance = student.attendance[date];
+                    let cellClass = 'table-secondary';
+                    let cellContent = '-';
+
+                    if (attendance) {
+                        if (attendance.present) {
+                            cellClass = 'table-success';
+                            cellContent = 'P';
+                        } else if (attendance.absent) {
+                            cellClass = 'table-danger';
+                            cellContent = 'A';
+                        }
+                    }
+
+                    heatmapHTML += `<td class="${cellClass} text-center"><strong>${cellContent}</strong></td>`;
+                });
+
+                heatmapHTML += '</tr>';
+            });
+
+            heatmapHTML += '</tbody></table>';
+            heatmapContainer.innerHTML = heatmapHTML;
+        }, attendanceData.students.length > 50 ? 100 : 0);
     }
 
     function showStudentDetails(index) {
@@ -915,10 +1143,99 @@ Instructor | Attendance Visualizer
         document.body.removeChild(link);
     });
 
+    // Load predefined sheets on page load
+    function loadPredefinedSheets() {
+        fetch('{% url "instructor_get_predefined_sheets" %}')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    predefinedSheets = data.sheets;
+                    const dropdown = document.getElementById('predefinedSheetsDropdown');
+                    
+                    // Clear existing options except the first one
+                    dropdown.innerHTML = '<option value="">Choose a predefined sheet...</option>';
+                    
+                    // Add predefined sheets to dropdown
+                    predefinedSheets.forEach(sheet => {
+                        const option = document.createElement('option');
+                        option.value = sheet.id;
+                        option.textContent = sheet.name;
+                        option.setAttribute('data-url', sheet.url);
+                        option.setAttribute('data-description', sheet.description);
+                        dropdown.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error loading predefined sheets:', error);
+            });
+    }
+
+    // Handle predefined sheets dropdown change - auto-load when selected
+    document.getElementById('predefinedSheetsDropdown').addEventListener('change', function () {
+        if (!this.value) {
+            return; // No selection made
+        }
+        
+        const selectedOption = this.options[this.selectedIndex];
+        const sheetUrl = selectedOption.getAttribute('data-url');
+        
+        // Show loading indicator
+        document.getElementById('loadingIndicator').classList.remove('d-none');
+        document.getElementById('loadingText').textContent = `Loading ${selectedOption.textContent}...`;
+
+        const formData = new FormData();
+        formData.append('sheets_url', sheetUrl);
+
+        fetch('{% url "instructor_process_google_sheets" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('loadingIndicator').classList.add('d-none');
+
+                if (data.success) {
+                    attendanceData = data;
+                    filteredData = attendanceData.students;
+                    displayData();
+                    
+                    // Show success message
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show mb-3';
+                    alertDiv.innerHTML = `
+                        <strong>Success!</strong> Loaded attendance data from "${selectedOption.textContent}".
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    `;
+                    const loadingIndicator = document.getElementById('loadingIndicator');
+                    loadingIndicator.parentNode.insertBefore(alertDiv, loadingIndicator);
+                    
+                    // Auto-dismiss after 5 seconds
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) {
+                            alertDiv.remove();
+                        }
+                    }, 5000);
+                } else {
+                    alert('Error: ' + data.error);
+                    // Reset dropdown on error
+                    this.selectedIndex = 0;
+                }
+            })
+            .catch(error => {
+                document.getElementById('loadingIndicator').classList.add('d-none');
+                alert('Error loading predefined sheet: ' + error);
+                // Reset dropdown on error
+                this.selectedIndex = 0;
+            });
+    });
+
     document.addEventListener('DOMContentLoaded', function () {
-        // Show Google Sheets section by default
-        document.getElementById('fileUploadSection').classList.add('d-none');
-        document.getElementById('googleSheetsSection').classList.remove('d-none');
+        // Load predefined sheets on page load
+        loadPredefinedSheets();
     });
 </script>
 

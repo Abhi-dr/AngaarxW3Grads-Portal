@@ -16,6 +16,7 @@ urlpatterns = [
     # ========================= ATTENDANCE VISUALIZER =========================
 
     path("attendance_visualizer/", views.attendance_visualizer, name="instructor_attendance_visualizer"),
+    path("get_predefined_sheets/", views.get_predefined_sheets, name="instructor_get_predefined_sheets"),
     path("process_attendance_excel/", views.process_attendance_excel, name="instructor_process_attendance_excel"),
     path("process_google_sheets/", views.process_google_sheets, name="instructor_process_google_sheets"),
     path("download_sample_attendance_excel/", views.download_sample_attendance_excel, name="instructor_download_sample_attendance_excel"),

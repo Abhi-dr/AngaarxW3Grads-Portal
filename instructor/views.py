@@ -150,6 +150,38 @@ def attendance_visualizer(request):
 @csrf_exempt
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+def get_predefined_sheets(request):
+    """Get predefined Google Sheets URLs for attendance visualization"""
+    try:
+        # Define your predefined Google Sheets here
+        # Replace these with your actual Google Sheets URLs
+        predefined_sheets = [
+            {
+                'id': 1,
+                'name': 'KCC - Section A1',
+                'url': 'https://docs.google.com/spreadsheets/u/0/d/1qlTzQCKiXI-bUnPXVNTQPDw1jeVg56HTOQ-VEtM7DUI/htmlview#gid=1386230316',
+            },
+            {
+                'id': 2,
+                'name': 'KCC - Section A2',
+                'url': 'https://docs.google.com/spreadsheets/d/1xXUmsOCobC-WipNCGARxHg8R9dNWM4zm8yfGvlAPSOQ/edit?usp=sharing'
+            }
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'sheets': predefined_sheets
+        })
+        
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': f'Error fetching predefined sheets: {str(e)}'
+        })
+
+@csrf_exempt
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
 def process_attendance_excel(request):
     """Process Excel file for attendance visualization"""
     if request.method == 'POST' and request.FILES.get('excel_file'):

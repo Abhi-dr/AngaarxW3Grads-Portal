@@ -22,7 +22,13 @@ Instructor -> Home
 
     @keyframes html-progress {
         to {
-            --progress-value: {{ total_completed_sessions_percentage }};
+            --progress-value: {
+                    {
+                    total_completed_sessions_percentage
+                }
+            }
+
+            ;
         }
     }
 
@@ -107,7 +113,6 @@ Instructor -> Home
         width: 0;
         height: 0;
     }
-    
 </style>
 
 
@@ -336,8 +341,7 @@ Instructor -> Home
                                 </div>
                             </div> -->
 
-                        <img src="{{ course.thumbnail.url }}"
-                            height="182vh" style="border-radius: 5px;" alt="">
+                        <img src="{{ course.thumbnail.url }}" height="182vh" style="border-radius: 5px;" alt="">
                     </div>
                 </div>
 
@@ -383,19 +387,16 @@ Instructor -> Home
                 <div class="table-responsive">
                     <table class="table text-nowrap mb-0 align-middle">
                         <tbody>
-                            <tr>
+                            <tr class="text-center">
                                 <td class="border-bottom-0">
-                                    <a href="{% url 'instructor_add_sheet' %}" class="btn btn-outline-warning">Add Sheet</a>
+                                    <a href="{% url 'instructor_add_sheet' %}" class="btn btn-outline-warning">Add
+                                        Sheet</a>
                                 </td>
-
                                 <td class="border-bottom-0">
-                                    <a href="{% url 'instructor_attendance_visualizer' %}" class="btn btn-outline-success">Attendance Visualizer</a>
+                                    <a href="{% url 'instructor_attendance_visualizer' %}"
+                                        class="btn btn-outline-success">Attendance Visualizer</a>
                                 </td>
                             </tr>
-
-                            
-
-                            
                         </tbody>
                     </table>
                 </div>
@@ -415,16 +416,18 @@ Instructor -> Home
                     <ul class="timeline-widget mb-0 position-relative mb-n3">
 
 
-                      {% if sessions %}
+                        {% if sessions %}
                         {% for session in sessions %}
 
                         <li class="timeline-item d-flex position-relative overflow-hidden">
                             <div class="timeline-time  flex-shrink-0 text-end">
                                 <span class="fw-bolder">({{ session.course.name }})</span>
-                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{ session.topic|title|truncatechars:6 }}</span>
+                                <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{
+                                    session.topic|title|truncatechars:6 }}</span>
                             </div>
                             <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                <span class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
+                                <span
+                                    class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
                                 <span class="timeline-badge-border d-block flex-shrink-0"></span>
                             </div>
                             <div class="timeline-desc fs-3  mt-n1">{{ session.session_time }}
@@ -432,7 +435,8 @@ Instructor -> Home
 
                                 {% if session.get_meeting_status.status == "Ongoing" %}
 
-                                <a href="{{ session.link }}" class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                <a href="{{ session.link }}"
+                                    class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
                                     {{ session.get_meeting_status.status }}... Join
                                 </a>
 
@@ -448,13 +452,13 @@ Instructor -> Home
                                     class="text-primary d-block fw-normal">Know More
                                 </a> -->
                             </div>
-                            
+
                         </li>
 
 
                         {% endfor %}
 
-                        
+
                         {% else %}
 
                         <li class="timeline-item d-flex position-relative overflow-hidden">
@@ -491,7 +495,7 @@ Instructor -> Home
                             </div>
                             <div class="timeline-desc fs-3  mt-n1 fw-semibold">Coming Soon!
                             </div>
-                        </li>                   
+                        </li>
 
                         {% endif %}
                     </ul>
@@ -531,7 +535,7 @@ Instructor -> Home
                                             Status
                                         </h6>
                                     </th>
-                                    
+
                                     <th class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">
                                             Action
@@ -549,7 +553,8 @@ Instructor -> Home
                                         <h6 class="fw-semibold mb-0 text-center">{{ session.id }}</h6>
                                     </td>
                                     <td class="border-bottom-0">
-                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="{{ session.topic }}">{{ session.topic|truncatechars:10 }}</h6>
+                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            title="{{ session.topic }}">{{ session.topic|truncatechars:10 }}</h6>
                                         <span class="fw-normal">{{ session.course.name }}</span>
                                     </td>
                                     <td class="border-bottom-0">
@@ -569,18 +574,23 @@ Instructor -> Home
 
                                             {% if session.get_meeting_status.status == "Upcoming" %}
 
-                                            <a href="{% url 'edit_session' session.id %}" class="btn btn-outline-info">Edit📝
+                                            <a href="{% url 'edit_session' session.id %}"
+                                                class="btn btn-outline-info">Edit📝
                                             </a>
 
                                             {% elif not session.is_completed %}
 
-                                            <a href="{% url 'mark_session_completed' session.id %}" class="btn btn-outline-success">Mark Complete ✅
+                                            <a href="{% url 'mark_session_completed' session.id %}"
+                                                class="btn btn-outline-success">Mark Complete ✅
                                             </a>
 
                                             {% elif session.recorded_session_link == None %}
 
-                                            <button class="btn btn-outline-dark text-blue float-end" data-bs-toggle="modal" data-bs-target="#uploadRecordedSessionModal" data-session-id="{{ session.id }}" session-topic="{{ session.topic }}">Upload Recording↗️</button>
-                                            
+                                            <button class="btn btn-outline-dark text-blue float-end"
+                                                data-bs-toggle="modal" data-bs-target="#uploadRecordedSessionModal"
+                                                data-session-id="{{ session.id }}"
+                                                session-topic="{{ session.topic }}">Upload Recording↗️</button>
+
                                             {% endif %}
                                         </div>
                                     </td>
@@ -596,7 +606,7 @@ Instructor -> Home
 
     </div>
     <!-- ================================= ALL ELIGIBLE JOBS ============================ -->
-    
+
     <!-- <div class="card-body">
         <h5 class="card-title fw-semibold mb-4 text-white">Commpanies Only For You 🔥</h5>
     </div>
@@ -687,7 +697,7 @@ Instructor -> Home
     <div class="py-6 px-6 text-center">
         <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
                 class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
-<!--                 
+            <!--                 
             All Rights Reserved by <a href="https://gla.ac.in" target="_blank"
                 class="pe-1 text-primary text-decoration-underline">GLA University</a> -->
 
