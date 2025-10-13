@@ -119,6 +119,7 @@ urlpatterns += [
     
     path("batch_leaderboard/<slug:slug>", batch_views.leaderboard, name="administrator_batch_leaderboard"),
     path("batch_leaderboard_api/<slug:slug>", batch_views.fetch_batch_leaderboard, name="administrator_fetch_batch_leaderboard"),
+    path('download-batch-leaderboard/<slug:slug>/', batch_views.download_batch_leaderboard_excel, name='download_batch_leaderboard'),
     
     # ============================ COURSE SPECIFIC ENROLLMENT WORK ===========
     

@@ -35,11 +35,14 @@ active
 <div class="container-fluid">
     <div class="card">
         <div class="card-body">
-            <h3 class="heading">
-                <span class="fw-semibold">{{ batch.name }}'s Leaderboard🔥</span>
-            </h3>
-
-
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="heading mb-0">
+                    <span class="fw-semibold">{{ batch.name }}'s Leaderboard🔥</span>
+                </h3>
+                <a href="{% url 'download_batch_leaderboard' slug=batch.slug %}" class="download-btn">
+                    <i class="fas fa-download"></i> Download Leaderboard
+                </a>
+            </div>
         </div>
     </div>
 

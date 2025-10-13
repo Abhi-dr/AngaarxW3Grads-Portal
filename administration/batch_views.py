@@ -539,3 +539,96 @@ def fetch_batch_leaderboard(request, slug):
         'leaderboard': leaderboard,
         'solved_question_counts': solved_question_counts
     })
+
+
+# =========================================== DOWNLOAD BATCH LEADERBOARD =============================
+import pandas as pd
+from django.http import HttpResponse
+from django.utils.timezone import make_naive
+
+@admin_required
+def download_batch_leaderboard_excel(request, slug):
+    batch = get_object_or_404(Batch, slug=slug)
+    sheets = batch.sheets.all()
+    total_questions = Question.objects.filter(sheets__in=sheets).distinct()
+
+    # Aggregate submission data at the database level
+    submissions = Submission.objects.filter(
+        question__in=total_questions,
+        status='Accepted'
+    ).values(
+        'user_id', 'question_id', 'question__sheets__id'
+    ).annotate(
+        max_score=Max('score'),
+        earliest_submission=Min('submitted_at')
+    )
+
+    # Process aggregated data
+    user_scores = {}
+    for sub in submissions:
+        user_id = sub['user_id']
+        question_id = sub['question_id']
+        sheet_id = sub['question__sheets__id']
+
+        if user_id not in user_scores:
+            user_scores[user_id] = {
+                'total_score': 0,
+                'earliest_submission': sub['earliest_submission'],
+                'solved_questions': set(),
+                'sheet_breakdown': {}
+            }
+
+        # Add score
+        user_scores[user_id]['total_score'] += sub['max_score']
+        user_scores[user_id]['earliest_submission'] = min(
+            user_scores[user_id]['earliest_submission'], sub['earliest_submission']
+        )
+        user_scores[user_id]['solved_questions'].add(question_id)
+
+        # Sheet breakdown
+        if sheet_id not in user_scores[user_id]['sheet_breakdown']:
+            user_scores[user_id]['sheet_breakdown'][sheet_id] = 0
+        user_scores[user_id]['sheet_breakdown'][sheet_id] += 1
+
+    # Format leaderboard data for DataFrame
+    leaderboard = []
+    for user_id, data in user_scores.items():
+        user = Student.objects.get(id=user_id)
+        solved_problems = len(data['solved_questions'])
+
+        # Convert timezone-aware datetime to naive
+        earliest_submission_naive = make_naive(data['earliest_submission'])
+
+        # Create sheet breakdown string
+        sheet_details = []
+        for sheet_id, count in data['sheet_breakdown'].items():
+            sheet_name = Sheet.objects.get(id=sheet_id).name
+            sheet_details.append(f"{sheet_name}: {count}")
+        sheet_breakdown_str = ", ".join(sheet_details) if sheet_details else "No sheets solved"
+
+        leaderboard.append({
+            'Student ID': user_id,
+            'Student Name': f"{user.first_name} {user.last_name}",
+            'Email': user.email,
+            'Total Score': data['total_score'],
+            'Earliest Submission': earliest_submission_naive,
+            'Solved Problems': solved_problems,
+            'Sheet Breakdown': sheet_breakdown_str,
+        })
+
+    # Sort by total score (descending) and earliest submission (ascending)
+    leaderboard.sort(key=lambda x: (-x['Total Score'], x['Earliest Submission']))
+
+    # Create a DataFrame from the leaderboard data
+    df = pd.DataFrame(leaderboard)
+
+    # Generate Excel file
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = f'attachment; filename="batch_leaderboard_{slug}.xlsx"'
+
+    with pd.ExcelWriter(response, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name="Batch Leaderboard")
+
+    return response
