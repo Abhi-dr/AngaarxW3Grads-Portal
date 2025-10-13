@@ -159,7 +159,7 @@ def get_predefined_sheets(request):
             {
                 'id': 1,
                 'name': 'KCC - Section A1',
-                'url': 'https://docs.google.com/spreadsheets/u/0/d/1qlTzQCKiXI-bUnPXVNTQPDw1jeVg56HTOQ-VEtM7DUI/htmlview#gid=1386230316',
+                'url': 'https://docs.google.com/spreadsheets/d/1qlTzQCKiXI-bUnPXVNTQPDw1jeVg56HTOQ-VEtM7DUI/edit?usp=sharing',
             },
             {
                 'id': 2,
