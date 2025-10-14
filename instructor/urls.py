@@ -20,6 +20,7 @@ urlpatterns = [
     path("process_attendance_excel/", views.process_attendance_excel, name="instructor_process_attendance_excel"),
     path("process_google_sheets/", views.process_google_sheets, name="instructor_process_google_sheets"),
     path("download_sample_attendance_excel/", views.download_sample_attendance_excel, name="instructor_download_sample_attendance_excel"),
+    path("export_attendance_pdf/", views.export_attendance_pdf, name="instructor_export_attendance_pdf"),
 
     # ============================ TEST CASES WORK ==========================
 
