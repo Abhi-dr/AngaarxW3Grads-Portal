@@ -652,6 +652,79 @@ def export_attendance_pdf(request):
         story.append(PageBreak())
         plt.close()
         
+        # # 3. Attendance Heatmap
+        # if attendance_data.get('date_columns') and len(filtered_data) > 0:
+        #     dates = attendance_data['date_columns']
+        #     student_names = [student['name'][:20] + '...' if len(student['name']) > 20 else student['name'] for student in filtered_data]
+            
+        #     # Create attendance matrix
+        #     attendance_matrix = []
+        #     for student in filtered_data:
+        #         student_row = []
+        #         for date in dates:
+        #             if date in student['attendance']:
+        #                 if student['attendance'][date].get('present', False):
+        #                     student_row.append(1)  # Present
+        #                 elif student['attendance'][date].get('absent', False):
+        #                     student_row.append(0)  # Absent
+        #                 else:
+        #                     student_row.append(0.5)  # No data
+        #             else:
+        #                 student_row.append(0.5)  # No data
+        #         attendance_matrix.append(student_row)
+            
+        #     # Convert to numpy array
+        #     attendance_matrix = np.array(attendance_matrix)
+            
+        #     # Create heatmap
+        #     plt.figure(figsize=(max(12, len(dates) * 0.8), max(8, len(student_names) * 0.3)))
+            
+        #     # Create custom colormap: Red for absent (0), Yellow for no data (0.5), Green for present (1)
+        #     from matplotlib.colors import ListedColormap
+        #     colors_heatmap = ['#e74c3c', '#f39c12', '#27ae60']  # Red, Yellow, Green
+        #     cmap = ListedColormap(colors_heatmap)
+            
+        #     # Create heatmap
+        #     sns.heatmap(attendance_matrix, 
+        #                xticklabels=dates, 
+        #                yticklabels=student_names,
+        #                cmap=cmap,
+        #                vmin=0, vmax=1,
+        #                cbar_kws={'label': 'Attendance Status', 
+        #                         'ticks': [0, 0.5, 1], 
+        #                         'format': '%.1f'},
+        #                linewidths=0.5,
+        #                linecolor='white')
+            
+        #     plt.title('📅 Student Attendance Heatmap', fontsize=16, fontweight='bold', pad=20)
+        #     plt.xlabel('Date', fontsize=12)
+        #     plt.ylabel('Students', fontsize=12)
+        #     plt.xticks(rotation=45, ha='right')
+        #     plt.yticks(rotation=0)
+            
+        #     # Add custom colorbar labels
+        #     cbar = plt.gca().collections[0].colorbar
+        #     cbar.set_ticklabels(['Absent', 'No Data', 'Present'])
+            
+        #     plt.tight_layout()
+            
+        #     # Save heatmap
+        #     heatmap_buffer = BytesIO()
+        #     plt.savefig(heatmap_buffer, format='png', dpi=300, bbox_inches='tight')
+        #     heatmap_buffer.seek(0)
+            
+        #     # Scale image based on data size
+        #     img_width = min(7.5*inch, max(5*inch, len(dates) * 0.1*inch))
+        #     img_height = min(10*inch, max(4*inch, len(student_names) * 0.15*inch))
+        #     heatmap_image = Image(heatmap_buffer, width=img_width, height=img_height)
+            
+        #     story.append(Paragraph("📅 Complete Attendance Heatmap", heading_style))
+        #     story.append(Paragraph("Red = Absent, Yellow = No Data, Green = Present", styles['Normal']))
+        #     story.append(Spacer(1, 10))
+        #     story.append(heatmap_image)
+        #     story.append(PageBreak())
+        #     plt.close()
+        
         # 3. Top 10 Students Bar Chart
         student_percentages = []
         for student in filtered_data:
