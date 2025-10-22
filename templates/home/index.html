@@ -208,14 +208,14 @@
                     <i class="fas fa-laptop-code"></i>
                     Free Online Classes
                 </button>
-                <button class="tab-btn" data-tab="events">
+                <!-- <button class="tab-btn" data-tab="events">
                     <i class="fas fa-calendar-alt"></i>
                     Upcoming Events
-                </button>
-                <button class="tab-btn" data-tab="workshops">
+                </button> -->
+                <!-- <button class="tab-btn" data-tab="workshops">
                     <i class="fas fa-university"></i>
                     College Workshops
-                </button>
+                </button> -->
             </div>
 
             <div class="tab-content">
@@ -226,7 +226,7 @@
                         
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="" alt="C Programming">
+                                <img src="https://theangaarbatch.in/media/batches/thumbnails/Gemini_Generated_Image_epk0bnepk0bnepk0.png" alt="C Programming">
                                 <div class="course-badge">For Ultimate Beginners</div>
                             </div>
                             <div class="course-content">
@@ -234,7 +234,7 @@
                                 <p>Complete C programming from ultimate basics to advanced level</p>
                                 <div class="course-meta">
                                     <div class="instructor">
-                                        <img src="" alt="Instructor">
+                                        <img src="{% static 'img/home/ns.png' %}" alt="Instructor">
                                         <span>Naman Sharma</span>
                                     </div>
                                     <div class="rating">
@@ -243,7 +243,7 @@
                                 </div>
                                 <div class="course-footer">
                                     <span class="price">₹ <s><small>2,999</small></s> Your Curiosity</span>
-                                    <button class="course-cta">Join Now</button>
+                                    <a href="https://chat.whatsapp.com/LHsRJOlzUSn7IkdJCcQa84" target="_blank" class="course-cta">Join Now</a>
                                 </div>
                             </div>
                         </div>
@@ -258,7 +258,7 @@
                                 <p>Complete Python programming from ultimate basics to advanced level</p>
                                 <div class="course-meta">
                                     <div class="instructor">
-                                        <img src="" alt="Instructor">
+                                        <img src="{% static 'img/home/dk.png' %}" alt="Instructor">
                                         <span>DK</span>
                                     </div>
                                     <div class="rating">
@@ -267,19 +267,15 @@
                                 </div>
                                 <div class="course-footer">
                                     <span class="price">₹ <s><small>2,999</small></s> Your Discipline</span>
-                                    <button class="course-cta">Join Now</button>
+                                    <a href="https://chat.whatsapp.com/CsAGcFvmM4D6lgBQXBYmby" target="_blank" class="course-cta">Join Now</a>
                                 </div>
                             </div>
                         </div>
-
-                       
-
-                        
                     </div>
                 </div>
 
                 <!-- Upcoming Events Tab -->
-                <div class="tab-pane" id="events">
+                <!-- <div class="tab-pane" id="events">
                     <div class="events-grid">
                         <div class="event-card">
                             <div class="event-image">
@@ -327,10 +323,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
                 <!-- College Workshops Tab -->
-                <div class="tab-pane" id="workshops">
+                <!-- <div class="tab-pane" id="workshops">
                     <div class="workshops-grid">
                         <div class="workshop-card">
                             <div class="workshop-image">
@@ -383,7 +379,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -403,23 +399,25 @@
         <div class="code-challenge-content">
             <div class="challenge-problem">
                 <div class="problem-header">
-                    <h3><i class="fas fa-code"></i> Challenge: Palindrome Checker</h3>
+                    <h3><i class="fas fa-code"></i> Challenge: Hello Angaar</h3>
                     <div class="difficulty-badge">Beginner Friendly</div>
                 </div>
                 <div class="problem-description">
-                    <p>Write a Python function that checks if a given word is a palindrome (reads the same forwards
-                        and backwards).</p>
+                    <p>Write a Python program that prints "I am Angaari" to the console.</p>
                     <div class="problem-examples">
-                        <h4>Examples:</h4>
+                        <h4>Expected Output:</h4>
                         <div class="example">
-                            <span class="input">Input: "radar"</span>
-                            <span class="output">Output: True</span>
-                        </div>
-                        <div class="example">
-                            <span class="input">Input: "hello"</span>
-                            <span class="output">Output: False</span>
+                            <span class="output">I am Angaari</span>
                         </div>
                     </div>
+                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin-top: 15px;">
+                        <i class="fas fa-fire"></i>
+                        <!-- write a motivational line -->
+                        This is your first step into the world of coding with Angaar. <br>
+
+                        <i class="fas fa-fire"></i>
+                        Let's ignite your passion for programming!
+                    </p>
                 </div>
             </div>
 
@@ -432,7 +430,7 @@
                         </div>
                     </div>
                     <div class="editor-actions">
-                        <button class="run-btn" onclick="runCode()">
+                        <button class="run-btn" id="runButton" onclick="runCode()">
                             <i class="fas fa-play"></i>
                             Run Code
                         </button>
@@ -440,15 +438,10 @@
                 </div>
 
                 <div class="code-editor" id="codeEditor">
-                    <textarea id="codeInput" spellcheck="false">def is_palindrome(word):
-    # Your code here
-    # Hint: Compare the word with its reverse
-    pass
+                    <textarea id="codeInput" spellcheck="false"># Write your code here
+# Print "I am Angaari"
 
-# Test your function
-test_word = "radar"
-result = is_palindrome(test_word)
-print(f"'{test_word}' is palindrome: {result}")
+print("Hello World")
 </textarea>
                 </div>
 
@@ -517,10 +510,10 @@ print(f"'{test_word}' is palindrome: {result}")
                         <div class="region-colleges">
                             <div class="college-interactive-card" data-college="iit-delhi">
                                 <div class="college-card-mini">
-                                    <img src="{% static 'img/home/iitd.png' %}" alt="IIT Delhi" class="college-mini-logo">
+                                    <img src="{% static 'img/home/iitd.png' %}" loading="lazy" alt="IIT Delhi" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>IIT Delhi</h5>
-                                        <span class="workshop-count">12 Workshops</span>
+                                        <span class="workshop-count">2 Workshops</span>
                                     </div>
                                     <div class="college-status active">
                                         <i class="fas fa-circle"></i>
@@ -530,10 +523,10 @@ print(f"'{test_word}' is palindrome: {result}")
 
                             <div class="college-interactive-card" data-college="dtu">
                                 <div class="college-card-mini">
-                                    <img src="" alt="DTU" class="college-mini-logo">
+                                    <img src="https://upload.wikimedia.org/wikipedia/en/b/b5/DTU%2C_Delhi_official_logo.png" loading="lazy" alt="DTU" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>DTU</h5>
-                                        <span class="workshop-count">8 Workshops</span>
+                                        <span class="workshop-count">3 Workshops</span>
                                     </div>
                                     <div class="college-status active">
                                         <i class="fas fa-circle"></i>
@@ -543,10 +536,10 @@ print(f"'{test_word}' is palindrome: {result}")
 
                             <div class="college-interactive-card" data-college="nsut">
                                 <div class="college-card-mini">
-                                    <img src="" alt="NSUT" class="college-mini-logo">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/NSUT_logo.png" loading="lazy" alt="NSUT" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>NSUT</h5>
-                                        <span class="workshop-count">15 Workshops</span>
+                                        <span class="workshop-count">2 Workshops</span>
                                     </div>
                                     <div class="college-status active">
                                         <i class="fas fa-circle"></i>
@@ -648,175 +641,7 @@ print(f"'{test_word}' is palindrome: {result}")
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- College Info Cards -->
-            <div class="college-info-cards">
-                <!-- IIT Delhi -->
-                <div class="college-card" id="card-iit-delhi" style="display: none;">
-                    <div class="college-card-header">
-                        <img src="" alt="IIT Delhi" class="college-logo">
-                        <div class="college-info">
-                            <h3>IIT Delhi</h3>
-                            <p class="college-location">New Delhi, India</p>
-                        </div>
-                        <button class="close-card" onclick="closeCollegeCard()">×</button>
-                    </div>
-                    <div class="college-card-content">
-                        <div class="workshop-stats">
-                            <div class="stat">
-                                <span class="stat-number">12</span>
-                                <span class="stat-label">Workshops</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">500+</span>
-                                <span class="stat-label">Students</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">4.9</span>
-                                <span class="stat-label">Rating</span>
-                            </div>
-                        </div>
-                        <div class="recent-workshops">
-                            <h4>Recent Workshops</h4>
-                            <div class="workshop-list">
-                                <div class="workshop-item">
-                                    <span class="workshop-name">Advanced Python</span>
-                                    <span class="workshop-date">Sep 2024</span>
-                                </div>
-                                <div class="workshop-item">
-                                    <span class="workshop-name">DSA Bootcamp</span>
-                                    <span class="workshop-date">Aug 2024</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="college-gallery">
-                            <img src="" alt="Workshop 1">
-                            <img src="" alt="Workshop 2">
-                            <img src="" alt="Workshop 3">
-                            <span class="more-photos">+15</span>
-                        </div>
-                        <div class="student-testimonial">
-                            <p>"The Python workshop was incredible! Learned so much in just 2 days."</p>
-                            <span>- Rahul, CSE Student</span>
-                        </div>
-                        <button class="request-workshop-btn">
-                            <i class="fas fa-calendar-plus"></i>
-                            Request Workshop
-                        </button>
-                    </div>
-                </div>
-
-                <!-- DTU -->
-                <div class="college-card" id="card-dtu" style="display: none;">
-                    <div class="college-card-header">
-                        <img src="" alt="DTU" class="college-logo">
-                        <div class="college-info">
-                            <h3>Delhi Technological University</h3>
-                            <p class="college-location">Delhi, India</p>
-                        </div>
-                        <button class="close-card" onclick="closeCollegeCard()">×</button>
-                    </div>
-                    <div class="college-card-content">
-                        <div class="workshop-stats">
-                            <div class="stat">
-                                <span class="stat-number">8</span>
-                                <span class="stat-label">Workshops</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">350+</span>
-                                <span class="stat-label">Students</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">4.8</span>
-                                <span class="stat-label">Rating</span>
-                            </div>
-                        </div>
-                        <div class="recent-workshops">
-                            <h4>Recent Workshops</h4>
-                            <div class="workshop-list">
-                                <div class="workshop-item">
-                                    <span class="workshop-name">Web Development</span>
-                                    <span class="workshop-date">Sep 2024</span>
-                                </div>
-                                <div class="workshop-item">
-                                    <span class="workshop-name">React Bootcamp</span>
-                                    <span class="workshop-date">Jul 2024</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="college-gallery">
-                            <img src="" alt="Workshop 1">
-                            <img src="" alt="Workshop 2">
-                            <img src="" alt="Workshop 3">
-                            <span class="more-photos">+10</span>
-                        </div>
-                        <div class="student-testimonial">
-                            <p>"Amazing hands-on experience with React. Built my first app!"</p>
-                            <span>- Priya, IT Student</span>
-                        </div>
-                        <button class="request-workshop-btn">
-                            <i class="fas fa-calendar-plus"></i>
-                            Request Workshop
-                        </button>
-                    </div>
-                </div>
-
-                <!-- NIT Kurukshetra -->
-                <div class="college-card" id="card-nit-kurukshetra" style="display: none;">
-                    <div class="college-card-header">
-                        <img src="" alt="NIT Kurukshetra" class="college-logo">
-                        <div class="college-info">
-                            <h3>NIT Kurukshetra</h3>
-                            <p class="college-location">Haryana, India</p>
-                        </div>
-                        <button class="close-card" onclick="closeCollegeCard()">×</button>
-                    </div>
-                    <div class="college-card-content">
-                        <div class="workshop-stats">
-                            <div class="stat">
-                                <span class="stat-number">15</span>
-                                <span class="stat-label">Workshops</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">600+</span>
-                                <span class="stat-label">Students</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-number">4.9</span>
-                                <span class="stat-label">Rating</span>
-                            </div>
-                        </div>
-                        <div class="recent-workshops">
-                            <h4>Recent Workshops</h4>
-                            <div class="workshop-list">
-                                <div class="workshop-item">
-                                    <span class="workshop-name">Machine Learning</span>
-                                    <span class="workshop-date">Sep 2024</span>
-                                </div>
-                                <div class="workshop-item">
-                                    <span class="workshop-name">Data Science</span>
-                                    <span class="workshop-date">Aug 2024</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="college-gallery">
-                            <img src="" alt="Workshop 1">
-                            <img src="" alt="Workshop 2">
-                            <img src="" alt="Workshop 3">
-                            <span class="more-photos">+20</span>
-                        </div>
-                        <div class="student-testimonial">
-                            <p>"The ML workshop opened up a whole new world for me!"</p>
-                            <span>- Vikash, CSE Student</span>
-                        </div>
-                        <button class="request-workshop-btn">
-                            <i class="fas fa-calendar-plus"></i>
-                            Request Workshop
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </div>            
         </div>
 
         <!-- Map Statistics -->
@@ -2848,71 +2673,136 @@ print(f"'{test_word}' is palindrome: {result}")
         });
     });
 
-    // Code Challenge Functionality
-    function runCode() {
+    // Code Challenge Functionality with Backend API
+    async function runCode() {
         const code = document.getElementById('codeInput').value;
         const outputContent = document.getElementById('outputContent');
+        const runButton = document.getElementById('runButton');
 
-        // Clear previous output
-        outputContent.innerHTML = '<div class="output-running"><i class="fas fa-spinner fa-spin"></i> Running code...</div>';
+        // Disable button and show loading
+        runButton.disabled = true;
+        runButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Running...';
+        outputContent.innerHTML = '<div class="output-running"><i class="fas fa-spinner fa-spin"></i> Executing your code...</div>';
 
-        // Simulate code execution (in a real implementation, this would send to a backend)
-        setTimeout(() => {
-            try {
-                // Simple palindrome checker validation
-                if (code.includes('return word == word[::-1]') ||
-                    code.includes('return word.lower() == word.lower()[::-1]') ||
-                    (code.includes('word[::-1]') && code.includes('return'))) {
+        try {
+            // Call backend API
+            const response = await fetch('/execute-code/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    source_code: code
+                })
+            });
 
-                    outputContent.innerHTML = `
-                            <div style="color: #28a745;">✓ Code executed successfully!</div>
-                            <div style="margin-top: 10px;">
-                                <div>'radar' is palindrome: True</div>
-                                <div style="color: #28a745; margin-top: 10px;">🎉 Correct! Your solution works perfectly.</div>
-                            </div>
-                        `;
+            const data = await response.json();
 
-                    // Show success modal after a short delay
-                    setTimeout(() => {
-                        document.getElementById('challengeSuccess').style.display = 'flex';
-                    }, 1500);
-
-                } else if (code.includes('pass') || code.trim().endsWith('pass')) {
-                    outputContent.innerHTML = `
-                            <div style="color: #ffc107;">⚠ Function not implemented</div>
-                            <div style="margin-top: 10px;">
-                                <div>'radar' is palindrome: None</div>
-                                <div style="color: #ffc107; margin-top: 10px;">💡 Hint: Try comparing the word with its reverse using word[::-1]</div>
-                            </div>
-                        `;
-                } else {
-                    outputContent.innerHTML = `
-                            <div style="color: #dc3545;">✗ Code has issues</div>
-                            <div style="margin-top: 10px;">
-                                <div>'radar' is palindrome: False</div>
-                                <div style="color: #dc3545; margin-top: 10px;">❌ Not quite right. Keep trying!</div>
-                            </div>
-                        `;
-                }
-            } catch (error) {
+            if (data.error) {
                 outputContent.innerHTML = `
-                        <div style="color: #dc3545;">Error: ${error.message}</div>
-                    `;
+                    <div style="color: #dc3545;">
+                        <div style="margin-bottom: 10px;">❌ Error executing code</div>
+                        <div style="font-size: 0.9rem;">${data.error}</div>
+                    </div>
+                `;
+                return;
             }
-        }, 1000);
+
+            // Display result
+            displayResult(data.result);
+
+        } catch (error) {
+            outputContent.innerHTML = `
+                <div style="color: #dc3545;">
+                    <div style="margin-bottom: 10px;">❌ Error executing code</div>
+                    <div style="font-size: 0.9rem;">${error.message}</div>
+                </div>
+            `;
+        } finally {
+            // Re-enable button
+            runButton.disabled = false;
+            runButton.innerHTML = '<i class="fas fa-play"></i> Run Code';
+        }
+    }
+
+    function displayResult(result) {
+        const outputContent = document.getElementById('outputContent');
+        
+        // Status ID: 3 = Accepted, 4 = Wrong Answer, 5 = Time Limit Exceeded, 6 = Compilation Error, etc.
+        if (result.status.id === 3) {
+            // Success
+            const output = result.stdout || '(no output)';
+            const isCorrect = output.trim() === 'I am Angaari';
+            
+            if (isCorrect) {
+                outputContent.innerHTML = `
+                    <div style="color: #28a745;">
+                        <div style="margin-bottom: 10px;">✓ Code executed successfully!</div>
+                        <div style="background: rgba(40, 167, 69, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #28a745;">
+                            <pre style="margin: 0; color: #28a745;">${output}</pre>
+                        </div>
+                        <div style="color: #28a745; margin-top: 15px; font-weight: 600;">
+                            🎉 Perfect! Your output matches exactly!
+                        </div>
+                    </div>
+                `;
+                
+                // Show success modal after a delay
+                setTimeout(() => {
+                    document.getElementById('challengeSuccess').style.display = 'flex';
+                }, 1500);
+            } else {
+                outputContent.innerHTML = `
+                    <div style="color: #ffc107;">
+                        <div style="margin-bottom: 10px;">⚠ Code executed but output doesn't match</div>
+                        <div style="background: rgba(255, 193, 7, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #ffc107;">
+                            <div style="margin-bottom: 5px; font-weight: 600;">Your output:</div>
+                            <pre style="margin: 0; color: #ffc107;">${output}</pre>
+                        </div>
+                        <div style="margin-top: 10px; background: rgba(255, 96, 38, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #ff6026;">
+                            <div style="margin-bottom: 5px; font-weight: 600;">Expected output:</div>
+                            <pre style="margin: 0; color: #ff6026;">I am Angaari</pre>
+                        </div>
+                    </div>
+                `;
+            }
+        } else if (result.stderr) {
+            // Runtime Error
+            outputContent.innerHTML = `
+                <div style="color: #dc3545;">
+                    <div style="margin-bottom: 10px;">❌ Runtime Error</div>
+                    <div style="background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #dc3545;">
+                        <pre style="margin: 0; color: #dc3545; font-size: 0.85rem;">${result.stderr}</pre>
+                    </div>
+                </div>
+            `;
+        } else if (result.compile_output) {
+            // Compilation Error
+            outputContent.innerHTML = `
+                <div style="color: #dc3545;">
+                    <div style="margin-bottom: 10px;">❌ Compilation Error</div>
+                    <div style="background: rgba(220, 53, 69, 0.1); padding: 10px; border-radius: 8px; border-left: 3px solid #dc3545;">
+                        <pre style="margin: 0; color: #dc3545; font-size: 0.85rem;">${result.compile_output}</pre>
+                    </div>
+                </div>
+            `;
+        } else {
+            // Other status
+            outputContent.innerHTML = `
+                <div style="color: #ffc107;">
+                    <div style="margin-bottom: 10px;">⚠ ${result.status.description}</div>
+                    <div style="font-size: 0.9rem;">Please try again or check your code.</div>
+                </div>
+            `;
+        }
     }
 
     function resetChallenge() {
         document.getElementById('challengeSuccess').style.display = 'none';
-        document.getElementById('codeInput').value = `def is_palindrome(word):
-    # Your code here
-    # Hint: Compare the word with its reverse
-    pass
+        document.getElementById('codeInput').value = `# Write your code here
+# Print "I am Angaari"
 
-# Test your function
-test_word = "radar"
-result = is_palindrome(test_word)
-print(f"'{test_word}' is palindrome: {result}")`;
+print("Hello World")`;
 
         document.getElementById('outputContent').innerHTML = `
                 <div class="output-placeholder">
