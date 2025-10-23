@@ -879,13 +879,13 @@ print("Hello World")
             <div class="testimonials-track" id="testimonialsTrack">
                 <!-- Testimonial 1 -->
                 <div class="testimonial-card">
-                    <div class="testimonial-video">
-                        <img src="" alt="Rahul Kumar" class="testimonial-bg">
-                        <div class="video-overlay">
+                    <div class="testimonial-video" data-video-id="testimonial-1">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800" alt="Priya Sharma" class="testimonial-bg">
+                        <div class="video-overlay" onclick="openVideoModal('testimonial-1')">
                             <div class="play-button-large">
                                 <i class="fas fa-play"></i>
                             </div>
-                            <div class="video-duration">3:24</div>
+                            <div class="video-duration">2:45</div>
                         </div>
                     </div>
                     <div class="testimonial-content">
@@ -893,15 +893,13 @@ print("Hello World")
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "The Angaar Batch completely transformed my coding journey! From knowing nothing about
-                            programming to landing my first job as a software developer. The mentors are incredible
-                            and the community support is unmatched."
+                            "I was struggling with C programming for months until I joined The Angaar Batch. The way they explain complex concepts with real-world examples is amazing. Now I'm confident in my coding skills and ready for any challenge!"
                         </p>
                         <div class="testimonial-author">
-                            <img src="" alt="Rahul Kumar" class="author-avatar">
+                            <div class="author-avatar-circle">PS</div>
                             <div class="author-info">
-                                <h4>Rahul Kumar</h4>
-                                <p>Software Developer at TCS</p>
+                                <h4>Priya Sharma</h4>
+                                <p>Computer Science Student</p>
                                 <div class="rating">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -910,27 +908,19 @@ print("Hello World")
                                     <i class="fas fa-star"></i>
                                 </div>
                             </div>
-                            <div class="company-badge">
-                                <img src="" alt="TCS">
-                            </div>
-                        </div>
-                        <div class="testimonial-skills">
-                            <span class="skill-badge">Python</span>
-                            <span class="skill-badge">Django</span>
-                            <span class="skill-badge">JavaScript</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Testimonial 2 -->
                 <div class="testimonial-card">
-                    <div class="testimonial-video">
-                        <img src="" alt="Priya Sharma" class="testimonial-bg">
-                        <div class="video-overlay">
+                    <div class="testimonial-video" data-video-id="testimonial-2">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800" alt="Amit Joshi" class="testimonial-bg">
+                        <div class="video-overlay" onclick="openVideoModal('testimonial-2')">
                             <div class="play-button-large">
                                 <i class="fas fa-play"></i>
                             </div>
-                            <div class="video-duration">2:47</div>
+                            <div class="video-duration">3:12</div>
                         </div>
                     </div>
                     <div class="testimonial-content">
@@ -938,14 +928,47 @@ print("Hello World")
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "I was struggling with C programming for months until I joined The Angaar Batch. The way
-                            they explain complex concepts with real-world examples is amazing. Now I'm confident in
-                            my coding skills!"
+                            "The free classes are just the beginning! The quality of education and the passion of the instructors is incredible. I went from zero coding knowledge to building my own web applications. Highly recommend to anyone serious about coding!"
                         </p>
                         <div class="testimonial-author">
-                            <img src="" alt="Priya Sharma" class="author-avatar">
+                            <div class="author-avatar-circle">AJ</div>
                             <div class="author-info">
-                                <h4>Priya Sharma</h4>
+                                <h4>Amit Joshi</h4>
+                                <p>Full Stack Developer</p>
+                                <div class="rating">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 3 -->
+                <div class="testimonial-card">
+                    <div class="testimonial-video" data-video-id="testimonial-3">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800" alt="Sneha Kapoor" class="testimonial-bg">
+                        <div class="video-overlay" onclick="openVideoModal('testimonial-3')">
+                            <div class="play-button-large">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="video-duration">3:45</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-content">
+                        <div class="quote-icon">
+                            <i class="fas fa-quote-left"></i>
+                        </div>
+                        <p class="testimonial-text">
+                            "What sets The Angaar Batch apart is their approach to teaching. They don't just teach syntax, they teach you how to think like a programmer. The community is so supportive and the mentors are always there to help. Pure Angaar! 🔥"
+                        </p>
+                        <div class="testimonial-author">
+                            <div class="author-avatar-circle">SK</div>
+                            <div class="author-info">
+                                <h4>Sneha Kapoor</h4>
                                 <p>Frontend Developer at Flipkart</p>
                                 <div class="rating">
                                     <i class="fas fa-star"></i>
@@ -955,27 +978,19 @@ print("Hello World")
                                     <i class="fas fa-star"></i>
                                 </div>
                             </div>
-                            <div class="company-badge">
-                                <img src="" alt="Flipkart">
-                            </div>
-                        </div>
-                        <div class="testimonial-skills">
-                            <span class="skill-badge">React</span>
-                            <span class="skill-badge">JavaScript</span>
-                            <span class="skill-badge">CSS</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Testimonial 3 -->
+                <!-- Testimonial 4 -->
                 <div class="testimonial-card">
-                    <div class="testimonial-video">
-                        <img src="" alt="Vikash Gupta" class="testimonial-bg">
-                        <div class="video-overlay">
+                    <div class="testimonial-video" data-video-id="testimonial-4">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800" alt="Vikash Gupta" class="testimonial-bg">
+                        <div class="video-overlay" onclick="openVideoModal('testimonial-4')">
                             <div class="play-button-large">
                                 <i class="fas fa-play"></i>
                             </div>
-                            <div class="video-duration">4:12</div>
+                            <div class="video-duration">3:20</div>
                         </div>
                     </div>
                     <div class="testimonial-content">
@@ -983,12 +998,10 @@ print("Hello World")
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "I joined as a complete beginner and now I'm working as a Python developer! The
-                            step-by-step approach and practical projects helped me build a strong foundation. The
-                            Angaar Batch family is the best!"
+                            "I joined as a complete beginner and now I'm working as a Python developer! The step-by-step approach and practical projects helped me build a strong foundation. The Angaar Batch family is the best coding community out there!"
                         </p>
                         <div class="testimonial-author">
-                            <img src="" alt="Vikash Gupta" class="author-avatar">
+                            <div class="author-avatar-circle">VG</div>
                             <div class="author-info">
                                 <h4>Vikash Gupta</h4>
                                 <p>Python Developer at Infosys</p>
@@ -1000,72 +1013,19 @@ print("Hello World")
                                     <i class="fas fa-star"></i>
                                 </div>
                             </div>
-                            <div class="company-badge">
-                                <img src="" alt="Infosys">
-                            </div>
-                        </div>
-                        <div class="testimonial-skills">
-                            <span class="skill-badge">Python</span>
-                            <span class="skill-badge">Flask</span>
-                            <span class="skill-badge">SQL</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Testimonial 4 -->
-                <div class="testimonial-card">
-                    <div class="testimonial-video">
-                        <img src="" alt="Sneha Kapoor" class="testimonial-bg">
-                        <div class="video-overlay">
-                            <div class="play-button-large">
-                                <i class="fas fa-play"></i>
-                            </div>
-                            <div class="video-duration">3:56</div>
-                        </div>
-                    </div>
-                    <div class="testimonial-content">
-                        <div class="quote-icon">
-                            <i class="fas fa-quote-left"></i>
-                        </div>
-                        <p class="testimonial-text">
-                            "What sets The Angaar Batch apart is their approach to teaching. They don't just teach
-                            syntax, they teach you how to think like a programmer. The community is so supportive
-                            and the mentors are always there to help."
-                        </p>
-                        <div class="testimonial-author">
-                            <img src="" alt="Sneha Kapoor" class="author-avatar">
-                            <div class="author-info">
-                                <h4>Sneha Kapoor</h4>
-                                <p>Full Stack Developer at Amazon</p>
-                                <div class="rating">
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                    <i class="fas fa-star"></i>
-                                </div>
-                            </div>
-                            <div class="company-badge">
-                                <img src="" alt="Amazon">
-                            </div>
-                        </div>
-                        <div class="testimonial-skills">
-                            <span class="skill-badge">React</span>
-                            <span class="skill-badge">Node.js</span>
-                            <span class="skill-badge">MongoDB</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Testimonial 5 -->
                 <div class="testimonial-card">
-                    <div class="testimonial-video">
-                        <img src="" alt="Amit Joshi" class="testimonial-bg">
-                        <div class="video-overlay">
+                    <div class="testimonial-video" data-video-id="testimonial-5">
+                        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=800" alt="Meera Patel" class="testimonial-bg">
+                        <div class="video-overlay" onclick="openVideoModal('testimonial-5')">
                             <div class="play-button-large">
                                 <i class="fas fa-play"></i>
                             </div>
-                            <div class="video-duration">2:33</div>
+                            <div class="video-duration">2:55</div>
                         </div>
                     </div>
                     <div class="testimonial-content">
@@ -1073,15 +1033,13 @@ print("Hello World")
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "The free classes are just the beginning! The quality of education and the passion of
-                            the instructors is incredible. I went from zero coding knowledge to building my own web
-                            applications."
+                            "The energy and enthusiasm of The Angaar Batch is contagious! They make learning fun and engaging. I never thought I could understand programming concepts so easily. Now I'm building my own projects and loving every moment of it!"
                         </p>
                         <div class="testimonial-author">
-                            <img src="" alt="Amit Joshi" class="author-avatar">
+                            <div class="author-avatar-circle">MP</div>
                             <div class="author-info">
-                                <h4>Amit Joshi</h4>
-                                <p>Web Developer at Zomato</p>
+                                <h4>Meera Patel</h4>
+                                <p>Web Developer</p>
                                 <div class="rating">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -1090,27 +1048,19 @@ print("Hello World")
                                     <i class="fas fa-star"></i>
                                 </div>
                             </div>
-                            <div class="company-badge">
-                                <img src="" alt="Zomato">
-                            </div>
-                        </div>
-                        <div class="testimonial-skills">
-                            <span class="skill-badge">HTML/CSS</span>
-                            <span class="skill-badge">JavaScript</span>
-                            <span class="skill-badge">React</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Testimonial 6 -->
                 <div class="testimonial-card">
-                    <div class="testimonial-video">
-                        <img src="" alt="Meera Patel" class="testimonial-bg">
-                        <div class="video-overlay">
+                    <div class="testimonial-video" data-video-id="testimonial-6">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=800" alt="Rahul Kumar" class="testimonial-bg">
+                        <div class="video-overlay" onclick="openVideoModal('testimonial-6')">
                             <div class="play-button-large">
                                 <i class="fas fa-play"></i>
                             </div>
-                            <div class="video-duration">3:18</div>
+                            <div class="video-duration">3:30</div>
                         </div>
                     </div>
                     <div class="testimonial-content">
@@ -1118,15 +1068,13 @@ print("Hello World")
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "The energy and enthusiasm of The Angaar Batch is contagious! They make learning fun and
-                            engaging. I never thought I could understand programming concepts so easily. Now I'm
-                            building my own projects!"
+                            "The Angaar Batch completely transformed my coding journey! From knowing nothing about programming to landing my first job as a software developer. The mentors are incredible and the community support is unmatched. Best decision ever! 🔥"
                         </p>
                         <div class="testimonial-author">
-                            <img src="" alt="Meera Patel" class="author-avatar">
+                            <div class="author-avatar-circle">RK</div>
                             <div class="author-info">
-                                <h4>Meera Patel</h4>
-                                <p>Data Analyst at Microsoft</p>
+                                <h4>Rahul Kumar</h4>
+                                <p>Software Developer at TCS</p>
                                 <div class="rating">
                                     <i class="fas fa-star"></i>
                                     <i class="fas fa-star"></i>
@@ -1135,14 +1083,6 @@ print("Hello World")
                                     <i class="fas fa-star"></i>
                                 </div>
                             </div>
-                            <div class="company-badge">
-                                <img src="" alt="Microsoft">
-                            </div>
-                        </div>
-                        <div class="testimonial-skills">
-                            <span class="skill-badge">Python</span>
-                            <span class="skill-badge">Data Science</span>
-                            <span class="skill-badge">ML</span>
                         </div>
                     </div>
                 </div>
@@ -1169,25 +1109,6 @@ print("Hello World")
             </div>
         </div>
 
-        <!-- Testimonials Stats -->
-        <div class="testimonials-stats">
-            <div class="stat-item">
-                <div class="stat-number" data-target="4.9">0</div>
-                <div class="stat-label">Average Rating</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" data-target="2500">0</div>
-                <div class="stat-label">Happy Students</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" data-target="98">0</div>
-                <div class="stat-label">% Success Rate</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" data-target="150">0</div>
-                <div class="stat-label">Companies Hiring</div>
-            </div>
-        </div>
     </div>
 
     <!-- Floating Background Elements -->
@@ -1199,6 +1120,22 @@ print("Hello World")
         <div class="floating-element element-5"><i class="fas fa-fire"></i></div>
     </div>
 </section>
+
+<!-- Video Modal -->
+<div id="videoModal" class="video-modal">
+    <div class="video-modal-content">
+        <button class="video-modal-close" onclick="closeVideoModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="video-container">
+            <div id="videoPlaceholder" class="video-placeholder">
+                <i class="fas fa-video"></i>
+                <p>Video will be loaded here</p>
+                <small>Coming soon...</small>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Partnership Spotlight Section -->
 <section id="partnerships" class="partnerships-section">
@@ -3253,6 +3190,35 @@ Thank you!`;
     // Open email client
     window.location.href = mailtoLink;
 }
+
+// Video Modal Functions
+function openVideoModal(videoId) {
+    const modal = document.getElementById('videoModal');
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    
+    // Here you can add video URL mapping when videos are ready
+    const videoPlaceholder = document.getElementById('videoPlaceholder');
+    videoPlaceholder.innerHTML = `
+        <i class="fas fa-video"></i>
+        <p>Video: ${videoId}</p>
+        <small>Video will be loaded here when available</small>
+    `;
+}
+
+function closeVideoModal() {
+    const modal = document.getElementById('videoModal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('videoModal');
+    if (event.target === modal) {
+        closeVideoModal();
+    }
+});
 </script>
 
 {% endblock %}
