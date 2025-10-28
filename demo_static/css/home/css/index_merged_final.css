@@ -1522,6 +1522,17 @@ ul {
     flex-direction: column;
 }
 
+.region-group-next-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 96, 38, 0.15);
+    border-radius: 20px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    height: 450px;
+    display: flex;
+    flex-direction: column;
+}
+
 .region-group:hover {
     transform: translateY(-5px);
     border-color: rgba(255, 96, 38, 0.3);
@@ -3004,6 +3015,11 @@ button:active {
         height: 380px;
     }
 
+    .region-group-next-card {
+        padding: 20px;
+        height: 96%;
+    }
+
     .college-card {
         margin-bottom: 20px;
     }
@@ -3068,38 +3084,60 @@ button:active {
     }
 
     /* Testimonials Responsive */
+    .testimonials-section {
+        padding: 60px 0;
+        overflow-x: hidden;
+    }
+
+    .testimonials-carousel {
+        margin-top: 40px;
+        overflow: hidden;
+    }
+
+    .testimonials-track {
+        width: 100%;
+    }
+
     .testimonial-card {
+        display: grid;
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
         min-height: auto;
+        border-radius: 20px;
+    }
+
+    .testimonial-card:hover {
+        transform: none;
     }
 
     .testimonial-video {
-        height: 250px;
+        height: 280px;
         order: -1;
         grid-row: 1;
     }
 
     .testimonial-content {
         grid-row: 2;
-        padding: 25px 20px;
+        padding: 30px 20px;
     }
 
     .testimonial-text {
-        font-size: 1rem;
-        line-height: 1.6;
+        font-size: 1.05rem;
+        line-height: 1.7;
+        margin-bottom: 25px;
     }
 
     .testimonial-author {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
     }
 
     .author-avatar-circle {
         width: 50px;
         height: 50px;
-        font-size: 1.1rem;  
+        font-size: 1.1rem;
+        flex-shrink: 0;
     }
 
     .author-info h4 {
@@ -3116,12 +3154,28 @@ button:active {
 
     .quote-icon {
         font-size: 2rem;
-        margin-bottom: 15px;
+        margin-bottom: 20px;
     }
 
     .testimonials-navigation {
         flex-direction: column;
+        gap: 25px;
+        margin-top: 30px;
+    }
+
+    .testimonials-stats {
+        grid-template-columns: repeat(2, 1fr);
         gap: 20px;
+        padding: 30px 20px;
+        margin-top: 50px;
+    }
+
+    .testimonials-stats .stat-number {
+        font-size: 2rem;
+    }
+
+    .testimonials-stats .stat-label {
+        font-size: 0.9rem;
     }
 
     .nav-arrows {
@@ -3204,30 +3258,48 @@ button:active {
 
 /* Tablet Responsive (769px - 1024px) */
 @media (min-width: 769px) and (max-width: 1024px) {
+    .testimonials-section {
+        padding: 80px 0;
+        overflow-x: hidden;
+    }
+
     .testimonials-container {
-        padding: 0 25px;
+        padding: 0 30px;
+    }
+
+    .testimonials-carousel {
+        margin-top: 50px;
     }
 
     .testimonial-card {
-        grid-template-columns: 1fr 1fr;
+        display: grid;
+        grid-template-columns: 1fr 1.2fr;
     }
 
     .testimonial-video {
-        height: 350px;
+        height: 380px;
     }
 
     .testimonial-content {
-        padding: 30px 25px;
+        padding: 35px 30px;
     }
 
     .testimonial-text {
-        font-size: 1.05rem;
+        font-size: 1.08rem;
+        line-height: 1.75;
+    }
+
+    .testimonial-author {
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
     }
 
     .author-avatar-circle {
         width: 55px;
         height: 55px;
         font-size: 1.2rem;
+        flex-shrink: 0;
     }
 
     .author-info h4 {
@@ -3239,42 +3311,84 @@ button:active {
     }
 
     .quote-icon {
-        font-size: 2.5rem;
+        font-size: 2.3rem;
     }
 
     .nav-arrow {
         width: 50px;
         height: 50px;
     }
+
+    .testimonials-stats {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+        padding: 35px 25px;
+    }
+
+    .testimonials-stats .stat-number {
+        font-size: 2.2rem;
+    }
 }
 
 /* Small Mobile (max 480px) */
 @media (max-width: 480px) {
+    .testimonials-section {
+        padding: 50px 0;
+        overflow-x: hidden;
+    }
+
+    .testimonials-container {
+        padding: 0 15px;
+    }
+
+    .testimonials-carousel {
+        margin-top: 35px;
+        overflow: hidden;
+    }
+
+    .testimonials-track {
+        width: 100%;
+    }
+
     .testimonial-card {
+        display: grid;
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
+        border-radius: 18px;
+    }
+
+    .testimonial-card:hover {
+        transform: none;
     }
 
     .testimonial-video {
-        height: 200px;
+        height: 220px;
         order: -1;
         grid-row: 1;
     }
 
     .testimonial-content {
         grid-row: 2;
-        padding: 20px 15px;
+        padding: 25px 18px;
     }
 
     .testimonial-text {
-        font-size: 0.95rem;
-        line-height: 1.5;
+        font-size: 0.98rem;
+        line-height: 1.65;
+        margin-bottom: 20px;
+    }
+
+    .testimonial-author {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
     }
 
     .author-avatar-circle {
         width: 45px;
         height: 45px;
         font-size: 1rem;
+        flex-shrink: 0;
     }
 
     .author-info h4 {
@@ -3291,7 +3405,7 @@ button:active {
 
     .quote-icon {
         font-size: 1.8rem;
-        margin-bottom: 12px;
+        margin-bottom: 15px;
     }
 
     .play-button-large {
@@ -3341,6 +3455,21 @@ button:active {
 
     .video-placeholder small {
         font-size: 0.75rem;
+    }
+
+    .testimonials-stats {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 25px 15px;
+        margin-top: 40px;
+    }
+
+    .testimonials-stats .stat-number {
+        font-size: 1.8rem;
+    }
+
+    .testimonials-stats .stat-label {
+        font-size: 0.85rem;
     }
 }
 
@@ -3426,6 +3555,8 @@ button:active {
 .testimonials-container {
     margin: 0 auto;
     padding: 0 30px;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .testimonials-carousel {
@@ -3541,8 +3672,8 @@ button:active {
 
 .testimonial-text {
     color: rgba(255, 255, 255, 0.9);
-    font-size: 1.3rem;
-    line-height: 1.6;
+    font-size: 1.15rem;
+    line-height: 1.8;
     font-style: italic;
     margin-bottom: 30px;
     font-weight: 400;
