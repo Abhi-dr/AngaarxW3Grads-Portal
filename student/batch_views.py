@@ -88,7 +88,16 @@ def enroll_batch(request, id):
     extra_data = {}
     if batch.required_fields:
         for field in batch.required_fields:
-            extra_data[field] = request.POST.get(field, "")
+            # Special handling for college_name field
+            if field.lower() == 'college_name':
+                # Check if user selected "Other" and entered custom college name
+                custom_college = request.POST.get(f"{field}_custom", "").strip()
+                if custom_college:
+                    extra_data[field] = custom_college
+                else:
+                    extra_data[field] = request.POST.get(field, "")
+            else:
+                extra_data[field] = request.POST.get(field, "")
 
     EnrollmentRequest.objects.create(student=student, batch=batch, additional_data=extra_data,  status="Accepted")
 

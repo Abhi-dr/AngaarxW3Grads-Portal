@@ -8,6 +8,10 @@ from datetime import timedelta
 from django.db.models import Count
 from practice.models import Batch, Submission, Question
 from django.contrib import messages
+import requests
+import time
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 
 from administration.models import Achievement
@@ -315,3 +319,106 @@ def link_callback(uri, rel):
     if not os.path.isfile(path):
         raise Exception(f"Media URI must start with {settings.STATIC_URL} or {settings.MEDIA_URL}")
     return path
+
+
+# ======================================= CODE EXECUTION ================================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def execute_code(request):
+    """
+    Execute code using Judge0 API
+    """
+    try:
+        import json
+        data = json.loads(request.body)
+        source_code = data.get('source_code', '')
+        
+        if not source_code:
+            return JsonResponse({
+                'error': 'No source code provided'
+            }, status=400)
+        
+        # Judge0 API configuration
+        JUDGE0_API_KEY = '50e72a59c4msha2a0de8110e0aa9p1032ccjsn5de89ef15362'
+        JUDGE0_HOST = 'judge0-ce.p.rapidapi.com'
+        
+        # Step 1: Create submission
+        submission_url = f'https://{JUDGE0_HOST}/submissions?base64_encoded=false&wait=false'
+        headers = {
+            'content-type': 'application/json',
+            'x-rapidapi-key': JUDGE0_API_KEY,
+            'x-rapidapi-host': JUDGE0_HOST
+        }
+        
+        submission_data = {
+            'source_code': source_code,
+            'language_id': 71,  # Python 3
+            'stdin': ''
+        }
+        
+        response = requests.post(submission_url, json=submission_data, headers=headers)
+        
+        if response.status_code != 201:
+            return JsonResponse({
+                'error': 'Failed to create submission',
+                'details': response.text
+            }, status=500)
+        
+        submission_result = response.json()
+        token = submission_result.get('token')
+        
+        if not token:
+            return JsonResponse({
+                'error': 'No token received from Judge0'
+            }, status=500)
+        
+        # Step 2: Poll for result
+        result_url = f'https://{JUDGE0_HOST}/submissions/{token}?base64_encoded=false'
+        max_attempts = 10
+        attempt = 0
+        
+        while attempt < max_attempts:
+            time.sleep(1)  # Wait 1 second between polls
+            
+            result_response = requests.get(result_url, headers=headers)
+            
+            if result_response.status_code != 200:
+                return JsonResponse({
+                    'error': 'Failed to get submission result',
+                    'details': result_response.text
+                }, status=500)
+            
+            result = result_response.json()
+            status_id = result.get('status', {}).get('id', 0)
+            
+            # Status IDs: 1 = In Queue, 2 = Processing, 3+ = Done
+            if status_id > 2:
+                # Execution completed
+                return JsonResponse({
+                    'status': 'success',
+                    'result': {
+                        'status': result.get('status', {}),
+                        'stdout': result.get('stdout', ''),
+                        'stderr': result.get('stderr', ''),
+                        'compile_output': result.get('compile_output', ''),
+                        'time': result.get('time', ''),
+                        'memory': result.get('memory', '')
+                    }
+                })
+            
+            attempt += 1
+        
+        # Timeout
+        return JsonResponse({
+            'error': 'Execution timeout - please try again'
+        }, status=408)
+        
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'error': 'Invalid JSON data'
+        }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e)
+        }, status=500)
