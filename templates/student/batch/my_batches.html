@@ -24,6 +24,153 @@ Dashboard | My Courses
     .collapse {
         transition: height 0.35s ease;
     }
+    
+    /* College Dropdown Styling - Dark Mode Compatible */
+    .college-dropdown {
+        padding: 0.4rem 0.5rem;
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        max-height: 200px;
+        overflow-y: auto;
+        background-color: rgba(255, 255, 255, 0.05);
+        color: inherit;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    }
+    
+    .college-dropdown::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .college-dropdown::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .college-dropdown::-webkit-scrollbar-thumb {
+        background-color: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+    }
+    
+    .college-dropdown:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        outline: none;
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    
+    .college-dropdown option {
+        padding: 0.6rem;
+        cursor: pointer;
+        background-color: var(--bs-body-bg, #212529);
+        
+    }
+
+    [data-bs-theme="dark"] select>option {
+    color: #ffffff;
+    }
+    
+    .college-dropdown option:hover,
+    .college-dropdown option:checked {
+        background-color: rgba(13, 110, 253, 0.2);
+    }
+    
+    .college-dropdown option[value="other"] {
+        border-top: 1px solid rgba(255, 255, 255, 0.2);
+        margin-top: 0.25rem;
+        padding-top: 0.75rem;
+        font-weight: 600;
+        color: #0d6efd;
+        background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.05));
+    }
+    
+    /* Custom Input for Manual Entry */
+    .college-custom-input {
+        border: 2px solid #28a745;
+        border-radius: 0.5rem;
+        padding: 0.65rem 0.75rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background-color: rgba(40, 167, 69, 0.08);
+        color: inherit;
+    }
+    
+    .college-custom-input:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+        outline: none;
+        background-color: rgba(40, 167, 69, 0.12);
+    }
+    
+    .college-custom-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+        font-style: italic;
+    }
+    
+    /* Invalid State Styling */
+    .college-dropdown.is-invalid,
+    .college-custom-input.is-invalid {
+        border-color: #dc3545;
+        animation: shake 0.3s ease;
+    }
+    
+    .college-dropdown.is-invalid:focus,
+    .college-custom-input.is-invalid:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+    }
+    
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    /* Search Input Styling - Dark Mode */
+    .college-search-input {
+        padding: 0.6rem 0.75rem;
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.05);
+        color: inherit;
+    }
+    
+    .college-search-input:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+        outline: none;
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .college-search-input::placeholder {
+        color: rgb(255, 255, 255);
+    }
+    
+    .search-icon {
+        color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Input Group Styling for Dark Mode */
+    .input-group-text {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: inherit;
+    }
+    
+    /* Results Count Badge */
+    .search-results-badge {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+        border-radius: 0.375rem;
+        background: rgba(13, 110, 253, 0.2);
+        color: #0d6efd;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
 </style>
 
 {% endblock %}
@@ -321,6 +468,104 @@ Dashboard | My Courses
             });
         }
 
+        // Comprehensive list of Indian colleges and universities
+        const collegesList = [
+            // IITs
+            "IIT Delhi", "IIT Bombay", "IIT Madras", "IIT Kanpur", "IIT Kharagpur",
+            "IIT Roorkee", "IIT Guwahati", "IIT Hyderabad", "IIT Indore", "IIT BHU Varanasi",
+            "IIT Gandhinagar", "IIT Ropar", "IIT Patna", "IIT Bhubaneswar", "IIT Jodhpur",
+            "IIT Mandi", "IIT Palakkad", "IIT Tirupati", "IIT Dhanbad", "IIT Jammu",
+            "IIT Goa", "IIT Dharwad", "IIT Bhilai",
+            
+            // NITs
+            "NIT Trichy", "NIT Surathkal", "NIT Warangal", "NIT Calicut", "NIT Rourkela",
+            "NIT Durgapur", "NIT Jaipur", "NIT Kurukshetra", "NIT Silchar", "NIT Hamirpur",
+            "NIT Jalandhar", "NIT Allahabad", "NIT Bhopal", "NIT Jamshedpur", "NIT Raipur",
+            "NIT Agartala", "NIT Arunachal Pradesh", "NIT Delhi", "NIT Goa", "NIT Meghalaya",
+            "NIT Manipur", "NIT Mizoram", "NIT Nagaland", "NIT Patna", "NIT Puducherry",
+            "NIT Sikkim", "NIT Srinagar", "NIT Uttarakhand", "NIT Andhra Pradesh",
+            
+            // IIITs
+            "IIIT Hyderabad", "IIIT Allahabad", "IIIT Bangalore", "IIIT Delhi",
+            "IIIT Gwalior", "IIIT Jabalpur", "IIIT Kota", "IIIT Vadodara",
+            "IIIT Pune", "IIIT Kancheepuram", "IIIT Lucknow", "IIIT Nagpur",
+            
+            // DTU/NSUT
+            "Delhi Technological University (DTU)", "Netaji Subhas University of Technology (NSUT)",
+            
+            // Other Major Universities - Delhi NCR
+            "Indraprastha Institute of Information Technology Delhi (IIIT-D)",
+            "Guru Gobind Singh Indraprastha University (GGSIPU)",
+            "Jamia Millia Islamia", "Jawaharlal Nehru University",
+            "Ambedkar University Delhi", "Delhi University",
+            "Amity University Noida", "Shiv Nadar University",
+            "Bennett University Greater Noida", "Ashoka University",
+            "JIIT Noida", "JIMS Noida", "GTBIT Delhi",
+            "Maharaja Agrasen Institute of Technology", "NSIT Delhi",
+            "Indira Gandhi Delhi Technical University for Women (IGDTUW)",
+            "Bharati Vidyapeeth's College of Engineering",
+            "Netaji Subhas Institute of Technology (NSIT)",
+            "Anand College Delhi (ANDC)",
+            "Laxmibai College Delhi",
+            "KCC Institute of Technology & Management",
+            "Greater Noida Institute of Technology (GNIOT)",
+            "Galgotias College of Engineering and Technology",
+
+            
+            // Uttar Pradesh
+            "GLA University Mathura", "GL Bajaj Institute of Technology and Management Mathura",
+            "BSA College of Engineering and Technology Mathura",
+            "AKGEC Ghaziabad", "Ajay Kumar Garg Engineering College",
+            "IMS Engineering College Ghaziabad",
+            "IET Lucknow", "KNIT Sultanpur", "MMMUT Gorakhpur",
+            "BIT Mesra", "HBTU Kanpur", "Galgotias University",
+            "Sharda University", "Aligarh Muslim University",
+            
+            // Maharashtra
+            "VJTI Mumbai", "COEP Pune", "PICT Pune", "SPIT Mumbai",
+            "DJ Sanghvi College of Engineering", "KJ Somaiya College of Engineering",
+            "Sardar Patel Institute of Technology", "Ramrao Adik Institute of Technology",
+            "MIT Pune", "VIT Pune", "IIIT Pune",
+            
+            // Karnataka
+            "RVCE Bangalore", "BMS College of Engineering", "PES University",
+            "MS Ramaiah Institute of Technology", "Dayananda Sagar College of Engineering",
+            "JSS Science and Technology University", "NMIT Bangalore",
+            
+            // Tamil Nadu
+            "Anna University", "PSG College of Technology", "Thiagarajar College of Engineering",
+            "SSN College of Engineering", "SRM University", "VIT Vellore",
+            "Amrita Vishwa Vidyapeetham",
+            
+            // Telangana
+            "BITS Pilani Hyderabad Campus", "Vasavi College of Engineering",
+            "CVR College of Engineering", "CBIT Hyderabad",
+            "Osmania University", "JNTUH",
+            
+            // Rajasthan
+            "BITS Pilani", "Manipal University Jaipur", "Poornima University",
+            "LNM Institute of Information Technology", "MBM Engineering College Jodhpur",
+            "UEM Jaipur",
+            
+            // Uttarakhand
+            "Tula's Institute Dehradun", "Graphic Era University",
+            "DIT University", "UPES Dehradun",
+            
+            // Gujarat
+            "DAIICT Gandhinagar", "Nirma University", "LDCE Ahmedabad",
+            "SVNIT Surat", "GEC Gandhinagar",
+            
+            // West Bengal
+            "Jadavpur University", "Heritage Institute of Technology",
+            "Techno India", "Kalyani Government Engineering College",
+            
+            // Other States
+            "Thapar University Patiala", "Chitkara University",
+            "LPU Jalandhar", "PEC Chandigarh",
+            "Manipal Institute of Technology", "Christ University Bangalore",
+            "Sikkim Manipal Institute of Technology"
+        ].sort();
+
         enrollButtons.forEach(button => {
             button.addEventListener("click", function () {
                 const batchId = this.getAttribute("data-batch-id");
@@ -344,18 +589,206 @@ Dashboard | My Courses
                 // Generate required fields dynamically
                 extraFieldsContainer.innerHTML = "";
                 requiredFields.forEach(field => {
-                    let label = field.replace("_", " ").toUpperCase();
-                    extraFieldsContainer.innerHTML += `
-                        <div class="mb-3">
-                            <label class="form-label">${label}</label>
-                            <input type="text" placeholder="Enter your ${label} here..." name="${field}" class="form-control" required>
-                        </div>
-                    `;
+                    let label = field.replace(/_/g, " ").toUpperCase();
+                    
+                    // Special handling for college_name field
+                    if (field.toLowerCase() === 'college_name') {
+                        extraFieldsContainer.innerHTML += `
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    ${label} <span class="text-danger">*</span>
+                                    <span id="results_badge_${field}" class="search-results-badge" style="display: none;">
+                                        <i class="fas fa-check-circle"></i> 0 found
+                                    </span>
+                                </label>
+                                
+                                <!-- Search input with icon -->
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search search-icon"></i>
+                                    </span>
+                                    <input type="text" 
+                                           id="college_search_${field}" 
+                                           class="form-control college-search-input" 
+                                           placeholder="🔍 Search from ${collegesList.length}+ colleges..." 
+                                           autocomplete="off">
+                                </div>
+                                
+                                <!-- Dropdown with all colleges -->
+                                <select name="${field}" id="college_select_${field}" class="form-control college-dropdown" required size="6">
+                                    <option value="" disabled selected>👇 Select your college from below</option>
+                                    ${collegesList.map(college => `<option value="${college}">${college}</option>`).join('')}
+                                    <option value="other">✏️ Other (Enter Manually)</option>
+                                </select>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle"></i> Can't find your college? Select "Other" to enter manually
+                                </small>
+                                
+                                <!-- Custom input for manual entry -->
+                                <input type="text" 
+                                       name="${field}_custom" 
+                                       id="college_custom_${field}" 
+                                       class="form-control mt-2 college-custom-input" 
+                                       placeholder="✏️ Enter your college name here..." 
+                                       style="display: none;">
+                            </div>
+                        `;
+                    } else {
+                        // Regular text input for other fields
+                        extraFieldsContainer.innerHTML += `
+                            <div class="mb-3">
+                                <label class="form-label">${label}</label>
+                                <input type="text" placeholder="Enter your ${label} here..." name="${field}" class="form-control" required>
+                            </div>
+                        `;
+                    }
+                });
+
+                // Add event listeners for college search functionality
+                const collegeSearchInputs = document.querySelectorAll('[id^="college_search_"]');
+                collegeSearchInputs.forEach(searchInput => {
+                    const fieldName = searchInput.id.replace('college_search_', '');
+                    const dropdown = document.getElementById(`college_select_${fieldName}`);
+                    const resultsBadge = document.getElementById(`results_badge_${fieldName}`);
+                    
+                    searchInput.addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase().trim();
+                        const options = dropdown.querySelectorAll('option');
+                        let visibleCount = 0;
+                        
+                        options.forEach(option => {
+                            if (option.value === '' || option.value === 'other') {
+                                // Always show the placeholder and "Other" option
+                                option.style.display = '';
+                                return;
+                            }
+                            
+                            const collegeText = option.textContent.toLowerCase();
+                            if (collegeText.includes(searchTerm)) {
+                                option.style.display = '';
+                                visibleCount++;
+                            } else {
+                                option.style.display = 'none';
+                            }
+                        });
+                        
+                        // Update results badge
+                        if (searchTerm.length > 0) {
+                            resultsBadge.style.display = 'inline-block';
+                            resultsBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${visibleCount} found`;
+                        } else {
+                            resultsBadge.style.display = 'none';
+                        }
+                        
+                        // Auto-select if only one college matches
+                        if (visibleCount === 1 && searchTerm.length > 2) {
+                            const visibleOption = Array.from(options).find(opt => 
+                                opt.style.display !== 'none' && opt.value !== '' && opt.value !== 'other'
+                            );
+                            if (visibleOption) {
+                                dropdown.value = visibleOption.value;
+                                // Add visual feedback
+                                dropdown.style.borderColor = '#28a745';
+                                setTimeout(() => {
+                                    dropdown.style.borderColor = '';
+                                }, 1000);
+                            }
+                        }
+                    });
+                    
+                    // Clear search when dropdown is selected
+                    dropdown.addEventListener('change', function() {
+                        searchInput.value = '';
+                        resultsBadge.style.display = 'none';
+                        // Reset all options visibility
+                        const options = dropdown.querySelectorAll('option');
+                        options.forEach(option => {
+                            option.style.display = '';
+                        });
+                    });
+                    
+                    // Keyboard navigation: Enter key to focus dropdown
+                    searchInput.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const visibleOptions = Array.from(dropdown.querySelectorAll('option')).filter(opt => 
+                                opt.style.display !== 'none' && opt.value !== '' && opt.value !== 'other'
+                            );
+                            
+                            if (visibleOptions.length === 1) {
+                                // Auto-select the only visible option
+                                dropdown.value = visibleOptions[0].value;
+                                dropdown.dispatchEvent(new Event('change'));
+                            } else if (visibleOptions.length > 0) {
+                                // Focus the dropdown for manual selection
+                                dropdown.focus();
+                            }
+                        } else if (e.key === 'Escape') {
+                            // Clear search on Escape
+                            this.value = '';
+                            this.dispatchEvent(new Event('input'));
+                        }
+                    });
+                });
+                
+                // Add event listeners for college dropdown changes
+                const collegeDropdowns = document.querySelectorAll('.college-dropdown');
+                collegeDropdowns.forEach(dropdown => {
+                    dropdown.addEventListener('change', function() {
+                        const fieldName = this.name;
+                        const customInput = document.getElementById(`college_custom_${fieldName}`);
+                        
+                        if (this.value === 'other') {
+                            // Show custom input and make it required
+                            customInput.style.display = 'block';
+                            customInput.required = true;
+                            this.required = false;
+                            // Clear the dropdown selection to avoid confusion
+                            this.value = '';
+                        } else {
+                            // Hide custom input and make dropdown required
+                            customInput.style.display = 'none';
+                            customInput.required = false;
+                            customInput.value = '';
+                            this.required = true;
+                        }
+                    });
                 });
 
                 // Update form action dynamically
                 enrollForm.action = `/dashboard/enroll_course/${batchId}/`;
             });
+        });
+
+        // Form validation on submit
+        enrollForm.addEventListener('submit', function(e) {
+            const collegeDropdowns = document.querySelectorAll('.college-dropdown');
+            let isValid = true;
+            let errorMessage = '';
+
+            collegeDropdowns.forEach(dropdown => {
+                const fieldName = dropdown.name;
+                const customInput = document.getElementById(`college_custom_${fieldName}`);
+                
+                // Check if both dropdown and custom input are empty
+                if ((!dropdown.value || dropdown.value === '') && (!customInput.value || customInput.value.trim() === '')) {
+                    isValid = false;
+                    errorMessage = 'Please select a college from the dropdown or enter it manually.';
+                    dropdown.classList.add('is-invalid');
+                    if (customInput.style.display !== 'none') {
+                        customInput.classList.add('is-invalid');
+                    }
+                } else {
+                    dropdown.classList.remove('is-invalid');
+                    customInput.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                e.preventDefault();
+                alert(errorMessage);
+                return false;
+            }
         });
     });
 

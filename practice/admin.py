@@ -119,7 +119,7 @@ class StreakAdmin(admin.ModelAdmin):
 @admin.register(EnrollmentRequest)
 class EnrollmentRequestAdmin(admin.ModelAdmin):
     list_display = ['student', 'batch', 'status']
-    search_fields = ['student__user__username', 'batch__name']
+    search_fields = ['student__username', 'batch__name', 'status']
     list_per_page = 30
     list_filter = ['batch']
 
