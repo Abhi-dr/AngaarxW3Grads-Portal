@@ -22,6 +22,9 @@ from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRe
 from django.views.decorators.cache import cache_control
 from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode
 
+import google.generativeai as genai
+from django.conf import settings
+
 # ========================= SHEET WORK ==========================
 
 @login_required(login_url='login')
@@ -740,11 +743,13 @@ def edit_question(request, id):
         
         question.save()
         
-        question.sheets.clear()
-        
-        for sheet_id in sheet:
-            sheet = Sheet.objects.get(id=sheet_id)
-            question.sheets.add(sheet)
+        # Only update sheet associations if sheets are provided in the form
+        if sheet:  # Check if sheet list is not empty
+            question.sheets.clear()
+            
+            for sheet_id in sheet:
+                sheet_obj = Sheet.objects.get(id=sheet_id)
+                question.sheets.add(sheet_obj)
         
         messages.success(request, 'Problem updated successfully')
         return redirect('instructor_edit_question', id=question.id)
@@ -870,8 +875,8 @@ def add_question_json(request, slug):
             
             return JsonResponse({
                 'status': 'success',
-                'message': 'Question added successfully!',
-                'redirect_url': reverse('instructor_sheet', args=[sheet.slug])
+                'message': 'Question added successfully! Redirecting to test code...',
+                'redirect_url': reverse('instructor_test_code', args=[question.slug])
             })
             
         except json.JSONDecodeError:
@@ -879,6 +884,306 @@ def add_question_json(request, slug):
                 'status': 'error',
                 'message': 'Invalid JSON format. Please check your JSON data.'
             })
+            
+        except Exception as e:
+            return JsonResponse({
+                'status': 'error',
+                'message': f'An error occurred: {str(e)}'
+            })
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'})
+
+# ========================= GENERATE QUESTION JSON USING GEMINI AI ==========================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@csrf_exempt
+def generate_question_json(request):
+    """
+    Generate question JSON from a question title/description using Gemini AI
+    """
+    if request.method == "POST" and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        try:
+            question_title = request.POST.get("question_title", "").strip()
+            
+            if not question_title:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': 'Please provide a question title or description.'
+                })
+            
+            # Configure Gemini AI
+            try:
+                # Get API key from settings
+                api_key = getattr(settings, 'GEMINI_API_KEY', None)
+                if not api_key:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': 'Gemini API key not configured. Please add GEMINI_API_KEY to your settings.'
+                    })
+                
+                genai.configure(api_key=api_key)
+                model = genai.GenerativeModel('gemini-2.0-flash')
+                
+            except Exception as e:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Failed to initialize Gemini AI: {str(e)}'
+                })
+            
+            # Create the prompt
+            prompt = f"""You are given a programming problem request: {question_title}
+
+Create a complete coding question and produce a JSON output containing all the sections listed below:
+
+**REQUIRED SECTIONS:**
+
+1. **title**: A short, clear title for the question.
+
+2. **scenario**: An optional scenario description (can be empty string if not applicable).
+
+3. **description**: A comprehensive problem description with examples and explanations.
+   - Use backticks `` for inline code highlighting (e.g., `arr[i]`, `n`, `O(n)`)
+   - Use backticks for variable names, function names, and code snippets in the description
+
+4. **input_format**: Detailed description of how input will be provided.
+   - Use backticks `` for highlighting format specifications
+
+5. **output_format**: Detailed description of the expected output format.
+   - Use backticks `` for highlighting output specifications
+
+6. **constraints**: All constraints, limits, and edge cases for the problem.
+   - Use backticks `` for highlighting constraint values (e.g., `1 ≤ n ≤ 10^5`)
+
+7. **hint**: An optional hint to help solve the problem (can be empty string).
+   - Use backticks `` for code-related hints
+
+8. **difficulty_level**: Must be exactly one of: "Easy", "Medium", or "Hard"
+
+9. **test_cases**: An array with EXACTLY 10 test cases:
+   - At least 2 must be marked as sample test cases (is_sample: true)
+   - Remaining 8 should be hidden test cases (is_sample: false)
+   - Each test case MUST have:
+     * "input": Only the raw input value (no labels, no extra text, no formatting)
+     * "output": Only the raw output value (no labels, no extra text, no formatting)
+     * "is_sample": true for sample cases, false for hidden cases
+   - Test cases should cover: basic cases, edge cases, large inputs, and boundary conditions
+   - VERIFY each test case output is CORRECT before including it
+
+10. **driver_codes**: An array with driver code for ALL 4 languages:
+    - Python (language_id: 71)
+    - C (language_id: 50)
+    - C++ (language_id: 54)
+    - Java (language_id: 62)
+
+**DRIVER CODE REQUIREMENTS:**
+
+For each language, provide:
+
+a) **visible_driver_code**: 
+   - Only the function/class definition that students will see and write code in
+   - NO main function, NO test code, NO extra text like "Here is the code"
+   - Just the function signature with empty body or comment placeholder
+   - This is what students will fill in with their solution
+
+b) **complete_driver_code**:
+   - CRITICAL: This code must have "#USER_CODE#" placeholder where the visible_driver_code will be inserted
+   - DO NOT write the solution in complete_driver_code
+   - The system will replace "#USER_CODE#" with the student's code from visible_driver_code
+   - Structure: Imports → #USER_CODE# → Main/Driver logic
+   - Must read 't' (number of test cases) from input
+   - Execute the function 't' times in a loop
+   - After EACH test case execution, print "~" on a new line
+   - Use simple input reading (e.g., int(input()) for Python, scanf for C, Scanner for Java)
+   
+**IMPORTANT WORKFLOW:**
+1. Student writes solution in visible_driver_code template
+2. System replaces "#USER_CODE#" in complete_driver_code with student's code
+3. Complete code is sent to Judge0 for execution
+4. Therefore, complete_driver_code should ONLY have the framework, NOT the solution
+
+**DRIVER CODE EXAMPLES:**
+
+**Python Example:**
+Visible code (what student sees and fills):
+```
+def find_max(arr):
+    # Write your code here
+    pass
+```
+
+Complete driver code (framework only, NO solution):
+```
+#USER_CODE#
+
+t = int(input())
+for _ in range(t):
+    n = int(input())
+    arr = list(map(int, input().split()))
+    result = find_max(arr)
+    print(result)
+    print('~')
+```
+
+Note: The complete driver code has NO solution inside find_max() - it's just the framework.
+The system will replace #USER_CODE# with the student's implementation of find_max().
+
+**Java Example:**
+Visible code:
+```
+class Solution {{
+    public int findMax(int[] arr) {{
+        // Write your code here
+    }}
+}}
+```
+
+Complete driver code:
+```
+import java.io.*;
+import java.util.*;
+
+#USER_CODE#
+
+public class Main {{
+    public static void main(String args[]) throws IOException {{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        int t = Integer.parseInt(br.readLine());
+        
+        while (t-- > 0) {{
+            int n = Integer.parseInt(br.readLine());
+            String[] input = br.readLine().split(" ");
+            int[] arr = new int[n];
+            for(int i = 0; i < n; i++) {{
+                arr[i] = Integer.parseInt(input[i]);
+            }}
+            Solution sol = new Solution();
+            int result = sol.findMax(arr);
+            System.out.println(result);
+            System.out.println("~");
+        }}
+    }}
+}}
+```
+
+Note: Solution class has empty findMax() method - the student will write the logic.
+Complete driver code only has the test harness and I/O handling.
+
+**CRITICAL REQUIREMENTS:**
+
+✓ Return ONLY valid JSON (no markdown, no extra text, no code blocks)
+✓ Ensure all strings are properly escaped for JSON
+✓ Use backticks `` for code highlighting in description, input_format, output_format, constraints, and hint
+✓ EXACTLY 10 test cases (verify before returning)
+✓ All 4 driver codes must be present and correct
+✓ Test case inputs/outputs must be clean (no extra text)
+✓ "#USER_CODE#" must be present in EVERY complete_driver_code (exact case-sensitive string)
+✓ DO NOT put the solution in complete_driver_code - only framework/driver logic
+✓ Complete driver code = Imports + #USER_CODE# placeholder + Main/Driver logic
+✓ Each driver must print "~" after each test case
+✓ Functions must PRINT results, not return them
+✓ DOUBLE-CHECK all test case outputs for correctness
+
+Return the JSON in this exact structure:
+
+{{
+    "title": "...",
+    "scenario": "...",
+    "description": "...",
+    "input_format": "...",
+    "output_format": "...",
+    "constraints": "...",
+    "hint": "...",
+    "difficulty_level": "Easy|Medium|Hard",
+    "test_cases": [
+        {{"input": "...", "output": "...", "is_sample": true}},
+        {{"input": "...", "output": "...", "is_sample": true}},
+        {{"input": "...", "output": "...", "is_sample": false}},
+        {{"input": "...", "output": "...", "is_sample": false}},
+        {{"input": "...", "output": "...", "is_sample": false}},
+        {{"input": "...", "output": "...", "is_sample": false}},
+        {{"input": "...", "output": "...", "is_sample": false}},
+        {{"input": "...", "output": "...", "is_sample": false}},
+        {{"input": "...", "output": "...", "is_sample": false}},
+        {{"input": "...", "output": "...", "is_sample": false}}
+    ],
+    "driver_codes": [
+        {{"language_id": 71, "visible_driver_code": "...", "complete_driver_code": "..."}},
+        {{"language_id": 50, "visible_driver_code": "...", "complete_driver_code": "..."}},
+        {{"language_id": 54, "visible_driver_code": "...", "complete_driver_code": "..."}},
+        {{"language_id": 62, "visible_driver_code": "...", "complete_driver_code": "..."}}
+    ]
+}}"""
+
+            # Generate response from Gemini
+            try:
+                response = model.generate_content(prompt)
+                generated_text = response.text
+                
+                # Clean up the response - remove markdown code blocks if present
+                generated_text = generated_text.strip()
+                if generated_text.startswith('```json'):
+                    generated_text = generated_text[7:]
+                if generated_text.startswith('```'):
+                    generated_text = generated_text[3:]
+                if generated_text.endswith('```'):
+                    generated_text = generated_text[:-3]
+                generated_text = generated_text.strip()
+                
+                # Try to parse as JSON to validate
+                try:
+                    json_data = json.loads(generated_text)
+                    
+                    # Validate required fields
+                    required_fields = ['title', 'description', 'input_format', 'output_format', 'constraints', 'difficulty_level']
+                    missing_fields = [field for field in required_fields if field not in json_data or not json_data[field]]
+                    
+                    if missing_fields:
+                        return JsonResponse({
+                            'status': 'error',
+                            'message': f'Generated JSON is missing required fields: {", ".join(missing_fields)}. Please try again.'
+                        })
+                    
+                    # Validate difficulty level
+                    valid_difficulty_levels = ['Easy', 'Medium', 'Hard']
+                    if json_data['difficulty_level'] not in valid_difficulty_levels:
+                        json_data['difficulty_level'] = 'Medium'  # Default to Medium if invalid
+                    
+                    # Basic check: Ensure driver codes have #USER_CODE# placeholder
+                    # This is critical for the system to work
+                    if 'driver_codes' in json_data and isinstance(json_data['driver_codes'], list):
+                        missing_placeholder = []
+                        for dc in json_data['driver_codes']:
+                            lang_id = dc.get('language_id', 'unknown')
+                            complete_code = dc.get('complete_driver_code', '')
+                            if '#USER_CODE#' not in complete_code:
+                                lang_names = {71: 'Python', 50: 'C', 54: 'C++', 62: 'Java'}
+                                lang_name = lang_names.get(lang_id, f'language_id {lang_id}')
+                                missing_placeholder.append(lang_name)
+                        
+                        if missing_placeholder:
+                            return JsonResponse({
+                                'status': 'error',
+                                'message': f'Driver code for {", ".join(missing_placeholder)} is missing "#USER_CODE#" placeholder. This is required for the system to inject student code. Please try again.'
+                            })
+                    
+                    return JsonResponse({
+                        'status': 'success',
+                        'message': 'Question JSON generated successfully!',
+                        'json_data': json_data
+                    })
+                    
+                except json.JSONDecodeError as je:
+                    return JsonResponse({
+                        'status': 'error',
+                        'message': f'Failed to parse generated JSON. Error: {str(je)}. Please try again or refine your question description.'
+                    })
+                    
+            except Exception as e:
+                return JsonResponse({
+                    'status': 'error',
+                    'message': f'Failed to generate question from Gemini AI: {str(e)}'
+                })
             
         except Exception as e:
             return JsonResponse({

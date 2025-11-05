@@ -34,6 +34,10 @@ active
 
 
                 <a href="{% url 'instructor_add_new_question' sheet.slug %}" class="btn btn-outline-primary">Add New Question</a>
+                
+                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#aiGenerateModal">
+                    <i class="ti ti-sparkles"></i> AI Generate Question
+                </button>
 
                 <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -368,6 +372,95 @@ active
         </div>
     </div>
 
+    <!-- =============================== AI GENERATE QUESTION MODAL ================================= -->
+
+    <div class="modal fade" id="aiGenerateModal" tabindex="-1" aria-labelledby="aiGenerateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="aiGenerateModalLabel">
+                        <i class="ti ti-sparkles"></i> AI-Powered Question Generator
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Step 1: Input Question Title -->
+                    <div id="step1Container">
+                        <div class="alert alert-info">
+                            <i class="ti ti-info-circle"></i> 
+                            <strong>How it works:</strong> Enter a question title or brief description, and I'll automatically generate the complete question
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="questionTitleInput" class="form-label fw-semibold">Question Title or Description</label>
+                            <textarea 
+                                class="form-control" 
+                                id="questionTitleInput" 
+                                rows="3" 
+                                placeholder="e.g., 'Two Sum Problem' or 'Write a function to find the sum of two numbers in an array that equals a target'"
+                                required
+                            ></textarea>
+                            <small class="text-muted">Be as specific as possible for better results</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-success" id="generateBtn" onclick="generateQuestionJSON()">
+                                <i class="ti ti-sparkles"></i> Generate Question
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Step 2: Review and Edit Generated JSON -->
+                    <div id="step2Container" style="display: none;">
+                        <div class="alert alert-success">
+                            <i class="ti ti-check-circle"></i> 
+                            <strong>Question generated successfully!</strong> Review and edit if needed, then click "Add Question" to save.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="generatedJsonTextarea" class="form-label fw-semibold">
+                                Generated Question JSON
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2" onclick="copyToClipboard()">
+                                    <i class="ti ti-copy"></i> Copy JSON
+                                </button>
+                            </label>
+                            <textarea 
+                                class="form-control font-monospace" 
+                                id="generatedJsonTextarea" 
+                                rows="10"
+                                style="font-size: 0.9rem;"
+                            ></textarea>
+                            <small class="text-muted">You can edit the JSON before adding the question</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-outline-secondary" onclick="backToStep1()">
+                                <i class="ti ti-arrow-left"></i> Back
+                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <button type="button" class="btn btn-primary" id="addQuestionBtn" onclick="addGeneratedQuestion()">
+                                    <i class="ti ti-check"></i> Add Question to Sheet
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading State -->
+                    <div id="loadingContainer" style="display: none;">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-success" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <h5 class="mt-3">DK is generating question for you, {{request.user.first_name}} Sir...</h5>
+                            <p class="text-muted">This may take a few seconds</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -587,4 +680,192 @@ active
 
     fetchTimer();
 </script>
+
+<!-- AI Question Generation JavaScript -->
+<script>
+    // Global variable to store generated JSON
+    let generatedQuestionData = null;
+    
+    /**
+     * Generate question JSON using Gemini AI
+     */
+    async function generateQuestionJSON() {
+        const questionTitle = document.getElementById('questionTitleInput').value.trim();
+        
+        if (!questionTitle) {
+            alert('Please enter a question title or description');
+            return;
+        }
+        
+        // Show loading state
+        document.getElementById('step1Container').style.display = 'none';
+        document.getElementById('loadingContainer').style.display = 'block';
+        
+        // Disable generate button
+        document.getElementById('generateBtn').disabled = true;
+        
+        try {
+            const formData = new FormData();
+            formData.append('question_title', questionTitle);
+            
+            const response = await fetch("{% url 'instructor_generate_question_json' %}", {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                // Store the generated data
+                generatedQuestionData = data.json_data;
+                
+                // Display the JSON in the textarea (formatted)
+                document.getElementById('generatedJsonTextarea').value = JSON.stringify(data.json_data, null, 2);
+                
+                // Hide loading, show step 2
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('step2Container').style.display = 'block';
+                
+            } else {
+                // Show error
+                alert('Error: ' + data.message);
+                
+                // Return to step 1
+                document.getElementById('loadingContainer').style.display = 'none';
+                document.getElementById('step1Container').style.display = 'block';
+                document.getElementById('generateBtn').disabled = false;
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while generating the question. Please try again.');
+            
+            // Return to step 1
+            document.getElementById('loadingContainer').style.display = 'none';
+            document.getElementById('step1Container').style.display = 'block';
+            document.getElementById('generateBtn').disabled = false;
+        }
+    }
+    
+    /**
+     * Go back to step 1
+     */
+    function backToStep1() {
+        document.getElementById('step2Container').style.display = 'none';
+        document.getElementById('step1Container').style.display = 'block';
+        document.getElementById('generateBtn').disabled = false;
+    }
+    
+    /**
+     * Copy JSON to clipboard
+     */
+    function copyToClipboard() {
+        const textarea = document.getElementById('generatedJsonTextarea');
+        textarea.select();
+        document.execCommand('copy');
+        
+        // Show feedback
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="ti ti-check"></i> Copied!';
+        btn.classList.add('btn-success');
+        btn.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+        }, 2000);
+    }
+    
+    /**
+     * Add the generated question to the sheet
+     */
+    async function addGeneratedQuestion() {
+        const jsonText = document.getElementById('generatedJsonTextarea').value.trim();
+        
+        if (!jsonText) {
+            alert('No question data to add');
+            return;
+        }
+        
+        // Validate JSON format
+        try {
+            JSON.parse(jsonText);
+        } catch (e) {
+            alert('Invalid JSON format. Please check the JSON syntax.');
+            return;
+        }
+        
+        // Disable button and show loading
+        const addBtn = document.getElementById('addQuestionBtn');
+        const originalHTML = addBtn.innerHTML;
+        addBtn.disabled = true;
+        addBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adding...';
+        
+        try {
+            const formData = new FormData();
+            formData.append('json_data', jsonText);
+            
+            const response = await fetch("{% url 'instructor_add_question_json' sheet.slug %}", {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                // Show success message
+                alert(data.message);
+                
+                // Redirect to the sheet page
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    window.location.reload();
+                }
+            } else {
+                alert('Error: ' + data.message);
+                addBtn.disabled = false;
+                addBtn.innerHTML = originalHTML;
+            }
+            
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An error occurred while adding the question. Please try again.');
+            addBtn.disabled = false;
+            addBtn.innerHTML = originalHTML;
+        }
+    }
+    
+    /**
+     * Reset modal when it's closed
+     */
+    document.getElementById('aiGenerateModal').addEventListener('hidden.bs.modal', function () {
+        // Reset all containers
+        document.getElementById('step1Container').style.display = 'block';
+        document.getElementById('step2Container').style.display = 'none';
+        document.getElementById('loadingContainer').style.display = 'none';
+        
+        // Clear inputs
+        document.getElementById('questionTitleInput').value = '';
+        document.getElementById('generatedJsonTextarea').value = '';
+        
+        // Reset buttons
+        document.getElementById('generateBtn').disabled = false;
+        document.getElementById('addQuestionBtn').disabled = false;
+        
+        // Clear stored data
+        generatedQuestionData = null;
+    });
+</script>
+
 {% endblock %}
