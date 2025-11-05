@@ -5450,3 +5450,90 @@ button:active {
     transform: translateY(-3px);
     box-shadow: 0 15px 40px rgba(255, 96, 38, 0.4);
 }
+
+/* ========================================================================== */
+/* ======================== FOOTER SOCIAL ICONS ============================= */
+/* ========================================================================== */
+
+.footer-social-icon {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.footer-social-icon span {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-right: 10px;
+}
+
+.footer-social-icon a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.footer-social-icon a i {
+    font-size: 1.1rem;
+    color: white;
+    padding: 10px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.footer-social-icon a:hover {
+    transform: translateY(-3px) scale(1.05);
+}
+
+.footer-social-icon a:hover i {
+    box-shadow: 0 8px 20px rgba(255, 96, 38, 0.4);
+}
+
+/* Social icon specific backgrounds */
+.footer-social-icon .twitter-bg {
+    background: linear-gradient(135deg, #0077b5, #00a0dc);
+}
+
+.footer-social-icon .google-bg {
+    background: linear-gradient(135deg, #e1306c, #f56040, #fcaf45);
+}
+
+.footer-social-icon .facebook-bg {
+    background: linear-gradient(135deg, #3b5998, #4c70ba);
+}
+
+/* Hover effects for social icons */
+.footer-social-icon a:hover .twitter-bg {
+    background: linear-gradient(135deg, #0066a0, #0088cc);
+    box-shadow: 0 8px 20px rgba(0, 119, 181, 0.4);
+}
+
+.footer-social-icon a:hover .google-bg {
+    background: linear-gradient(135deg, #d1205c, #e55030, #fcb035);
+    box-shadow: 0 8px 20px rgba(225, 48, 108, 0.4);
+}
+
+.footer-social-icon a:hover .facebook-bg {
+    background: linear-gradient(135deg, #2d4373, #3c60a8);
+    box-shadow: 0 8px 20px rgba(59, 89, 152, 0.4);
+}
+
+/* Responsive design for social icons */
+@media (max-width: 768px) {
+    .footer-social-icon {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .footer-social-icon span {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+    }
+}

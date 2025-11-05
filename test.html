@@ -1,994 +1,170 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Angaar Batch - Team</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css?family=Raleway:400,500,700,800');
-
-        :root {
-            --brand-primary: #ff6026;
-            --brand-secondary: #ff9a56;
-            --bg-dark: #0d0d0d;
-            --bg-card: rgba(30, 30, 30, 0.5);
-            --text-light: #fff;
-            --text-muted: #aaa;
-            --border-color: rgba(255, 255, 255, 0.05);
-            --brand-gradient: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-            --brand-glow: 0 12px 30px rgba(255, 96, 38, 0.2);
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            background-color: var(--bg-dark);
-            font-family: 'Raleway', sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text-muted);
-        }
-
-        .team-page-container {
-            position: relative;
-            padding: 80px 15px;
-            overflow: hidden;
-            width: 100%;
-            max-width: 1200px;
-        }
-
-        .team-bg-gradient {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
-                radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
-            z-index: -2;
-            pointer-events: none;
-        }
-
-        .team-bg-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        /* Header */
-        .team-header {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .team-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 20px;
-            background: var(--brand-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            position: relative;
-            display: inline-block;
-        }
-
-        .team-title::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: var(--brand-gradient);
-            border-radius: 2px;
-        }
-
-        .team-subtitle {
-            font-size: 1.2rem;
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-
-        /* Base Card Styling */
-        .base-card {
-            background: var(--bg-card);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            transition: all 0.4s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--border-color);
-            text-align: center;
-        }
-
-        .base-card:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--brand-glow);
-        }
-
-        /* Founders Section */
-        .founders-row {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 30px;
-            margin-bottom: 50px;
-        }
-
-        .founders-row .team-card {
-            width: 280px;
-        }
-
-        .team-card .team-img-wrapper {
-            position: relative;
-            padding-top: 20px;
-        }
-
-        .team-card .team-img {
-            width: 85%;
-            border-radius: 12px;
-            transition: all 0.4s ease;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-        }
-
-        .team-card:hover .team-img {
-            transform: scale(1.05);
-        }
-
-        .team-card .team-card-content {
-            padding: 20px;
-        }
-
-        .team-name {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text-light);
-        }
-
-        .team-position {
-            font-size: 1rem;
-            color: var(--brand-primary);
-            margin-bottom: 15px;
-            font-weight: 500;
-        }
-
-        .team-social {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 15px;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.4s ease;
-        }
-
-        .base-card:hover .team-social,
-        .base-card:hover .member-social {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .social-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-light);
-            font-size: 16px;
-            transition: all 0.3s ease;
-            text-decoration: none;
-        }
-
-        .social-icon:hover {
-            background: var(--brand-primary);
-            transform: translateY(-5px);
-        }
-
-        /* Hierarchical Structure */
-        .hierarchical-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 50px;
-            position: relative;
-        }
-
-        .hierarchical-container::before {
-            content: '';
-            position: absolute;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 50px;
-            background: linear-gradient(to bottom, var(--brand-primary), rgba(255, 96, 38, 0.1));
-            z-index: 1;
-        }
-
-        .role-heading {
-            position: relative;
-            padding: 15px 30px;
-            background: rgba(30, 30, 30, 0.7);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 96, 38, 0.5);
-            transition: all 0.4s ease;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 0 20px rgba(255, 96, 38, 0.3);
-            cursor: pointer;
-        }
-
-        .role-heading:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0 30px rgba(255, 96, 38, 0.5);
-        }
-
-        .role-heading h3 {
-            color: var(--text-light);
-            font-size: 1.5rem;
-            margin: 0;
-            white-space: nowrap;
-            background: var(--brand-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        /* Core & Outreach Members */
-        .members-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 30px;
-            padding-top: 50px;
-            width: 100%;
-            position: relative;
-        }
-
-        .member-card {
-            width: 220px;
-        }
-
-        .member-card:hover {
-            transform: translateY(-8px);
-        }
-
-        .member-card .team-img-wrapper {
-            padding-top: 15px;
-        }
-
-        .member-card .team-img {
-            width: 80%;
-        }
-
-        .member-card .team-card-content {
-            padding: 15px;
-        }
-
-        .member-card .team-name {
-            font-size: 1.3rem;
-        }
-
-        .member-card .team-position {
-            font-size: 0.9rem;
-        }
-
-        .member-card .social-icon {
-            width: 30px;
-            height: 30px;
-            font-size: 14px;
-        }
-
-        /* Outreach Associate Card Specifics */
-        .outreach-card {
-            width: 200px;
-            padding: 20px 0;
-        }
-
-        .outreach-card .circular-img-wrapper {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin: 0 auto 15px;
-            border: 4px solid var(--brand-primary);
-            box-shadow: 0 0 15px rgba(255, 96, 38, 0.5);
-        }
-
-        .outreach-card .circular-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .outreach-card .member-name {
-            font-size: 1.2rem;
-        }
-
-        .outreach-card .member-position {
-            font-size: 0.8rem;
-        }
-
-        .outreach-card .social-icon {
-            width: 28px;
-            height: 28px;
-            font-size: 12px;
-        }
-
-        /* Modal Styles - Fixed */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-        }
-
-        .modal.show {
-            display: block;
-        }
-
-        .modal-content {
-            background: rgba(15, 15, 15, 0.95);
-            margin: 2% auto;
-            padding: 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            width: 90%;
-            max-width: 1000px;
-            max-height: 90vh;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(15px);
-            animation: modalSlideIn 0.3s ease-out;
-        }
-
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            padding: 25px 30px;
-            background: rgba(30, 30, 30, 0.8);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            color: var(--text-light);
-            font-size: 2rem;
-            font-weight: 700;
-            background: var(--brand-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .close {
-            color: var(--text-muted);
-            font-size: 2.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            line-height: 1;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-        }
-
-        .close:hover,
-        .close:focus {
-            color: var(--brand-primary);
-            background: rgba(255, 96, 38, 0.1);
-            text-decoration: none;
-        }
-
-        .modal-body {
-            padding: 30px;
-            overflow-y: auto;
-            max-height: calc(90vh - 100px);
-        }
-
-        .modal-body::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .modal-body::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: var(--brand-primary);
-            border-radius: 4px;
-        }
-
-        /* Grid for modal cards */
-        .modal-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 25px;
-            padding: 20px 0;
-        }
-
-        .grid-card {
-            background: rgba(40, 40, 40, 0.8);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.4s ease;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            cursor: pointer;
-            opacity: 0;
-            animation: cardFadeIn 0.6s ease forwards;
-        }
-
-        @keyframes cardFadeIn {
-            to {
-                opacity: 1;
-            }
-        }
-
-        .grid-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 40px rgba(255, 96, 38, 0.3);
-            border-color: rgba(255, 96, 38, 0.3);
-        }
-
-        .grid-card img {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 15px;
-            border: 3px solid var(--brand-primary);
-            box-shadow: 0 0 15px rgba(255, 96, 38, 0.4);
-        }
-
-        .grid-card h4 {
-            color: var(--text-light);
-            margin: 0 0 8px 0;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .grid-card p {
-            color: var(--text-muted);
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        /* Contributor details modal */
-        .contributor-details {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .contributor-details img {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            margin-bottom: 20px;
-            border: 4px solid var(--brand-primary);
-            box-shadow: 0 0 20px rgba(255, 96, 38, 0.5);
-        }
-
-        .contributor-details h3 {
-            color: var(--text-light);
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }
-
-        .contributor-details .role {
-            color: var(--brand-secondary);
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .contributor-details .contribution {
-            color: var(--text-muted);
-            line-height: 1.8;
-            font-size: 1rem;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .team-title {
-                font-size: 2.5rem;
-            }
-
-            .founders-row {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .modal-content {
-                width: 95%;
-                margin: 5% auto;
-            }
-
-            .modal-header {
-                padding: 20px;
-            }
-
-            .modal-header h2 {
-                font-size: 1.6rem;
-            }
-
-            .modal-body {
-                padding: 20px;
-            }
-
-            .modal-grid {
-                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-                gap: 20px;
-            }
-
-            .grid-card {
-                padding: 15px;
-            }
-
-            .grid-card img {
-                width: 80px;
-                height: 80px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .modal-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 15px;
-            }
-
-            .contributor-details img {
-                width: 120px;
-                height: 120px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div class="team-page-container">
-        <div class="team-bg-gradient"></div>
-        <div class="team-bg-particles" id="particles-js"></div>
-
-        <header class="team-header" data-aos="fade-up">
-            <h1 class="team-title">Meet Our Team</h1>
-            <p class="team-subtitle">The passionate individuals behind Angaar who are dedicated to transforming
-                education and empowering the next generation of tech professionals.</p>
-        </header>
-
-        <section class="founders-row" data-aos="fade-up">
-            <div class="base-card team-card" data-aos="fade-up" data-aos-delay="100">
-                <div class="team-img-wrapper">
-                    <img class="team-img" src="https://theangaarbatch.in/static/img/home/ns.png" alt="Naman Sharma">
+<!-- Community Hub Section -->
+<section id="community" class="community-section">
+    <div class="community-container">
+        <div class="section-header">
+            <span class="section-badge">Live Community</span>
+            <h2 class="section-title">The Angaar Community Hub</h2>
+            <p class="section-subtitle">
+                A glimpse into our vibrant, living ecosystem where learning never stops
+            </p>
+        </div>
+
+        <div class="community-grid">            
+
+            <div class="community-card workshop-card">
+                <div class="card-header">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <h3>Recent Workshop Highlights</h3>
                 </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Naman Sharma</h3>
-                    <p class="team-position">Founder & Educator</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/namansharma1412" target="_blank" class="social-icon"><i
-                                class="fab fa-linkedin-in"></i></a>
+                <div class="workshop-content">
+                    <div class="workshop-gallery">
+                        <img src="" alt="Workshop 1">
+                        <img src="" alt="Workshop 2">
+                        <img src="" alt="Workshop 3">
                     </div>
-                </div>
-            </div>
-            <div class="base-card team-card" data-aos="fade-up" data-aos-delay="200">
-                <div class="team-img-wrapper">
-                    <img class="team-img" src="https://theangaarbatch.in/static/img/home/dk.png"
-                        alt="Divyanshu Khandelwal">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Divyanshu Khandelwal</h3>
-                    <p class="team-position">Co-Founder & Educator</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/divyanshu-khandelwal-dkoder" target="_blank"
-                            class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="https://www.instagram.com/iamblackorder/" target="_blank" class="social-icon"><i
-                                class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="base-card team-card" data-aos="fade-up" data-aos-delay="300">
-                <div class="team-img-wrapper">
-                    <img class="team-img"
-                        src="https://media.licdn.com/dms/image/D4D03AQE01gEw-M3YgQ/profile-displayphoto-shrink_800_800/0/1698731309852?e=1728518400&v=beta&t=H-3QWvWJ6s0w3-o4e-F7_iT8C2wP4f2_B_7uQv3zV6E"
-                        alt="Piyush Khandelwal">
-                </div>
-                <div class="team-card-content">
-                    <h3 class="team-name">Piyush Khandelwal</h3>
-                    <p class="team-position">Advisor & Director @W3Grads</p>
-                    <div class="team-social">
-                        <a href="https://www.linkedin.com/in/piyush-khandelwal-5a9b9718" target="_blank"
-                            class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="hierarchical-container" data-aos="fade-up">
-            <div class="role-heading">
-                <h3>Core Members</h3>
-            </div>
-            <div class="members-grid">
-                <div class="base-card member-card">
-                    <div class="team-img-wrapper"><img class="team-img"
-                            src="https://placehold.co/200x200/1e1e1e/ff6026?text=CM" alt="Core Member 1"></div>
-                    <div class="team-card-content">
-                        <h3 class="team-name">Core Member 1</h3>
-                        <p class="team-position">Core Team</p>
-                        <div class="team-social"><a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <div class="workshop-info">
+                        <h4>Machine Learning Workshop at IIT Delhi</h4>
+                        <p>200+ students learned ML fundamentals and built their first neural network</p>
+                        <div class="workshop-stats">
+                            <span class="stat">200+ Attendees</span>
+                            <span class="stat">4.9/5 Rating</span>
                         </div>
                     </div>
+
                 </div>
-                <div class="base-card member-card">
-                    <div class="team-img-wrapper"><img class="team-img"
-                            src="https://placehold.co/200x200/1e1e1e/ff6026?text=CM" alt="Core Member 2"></div>
-                    <div class="team-card-content">
-                        <h3 class="team-name">Core Member 2</h3>
-                        <p class="team-position">Core Team</p>
-                        <div class="team-social"><a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                <!-- <div class="stats-content" style="margin-top: -10%;">
+                    
+                    <iframe style="border-radius: 4%;" width="100%" height="250" 
+                    src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTxKEXFGTOwunkykOkEwcoqC-jLfCoWvZ9y04Lu4LpiFX8a11xYBA2lRP8W1pko_iSiPrHxx2_0VIFS/pubhtml?gid=65729728&single=true" 
+                    title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"></iframe>
+                    
+                </div> -->
+            </div>
+
+            <!-- Webinar Recording -->
+            <div class="community-card webinar-card">
+                <div class="card-header">
+                    <i class="fas fa-video"></i>
+                    <h3>Latest Webinar</h3>
+                </div>
+                <div class="webinar-content">
+                    <div class="webinar-thumbnail">
+                        <img src="" alt="Webinar">
+                        <div class="play-overlay">
+                            <i class="fas fa-play"></i>
                         </div>
+                        <div class="webinar-duration">45:32</div>
                     </div>
-                </div>
-                <div class="base-card member-card">
-                    <div class="team-img-wrapper"><img class="team-img"
-                            src="https://placehold.co/200x200/1e1e1e/ff6026?text=CM" alt="Core Member 3"></div>
-                    <div class="team-card-content">
-                        <h3 class="team-name">Core Member 3</h3>
-                        <p class="team-position">Core Team</p>
-                        <div class="team-social"><a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="base-card member-card">
-                    <div class="team-img-wrapper"><img class="team-img"
-                            src="https://placehold.co/200x200/1e1e1e/ff6026?text=CM" alt="Core Member 4"></div>
-                    <div class="team-card-content">
-                        <h3 class="team-name">Core Member 4</h3>
-                        <p class="team-position">Core Team</p>
-                        <div class="team-social"><a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+                    <div class="webinar-info">
+                        <h4>Career Transition: From Non-Tech to Software Developer</h4>
+                        <p>Industry expert shares proven strategies for breaking into tech</p>
+                        <div class="webinar-meta">
+                            <span class="webinar-views">1.2K views</span>
+                            <span class="webinar-date">1 week ago</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <section class="hierarchical-container" data-aos="fade-up">
-            <div class="role-heading">
-                <h3>Outreach Associates</h3>
-            </div>
-            <div class="members-grid">
-                <div class="base-card outreach-card">
-                    <div class="circular-img-wrapper"><img class="circular-img"
-                            src="https://placehold.co/120x120/1e1e1e/ff6026?text=OA" alt="Outreach Member 1"></div>
-                    <div class="card-content">
-                        <h3 class="team-name member-name">Outreach 1</h3>
-                        <p class="team-position member-position">Associate</p>
-                        <div class="team-social member-social"><a href="#" class="social-icon"><i
-                                    class="fab fa-linkedin-in"></i></a></div>
+            <!-- Problem of the Day -->
+            <div class="community-card potd-card">
+                <div class="card-header">
+                    <i class="fas fa-code"></i>
+                    <h3>Problem of the Day</h3>
+                </div>
+                <div class="potd-content">
+                    <div class="problem-info">
+                        <h4>Two Sum Problem</h4>
+                        <div class="problem-difficulty easy">Easy</div>
+                    </div>
+                    <p class="problem-description">
+                        Given an array of integers and a target sum, return indices of two numbers that add up to
+                        the target.
+                    </p>
+                    <div class="problem-stats">
+                        <span class="stat">
+                            <i class="fas fa-trophy"></i>
+                            156 solved today
+                        </span>
+                        <span class="stat">
+                            <i class="fas fa-users"></i>
+                            453 total attempts
+                        </span>
+                    </div>
+                    <button class="solve-btn">
+                        <i class="fas fa-play"></i>
+                        Solve Now
+                    </button>
+                </div>
+            </div> 
+
+            <!-- Community Stats -->
+            <!-- <div class="community-card stats-card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Community Pulse</h3>
+                </div>
+                <div class="stats-content">
+                    <div class="live-stats">
+                        <div class="live-indicator">
+                            <div class="pulse-dot"></div>
+                            <span>Live Now</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">47</span>
+                            <span class="stat-label">Students Online</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">12</span>
+                            <span class="stat-label">Active Discussions</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">3</span>
+                            <span class="stat-label">Live Coding Sessions</span>
+                        </div>
+                    </div>
+                    <div class="recent-activity">
+                        <h5>Recent Activity</h5>
+                        <div class="activity-item">
+                            <div class="activity-avatar">RK</div>
+                            <span>Rahul completed Python Basics</span>
+                            <span class="activity-time">2m ago</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-avatar">PS</div>
+                            <span>Priya solved Two Sum problem</span>
+                            <span class="activity-time">5m ago</span>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-avatar">VG</div>
+                            <span>Vikash joined React Workshop</span>
+                            <span class="activity-time">8m ago</span>
+                        </div>
                     </div>
                 </div>
-                <div class="base-card outreach-card">
-                    <div class="circular-img-wrapper"><img class="circular-img"
-                            src="https://placehold.co/120x120/1e1e1e/ff6026?text=OA" alt="Outreach Member 2"></div>
-                    <div class="card-content">
-                        <h3 class="team-name member-name">Outreach 2</h3>
-                        <p class="team-position member-position">Associate</p>
-                        <div class="team-social member-social"><a href="#" class="social-icon"><i
-                                    class="fab fa-linkedin-in"></i></a></div>
-                    </div>
-                </div>
-                <div class="base-card outreach-card">
-                    <div class="circular-img-wrapper"><img class="circular-img"
-                            src="https://placehold.co/120x120/1e1e1e/ff6026?text=OA" alt="Outreach Member 3"></div>
-                    <div class="card-content">
-                        <h3 class="team-name member-name">Outreach 3</h3>
-                        <p class="team-position member-position">Associate</p>
-                        <div class="team-social member-social"><a href="#" class="social-icon"><i
-                                    class="fab fa-linkedin-in"></i></a></div>
-                    </div>
-                </div>
-                <div class="base-card outreach-card">
-                    <div class="circular-img-wrapper"><img class="circular-img"
-                            src="https://placehold.co/120x120/1e1e1e/ff6026?text=OA" alt="Outreach Member 4"></div>
-                    <div class="card-content">
-                        <h3 class="team-name member-name">Outreach 4</h3>
-                        <p class="team-position member-position">Associate</p>
-                        <div class="team-social member-social"><a href="#" class="social-icon"><i
-                                    class="fab fa-linkedin-in"></i></a></div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            </div> -->
 
-        <section class="hierarchical-container" data-aos="fade-up">
-            <div id="open-ambassadors-btn" class="role-heading">
-                <h3>Campus Ambassadors</h3>
-            </div>
-        </section>
-
-        <section class="hierarchical-container" data-aos="fade-up">
-            <div id="open-contributors-btn" class="role-heading">
-                <h3>Contributors</h3>
-            </div>
-        </section>
-    </div>
-
-    <!-- Ambassadors Modal -->
-    <div id="ambassadors-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Campus Ambassadors</h2>
-                <span class="close" onclick="closeModal('ambassadors-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="ambassadors-grid" class="modal-grid">
-                    <!-- Content will be populated by JavaScript -->
+        
+        </div>
+        <div class="community-card cta-card mt-5">
+            <div class="cta-content">
+                <div class="cta-icon">
+                    <i class="fas fa-fire"></i>
                 </div>
+                <h3>Ready to Join the Fire?</h3>
+                <p>Become part of India's most vibrant coding community and accelerate your tech journey</p>
+                <div class="cta-stats">
+                    <span>10,000+ Active Members</span>
+                    <span>500+ Success Stories</span>
+                    <span>24/7 Support</span>
+                </div>
+                <a href="#programs" class="join-community-btn">
+                    <i class="fas fa-rocket"></i>
+                    Join Angaar Batch Today
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Contributors Modal -->
-    <div id="contributors-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Contributors</h2>
-                <span class="close" onclick="closeModal('contributors-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="contributors-grid" class="modal-grid">
-                    <!-- Content will be populated by JavaScript -->
-                </div>
-            </div>
-        </div>
-    </div>
+</section>
 
-    <!-- Contributor Details Modal -->
-    <div id="contributor-details-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="contributor-name"></h2>
-                <span class="close" onclick="closeModal('contributor-details-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="contributor-details">
-                    <img id="contributor-image" src="" alt="Contributor">
-                    <div class="role" id="contributor-role"></div>
-                    <div class="contribution" id="contributor-contribution"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script>
-        // Initialize AOS
-        AOS.init({
-            duration: 800,
-            easing: 'ease-in-out',
-            once: true
-        });
-
-        // Initialize Particles
-        particlesJS('particles-js', {
-            particles: {
-                number: { value: 80, density: { enable: true, value_area: 800 } },
-                color: { value: "#ff6026" },
-                shape: { type: "circle" },
-                opacity: { value: 0.3, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1 } },
-                size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.1 } },
-                line_linked: { enable: true, distance: 150, color: "#ff6026", opacity: 0.2, width: 1 },
-                move: { enable: true, speed: 1, direction: "none", random: true, straight: false, out_mode: "out" }
-            },
-            interactivity: {
-                detect_on: "canvas",
-                events: {
-                    onhover: { enable: true, mode: "grab" },
-                    onclick: { enable: true, mode: "push" }
-                },
-                modes: {
-                    grab: { distance: 140, line_linked: { opacity: 0.5 } },
-                    push: { particles_nb: 4 }
-                }
-            },
-            retina_detect: true
-        });
-
-        // Team data
-        const campusAmbassadors = [
-            { name: 'Aarav Sharma', college: 'IIT Bombay', image: 'https://i.pravatar.cc/150?img=1' },
-            { name: 'Priya Patel', college: 'NIT Trichy', image: 'https://i.pravatar.cc/150?img=5' },
-            { name: 'Rohan Gupta', college: 'BITS Pilani', image: 'https://i.pravatar.cc/150?img=3' },
-            { name: 'Sneha Reddy', college: 'VIT Vellore', image: 'https://i.pravatar.cc/150?img=8' },
-            { name: 'Vikram Singh', college: 'DTU', image: 'https://i.pravatar.cc/150?img=11' },
-            { name: 'Ananya Iyer', college: 'IIIT Hyderabad', image: 'https://i.pravatar.cc/150?img=12' },
-            { name: 'Siddharth Kumar', college: 'Manipal University', image: 'https://i.pravatar.cc/150?img=15' },
-            { name: 'Diya Mehta', college: 'SRM University', image: 'https://i.pravatar.cc/150?img=20' },
-        ];
-
-        const contributors = [
-            {
-                id: 1,
-                name: 'Amit Kumar',
-                role: 'Frontend Developer',
-                image: 'https://i.pravatar.cc/150?img=51',
-                contribution: 'Developed the responsive UI components for the team page and implemented the dynamic modal system with improved user experience and accessibility features.'
-            },
-            {
-                id: 2,
-                name: 'Bhavna Choudhary',
-                role: 'UI/UX Designer',
-                image: 'https://i.pravatar.cc/150?img=45',
-                contribution: 'Designed the fiery theme, card layouts, and overall user experience, ensuring a cohesive and modern look that reflects the Angaar brand identity.'
-            },
-            {
-                id: 3,
-                name: 'Chirag Jain',
-                role: 'Backend Developer',
-                image: 'https://i.pravatar.cc/150?img=53',
-                contribution: 'Worked on the initial server setup and API integrations for fetching dynamic content, ensuring robust data management and seamless integration.'
-            },
-            {
-                id: 4,
-                name: 'Deepika Verma',
-                role: 'DevOps Engineer',
-                image: 'https://i.pravatar.cc/150?img=35',
-                contribution: 'Managed the deployment pipeline and optimized the website for performance and scalability, implementing best practices for continuous integration and delivery.'
-            },
-            {
-                id: 5,
-                name: 'Rahul Sharma',
-                role: 'Quality Assurance',
-                image: 'https://i.pravatar.cc/150?img=60',
-                contribution: 'Conducted comprehensive testing across multiple devices and browsers, ensuring cross-platform compatibility and identifying potential user experience issues.'
-            },
-            {
-                id: 6,
-                name: 'Kavya Patel',
-                role: 'Content Writer',
-                image: 'https://i.pravatar.cc/150?img=25',
-                contribution: 'Created engaging content for the team profiles and descriptions, maintaining consistency with the brand voice and ensuring clear communication of team values.'
-            }
-        ];
-
-        // Modal functions
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            document.body.style.overflow = '';
-        }
-
-        // Create grid cards
-        function createGridCard(person, type) {
-            const isContributor = type === 'contributor';
-            const card = document.createElement('div');
-            card.className = 'grid-card';
-
-            if (isContributor) {
-                card.setAttribute('data-contributor-id', person.id);
-                card.style.cursor = 'pointer';
-                card.addEventListener('click', () => showContributorDetails(person));
-            }
-
-            card.innerHTML = `
-                <img src="${person.image}" alt="${person.name}">
-                <h4>${person.name}</h4>
-                <p>${isContributor ? person.role : person.college}</p>
-            `;
-
-            // Add animation delay
-            card.style.animationDelay = `${Math.random() * 0.5}s`;
-
-            return card;
-        }
-
-        // Show contributor details
-        function showContributorDetails(contributor) {
-            document.getElementById('contributor-name').textContent = contributor.name;
-            document.getElementById('contributor-image').src = contributor.image;
-            document.getElementById('contributor-role').textContent = contributor.role;
-            document.getElementById('contributor-contribution').textContent = contributor.contribution;
-
-            closeModal('contributors-modal');
-            setTimeout(() => {
-                openModal('contributor-details-modal');
-            }, 200);
-        }
-
-        // Populate grids
-        function populateGrid(gridId, data, type) {
-            const grid = document.getElementById(gridId);
-            grid.innerHTML = '';
-
-            data.forEach((item, index) => {
-                const card = createGridCard(item, type);
-                card.style.animationDelay = `${index * 0.1}s`;
-                grid.appendChild(card);
-            });
-        }
-
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function () {
-            // Open ambassadors modal
-            document.getElementById('open-ambassadors-btn').addEventListener('click', function () {
-                populateGrid('ambassadors-grid', campusAmbassadors, 'ambassador');
-                openModal('ambassadors-modal');
-            });
-
-            // Open contributors modal
-            document.getElementById('open-contributors-btn').addEventListener('click', function () {
-                populateGrid('contributors-grid', contributors, 'contributor');
-                openModal('contributors-modal');
-            });
-
-            // Close modal when clicking outside
-            window.addEventListener('click', function (event) {
-                if (event.target.classList.contains('modal')) {
-                    event.target.style.display = 'none';
-                    document.body.style.overflow = '';
-                }
-            });
-
-            // ESC key to close modal
-            document.addEventListener('keydown', function (event) {
-                if (event.key === 'Escape') {
-                    const modals = document.querySelectorAll('.modal');
-                    modals.forEach(modal => {
-                        if (modal.style.display === 'block') {
-                            modal.style.display = 'none';
-                        }
-                    });
-                    document.body.style.overflow = '';
-                }
-            });
-        });
-    </script>
-</body>
-
-</html>
