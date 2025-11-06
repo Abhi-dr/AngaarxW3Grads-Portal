@@ -96,7 +96,9 @@ urlpatterns += [
 urlpatterns += [
     # Fixed URLs first
     path("my_courses/", batch_views.my_batches, name="my_batches"),
+
     path("api/fetch_my_batch_data/", batch_views.fetch_my_batch_data, name="fetch_my_batch_data"),
+    
     path("enroll_course/<int:id>/", batch_views.enroll_batch, name="enroll_batch"),
     path("sheet_progress/<int:sheet_id>/", batch_views.sheet_progress, name="sheet_progress"),
     path("fetch_sheet_questions/<int:id>/", batch_views.fetch_sheet_questions, name="fetch_sheet_questions"),
