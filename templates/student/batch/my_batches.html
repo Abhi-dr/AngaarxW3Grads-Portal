@@ -171,6 +171,125 @@ Dashboard | My Courses
         font-weight: 600;
         margin-left: 0.5rem;
     }
+
+    /* ================================================ */
+    /* IMAGE LAZY LOADING & OPTIMIZATION STYLES */
+    /* ================================================ */
+    
+    /* Skeleton Loader for Images */
+    .image-skeleton {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.05) 25%,
+            rgba(255, 255, 255, 0.1) 50%,
+            rgba(255, 255, 255, 0.05) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        min-height: 200px;
+    }
+    
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+        100% {
+            background-position: 200% 0;
+        }
+    }
+    
+    /* Image Container for Lazy Loading */
+    .lazy-image-container {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Lazy Load Images - Hidden Initially */
+    .lazy-image {
+        opacity: 0;
+        transition: opacity 0.4s ease-in-out;
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+    
+    /* Loaded State */
+    .lazy-image.loaded {
+        opacity: 1;
+    }
+    
+    /* Error State for Broken Images */
+    .lazy-image.error {
+        opacity: 0.5;
+        filter: grayscale(100%);
+    }
+    
+    /* Placeholder for Missing Images */
+    .image-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        background: linear-gradient(135deg, rgba(255, 96, 38, 0.1), rgba(255, 79, 15, 0.1));
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 3rem;
+    }
+    
+    /* Optimize Image Rendering */
+    .card-img-top {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+        will-change: transform;
+    }
+    
+    /* Card Hover Performance Optimization */
+    .card {
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        will-change: transform;
+    }
+    
+    /* Loading Spinner for Images */
+    .image-loading-spinner {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.1);
+        border-top: 3px solid #ff6026;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        z-index: 1;
+    }
+    
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
+    /* Fade In Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.3s ease-in-out;
+    }
 </style>
 
 {% endblock %}
@@ -711,6 +830,72 @@ Dashboard | My Courses
     }
 
     // ========================================
+    // LAZY LOADING HELPER FUNCTION
+    // ========================================
+    
+    function initializeLazyLoading() {
+        const lazyImages = document.querySelectorAll('.lazy-image');
+        
+        if ('IntersectionObserver' in window) {
+            // Use Intersection Observer for better performance
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.getAttribute('data-src');
+                        
+                        if (src) {
+                            // Create new image to preload
+                            const tempImg = new Image();
+                            
+                            tempImg.onload = function() {
+                                img.src = src;
+                                img.classList.add('loaded');
+                                img.classList.add('fade-in');
+                                
+                                // Remove skeleton loader
+                                const skeleton = img.previousElementSibling;
+                                if (skeleton && skeleton.classList.contains('image-skeleton')) {
+                                    skeleton.style.display = 'none';
+                                }
+                            };
+                            
+                            tempImg.onerror = function() {
+                                img.classList.add('error');
+                                img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23333" width="200" height="200"/%3E%3Ctext fill="%23666" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EImage Error%3C/text%3E%3C/svg%3E';
+                                
+                                // Remove skeleton loader
+                                const skeleton = img.previousElementSibling;
+                                if (skeleton && skeleton.classList.contains('image-skeleton')) {
+                                    skeleton.style.display = 'none';
+                                }
+                            };
+                            
+                            tempImg.src = src;
+                        }
+                        
+                        observer.unobserve(img);
+                    }
+                });
+            }, {
+                rootMargin: '50px', // Start loading 50px before entering viewport
+                threshold: 0.01
+            });
+            
+            lazyImages.forEach(img => imageObserver.observe(img));
+        } else {
+            // Fallback for browsers without Intersection Observer
+            lazyImages.forEach(img => {
+                const src = img.getAttribute('data-src');
+                if (src) {
+                    img.src = src;
+                    img.classList.add('loaded');
+                }
+            });
+        }
+    }
+
+    // ========================================
     // RENDER BATCHES FUNCTION
     // ========================================
     
@@ -764,6 +949,9 @@ Dashboard | My Courses
             // Re-attach enroll button event listeners
             attachEnrollButtonListeners();
         }
+        
+        // Initialize lazy loading for batch images
+        setTimeout(() => initializeLazyLoading(), 100);
     }
 
     // ========================================
@@ -816,6 +1004,9 @@ Dashboard | My Courses
                 otherCoursesContainer.innerHTML += createOtherCourseCard(course);
             });
         }
+        
+        // Initialize lazy loading for course images
+        setTimeout(() => initializeLazyLoading(), 100);
     }
 
     // ========================================
@@ -828,7 +1019,10 @@ Dashboard | My Courses
                 <h5 class="card-title fw-semibold mb-0"></h5>
                 <div class="card">
                     <a href="/dashboard/${batch.slug}/">
-                        <img src="${batch.thumbnail}" class="card-img-top" alt="Batch Thumbnail" />
+                        <div class="lazy-image-container">
+                            <div class="image-skeleton"></div>
+                            <img data-src="${batch.thumbnail}" class="card-img-top lazy-image" alt="${batch.name}" loading="lazy" />
+                        </div>
                         <div class="card-body">
                             <h5 class="card-title">${batch.name}🔥</h5>
                             <a href="/dashboard/${batch.slug}/" class="btn btn-outline-secondary w-100">View More</a>
@@ -843,7 +1037,10 @@ Dashboard | My Courses
         return `
             <div class="col-md-3">
                 <div class="card">
-                    <img src="${batch.thumbnail}" class="card-img-top" alt="Batch Thumbnail" />
+                    <div class="lazy-image-container">
+                        <div class="image-skeleton"></div>
+                        <img data-src="${batch.thumbnail}" class="card-img-top lazy-image" alt="${batch.name}" loading="lazy" />
+                    </div>
                     <div class="card-body">
                         <h5 class="card-title">${batch.name}🔥</h5>
                         <button class="btn btn-outline-warning w-100" disabled>Requested</button>
@@ -857,7 +1054,10 @@ Dashboard | My Courses
         return `
             <div class="col-md-3">
                 <div class="card">
-                    <img src="${batch.thumbnail}" class="card-img-top" alt="Batch Thumbnail" />
+                    <div class="lazy-image-container">
+                        <div class="image-skeleton"></div>
+                        <img data-src="${batch.thumbnail}" class="card-img-top lazy-image" alt="${batch.name}" loading="lazy" />
+                    </div>
                     <div class="card-body">
                         <h5 class="card-title">${batch.name}🔥</h5>
                         <button class="btn btn-danger w-100" disabled>Rejected</button>
@@ -882,7 +1082,10 @@ Dashboard | My Courses
             <div class="col-md-3">
                 <div class="card">
                     <a href="#">
-                        <img src="${batch.thumbnail}" class="card-img-top" alt="Batch Thumbnail" />
+                        <div class="lazy-image-container">
+                            <div class="image-skeleton"></div>
+                            <img data-src="${batch.thumbnail}" class="card-img-top lazy-image" alt="${batch.name}" loading="lazy" />
+                        </div>
                         <div class="card-body">
                             <h5 class="card-title">${batch.name}🔥</h5>
                             ${enrollButton}
@@ -906,7 +1109,10 @@ Dashboard | My Courses
                         <span class="badge bg-dark">Archived</span>
                     </div>
                     <a href="/dashboard/jovac/${course.slug}/" class="text-decoration-none">
-                        <img src="${course.thumbnail}" class="card-img-top" alt="JOVAC Thumbnail" style="opacity: 0.8;" />
+                        <div class="lazy-image-container">
+                            <div class="image-skeleton"></div>
+                            <img data-src="${course.thumbnail}" class="card-img-top lazy-image" alt="${course.name}" style="opacity: 0.8;" loading="lazy" />
+                        </div>
                         <div class="card-body">
                             <h5 class="">${course.name}📁</h5>
                             By: <p class="card-text">${course.instructor_names}</p>
@@ -925,7 +1131,10 @@ Dashboard | My Courses
                     <div class="position-absolute top-0 end-0 m-2">
                         <span class="badge bg-secondary">Archived</span>
                     </div>
-                    <img src="${course.thumbnail}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                    <div class="lazy-image-container">
+                        <div class="image-skeleton"></div>
+                        <img data-src="${course.thumbnail}" class="card-img-top lazy-image" alt="${course.name}" style="opacity: 0.8;" loading="lazy" />
+                    </div>
                     <div class="card-body">
                         <h5 class="card-title text-muted">${course.name}📁</h5>
                         By: <p class="card-text text-muted fs-6 mb-2">${course.instructor_names}</p>
@@ -943,7 +1152,10 @@ Dashboard | My Courses
                     <div class="position-absolute top-0 end-0 m-2">
                         <span class="badge bg-secondary">Archived</span>
                     </div>
-                    <img src="${course.thumbnail}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                    <div class="lazy-image-container">
+                        <div class="image-skeleton"></div>
+                        <img data-src="${course.thumbnail}" class="card-img-top lazy-image" alt="${course.name}" style="opacity: 0.8;" loading="lazy" />
+                    </div>
                     <div class="card-body">
                         <h5 class="card-title text-muted">${course.name}📁</h5>
                         <button class="btn btn-outline-secondary w-100" disabled>Was Rejected</button>
@@ -961,7 +1173,10 @@ Dashboard | My Courses
                         <span class="badge bg-secondary">Archived</span>
                     </div>
                     <a href="#" class="text-decoration-none">
-                        <img src="${course.thumbnail}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                        <div class="lazy-image-container">
+                            <div class="image-skeleton"></div>
+                            <img data-src="${course.thumbnail}" class="card-img-top lazy-image" alt="${course.name}" style="opacity: 0.8;" loading="lazy" />
+                        </div>
                         <div class="card-body">
                             <h5 class="card-title text-muted">${course.name}📁</h5>
                             By: <p class="card-text text-muted fs-6 mb-2">${course.instructor_names}</p>
