@@ -22,57 +22,92 @@ from channels.layers import get_channel_layer
 
 @login_required(login_url="login")
 def my_batches(request):
-    
-    student = request.user.student
-    
-    # Fetch all batches with their enrollment status for the current student
-    
-    all_batches = Batch.objects.annotate(
-            enrollment_status=Case(
-                When(enrollment_requests__student=student, enrollment_requests__status='Accepted', then=Value('Accepted')),
-                When(enrollment_requests__student=student, enrollment_requests__status='Pending', then=Value('Pending')),
-                When(enrollment_requests__student=student, enrollment_requests__status='Rejected', then=Value('Rejected')),
+    return render(request, 'student/batch/my_batches.html')
+
+
+@login_required(login_url="login")
+def fetch_my_batch_data(request):
+    """API endpoint to fetch batch and course data as JSON"""
+    try:
+        student = request.user.student
+        
+        # Fetch all batches with their enrollment status for the current student
+        all_batches = Batch.objects.annotate(
+                enrollment_status=Case(
+                    When(enrollment_requests__student=student, enrollment_requests__status='Accepted', then=Value('Accepted')),
+                    When(enrollment_requests__student=student, enrollment_requests__status='Pending', then=Value('Pending')),
+                    When(enrollment_requests__student=student, enrollment_requests__status='Rejected', then=Value('Rejected')),
+                    default=Value('Not Enrolled'),
+                    output_field=CharField(),
+                )
+            ).select_related().distinct()  # Ensure distinct batches
+
+        student_batches = all_batches.filter(enrollment_status='Accepted')
+        pending_batches = all_batches.filter(enrollment_status='Pending')
+        rejected_batches = all_batches.filter(enrollment_status='Rejected')
+        other_batches = [batch for batch in all_batches if batch not in student_batches and batch not in pending_batches and batch not in rejected_batches]
+        
+        # ======== COURSE REGISTRATIONS ========
+        all_courses = Course.objects.annotate(
+            registration_status=Case(
+                When(courseregistration__student=student, courseregistration__status='Approved', then=Value('Approved')),
+                When(courseregistration__student=student, courseregistration__status='Pending', then=Value('Pending')),
+                When(courseregistration__student=student, courseregistration__status='Rejected', then=Value('Rejected')),
                 default=Value('Not Enrolled'),
                 output_field=CharField(),
             )
-        ).select_related().distinct()  # Ensure distinct batches
+        ).prefetch_related('courseregistration_set').distinct()
 
-    student_batches = all_batches.filter(enrollment_status='Accepted')
-    pending_batches = all_batches.filter(enrollment_status='Pending')
-    rejected_batches = all_batches.filter(enrollment_status='Rejected')
-    other_batches = [batch for batch in all_batches if batch not in student_batches and batch not in pending_batches and batch not in rejected_batches]
+        approved_courses = all_courses.filter(registration_status='Approved')
+        pending_courses = all_courses.filter(registration_status='Pending')
+        rejected_courses = all_courses.filter(registration_status='Rejected')
+        other_courses = [course for course in all_courses if course not in approved_courses and course not in pending_courses and course not in rejected_courses]
+
+        # Serialize batch data
+        def serialize_batch(batch):
+            return {
+                'id': batch.id,
+                'name': batch.name,
+                'slug': batch.slug,
+                'thumbnail': batch.thumbnail.url if batch.thumbnail else '',
+                'required_fields': batch.required_fields if hasattr(batch, 'required_fields') else [],
+            }
+        
+        # Serialize course data
+        def serialize_course(course):
+            return {
+                'id': course.id,
+                'name': course.name,
+                'slug': course.slug,
+                'thumbnail': course.thumbnail.url if course.thumbnail else '',
+                'instructor_names': course.get_instructor_names(),  # Fixed: Call the method
+            }
+
+        # Build response data
+        data = {
+            'success': True,
+            'batches': {
+                'student_batches': [serialize_batch(b) for b in student_batches],
+                'pending_batches': [serialize_batch(b) for b in pending_batches],
+                'rejected_batches': [serialize_batch(b) for b in rejected_batches],
+                'other_batches': [serialize_batch(b) for b in other_batches],
+            },
+            'courses': {
+                'approved_courses': [serialize_course(c) for c in approved_courses],
+                'pending_courses': [serialize_course(c) for c in pending_courses],
+                'rejected_courses': [serialize_course(c) for c in rejected_courses],
+                'other_courses': [serialize_course(c) for c in other_courses],
+            }
+        }
+        
+        return JsonResponse(data)
     
-    # ======== COURSE REGISTRATIONS ========
-    all_courses = Course.objects.annotate(
-        registration_status=Case(
-            When(courseregistration__student=student, courseregistration__status='Approved', then=Value('Approved')),
-            When(courseregistration__student=student, courseregistration__status='Pending', then=Value('Pending')),
-            When(courseregistration__student=student, courseregistration__status='Rejected', then=Value('Rejected')),
-            default=Value('Not Enrolled'),
-            output_field=CharField(),
-        )
-    ).prefetch_related('courseregistration_set').distinct()
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        }, status=500)
 
-    approved_courses = all_courses.filter(registration_status='Approved')
-    pending_courses = all_courses.filter(registration_status='Pending')
-    rejected_courses = all_courses.filter(registration_status='Rejected')
-    other_courses = [course for course in all_courses if course not in approved_courses and course not in pending_courses and course not in rejected_courses]
-
-
-    parameters = {
-        "student_batches": student_batches,  # Only Accepted batches
-        "pending_batches": pending_batches,
-        "rejected_batches": rejected_batches,
-        "other_batches": other_batches,
-
-        # Courses
-        "approved_courses": approved_courses,
-        "pending_courses": pending_courses,
-        "rejected_courses": rejected_courses,
-        "other_courses": other_courses,
-    }
-    
-    return render(request, 'student/batch/my_batches.html', parameters)
 
 # ========================================= ENROLL BATCH ========================================
 

@@ -188,11 +188,30 @@ Dashboard | My Courses
 
     {% endfor %}
 
-    <!-- ===============================================================================================-->
-    <!-- ============================================ JOVAC ARCHIVED ===================================-->
-    <!-- ===============================================================================================-->
+    <!-- Loading State -->
+    <div id="loading-container" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h4 class="mt-3 text-muted">Loading your courses...</h4>
+    </div>
 
-    <div class="card mb-4">
+    <!-- Error State -->
+    <div id="error-container" class="alert alert-danger" style="display: none;" role="alert">
+        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Error Loading Data</h4>
+        <p id="error-message"></p>
+        <hr>
+        <button class="btn btn-danger" onclick="loadBatchData()">Retry</button>
+    </div>
+
+    <!-- Main Content Container -->
+    <div id="main-content" style="display: none;">
+
+        <!-- ===============================================================================================-->
+        <!-- ============================================ JOVAC ARCHIVED ===================================-->
+        <!-- ===============================================================================================-->
+
+        <div class="card mb-4" id="jovac-section" style="display: none;">
         <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#jovacArchiveSection" aria-expanded="false" aria-controls="jovacArchiveSection">
             <div class="d-flex justify-content-between align-items-center">
                 <h3 class="heading">
@@ -209,221 +228,73 @@ Dashboard | My Courses
         <div class="collapse" id="jovacArchiveSection">
             <div class="card-body">
                 <!-- =========================================== APPROVED JOVAC COURSES =========================== -->
-                <div class="row row-cols-1 row-cols-md-3 g-4">
-                    {% for course in approved_courses %}
-                    <div class="col-md-3">
-                        <h5 class="card-title fw-semibold mb-0"></h5>
-                        <div class="card position-relative">
-                            <!-- Archived overlay -->
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <span class="badge bg-dark">Archived</span>
-                            </div>
-                            <a href="{% url 'student_jovac' course.slug %}" class="text-decoration-none">
-                                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="JOVAC Thumbnail" style="opacity: 0.8;" />
-                                <div class="card-body">
-                                    <h5 class="">
-                                        {{ course.name }}📁
-                                    </h5>
-                                    By: <p class="card-text">
-                                         {{ course.get_instructor_names }}
-                                    </p>
-          
-                                    <a href="{% url 'student_jovac' course.slug %}" class="btn btn-outline-secondary w-100">View Archive</a>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                    <!-- ====================================== PENDING JOVAC ======================================== -->
-                    {% for course in pending_courses %}
-                    <div class="col-md-3">
-                        <div class="card position-relative">
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <span class="badge bg-secondary">Archived</span>
-                            </div>
-                            <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
-                            <div class="card-body">
-                                <h5 class="card-title text-muted">{{ course.name }}📁</h5>
-                                By: <p class="card-text text-muted fs-6 mb-2">
-                                         {{ course.get_instructor_names }}
-                                    </p>
-                                <button class="btn btn-outline-secondary w-100" disabled>Was Requested</button>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                    <!-- ====================================== REJECTED JOVAC ======================================== -->
-                    {% for course in rejected_courses %}
-                    <div class="col-md-3">
-                        <div class="card position-relative">
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <span class="badge bg-secondary">Archived</span>
-                            </div>
-                            <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
-                            <div class="card-body">
-                                <h5 class="card-title text-muted">{{ course.name }}📁</h5>
-                                <button class="btn btn-outline-secondary w-100" disabled>Was Rejected</button>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-
-                    <!-- ====================================== ALL OTHER JOVAC ======================================== -->
-                    {% for course in other_courses %}
-                    <div class="col-md-3">
-                        <div class="card position-relative">
-                            <div class="position-absolute top-0 end-0 m-2">
-                                <span class="badge bg-secondary">Archived</span>
-                            </div>
-                            <a href="#" class="text-decoration-none">
-                                <img src="{{ course.thumbnail.url }}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
-                                <div class="card-body">
-                                    <h5 class="card-title text-muted">{{ course.name }}📁</h5>
-                                     By: <p class="card-text text-muted fs-6 mb-2">
-                                         {{ course.get_instructor_names }}
-                                    </p>
-                                    <button class="btn btn-outline-secondary w-100" disabled>No Longer Available</button>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
+                <div class="row row-cols-1 row-cols-md-3 g-4" id="approved-courses-container">
+                    <!-- Courses will be loaded dynamically via AJAX -->
+                </div>
+                
+                <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="pending-courses-container">
+                    <!-- Pending courses will be loaded dynamically via AJAX -->
+                </div>
+                
+                <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="rejected-courses-container">
+                    <!-- Rejected courses will be loaded dynamically via AJAX -->
+                </div>
+                
+                <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="other-courses-container">
+                    <!-- Other courses will be loaded dynamically via AJAX -->
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- ===============================================================================================-->
-    <!-- =========================================== BATCHES ===========================================-->
-    <!-- ===============================================================================================-->
-
-    <div class="card">
-        {% if student_batches %}
-        <div class="card-body">
-            <h3 class="heading">
-                <span class="fw-semibold">M Y &nbsp; C O U R S E S 🔥</span>
-                <span class="fs-4"> | Angaar x W3Grads
-                </span>
-            </h3>
         </div>
-        {% endif %}
-    </div>
 
-    <!-- ======================== COURSE CODE ====================== -->
+        <!-- ===============================================================================================-->
+        <!-- =========================================== BATCHES ===========================================-->
+        <!-- ===============================================================================================-->
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-
-        {% for batch in student_batches %}
-
-        <div class="col-md-3">
-            <h5 class="card-title fw-semibold mb-0"></h5>
-            <div class="card">
-                <a href="{% url 'batch' batch.slug %}">
-                    <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            {{ batch.name }}🔥
-                        </h5>
-                        <!-- <p class="card-text mb-2">
-                            Total Sawal : {{ sheet.get_total_questions }}
-                        </p> -->
-                        <!-- <p class="card-text text-black mb-1">
-                            Total Registrations: {{ company.job_set.all }}
-                        </p> -->
-                        <a href="{% url 'batch' batch.slug %}" class="btn btn-outline-secondary w-100">View More</a>
-                    </div>
-                </a>
+        <div class="card" id="my-courses-header" style="display: none;">
+            <div class="card-body">
+                <h3 class="heading">
+                    <span class="fw-semibold">M Y &nbsp; C O U R S E S 🔥</span>
+                    <span class="fs-4"> | Angaar x W3Grads
+                    </span>
+                </h3>
             </div>
         </div>
 
-        {% endfor %}
+        <!-- ======================== COURSE CODE ====================== -->
 
-    </div>
-
-    <!-- ======================== ALL BATCH DATA TABLE ====================== -->
-
-    <div class="card">
-
-        {% if pending_batches or other_batches or rejected_batches %}
-
-        <div class="card-body">
-            <h3 class="heading">
-                <span class="fw-semibold">A L L &nbsp; C O U R S E S 🔥</span>
-                <span class="fs-4"> | Angaar x W3Grads
-                </span>
-            </h3>
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="student-batches-container">
+            <!-- Student batches will be loaded dynamically via AJAX -->
         </div>
 
-        {% endif %}
-    </div>
+        <!-- ======================== ALL BATCH DATA TABLE ====================== -->
 
-    <!-- ======================== COURSE CODE ====================== -->
+        <div class="card" id="all-courses-header" style="display: none;">
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-
-        {% for batch in pending_batches %}
-
-        <div class="col-md-3">
-            <div class="card">
-                <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Batch Thumbnail" />
-                <div class="card-body">
-                    <h5 class="card-title">{{ batch.name }}🔥</h5>
-                    <button class="btn btn-outline-warning w-100" disabled>Requested</button>
-                </div>
+            <div class="card-body">
+                <h3 class="heading">
+                    <span class="fw-semibold">A L L &nbsp; C O U R S E S 🔥</span>
+                    <span class="fs-4"> | Angaar x W3Grads
+                    </span>
+                </h3>
             </div>
         </div>
 
-        {% endfor %}
+        <!-- ======================== COURSE CODE ====================== -->
 
-        <!-- ====================== REJECTED BATCHES =================== -->
-
-        {% for batch in rejected_batches %}
-
-        <div class="col-md-3">
-            <div class="card">
-                <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Batch Thumbnail" />
-                <div class="card-body">
-                    <h5 class="card-title">{{ batch.name }}🔥</h5>
-                    <button class="btn btn-danger w-100" disabled>Rejected</button>
-                </div>
-            </div>
+        <div class="row row-cols-1 row-cols-md-3 g-4" id="pending-batches-container">
+            <!-- Pending batches will be loaded dynamically via AJAX -->
         </div>
-
-        {% endfor %}
-
-        <!-- ====================== ALL OTHER BATCHES ================ -->
-
-        {% for batch in other_batches %}
-        <div class="col-md-3">
-            <div class="card">
-                <a href="#">
-                    <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="Batch Thumbnail" />
-                    <div class="card-body">
-                        <h5 class="card-title">{{ batch.name }}🔥</h5>
-
-                        {% if batch.required_fields %}
-                        <!-- If extra fields exist, open modal -->
-                        <button class="btn btn-success w-100 enroll-btn" data-bs-toggle="modal"
-                            data-bs-target="#enrollModal" data-batch-id="{{ batch.id }}"
-                            data-batch-name="{{ batch.name }}" data-required-fields="{{ batch.required_fields|safe }}">
-                            Enroll Now
-                        </button>
-
-                        <p class="text-success mt-2">Require Extra Info!</p>
-
-                        {% else %}
-                        <!-- Direct enrollment if no extra fields -->
-                        <a href="{% url 'enroll_batch' batch.id %}" class="btn btn-success w-100">Enroll Now</a>
-                        {% endif %}
-
-                    </div>
-                </a>
-            </div>
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="rejected-batches-container">
+            <!-- Rejected batches will be loaded dynamically via AJAX -->
         </div>
-        {% endfor %}
+        
+        <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="other-batches-container">
+            <!-- Other batches will be loaded dynamically via AJAX -->
+        </div>
     </div>
+    <!-- End of main-content -->
 
     <!-- Enrollment Modal -->
     <div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
@@ -791,6 +662,503 @@ Dashboard | My Courses
             }
         });
     });
+
+    // ========================================
+    // AJAX API CALL TO LOAD BATCH DATA
+    // ========================================
+    
+    function loadBatchData() {
+        // Show loading, hide error and main content
+        document.getElementById('loading-container').style.display = 'block';
+        document.getElementById('error-container').style.display = 'none';
+        document.getElementById('main-content').style.display = 'none';
+
+        fetch('/dashboard/api/fetch_my_batch_data/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.error || 'Unknown error occurred');
+            }
+            
+            // Hide loading and show main content
+            document.getElementById('loading-container').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            
+            // Render the data
+            renderBatches(data.batches);
+            renderCourses(data.courses);
+        })
+        .catch(error => {
+            console.error('Error loading batch data:', error);
+            
+            // Show error state
+            document.getElementById('loading-container').style.display = 'none';
+            document.getElementById('error-container').style.display = 'block';
+            document.getElementById('error-message').textContent = error.message || 'Failed to load course data. Please try again.';
+        });
+    }
+
+    // ========================================
+    // RENDER BATCHES FUNCTION
+    // ========================================
+    
+    function renderBatches(batches) {
+        const { student_batches, pending_batches, rejected_batches, other_batches } = batches;
+        
+        // Render student batches
+        const studentBatchesContainer = document.getElementById('student-batches-container');
+        studentBatchesContainer.innerHTML = '';
+        
+        if (student_batches && student_batches.length > 0) {
+            document.getElementById('my-courses-header').style.display = 'block';
+            student_batches.forEach(batch => {
+                studentBatchesContainer.innerHTML += createStudentBatchCard(batch);
+            });
+        }
+        
+        // Show all courses header if there are any non-student batches
+        if ((pending_batches && pending_batches.length > 0) || 
+            (rejected_batches && rejected_batches.length > 0) || 
+            (other_batches && other_batches.length > 0)) {
+            document.getElementById('all-courses-header').style.display = 'block';
+        }
+        
+        // Render pending batches
+        const pendingBatchesContainer = document.getElementById('pending-batches-container');
+        pendingBatchesContainer.innerHTML = '';
+        if (pending_batches && pending_batches.length > 0) {
+            pending_batches.forEach(batch => {
+                pendingBatchesContainer.innerHTML += createPendingBatchCard(batch);
+            });
+        }
+        
+        // Render rejected batches
+        const rejectedBatchesContainer = document.getElementById('rejected-batches-container');
+        rejectedBatchesContainer.innerHTML = '';
+        if (rejected_batches && rejected_batches.length > 0) {
+            rejected_batches.forEach(batch => {
+                rejectedBatchesContainer.innerHTML += createRejectedBatchCard(batch);
+            });
+        }
+        
+        // Render other batches
+        const otherBatchesContainer = document.getElementById('other-batches-container');
+        otherBatchesContainer.innerHTML = '';
+        if (other_batches && other_batches.length > 0) {
+            other_batches.forEach(batch => {
+                otherBatchesContainer.innerHTML += createOtherBatchCard(batch);
+            });
+            
+            // Re-attach enroll button event listeners
+            attachEnrollButtonListeners();
+        }
+    }
+
+    // ========================================
+    // RENDER COURSES FUNCTION
+    // ========================================
+    
+    function renderCourses(courses) {
+        const { approved_courses, pending_courses, rejected_courses, other_courses } = courses;
+        
+        // Show JOVAC section if there are any courses
+        if ((approved_courses && approved_courses.length > 0) || 
+            (pending_courses && pending_courses.length > 0) || 
+            (rejected_courses && rejected_courses.length > 0) || 
+            (other_courses && other_courses.length > 0)) {
+            document.getElementById('jovac-section').style.display = 'block';
+        }
+        
+        // Render approved courses
+        const approvedCoursesContainer = document.getElementById('approved-courses-container');
+        approvedCoursesContainer.innerHTML = '';
+        if (approved_courses && approved_courses.length > 0) {
+            approved_courses.forEach(course => {
+                approvedCoursesContainer.innerHTML += createApprovedCourseCard(course);
+            });
+        }
+        
+        // Render pending courses
+        const pendingCoursesContainer = document.getElementById('pending-courses-container');
+        pendingCoursesContainer.innerHTML = '';
+        if (pending_courses && pending_courses.length > 0) {
+            pending_courses.forEach(course => {
+                pendingCoursesContainer.innerHTML += createPendingCourseCard(course);
+            });
+        }
+        
+        // Render rejected courses
+        const rejectedCoursesContainer = document.getElementById('rejected-courses-container');
+        rejectedCoursesContainer.innerHTML = '';
+        if (rejected_courses && rejected_courses.length > 0) {
+            rejected_courses.forEach(course => {
+                rejectedCoursesContainer.innerHTML += createRejectedCourseCard(course);
+            });
+        }
+        
+        // Render other courses
+        const otherCoursesContainer = document.getElementById('other-courses-container');
+        otherCoursesContainer.innerHTML = '';
+        if (other_courses && other_courses.length > 0) {
+            other_courses.forEach(course => {
+                otherCoursesContainer.innerHTML += createOtherCourseCard(course);
+            });
+        }
+    }
+
+    // ========================================
+    // BATCH CARD TEMPLATES
+    // ========================================
+    
+    function createStudentBatchCard(batch) {
+        return `
+            <div class="col-md-3">
+                <h5 class="card-title fw-semibold mb-0"></h5>
+                <div class="card">
+                    <a href="/dashboard/${batch.slug}/">
+                        <img src="${batch.thumbnail}" class="card-img-top" alt="Batch Thumbnail" />
+                        <div class="card-body">
+                            <h5 class="card-title">${batch.name}🔥</h5>
+                            <a href="/dashboard/${batch.slug}/" class="btn btn-outline-secondary w-100">View More</a>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+    
+    function createPendingBatchCard(batch) {
+        return `
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="${batch.thumbnail}" class="card-img-top" alt="Batch Thumbnail" />
+                    <div class="card-body">
+                        <h5 class="card-title">${batch.name}🔥</h5>
+                        <button class="btn btn-outline-warning w-100" disabled>Requested</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function createRejectedBatchCard(batch) {
+        return `
+            <div class="col-md-3">
+                <div class="card">
+                    <img src="${batch.thumbnail}" class="card-img-top" alt="Batch Thumbnail" />
+                    <div class="card-body">
+                        <h5 class="card-title">${batch.name}🔥</h5>
+                        <button class="btn btn-danger w-100" disabled>Rejected</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function createOtherBatchCard(batch) {
+        const hasRequiredFields = batch.required_fields && batch.required_fields.length > 0;
+        const enrollButton = hasRequiredFields 
+            ? `<button class="btn btn-success w-100 enroll-btn" data-bs-toggle="modal"
+                    data-bs-target="#enrollModal" data-batch-id="${batch.id}"
+                    data-batch-name="${batch.name}" data-required-fields='${JSON.stringify(batch.required_fields)}'>
+                    Enroll Now
+               </button>
+               <p class="text-success mt-2">Require Extra Info!</p>`
+            : `<a href="/dashboard/enroll_course/${batch.id}/" class="btn btn-success w-100">Enroll Now</a>`;
+        
+        return `
+            <div class="col-md-3">
+                <div class="card">
+                    <a href="#">
+                        <img src="${batch.thumbnail}" class="card-img-top" alt="Batch Thumbnail" />
+                        <div class="card-body">
+                            <h5 class="card-title">${batch.name}🔥</h5>
+                            ${enrollButton}
+                        </div>
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    // ========================================
+    // COURSE CARD TEMPLATES
+    // ========================================
+    
+    function createApprovedCourseCard(course) {
+        return `
+            <div class="col-md-3">
+                <h5 class="card-title fw-semibold mb-0"></h5>
+                <div class="card position-relative">
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-dark">Archived</span>
+                    </div>
+                    <a href="/dashboard/jovac/${course.slug}/" class="text-decoration-none">
+                        <img src="${course.thumbnail}" class="card-img-top" alt="JOVAC Thumbnail" style="opacity: 0.8;" />
+                        <div class="card-body">
+                            <h5 class="">${course.name}📁</h5>
+                            By: <p class="card-text">${course.instructor_names}</p>
+                            <a href="/dashboard/jovac/${course.slug}/" class="btn btn-outline-secondary w-100">View Archive</a>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+    
+    function createPendingCourseCard(course) {
+        return `
+            <div class="col-md-3">
+                <div class="card position-relative">
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-secondary">Archived</span>
+                    </div>
+                    <img src="${course.thumbnail}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">${course.name}📁</h5>
+                        By: <p class="card-text text-muted fs-6 mb-2">${course.instructor_names}</p>
+                        <button class="btn btn-outline-secondary w-100" disabled>Was Requested</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function createRejectedCourseCard(course) {
+        return `
+            <div class="col-md-3">
+                <div class="card position-relative">
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-secondary">Archived</span>
+                    </div>
+                    <img src="${course.thumbnail}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">${course.name}📁</h5>
+                        <button class="btn btn-outline-secondary w-100" disabled>Was Rejected</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    function createOtherCourseCard(course) {
+        return `
+            <div class="col-md-3">
+                <div class="card position-relative">
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-secondary">Archived</span>
+                    </div>
+                    <a href="#" class="text-decoration-none">
+                        <img src="${course.thumbnail}" class="card-img-top" alt="course Thumbnail" style="opacity: 0.8;" />
+                        <div class="card-body">
+                            <h5 class="card-title text-muted">${course.name}📁</h5>
+                            By: <p class="card-text text-muted fs-6 mb-2">${course.instructor_names}</p>
+                            <button class="btn btn-outline-secondary w-100" disabled>No Longer Available</button>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        `;
+    }
+
+    // ========================================
+    // RE-ATTACH EVENT LISTENERS
+    // ========================================
+    
+    function attachEnrollButtonListeners() {
+        const enrollButtons = document.querySelectorAll(".enroll-btn");
+        
+        enrollButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                const batchId = this.getAttribute("data-batch-id");
+                const batchName = this.getAttribute("data-batch-name");
+                let requiredFields = this.getAttribute("data-required-fields");
+
+                try {
+                    requiredFields = JSON.parse(requiredFields);
+                    console.log(requiredFields);
+                } catch (e) {
+                    requiredFields = [];
+                    alert("Invalid required fields data");
+                }
+
+                // Set batch name and ID
+                modalBatchName.textContent = batchName;
+                modalBatchId.value = batchId;
+
+                // Generate required fields dynamically
+                extraFieldsContainer.innerHTML = "";
+                requiredFields.forEach(field => {
+                    let label = field.replace(/_/g, " ").toUpperCase();
+                    
+                    // Special handling for college_name field
+                    if (field.toLowerCase() === 'college_name') {
+                        extraFieldsContainer.innerHTML += `
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    ${label} <span class="text-danger">*</span>
+                                    <span id="results_badge_${field}" class="search-results-badge" style="display: none;">
+                                        <i class="fas fa-check-circle"></i> 0 found
+                                    </span>
+                                </label>
+                                
+                                <!-- Search input with icon -->
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search search-icon"></i>
+                                    </span>
+                                    <input type="text" 
+                                           id="college_search_${field}" 
+                                           class="form-control college-search-input" 
+                                           placeholder="🔍 Search from ${collegesList.length}+ colleges..." 
+                                           autocomplete="off">
+                                </div>
+                                
+                                <!-- Dropdown with all colleges -->
+                                <select name="${field}" id="college_select_${field}" class="form-control college-dropdown" required size="6">
+                                    <option value="" disabled selected>👇 Select your college from below</option>
+                                    ${collegesList.map(college => `<option value="${college}">${college}</option>`).join('')}
+                                    <option value="other">✏️ Other (Enter Manually)</option>
+                                </select>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="fas fa-info-circle"></i> Can't find your college? Select "Other" to enter manually
+                                </small>
+                                
+                                <!-- Custom input for manual entry -->
+                                <input type="text" 
+                                       name="${field}_custom" 
+                                       id="college_custom_${field}" 
+                                       class="form-control mt-2 college-custom-input" 
+                                       placeholder="✏️ Enter your college name here..." 
+                                       style="display: none;">
+                            </div>
+                        `;
+                    } else {
+                        // Regular text input for other fields
+                        extraFieldsContainer.innerHTML += `
+                            <div class="mb-3">
+                                <label class="form-label">${label}</label>
+                                <input type="text" placeholder="Enter your ${label} here..." name="${field}" class="form-control" required>
+                            </div>
+                        `;
+                    }
+                });
+
+                // Re-attach event listeners for college search and dropdown
+                attachCollegeFieldListeners();
+
+                // Update form action dynamically
+                enrollForm.action = `/dashboard/enroll_course/${batchId}/`;
+            });
+        });
+    }
+
+    // Helper function to attach college field listeners
+    function attachCollegeFieldListeners() {
+        const collegeSearchInputs = document.querySelectorAll('[id^="college_search_"]');
+        collegeSearchInputs.forEach(searchInput => {
+            const fieldName = searchInput.id.replace('college_search_', '');
+            const dropdown = document.getElementById(`college_select_${fieldName}`);
+            const resultsBadge = document.getElementById(`results_badge_${fieldName}`);
+            
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                const options = dropdown.querySelectorAll('option');
+                let visibleCount = 0;
+                
+                options.forEach(option => {
+                    if (option.value === '' || option.value === 'other') {
+                        option.style.display = '';
+                        return;
+                    }
+                    
+                    const collegeText = option.textContent.toLowerCase();
+                    if (collegeText.includes(searchTerm)) {
+                        option.style.display = '';
+                        visibleCount++;
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+                
+                if (searchTerm.length > 0) {
+                    resultsBadge.style.display = 'inline-block';
+                    resultsBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${visibleCount} found`;
+                } else {
+                    resultsBadge.style.display = 'none';
+                }
+                
+                if (visibleCount === 1 && searchTerm.length > 2) {
+                    const visibleOption = Array.from(options).find(opt => 
+                        opt.style.display !== 'none' && opt.value !== '' && opt.value !== 'other'
+                    );
+                    if (visibleOption) {
+                        dropdown.value = visibleOption.value;
+                        dropdown.style.borderColor = '#28a745';
+                        setTimeout(() => {
+                            dropdown.style.borderColor = '';
+                        }, 1000);
+                    }
+                }
+            });
+            
+            dropdown.addEventListener('change', function() {
+                searchInput.value = '';
+                resultsBadge.style.display = 'none';
+                const options = dropdown.querySelectorAll('option');
+                options.forEach(option => {
+                    option.style.display = '';
+                });
+                
+                const customInput = document.getElementById(`college_custom_${fieldName}`);
+                if (this.value === 'other') {
+                    customInput.style.display = 'block';
+                    customInput.required = true;
+                    this.required = false;
+                    this.value = '';
+                } else {
+                    customInput.style.display = 'none';
+                    customInput.required = false;
+                    customInput.value = '';
+                    this.required = true;
+                }
+            });
+            
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const visibleOptions = Array.from(dropdown.querySelectorAll('option')).filter(opt => 
+                        opt.style.display !== 'none' && opt.value !== '' && opt.value !== 'other'
+                    );
+                    
+                    if (visibleOptions.length === 1) {
+                        dropdown.value = visibleOptions[0].value;
+                        dropdown.dispatchEvent(new Event('change'));
+                    } else if (visibleOptions.length > 0) {
+                        dropdown.focus();
+                    }
+                } else if (e.key === 'Escape') {
+                    this.value = '';
+                    this.dispatchEvent(new Event('input'));
+                }
+            });
+        });
+    }
+
+    // Load data on page load
+    loadBatchData();
 
 </script>
 
