@@ -113,6 +113,37 @@ active
             });
     }
 
+    function rejectEnrollment(id) {
+        if (!confirm("Are you sure you want to reject this enrollment?")) return;
+
+        const url = "{% url 'administrator_reject_enrollment_batch' 0 %}".replace('0', id);
+
+        fetch(url, {
+            method: 'GET', // or POST if your view expects it, but the view seems to handle GET/AJAX
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(resp => resp.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the student from the local array
+                    allEnrollments = allEnrollments.filter(s => s.id != id);
+                    // Re-filter and display
+                    filterEnrollments();
+                    document.getElementById('totalEnrollments').textContent = allEnrollments.length;
+
+                    // Optional: Show success toast/alert
+                } else {
+                    alert("Error: " + (data.message || "Could not reject enrollment"));
+                }
+            })
+            .catch(err => {
+                console.error("Error rejecting enrollment:", err);
+                alert("An error occurred while rejecting.");
+            });
+    }
+
     function filterEnrollments() {
         const query = document.getElementById('queryInput')?.value.toLowerCase().trim() || '';
 
@@ -198,8 +229,10 @@ active
                 dynamicCells += `<td style="text-align: left;"><p class="fw-semibold mb-1 text-wrap">${val}</p></td>`;
             });
 
-            // Actions column kept minimal for later enhancement
-            const actionsHtml = `<a href="#" class="btn btn-sm btn-outline-primary disabled">View</a>`;
+            // Actions column
+            const actionsHtml = `
+                <button class="btn btn-sm btn-outline-danger" onclick="rejectEnrollment(${student.id})">Reject</button>
+            `;
 
             tr.innerHTML = `
             <td>${index + 1}</td>
