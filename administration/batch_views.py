@@ -15,6 +15,7 @@ from angaar_hai.custom_decorators import admin_required
 
 
 import datetime
+import json
 
 # ========================= BATCH WORK ==========================
 
@@ -87,6 +88,65 @@ def enrollment_requests(request):
     }
     
     return render(request, "administration/batch/students_enroll_request.html", parameters)
+
+# =============================== FETCH ALL ENROLLMENTS OF BATCH ==============================
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def administrator_fetch_enrollments_of_batch(request, slug):
+    """
+    Return accepted enrollments for the given batch as JSON.
+    Each enrollment may include extra/custom fields coming from `additional_data`.
+    """
+    if request.method != "GET":
+        return JsonResponse({"success": False, "error": "Only GET allowed"}, status=405)
+
+    batch = get_object_or_404(Batch, slug=slug)
+
+    # Fetch enrollments that are accepted (adjust filter if you need other statuses)
+    enrollments_qs = EnrollmentRequest.objects.select_related('student').filter(batch=batch, status="Accepted").order_by('-request_date')
+
+    response_data = []
+    for req in enrollments_qs:
+        student = getattr(req, "student", None)
+
+        # Normalize additional_data (may be dict or JSON string)
+        additional_data = req.additional_data or {}
+        if isinstance(additional_data, str):
+            try:
+                additional_data = json.loads(additional_data)
+            except Exception:
+                additional_data = {"raw": additional_data}
+
+        # Format dates
+        enrolled_date = None
+        if getattr(req, "request_date", None):
+            try:
+                enrolled_date = req.request_date.strftime('%d %b, %Y %H:%M')
+            except Exception:
+                enrolled_date = str(req.request_date)
+
+        entry = {
+            "id": req.id,
+            "student_id": getattr(student, "id", None),
+            "student_name": f"{getattr(student,'first_name','')} {getattr(student,'last_name','')}".strip() or None,
+            "email": getattr(student, "email", ""),
+            "phone": getattr(student, "phone", ""),
+            "status": req.status,
+            "status_color": "success" if req.status == "Accepted" else "secondary",
+            "enrolled_date": enrolled_date or "—",
+            "additional_data": additional_data
+        }
+
+        # Elevate common additional fields to top-level for convenience (optional)
+        if isinstance(additional_data, dict):
+            for key in ("college", "course", "year", "role", "city"):
+                if key in additional_data:
+                    entry[key] = additional_data.get(key)
+
+        response_data.append(entry)
+
+    return JsonResponse({"success": True, "data": response_data}, status=200)
 
 # ================================ APPROVE ALL ENROLLMENT REQUESTS ====================
 

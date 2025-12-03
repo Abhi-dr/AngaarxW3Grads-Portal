@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title %}
-{{ batch.name }} | Enrollment Requests
+{{ batch.name }} | Enrollments
 {% endblock %}
 
 {% block my_batches_active %}
@@ -13,374 +13,208 @@ active
 
 <div class="container-fluid">
     <div class="card">
-        <div class="card-body">
-            <h3 class="heading">
-                <h3 class="heading">
-                    <span class="fw-semibold">
-                        &nbsp;Pending Requests: ({{ total_pending_requests }})
-                    </span>
-                    <a id="approve-all-button" class="btn btn-success btn-lg">Approve All</a>
-
-                </h3>
+        <div class="card-body d-flex align-items-center">
+            <h3 class="heading mb-0">
+                <span class="fw-semibold">&nbsp;Enrollments: (<span id="totalEnrollments">0</span>)</span>
             </h3>
-        </div>
-    </div>
-
-
-    {% for message in messages %}
-
-    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-        <strong>{{ message.tag }}</strong> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-
-    {% endfor %}
-
-    <!-- create a search bar -->
-
-    <div class="card w-100">
-        <div class="card-body p-4">
-            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
-            <form method="post">
-
-                {% csrf_token %}
-
-                <div class="input-group">
-                    <input type="text" class="form-control" placeholder="Search by ID, Name, Email or Phone Number"
-                        aria-label="Search by ID, Name, Email or Phone Number" aria-describedby="button-addon2"
-                        name="query">
-                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
-                    <!-- make a button to clear the search -->
-                    <a href="#" class="btn btn-outline-danger">Clear</a>
-                </div>
+            <!-- optional search kept -->
+            <form class="ms-auto d-flex" id="searchForm" onsubmit="event.preventDefault(); filterEnrollments();">
+                <input type="text" id="queryInput" class="form-control form-control-sm me-2"
+                    placeholder="Search by ID, Name, Email or Phone" oninput="filterEnrollments()" />
+                <button class="btn btn-outline-secondary btn-sm" type="submit">Search</button>
             </form>
         </div>
     </div>
 
+    {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        <strong>{{ message.tag }}</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Pending Requests 🔥
-                {% if query %}
-                <span class="fs-6"> | Search Results for "{{ query }}"</span>
-                {% endif %}
+            <h5 class="card-title fw-semibold mb-4">Enrollments 🔥
+                <span class="fs-6" id="searchInfo"></span>
             </h5>
+
             <div class="table-responsive">
                 <table class="table text-nowrap mb-0 align-middle">
                     <thead class="text-dark fs-4">
-
                         <tr>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    #
-                                </h6>
+                                <h6 class="fw-semibold mb-0">#</h6>
                             </th>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Name
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Name</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Additional Data
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Additional Data</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Status
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Status</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Date
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Enrolled On</h6>
                             </th>
-
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#1
-                                </h6>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Actions</h6>
                             </th>
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#2
-                                </h6>
-                            </th>
-
                         </tr>
                     </thead>
-
                     <tbody id="enrollmentTableBody">
-
-
-
+                        <!-- rows populated by JS -->
                     </tbody>
-
                 </table>
             </div>
         </div>
     </div>
-
-    <!-- ====================================== REJECTED REQUESTS =================================== -->
-
-    <div class="card w-100">
-        <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Rejected Requests 🔥
-                {% if query %}
-                <span class="fs-6"> | Search Results for "{{ query }}"</span>
-                {% endif %}
-            </h5>
-            <div class="table-responsive">
-                <table class="table text-nowrap mb-0 align-middle">
-                    <thead class="text-dark fs-4">
-
-                        <tr>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    #
-                                </h6>
-                            </th>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Name
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Status
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Date
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#1
-                                </h6>
-                            </th>
-
-                        </tr>
-                    </thead>
-
-                    <tbody id="enrollmentRejectedTableBody">
-
-
-
-                    </tbody>
-
-                </table>
-            </div>
-        </div>
-    </div>
-
-
 </div>
 
 <script>
+    let allEnrollments = [];
+
     document.addEventListener("DOMContentLoaded", function () {
-        fetchPendingEnrollments();
-        fetchRejectedEnrollments();
-        setupWebSocket();
+        fetchEnrollments();
     });
 
-    function fetchPendingEnrollments() {
-        fetch("{% url 'administrator_fetch_pending_enrollments_of_batch' batch.slug %}")
-            .then(response => response.json())
-            .then(data => {
-                display_pending_requests(data.data);
+    /*
+      NOTE:
+      - Replace the fetch URL below with your actual API endpoint that returns
+        enrollments for the batch. The expected JSON format used here is:
+        { data: [ { id, student_name, additional_data (object), status, enrolled_date } ] }
+    */
+
+    function fetchEnrollments() {
+        const url = "{% url 'administrator_fetch_enrollments_of_batch' batch.slug %}";
+
+        fetch(url)
+            .then(resp => {
+                if (!resp.ok) throw new Error('Network response was not ok');
+                return resp.json();
             })
-            .catch(error => console.error("Error fetching pending enrollments:", error));
-    }
-
-    function fetchRejectedEnrollments() {
-        fetch("{% url 'administrator_fetch_rejected_enrollments_of_batch' batch.slug %}")
-            .then(response => response.json())
             .then(data => {
-                display_rejected_requests(data.data);
+                allEnrollments = data.data || [];
+                // Pre-parse additional data for all records once
+                allEnrollments.forEach(student => {
+                    let additional_data = student.additional_data || {};
+                    if (typeof additional_data === 'string') {
+                        try { additional_data = JSON.parse(additional_data); } catch (e) { }
+                    }
+                    student.parsed_additional_data = additional_data;
+                });
+
+                document.getElementById('totalEnrollments').textContent = allEnrollments.length;
+                filterEnrollments(); // Display initial data
             })
-            .catch(error => console.error("Error fetching rejected enrollments:", error));
-    }
-
-    // Initialize WebSocket
-    function setupWebSocket() {
-        const batchSlug = "{{ batch.slug }}";
-        const socket = new WebSocket(`wss://${window.location.host}/ws/enrollment_updates/${batchSlug}/`);
-
-        socket.onmessage = function (event) {
-            const data = JSON.parse(event.data);
-
-            if (data.action === "update_pending") {
-                display_pending_requests(data.enrollments);
-            } else if (data.action === "update_rejected") {
-                display_rejected_requests(data.enrollments);
-            }
-        };
-
-        socket.onclose = function () {
-            console.error("WebSocket closed unexpectedly. Trying to reconnect...");
-            setTimeout(setupWebSocket, 5000); // Attempt reconnection after 5 seconds
-        };
-    }
-
-    function display_pending_requests(enrollments) {
-        const dataTableBody = document.getElementById("enrollmentTableBody");
-        dataTableBody.innerHTML = "";
-
-        enrollments.forEach((student, index) => {
-            const row = document.createElement("tr");
-
-            let additional_data = {};
-            try {
-                additional_data = student.additional_data;
-            } catch (e) {
-                console.error("Invalid JSON in additional_data:", student.additional_data);
-            }
-
-            let additionalFieldsHtml = "";
-            for (const key in additional_data) {
-                if (additional_data.hasOwnProperty(key)) {
-                    additionalFieldsHtml += `<p class="fw-semibold mb-1 text-wrap">${key}: ${additional_data[key]}</p>`;
-                }
-            }
-
-            row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>
-                <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
-            </td>
-            <td style="text-align: center;">
-                ${additionalFieldsHtml}
-            </td>
-            <td style="text-align: center;">
-                <span class="badge bg-${student.status_color}">${student.status}</span>
-            </td>
-            <td style="text-align: center;">
-                <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
-            </td>
-            <td>
-                <button onclick="rejectEnrollment(${student.id}, this)" class="btn btn-outline-danger">Reject</button>
-            </td>
-            <td>
-                <button onclick="approveEnrollment(${student.id}, this)" class="btn btn-success">Approve</button>
-            </td>
-        `;
-
-            dataTableBody.appendChild(row);
-        });
-    }
-
-    function display_rejected_requests(enrollments) {
-        const dataTableBody = document.getElementById("enrollmentRejectedTableBody");
-        dataTableBody.innerHTML = "";
-
-        enrollments.forEach((student, index) => {
-            const row = document.createElement("tr");
-
-            row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>
-                <h6 class="fw-semibold mb-1 text-wrap cursor-pointer">${student.student_name}</h6>
-            </td>
-            <td style="text-align: center;">
-                <p class="fw-semibold mb-1 text-wrap">${student.batch_name}</p>
-            </td>
-            <td style="text-align: center;">
-                <span class="badge bg-${student.status_color}">${student.status}</span>
-            </td>
-            <td style="text-align: center;">
-                <p class="fw-semibold mb-1 text-wrap">${student.request_date}</p>
-            </td>
-            <td>
-                <button onclick="approveEnrollment(${student.id}, this)" class="btn btn-success">Approve</button>
-            </td>
-        `;
-
-            dataTableBody.appendChild(row);
-        });
-    }
-
-    function approveEnrollment(id, button) {
-        const url = "{% url 'administrator_approve_enrollment_batch' 0 %}?id=".replace("0", id);
-
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    button.closest('tr').remove();
-                } else {
-                    alert('Failed to approve the enrollment request: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Something went wrong!');
+            .catch(err => {
+                console.error("Error fetching enrollments:", err);
             });
     }
 
-    function rejectEnrollment(id, button) {
-        if (!confirm('Are you sure you want to REJECT the request?')) {
-            return;
+    function filterEnrollments() {
+        const query = document.getElementById('queryInput')?.value.toLowerCase().trim() || '';
+
+        const filtered = allEnrollments.filter(student => {
+            if (!query) return true;
+
+            // Check main fields
+            const name = (student.student_name || '').toLowerCase();
+            const email = (student.email || '').toLowerCase();
+            const phone = (student.phone || '').toLowerCase();
+            const id = String(student.id || '').toLowerCase();
+
+            if (name.includes(query) || email.includes(query) || phone.includes(query) || id.includes(query)) {
+                return true;
+            }
+
+            // Optional: Check inside additional data values as well?
+            // If the user wants to search "College Name", this would be useful.
+            // Let's include it for a better experience.
+            const additional = student.parsed_additional_data || {};
+            for (let key in additional) {
+                if (String(additional[key]).toLowerCase().includes(query)) {
+                    return true;
+                }
+            }
+
+            return false;
+        });
+
+        display_enrollments(filtered);
+
+        const searchInfo = document.getElementById('searchInfo');
+        searchInfo.textContent = query ? ` | Search Results for "${query}"` : '';
+    }
+
+    function display_enrollments(enrollments) {
+        const tbody = document.getElementById('enrollmentTableBody');
+        const theadRow = document.querySelector('table thead tr');
+        tbody.innerHTML = '';
+
+        // 1. Determine all unique additional keys from the FILTERED list
+        let allKeys = new Set();
+        enrollments.forEach(student => {
+            // parsed_additional_data is already set in fetchEnrollments
+            const additional_data = student.parsed_additional_data || {};
+            Object.keys(additional_data).forEach(k => allKeys.add(k));
+        });
+        const sortedKeys = Array.from(allKeys).sort();
+
+        // 2. Update Header
+        // Base headers: #, Name
+        let headerHtml = `
+            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">#</h6></th>
+            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Name</h6></th>
+        `;
+
+        // Dynamic headers
+        sortedKeys.forEach(key => {
+            // Capitalize first letter for display
+            const label = key.charAt(0).toUpperCase() + key.slice(1);
+            headerHtml += `<th class="border-bottom-0"><h6 class="fw-semibold mb-0">${label}</h6></th>`;
+        });
+
+        // End headers: Status, Enrolled On, Actions
+        headerHtml += `
+            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Status</h6></th>
+            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Enrolled On</h6></th>
+            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Actions</h6></th>
+        `;
+
+        if (theadRow) {
+            theadRow.innerHTML = headerHtml;
         }
 
-        const url = "{% url 'administrator_reject_enrollment_batch' 0 %}?id=".replace("0", id);
+        // 3. Render Rows
+        enrollments.forEach((student, index) => {
+            const tr = document.createElement('tr');
+            const additional_data = student.parsed_additional_data || {};
 
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': '{{ csrf_token }}',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    button.closest('tr').remove();
-                    alert('Enrollment request rejected successfully!');
-                } else {
-                    alert('Failed to reject the enrollment request: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Something went wrong!');
+            let dynamicCells = '';
+            sortedKeys.forEach(key => {
+                const val = additional_data[key] !== undefined ? additional_data[key] : '—';
+                dynamicCells += `<td style="text-align: left;"><p class="fw-semibold mb-1 text-wrap">${val}</p></td>`;
             });
-    }
 
-    document.getElementById('approve-all-button').addEventListener('click', function () {
-        const batchId = '{{ batch.id }}';
-        $.ajax({
-            url: "{% url 'approve_all_enrollments_batch' batch.id %}",
-            type: 'POST',
-            data: {
-                'csrfmiddlewaretoken': '{{ csrf_token }}',
-            },
-            success: function (response) {
-                if (response.success) {
-                    alert("All pending enrollment requests have been accepted.");
-                    location.reload();
-                } else {
-                    alert("An error occurred while processing your request.");
-                }
-            },
-            error: function (xhr, status, error) {
-                console.error(xhr);
-                alert("An error occurred: " + error);
-            }
+            // Actions column kept minimal for later enhancement
+            const actionsHtml = `<a href="#" class="btn btn-sm btn-outline-primary disabled">View</a>`;
+
+            tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td><h6 class="fw-semibold mb-1 text-wrap">${student.student_name || '–'}</h6></td>
+            ${dynamicCells}
+            <td style="text-align: center;"><span class="badge bg-${student.status_color || 'secondary'}">${student.status || 'Enrolled'}</span></td>
+            <td style="text-align: center;"><p class="fw-semibold mb-1 text-wrap">${student.enrolled_date || '—'}</p></td>
+            <td style="text-align: center;">
+                ${actionsHtml}
+            </td>
+        `;
+
+            tbody.appendChild(tr);
         });
-    });
+    }
 </script>
 
 {% endblock %}

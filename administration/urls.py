@@ -100,6 +100,7 @@ urlpatterns += [
     # path("edit_batch/<int:id>/",  batch_views.edit_batch, name="edit_batch"),
     
     path("enrollment_requests/", batch_views.enrollment_requests, name="administrator_enrollment_requests"),
+    path("administrator_fetch_enrollments_of_batch/<slug:slug>/", batch_views.administrator_fetch_enrollments_of_batch, name="administrator_fetch_enrollments_of_batch"),
     path("fetch_pending_enrollments/", batch_views.fetch_pending_enrollments, name="administrator_fetch_pending_enrollments"),
     path("fetch_rejected_enrollments/", batch_views.fetch_rejected_enrollments, name="administrator_fetch_rejected_enrollments"),
     
