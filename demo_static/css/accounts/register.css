@@ -372,13 +372,13 @@ body {
     .stat-badge {
         text-align: center;
     }
-    
+
     .google-btn {
         padding: 10px 14px;
         font-size: 0.9rem;
         min-height: 44px;
     }
-    
+
     .google-icon {
         width: 18px;
         height: 18px;
@@ -475,4 +475,105 @@ body {
     max-width: 20px;
     max-height: 20px;
     flex-shrink: 0;
+}
+
+/* Password Checklist Styles */
+.password-checklist {
+    margin-top: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    /* Light grey/white default */
+    margin-bottom: 8px;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.checklist-item:last-child {
+    margin-bottom: 0;
+}
+
+.checklist-item .icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    font-size: 0.65rem;
+    font-weight: bold;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+/* Valid state - Green checkmark */
+.checklist-item.valid {
+    color: #22c55e;
+    /* Bright green */
+}
+
+.checklist-item.valid .icon {
+    background: #22c55e;
+    border-color: #22c55e;
+    color: #fff;
+}
+
+/* Invalid state - stays neutral until user starts typing */
+.checklist-item.invalid {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Error state - Red X when actively invalid after typing */
+.checklist-item.error {
+    color: #ef4444;
+    /* Bright red */
+}
+
+.checklist-item.error .icon {
+    border-color: #ef4444;
+    color: #ef4444;
+}
+
+/* Password Toggle Styles */
+.password-input-wrapper {
+    position: relative;
+}
+
+.password-input-wrapper .form-input {
+    padding-right: 44px;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.password-toggle:hover {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.password-toggle:focus {
+    outline: none;
+}
+
+.eye-icon {
+    width: 20px;
+    height: 20px;
 }
