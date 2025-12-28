@@ -1862,7 +1862,7 @@ print("Hello World")
     </div>
 </section> -->
 
-<!-- Project Showcase Section -->
+<!-- Gallery By Himanshu  Showcase Section -->
 <section id="project-showcase" class="project-showcase-section">
     <div class="showcase-container">
         
@@ -2152,58 +2152,103 @@ print("Hello World")
     </style>
 
     <script>
-        // Add interactive effects for the showcase section
-        document.addEventListener('DOMContentLoaded', function() {
-            const showcaseSection = document.getElementById('project-showcase');
-            const cards = document.querySelectorAll('.project-card');
+        // Asynchronous interactive effects for the showcase section
+        (function() {
+            // Use requestAnimationFrame to defer execution and avoid blocking image loading
+            requestAnimationFrame(function() {
+                const showcaseSection = document.getElementById('project-showcase');
+                const cards = document.querySelectorAll('.project-card');
 
-            // Intersection Observer for fade-in effect
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, { threshold: 0.1 });
-
-            cards.forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(30px)';
-                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-                observer.observe(card);
-            });
-
-            // Add click effect on cards
-            cards.forEach(card => {
-                card.addEventListener('click', function() {
-                    this.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        this.style.transform = '';
-                    }, 150);
-                });
-            });
-
-            // Dynamic particle effect
-            function createParticles() {
-                const container = document.querySelector('.showcase-bg-elements');
-                for (let i = 0; i < 20; i++) {
-                    const particle = document.createElement('div');
-                    particle.style.position = 'absolute';
-                    particle.style.width = '4px';
-                    particle.style.height = '4px';
-                    particle.style.background = 'rgba(255, 96, 38, 0.3)';
-                    particle.style.borderRadius = '50%';
-                    particle.style.left = Math.random() * 100 + '%';
-                    particle.style.top = Math.random() * 100 + '%';
-                    particle.style.animation = `float ${Math.random() * 10 + 5}s infinite`;
-                    particle.style.animationDelay = Math.random() * 2 + 's';
-                    container.appendChild(particle);
+                // Only proceed if elements exist
+                if (!showcaseSection || !cards.length) {
+                    // Retry after a short delay if elements not ready
+                    setTimeout(arguments.callee, 50);
+                    return;
                 }
-            }
 
-            createParticles();
-        });
+                // Intersection Observer for fade-in effect
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                // Process cards asynchronously in chunks to avoid blocking
+                let cardIndex = 0;
+                const processCards = function() {
+                    const batchSize = 5;
+                    const endIndex = Math.min(cardIndex + batchSize, cards.length);
+
+                    for (let i = cardIndex; i < endIndex; i++) {
+                        const card = cards[i];
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(30px)';
+                        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                        observer.observe(card);
+
+                        // Add click effect
+                        card.addEventListener('click', function() {
+                            this.style.transform = 'scale(0.95)';
+                            setTimeout(() => {
+                                this.style.transform = '';
+                            }, 150);
+                        });
+                    }
+
+                    cardIndex = endIndex;
+                    if (cardIndex < cards.length) {
+                        // Process next batch asynchronously
+                        requestAnimationFrame(processCards);
+                    } else {
+                        // All cards processed, create particles
+                        createParticles();
+                    }
+                };
+
+                // Start processing cards
+                processCards();
+
+                // Dynamic particle effect - create particles asynchronously
+                function createParticles() {
+                    const container = document.querySelector('.showcase-bg-elements');
+                    if (!container) return;
+
+                    // Create particles in batches to avoid blocking
+                    let particleCount = 0;
+                    const totalParticles = 20;
+
+                    const createParticleBatch = function() {
+                        const batchSize = 5;
+                        const endCount = Math.min(particleCount + batchSize, totalParticles);
+
+                        for (let i = particleCount; i < endCount; i++) {
+                            const particle = document.createElement('div');
+                            particle.style.position = 'absolute';
+                            particle.style.width = '4px';
+                            particle.style.height = '4px';
+                            particle.style.background = 'rgba(255, 96, 38, 0.3)';
+                            particle.style.borderRadius = '50%';
+                            particle.style.left = Math.random() * 100 + '%';
+                            particle.style.top = Math.random() * 100 + '%';
+                            particle.style.animation = `float ${Math.random() * 10 + 5}s infinite`;
+                            particle.style.animationDelay = Math.random() * 2 + 's';
+                            container.appendChild(particle);
+                        }
+
+                        particleCount = endCount;
+                        if (particleCount < totalParticles) {
+                            // Create next batch asynchronously
+                            requestAnimationFrame(createParticleBatch);
+                        }
+                    };
+
+                    createParticleBatch();
+                }
+            });
+        })();
     </script>
 </section>
 
