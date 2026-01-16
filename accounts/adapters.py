@@ -3,6 +3,7 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.core.exceptions import ImmediateHttpResponse
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.contrib.auth import login as auth_login
 from django.urls import reverse
 from django.conf import settings
 from django.core.exceptions import ValidationError
@@ -46,6 +47,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def is_open_for_signup(self, request, sociallogin):
         """
         Control whether social signup is allowed.
+        Only allow Google provider with verified email.
         """
         # Only allow Google provider
         if sociallogin.account.provider != 'google':
@@ -53,10 +55,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         
         # Check if email is verified
         email_verified = sociallogin.account.extra_data.get('email_verified', False)
-        if not email_verified:
-            return False
-        
-        return True
+        return email_verified
     
     def pre_social_login(self, request, sociallogin):
         """
@@ -85,16 +84,18 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 messages.error(request, "This email is registered as staff. Please use username/password login.")
                 raise ImmediateHttpResponse(redirect('login'))
             
-            # If user exists as Student, connect the account
+            # If user exists as Student, connect the account and log in
             try:
                 existing_student = Student.objects.get(email=email)
                 if sociallogin.user.pk != existing_student.pk:
                     # Connect social account to existing student
                     sociallogin.connect(request, existing_student)
-                    messages.success(request, f"Welcome back, {existing_student.first_name}!")
-                    raise ImmediateHttpResponse(redirect('student'))
+                    # Log in the user after connecting
+                    auth_login(request, existing_student, backend='allauth.account.auth_backends.AuthenticationBackend')
+                    messages.success(request, "Google account successfully connected and logged in!")
             except Student.DoesNotExist:
-                pass
+                # New user - allow to proceed to signup (signals will handle creation)
+                logger.info(f"New student signup via Google: {email}")
             
         except ImmediateHttpResponse:
             raise
@@ -105,7 +106,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     
     def save_user(self, request, sociallogin, form=None):
         """
-        Save user from social login with custom Student profile creation.
+        Save user from social login. Student profile creation is handled by signals.
         """
         try:
             # Get the user from sociallogin
@@ -114,36 +115,31 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # Get social account data
             user_data = sociallogin.account.extra_data
             
-            # Generate unique username
-            username = self.generate_unique_username(user_data)
+            # Generate unique username if not already set
+            if not user.username:
+                username = self.generate_unique_username(user_data)
+                user.username = username
             
-            # Update user fields
-            user.username = username
+            # Update user fields from Google data
             user.first_name = user_data.get('given_name', '') or user.first_name or 'Not Set'
             user.last_name = user_data.get('family_name', '') or user.last_name or 'Not Set'
             user.email = user_data.get('email', '') or user.email or 'Not Set'
             
-            # Save the user first
+            # Ensure user is active and not staff
+            user.is_active = True
+            user.is_staff = False
+            user.is_superuser = False
+            
+            # Save the user
             user.save()
             
-            # Create Student profile
-            student = Student.objects.create(
-                user_ptr=user,
-                username=username,
-                first_name=user.first_name,
-                last_name=user.last_name,
-                email=user.email,
-                mobile_number='-',
-                gender='Not Set',
-            )
-            
-            logger.info(f"Created new student via Google OAuth: {student.username}")
+            logger.info(f"User saved from Google OAuth: {user.username} ({user.email})")
             
             return user
             
         except Exception as e:
             logger.error(f"Error in save_user: {e}", exc_info=True)
-            raise ValidationError("Failed to create user account. Please try again.")
+            raise ValidationError(f"Failed to create user account: {str(e)}")
     
     def generate_unique_username(self, user_data):
         """
@@ -174,9 +170,15 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     def get_login_redirect_url(self, request):
         """
         Custom redirect after successful social login.
+        Redirect to student dashboard.
         """
-        # Always redirect students to dashboard
-        return reverse('student')
+        try:
+            url = reverse('student')
+            logger.info(f"Redirecting to student dashboard: {url}")
+            return url
+        except Exception as e:
+            logger.error(f"Error getting login redirect URL: {e}")
+            return '/dashboard/'
     
     def authentication_error(self, request, provider_id, error=None, exception=None, extra_context=None):
         """

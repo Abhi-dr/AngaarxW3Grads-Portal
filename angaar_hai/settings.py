@@ -323,7 +323,8 @@ SOCIALACCOUNT_ADAPTER = 'accounts.adapters.CustomSocialAccountAdapter'
 
 # Login/Logout URLs
 LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/dashboard/'
+LOGIN_REDIRECT_URL = '/dashboard/'  # Changed to support all user types
+ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'  # Redirect after signup
 LOGOUT_REDIRECT_URL = '/'
 
 # Account settings

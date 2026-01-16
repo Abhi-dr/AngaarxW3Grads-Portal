@@ -1,10 +1,12 @@
 from django.dispatch import receiver
 from django.contrib.auth import login
+from django.contrib.auth.signals import user_logged_in
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.db import transaction
 from django.core.exceptions import ValidationError
 import re
+import logging
 
 from allauth.socialaccount.signals import pre_social_login, social_account_added
 from allauth.socialaccount.models import SocialAccount
@@ -13,12 +15,15 @@ from allauth.account.signals import user_signed_up
 from .models import Student, Instructor, Administrator
 from .views import send_welcome_mail
 
+logger = logging.getLogger(__name__)
+
 
 @receiver(pre_social_login)
 def pre_social_login_handler(sender, request, sociallogin, **kwargs):
     """
     Handle pre-social login to check for existing accounts and security measures.
     This signal is fired before the user is logged in via social account.
+    NOTE: Adapter handles the main logic, this is just for logging.
     """
     try:
         # Get the social account data
@@ -26,34 +31,10 @@ def pre_social_login_handler(sender, request, sociallogin, **kwargs):
         user_data = social_account.extra_data
         email = user_data.get('email', '')
         
-        # Security Check: Only allow Google provider
-        if social_account.provider != 'google':
-            messages.error(request, "Only Google login is supported for students.")
-            return redirect('login')
+        logger.info(f"Pre-social login for {social_account.provider} account: {email}")
         
-        # Check if email is verified with Google
-        if not user_data.get('email_verified', False):
-            messages.error(request, "Please verify your email with Google before logging in.")
-            return redirect('login')
-        
-        # Check if user already exists as Instructor or Administrator
-        if (Instructor.objects.filter(email=email).exists() or 
-            Administrator.objects.filter(email=email).exists()):
-            messages.error(request, "This email is registered as staff. Please use username/password login.")
-            return redirect('login')
-        
-        # If user already exists as Student, connect the social account
-        try:
-            existing_student = Student.objects.get(email=email)
-            if not sociallogin.user.pk:
-                sociallogin.connect(request, existing_student)
-            return
-        except Student.DoesNotExist:
-            pass
-            
     except Exception as e:
-        print(f"Error in pre_social_login_handler: {e}")
-        messages.error(request, "An error occurred during login. Please try again.")
+        logger.error(f"Error in pre_social_login_handler: {e}")
 
 
 @receiver(social_account_added)
@@ -84,57 +65,40 @@ def user_signed_up_handler(sender, request, user, sociallogin=None, **kwargs):
         
     try:
         with transaction.atomic():
+            # Check if Student profile already exists
+            if hasattr(user, 'student'):
+                logger.info(f"Student profile already exists for: {user.username}")
+                return
+            
             # Get social account data
             social_account = sociallogin.account
-            user_data = social_account.extra_data
             
             if social_account.provider == 'google':
-                # Generate unique username from Google data
-                first_name = user_data.get('given_name', '') or user.first_name or 'user'
-                base_username = first_name.lower().strip()
-                
-                # Clean username - remove special characters and spaces
-                base_username = re.sub(r'[^a-zA-Z0-9]', '', base_username)
-                if not base_username:
-                    base_username = 'user'
-                
-                # Find unique username
-                username = base_username
-                counter = 1
-                while (Student.objects.filter(username=username).exists() or 
-                       Instructor.objects.filter(username=username).exists() or 
-                       Administrator.objects.filter(username=username).exists()):
-                    username = f"{base_username}{counter}"
-                    counter += 1
-                
-                # Create Student profile
+                # Create Student profile using user fields (already set by adapter)
                 student = Student.objects.create(
                     user_ptr=user,
-                    username=username,
-                    first_name=user_data.get('given_name', '') or user.first_name or 'Not Set',
-                    last_name=user_data.get('family_name', '') or user.last_name or 'Not Set',
-                    email=user_data.get('email', '') or user.email or 'Not Set',
+                    username=user.username,
+                    first_name=user.first_name or 'Not Set',
+                    last_name=user.last_name or 'Not Set',
+                    email=user.email or 'Not Set',
                     mobile_number='-',
                     gender='Not Set',
                 )
-                
-                # Update the user object with the username
-                user.username = username
-                user.save()
                 
                 # Send welcome email
                 try:
                     if student.email and student.email != 'Not Set':
                         send_welcome_mail(student.email, student.first_name)
                 except Exception as email_error:
-                    print(f"Failed to send welcome email: {email_error}")
+                    logger.warning(f"Failed to send welcome email: {email_error}")
                 
                 # Success message
-                messages.success(request, f"Welcome to Angaar, {student.first_name}! Your account is ready.")
+                messages.success(request, f"🔥 Welcome to Angaar, {student.first_name}! Your account is ready.")
+                
+                logger.info(f"New student created via Google OAuth: {student.username} ({student.email})")
                 
     except Exception as e:
-        print(f"Error in user_signed_up_handler: {e}")
-        messages.error(request, "An error occurred during account creation. Please try again.")
+        logger.error(f"Error in user_signed_up_handler: {e}", exc_info=True)
 
 
 def validate_google_oauth_settings():
@@ -161,3 +125,22 @@ def validate_google_oauth_settings():
         raise ValidationError("Google provider not configured in SOCIALACCOUNT_PROVIDERS")
     
     return True
+
+
+@receiver(user_logged_in)
+def user_logged_in_handler(sender, request, user, **kwargs):
+    """
+    Handle post-login actions and ensure proper redirect.
+    This fires after a user is successfully logged in (including social login).
+    """
+    try:
+        # Log the login
+        if hasattr(user, 'student'):
+            logger.info(f"Student logged in: {user.username}")
+        elif hasattr(user, 'instructor'):
+            logger.info(f"Instructor logged in: {user.username}")
+        elif hasattr(user, 'administrator'):
+            logger.info(f"Administrator logged in: {user.username}")
+            
+    except Exception as e:
+        logger.error(f"Error in user_logged_in_handler: {e}")
