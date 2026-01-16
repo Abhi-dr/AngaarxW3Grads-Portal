@@ -61,8 +61,8 @@ Student | Coding Playground
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: #1a1a1a;
-        color: #ffffff;
+        background: var(--bs-body-bg);
+        color: var(--bs-body-color);
         z-index: 9999;
         overflow: hidden;
         display: none;
@@ -74,13 +74,13 @@ Student | Coding Playground
 
     .presentation-mode .presentation-header {
         padding: 5px 30px;
-        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
-        color: white;
+        background: var(--bs-secondary-bg);
+        color: var(--bs-body-color);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-        border-bottom: 2px solid #4a5568;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        border-bottom: 2px solid var(--bs-border-color);
         flex-shrink: 0;
     }
 
@@ -112,10 +112,10 @@ Student | Coding Playground
     .presentation-mode .language-selector-header select {
         font-size: 16px;
         padding: 8px 15px;
-        border: 2px solid #4a5568;
+        border: 2px solid var(--bs-border-color);
         border-radius: 6px;
-        background: #2d3748;
-        color: white;
+        background: var(--bs-secondary-bg);
+        color: var(--bs-body-color);
         min-width: 120px;
     }
 
@@ -130,10 +130,10 @@ Student | Coding Playground
         display: flex;
         align-items: center;
         gap: 10px;
-        background: #2d3748;
+        background: var(--bs-secondary-bg);
         padding: 8px 12px;
         border-radius: 6px;
-        border: 2px solid #4a5568;
+        border: 2px solid var(--bs-border-color);
     }
 
     .presentation-mode .font-size-controls label {
@@ -143,11 +143,30 @@ Student | Coding Playground
         white-space: nowrap;
     }
 
+    /* Light theme styling for font size controls */
+    [data-bs-theme="light"] .presentation-mode .font-size-controls {
+        background: #000000;
+        border-color: #000000;
+        padding: 10px 15px;
+    }
+
+    [data-bs-theme="light"] .presentation-mode .font-size-controls label {
+        color: white;
+    }
+
+    [data-bs-theme="light"] .presentation-mode .font-size-slider {
+        background: #333333;
+    }
+
+    [data-bs-theme="light"] .presentation-mode .font-size-display {
+        color: white;
+    }
+
     .presentation-mode .font-size-slider {
         width: 80px;
         height: 4px;
         border-radius: 2px;
-        background: #4a5568;
+        background: var(--bs-border-color);
         outline: none;
         -webkit-appearance: none;
     }
@@ -191,8 +210,8 @@ Student | Coding Playground
         flex: 1;
         display: flex;
         flex-direction: column;
-        background: #1e1e1e;
-        border-right: 3px solid #4a5568;
+        background: var(--bs-body-bg);
+        border-right: 3px solid var(--bs-border-color);
         min-width: 200px;
         transition: flex 0.1s ease;
     }
@@ -201,7 +220,7 @@ Student | Coding Playground
         flex: 1;
         display: flex;
         flex-direction: column;
-        background: #1e1e1e;
+        background: var(--bs-body-bg);
         min-width: 200px;
         transition: flex 0.1s ease;
     }
@@ -209,7 +228,7 @@ Student | Coding Playground
     /* Resizer */
     .presentation-mode .resizer {
         width: 6px;
-        background: #4a5568;
+        background: var(--bs-border-color);
         cursor: ew-resize;
         position: relative;
         flex-shrink: 0;
@@ -217,11 +236,11 @@ Student | Coding Playground
     }
 
     .presentation-mode .resizer:hover {
-        background: #63b3ed;
+        background: var(--bs-primary);
     }
 
     .presentation-mode .resizer:active {
-        background: #4299e1;
+        background: var(--bs-primary);
     }
 
     .presentation-mode .resizer::before {
@@ -244,10 +263,10 @@ Student | Coding Playground
     }
 
     .presentation-mode .code-header {
-        background: #2d3748;
+        background: var(--bs-secondary-bg);
         padding: 12px 20px;
         border-radius: 8px 8px 0 0;
-        border-bottom: 2px solid #4a5568;
+        border-bottom: 2px solid var(--bs-border-color);
         margin-bottom: 0;
     }
 
@@ -255,14 +274,14 @@ Student | Coding Playground
         margin: 0;
         font-size: 18px;
         font-weight: 600;
-        color: #ffffff;
+        color: var(--bs-body-color);
     }
 
     .presentation-mode .editor-container {
         flex: 1;
         margin: 0;
         position: relative;
-        border: 2px solid #4a5568;
+        border: 2px solid var(--bs-border-color);
         border-top: none;
         border-radius: 0 0 8px 8px;
     }
@@ -279,8 +298,8 @@ Student | Coding Playground
 
     .presentation-mode .controls-section {
         padding: 5px 20px;
-        background: #2d3748;
-        border-top: 2px solid #4a5568;
+        background: var(--bs-secondary-bg);
+        border-top: 2px solid var(--bs-border-color);
         display: flex;
         gap: 15px;
         align-items: center;
@@ -315,7 +334,7 @@ Student | Coding Playground
     }
 
     .presentation-mode .input-section label {
-        color: #cbd5e0;
+        color: var(--bs-body-color);
         font-weight: 500;
         margin-bottom: 8px;
         display: block;
@@ -326,16 +345,16 @@ Student | Coding Playground
         font-size: 14px;
         resize: vertical;
         height: 60px;
-        background: #2d3748;
-        border: 2px solid #4a5568;
+        background: var(--bs-secondary-bg);
+        border: 2px solid var(--bs-border-color);
         border-radius: 6px;
-        color: white;
+        color: var(--bs-body-color);
         padding: 10px;
     }
 
     .presentation-mode .input-section textarea:focus {
         outline: none;
-        border-color: #63b3ed;
+        border-color: var(--bs-primary);
         box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.1);
     }
 
@@ -347,10 +366,10 @@ Student | Coding Playground
     }
 
     .presentation-mode .output-header {
-        background: #2d3748;
+        background: var(--bs-secondary-bg);
         padding: 12px 20px;
         border-radius: 8px 8px 0 0;
-        border: 2px solid #4a5568;
+        border: 2px solid var(--bs-border-color);
         border-bottom: none;
         margin-bottom: 0;
     }
@@ -359,15 +378,15 @@ Student | Coding Playground
         margin: 0;
         font-size: 18px;
         font-weight: 600;
-        color: #ffffff;
+        color: var(--bs-body-color);
     }
 
     .presentation-mode .output-content {
         flex: 1;
-        border: 2px solid #4a5568;
+        border: 2px solid var(--bs-border-color);
         border-top: none;
         border-radius: 0 0 8px 8px;
-        background: #1a202c;
+        background: var(--bs-body-bg);
         overflow: auto;
     }
 
@@ -377,7 +396,7 @@ Student | Coding Playground
         white-space: pre-wrap;
         word-wrap: break-word;
         height: 100%;
-        color: #e2e8f0;
+        color: var(--bs-body-color);
         font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         line-height: 1.5;
     }
@@ -943,7 +962,7 @@ Student | Coding Playground
         saveTimeout = setTimeout(autoSave, 2000); // Save after 2 seconds of inactivity
     }
 
-    // Force dark theme for presentation mode
+    // Update editor theme to match website theme
     function updateEditorTheme() {
         const currentTheme = localStorage.getItem("theme");
         const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
@@ -951,8 +970,17 @@ Student | Coding Playground
         const theme = isDark ? "ace/theme/twilight" : "ace/theme/chrome";
         editor.setTheme(theme);
         
-        // Always use dark theme for presentation mode
-        editorPresentation.setTheme("ace/theme/twilight");
+        // Apply the same theme to presentation mode editor
+        editorPresentation.setTheme(theme);
+        
+        // Force update presentation mode styles
+        if ($("#presentationMode").hasClass("active")) {
+            // Trigger a style recalculation by toggling a class
+            $("#presentationMode").removeClass("active");
+            setTimeout(() => {
+                $("#presentationMode").addClass("active");
+            }, 10);
+        }
     }
 
     function setEditorContent(languageId, customCode = null) {
@@ -1214,12 +1242,17 @@ Student | Coding Playground
 
     window.addEventListener('storage', function(e) {
         if (e.key === 'theme') {
-            updateEditorTheme();
+            // Small delay to ensure DOM is updated
+            setTimeout(() => {
+                updateEditorTheme();
+            }, 100);
         }
     });
 
     document.addEventListener('themeChanged', function() {
-        updateEditorTheme();
+        setTimeout(() => {
+            updateEditorTheme();
+        }, 100);
     });
 
     // Window resize handler for presentation mode
