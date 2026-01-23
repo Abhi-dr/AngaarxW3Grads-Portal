@@ -79,7 +79,7 @@ Student | Coding Playground
         display: flex;
         justify-content: space-between;
         align-items: center;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         border-bottom: 2px solid var(--bs-border-color);
         flex-shrink: 0;
     }
@@ -399,6 +399,9 @@ Student | Coding Playground
         color: var(--bs-body-color);
         font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
         line-height: 1.5;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     .exit-presentation {
@@ -446,7 +449,16 @@ Student | Coding Playground
 
     [data-bs-theme="dark"] .presentation-mode .output-content {
         background: var(--bs-body-bg);
-        color: var(--bs-body-color);
+        color: #ffffff;
+        /* Explicit white for clarity */
+    }
+
+    [data-bs-theme="dark"] .presentation-mode .output-content pre {
+        color: #ffffff;
+        font-weight: 500;
+        text-rendering: optimizeLegibility;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     /* Auto-save indicator */
@@ -562,7 +574,7 @@ Student | Coding Playground
         .mobile-controls {
             display: none;
         }
-        
+
         .presentation-toggle {
             display: inline-block;
         }
@@ -570,12 +582,15 @@ Student | Coding Playground
 
     /* Touch-friendly improvements */
     @media (max-width: 768px) {
-        button, .btn {
+
+        button,
+        .btn {
             min-height: 40px;
             touch-action: manipulation;
         }
 
-        select, .form-select {
+        select,
+        .form-select {
             min-height: 40px;
             font-size: 15px;
         }
@@ -620,8 +635,13 @@ Student | Coding Playground
     }
 
     @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
     }
 
     .mobile-run-btn.btn-loading::after {
@@ -665,12 +685,13 @@ Student | Coding Playground
                     <button type="button" class="btn btn-success mobile-run-btn" id="mobileRunBtn">
                         <span class="btn-text">▶️ Run Code</span>
                     </button>
-                    <button type="button" class="btn btn-outline-primary mobile-input-btn" data-bs-toggle="modal" data-bs-target="#inputModal">
+                    <button type="button" class="btn btn-outline-primary mobile-input-btn" data-bs-toggle="modal"
+                        data-bs-target="#inputModal">
                         📝 Enter Inputs
                     </button>
                 </div>
             </div>
-            
+
             <form id="codeForm">
                 {% csrf_token %}
                 <div class="desktop-controls">
@@ -689,7 +710,8 @@ Student | Coding Playground
             </form>
 
             <div class="desktop-controls">
-                <button type="button" class="btn btn-primary mt-3 float-end" data-bs-toggle="modal" data-bs-target="#inputModal">
+                <button type="button" class="btn btn-primary mt-3 float-end" data-bs-toggle="modal"
+                    data-bs-target="#inputModal">
                     Enter Inputs
                 </button>
             </div>
@@ -705,7 +727,8 @@ Student | Coding Playground
                             <form id="inputForm">
                                 <div class="mb-3">
                                     <label for="inputText" class="form-label">Input:</label>
-                                    <textarea type="text" class="form-control" id="inputText" name="inputText" placeholder="Enter Inputs here..."></textarea>
+                                    <textarea type="text" class="form-control" id="inputText" name="inputText"
+                                        placeholder="Enter Inputs here..."></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-primary float-end">Submit</button>
                             </form>
@@ -740,7 +763,7 @@ Student | Coding Playground
             <button class="exit-presentation" id="exitPresentation">✕ Exit</button>
         </div>
     </div>
-    
+
     <div class="presentation-body">
         <div class="presentation-left" id="presentationLeft">
             <div class="code-section">
@@ -751,7 +774,7 @@ Student | Coding Playground
                     <div id="editorPresentation"></div>
                 </div>
             </div>
-            
+
             <div class="controls-section">
                 <button type="button" id="submitBtnPresentation">▶ Run Code</button>
                 <div class="input-section">
@@ -760,9 +783,9 @@ Student | Coding Playground
                 </div>
             </div>
         </div>
-        
+
         <div class="resizer" id="resizer"></div>
-        
+
         <div class="presentation-right" id="presentationRight">
             <div class="output-section">
                 <div class="output-header">
@@ -782,605 +805,605 @@ Student | Coding Playground
 
 <script>
     $(document).ready(function () {
-    const editor = ace.edit("editor");
-    const editorPresentation = ace.edit("editorPresentation");
-    const languageSelect = $("#language");
-    const languagePresentationSelect = $("#languagePresentation");
-    
-    // Auto-save functionality
-    let saveTimeout;
-    let lastSavedCode = '';
-    let lastSavedLanguage = '';
-    let lastSavedInput = '';
-    let lastSavedFontSize = 16;
-    let lastSavedPanelSizes = { left: 50, right: 50 };
+        const editor = ace.edit("editor");
+        const editorPresentation = ace.edit("editorPresentation");
+        const languageSelect = $("#language");
+        const languagePresentationSelect = $("#languagePresentation");
 
-    // Resizer functionality
-    let isResizing = false;
-    let startX = 0;
-    let startLeftWidth = 0;
-    let startRightWidth = 0;
+        // Auto-save functionality
+        let saveTimeout;
+        let lastSavedCode = '';
+        let lastSavedLanguage = '';
+        let lastSavedInput = '';
+        let lastSavedFontSize = 16;
+        let lastSavedPanelSizes = { left: 50, right: 50 };
 
-    const topLanguages = [
-        { id: 71, name: "Python" },
-        { id: 50, name: "C" },
-        { id: 54, name: "C++" },
-        { id: 62, name: "Java" }
-    ];
+        // Resizer functionality
+        let isResizing = false;
+        let startX = 0;
+        let startLeftWidth = 0;
+        let startRightWidth = 0;
 
-    const defaultCode = {
-        71: "# Chal beta hoja shuru... Krde mera naam roshan 🔥\n",
-        50: `#include <stdio.h>\n\nint main() {\n\t// Write your C code here\n\treturn 0;\n}`,
-        54: `#include <iostream>\nusing namespace std;\n\nint main() {\n\t// Write your C++ code here\n\treturn 0;\n}`,
-        62: `public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}`
-    };
+        const topLanguages = [
+            { id: 71, name: "Python" },
+            { id: 50, name: "C" },
+            { id: 54, name: "C++" },
+            { id: 62, name: "Java" }
+        ];
 
-    // Font size functionality
-    function updateFontSize(size) {
-        const fontSize = parseInt(size);
-        $("#fontSizeDisplay").text(fontSize + "px");
-        
-        // Update editor font size
-        editorPresentation.setFontSize(fontSize);
-        
-        // Update output font size
-        $("#outputPresentation").css("font-size", fontSize + "px");
-        
-        lastSavedFontSize = fontSize;
-        scheduleAutoSave();
-    }
+        const defaultCode = {
+            71: "# Chal beta hoja shuru... Krde mera naam roshan 🔥\n",
+            50: `#include <stdio.h>\n\nint main() {\n\t// Write your C code here\n\treturn 0;\n}`,
+            54: `#include <iostream>\nusing namespace std;\n\nint main() {\n\t// Write your C++ code here\n\treturn 0;\n}`,
+            62: `public class Main {\n\tpublic static void main(String[] args) {\n\t\t// Write your Java code here\n\t}\n}`
+        };
 
-    // Panel resizing functionality
-    function initializeResizer() {
-        const resizer = document.getElementById('resizer');
-        const leftPanel = document.getElementById('presentationLeft');
-        const rightPanel = document.getElementById('presentationRight');
-        const presentationMode = document.getElementById('presentationMode');
+        // Font size functionality
+        function updateFontSize(size) {
+            const fontSize = parseInt(size);
+            $("#fontSizeDisplay").text(fontSize + "px");
 
-        resizer.addEventListener('mousedown', function(e) {
-            isResizing = true;
-            startX = e.clientX;
-            
-            const leftRect = leftPanel.getBoundingClientRect();
-            const rightRect = rightPanel.getBoundingClientRect();
-            startLeftWidth = leftRect.width;
-            startRightWidth = rightRect.width;
-            
-            presentationMode.classList.add('resizing');
-            
-            e.preventDefault();
-        });
+            // Update editor font size
+            editorPresentation.setFontSize(fontSize);
 
-        document.addEventListener('mousemove', function(e) {
-            if (!isResizing) return;
+            // Update output font size
+            $("#outputPresentation").css("font-size", fontSize + "px");
 
-            const deltaX = e.clientX - startX;
-            const containerWidth = leftPanel.parentElement.offsetWidth - 6; // Subtract resizer width
-            
-            let newLeftWidth = startLeftWidth + deltaX;
-            let newRightWidth = startRightWidth - deltaX;
-            
-            // Set minimum widths
-            const minWidth = 200;
-            if (newLeftWidth < minWidth) {
-                newLeftWidth = minWidth;
-                newRightWidth = containerWidth - minWidth;
-            } else if (newRightWidth < minWidth) {
-                newRightWidth = minWidth;
-                newLeftWidth = containerWidth - minWidth;
-            }
-            
-            // Calculate flex values
-            const leftFlex = (newLeftWidth / containerWidth) * 100;
-            const rightFlex = (newRightWidth / containerWidth) * 100;
-            
-            leftPanel.style.flex = leftFlex;
-            rightPanel.style.flex = rightFlex;
-            
-            // Save panel sizes
-            lastSavedPanelSizes = { left: leftFlex, right: rightFlex };
-        });
-
-        document.addEventListener('mouseup', function() {
-            if (isResizing) {
-                isResizing = false;
-                presentationMode.classList.remove('resizing');
-                scheduleAutoSave();
-            }
-        });
-    }
-
-    // Auto-save functions
-    function showSaveIndicator(status) {
-        const indicators = [document.getElementById('saveIndicator'), document.getElementById('saveIndicatorPresentation')];
-        indicators.forEach(indicator => {
-            if (indicator) {
-                indicator.className = 'save-indicator';
-                if (status === 'saving') {
-                    indicator.className += ' saving show';
-                    indicator.textContent = '⏳';
-                    indicator.title = 'Saving...';
-                } else if (status === 'saved') {
-                    indicator.className += ' show';
-                    indicator.textContent = '✓';
-                    indicator.title = 'Auto-saved';
-                    setTimeout(() => {
-                        indicator.className = 'save-indicator';
-                    }, 2000);
-                }
-            }
-        });
-    }
-
-    function autoSave() {
-        const currentCode = editor.getValue();
-        const currentLanguage = languageSelect.val();
-        const currentInput = $("#inputText").val();
-        
-        if (currentCode !== lastSavedCode || currentLanguage !== lastSavedLanguage || 
-            currentInput !== lastSavedInput || lastSavedFontSize !== parseInt($("#fontSizeSlider").val())) {
-            
-            showSaveIndicator('saving');
-            
-            const saveData = {
-                code: currentCode,
-                language: currentLanguage,
-                input: currentInput,
-                fontSize: lastSavedFontSize,
-                panelSizes: lastSavedPanelSizes,
-                timestamp: Date.now()
-            };
-            
-            try {
-                localStorage.setItem('codingPlayground_autoSave', JSON.stringify(saveData));
-                lastSavedCode = currentCode;
-                lastSavedLanguage = currentLanguage;
-                lastSavedInput = currentInput;
-                
-                setTimeout(() => showSaveIndicator('saved'), 500);
-            } catch (error) {
-                console.warn('Failed to auto-save to localStorage:', error);
-            }
+            lastSavedFontSize = fontSize;
+            scheduleAutoSave();
         }
-    }
 
-    function loadAutoSavedData() {
-        try {
-            const savedData = localStorage.getItem('codingPlayground_autoSave');
-            if (savedData) {
-                const data = JSON.parse(savedData);
-                return data;
-            }
-        } catch (error) {
-            console.warn('Failed to load auto-saved data:', error);
-        }
-        return null;
-    }
+        // Panel resizing functionality
+        function initializeResizer() {
+            const resizer = document.getElementById('resizer');
+            const leftPanel = document.getElementById('presentationLeft');
+            const rightPanel = document.getElementById('presentationRight');
+            const presentationMode = document.getElementById('presentationMode');
 
-    function scheduleAutoSave() {
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(autoSave, 2000); // Save after 2 seconds of inactivity
-    }
+            resizer.addEventListener('mousedown', function (e) {
+                isResizing = true;
+                startX = e.clientX;
 
-    // Update editor theme to match website theme
-    function updateEditorTheme() {
-        const currentTheme = localStorage.getItem("theme");
-        const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
-        
-        const theme = isDark ? "ace/theme/twilight" : "ace/theme/chrome";
-        editor.setTheme(theme);
-        
-        // Apply the same theme to presentation mode editor
-        editorPresentation.setTheme(theme);
-        
-        // Force update presentation mode styles
-        if ($("#presentationMode").hasClass("active")) {
-            // Trigger a style recalculation by toggling a class
-            $("#presentationMode").removeClass("active");
-            setTimeout(() => {
-                $("#presentationMode").addClass("active");
-            }, 10);
-        }
-    }
+                const leftRect = leftPanel.getBoundingClientRect();
+                const rightRect = rightPanel.getBoundingClientRect();
+                startLeftWidth = leftRect.width;
+                startRightWidth = rightRect.width;
 
-    function setEditorContent(languageId, customCode = null) {
-        const code = customCode || defaultCode[languageId] || "// Start coding...";
-        editor.setValue(code, -1);
-        editorPresentation.setValue(code, -1);
-    }
+                presentationMode.classList.add('resizing');
 
-    function syncEditors() {
-        const mainCode = editor.getValue();
-        const mainLanguage = languageSelect.val();
-        const mainInput = $("#inputText").val();
-        
-        editorPresentation.setValue(mainCode, -1);
-        languagePresentationSelect.val(mainLanguage);
-        $("#inputTextPresentation").val(mainInput);
-        
-        // Update syntax highlighting for presentation editor
-        updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
-    }
-
-    function updateSyntaxHighlighting(selectElement, editorInstance) {
-        const selectedLanguage = selectElement.val();
-        if (selectedLanguage == 71) {
-            editorInstance.session.setMode("ace/mode/python");
-        } else if (selectedLanguage == 50 || selectedLanguage == 54) {
-            editorInstance.session.setMode("ace/mode/c_cpp");
-        } else if (selectedLanguage == 62) {
-            editorInstance.session.setMode("ace/mode/java");
-        }
-    }
-
-    // Initialize languages
-    $.ajax({
-        url: "https://theangaarbatch.in/judge0/languages",
-        type: "GET",
-        success: function (response) {
-            // Populate all language selectors
-            [languageSelect, languagePresentationSelect, $("#languageMobile")].forEach(select => {
-                topLanguages.forEach(function (language) {
-                    select.append(`<option value="${language.id}">${language.name}</option>`);
-                });
-
-                let otherLanguages = response.filter(function (language) {
-                    return !topLanguages.some(topLang => topLang.id === language.id);
-                });
-                otherLanguages.sort((a, b) => a.name.localeCompare(b.name));
-
-                otherLanguages.forEach(function (language) {
-                    select.append(`<option value="${language.id}">${language.name}</option>`);
-                });
+                e.preventDefault();
             });
 
-            // Load auto-saved data
+            document.addEventListener('mousemove', function (e) {
+                if (!isResizing) return;
+
+                const deltaX = e.clientX - startX;
+                const containerWidth = leftPanel.parentElement.offsetWidth - 6; // Subtract resizer width
+
+                let newLeftWidth = startLeftWidth + deltaX;
+                let newRightWidth = startRightWidth - deltaX;
+
+                // Set minimum widths
+                const minWidth = 200;
+                if (newLeftWidth < minWidth) {
+                    newLeftWidth = minWidth;
+                    newRightWidth = containerWidth - minWidth;
+                } else if (newRightWidth < minWidth) {
+                    newRightWidth = minWidth;
+                    newLeftWidth = containerWidth - minWidth;
+                }
+
+                // Calculate flex values
+                const leftFlex = (newLeftWidth / containerWidth) * 100;
+                const rightFlex = (newRightWidth / containerWidth) * 100;
+
+                leftPanel.style.flex = leftFlex;
+                rightPanel.style.flex = rightFlex;
+
+                // Save panel sizes
+                lastSavedPanelSizes = { left: leftFlex, right: rightFlex };
+            });
+
+            document.addEventListener('mouseup', function () {
+                if (isResizing) {
+                    isResizing = false;
+                    presentationMode.classList.remove('resizing');
+                    scheduleAutoSave();
+                }
+            });
+        }
+
+        // Auto-save functions
+        function showSaveIndicator(status) {
+            const indicators = [document.getElementById('saveIndicator'), document.getElementById('saveIndicatorPresentation')];
+            indicators.forEach(indicator => {
+                if (indicator) {
+                    indicator.className = 'save-indicator';
+                    if (status === 'saving') {
+                        indicator.className += ' saving show';
+                        indicator.textContent = '⏳';
+                        indicator.title = 'Saving...';
+                    } else if (status === 'saved') {
+                        indicator.className += ' show';
+                        indicator.textContent = '✓';
+                        indicator.title = 'Auto-saved';
+                        setTimeout(() => {
+                            indicator.className = 'save-indicator';
+                        }, 2000);
+                    }
+                }
+            });
+        }
+
+        function autoSave() {
+            const currentCode = editor.getValue();
+            const currentLanguage = languageSelect.val();
+            const currentInput = $("#inputText").val();
+
+            if (currentCode !== lastSavedCode || currentLanguage !== lastSavedLanguage ||
+                currentInput !== lastSavedInput || lastSavedFontSize !== parseInt($("#fontSizeSlider").val())) {
+
+                showSaveIndicator('saving');
+
+                const saveData = {
+                    code: currentCode,
+                    language: currentLanguage,
+                    input: currentInput,
+                    fontSize: lastSavedFontSize,
+                    panelSizes: lastSavedPanelSizes,
+                    timestamp: Date.now()
+                };
+
+                try {
+                    localStorage.setItem('codingPlayground_autoSave', JSON.stringify(saveData));
+                    lastSavedCode = currentCode;
+                    lastSavedLanguage = currentLanguage;
+                    lastSavedInput = currentInput;
+
+                    setTimeout(() => showSaveIndicator('saved'), 500);
+                } catch (error) {
+                    console.warn('Failed to auto-save to localStorage:', error);
+                }
+            }
+        }
+
+        function loadAutoSavedData() {
+            try {
+                const savedData = localStorage.getItem('codingPlayground_autoSave');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    return data;
+                }
+            } catch (error) {
+                console.warn('Failed to load auto-saved data:', error);
+            }
+            return null;
+        }
+
+        function scheduleAutoSave() {
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(autoSave, 2000); // Save after 2 seconds of inactivity
+        }
+
+        // Update editor theme to match website theme
+        function updateEditorTheme() {
+            const currentTheme = localStorage.getItem("theme");
+            const isDark = currentTheme === "dark" || document.documentElement.getAttribute('data-bs-theme') === 'dark';
+
+            const theme = isDark ? "ace/theme/twilight" : "ace/theme/chrome";
+            editor.setTheme(theme);
+
+            // Apply the same theme to presentation mode editor
+            editorPresentation.setTheme(theme);
+
+            // Force update presentation mode styles
+            if ($("#presentationMode").hasClass("active")) {
+                // Trigger a style recalculation by toggling a class
+                $("#presentationMode").removeClass("active");
+                setTimeout(() => {
+                    $("#presentationMode").addClass("active");
+                }, 10);
+            }
+        }
+
+        function setEditorContent(languageId, customCode = null) {
+            const code = customCode || defaultCode[languageId] || "// Start coding...";
+            editor.setValue(code, -1);
+            editorPresentation.setValue(code, -1);
+        }
+
+        function syncEditors() {
+            const mainCode = editor.getValue();
+            const mainLanguage = languageSelect.val();
+            const mainInput = $("#inputText").val();
+
+            editorPresentation.setValue(mainCode, -1);
+            languagePresentationSelect.val(mainLanguage);
+            $("#inputTextPresentation").val(mainInput);
+
+            // Update syntax highlighting for presentation editor
+            updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
+        }
+
+        function updateSyntaxHighlighting(selectElement, editorInstance) {
+            const selectedLanguage = selectElement.val();
+            if (selectedLanguage == 71) {
+                editorInstance.session.setMode("ace/mode/python");
+            } else if (selectedLanguage == 50 || selectedLanguage == 54) {
+                editorInstance.session.setMode("ace/mode/c_cpp");
+            } else if (selectedLanguage == 62) {
+                editorInstance.session.setMode("ace/mode/java");
+            }
+        }
+
+        // Initialize languages
+        $.ajax({
+            url: "https://theangaarbatch.in/judge0/languages",
+            type: "GET",
+            success: function (response) {
+                // Populate all language selectors
+                [languageSelect, languagePresentationSelect, $("#languageMobile")].forEach(select => {
+                    topLanguages.forEach(function (language) {
+                        select.append(`<option value="${language.id}">${language.name}</option>`);
+                    });
+
+                    let otherLanguages = response.filter(function (language) {
+                        return !topLanguages.some(topLang => topLang.id === language.id);
+                    });
+                    otherLanguages.sort((a, b) => a.name.localeCompare(b.name));
+
+                    otherLanguages.forEach(function (language) {
+                        select.append(`<option value="${language.id}">${language.name}</option>`);
+                    });
+                });
+
+                // Load auto-saved data
+                const savedData = loadAutoSavedData();
+                if (savedData) {
+                    languageSelect.val(savedData.language);
+                    languagePresentationSelect.val(savedData.language);
+                    $("#languageMobile").val(savedData.language);
+                    setEditorContent(savedData.language, savedData.code);
+                    $("#inputText").val(savedData.input);
+                    $("#inputTextPresentation").val(savedData.input);
+
+                    // Restore font size
+                    if (savedData.fontSize) {
+                        $("#fontSizeSlider").val(savedData.fontSize);
+                        updateFontSize(savedData.fontSize);
+                    }
+
+                    // Restore panel sizes
+                    if (savedData.panelSizes) {
+                        lastSavedPanelSizes = savedData.panelSizes;
+                        $("#presentationLeft").css('flex', savedData.panelSizes.left);
+                        $("#presentationRight").css('flex', savedData.panelSizes.right);
+                    }
+
+                    updateSyntaxHighlighting(languageSelect, editor);
+                    updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
+                } else {
+                    // Set Python (71) as default language
+                    const defaultLanguageId = 71;
+                    languageSelect.val(defaultLanguageId);
+                    languagePresentationSelect.val(defaultLanguageId);
+                    $("#languageMobile").val(defaultLanguageId);
+                    setEditorContent(defaultLanguageId);
+                    updateSyntaxHighlighting(languageSelect, editor);
+                    updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
+                    updateFontSize(16); // Set default font size
+                }
+            },
+            error: function (xhr, status, error) {
+                alert("Error fetching languages: " + error);
+            }
+        });
+
+        // Setup editors
+        [editor, editorPresentation].forEach(editorInstance => {
+            editorInstance.session.setMode("ace/mode/python");
+            editorInstance.setOptions({
+                enableBasicAutocompletion: true,
+                enableSnippets: true,
+                enableLiveAutocompletion: true,
+                cursorStyle: "smooth",
+                enableEmmet: true,
+            });
+        });
+
+        // Set initial theme
+        updateEditorTheme();
+
+        // Initialize resizer
+        initializeResizer();
+
+        // Font size slider event
+        $("#fontSizeSlider").on('input', function () {
+            updateFontSize($(this).val());
+        });
+
+        // Language change handlers
+        function handleLanguageChange(selectedLanguageId) {
+            languageSelect.val(selectedLanguageId);
+            languagePresentationSelect.val(selectedLanguageId);
+            $("#languageMobile").val(selectedLanguageId);
+            setEditorContent(selectedLanguageId);
+            updateSyntaxHighlighting(languageSelect, editor);
+            updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
+            $("#output").addClass("d-none");
+            $("#output pre").text("");
+            scheduleAutoSave();
+        }
+
+        languageSelect.change(function () {
+            handleLanguageChange($(this).val());
+        });
+
+        $("#languageMobile").change(function () {
+            handleLanguageChange($(this).val());
+        });
+
+        languagePresentationSelect.change(function () {
+            let selectedLanguageId = $(this).val();
+            languageSelect.val(selectedLanguageId);
+            setEditorContent(selectedLanguageId);
+            updateSyntaxHighlighting($(this), editorPresentation);
+            updateSyntaxHighlighting(languageSelect, editor);
+            $("#outputPresentation").text("Run your code to see the output here...");
+            scheduleAutoSave();
+        });
+
+        // Auto-save on editor changes
+        editor.on('change', scheduleAutoSave);
+        $("#inputText").on('input', scheduleAutoSave);
+        $("#inputTextPresentation").on('input', function () {
+            $("#inputText").val($(this).val());
+            scheduleAutoSave();
+        });
+
+        // Sync presentation editor changes back to main editor
+        editorPresentation.on('change', function () {
+            editor.setValue(editorPresentation.getValue(), -1);
+            scheduleAutoSave();
+        });
+
+        // Presentation mode controls
+        $("#presentationToggle").click(function () {
+            syncEditors();
+            $("#presentationMode").addClass("active");
+            $("body").css("overflow", "hidden");
+
+            // Apply saved settings
             const savedData = loadAutoSavedData();
             if (savedData) {
-                languageSelect.val(savedData.language);
-                languagePresentationSelect.val(savedData.language);
-                $("#languageMobile").val(savedData.language);
-                setEditorContent(savedData.language, savedData.code);
-                $("#inputText").val(savedData.input);
-                $("#inputTextPresentation").val(savedData.input);
-                
-                // Restore font size
                 if (savedData.fontSize) {
                     $("#fontSizeSlider").val(savedData.fontSize);
                     updateFontSize(savedData.fontSize);
                 }
-                
-                // Restore panel sizes
                 if (savedData.panelSizes) {
-                    lastSavedPanelSizes = savedData.panelSizes;
                     $("#presentationLeft").css('flex', savedData.panelSizes.left);
                     $("#presentationRight").css('flex', savedData.panelSizes.right);
                 }
-                
-                updateSyntaxHighlighting(languageSelect, editor);
-                updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
-            } else {
-                // Set Python (71) as default language
-                const defaultLanguageId = 71;
-                languageSelect.val(defaultLanguageId);
-                languagePresentationSelect.val(defaultLanguageId);
-                $("#languageMobile").val(defaultLanguageId);
-                setEditorContent(defaultLanguageId);
-                updateSyntaxHighlighting(languageSelect, editor);
-                updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
-                updateFontSize(16); // Set default font size
             }
-        },
-        error: function (xhr, status, error) {
-            alert("Error fetching languages: " + error);
-        }
-    });
 
-    // Setup editors
-    [editor, editorPresentation].forEach(editorInstance => {
-        editorInstance.session.setMode("ace/mode/python");
-        editorInstance.setOptions({
-            enableBasicAutocompletion: true,
-            enableSnippets: true,
-            enableLiveAutocompletion: true,
-            cursorStyle: "smooth",
-            enableEmmet: true,
-        });
-    });
-
-    // Set initial theme
-    updateEditorTheme();
-
-    // Initialize resizer
-    initializeResizer();
-
-    // Font size slider event
-    $("#fontSizeSlider").on('input', function() {
-        updateFontSize($(this).val());
-    });
-
-    // Language change handlers
-    function handleLanguageChange(selectedLanguageId) {
-        languageSelect.val(selectedLanguageId);
-        languagePresentationSelect.val(selectedLanguageId);
-        $("#languageMobile").val(selectedLanguageId);
-        setEditorContent(selectedLanguageId);
-        updateSyntaxHighlighting(languageSelect, editor);
-        updateSyntaxHighlighting(languagePresentationSelect, editorPresentation);
-        $("#output").addClass("d-none");
-        $("#output pre").text("");
-        scheduleAutoSave();
-    }
-
-    languageSelect.change(function () {
-        handleLanguageChange($(this).val());
-    });
-
-    $("#languageMobile").change(function () {
-        handleLanguageChange($(this).val());
-    });
-
-    languagePresentationSelect.change(function () {
-        let selectedLanguageId = $(this).val();
-        languageSelect.val(selectedLanguageId);
-        setEditorContent(selectedLanguageId);
-        updateSyntaxHighlighting($(this), editorPresentation);
-        updateSyntaxHighlighting(languageSelect, editor);
-        $("#outputPresentation").text("Run your code to see the output here...");
-        scheduleAutoSave();
-    });
-
-    // Auto-save on editor changes
-    editor.on('change', scheduleAutoSave);
-    $("#inputText").on('input', scheduleAutoSave);
-    $("#inputTextPresentation").on('input', function() {
-        $("#inputText").val($(this).val());
-        scheduleAutoSave();
-    });
-
-    // Sync presentation editor changes back to main editor
-    editorPresentation.on('change', function() {
-        editor.setValue(editorPresentation.getValue(), -1);
-        scheduleAutoSave();
-    });
-
-    // Presentation mode controls
-    $("#presentationToggle").click(function() {
-        syncEditors();
-        $("#presentationMode").addClass("active");
-        $("body").css("overflow", "hidden");
-        
-        // Apply saved settings
-        const savedData = loadAutoSavedData();
-        if (savedData) {
-            if (savedData.fontSize) {
-                $("#fontSizeSlider").val(savedData.fontSize);
-                updateFontSize(savedData.fontSize);
-            }
-            if (savedData.panelSizes) {
-                $("#presentationLeft").css('flex', savedData.panelSizes.left);
-                $("#presentationRight").css('flex', savedData.panelSizes.right);
-            }
-        }
-        
-        // Refresh editor layout
-        setTimeout(() => {
-            editorPresentation.resize();
-        }, 100);
-    });
-
-    $("#exitPresentation").click(function() {
-        // Sync back any changes made in presentation mode
-        editor.setValue(editorPresentation.getValue(), -1);
-        languageSelect.val(languagePresentationSelect.val());
-        $("#inputText").val($("#inputTextPresentation").val());
-        
-        $("#presentationMode").removeClass("active");
-        $("body").css("overflow", "auto");
-        scheduleAutoSave();
-    });
-
-    // Keyboard shortcuts
-    $(document).keydown(function (event) {
-        // Ctrl/Alt + Enter to run code
-        if ((event.ctrlKey || event.altKey) && event.key === "Enter") {
-            event.preventDefault();
-            if ($("#presentationMode").hasClass("active")) {
-                $("#submitBtnPresentation").click();
-            } else {
-                document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
-                $("#submit-btn").click();
-            }
-        }
-        
-        // F11 or Ctrl+Shift+P for presentation mode
-        if (event.key === "F11" || (event.ctrlKey && event.shiftKey && event.key === "P")) {
-            event.preventDefault();
-            if ($("#presentationMode").hasClass("active")) {
-                $("#exitPresentation").click();
-            } else {
-                $("#presentationToggle").click();
-            }
-        }
-        
-        // Escape to exit presentation mode
-        if (event.key === "Escape" && $("#presentationMode").hasClass("active")) {
-            $("#exitPresentation").click();
-        }
-
-        // Ctrl + Plus/Minus for font size (only in presentation mode)
-        if ($("#presentationMode").hasClass("active") && event.ctrlKey) {
-            if (event.key === "+" || event.key === "=") {
-                event.preventDefault();
-                const currentSize = parseInt($("#fontSizeSlider").val());
-                const newSize = Math.min(32, currentSize + 1);
-                $("#fontSizeSlider").val(newSize);
-                updateFontSize(newSize);
-            } else if (event.key === "-") {
-                event.preventDefault();
-                const currentSize = parseInt($("#fontSizeSlider").val());
-                const newSize = Math.max(10, currentSize - 1);
-                $("#fontSizeSlider").val(newSize);
-                updateFontSize(newSize);
-            }
-        }
-    });
-
-    // Theme change listeners
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
-                updateEditorTheme();
-            }
-        });
-    });
-
-    observer.observe(document.documentElement, {
-        attributes: true,
-        attributeFilter: ['data-bs-theme']
-    });
-
-    window.addEventListener('storage', function(e) {
-        if (e.key === 'theme') {
-            // Small delay to ensure DOM is updated
-            setTimeout(() => {
-                updateEditorTheme();
-            }, 100);
-        }
-    });
-
-    document.addEventListener('themeChanged', function() {
-        setTimeout(() => {
-            updateEditorTheme();
-        }, 100);
-    });
-
-    // Window resize handler for presentation mode
-    window.addEventListener('resize', function() {
-        if ($("#presentationMode").hasClass("active")) {
+            // Refresh editor layout
             setTimeout(() => {
                 editorPresentation.resize();
             }, 100);
-        }
-    });
+        });
 
-    // Code execution functions
-    function executeCode(isPresentation = false, isMobile = false) {
-        let submitBtn;
-        if (isPresentation) {
-            submitBtn = $("#submitBtnPresentation");
-        } else if (isMobile) {
-            submitBtn = $("#mobileRunBtn");
-        } else {
-            submitBtn = $("#submit-btn");
-        }
-        
-        const outputElement = isPresentation ? $("#outputPresentation") : $("#output pre");
-        const languageId = isPresentation ? languagePresentationSelect.val() : $("#language").val() || $("#languageMobile").val();
-        const sourceCode = isPresentation ? editorPresentation.getValue() : editor.getValue();
-        const inputText = isPresentation ? $("#inputTextPresentation").val() : $("#inputText").val();
+        $("#exitPresentation").click(function () {
+            // Sync back any changes made in presentation mode
+            editor.setValue(editorPresentation.getValue(), -1);
+            languageSelect.val(languagePresentationSelect.val());
+            $("#inputText").val($("#inputTextPresentation").val());
 
-        if (!isPresentation) $("#output").addClass("d-none");
-        
-        // Add loading state
-        submitBtn.prop("disabled", true);
-        submitBtn.addClass("btn-loading");
-        
-        // Update button text based on context
-        const btnText = submitBtn.find('.btn-text');
-        if (isPresentation) {
-            btnText.text("⏳ Running...");
-        } else if (isMobile) {
-            btnText.text("🔄 Running...");
-        } else {
-            btnText.text("Executing...");
-        }
+            $("#presentationMode").removeClass("active");
+            $("body").css("overflow", "auto");
+            scheduleAutoSave();
+        });
 
-        $.ajax({
-            url: "{% url 'execute_code' %}",
-            type: "POST",
-            data: {
-                language_id: languageId,
-                source_code: sourceCode,
-                input_data: inputText,
-                csrfmiddlewaretoken: "{{ csrf_token }}"
-            },
-            success: function (response) {
-                // Remove loading state
-                submitBtn.prop("disabled", false);
-                submitBtn.removeClass("btn-loading");
-                
-                // Restore button text
-                if (isPresentation) {
-                    btnText.text("▶ Run Code");
-                } else if (isMobile) {
-                    btnText.text("▶️ Run Code");
+        // Keyboard shortcuts
+        $(document).keydown(function (event) {
+            // Ctrl/Alt + Enter to run code
+            if ((event.ctrlKey || event.altKey) && event.key === "Enter") {
+                event.preventDefault();
+                if ($("#presentationMode").hasClass("active")) {
+                    $("#submitBtnPresentation").click();
                 } else {
-                    btnText.text("Submit");
-                }
-                
-                if (!isPresentation) $("#output").removeClass("d-none");
-
-                if (response.error) {
-                    outputElement.text(response.error);
-                } else {
-                    outputElement.text(response.output);
-                }
-
-                if (!isPresentation) {
                     document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
-                    document.getElementById("op-div").scrollIntoView(false);
+                    $("#submit-btn").click();
                 }
-            },
-            error: function (xhr, status, error) {
-                alert("Error from AJAX: " + error);
-                
-                // Remove loading state on error
-                submitBtn.prop("disabled", false);
-                submitBtn.removeClass("btn-loading");
-                
-                // Restore button text
-                if (isPresentation) {
-                    btnText.text("▶ Run Code");
-                } else if (isMobile) {
-                    btnText.text("▶️ Run Code");
+            }
+
+            // F11 or Ctrl+Shift+P for presentation mode
+            if (event.key === "F11" || (event.ctrlKey && event.shiftKey && event.key === "P")) {
+                event.preventDefault();
+                if ($("#presentationMode").hasClass("active")) {
+                    $("#exitPresentation").click();
                 } else {
-                    btnText.text("Submit");
+                    $("#presentationToggle").click();
+                }
+            }
+
+            // Escape to exit presentation mode
+            if (event.key === "Escape" && $("#presentationMode").hasClass("active")) {
+                $("#exitPresentation").click();
+            }
+
+            // Ctrl + Plus/Minus for font size (only in presentation mode)
+            if ($("#presentationMode").hasClass("active") && event.ctrlKey) {
+                if (event.key === "+" || event.key === "=") {
+                    event.preventDefault();
+                    const currentSize = parseInt($("#fontSizeSlider").val());
+                    const newSize = Math.min(32, currentSize + 1);
+                    $("#fontSizeSlider").val(newSize);
+                    updateFontSize(newSize);
+                } else if (event.key === "-") {
+                    event.preventDefault();
+                    const currentSize = parseInt($("#fontSizeSlider").val());
+                    const newSize = Math.max(10, currentSize - 1);
+                    $("#fontSizeSlider").val(newSize);
+                    updateFontSize(newSize);
                 }
             }
         });
-    }
 
-    // Form submissions
-    $("#codeForm").off("submit").submit(function (event) {
-        event.preventDefault();
-        executeCode(false);
+        // Theme change listeners
+        const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
+                    updateEditorTheme();
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-bs-theme']
+        });
+
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'theme') {
+                // Small delay to ensure DOM is updated
+                setTimeout(() => {
+                    updateEditorTheme();
+                }, 100);
+            }
+        });
+
+        document.addEventListener('themeChanged', function () {
+            setTimeout(() => {
+                updateEditorTheme();
+            }, 100);
+        });
+
+        // Window resize handler for presentation mode
+        window.addEventListener('resize', function () {
+            if ($("#presentationMode").hasClass("active")) {
+                setTimeout(() => {
+                    editorPresentation.resize();
+                }, 100);
+            }
+        });
+
+        // Code execution functions
+        function executeCode(isPresentation = false, isMobile = false) {
+            let submitBtn;
+            if (isPresentation) {
+                submitBtn = $("#submitBtnPresentation");
+            } else if (isMobile) {
+                submitBtn = $("#mobileRunBtn");
+            } else {
+                submitBtn = $("#submit-btn");
+            }
+
+            const outputElement = isPresentation ? $("#outputPresentation") : $("#output pre");
+            const languageId = isPresentation ? languagePresentationSelect.val() : $("#language").val() || $("#languageMobile").val();
+            const sourceCode = isPresentation ? editorPresentation.getValue() : editor.getValue();
+            const inputText = isPresentation ? $("#inputTextPresentation").val() : $("#inputText").val();
+
+            if (!isPresentation) $("#output").addClass("d-none");
+
+            // Add loading state
+            submitBtn.prop("disabled", true);
+            submitBtn.addClass("btn-loading");
+
+            // Update button text based on context
+            const btnText = submitBtn.find('.btn-text');
+            if (isPresentation) {
+                btnText.text("⏳ Running...");
+            } else if (isMobile) {
+                btnText.text("🔄 Running...");
+            } else {
+                btnText.text("Executing...");
+            }
+
+            $.ajax({
+                url: "{% url 'execute_code' %}",
+                type: "POST",
+                data: {
+                    language_id: languageId,
+                    source_code: sourceCode,
+                    input_data: inputText,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function (response) {
+                    // Remove loading state
+                    submitBtn.prop("disabled", false);
+                    submitBtn.removeClass("btn-loading");
+
+                    // Restore button text
+                    if (isPresentation) {
+                        btnText.text("▶ Run Code");
+                    } else if (isMobile) {
+                        btnText.text("▶️ Run Code");
+                    } else {
+                        btnText.text("Submit");
+                    }
+
+                    if (!isPresentation) $("#output").removeClass("d-none");
+
+                    if (response.error) {
+                        outputElement.text(response.error);
+                    } else {
+                        outputElement.text(response.output);
+                    }
+
+                    if (!isPresentation) {
+                        document.getElementById("op-div").scrollIntoView({ behavior: 'smooth' });
+                        document.getElementById("op-div").scrollIntoView(false);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert("Error from AJAX: " + error);
+
+                    // Remove loading state on error
+                    submitBtn.prop("disabled", false);
+                    submitBtn.removeClass("btn-loading");
+
+                    // Restore button text
+                    if (isPresentation) {
+                        btnText.text("▶ Run Code");
+                    } else if (isMobile) {
+                        btnText.text("▶️ Run Code");
+                    } else {
+                        btnText.text("Submit");
+                    }
+                }
+            });
+        }
+
+        // Form submissions
+        $("#codeForm").off("submit").submit(function (event) {
+            event.preventDefault();
+            executeCode(false);
+        });
+
+        $("#mobileRunBtn").click(function () {
+            executeCode(false, true);
+        });
+
+        $("#submitBtnPresentation").click(function () {
+            executeCode(true);
+        });
+
+        $("#inputForm").off("submit").submit(function (event) {
+            event.preventDefault();
+            const inputText = $("#inputText").val();
+            console.log("Input received: " + inputText);
+            $("#inputModal").modal('hide');
+            scheduleAutoSave();
+        });
+
+        // Save before page unload
+        window.addEventListener('beforeunload', function () {
+            autoSave();
+        });
+
+        // Initialize default font size
+        updateFontSize(16);
     });
-
-    $("#mobileRunBtn").click(function() {
-        executeCode(false, true);
-    });
-
-    $("#submitBtnPresentation").click(function() {
-        executeCode(true);
-    });
-
-    $("#inputForm").off("submit").submit(function (event) {
-        event.preventDefault();
-        const inputText = $("#inputText").val();
-        console.log("Input received: " + inputText);
-        $("#inputModal").modal('hide');
-        scheduleAutoSave();
-    });
-
-    // Save before page unload
-    window.addEventListener('beforeunload', function() {
-        autoSave();
-    });
-
-    // Initialize default font size
-    updateFontSize(16);
-});
 </script>
 {% endblock %}
 {% endblock %}

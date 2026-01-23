@@ -24,7 +24,11 @@ Student | Home
 
     @keyframes html-progress {
         to {
-            --progress-value: {{user.get_attendance_percentage}}
+            --progress-value: {
+                    {
+                    user.get_attendance_percentage
+                }
+            }
 
             ;
         }
@@ -38,7 +42,11 @@ Student | Home
 
     @keyframes css-progress {
         to {
-            --progress-value: {{questions_completion_percentage}}
+            --progress-value: {
+                    {
+                    questions_completion_percentage
+                }
+            }
 
             ;
         }
@@ -52,10 +60,18 @@ Student | Home
 
     @keyframes js-progress {
         to {
-            --progress-value: {{user.get_profile_score}}
+            --progress-value: {
+                    {
+                    user.get_profile_score
+                }
+            }
 
             ;
         }
+    }
+
+    .completion-text {
+        color: black;
     }
 
     .progress-bar {
@@ -107,6 +123,10 @@ Student | Home
     }
 
     [data-bs-theme="dark"] {
+
+        .completion-text {
+            color: white;
+        }
 
         .html {
             background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
@@ -224,24 +244,27 @@ Student | Home
                                     <div class="d-flex align-items-center pb-1">
 
                                         {% if pod %}
-                                        
+
                                         {% if pod|is_solved_by_user:user %}
-                                            <span class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-check text-success"></i>
-                                            </span>
-                                            <p class="s-3 mb-0">Problem Solved!</p>
+                                        <span
+                                            class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-check text-success"></i>
+                                        </span>
+                                        <p class="s-3 mb-0">Problem Solved!</p>
                                         {% else %}
-                                            <span class="me-2 rounded-circle bg-danger round-20 d-flex align-items-center text-dark justify-content-center">
-                                                ❌
-                                            </span>
-                                            <p class="s-3 mb-0">Not Solved</p>
+                                        <span
+                                            class="me-2 rounded-circle bg-danger round-20 d-flex align-items-center text-dark justify-content-center">
+                                            ❌
+                                        </span>
+                                        <p class="s-3 mb-0">Not Solved</p>
                                         {% endif %}
 
                                         {% else %}
-                                            <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-arrow-right text-danger"></i>
-                                            </span>
-                                            <p class="s-3 mb-0">Not Available</p>
+                                        <span
+                                            class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-arrow-right text-danger"></i>
+                                        </span>
+                                        <p class="s-3 mb-0">Not Available</p>
                                         {% endif %}
 
                                     </div>
@@ -254,16 +277,18 @@ Student | Home
                                         <a href="{% url 'problem' pod.question.slug %}" target="_blank">
 
                                             {% if pod|is_solved_by_user:user %}
-                                                <div class="text-white bg-success rounded-circle p-6 d-flex align-items-center justify-content-center">
-                                                    <i class="ti ti-check fs-6"></i>
-                                                    <span>Done</span>
-                                                </div>
-                                            
+                                            <div
+                                                class="text-white bg-success rounded-circle p-6 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-check fs-6"></i>
+                                                <span>Done</span>
+                                            </div>
+
                                             {% else %}
-                                                <div class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
-                                                    <i class="ti ti-arrow-right fs-6"></i>
-                                                    <span>Go</span>
-                                                </div>
+                                            <div
+                                                class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-arrow-right fs-6"></i>
+                                                <span>Go</span>
+                                            </div>
                                             {% endif %}
                                         </a>
 
@@ -271,9 +296,12 @@ Student | Home
 
                                         {% else %}
 
-                                        <a id="random-question-generator1" href="{% url 'get_random_question' %}" onclick="return random_generator();" class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">Get a random question</a>
+                                        <a id="random-question-generator1" href="{% url 'get_random_question' %}"
+                                            onclick="return random_generator();"
+                                            class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">Get a random
+                                            question</a>
 
-                                    {% endcomment %}
+                                        {% endcomment %}
 
                                         {% endif %}
                                     </div>
@@ -305,8 +333,9 @@ Student | Home
                                             class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
                                             <i class="ti ti-arrow-up-right text-success"></i>
                                         </span>
-                                        <p class="text-light-primary me-1 fs-3 mb-0">{{ questions_completion_percentage }}%</p>
-                                        <p class="text-light-primary fs-3 mb-0">Completed</p>
+                                        <p class="completion-text me-1 fs-3 mb-0">{{ questions_completion_percentage }}%
+                                        </p>
+                                        <p class="completion-text fs-3 mb-0">Completed</p>
 
                                     </div>
                                     <div class="d-flex align-items-center">
@@ -322,96 +351,98 @@ Student | Home
                                     <div class="d-flex justify-content-center">
                                         <div class="progress-bar-container">
 
-                                            
-                                        <div class="progress-bar css">
-                                            <progress id="css" min="0" max="100" value="70"></progress>
+
+                                            <div class="progress-bar css">
+                                                <progress id="css" min="0" max="100" value="70"></progress>
+
+                                            </div>
 
                                         </div>
-                                        
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
-
         </div>
-    </div>
 
-    <div class="col-lg-4">
-        <div class="row">
-            <div class="col-lg-12">
-                <!-- Yearly Breakup -->
-                <a href="{% url 'my_profile' %}" style="text-decoration: none; color: black;">
-                    <div class="card overflow-hidden">
-                        <div class="card-body p-4">
-                            <h5 class="card-title mb-9 fw-semibold">Profile Score</h5>
-                            <div class="row align-items-center">
-                                <div class="col-8">
-                                    <h4 class="fw-semibold mb-3">{{ user.get_profile_score }}</h4>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <span
-                                            class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-arrow-up-right text-success"></i>
-                                        </span>
-                                        <p class="me-1 fs-3 mb-0">Top</p>
-
+        <div class="col-lg-4">
+            <div class="row">
+                <div class="col-lg-12">
+                    <!-- Yearly Breakup -->
+                    <a href="{% url 'my_profile' %}" style="text-decoration: none; color: black;">
+                        <div class="card overflow-hidden">
+                            <div class="card-body p-4">
+                                <h5 class="card-title mb-9 fw-semibold">Profile Score</h5>
+                                <div class="row align-items-center">
+                                    <div class="col-8">
+                                        <h4 class="fw-semibold mb-3">{{ user.get_profile_score }}</h4>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <span
+                                                class="me-1 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-arrow-up-right text-success"></i>
+                                            </span>
+                                            <p class="me-1 fs-3 mb-0">Top</p>
 
 
-                                        {% if user.get_profile_score == 100 %}
-                                        <p class="fs-3 mb-0">1%</p>
 
-                                        {% elif user.get_profile_score >= 90 %}
-                                        <p class="fs-3 mb-0">30%</p>
+                                            {% if user.get_profile_score == 100 %}
+                                            <p class="fs-3 mb-0">1%</p>
 
-                                        {% elif user.get_profile_score >= 60 %}
-                                        <p class="fs-3 mb-0">50%</p>
+                                            {% elif user.get_profile_score >= 90 %}
+                                            <p class="fs-3 mb-0">30%</p>
 
-                                        {% elif user.get_profile_score >= 30 %}
+                                            {% elif user.get_profile_score >= 60 %}
+                                            <p class="fs-3 mb-0">50%</p>
 
-                                        <p class="fs-3 mb-0">90%</p>
+                                            {% elif user.get_profile_score >= 30 %}
 
-                                        {% else %}
-                                        <p class="fs-3 mb-0">Not Available</p>
+                                            <p class="fs-3 mb-0">90%</p>
 
-                                        {% endif %}
+                                            {% else %}
+                                            <p class="fs-3 mb-0">Not Available</p>
 
-                                    </div>
+                                            {% endif %}
 
-                                    {% if not user.get_profile_score == 100 %}
-
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-4">
-                                            <!-- <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span> -->
-                                            <span class="fs-2">Complete to Earn More <img id="coin-icon" class="mt-n1"
-                                                src="{% static 'img/student/coin.png' %}" alt=""></span>
                                         </div>
-                                        <!-- <div>
+
+                                        {% if not user.get_profile_score == 100 %}
+
+                                        <div class="d-flex align-items-center">
+                                            <div class="me-4">
+                                                <!-- <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span> -->
+                                                <span class="fs-2">Complete to Earn More <img id="coin-icon"
+                                                        class="mt-n1" src="{% static 'img/student/coin.png' %}"
+                                                        alt=""></span>
+                                            </div>
+                                            <!-- <div>
                                             <span
                                                 class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
                                             <span class="fs-2">Left</span>
                                         </div> -->
+                                        </div>
+
+                                        {% endif %}
                                     </div>
+                                    <div class="col-4">
+                                        <div class="d-flex justify-content-center">
+                                            <div class="progress-bar-container">
 
-                                    {% endif %}
-                                </div>
-                                <div class="col-4">
-                                    <div class="d-flex justify-content-center">
-                                        <div class="progress-bar-container">
-
-                                            <div class="progress-bar js">
-                                                <progress id="js" min="0" max="100" value="{{ average_progress }}"></progress>
+                                                <div class="progress-bar js">
+                                                    <progress id="js" min="0" max="100"
+                                                        value="{{ average_progress }}"></progress>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </a>
-            </div>
-            <!-- <div class="col-lg-12">
+                    </a>
+                </div>
+                <!-- <div class="col-lg-12">
                 <div class="card">
                     <div class="card-body">
                         <div class="row alig n-items-Coming soon">
@@ -440,279 +471,284 @@ Student | Home
 
                 </div>
             </div> -->
-        </div>
-    </div>
-</div>
-
-<!-- ================================= Schedule ====================================== -->
-
-<div class="row">
-
-    <div class="col-lg-4 d-flex align-items-stretch">
-        <div class="card w-100">
-            <div class="card-body p-4">
-                <div class="mb-4">
-                    <h5 class="card-title fw-semibold">Latest Schedule
-                    </h5>
-                </div>
-
-                <ul class="timeline-widget mb-0 position-relative mb-n3">
-
-                    {% comment %}
-
-
-                    {% if sessions %}
-                    {% for session in sessions %}
-
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end">
-                            <span class="fw-bolder">({{ session.course.name }})</span>
-                            <span data-bs-toggle="tooltip" data-bs-placement="top"
-                                title="{{ session.topic }}">{{session.topic|title|truncatechars:6 }}</span>
-                        </div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span
-                                class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1">{{ session.session_time }}
-                            <br>
-
-                            {% if session.get_meeting_status.status == "Ongoing" %}
-
-                            <a href="{{ session.link }}"
-                                class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
-                                {{ session.get_meeting_status.status }}... Join
-                            </a>
-
-                            {% else %}
-
-                            <a class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
-                                {{ session.get_meeting_status.status }}
-                            </a>
-
-                            {% endif %}
-
-                            <!-- <a href="#"
-                                    class="text-primary d-block fw-normal">Know More
-                                </a> -->
-                        </div>
-
-                    </li>
-
-                    {% endfor %}
-
-                    {% else %}
-
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end fw-bold">MERN Stack with Gen AI</div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1 text-primary fw-semibold">10th June, '25!
-                        </div>
-                    </li>
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end fw-bold">Master Java & DSA!</div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1 text-success fw-semibold">10th June, '25!
-                        </div>
-                    </li>
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end fw-bold">Django with AI Agents!</div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1 text-danger fw-semibold">10th June, '25!
-                        </div>
-                    </li>
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end fw-bold">DA & Industry Tools!</div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span class="timeline-badge border-2 border border-secondary flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1 text-secondary fw-semibold">10th June, '25!
-                        </div>
-                    </li>                    
-                   
-                    {% endif %}
-
-                    {% endcomment %}
-
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end fw-bold">@ 9:00 PM</div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1 text-primary fw-semibold">Python Class
-                            <a href="https://chat.whatsapp.com/CsAGcFvmM4D6lgBQXBYmby" target="_blank" class="btn btn-sm btn-outline-primary">Join
-                                <i class="ti ti-user"></i>
-                            </a>
-                        </div>
-                    </li>
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end fw-bold">@ 9:00 PM</div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1 text-success fw-semibold">C Programming
-                            <a href="https://chat.whatsapp.com/LHsRJOlzUSn7IkdJCcQa84" target="_blank" class="btn btn-sm btn-outline-success">Join
-                                <i class="ti ti-user"></i>
-                            </a>
-                        </div>
-                    </li>
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1 text-danger fw-semibold">Coming Soon!
-                        </div>
-                    </li>
-                    <li class="timeline-item d-flex position-relative overflow-hidden">
-                        <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
-                        <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                            <span class="timeline-badge border-2 border border-secondary flex-shrink-0 my-8"></span>
-                            <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                        </div>
-                        <div class="timeline-desc fs-3 mt-n1 text-secondary fw-semibold">Coming Soon!
-                        </div>
-                    </li>      
-
-                </ul>
             </div>
         </div>
     </div>
 
-    <!-- ================================ Last 3 sessions JOBS ============================ -->
+    <!-- ================================= Schedule ====================================== -->
 
-    <div class="col-lg-8 d-flex align-items-stretch">
-        <div class="card w-100">
-            <div class="card-body p-4">
-                <h5 class="card-title fw-semibold mb-4">Next Questions from Your Sheets 🔥</h5>
-                <div class="table-responsive">
-                    <table class="table text-nowrap mb-0 align-middle">
-                        <thead class="text-dark fs-4">
+    <div class="row">
 
-                            <tr>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">
-                                        #
-                                    </h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">
-                                        Title
-                                    </h6>
-                                </th>
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">
-                                        Level
-                                    </h6>
-                                </th>
+        <div class="col-lg-4 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body p-4">
+                    <div class="mb-4">
+                        <h5 class="card-title fw-semibold">Latest Schedule
+                        </h5>
+                    </div>
 
-                                <th class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0">
-                                        Action
-                                    </h6>
-                                </th>
-                            </tr>
-                        </thead>
+                    <ul class="timeline-widget mb-0 position-relative mb-n3">
 
-                        <tbody>
+                        {% comment %}
 
-                            {% if next_questions %}
 
-                            {% for item in next_questions %}
+                        {% if sessions %}
+                        {% for session in sessions %}
 
-                            <tr>
-                                <td class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0 text-center">{{ forloop.counter }}</h6>
-                                </td>
-                                <td class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="{{ item.sheet.title }}">{{ item.sheet.title|truncatechars:15 }}</h6>
-                                
-                                    <span class="fw-normal">
-                                        {% if item.type == 'MCQ' %}
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end">
+                                <span class="fw-bolder">({{ session.course.name }})</span>
+                                <span data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ session.topic }}">{{session.topic|title|truncatechars:6 }}</span>
+                            </div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span
+                                    class="timeline-badge border-2 border border-{{ session.get_meeting_status.color }} flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1">{{ session.session_time }}
+                                <br>
+
+                                {% if session.get_meeting_status.status == "Ongoing" %}
+
+                                <a href="{{ session.link }}"
+                                    class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                    {{ session.get_meeting_status.status }}... Join
+                                </a>
+
+                                {% else %}
+
+                                <a class="btn btn-outline-{{ session.get_meeting_status.color }} btn-sm mt-1">
+                                    {{ session.get_meeting_status.status }}
+                                </a>
+
+                                {% endif %}
+
+                                <!-- <a href="#"
+                                    class="text-primary d-block fw-normal">Know More
+                                </a> -->
+                            </div>
+
+                        </li>
+
+                        {% endfor %}
+
+                        {% else %}
+
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">MERN Stack with Gen AI</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1 text-primary fw-semibold">10th June, '25!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">Master Java & DSA!</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1 text-success fw-semibold">10th June, '25!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">Django with AI Agents!</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1 text-danger fw-semibold">10th June, '25!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">DA & Industry Tools!</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-secondary flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1 text-secondary fw-semibold">10th June, '25!
+                            </div>
+                        </li>
+
+                        {% endif %}
+
+                        {% endcomment %}
+
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">@ 9:00 PM</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1 text-primary fw-semibold">Python Class
+                                <a href="https://chat.whatsapp.com/CsAGcFvmM4D6lgBQXBYmby" target="_blank"
+                                    class="btn btn-sm btn-outline-primary">Join
+                                    <i class="ti ti-user"></i>
+                                </a>
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">@ 9:00 PM</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1 text-success fw-semibold">C Programming
+                                <a href="https://chat.whatsapp.com/LHsRJOlzUSn7IkdJCcQa84" target="_blank"
+                                    class="btn btn-sm btn-outline-success">Join
+                                    <i class="ti ti-user"></i>
+                                </a>
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1 text-danger fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+                        <li class="timeline-item d-flex position-relative overflow-hidden">
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
+                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
+                                <span class="timeline-badge border-2 border border-secondary flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
+                            </div>
+                            <div class="timeline-desc fs-3 mt-n1 text-secondary fw-semibold">Coming Soon!
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================ Last 3 sessions JOBS ============================ -->
+
+        <div class="col-lg-8 d-flex align-items-stretch">
+            <div class="card w-100">
+                <div class="card-body p-4">
+                    <h5 class="card-title fw-semibold mb-4">Next Questions from Your Sheets 🔥</h5>
+                    <div class="table-responsive">
+                        <table class="table text-nowrap mb-0 align-middle">
+                            <thead class="text-dark fs-4">
+
+                                <tr>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            #
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Title
+                                        </h6>
+                                    </th>
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Level
+                                        </h6>
+                                    </th>
+
+                                    <th class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0">
+                                            Action
+                                        </h6>
+                                    </th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {% if next_questions %}
+
+                                {% for item in next_questions %}
+
+                                <tr>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0 text-center">{{ forloop.counter }}</h6>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                            title="{{ item.sheet.title }}">{{ item.sheet.title|truncatechars:15 }}</h6>
+
+                                        <span class="fw-normal">
+                                            {% if item.type == 'MCQ' %}
                                             {{ item.question.question_text|truncatechars:25 }}
-                                        {% else %}
+                                            {% else %}
                                             {{ item.question.title|truncatechars:25 }}
-                                        {% endif %}
-                                    </span>
-                                </td>
-                                <td class="border-bottom-0">
-                                    <span class="badge bg-{{ item.question.get_difficulty_level_color }} text-color">
-                                        {{ item.question.difficulty_level }}
-                                    </span>
-                                </td>
+                                            {% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <span
+                                            class="badge bg-{{ item.question.get_difficulty_level_color }} text-color">
+                                            {{ item.question.difficulty_level }}
+                                        </span>
+                                    </td>
 
-                                <td class="border-bottom-0 text-center">
-                                    <div class="d-flex align-items-center gap-2">
-                                        {% if item.type == 'MCQ' %}
-                                            <a href="{% url 'mcq_question' item.sheet.slug item.question.slug %}" target="_blank"
-                                                class="btn btn-outline-danger">Solve MCQ 🔥
+                                    <td class="border-bottom-0 text-center">
+                                        <div class="d-flex align-items-center gap-2">
+                                            {% if item.type == 'MCQ' %}
+                                            <a href="{% url 'mcq_question' item.sheet.slug item.question.slug %}"
+                                                target="_blank" class="btn btn-outline-danger">Solve MCQ 🔥
                                             </a>
-                                        {% else %}
+                                            {% else %}
                                             <a href="{% url 'problem' item.question.slug %}" target="_blank"
                                                 class="btn btn-outline-danger">Code Now 🔥
                                             </a>
-                                        {% endif %}
+                                            {% endif %}
 
-                                    </div>
-                                </td>
+                                        </div>
+                                    </td>
 
-                            </tr>
+                                </tr>
 
-                            {% endfor %}
+                                {% endfor %}
 
-                            {% else %}
+                                {% else %}
 
-                            <tr>
-                                <td class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-0 text-center">-</h6>
-                                </td>
-                                <td class="border-bottom-0">
-                                    <h6 class="fw-semibold mb-1">All Caught Up!</h6>
-                                    <span class="fw-normal">You've completed all available questions in your enrolled sheets.</span>
-                                </td>
-                                <td class="border-bottom-0">
-                                    <p class="mb-0 fw-normal">-</p>
-                                </td>
+                                <tr>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-0 text-center">-</h6>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <h6 class="fw-semibold mb-1">All Caught Up!</h6>
+                                        <span class="fw-normal">You've completed all available questions in your
+                                            enrolled sheets.</span>
+                                    </td>
+                                    <td class="border-bottom-0">
+                                        <p class="mb-0 fw-normal">-</p>
+                                    </td>
 
-                                <td class="border-bottom-0 text-center">
-                                    <div class="d-flex align-items-center gap-2">
+                                    <td class="border-bottom-0 text-center">
+                                        <div class="d-flex align-items-center gap-2">
 
-                                        <a href="{% url 'my_batches' %}" class="btn btn-outline-primary">View My Batches
-                                        </a>
+                                            <a href="{% url 'my_batches' %}" class="btn btn-outline-primary">View My
+                                                Batches
+                                            </a>
 
-                                    </div>
-                                </td>
-                            </tr>
+                                        </div>
+                                    </td>
+                                </tr>
 
-                            {% endif %}
-                        </tbody>
-                    </table>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
+
+
+
     </div>
+    <!-- ================================= ALL ELIGIBLE JOBS ============================ -->
 
-
-
-</div>
-<!-- ================================= ALL ELIGIBLE JOBS ============================ -->
-
-<!-- <div class="card-body">
+    <!-- <div class="card-body">
         <h5 class="card-title fw-semibold mb-4 text-white">Commpanies Only For You 🔥</h5>
     </div>
     
@@ -722,7 +758,7 @@ Student | Home
         </div>
     </div> -->
 
-<!-- <div class="col-lg- d-flex align-items-strech">
+    <!-- <div class="col-lg- d-flex align-items-strech">
 
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
@@ -799,35 +835,35 @@ Student | Home
 
     </div> -->
 
-<div class="py-6 px-6 text-center">
-    <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
-            class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
-    </p>
+    <div class="py-6 px-6 text-center">
+        <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
+                class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
+        </p>
 
-</div>
+    </div>
 </div>
 
 {% block myjs %}
 
 <script>
-    function random_generator(){
+    function random_generator() {
         btn = document.getElementById('random-question-generator1');
         btn.style.pointerEvents = 'none';
         btn.classList.add('disabled');
         btn.innerHTML = "Generating...";
-        setTimeout(function(){
+        setTimeout(function () {
             btn.style.pointerEvents = 'auto';
             btn.classList.remove('disabled');
             btn.innerHTML = "Get a random question";
         }, 3000);
     }
 
-    function random_generator2(){
+    function random_generator2() {
         btn = document.getElementById('random-question-generator2');
         btn.style.pointerEvents = 'none';
         btn.classList.add('disabled');
         btn.innerHTML = "Generating...";
-        setTimeout(function(){
+        setTimeout(function () {
             btn.style.pointerEvents = 'auto';
             btn.classList.remove('disabled');
             btn.innerHTML = "Get a random question";
