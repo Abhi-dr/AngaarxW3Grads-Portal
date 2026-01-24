@@ -9,7 +9,9 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 import logging
 
+from django.contrib.auth.models import User
 from .models import Student, Instructor, Administrator
+from .views import send_welcome_mail
 
 logger = logging.getLogger(__name__)
 
@@ -93,8 +95,36 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 sociallogin.user = existing_student
                 
                 logger.info(f"Existing student logging in via Google: {email}")
+                
+            # Check for "Zombie" users - User exists but not Student (failed previous signup)
+            elif User.objects.filter(email=email).exists():
+                user = User.objects.get(email=email)
+                
+                # Heal the split user by converting to Student
+                logger.info(f"Repairing user account for Google login: {email}")
+                
+                # Create Student instance pointing to existing User
+                student = Student(user_ptr=user)
+                student.__dict__.update(user.__dict__)
+                
+                # Set default student fields
+                student.mobile_number = '-'
+                student.gender = 'Not Set'
+                student.college = None
+                student.dob = None
+                student.is_changed_password = False
+                student.profile_pic = '/student_profile/default.jpg'
+                student.linkedin_id = None
+                student.github_id = None
+                student.coins = 100
+                
+                student.save()
+                
+                sociallogin.user = student
+                logger.info(f"Repaired and logged in student: {email}")
+
             else:
-                # New user - allow to proceed to signup (signals will handle Student creation)
+                # New user - allow to proceed to signup
                 logger.info(f"New student signup via Google: {email}")
             
         except ImmediateHttpResponse:
@@ -106,12 +136,9 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     
     def save_user(self, request, sociallogin, form=None):
         """
-        Save user from social login. Student profile creation is handled by signals.
+        Save user from social login. Creates Student profile directly to avoid signal race conditions.
         """
         try:
-            # Get the user from sociallogin
-            user = sociallogin.user
-            
             # Get social account data
             user_data = sociallogin.account.extra_data
             
@@ -120,10 +147,15 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             if not email:
                 raise ValidationError("Email is required for Google OAuth registration.")
             
+            # Create a new Student instance explicitly
+            # We don't use sociallogin.user (which is a User instance) directly
+            # We create a Student instance and populate it
+            
+            user = Student()
+            
             # Generate unique username if not already set
-            if not user.username:
-                username = self.generate_unique_username(user_data)
-                user.username = username
+            username = self.generate_unique_username(user_data)
+            user.username = username
             
             # Update user fields from Google data with fallbacks
             user.first_name = user_data.get('given_name', '').strip() or 'Not Set'
@@ -135,10 +167,31 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             user.is_staff = False
             user.is_superuser = False
             
-            # Save the user
+            # Student specific fields
+            user.mobile_number = '-'
+            user.gender = 'Not Set'
+            user.college = None
+            user.dob = None
+            user.is_changed_password = False
+            user.profile_pic = '/student_profile/default.jpg'
+            user.linkedin_id = None
+            user.github_id = None
+            user.coins = 100
+            
+            # Save the user (this saves both User and Student tables)
             user.save()
             
-            logger.info(f"User saved from Google OAuth: {user.username} ({user.email})")
+            # Important: Update sociallogin.user to point to our new Student instance
+            sociallogin.user = user
+            
+            # Send welcome email
+            try:
+                if user.email and user.email != 'Not Set':
+                    send_welcome_mail(user.email, user.first_name)
+            except Exception as email_error:
+                logger.warning(f"Failed to send welcome email: {email_error}")
+            
+            logger.info(f"Student created directly from Google OAuth: {user.username} ({user.email})")
             
             return user
             
