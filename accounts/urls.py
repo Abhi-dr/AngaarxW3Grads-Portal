@@ -23,4 +23,7 @@ urlpatterns = [
 
     # Social authentication URLs (includes Google OAuth)
     path('social/', include('allauth.urls')),
+
+    path("export-students/", views.export_students_excel, name="export_students"),
+
 ]

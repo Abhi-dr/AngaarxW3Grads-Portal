@@ -398,3 +398,42 @@ def get_students_api(request):
             'message': str(e)
         }, status=400)
 
+
+
+# =====================================
+
+import openpyxl
+from django.http import HttpResponse
+from .models import Student
+
+
+def export_students_excel(request):
+    # Create workbook and sheet
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Students"
+
+    # Header row
+    ws.append(["Full Name", "Email", "Mobile Number"])
+
+    # Query only required fields & only students with phone numbers
+    students = Student.objects.filter(
+        mobile_number__isnull=False
+    ).exclude(
+        mobile_number=""
+    ).values_list("first_name", "last_name", "email", "mobile_number")
+
+    # Add data rows
+    for first_name, last_name, email, mobile in students:
+        full_name = f"{first_name} {last_name}".strip()
+        ws.append([full_name, email, mobile])
+
+    # Prepare response
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = 'attachment; filename="students_list.xlsx"'
+
+    wb.save(response)
+    return response
+

@@ -66,7 +66,7 @@ def user_signed_up_handler(sender, request, user, sociallogin=None, **kwargs):
     try:
         with transaction.atomic():
             # Check if Student profile already exists
-            if hasattr(user, 'student'):
+            if Student.objects.filter(pk=user.pk).exists():
                 logger.info(f"Student profile already exists for: {user.username}")
                 return
             
@@ -74,16 +74,27 @@ def user_signed_up_handler(sender, request, user, sociallogin=None, **kwargs):
             social_account = sociallogin.account
             
             if social_account.provider == 'google':
-                # Create Student profile using user fields (already set by adapter)
-                student = Student.objects.create(
-                    user_ptr=user,
-                    username=user.username,
-                    first_name=user.first_name or 'Not Set',
-                    last_name=user.last_name or 'Not Set',
-                    email=user.email or 'Not Set',
-                    mobile_number='-',
-                    gender='Not Set',
-                )
+                # Convert the User instance to a Student instance
+                # Since Student inherits from User (multi-table inheritance),
+                # we need to create a Student record that points to the existing User
+                user.__class__ = Student
+                
+                # Set Student-specific fields
+                user.mobile_number = '-'
+                user.gender = 'Not Set'
+                user.college = None
+                user.dob = None
+                user.is_changed_password = False
+                user.profile_pic = '/student_profile/default.jpg'
+                user.linkedin_id = None
+                user.github_id = None
+                user.coins = 100
+                
+                # Save as Student
+                user.save()
+                
+                # Refresh from database to ensure Student instance
+                student = Student.objects.get(pk=user.pk)
                 
                 # Send welcome email
                 try:
