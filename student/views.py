@@ -34,7 +34,7 @@ from django.db.models import Max, Sum
 def dashboard(request):
     
     notifications = Notification.objects.filter(expiration_date__gt=timezone.now(), is_alert=True)
-    student = request.user.student
+    student = request.user
     
     # Get enrolled batches for the student
     enrolled_batches = Batch.objects.filter(
@@ -127,10 +127,13 @@ def dashboard(request):
     
     # Check birthday
     is_birthday = False
-    if student.dob:
-        if student.dob.day == timezone.now().day and student.dob.month == timezone.now().month:
-            is_birthday = True
-    
+    try:
+        if student.dob:
+            if student.dob.day == timezone.now().day and student.dob.month == timezone.now().month:
+                is_birthday = True
+    except Exception as e:
+        print(f"Error checking birthday: {e}")
+
     parameters = {
         "notifications": notifications,
         "is_birthday": is_birthday,

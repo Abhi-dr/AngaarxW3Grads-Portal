@@ -84,17 +84,17 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
                 messages.error(request, "This email is registered as staff. Please use username/password login.")
                 raise ImmediateHttpResponse(redirect('login'))
             
-            # If user exists as Student, connect the account and log in
-            try:
+            # Check if user exists as Student with this email
+            if Student.objects.filter(email=email).exists():
                 existing_student = Student.objects.get(email=email)
-                if sociallogin.user.pk != existing_student.pk:
-                    # Connect social account to existing student
-                    sociallogin.connect(request, existing_student)
-                    # Log in the user after connecting
-                    auth_login(request, existing_student, backend='allauth.account.auth_backends.AuthenticationBackend')
-                    messages.success(request, "Google account successfully connected and logged in!")
-            except Student.DoesNotExist:
-                # New user - allow to proceed to signup (signals will handle creation)
+                
+                # Set the sociallogin user to the existing student
+                # This tells allauth to use this existing user instead of creating a new one
+                sociallogin.user = existing_student
+                
+                logger.info(f"Existing student logging in via Google: {email}")
+            else:
+                # New user - allow to proceed to signup (signals will handle Student creation)
                 logger.info(f"New student signup via Google: {email}")
             
         except ImmediateHttpResponse:
@@ -115,15 +115,20 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # Get social account data
             user_data = sociallogin.account.extra_data
             
+            # Validate email exists
+            email = user_data.get('email', '').lower().strip()
+            if not email:
+                raise ValidationError("Email is required for Google OAuth registration.")
+            
             # Generate unique username if not already set
             if not user.username:
                 username = self.generate_unique_username(user_data)
                 user.username = username
             
-            # Update user fields from Google data
-            user.first_name = user_data.get('given_name', '') or user.first_name or 'Not Set'
-            user.last_name = user_data.get('family_name', '') or user.last_name or 'Not Set'
-            user.email = user_data.get('email', '') or user.email or 'Not Set'
+            # Update user fields from Google data with fallbacks
+            user.first_name = user_data.get('given_name', '').strip() or 'Not Set'
+            user.last_name = user_data.get('family_name', '').strip() or ''
+            user.email = email
             
             # Ensure user is active and not staff
             user.is_active = True
@@ -137,6 +142,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             
             return user
             
+        except ValidationError:
+            raise
         except Exception as e:
             logger.error(f"Error in save_user: {e}", exc_info=True)
             raise ValidationError(f"Failed to create user account: {str(e)}")
@@ -215,14 +222,18 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         user = sociallogin.user
         user_data = sociallogin.account.extra_data
         
-        # Set user fields from Google data
-        user.first_name = user_data.get('given_name', '') or data.get('first_name', '')
-        user.last_name = user_data.get('family_name', '') or data.get('last_name', '')
-        user.email = user_data.get('email', '') or data.get('email', '')
+        # Set user fields from Google data with proper fallbacks
+        user.first_name = user_data.get('given_name', '').strip() or data.get('first_name', '') or 'Not Set'
+        user.last_name = user_data.get('family_name', '').strip() or data.get('last_name', '') or ''
+        user.email = user_data.get('email', '').lower().strip() or data.get('email', '')
         
-        # Ensure email is set
+        # Ensure email is set and valid
         if not user.email:
             raise ValidationError("Email is required for account creation.")
+        
+        # Basic email format validation
+        if '@' not in user.email or '.' not in user.email:
+            raise ValidationError("Invalid email format.")
         
         return user
     
