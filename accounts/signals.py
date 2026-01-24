@@ -47,7 +47,8 @@ def social_account_added_handler(sender, request, sociallogin, **kwargs):
         social_account = sociallogin.account
         
         if social_account.provider == 'google':
-            messages.success(request, f"Google account successfully linked to your profile!")
+            # messages.success(request, f"Google account successfully linked to your profile!")
+            pass
             
     except Exception as e:
         print(f"Error in social_account_added_handler: {e}")

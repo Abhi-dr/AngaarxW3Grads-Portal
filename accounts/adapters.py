@@ -21,24 +21,19 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     Custom account adapter for additional account management control.
     """
     
-    def is_open_for_signup(self, request):
-        """
-        Allow signup only through social accounts for students.
-        Regular signup is handled separately.
-        """
-        return True
+
     
-    def save_user(self, request, user, form, commit=True):
+
+
+    def add_message(self, request, level, message_template, message_context=None, extra_tags=''):
         """
-        Save user with additional validation.
+        Override to suppress specific messages like "Successfully signed in as...".
         """
-        user = super().save_user(request, user, form, commit=False)
-        
-        # Additional validation can be added here
-        if commit:
-            user.save()
-        
-        return user
+        # Suppress the "Successfully signed in as..." message
+        if message_template == 'account/messages/logged_in.txt':
+            return
+            
+        super().add_message(request, level, message_template, message_context, extra_tags)
 
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
@@ -268,31 +263,10 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         
         return False
     
-    def populate_user(self, request, sociallogin, data):
-        """
-        Populate user fields from social account data.
-        """
-        user = sociallogin.user
-        user_data = sociallogin.account.extra_data
-        
-        # Set user fields from Google data with proper fallbacks
-        user.first_name = user_data.get('given_name', '').strip() or data.get('first_name', '') or 'Not Set'
-        user.last_name = user_data.get('family_name', '').strip() or data.get('last_name', '') or ''
-        user.email = user_data.get('email', '').lower().strip() or data.get('email', '')
-        
-        # Ensure email is set and valid
-        if not user.email:
-            raise ValidationError("Email is required for account creation.")
-        
-        # Basic email format validation
-        if '@' not in user.email or '.' not in user.email:
-            raise ValidationError("Invalid email format.")
-        
-        return user
+
     
     def get_connect_redirect_url(self, request, socialaccount):
         """
         Redirect URL after connecting a social account.
         """
-        messages.success(request, "Google account successfully connected!")
         return reverse('student')
