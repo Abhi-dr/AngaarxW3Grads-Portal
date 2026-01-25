@@ -12,6 +12,20 @@ FLARE 1.0 | Launch Your Tech Career
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
+    /* Background Gradient (from team.html) */
+    .showcase-bg-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.15) 0%, transparent 30%),
+            radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
     /* Course Cards Section */
     .courses-section {
         position: relative;
@@ -186,6 +200,29 @@ FLARE 1.0 | Launch Your Tech Career
 
     .register-btn:hover i {
         transform: translateX(5px);
+    }
+
+    .path-btn {
+        background: transparent;
+        color: #ff6026;
+        border: 2px solid #ff6026;
+        padding: 10px 28px;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: 10px;
+    }
+
+    .path-btn:hover {
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        color: white;
+        border-color: transparent;
     }
 
     /* WhatsApp Join Button */
@@ -474,6 +511,164 @@ FLARE 1.0 | Launch Your Tech Career
         }
     }
 
+    /* Modal Styles */
+    .curriculum-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+    }
+
+    .curriculum-modal.show {
+        display: block;
+    }
+
+    .modal-content {
+        background: rgba(15, 15, 15, 0.95);
+        margin: 2% auto;
+        padding: 0;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        width: 80%;
+        max-width: 900px;
+        max-height: 90vh;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(15px);
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .modal-header {
+        padding: 20px 30px;
+        background: rgba(30, 30, 30, 0.8);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        color: white;
+        font-size: 1.8rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .modal-close {
+        color: #aaa;
+        font-size: 2rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        line-height: 1;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .modal-close:hover {
+        color: #ff6026;
+        background: rgba(255, 96, 38, 0.1);
+    }
+
+    .modal-body {
+        padding: 30px;
+        overflow-y: auto;
+        max-height: calc(90vh - 100px);
+    }
+
+    .modal-body::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .modal-body::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+        background: #ff6026;
+        border-radius: 4px;
+    }
+
+    .week-item {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .week-item:hover {
+        border-color: rgba(255, 96, 38, 0.3);
+        box-shadow: 0 5px 20px rgba(255, 96, 38, 0.15);
+    }
+
+    .week-title {
+        color: #ff6026;
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .week-subtitle {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .week-topics {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .week-topics li {
+        color: #ddd;
+        padding: 8px 0;
+        padding-left: 25px;
+        position: relative;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+
+    .week-topics li::before {
+        content: '•';
+        position: absolute;
+        left: 8px;
+        color: #ff6026;
+        font-weight: bold;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
         .courses-grid {
@@ -538,6 +733,13 @@ FLARE 1.0 | Launch Your Tech Career
             justify-content: center;
         }
 
+        .path-btn {
+            width: 100%;
+            justify-content: center;
+            margin-left: 0;
+            margin-top: 10px;
+        }
+
         .whatsapp-btn {
             width: 100%;
             justify-content: center;
@@ -553,6 +755,7 @@ FLARE 1.0 | Launch Your Tech Career
 
 {% block body %}
 <div class="showcase-page-container">
+    <div class="showcase-bg-gradient"></div>
     <div class="showcase-bg-particles" id="particles-js"></div>
 
     <div class="container">
@@ -568,13 +771,7 @@ FLARE 1.0 | Launch Your Tech Career
                 <i class="fab fa-whatsapp"></i>
                 Join WhatsApp Group
             </a>
-            <!-- <div class="event-status-banner" data-aos="zoom-in" data-aos-delay="200">
-                <i class="fas fa-rocket"></i>
-                New Batch Launching Soon - Limited Seats Available!
-            </div> -->
         </div>
-
-
 
         <!-- Courses Section -->
         <div class="courses-section">
@@ -602,7 +799,7 @@ FLARE 1.0 | Launch Your Tech Career
                     </p>
                     <ul class="course-features">
                         <li>Core Java & Advanced OOP Mastery</li>
-                        <li>50+ DSA Problems with Patterns</li>
+                        <li>150+ DSA Problems with Patterns</li>
                         <li>Interview-Level Problem Solving</li>
                         <li>Mock Interviews & Resume Review</li>
                         <li>Capstone Project Portfolio</li>
@@ -611,6 +808,9 @@ FLARE 1.0 | Launch Your Tech Career
                     <a href="https://rzp.io/rzp/tab-flare1-0-jdsa" target="_blank" class="register-btn">
                         Register Now <i class="fas fa-arrow-right"></i>
                     </a>
+                    <button class="path-btn" onclick="openCurriculumModal('java')">
+                        <i class="fas fa-map-marked-alt"></i> Know the Path
+                    </button>
                 </div>
 
                 <!-- Full Stack with GenAI Course -->
@@ -628,15 +828,18 @@ FLARE 1.0 | Launch Your Tech Career
                         with GenAI integration skills.
                     </p>
                     <ul class="course-features">
-                        <li>React/Next.js Frontend Development</li>
-                        <li>Django/Node.js Backend Expertise</li>
+                        <li>HTML/React Frontend Development</li>
+                        <li>Django Backend Expertise</li>
                         <li>SQL & NoSQL Database Design</li>
                         <li>ChatGPT & LLM API Integration</li>
-                        <li>AWS Deployment & DevOps Basics</li>
+                        <li>WebApp Deployment & DevOps Basics</li>
                     </ul>
                     <a href="https://rzp.io/rzp/tab-flare1-0-fsgai" target="_blank" class="register-btn">
                         Register Now <i class="fas fa-arrow-right"></i>
                     </a>
+                    <button class="path-btn" onclick="openCurriculumModal('fullstack')">
+                        <i class="fas fa-map-marked-alt"></i> Know the Path
+                    </button>
                 </div>
             </div>
         </div>
@@ -646,7 +849,7 @@ FLARE 1.0 | Launch Your Tech Career
             <a href="https://rzp.io/rzp/tab-flare1-0-combo" target="_blank" class="combo-btn">
                 <span class="combo-text">
                     Complete Tech Mastery - COMBO PACK
-                    <span class="combo-discount">Become a Full-Stack Problem Solver • Save ₹2000</span>
+                    <span class="combo-discount">Become a DSA and Full-Stack Problem Solver</span>
                 </span>
                 <span class="combo-price">
                     <span class="price-original">₹4,999</span>
@@ -783,6 +986,29 @@ FLARE 1.0 | Launch Your Tech Career
     </div>
 </div>
 
+<!-- Java DSA Curriculum Modal -->
+<div id="java-modal" class="curriculum-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fab fa-java"></i> Master Java + DSA - Learning Path</h2>
+            <span class="modal-close" onclick="closeCurriculumModal('java')">&times;</span>
+        </div>
+        <div class="modal-body" id="java-curriculum"></div>
+    </div>
+</div>
+
+<!-- Full Stack Curriculum Modal -->
+<div id="fullstack-modal" class="curriculum-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-layer-group"></i> Full Stack + GenAI - Learning Path</h2>
+            <span class="modal-close" onclick="closeCurriculumModal('fullstack')">&times;</span>
+        </div>
+        <div class="modal-body" id="fullstack-curriculum"></div>
+    </div>
+</div>
+
+
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
@@ -906,6 +1132,388 @@ FLARE 1.0 | Launch Your Tech Career
                 }
             });
         });
+    });
+
+    // Curriculum Data
+    const javaCurriculum =
+        [
+            {
+                week: 1,
+                title: "The Transition (Logic Building)",
+                topics: [
+                    "Java Syntax & Basics",
+                    "Time Complexity Analysis",
+                    "Pattern Printing Problems",
+                    "Logic Building Exercises",
+                    "Practice Set: Beginner Problems"
+                ]
+            },
+            {
+                week: 2,
+                title: "Arrays Mastery",
+                topics: [
+                    "Array Basics & Traversal",
+                    "Two Pointer Technique",
+                    "Reverse Array Problems",
+                    "Two Sum (Sorted Array)",
+                    "Practice: Array-Based Questions"
+                ]
+            },
+            {
+                week: 3,
+                title: "String Algorithms",
+                topics: [
+                    "String Immutability in Java",
+                    "Anagram Problems",
+                    "Reverse Words in String",
+                    "String Manipulation Techniques",
+                    "Practice: String Problem Set"
+                ]
+            },
+            {
+                week: 4,
+                title: "Sliding Window",
+                topics: [
+                    "Fixed Size Sliding Window",
+                    "Variable Size Sliding Window",
+                    "Kadane’s Algorithm",
+                    "Maximum Subarray Sum",
+                    "Practice: Sliding Window Problems"
+                ]
+            },
+            {
+                week: 5,
+                title: "Binary Search",
+                topics: [
+                    "Binary Search Fundamentals",
+                    "Search Space Concept (O(log N))",
+                    "First & Last Occurrence",
+                    "Search in Rotated Sorted Array",
+                    "Practice: Binary Search Variants"
+                ]
+            },
+            {
+                week: 6,
+                title: "HashMaps & Sets (Game Changer)",
+                topics: [
+                    "HashMap & HashSet Basics",
+                    "Frequency Counting",
+                    "Two Sum (Unsorted)",
+                    "Intersection of Arrays",
+                    "Optimized Hashing Problems"
+                ]
+            },
+            {
+                week: 7,
+                title: "Recursion & Backtracking",
+                topics: [
+                    "Recursion Tree & Call Stack",
+                    "Fibonacci Series",
+                    "Subsequences & Subsets",
+                    "Backtracking Basics",
+                    "Practice: Recursion Problems"
+                ]
+            },
+            {
+                week: 8,
+                title: "Sorting & Merging",
+                topics: [
+                    "Merge Sort",
+                    "Quick Sort Logic",
+                    "Custom Comparator in Java",
+                    "Sorting Use Cases",
+                    "Practice: Sorting Problems"
+                ]
+            },
+            {
+                week: 9,
+                title: "Linked List",
+                topics: [
+                    "Singly Linked List",
+                    "Fast & Slow Pointer Technique",
+                    "Reverse Linked List",
+                    "Detect Cycle in LL",
+                    "Practice: Linked List Problems"
+                ]
+            },
+            {
+                week: 10,
+                title: "Stacks & Queues",
+                topics: [
+                    "Stack Implementation",
+                    "Monotonic Stack",
+                    "Valid Parentheses Problem",
+                    "Next Greater Element",
+                    "Queue & Deque Basics"
+                ]
+            },
+            {
+                week: 11,
+                title: "Binary Trees (Basics)",
+                topics: [
+                    "Tree Terminology",
+                    "DFS Traversals",
+                    "BFS / Level Order Traversal",
+                    "Height of Binary Tree",
+                    "Tree Practice Problems"
+                ]
+            },
+            {
+                week: 12,
+                title: "Advanced Trees & Heaps",
+                topics: [
+                    "Tree Views (Left / Right)",
+                    "Heap & Priority Queue",
+                    "Top K Elements",
+                    "Heap-Based Problems",
+                    "Final DSA Revision"
+                ]
+            }
+        ];
+
+    const fullstackCurriculum = [
+        {
+    week: 1,
+    title: "HTML & CSS Foundations",
+    topics: [
+      "HTML5 structure & semantic tags",
+      "CSS fundamentals (Flexbox, Grid)",
+      "Responsive design principles",
+      "UI/UX basics for web development",
+      "Folder structure & best practices"
+    ],
+    practice: [
+      "Build 3–4 static websites",
+      "Create a personal portfolio site",
+      "Make one fully responsive webpage",
+      "Redesign one site using Flexbox/Grid"
+    ]
+  },
+  {
+    week: 2,
+    title: "Django Setup & First Project",
+    topics: [
+      "Django installation & environment setup",
+      "Project vs App architecture",
+      "URL routing & views",
+      "Templates & static files",
+      "Django project structure"
+    ],
+    practice: [
+      "Convert HTML project into Django",
+      "Create multiple views & routes",
+      "Setup static and template folders",
+      "Run first Django project successfully"
+    ]
+  },
+  {
+    week: 3,
+    title: "Understanding Django Backend & Views",
+    topics: [
+      "Request–response cycle",
+      "Function-based views",
+      "Dynamic data rendering",
+      "URL parameter handling"
+    ],
+    practice: [
+      "Pass data from backend to frontend",
+      "Create dynamic pages",
+      "Debug Django errors",
+      "Build a dynamic dashboard"
+    ]
+  },
+  {
+    week: 4,
+    title: "Models & Database Handling",
+    topics: [
+      "Django ORM",
+      "Models & fields",
+      "Migrations",
+      "SQLite & database flow"
+    ],
+    practice: [
+      "Create models",
+      "Run migrations",
+      "Store & fetch database records",
+      "Display database data on UI"
+    ]
+  },
+  {
+    week: 5,
+    title: "Git & GitHub Workshop",
+    topics: [
+      "Git basics (init, add, commit)",
+      "GitHub repository creation",
+      "Branching & merging",
+      "Version control workflow"
+    ],
+    practice: [
+      "Push project to GitHub",
+      "Create feature branches",
+      "Resolve merge conflicts",
+      "Write proper README"
+    ]
+  },
+  {
+    week: 6,
+    title: "CRUD Operations in Django",
+    topics: [
+      "Create, Read, Update, Delete",
+      "Django Forms",
+      "ModelForms",
+      "Form validation"
+    ],
+    practice: [
+      "Create CRUD system",
+      "Build forms",
+      "Add validation",
+      "Perform update & delete operations"
+    ]
+  },
+  {
+    week: 7,
+    title: "Template Inheritance & Jinja",
+    topics: [
+      "Base templates",
+      "Blocks & extends",
+      "Jinja filters",
+      "Reusable components"
+    ],
+    practice: [
+      "Create base layout",
+      "Implement navbar/footer",
+      "Use template inheritance",
+      "Optimize UI structure"
+    ]
+  },
+  {
+    week: 8,
+    title: "Model Relations & Foreign Keys",
+    topics: [
+      "ForeignKey relationships",
+      "One-to-many mapping",
+      "Related names",
+      "Query optimization"
+    ],
+    practice: [
+      "User–Post relation",
+      "Category–Product mapping",
+      "Display related data",
+      "Optimize database queries"
+    ]
+  },
+  {
+    week: 9,
+    title: "User Authentication System",
+    topics: [
+      "Signup & login system",
+      "Authentication & sessions",
+      "Login required views",
+      "User dashboard"
+    ],
+    practice: [
+      "Build auth system",
+      "Create protected routes",
+      "Implement logout system",
+      "Handle user sessions"
+    ]
+  },
+  {
+    week: 10,
+    title: "Django Admin Panel",
+    topics: [
+      "Admin customization",
+      "Model registration",
+      "Search & filters",
+      "Admin permissions"
+    ],
+    practice: [
+      "Customize admin panel",
+      "Add filters & search",
+      "Manage users from admin",
+      "Optimize admin UI"
+    ]
+  },
+  {
+    week: 11,
+    title: "AI Integration in Django",
+    topics: [
+      "OpenAI API integration",
+      "Prompt engineering",
+      "AI-powered features",
+      "Handling API responses"
+    ],
+    practice: [
+      "Build AI chatbot",
+      "Integrate AI in project",
+      "Create AI-based feature",
+      "Optimize prompts"
+    ]
+  },
+  {
+    week: 12,
+    title: "Deployment & Professional Presentation",
+    topics: [
+      "Deployment (Render / AWS)",
+      "Environment variables",
+      "Gunicorn & production setup",
+      "Pitch deck preparation"
+    ],
+    practice: [
+      "Deploy project live",
+      "Fix deployment errors",
+      "Prepare project demo",
+      "Create professional pitch deck"
+    ]
+  }
+];
+
+    // Modal Functions
+    function openCurriculumModal(type) {
+        const modal = document.getElementById(`${type}-modal`);
+        const curriculumDiv = document.getElementById(`${type}-curriculum`);
+        const curriculum = type === 'java' ? javaCurriculum : fullstackCurriculum;
+
+        curriculumDiv.innerHTML = curriculum.map(week => `
+            <div class="week-item">
+                <div class="week-title">
+                    <i class="fas fa-calendar-week"></i>
+                    Week ${week.week}
+                </div>
+                <div class="week-subtitle">${week.title}</div>
+                <ul class="week-topics">
+                    ${week.topics.map(topic => `<li>${topic}</li>`).join('')}
+                </ul>
+            </div>
+        `).join('');
+
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        AOS.refresh();
+    }
+
+    function closeCurriculumModal(type) {
+        const modal = document.getElementById(`${type}-modal`);
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function (event) {
+        if (event.target.classList.contains('curriculum-modal')) {
+            event.target.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    });
+
+    // ESC key to close modal
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.curriculum-modal').forEach(modal => {
+                modal.classList.remove('show');
+            });
+            document.body.style.overflow = '';
+        }
     });
 </script>
 
