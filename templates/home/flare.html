@@ -12,6 +12,22 @@ FLARE 1.0 | Launch Your Tech Career
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <style>
+    /* Performance Optimizations */
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        overflow-x: hidden;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+    }
+
     /* Background Gradient (from team.html) */
     .showcase-bg-gradient {
         position: absolute;
@@ -24,6 +40,7 @@ FLARE 1.0 | Launch Your Tech Career
             radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.1) 0%, transparent 40%);
         z-index: 0;
         pointer-events: none;
+        will-change: auto;
     }
 
     /* Course Cards Section */
@@ -1026,10 +1043,10 @@ FLARE 1.0 | Launch Your Tech Career
         particlesJS('particles-js', {
             "particles": {
                 "number": {
-                    "value": 80,
+                    "value": 40,
                     "density": {
                         "enable": true,
-                        "value_area": 800
+                        "value_area": 1000
                     }
                 },
                 "color": {
@@ -1071,7 +1088,7 @@ FLARE 1.0 | Launch Your Tech Career
                 },
                 "move": {
                     "enable": true,
-                    "speed": 1,
+                    "speed": 0.5,
                     "direction": "none",
                     "random": true,
                     "straight": false,
@@ -1083,11 +1100,11 @@ FLARE 1.0 | Launch Your Tech Career
                 "detect_on": "canvas",
                 "events": {
                     "onhover": {
-                        "enable": true,
+                        "enable": false,
                         "mode": "grab"
                     },
                     "onclick": {
-                        "enable": true,
+                        "enable": false,
                         "mode": "push"
                     },
                     "resize": true
@@ -1273,200 +1290,200 @@ FLARE 1.0 | Launch Your Tech Career
 
     const fullstackCurriculum = [
         {
-    week: 1,
-    title: "HTML & CSS Foundations",
-    topics: [
-      "HTML5 structure & semantic tags",
-      "CSS fundamentals (Flexbox, Grid)",
-      "Responsive design principles",
-      "UI/UX basics for web development",
-      "Folder structure & best practices"
-    ],
-    practice: [
-      "Build 3–4 static websites",
-      "Create a personal portfolio site",
-      "Make one fully responsive webpage",
-      "Redesign one site using Flexbox/Grid"
-    ]
-  },
-  {
-    week: 2,
-    title: "Django Setup & First Project",
-    topics: [
-      "Django installation & environment setup",
-      "Project vs App architecture",
-      "URL routing & views",
-      "Templates & static files",
-      "Django project structure"
-    ],
-    practice: [
-      "Convert HTML project into Django",
-      "Create multiple views & routes",
-      "Setup static and template folders",
-      "Run first Django project successfully"
-    ]
-  },
-  {
-    week: 3,
-    title: "Understanding Django Backend & Views",
-    topics: [
-      "Request–response cycle",
-      "Function-based views",
-      "Dynamic data rendering",
-      "URL parameter handling"
-    ],
-    practice: [
-      "Pass data from backend to frontend",
-      "Create dynamic pages",
-      "Debug Django errors",
-      "Build a dynamic dashboard"
-    ]
-  },
-  {
-    week: 4,
-    title: "Models & Database Handling",
-    topics: [
-      "Django ORM",
-      "Models & fields",
-      "Migrations",
-      "SQLite & database flow"
-    ],
-    practice: [
-      "Create models",
-      "Run migrations",
-      "Store & fetch database records",
-      "Display database data on UI"
-    ]
-  },
-  {
-    week: 5,
-    title: "Git & GitHub Workshop",
-    topics: [
-      "Git basics (init, add, commit)",
-      "GitHub repository creation",
-      "Branching & merging",
-      "Version control workflow"
-    ],
-    practice: [
-      "Push project to GitHub",
-      "Create feature branches",
-      "Resolve merge conflicts",
-      "Write proper README"
-    ]
-  },
-  {
-    week: 6,
-    title: "CRUD Operations in Django",
-    topics: [
-      "Create, Read, Update, Delete",
-      "Django Forms",
-      "ModelForms",
-      "Form validation"
-    ],
-    practice: [
-      "Create CRUD system",
-      "Build forms",
-      "Add validation",
-      "Perform update & delete operations"
-    ]
-  },
-  {
-    week: 7,
-    title: "Template Inheritance & Jinja",
-    topics: [
-      "Base templates",
-      "Blocks & extends",
-      "Jinja filters",
-      "Reusable components"
-    ],
-    practice: [
-      "Create base layout",
-      "Implement navbar/footer",
-      "Use template inheritance",
-      "Optimize UI structure"
-    ]
-  },
-  {
-    week: 8,
-    title: "Model Relations & Foreign Keys",
-    topics: [
-      "ForeignKey relationships",
-      "One-to-many mapping",
-      "Related names",
-      "Query optimization"
-    ],
-    practice: [
-      "User–Post relation",
-      "Category–Product mapping",
-      "Display related data",
-      "Optimize database queries"
-    ]
-  },
-  {
-    week: 9,
-    title: "User Authentication System",
-    topics: [
-      "Signup & login system",
-      "Authentication & sessions",
-      "Login required views",
-      "User dashboard"
-    ],
-    practice: [
-      "Build auth system",
-      "Create protected routes",
-      "Implement logout system",
-      "Handle user sessions"
-    ]
-  },
-  {
-    week: 10,
-    title: "Django Admin Panel",
-    topics: [
-      "Admin customization",
-      "Model registration",
-      "Search & filters",
-      "Admin permissions"
-    ],
-    practice: [
-      "Customize admin panel",
-      "Add filters & search",
-      "Manage users from admin",
-      "Optimize admin UI"
-    ]
-  },
-  {
-    week: 11,
-    title: "AI Integration in Django",
-    topics: [
-      "OpenAI API integration",
-      "Prompt engineering",
-      "AI-powered features",
-      "Handling API responses"
-    ],
-    practice: [
-      "Build AI chatbot",
-      "Integrate AI in project",
-      "Create AI-based feature",
-      "Optimize prompts"
-    ]
-  },
-  {
-    week: 12,
-    title: "Deployment & Professional Presentation",
-    topics: [
-      "Deployment (Render / AWS)",
-      "Environment variables",
-      "Gunicorn & production setup",
-      "Pitch deck preparation"
-    ],
-    practice: [
-      "Deploy project live",
-      "Fix deployment errors",
-      "Prepare project demo",
-      "Create professional pitch deck"
-    ]
-  }
-];
+            week: 1,
+            title: "HTML & CSS Foundations",
+            topics: [
+                "HTML5 structure & semantic tags",
+                "CSS fundamentals (Flexbox, Grid)",
+                "Responsive design principles",
+                "UI/UX basics for web development",
+                "Folder structure & best practices"
+            ],
+            practice: [
+                "Build 3–4 static websites",
+                "Create a personal portfolio site",
+                "Make one fully responsive webpage",
+                "Redesign one site using Flexbox/Grid"
+            ]
+        },
+        {
+            week: 2,
+            title: "Django Setup & First Project",
+            topics: [
+                "Django installation & environment setup",
+                "Project vs App architecture",
+                "URL routing & views",
+                "Templates & static files",
+                "Django project structure"
+            ],
+            practice: [
+                "Convert HTML project into Django",
+                "Create multiple views & routes",
+                "Setup static and template folders",
+                "Run first Django project successfully"
+            ]
+        },
+        {
+            week: 3,
+            title: "Understanding Django Backend & Views",
+            topics: [
+                "Request–response cycle",
+                "Function-based views",
+                "Dynamic data rendering",
+                "URL parameter handling"
+            ],
+            practice: [
+                "Pass data from backend to frontend",
+                "Create dynamic pages",
+                "Debug Django errors",
+                "Build a dynamic dashboard"
+            ]
+        },
+        {
+            week: 4,
+            title: "Models & Database Handling",
+            topics: [
+                "Django ORM",
+                "Models & fields",
+                "Migrations",
+                "SQLite & database flow"
+            ],
+            practice: [
+                "Create models",
+                "Run migrations",
+                "Store & fetch database records",
+                "Display database data on UI"
+            ]
+        },
+        {
+            week: 5,
+            title: "Git & GitHub Workshop",
+            topics: [
+                "Git basics (init, add, commit)",
+                "GitHub repository creation",
+                "Branching & merging",
+                "Version control workflow"
+            ],
+            practice: [
+                "Push project to GitHub",
+                "Create feature branches",
+                "Resolve merge conflicts",
+                "Write proper README"
+            ]
+        },
+        {
+            week: 6,
+            title: "CRUD Operations in Django",
+            topics: [
+                "Create, Read, Update, Delete",
+                "Django Forms",
+                "ModelForms",
+                "Form validation"
+            ],
+            practice: [
+                "Create CRUD system",
+                "Build forms",
+                "Add validation",
+                "Perform update & delete operations"
+            ]
+        },
+        {
+            week: 7,
+            title: "Template Inheritance & Jinja",
+            topics: [
+                "Base templates",
+                "Blocks & extends",
+                "Jinja filters",
+                "Reusable components"
+            ],
+            practice: [
+                "Create base layout",
+                "Implement navbar/footer",
+                "Use template inheritance",
+                "Optimize UI structure"
+            ]
+        },
+        {
+            week: 8,
+            title: "Model Relations & Foreign Keys",
+            topics: [
+                "ForeignKey relationships",
+                "One-to-many mapping",
+                "Related names",
+                "Query optimization"
+            ],
+            practice: [
+                "User–Post relation",
+                "Category–Product mapping",
+                "Display related data",
+                "Optimize database queries"
+            ]
+        },
+        {
+            week: 9,
+            title: "User Authentication System",
+            topics: [
+                "Signup & login system",
+                "Authentication & sessions",
+                "Login required views",
+                "User dashboard"
+            ],
+            practice: [
+                "Build auth system",
+                "Create protected routes",
+                "Implement logout system",
+                "Handle user sessions"
+            ]
+        },
+        {
+            week: 10,
+            title: "Django Admin Panel",
+            topics: [
+                "Admin customization",
+                "Model registration",
+                "Search & filters",
+                "Admin permissions"
+            ],
+            practice: [
+                "Customize admin panel",
+                "Add filters & search",
+                "Manage users from admin",
+                "Optimize admin UI"
+            ]
+        },
+        {
+            week: 11,
+            title: "AI Integration in Django",
+            topics: [
+                "OpenAI API integration",
+                "Prompt engineering",
+                "AI-powered features",
+                "Handling API responses"
+            ],
+            practice: [
+                "Build AI chatbot",
+                "Integrate AI in project",
+                "Create AI-based feature",
+                "Optimize prompts"
+            ]
+        },
+        {
+            week: 12,
+            title: "Deployment & Professional Presentation",
+            topics: [
+                "Deployment (Render / AWS)",
+                "Environment variables",
+                "Gunicorn & production setup",
+                "Pitch deck preparation"
+            ],
+            practice: [
+                "Deploy project live",
+                "Fix deployment errors",
+                "Prepare project demo",
+                "Create professional pitch deck"
+            ]
+        }
+    ];
 
     // Modal Functions
     function openCurriculumModal(type) {
