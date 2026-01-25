@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, flames
+from . import views, flames, flare
 
 urlpatterns = [
     path("", views.home, name="home"),
@@ -29,6 +29,12 @@ urlpatterns += [
     
     path("flames/<slug:slug>/register/", flames.register_flames, name="flames_register"),
     path("flames/validate-referral/", flames.validate_referral, name="validate_referral"),
+]
+
+# ====================================== FLARE ========================================
+
+urlpatterns += [
+    path("flare/", flare.flare, name="flare_home"),
 ]
 
 # ===================================== CERTIFICATE ====================================

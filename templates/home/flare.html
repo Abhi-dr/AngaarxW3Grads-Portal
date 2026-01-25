@@ -1,0 +1,912 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}
+FLARE 1.0 | Launch Your Tech Career
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/flames.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    /* Course Cards Section */
+    .courses-section {
+        position: relative;
+        z-index: 1;
+    }
+
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-top: 50px;
+    }
+
+    .course-card {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 30px;
+        position: relative;
+        backdrop-filter: blur(10px);
+        transition: all 0.4s ease;
+        overflow: hidden;
+    }
+
+    .course-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #ff6026, #ff9a56);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+
+    .course-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(255, 96, 38, 0.25);
+        border-color: rgba(255, 96, 38, 0.4);
+    }
+
+    .course-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .course-icon {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 20px;
+        font-size: 2.2rem;
+        color: white;
+    }
+
+    .course-title {
+        color: white;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .course-description {
+        color: #aaa;
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .course-features {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 20px;
+    }
+
+    .course-features li {
+        color: #ddd;
+        padding: 6px 0;
+        padding-left: 26px;
+        position: relative;
+        font-size: 0.85rem;
+    }
+
+    .course-features li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: #ff6026;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .course-price {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        color: white;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 1rem;
+        font-weight: 700;
+        box-shadow: 0 3px 10px rgba(255, 96, 38, 0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1.3;
+    }
+
+    .course-price .price-original {
+        font-size: 0.7em;
+        margin-bottom: 2px;
+    }
+
+    .combo-price {
+        background: linear-gradient(135deg, #ffd700, #ff9a56);
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 0.65em;
+        font-weight: 800;
+        color: #000;
+        box-shadow: 0 3px 10px rgba(255, 215, 0, 0.4);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1.2;
+    }
+
+    .combo-price .price-original {
+        font-size: 0.7em;
+        margin-right: 0;
+        margin-bottom: 2px;
+    }
+
+    .price-original {
+        text-decoration: line-through;
+        opacity: 0.7;
+        font-size: 0.75em;
+        margin-right: 6px;
+    }
+
+    .register-btn {
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        color: white;
+        padding: 12px 32px;
+        border: none;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 5px 20px rgba(255, 96, 38, 0.3);
+    }
+
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(255, 96, 38, 0.4);
+        color: white;
+    }
+
+    .register-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .register-btn:hover i {
+        transform: translateX(5px);
+    }
+
+    /* WhatsApp Join Button */
+    .whatsapp-btn {
+        background: linear-gradient(135deg, #25D366, #128C7E);
+        color: white;
+        padding: 12px 35px;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+        margin-top: 20px;
+    }
+
+    .whatsapp-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+        color: white;
+    }
+
+    .whatsapp-btn i {
+        font-size: 1.3rem;
+        transition: transform 0.3s ease;
+    }
+
+    .whatsapp-btn:hover i {
+        transform: scale(1.1);
+    }
+
+    /* Program Details Section */
+    .program-details {
+        /* padding: 80px 0; */
+        position: relative;
+        z-index: 1;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+        margin-top: 50px;
+    }
+
+    .detail-card {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .detail-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(255, 96, 38, 0.15);
+        border-color: rgba(255, 96, 38, 0.3);
+    }
+
+    .detail-icon {
+        font-size: 2.5rem;
+        color: #ff6026;
+        margin-bottom: 15px;
+    }
+
+    .detail-title {
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .detail-description {
+        color: #aaa;
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+
+    /* Why Choose Section */
+    .why-choose {
+        padding: 80px 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .benefits-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        margin-top: 50px;
+    }
+
+    .benefit-card {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        transition: all 0.4s ease;
+        backdrop-filter: blur(10px);
+    }
+
+    .benefit-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 35px rgba(255, 96, 38, 0.2);
+    }
+
+    .benefit-icon {
+        font-size: 2.5rem;
+        color: #ff6026;
+        margin-bottom: 15px;
+    }
+
+    .benefit-title {
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .benefit-description {
+        color: #aaa;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    /* Combo Offer Button Section */
+    .combo-section {
+        text-align: center;
+        margin: 50px 0 30px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .combo-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 20px 50px;
+        font-size: 1.5rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: white;
+        background: linear-gradient(135deg, #ff6026, #ff9a56, #ff6026);
+        background-size: 200% 200%;
+        border: none;
+        border-radius: 60px;
+        cursor: pointer;
+        text-decoration: none;
+        overflow: hidden;
+        box-shadow: 0 10px 40px rgba(255, 96, 38, 0.5);
+        transition: all 0.3s ease;
+        animation: gradientShift 3s ease infinite;
+    }
+
+    .combo-btn::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg,
+                transparent,
+                transparent 40%,
+                rgba(255, 255, 255, 0.3) 50%,
+                transparent 60%,
+                transparent);
+        animation: shimmer 3s infinite;
+    }
+
+    .combo-btn:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 50px rgba(255, 96, 38, 0.6);
+    }
+
+    .combo-icon {
+        font-size: 1.7rem;
+        animation: bounce 2s infinite;
+    }
+
+    .combo-price {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.7em;
+        font-weight: 700;
+    }
+
+    .combo-text {
+        position: relative;
+        z-index: 1;
+    }
+
+    .combo-discount {
+        display: block;
+        font-size: 0.55em;
+        font-weight: 600;
+        opacity: 0.9;
+        margin-top: 5px;
+    }
+
+    /* Stats Grid */
+    .stat-card {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(255, 96, 38, 0.1);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #ff6026;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        color: #aaa;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+        }
+
+        100% {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+    }
+
+    @keyframes gradientShift {
+        0% {
+            background-position: 0% 50%;
+        }
+
+        50% {
+            background-position: 100% 50%;
+        }
+
+        100% {
+            background-position: 0% 50%;
+        }
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    @keyframes bounce {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .courses-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .benefits-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .showcase-title {
+            font-size: 2.5rem;
+        }
+
+        .combo-btn {
+            padding: 16px 30px;
+            font-size: 1rem;
+            gap: 10px;
+            flex-direction: column;
+            width: 95%;
+        }
+
+        .combo-icon {
+            font-size: 1.5rem;
+        }
+
+        .combo-text {
+            text-align: center;
+        }
+
+        .combo-price {
+            font-size: 0.8em;
+            padding: 8px 18px;
+        }
+
+        .showcase-subtitle {
+            font-size: 1rem;
+            max-width: 650px;
+        }
+
+        .course-title {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .showcase-page-container {
+            padding: 40px 0;
+        }
+
+        .course-card {
+            padding: 30px 20px;
+        }
+
+        .register-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .whatsapp-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .combo-btn {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block body %}
+<div class="showcase-page-container">
+    <div class="showcase-bg-particles" id="particles-js"></div>
+
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="showcase-header mt-4" data-aos="fade-up" data-aos-duration="1000">
+            <h1 class="showcase-title">FLARE 1.0 <i class="fas fa-fire"></i></h1>
+            <p class="showcase-subtitle">
+                Transform Your Career with India's Most Practical Tech Training. Learn from Industry Experts, Build Real
+                Projects, Land Your Dream Job.
+            </p>
+            <a href="https://chat.whatsapp.com/IBSjQq09tN5AttBtvi5LFm" target="_blank" class="whatsapp-btn"
+                data-aos="zoom-in" data-aos-delay="200">
+                <i class="fab fa-whatsapp"></i>
+                Join WhatsApp Group
+            </a>
+            <!-- <div class="event-status-banner" data-aos="zoom-in" data-aos-delay="200">
+                <i class="fas fa-rocket"></i>
+                New Batch Launching Soon - Limited Seats Available!
+            </div> -->
+        </div>
+
+
+
+        <!-- Courses Section -->
+        <div class="courses-section">
+            <div class="section-header m-0" data-aos="fade-up">
+                <h2 class="section-title">Choose Your Success Path <i class="fas fa-code"></i></h2>
+                <p class="section-description">
+                    Industry-vetted courses designed to make you job-ready in months, not years
+                </p>
+            </div>
+
+            <div class="courses-grid">
+                <!-- Java with DSA Course -->
+                <div class="course-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="course-price">
+                        <span class="price-original">₹2,999</span>
+                        ₹1,999
+                    </div>
+                    <div class="course-icon">
+                        <i class="fab fa-java"></i>
+                    </div>
+                    <h3 class="course-title">Master Java + DSA</h3>
+                    <p class="course-description">
+                        Crack top tech interviews with expert-level DSA skills. Build the foundation that gets you hired
+                        at product-based companies.
+                    </p>
+                    <ul class="course-features">
+                        <li>Core Java & Advanced OOP Mastery</li>
+                        <li>50+ DSA Problems with Patterns</li>
+                        <li>Interview-Level Problem Solving</li>
+                        <li>Mock Interviews & Resume Review</li>
+                        <li>Capstone Project Portfolio</li>
+                    </ul>
+
+                    <a href="https://rzp.io/rzp/tab-flare1-0-jdsa" target="_blank" class="register-btn">
+                        Register Now <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+
+                <!-- Full Stack with GenAI Course -->
+                <div class="course-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="course-price">
+                        <span class="price-original">₹2,999</span>
+                        ₹1,999
+                    </div>
+                    <div class="course-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <h3 class="course-title">Full Stack + GenAI</h3>
+                    <p class="course-description">
+                        Build modern web applications with AI superpowers. Learn the hottest tech stack and stand out
+                        with GenAI integration skills.
+                    </p>
+                    <ul class="course-features">
+                        <li>React/Next.js Frontend Development</li>
+                        <li>Django/Node.js Backend Expertise</li>
+                        <li>SQL & NoSQL Database Design</li>
+                        <li>ChatGPT & LLM API Integration</li>
+                        <li>AWS Deployment & DevOps Basics</li>
+                    </ul>
+                    <a href="https://rzp.io/rzp/tab-flare1-0-fsgai" target="_blank" class="register-btn">
+                        Register Now <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combo Offer Section -->
+        <div class="combo-section" data-aos="zoom-in" data-aos-duration="800">
+            <a href="https://rzp.io/rzp/tab-flare1-0-combo" target="_blank" class="combo-btn">
+                <span class="combo-text">
+                    Complete Tech Mastery - COMBO PACK
+                    <span class="combo-discount">Become a Full-Stack Problem Solver • Save ₹2000</span>
+                </span>
+                <span class="combo-price">
+                    <span class="price-original">₹4,999</span>
+                    ₹2,999
+                </span>
+            </a>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" data-aos="fade-up" data-aos-duration="1000">
+            <div class="stat-card">
+                <div class="stat-number">2</div>
+                <div class="stat-label">Expert Courses</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2x</div>
+                <div class="stat-label">Classes Per Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">Daily</div>
+                <div class="stat-label">Practice Problems</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Practical Learning</div>
+            </div>
+        </div>
+
+        <!-- Program Details Section -->
+        <div class="program-details">
+            <div class="section-header m-0" data-aos="fade-up">
+                <h2 class="section-title">Learning Structure <i class="fas fa-calendar-alt"></i></h2>
+                <p class="section-description">
+                    Structured, consistent learning designed for working professionals and students
+                </p>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="detail-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <h4 class="detail-title">Live Expert Sessions</h4>
+                    <p class="detail-description">
+                        2 intensive live sessions weekly. Interactive learning with industry mentors, live coding, and
+                        instant doubt resolution.
+                    </p>
+                </div>
+
+                <div class="detail-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="detail-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h4 class="detail-title">Daily Skill Building</h4>
+                    <p class="detail-description">
+                        Curated daily challenges that build muscle memory. Consistency is key - practice problems
+                        designed to reinforce concepts.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why Choose FLARE Section -->
+        <div class="why-choose">
+            <div class="section-header m-0" data-aos="fade-up">
+                <h2 class="section-title">Why Choose FLARE 1.0? <i class="fas fa-star"></i></h2>
+                <p class="section-description">
+                    Everything you need to accelerate your tech career in one place
+                </p>
+            </div>
+
+            <div class="benefits-grid">
+                <div class="benefit-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="benefit-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h4 class="benefit-title">Expert Mentorship</h4>
+                    <p class="benefit-description">
+                        Learn from industry professionals with years of real-world experience
+                    </p>
+                </div>
+
+                <div class="benefit-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="benefit-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h4 class="benefit-title">Hands-on Projects</h4>
+                    <p class="benefit-description">
+                        Build real-world projects that showcase your skills to potential employers
+                    </p>
+                </div>
+
+                <div class="benefit-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="benefit-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4 class="benefit-title">Community Support</h4>
+                    <p class="benefit-description">
+                        Join a vibrant community of learners and collaborate on exciting projects
+                    </p>
+                </div>
+
+                <div class="benefit-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="benefit-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <h4 class="benefit-title">Industry Certificate</h4>
+                    <p class="benefit-description">
+                        Earn a recognized certificate upon completion to boost your resume
+                    </p>
+                </div>
+
+                <div class="benefit-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="benefit-icon">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <h4 class="benefit-title">Career Support</h4>
+                    <p class="benefit-description">
+                        Get guidance on interviews, resume building, and job placement assistance
+                    </p>
+                </div>
+
+                <div class="benefit-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="benefit-icon">
+                        <i class="fas fa-infinity"></i>
+                    </div>
+                    <h4 class="benefit-title">Lifetime Access</h4>
+                    <p class="benefit-description">
+                        Access all course materials and community resources even after completion
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize AOS animations
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100
+        });
+
+        // Initialize particles.js
+        particlesJS('particles-js', {
+            "particles": {
+                "number": {
+                    "value": 80,
+                    "density": {
+                        "enable": true,
+                        "value_area": 800
+                    }
+                },
+                "color": {
+                    "value": "#ff6026"
+                },
+                "shape": {
+                    "type": "circle",
+                    "stroke": {
+                        "width": 0,
+                        "color": "#000000"
+                    }
+                },
+                "opacity": {
+                    "value": 0.2,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 1,
+                        "opacity_min": 0.05,
+                        "sync": false
+                    }
+                },
+                "size": {
+                    "value": 3,
+                    "random": true,
+                    "anim": {
+                        "enable": true,
+                        "speed": 2,
+                        "size_min": 0.1,
+                        "sync": false
+                    }
+                },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 150,
+                    "color": "#ff6026",
+                    "opacity": 0.15,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 1,
+                    "direction": "none",
+                    "random": true,
+                    "straight": false,
+                    "out_mode": "out",
+                    "bounce": false
+                }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": {
+                    "onhover": {
+                        "enable": true,
+                        "mode": "grab"
+                    },
+                    "onclick": {
+                        "enable": true,
+                        "mode": "push"
+                    },
+                    "resize": true
+                },
+                "modes": {
+                    "grab": {
+                        "distance": 140,
+                        "line_linked": {
+                            "opacity": 0.4
+                        }
+                    },
+                    "push": {
+                        "particles_nb": 4
+                    }
+                }
+            },
+            "retina_detect": true
+        });
+
+        // Add hover effects for cards
+        const cards = document.querySelectorAll('.course-card, .detail-card, .benefit-card, .stat-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                this.style.transition = 'transform 0.3s ease';
+            });
+        });
+
+        // Smooth scrolling for internal links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href !== '#') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>
+
+{% endblock %}
