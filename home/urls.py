@@ -34,7 +34,10 @@ urlpatterns += [
 # ====================================== FLARE ========================================
 
 urlpatterns += [
-    path("flare/", flare.flare, name="flare_home"),
+    path("flare/", flare.flare, name="flare"),
+    path("flare/register/", flare.flare_registration_view, name="flare_registration"),
+    path("flare/register/submit/", flare.flare_registration_submit, name="flare_registration_submit"),
+    path("flare/register/success/", flare.flare_registration_success, name="flare_registration_success"),
 ]
 
 # ===================================== CERTIFICATE ====================================

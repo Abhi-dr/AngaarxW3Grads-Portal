@@ -120,3 +120,59 @@ admin.site.register(FlamesTeam, FlamesTeamAdmin)
 admin.site.register(FlamesTeamMember, FlamesTeamMemberAdmin)
 admin.site.register(Session)
 
+
+# ================== FLARE REGISTRATION ===================
+
+from .flareModel import FlareRegistration
+
+@admin.register(FlareRegistration)
+class FlareRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'email', 'phone_number', 'occupation_status', 'get_courses', 'commitment', 'created_at')
+    list_filter = ('occupation_status', 'commitment', 'created_at')
+    search_fields = ('full_name', 'email', 'phone_number')
+    readonly_fields = ('created_at', 'updated_at', 'get_courses_display', 'get_goals_display')
+    ordering = ('-created_at',)
+    
+    fieldsets = (
+        ('Personal Information', {
+            'fields': ('email', 'full_name', 'phone_number')
+        }),
+        ('Academic/Professional Details', {
+            'fields': ('occupation_status', 'current_year')
+        }),
+        ('Course Interest', {
+            'fields': ('get_courses_display', 'courses_interested')
+        }),
+        ('Career Goals', {
+            'fields': ('get_goals_display', 'career_goals')
+        }),
+        ('Motivation & Commitment', {
+            'fields': ('motivation', 'commitment')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    
+    def get_courses(self, obj):
+        """Display courses as comma-separated list"""
+        courses = obj.get_courses_list()
+        return ', '.join(courses) if courses else '-'
+    get_courses.short_description = 'Courses'
+    
+    def get_courses_display(self, obj):
+        """Display courses in a formatted way"""
+        courses = obj.get_courses_list()
+        if courses:
+            return '\n'.join([f'• {course}' for course in courses])
+        return 'No courses selected'
+    get_courses_display.short_description = 'Selected Courses'
+    
+    def get_goals_display(self, obj):
+        """Display career goals in a formatted way"""
+        goals = obj.get_career_goals_list()
+        if goals:
+            return '\n'.join([f'• {goal}' for goal in goals])
+        return 'No career goals selected'
+    get_goals_display.short_description = 'Career Goals'
