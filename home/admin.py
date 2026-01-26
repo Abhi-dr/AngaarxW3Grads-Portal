@@ -122,22 +122,53 @@ admin.site.register(Session)
 
 
 # ================== FLARE REGISTRATION ===================
+from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
 
 from .flareModel import FlareRegistration
+from .resources import FlareRegistrationResource
+
 
 @admin.register(FlareRegistration)
-class FlareRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'email', 'phone_number', 'occupation_status', 'get_courses', 'commitment', 'created_at')
-    list_filter = ('occupation_status', 'commitment', 'created_at')
-    search_fields = ('full_name', 'email', 'phone_number')
-    readonly_fields = ('created_at', 'updated_at', 'get_courses_display', 'get_goals_display')
+class FlareRegistrationAdmin(ImportExportModelAdmin):
+    resource_class = FlareRegistrationResource
+
+    list_display = (
+        'full_name',
+        'email',
+        'phone_number',
+        'occupation_status',
+        'get_courses',
+        'commitment',
+        'created_at'
+    )
+
+    list_filter = (
+        'occupation_status',
+        'commitment',
+        'created_at'
+    )
+
+    search_fields = (
+        'full_name',
+        'email',
+        'phone_number'
+    )
+
+    readonly_fields = (
+        'created_at',
+        'updated_at',
+        'get_courses_display',
+        'get_goals_display'
+    )
+
     ordering = ('-created_at',)
-    
+
     fieldsets = (
         ('Personal Information', {
             'fields': ('email', 'full_name', 'phone_number')
         }),
-        ('Academic/Professional Details', {
+        ('Academic / Professional Details', {
             'fields': ('occupation_status', 'current_year')
         }),
         ('Course Interest', {
@@ -154,25 +185,26 @@ class FlareRegistrationAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
-    
+
+    # --------------------------
+    # Display Helpers
+    # --------------------------
+
     def get_courses(self, obj):
-        """Display courses as comma-separated list"""
         courses = obj.get_courses_list()
-        return ', '.join(courses) if courses else '-'
-    get_courses.short_description = 'Courses'
-    
+        return ", ".join(courses) if courses else "-"
+    get_courses.short_description = "Courses"
+
     def get_courses_display(self, obj):
-        """Display courses in a formatted way"""
         courses = obj.get_courses_list()
         if courses:
-            return '\n'.join([f'• {course}' for course in courses])
-        return 'No courses selected'
-    get_courses_display.short_description = 'Selected Courses'
-    
+            return "\n".join([f"• {course}" for course in courses])
+        return "No courses selected"
+    get_courses_display.short_description = "Selected Courses"
+
     def get_goals_display(self, obj):
-        """Display career goals in a formatted way"""
         goals = obj.get_career_goals_list()
         if goals:
-            return '\n'.join([f'• {goal}' for goal in goals])
-        return 'No career goals selected'
-    get_goals_display.short_description = 'Career Goals'
+            return "\n".join([f"• {goal}" for goal in goals])
+        return "No career goals selected"
+    get_goals_display.short_description = "Career Goals"
