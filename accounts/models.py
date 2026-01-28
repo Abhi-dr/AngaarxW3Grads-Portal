@@ -130,3 +130,35 @@ class PasswordResetToken(models.Model):
     def __str__(self):
         return f"Password Reset Token for {self.user.email}"
 
+
+# ===================================== EMAIL VERIFICATION ==========================================
+
+class EmailVerificationToken(models.Model):
+    user = models.ForeignKey('Student', on_delete=models.CASCADE, related_name='email_verification_tokens')
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(hours=24)  # 24 hours validity
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def create_token(cls, user):
+        cls.objects.filter(user=user).delete()  # Remove existing tokens
+        raw_token = secrets.token_urlsafe(32)
+        hashed_token = hashlib.sha256(raw_token.encode()).hexdigest()
+        cls.objects.create(user=user, token_hash=hashed_token)
+        return raw_token
+
+    def is_valid(self, token):
+        hashed_input = hashlib.sha256(token.encode()).hexdigest()
+        return hashed_input == self.token_hash and timezone.now() < self.expires_at
+
+    def invalidate(self):
+        self.delete()
+
+    def __str__(self):
+        return f"Email Verification Token for {self.user.email}"
+

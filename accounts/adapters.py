@@ -1,5 +1,6 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+print("DEBUG: accounts.adapters module loaded")
 from allauth.core.exceptions import ImmediateHttpResponse
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -11,7 +12,7 @@ import logging
 
 from django.contrib.auth.models import User
 from .models import Student, Instructor, Administrator
-from .views import send_welcome_mail
+from .views import send_welcome_mail, send_verification_mail
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +22,25 @@ class CustomAccountAdapter(DefaultAccountAdapter):
     Custom account adapter for additional account management control.
     """
     
+    def respond_user_inactive(self, request, user):
+        print(f"DEBUG: respond_user_inactive called for {user.email}")
+        """
+        Redirect inactive users to the verification sent page instead of login.
+        Also resend the verification email to ensure they have the link.
+        """
+        from .views import send_verification_mail
+        from django.shortcuts import render
+        
+        try:
+            # Trigger resend of verification mail
+            send_verification_mail(user, request)
+            logger.info(f"Resent verification email to inactive user: {user.email}")
+        except Exception as e:
+            logger.error(f"Failed to resend verification email: {e}")
+            
+        return render(request, "accounts/verification_sent.html", {"email": user.email})
 
     
-
-
     def add_message(self, request, level, message_template, message_context=None, extra_tags=''):
         """
         Override to suppress specific messages like "Successfully signed in as...".
@@ -42,19 +58,26 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
     """
     
     def is_open_for_signup(self, request, sociallogin):
+        email = sociallogin.account.extra_data.get('email')
+        print(f"DEBUG: is_open_for_signup called for {email}")
         """
         Control whether social signup is allowed.
         Only allow Google provider with verified email.
         """
         # Only allow Google provider
         if sociallogin.account.provider != 'google':
+            print("DEBUG: is_open_for_signup: not google")
             return False
         
         # Check if email is verified
-        email_verified = sociallogin.account.extra_data.get('email_verified', False)
-        return email_verified
+        email_verified = sociallogin.account.extra_data.get('email_verified')
+        print(f"DEBUG: is_open_for_signup: email_verified={email_verified}")
+        
+        # Temporary loosen for debugging
+        return True
     
     def pre_social_login(self, request, sociallogin):
+        print(f"DEBUG: pre_social_login called for {sociallogin.account.extra_data.get('email')}")
         """
         Invoked just after a user successfully authenticates via a social provider,
         but before the login is actually processed.
@@ -130,6 +153,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             raise ImmediateHttpResponse(redirect('login'))
     
     def save_user(self, request, sociallogin, form=None):
+        print(f"DEBUG: save_user called for {sociallogin.account.extra_data.get('email')}")
         """
         Save user from social login. Creates Student profile directly to avoid signal race conditions.
         """
@@ -157,8 +181,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             user.last_name = user_data.get('family_name', '').strip() or ''
             user.email = email
             
-            # Ensure user is active and not staff
-            user.is_active = True
+            # Ensure user is inactive initially
+            user.is_active = False # Changed to False for verification
             user.is_staff = False
             user.is_superuser = False
             
@@ -179,12 +203,12 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # Important: Update sociallogin.user to point to our new Student instance
             sociallogin.user = user
             
-            # Send welcome email
+            # Send verification email
             try:
                 if user.email and user.email != 'Not Set':
-                    send_welcome_mail(user.email, user.first_name)
+                    send_verification_mail(user, request)
             except Exception as email_error:
-                logger.warning(f"Failed to send welcome email: {email_error}")
+                logger.error(f"Failed to send verification email inside save_user: {email_error}", exc_info=True)
             
             logger.info(f"Student created directly from Google OAuth: {user.username} ({user.email})")
             

@@ -56,6 +56,7 @@ def social_account_added_handler(sender, request, sociallogin, **kwargs):
 
 @receiver(user_signed_up)
 def user_signed_up_handler(sender, request, user, sociallogin=None, **kwargs):
+    print(f"DEBUG: user_signed_up_handler called for {user.email}")
     """
     Handle user signup via social login.
     This creates a Student profile for users who sign up via Google.
@@ -141,6 +142,7 @@ def validate_google_oauth_settings():
 
 @receiver(user_logged_in)
 def user_logged_in_handler(sender, request, user, **kwargs):
+    print(f"DEBUG: user_logged_in_handler called for {user.email}")
     """
     Handle post-login actions and ensure proper redirect.
     This fires after a user is successfully logged in (including social login).

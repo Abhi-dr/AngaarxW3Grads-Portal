@@ -13,8 +13,8 @@ from django.db import transaction
 from django.db.models import Q
 from django.contrib.auth import login as default_login
 
-from .models import Student, Instructor, Administrator, PasswordResetToken
-
+from .models import Student, Instructor, Administrator, PasswordResetToken, EmailVerificationToken
+from django.urls import reverse
 from django.utils.timezone import now
 from practice.models import Sheet
 
@@ -121,19 +121,24 @@ def register(request):
                     first_name=first_name,
                     last_name=last_name,
                     email=email,
+                    is_active=False,  # Set inactive initially
+                    mobile_number='-',
+                    gender='Not Set'
                 )
                 new_user.set_password(password)
                 new_user.save()
 
                 print(f"New user created: {new_user.username} with ID: {new_user.id}")
 
-                send_welcome_mail(email, first_name)
-
-                auth.login(request, new_user, backend='django.contrib.auth.backends.ModelBackend')
+                # Send Verification Email instead of Welcome Email
+                send_verification_mail(new_user, request)
                 
-                messages.success(request, "Account created successfully! Aaja Ab🔥")
+                # Do NOT login automatically
+                # auth.login(request, new_user, backend='django.contrib.auth.backends.ModelBackend')
+                
+                messages.success(request, "Account created! Please check your email to verify your account.")
 
-                return redirect(next_url if next_url else "student")
+                return render(request, "accounts/verification_sent.html", {"email": email})
 
         except Exception as e:
             messages.error(request, f"Something went wrong: {e}")
@@ -268,6 +273,44 @@ def get_active_sheet_timer(request):
     else:
         return JsonResponse({'start_time': None, 'end_time': None})
 
+# ===================================== VERIFY EMAIL ==============================
+
+def verify_email(request, user_id, token):
+    try:
+        user = Student.objects.get(pk=user_id)
+        # Assuming only one token per user, or filter by token hash if needed.
+        # But we are passing raw token which isn't stored. We verify hash.
+        # Wait, I implemented `is_valid` which compares hash.
+        # I should fetch the token object that corresponds to the user.
+        verification_token = EmailVerificationToken.objects.filter(user=user).first()
+        
+        if verification_token and verification_token.is_valid(token):
+            # Activate user
+            user.is_active = True
+            user.save()
+            
+            # Invalidate token
+            verification_token.invalidate()
+            
+            # Send welcome email now (since they are now active)
+            send_welcome_mail(user.email, user.first_name)
+            
+            # Log the user in
+            auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            
+            messages.success(request, "Email verified successfully! Welcome to the dashboard.🔥")
+            return redirect('student')
+        
+        else:
+            messages.error(request, 'Invalid or expired verification link!')
+            # return render(request, 'accounts/verification_failed.html')
+            return redirect('login') 
+
+    except Exception as e:
+         messages.error(request, 'Invalid verification link!')
+         return redirect('login')
+
+
 # ========================================
 
 from django.core.mail import EmailMultiAlternatives
@@ -298,11 +341,57 @@ def send_welcome_mail(to, name):
     </html>
     """
 
-    email = EmailMultiAlternatives(subject, '', from_email_full, to_email)
-    email.attach_alternative(html_content, 'text/html')
-    email.send()
+    try:
+        email = EmailMultiAlternatives(subject, '', from_email_full, to_email)
+        email.attach_alternative(html_content, 'text/html')
+        email.send()
+        
+        print(f"\nSUCCESS: WELCOME EMAIL SENT! to {to_email} \n")
+    except Exception as e:
+        import traceback
+        print(f"\nERROR SENDING WELCOME EMAIL to {to}: {e}")
+        traceback.print_exc()
+
+
+def send_verification_mail(user, request):
+    token = EmailVerificationToken.create_token(user)
+    verify_link = request.build_absolute_uri(
+        reverse('verify_email', args=[user.pk, token])
+    )
     
-    print(f"\nEMAIL SENT! to {to_email} \n")
+    subject = 'Verify Your Email Address - The Angaar Batch'
+    from_email = 'noreply@theangaarbatch.in'
+    to_email = [user.email]
+    
+    from_name = "The Angaar Batch "
+    from_email_full = f"{from_name} <{from_email}>"
+
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
+        <div style="background-color: #f4f4f4; padding: 20px; text-align: center;">
+        <img src="https://theangaarbatch.in/static/img/home/angaari_logo.png" alt="The Angaar Batch Logo" style="width: 120px; margin-bottom: 20px;">
+        <h1 style="color: #2C3E50;">Verify Your Email Address</h1>
+        <p style="font-size: 16px; color: #555555;">Hi {user.first_name},</p>
+        <p style="font-size: 16px; color: #555555;">Please confirm that you want to use this as your account email address. Once it's done you will be able to start learning!</p>
+        <a href="{verify_link}" style="background-color: #E74C3C; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 14px; display: inline-block; margin-top: 20px;">Verify My Email</a>
+        <p style="font-size: 14px; color: #777777; margin-top: 30px;">If you did not sign up for this account, you can ignore this email.</p>
+        </div>
+    </body>
+    </html>
+    """
+
+    try:
+        email = EmailMultiAlternatives(subject, '', from_email_full, to_email)
+        email.attach_alternative(html_content, 'text/html')
+        email.send()
+        
+        print(f"\nSUCCESS: VERIFICATION EMAIL SENT! to {user.email} (Link: {verify_link})\n")
+    except Exception as e:
+        import traceback
+        print(f"\nERROR SENDING VERIFICATION EMAIL to {user.email}: {e}")
+        traceback.print_exc()
+
 
 # ================================================== RESET PASSWORD ==========================================
 
