@@ -327,15 +327,20 @@ def send_welcome_mail(to, name):
 
     html_content = f"""
     <html>
-    <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
-        <div style="background-color: #f4f4f4; padding: 20px; text-align: center;">
-        <img src="https://theangaarbatch.in/static/img/home/angaari_logo.png" alt="The Angaar Batch Logo" style="width: 120px; margin-bottom: 20px;">
-        <h1 style="color: #2C3E50;">Welcome to The Angaar Batch🔥, {name}!</h1>
-        <p style="font-size: 16px; color: #555555;">We're thrilled to have you on board. Get ready to dive into an exciting journey of learning, coding, and growth.</p>
-        <p style="font-size: 16px; color: #555555;">Stay curious, stay passionate, and let's build something amazing together!</p>
-        <a href="https://theangaarbatch.in/accounts/login" style="background-color: #3498DB; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 14px; display: inline-block; margin-top: 20px;">Go to Dashboard</a>
-        <p style="font-size: 14px; color: #777777; margin-top: 30px;">If you have any questions, feel free to reply to this email.</p>
-        <p style="font-size: 14px; color: #777777;">Happy Coding! 🚀</p>
+    <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #0f172a; color: #f8fafc;">
+        <div style="max-width: 600px; margin: 20px auto; background-color: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+            <div style="background-color: #0f172a; padding: 30px; text-align: center; border-bottom: 2px solid #3498DB;">
+                <img src="https://theangaarbatch.in/static/img/home/angaari_logo.png" alt="The Angaar Batch Logo" style="width: 100px;">
+                <h1 style="color: #ffffff; margin-top: 15px; font-size: 24px;">Welcome to The Angaar Batch🔥</h1>
+            </div>
+            <div style="padding: 40px 30px; text-align: center;">
+                <h2 style="color: #ffffff; font-size: 22px; margin-top: 0;">Hi {name}!</h2>
+                <p style="font-size: 16px; color: #cbd5e1; line-height: 1.6;">We're thrilled to have you on board. Get ready to dive into an exciting journey of learning, coding, and growth.</p>
+                <p style="font-size: 16px; color: #cbd5e1; line-height: 1.6;">Stay curious, stay passionate, and let's build something amazing together!</p>
+                <a href="https://theangaarbatch.in/accounts/login" style="background-color: #3498DB; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: bold; display: inline-block; margin-top: 25px; box-shadow: 0 4px 6px -1px rgba(52, 152, 219, 0.4);">Go to Dashboard</a>
+                <p style="font-size: 14px; color: #94a3b8; margin-top: 35px; border-top: 1px solid #334155; padding-top: 20px;">If you have any questions, feel free to reply to this email.</p>
+                <p style="font-size: 14px; color: #94a3b8; font-weight: bold;">Happy Coding! 🚀</p>
+            </div>
         </div>
     </body>
     </html>
@@ -368,14 +373,18 @@ def send_verification_mail(user, request):
 
     html_content = f"""
     <html>
-    <body style="font-family: Arial, sans-serif; margin: 0; padding: 0;">
-        <div style="background-color: #f4f4f4; padding: 20px; text-align: center;">
-        <img src="https://theangaarbatch.in/static/img/home/angaari_logo.png" alt="The Angaar Batch Logo" style="width: 120px; margin-bottom: 20px;">
-        <h1 style="color: #2C3E50;">Verify Your Email Address</h1>
-        <p style="font-size: 16px; color: #555555;">Hi {user.first_name},</p>
-        <p style="font-size: 16px; color: #555555;">Please confirm that you want to use this as your account email address. Once it's done you will be able to start learning!</p>
-        <a href="{verify_link}" style="background-color: #E74C3C; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-size: 14px; display: inline-block; margin-top: 20px;">Verify My Email</a>
-        <p style="font-size: 14px; color: #777777; margin-top: 30px;">If you did not sign up for this account, you can ignore this email.</p>
+    <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #0f172a; color: #f8fafc;">
+        <div style="max-width: 600px; margin: 20px auto; background-color: #1e293b; border-radius: 12px; overflow: hidden; border: 1px solid #334155; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
+            <div style="background-color: #0f172a; padding: 30px; text-align: center; border-bottom: 2px solid #E74C3C;">
+                <img src="https://theangaarbatch.in/static/img/home/angaari_logo.png" alt="The Angaar Batch Logo" style="width: 100px;">
+                <h1 style="color: #ffffff; margin-top: 15px; font-size: 24px;">Verify Your Email Address</h1>
+            </div>
+            <div style="padding: 40px 30px; text-align: center;">
+                <p style="font-size: 18px; color: #ffffff; margin-top: 0;">Hi {user.first_name},</p>
+                <p style="font-size: 16px; color: #cbd5e1; line-height: 1.6;">Please confirm that you want to use this as your account email address. Once it's done you will be able to start learning!</p>
+                <a href="{verify_link}" style="background-color: #E74C3C; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-size: 16px; font-weight: bold; display: inline-block; margin-top: 25px; box-shadow: 0 4px 6px -1px rgba(231, 76, 60, 0.4);">Verify My Email</a>
+                <p style="font-size: 14px; color: #94a3b8; margin-top: 35px; border-top: 1px solid #334155; padding-top: 20px;">If you did not sign up for this account, you can ignore this email.</p>
+            </div>
         </div>
     </body>
     </html>
