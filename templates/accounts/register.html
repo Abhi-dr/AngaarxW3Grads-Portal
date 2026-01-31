@@ -13,6 +13,9 @@
   href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;500;600;700&display=swap"
   rel="stylesheet">
 
+<!-- Google reCAPTCHA -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
 
 {% endblock %}
 
@@ -63,8 +66,8 @@
       </a>
 
       <div class="divider">
-          <span>OR</span>
-        </div>
+        <span>OR</span>
+      </div>
 
       <!-- Django Messages -->
       {% if messages %}
@@ -157,6 +160,11 @@
           <div class="checklist-item" id="req-special">
             <span class="icon">○</span> Special Character (!@#...)
           </div>
+        </div>
+
+        <!-- reCAPTCHA Widget -->
+        <div class="form-group" style="display: flex; justify-content: center; margin: 20px 0;">
+          <div class="g-recaptcha" data-sitekey="{{ RECAPTCHA_SITE_KEY }}"></div>
         </div>
 
         <button type="submit" class="submit-btn" id="signup-button" disabled>Register</button>

@@ -26,17 +26,31 @@ class CustomAccountAdapter(DefaultAccountAdapter):
         print(f"DEBUG: respond_user_inactive called for {user.email}")
         """
         Redirect inactive users to the verification sent page instead of login.
-        Also resend the verification email to ensure they have the link.
+        Only resend verification email for manual registrations, NOT for Google OAuth users.
         """
         from .views import send_verification_mail
         from django.shortcuts import render
+        from allauth.socialaccount.models import SocialAccount
         
         try:
-            # Trigger resend of verification mail
-            send_verification_mail(user, request)
-            logger.info(f"Resent verification email to inactive user: {user.email}")
+            # Check if user has a Google social account
+            has_google_account = SocialAccount.objects.filter(
+                user=user,
+                provider='google'
+            ).exists()
+            
+            if not has_google_account:
+                # Only send verification email for manual registrations
+                send_verification_mail(user, request)
+                logger.info(f"Resent verification email to inactive user: {user.email}")
+            else:
+                # Google OAuth user - activate them instead of sending verification
+                logger.info(f"Activating Google OAuth user without verification email: {user.email}")
+                if hasattr(user, 'student'):
+                    user.is_active = True
+                    user.save()
         except Exception as e:
-            logger.error(f"Failed to resend verification email: {e}")
+            logger.error(f"Failed to handle inactive user: {e}")
             
         return render(request, "accounts/verification_sent.html", {"email": user.email})
 
@@ -107,6 +121,13 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # Check if user exists as Student with this email
             if Student.objects.filter(email=email).exists():
                 existing_student = Student.objects.get(email=email)
+                
+                # If the student was inactive (pending email verification from manual signup),
+                # activate them now since Google has verified their email
+                if not existing_student.is_active:
+                    existing_student.is_active = True
+                    existing_student.save()
+                    logger.info(f"Activated previously inactive student via Google login: {email}")
                 
                 # Set the sociallogin user to the existing student
                 # This tells allauth to use this existing user instead of creating a new one
@@ -181,8 +202,8 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             user.last_name = user_data.get('family_name', '').strip() or ''
             user.email = email
             
-            # Ensure user is inactive initially
-            user.is_active = False # Changed to False for verification
+            # Google OAuth users are already verified by Google, set as active
+            user.is_active = True
             user.is_staff = False
             user.is_superuser = False
             
@@ -203,12 +224,13 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             # Important: Update sociallogin.user to point to our new Student instance
             sociallogin.user = user
             
-            # Send verification email
+            # NO verification email for Google OAuth - email is already verified by Google
+            # Send welcome email instead
             try:
                 if user.email and user.email != 'Not Set':
-                    send_verification_mail(user, request)
+                    send_welcome_mail(user.email, user.first_name)
             except Exception as email_error:
-                logger.error(f"Failed to send verification email inside save_user: {email_error}", exc_info=True)
+                logger.error(f"Failed to send welcome email inside save_user: {email_error}", exc_info=True)
             
             logger.info(f"Student created directly from Google OAuth: {user.username} ({user.email})")
             

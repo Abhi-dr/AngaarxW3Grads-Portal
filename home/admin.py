@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session, WhatsAppGroup
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
@@ -119,6 +119,17 @@ admin.site.register(ReferralCode, ReferralCodeAdmin)
 admin.site.register(FlamesTeam, FlamesTeamAdmin)
 admin.site.register(FlamesTeamMember, FlamesTeamMemberAdmin)
 admin.site.register(Session)
+
+
+# ================== WHATSAPP GROUP ===================
+
+@admin.register(WhatsAppGroup)
+class WhatsAppGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_active', 'display_order', 'created_at')
+    list_filter = ('is_active',)
+    search_fields = ('name', 'description')
+    ordering = ('display_order', 'name')
+    list_editable = ('is_active', 'display_order')
 
 
 # ================== FLARE REGISTRATION ===================

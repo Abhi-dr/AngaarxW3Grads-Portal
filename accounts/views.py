@@ -8,6 +8,8 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils import timezone
+import requests
+import os
 
 from django.db import transaction
 from django.db.models import Q
@@ -98,6 +100,31 @@ def register(request):
     next_url = request.GET.get('next', '')
 
     if request.method == "POST":
+        # Validate reCAPTCHA first
+        recaptcha_response = request.POST.get('g-recaptcha-response')
+        
+        if not recaptcha_response:
+            messages.error(request, "Please complete the reCAPTCHA verification!")
+            return redirect("register")
+        
+        # Verify reCAPTCHA with Google
+        recaptcha_secret = os.getenv('RECAPTCHA_SECRET_KEY')
+        recaptcha_data = {
+            'secret': recaptcha_secret,
+            'response': recaptcha_response
+        }
+        
+        try:
+            recaptcha_verify = requests.post('https://www.google.com/recaptcha/api/siteverify', data=recaptcha_data)
+            recaptcha_result = recaptcha_verify.json()
+            
+            if not recaptcha_result.get('success', False):
+                messages.error(request, "reCAPTCHA verification failed. Please try again!")
+                return redirect("register")
+        except Exception as e:
+            messages.error(request, "Error verifying reCAPTCHA. Please try again!")
+            return redirect("register")
+        
         username = request.POST.get("username").strip().lower()
         first_name = request.POST.get("first_name").strip().title()
         last_name = request.POST.get("last_name").strip().title()
@@ -144,7 +171,11 @@ def register(request):
             messages.error(request, f"Something went wrong: {e}")
             return redirect("register")
 
-    return render(request, "accounts/register.html", {"next": next_url})
+    context = {
+        "next": next_url,
+        "RECAPTCHA_SITE_KEY": os.getenv('RECAPTCHA_SITE_KEY')
+    }
+    return render(request, "accounts/register.html", context)
 
 
 # =================================== logout ============================

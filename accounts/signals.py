@@ -13,7 +13,6 @@ from allauth.socialaccount.models import SocialAccount
 from allauth.account.signals import user_signed_up
 
 from .models import Student, Instructor, Administrator
-from .views import send_welcome_mail
 
 logger = logging.getLogger(__name__)
 
@@ -98,12 +97,8 @@ def user_signed_up_handler(sender, request, user, sociallogin=None, **kwargs):
                 # Refresh from database to ensure Student instance
                 student = Student.objects.get(pk=user.pk)
                 
-                # Send welcome email
-                try:
-                    if student.email and student.email != 'Not Set':
-                        send_welcome_mail(student.email, student.first_name)
-                except Exception as email_error:
-                    logger.warning(f"Failed to send welcome email: {email_error}")
+                # Welcome email is sent from adapters.py save_user method
+                # No need to send it here to avoid duplication
                 
                 # Success message
                 messages.success(request, f"🔥 Welcome to Angaar, {student.first_name}! Your account is ready.")
