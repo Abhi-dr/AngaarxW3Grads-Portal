@@ -808,11 +808,13 @@ FLARE 1.0 | Launch Your Tech Career
                 Transform Your Career with India's Most Practical Tech Training. Learn from Industry Experts, Build Real
                 Projects, Land Your Dream Job.
             </p>
-            <a href="https://chat.whatsapp.com/IBSjQq09tN5AttBtvi5LFm" target="_blank" class="whatsapp-btn"
+            {% if whatsapp_groups %}
+            <a href="{{ whatsapp_groups.0.whatsapp_link }}" target="_blank" class="whatsapp-btn"
                 data-aos="zoom-in" data-aos-delay="200">
                 <i class="fab fa-whatsapp"></i>
                 Join WhatsApp Group
             </a>
+            {% endif %}
         </div>
 
         <!-- Courses Section -->

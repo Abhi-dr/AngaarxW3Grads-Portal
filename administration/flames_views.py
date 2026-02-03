@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from openpyxl import Workbook
-from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session
+from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session, WhatsAppGroup
 from accounts.models import Instructor, Student
 
 @login_required
@@ -727,6 +727,9 @@ def admin_flames_emails(request):
         messages.success(request, f"Successfully sent {sent_count} emails with {error_count} errors.")
         return redirect('admin_flames_emails')
     
+    # Get active WhatsApp groups
+    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True)
+    
     context = {
         'courses': courses,
         'total_recipients': total_recipients,
@@ -734,6 +737,7 @@ def admin_flames_emails(request):
         'pending_registrations': pending_registrations,
         'solo_registrations': solo_registrations,
         'team_registrations': team_registrations,
+        'whatsapp_groups': whatsapp_groups,
     }
     
     return render(request, 'administration/flames/send_emails.html', context)

@@ -576,50 +576,32 @@ Student | Home
 
                         {% endcomment %}
 
+                        {% for group in whatsapp_groups %}
                         <li class="timeline-item d-flex position-relative overflow-hidden">
-                            <div class="timeline-time flex-shrink-0 text-end fw-bold">@ 9:00 PM</div>
+                            <div class="timeline-time flex-shrink-0 text-end fw-bold">{{ group.description }}</div>
                             <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8"></span>
+                                <span class="timeline-badge border-2 border border-primary flex-shrink-0 my-8" style="border-color: {{ group.icon_color }} !important;"></span>
                                 <span class="timeline-badge-border d-block flex-shrink-0"></span>
                             </div>
-                            <div class="timeline-desc fs-3 mt-n1 text-primary fw-semibold">Python Class
-                                <a href="https://chat.whatsapp.com/CsAGcFvmM4D6lgBQXBYmby" target="_blank"
-                                    class="btn btn-sm btn-outline-primary">Join
-                                    <i class="ti ti-user"></i>
+                            <div class="timeline-desc fs-3 mt-n1 fw-semibold" style="color: {{ group.icon_color }};">
+                                {{ group.name }}
+                                <a href="{{ group.whatsapp_link }}" target="_blank"
+                                    class="btn btn-sm btn-outline-primary" style="border-color: {{ group.icon_color }}; color: {{ group.icon_color }};">
+                                    Join <i class="ti ti-user"></i>
                                 </a>
                             </div>
                         </li>
-                        <li class="timeline-item d-flex position-relative overflow-hidden">
-                            <div class="timeline-time flex-shrink-0 text-end fw-bold">@ 9:00 PM</div>
-                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                <span class="timeline-badge border-2 border border-success flex-shrink-0 my-8"></span>
-                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                            </div>
-                            <div class="timeline-desc fs-3 mt-n1 text-success fw-semibold">C Programming
-                                <a href="https://chat.whatsapp.com/LHsRJOlzUSn7IkdJCcQa84" target="_blank"
-                                    class="btn btn-sm btn-outline-success">Join
-                                    <i class="ti ti-user"></i>
-                                </a>
-                            </div>
-                        </li>
-                        <li class="timeline-item d-flex position-relative overflow-hidden">
-                            <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
-                            <div class="timeline-badge-wrap d-flex flex-column align-items-center">
-                                <span class="timeline-badge border-2 border border-danger flex-shrink-0 my-8"></span>
-                                <span class="timeline-badge-border d-block flex-shrink-0"></span>
-                            </div>
-                            <div class="timeline-desc fs-3 mt-n1 text-danger fw-semibold">Coming Soon!
-                            </div>
-                        </li>
+                        {% empty %}
                         <li class="timeline-item d-flex position-relative overflow-hidden">
                             <div class="timeline-time flex-shrink-0 text-end fw-bold">Coming Soon!</div>
                             <div class="timeline-badge-wrap d-flex flex-column align-items-center">
                                 <span class="timeline-badge border-2 border border-secondary flex-shrink-0 my-8"></span>
                                 <span class="timeline-badge-border d-block flex-shrink-0"></span>
                             </div>
-                            <div class="timeline-desc fs-3 mt-n1 text-secondary fw-semibold">Coming Soon!
+                            <div class="timeline-desc fs-3 mt-n1 text-secondary fw-semibold">No groups available
                             </div>
                         </li>
+                        {% endfor %}
 
                     </ul>
                 </div>

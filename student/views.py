@@ -12,7 +12,7 @@ from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
 from .event_models import Event, CertificateTemplate, Certificate
 from practice.models import POD, Submission, Batch, Question, Sheet, Streak
-from home.models import Alumni, ReferralCode
+from home.models import Alumni, ReferralCode, WhatsAppGroup
 from django.template import engines, Template, Context
 from weasyprint import HTML
 from django.http import HttpResponse
@@ -138,6 +138,9 @@ def dashboard(request):
     except Exception as e:
         print(f"Error checking birthday: {e}")
 
+    # Get active WhatsApp groups
+    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True)
+
     parameters = {
         "notifications": notifications,
         "is_birthday": is_birthday,
@@ -149,6 +152,7 @@ def dashboard(request):
         "pod": pod,
         "next_questions": next_questions[:3],  # Limit to 3 questions
         "enrolled_sheets": enrolled_sheets,
+        "whatsapp_groups": whatsapp_groups,
     }
     
     # Check if the student's email is in the email list of Alumnis as well

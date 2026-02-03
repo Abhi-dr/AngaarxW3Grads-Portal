@@ -88,6 +88,9 @@ def admin_flames_emails(request):
         messages.success(request, f"Successfully sent {sent_count} emails with {error_count} errors.")
         return redirect('admin_flames_emails')
     
+    # Get active WhatsApp groups
+    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True)
+    
     context = {
         'courses': courses,
         'total_recipients': total_recipients,
@@ -95,6 +98,7 @@ def admin_flames_emails(request):
         'pending_registrations': pending_registrations,
         'solo_registrations': solo_registrations,
         'team_registrations': team_registrations,
+        'whatsapp_groups': whatsapp_groups,
     }
     
     return render(request, 'administration/flames/send_emails.html', context)
