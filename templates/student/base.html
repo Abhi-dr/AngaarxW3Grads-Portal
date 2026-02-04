@@ -243,16 +243,22 @@
             transition: 0.5s;
         }
 
-        .body-wrapper>.container-fluid{
+        .body-wrapper>.container-fluid {
             max-width: 100%;
         }
     </style>
 
     <script>
-        // Apply theme immediately before page loads to prevent flashing
+        // Apply theme AND sidebar state immediately before page loads to prevent flashing
         (function () {
             const theme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-bs-theme', theme);
+
+            // Restore sidebar state immediately to prevent flash
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed && window.innerWidth >= 1200) {
+                document.documentElement.classList.add('sidebar-collapsed-init');
+            }
         })();
     </script>
 
@@ -344,18 +350,382 @@
             }
         }
 
-        /* Add this to your existing CSS */
-        .sidebar-collapsed {
+        /* Sidebar Collapse/Expand Styles */
+
+        /* Apply sidebar collapsed state immediately on page load (before JS transfer) */
+        html.sidebar-collapsed-init .left-sidebar {
+            width: 70px;
+        }
+
+        html.sidebar-collapsed-init .left-sidebar .hide-menu,
+        html.sidebar-collapsed-init .left-sidebar .nav-small-cap-icon {
             display: none;
         }
 
-        @media (min-width: 992px) {
-            .sidebar-expanded {
+        html.sidebar-collapsed-init .page-wrapper .body-wrapper {
+            margin-left: 70px !important;
+        }
+
+        html.sidebar-collapsed-init .left-sidebar .brand-logo a.logo-img {
+            display: none;
+        }
+
+        html.sidebar-collapsed-init .left-sidebar .brand-logo {
+            justify-content: center;
+        }
+
+        html.sidebar-collapsed-init .left-sidebar .sidebar-link {
+            justify-content: center;
+            padding: 12px 10px;
+        }
+
+        html.sidebar-collapsed-init .left-sidebar .nav-small-cap::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        html.sidebar-collapsed-init .left-sidebar .nav-small-cap span {
+            display: none;
+        }
+
+        /* Main sidebar styles */
+        .left-sidebar {
+            transition: width 0.3s ease, transform 0.3s ease;
+            width: 270px;
+            overflow: visible !important;
+            position: relative;
+        }
+
+        .left-sidebar>div {
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: 100%;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .left-sidebar>div::-webkit-scrollbar {
+            display: none;
+        }
+
+        .left-sidebar.collapsed {
+            width: 70px;
+        }
+
+        .left-sidebar.collapsed .hide-menu,
+        .left-sidebar.collapsed .nav-small-cap-icon {
+            display: none;
+        }
+
+        /* Show section divider bar when collapsed */
+        .left-sidebar.collapsed .nav-small-cap {
+            padding: 8px 0;
+            margin: 0;
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 20px;
+        }
+
+        .left-sidebar.collapsed .nav-small-cap span {
+            display: none;
+        }
+
+        .left-sidebar.collapsed .nav-small-cap .nav-small-cap-icon {
+            display: none !important;
+        }
+
+        .left-sidebar.collapsed .nav-small-cap::before {
+            content: '';
+            display: block;
+            width: 40px;
+            min-width: 40px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        /* Spread icons with 20px gap when collapsed */
+        .left-sidebar.collapsed .scroll-sidebar {
+            height: calc(100vh - 80px);
+        }
+
+        .left-sidebar.collapsed #sidebarnav {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px 0;
+            height: 100%;
+        }
+
+        .left-sidebar.collapsed .sidebar-item {
+            margin: 0;
+        }
+
+        /* Make sidebar nav use flexbox for logout positioning */
+        #sidebarnav {
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 120px);
+        }
+
+        .left-sidebar.collapsed .nav-small-cap span {
+            display: none;
+        }
+
+        .left-sidebar.collapsed .brand-logo a.logo-img {
+            display: none;
+        }
+
+        .left-sidebar.collapsed .brand-logo {
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .left-sidebar.collapsed .sidebar-item {
+            text-align: center;
+        }
+
+        .left-sidebar.collapsed .sidebar-link {
+            justify-content: center;
+            padding: 12px 10px;
+        }
+
+        .left-sidebar.collapsed .sidebar-link span:first-child {
+            margin-right: 5px;
+
+        }
+
+        .left-sidebar.collapsed .sidebar-link i {
+            font-size: 1.3rem;
+        }
+
+        /* Logout button styles */
+        .sidebar-logout {
+            margin-top: auto !important;
+            padding: 15px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-logout .sidebar-link {
+            background: rgba(139, 69, 69, 0.12) !important;
+            border-radius: 8px;
+            margin: 0 15px;
+        }
+
+        .sidebar-logout .sidebar-link i {
+            color: #8b4545 !important;
+        }
+
+        .sidebar-logout .sidebar-link .hide-menu {
+            color: #8b4545 !important;
+        }
+
+        .sidebar-logout .sidebar-link:hover {
+            background: rgba(139, 69, 69, 0.25) !important;
+        }
+
+        .sidebar-logout .sidebar-link:hover i,
+        .sidebar-logout .sidebar-link:hover .hide-menu {
+            color: #6b3030 !important;
+        }
+
+        .left-sidebar.collapsed .sidebar-logout {
+            border-top: none;
+            padding: 15px 0;
+            margin-top: auto !important;
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .left-sidebar.collapsed .sidebar-logout .sidebar-link {
+            background: rgba(139, 69, 69, 0.15) !important;
+            border-radius: 10px;
+            padding: 12px;
+            margin: 0;
+            width: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .left-sidebar.collapsed .sidebar-logout .sidebar-link i {
+            color: #8b4545 !important;
+        }
+
+        .left-sidebar.collapsed .sidebar-logout .sidebar-link:hover {
+            background: rgba(139, 69, 69, 0.25) !important;
+        }
+
+        .left-sidebar.collapsed .sidebar-logout .sidebar-link:hover i {
+            color: #6b3030 !important;
+        }
+
+        /* Collapse toggle button */
+        .sidebar-toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: -18px;
+            width: 36px;
+            height: 36px;
+            background: #5d87ff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: #4570ea;
+            transform: scale(1.15);
+            box-shadow: 0 5px 15px rgba(93, 135, 255, 0.4);
+        }
+
+        .sidebar-toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        .sidebar-toggle-btn i {
+            color: white;
+            font-size: 18px;
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+        }
+
+        /* Show arrow when expanded, hide hamburger */
+        .toggle-icon-expanded {
+            display: block;
+        }
+
+        .toggle-icon-collapsed {
+            display: none;
+            position: absolute;
+        }
+
+        /* Show hamburger when collapsed, hide arrow */
+        .left-sidebar.collapsed .toggle-icon-expanded {
+            display: none;
+        }
+
+        .left-sidebar.collapsed .toggle-icon-collapsed {
+            display: block;
+            position: static;
+        }
+
+        /* Pulse animation on collapse/expand */
+        @keyframes togglePulse {
+            0% {
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(93, 135, 255, 0.8), 0 0 30px rgba(93, 135, 255, 0.4);
+            }
+
+            100% {
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        .sidebar-toggle-btn.animating {
+            animation: togglePulse 0.5s ease-out;
+        }
+
+        /* Bounce animation for the icons */
+        @keyframes iconBounce {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.3);
+            }
+        }
+
+        .sidebar-toggle-btn.animating i {
+            animation: iconBounce 0.4s ease-out;
+        }
+
+        /* Adjust body wrapper when sidebar is collapsed */
+        .page-wrapper[data-sidebar-collapsed="true"] .body-wrapper {
+            margin-left: 70px !important;
+        }
+
+        /* Tooltip for collapsed sidebar items */
+        .left-sidebar.collapsed .sidebar-item {
+            position: relative;
+        }
+
+        .left-sidebar.collapsed .sidebar-item .sidebar-link {
+            position: relative;
+        }
+
+        .left-sidebar.collapsed .sidebar-item .sidebar-link[data-title]::after {
+            content: attr(data-title);
+            position: fixed;
+            left: 80px;
+            background: #2d3748;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 99999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        .left-sidebar.collapsed .sidebar-item .sidebar-link[data-title]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 1199px) {
+            .sidebar-toggle-btn {
+                display: none;
+            }
+
+            .left-sidebar.collapsed {
+                width: 270px;
+            }
+
+            .left-sidebar.collapsed .hide-menu,
+            .left-sidebar.collapsed .nav-small-cap-icon,
+            .left-sidebar.collapsed .nav-small-cap span,
+            .left-sidebar.collapsed .brand-logo a.logo-img {
                 display: block;
             }
 
-            .sidebar-collapsed {
-                display: none;
+            .left-sidebar.collapsed .sidebar-link {
+                justify-content: flex-start;
+                padding: 10px 15px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .page-wrapper .body-wrapper {
+                transition: margin-left 0.3s ease;
             }
         }
     </style>
@@ -373,14 +743,19 @@
     <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
         data-sidebar-position="fixed" data-header-position="fixed">
         <!-- Sidebar Start -->
-        <aside class="left-sidebar sidebar-expanded" id="sidebar">
+        <aside class="left-sidebar" id="sidebar">
+            <!-- Sidebar Toggle Button for Desktop -->
+            <button class="sidebar-toggle-btn d-none d-xl-flex" id="sidebarToggleDesktop" title="Toggle Sidebar">
+                <i class="ti ti-chevron-left toggle-icon-expanded"></i>
+                <i class="ti ti-menu-2 toggle-icon-collapsed"></i>
+            </button>
             <!-- Sidebar scroll-->
             <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                     <a href="{% url 'student' %}" class="text-nowrap logo-img">
                         <img src="{% static 'img/student/logo.png' %}" alt="" style="width: 100%;" />
                     </a>
-                    <div class="close-btn d-block  d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
+                    <div class="close-btn d-block d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8"></i>
                     </div>
                 </div>
@@ -423,8 +798,8 @@
 
                             </a>
                         </li>
-<!-- id="leveller-btn" -->
-                        <li class="sidebar-item" >
+                        <!-- id="leveller-btn" -->
+                        <li class="sidebar-item">
                             <a class="sidebar-link {% block summer_active %} {% endblock %}"
                                 href="{% url 'student_flames' %}" aria-expanded="false">
                                 <span>
@@ -606,6 +981,16 @@
                                 <span class="hide-menu">My Profile</span>
                             </a>
                         </li>
+
+                        <!-- Logout -->
+                        <li class="sidebar-item sidebar-logout">
+                            <a class="sidebar-link" href="{% url 'logout' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-logout"></i>
+                                </span>
+                                <span class="hide-menu">Logout</span>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
             </div>
@@ -615,7 +1000,7 @@
         <!--  Main wrapper -->
         <div class="body-wrapper">
             <!--  Header Start -->
-            <header class="app-header">
+            <header class="app-header" style="width: -webkit-fill-available;">
                 <nav class="navbar navbar-expand-lg navbar-light">
                     <ul class="navbar-nav">
 
@@ -643,10 +1028,12 @@
                                     {{ user.coins }}
                                 </button>
 
-                                <button id="streakbtn" type="button" class="btn badge {% if streak.current_streak == 0 %}text-bg-secondary{% else %}text-bg-dark{% endif %} mx-1"
+                                <button id="streakbtn" type="button"
+                                    class="btn badge {% if streak.current_streak == 0 %}text-bg-secondary{% else %}text-bg-dark{% endif %} mx-1"
                                     data-bs-toggle="modal" data-bs-target="#streakModal" data-bs-toggle="tooltip"
                                     title="Your Current Streaks🔥">
-                                    <span class="fire-emoji">{% if streak.current_streak == 0 %}💔{% else %}🔥{% endif %}</span>{{ streak.current_streak }}
+                                    <span class="fire-emoji">{% if streak.current_streak == 0 %}💔{% else %}🔥
+                                        {% endif %}</span>{{ streak.current_streak }}
                                 </button>
 
                                 {% if can_restore_streak %}
@@ -776,21 +1163,22 @@
             <div class="modal-content">
                 <div class="modal-body">
                     {% if streak.current_streak == 0 %}
-                        <h4 class="modal-title text-center text-warning">Your Streak is Broken 💔</h4>
-                        <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
-                        {% if can_restore_streak %}
-                            <div class="alert alert-info text-center">
-                                <strong>Good news!</strong> You can restore your streak for 50 Sparks since you missed exactly 1 day.
-                            </div>
-                        {% else %}
-                            <div class="alert alert-warning text-center">
-                                Your streak has been reset. Start solving questions to build a new streak!
-                            </div>
-                        {% endif %}
+                    <h4 class="modal-title text-center text-warning">Your Streak is Broken 💔</h4>
+                    <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
+                    {% if can_restore_streak %}
+                    <div class="alert alert-info text-center">
+                        <strong>Good news!</strong> You can restore your streak for 50 Sparks since you missed exactly 1
+                        day.
+                    </div>
                     {% else %}
-                        <h4 class="modal-title text-center">Your Current Streak: <strong>
-                                {{ streak.current_streak }}</strong> Days 🔥</h4>
-                        <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
+                    <div class="alert alert-warning text-center">
+                        Your streak has been reset. Start solving questions to build a new streak!
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <h4 class="modal-title text-center">Your Current Streak: <strong>
+                            {{ streak.current_streak }}</strong> Days 🔥</h4>
+                    <p class="text-center">(Last submission date: {{ streak.last_submission_date }})</p>
                     {% endif %}
                     <p class="text-center mt-3">Snapchat streaks are fun? Wait till you see what coding streaks can do!
                         Other streaks might give you a red or yellow heart, but these streaks give you something even
@@ -892,25 +1280,95 @@
     </script>
 
     <script>
-        // Get references to the sidebar and the toggle button
+        // Get references to the sidebar and the toggle buttons
         const sidebar = document.getElementById('sidebar');
         const sidebarCollapse = document.getElementById('sidebarCollapse');
+        const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop');
+        const mainWrapper = document.getElementById('main-wrapper');
 
-        // Function to close the sidebar
+        // Function to close the sidebar (for mobile)
         function closeSidebar() {
             sidebar.classList.remove('show');
         }
 
-        // Event listener for clicks on the toggle button
+        // Function to toggle sidebar collapse state (for desktop)
+        function toggleSidebarCollapse() {
+            // Add animation class
+            sidebarToggleDesktop.classList.add('animating');
+
+            sidebar.classList.toggle('collapsed');
+            const isCollapsed = sidebar.classList.contains('collapsed');
+            mainWrapper.setAttribute('data-sidebar-collapsed', isCollapsed);
+            localStorage.setItem('sidebarCollapsed', isCollapsed);
+
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                sidebarToggleDesktop.classList.remove('animating');
+            }, 500);
+        }
+
+        // Restore sidebar state from localStorage
+        function restoreSidebarState() {
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed && window.innerWidth >= 1200) {
+                sidebar.classList.add('collapsed');
+                mainWrapper.setAttribute('data-sidebar-collapsed', 'true');
+            }
+        }
+
+        // Add data-title attributes to sidebar links for tooltips
+        function addSidebarTooltips() {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            sidebarLinks.forEach(link => {
+                const hideMenu = link.querySelector('.hide-menu');
+                if (hideMenu) {
+                    link.setAttribute('data-title', hideMenu.textContent.trim());
+                }
+            });
+        }
+
+        // Initialize sidebar
+        document.addEventListener('DOMContentLoaded', function () {
+            // Transfer collapsed state from html to sidebar element
+            if (document.documentElement.classList.contains('sidebar-collapsed-init')) {
+                sidebar.classList.add('collapsed');
+                mainWrapper.setAttribute('data-sidebar-collapsed', 'true');
+                document.documentElement.classList.remove('sidebar-collapsed-init');
+            }
+            addSidebarTooltips();
+        });
+
+        // Event listener for mobile toggle button
         sidebarCollapse.addEventListener('click', function () {
             sidebar.classList.toggle('show');
         });
 
-        // Event listener for clicks outside the sidebar
+        // Event listener for desktop toggle button
+        if (sidebarToggleDesktop) {
+            sidebarToggleDesktop.addEventListener('click', function (e) {
+                e.stopPropagation();
+                toggleSidebarCollapse();
+            });
+        }
+
+        // Event listener for clicks outside the sidebar (mobile only)
         document.addEventListener('click', function (event) {
             const target = event.target;
-            if (!sidebar.contains(target) && target !== sidebarCollapse) {
-                closeSidebar();
+            if (window.innerWidth < 1200) {
+                if (!sidebar.contains(target) && target !== sidebarCollapse) {
+                    closeSidebar();
+                }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            if (window.innerWidth < 1200) {
+                // On mobile, remove collapsed class to show full sidebar when opened
+                mainWrapper.removeAttribute('data-sidebar-collapsed');
+            } else {
+                // Restore saved state on desktop
+                restoreSidebarState();
             }
         });
     </script>
