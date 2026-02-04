@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib import messages
@@ -8,6 +9,7 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils import timezone
+import requests
 
 from django.db import transaction
 from django.db.models import Q
@@ -98,6 +100,26 @@ def register(request):
     next_url = request.GET.get('next', '')
 
     if request.method == "POST":
+
+        recaptcha_response = request.POST.get('g-recaptcha-response')
+
+        data = {
+            'secret': os.getenv("RECAPTCHA_SECRET_KEY"),
+            'response': recaptcha_response
+        }
+
+        r = requests.post(
+            'https://www.google.com/recaptcha/api/siteverify',
+            data=data
+        )
+
+        result = r.json()
+
+        if not result.get('success'):
+            messages.error(request, "reCAPTCHA verification failed. Try again.")
+            return redirect("register")
+        
+
         username = request.POST.get("username").strip().lower()
         first_name = request.POST.get("first_name").strip().title()
         last_name = request.POST.get("last_name").strip().title()
@@ -139,7 +161,11 @@ def register(request):
             messages.error(request, f"Something went wrong: {e}")
             return redirect("register")
 
-    return render(request, "accounts/register.html", {"next": next_url})
+    return render(request, "accounts/register.html", {
+        "next": next_url,
+        "RECAPTCHA_SITE_KEY":  os.getenv("RECAPTCHA_SITE_KEY")
+    })
+
 
 
 # =================================== logout ============================

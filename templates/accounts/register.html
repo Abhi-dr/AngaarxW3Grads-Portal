@@ -9,6 +9,21 @@
 <link rel="stylesheet" href="{% static 'css/accounts/register.css' %}">
 <link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+<style>
+  .recaptcha-wrapper {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: #202020;
+  border: 1px solid #e0e0e0;
+}
+
+</style>
+
 <link
   href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Poppins:wght@300;500;600;700&display=swap"
   rel="stylesheet">
@@ -135,6 +150,16 @@
             <span class="icon">○</span> Special Character (!@#...)
           </div>
         </div>
+
+
+        <div class="recaptcha-wrapper">
+          <div 
+            class="g-recaptcha"
+            data-sitekey="{{ RECAPTCHA_SITE_KEY }}"
+            data-theme="dark">
+          </div>
+        </div>
+
 
         <button type="submit" class="submit-btn" id="signup-button" disabled>Register</button>
 
