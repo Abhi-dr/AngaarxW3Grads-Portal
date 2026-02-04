@@ -204,7 +204,7 @@
 
         <div class="programs-tabs">
             <div class="tab-buttons">
-                <button class="tab-btn active" data-tab="courses">
+                <button class="tab-btn active" style="pointer-events: none;" data-tab="courses">
                     <i class="fas fa-laptop-code"></i>
                     Free Online Classes
                 </button>
@@ -223,10 +223,11 @@
                 <div class="tab-pane active" id="courses">
 
                     <div class="courses-grid">
-                        
+
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="https://theangaarbatch.in/media/batches/thumbnails/Gemini_Generated_Image_epk0bnepk0bnepk0.png" loading="lazy" alt="C Programming">
+                                <img src="https://theangaarbatch.in/media/batches/thumbnails/Gemini_Generated_Image_epk0bnepk0bnepk0.png"
+                                    loading="lazy" alt="C Programming">
                                 <div class="course-badge">For Ultimate Beginners</div>
                             </div>
                             <div class="course-content">
@@ -243,14 +244,20 @@
                                 </div>
                                 <div class="course-footer">
                                     <span class="price">₹ <s><small>2,999</small></s> Your Curiosity</span>
-                                    <a href="{% if whatsapp_groups %}{{ whatsapp_groups.0.whatsapp_link }}{% else %}https://chat.whatsapp.com/LHsRJOlzUSn7IkdJCcQa84{% endif %}" target="_blank" class="course-cta">Join Now</a>
+
+                                    <a id="c-join-link" href="#" target="_blank" class="course-cta">
+                                        Join Now
+                                    </a>
+
+
                                 </div>
                             </div>
                         </div>
 
                         <div class="course-card">
                             <div class="course-image">
-                                <img src="https://theangaarbatch.in/media/batches/thumbnails/Gemini_Generated_Image_xh8nu9xh8nu9xh8n.png" loading="lazy" alt="Python Programming">
+                                <img src="https://theangaarbatch.in/media/batches/thumbnails/Gemini_Generated_Image_xh8nu9xh8nu9xh8n.png"
+                                    loading="lazy" alt="Python Programming">
                                 <div class="course-badge">For Ultimate Beginners</div>
                             </div>
                             <div class="course-content">
@@ -267,7 +274,11 @@
                                 </div>
                                 <div class="course-footer">
                                     <span class="price">₹ <s><small>2,999</small></s> Your Discipline</span>
-                                    <a href="{% if whatsapp_groups|length > 1 %}{{ whatsapp_groups.1.whatsapp_link }}{% elif whatsapp_groups %}{{ whatsapp_groups.0.whatsapp_link }}{% else %}https://chat.whatsapp.com/CsAGcFvmM4D6lgBQXBYmby{% endif %}" target="_blank" class="course-cta">Join Now</a>
+
+                                    <a id="python-join-link" href="#" target="_blank" class="course-cta">
+                                        Join Now
+                                    </a>
+
                                 </div>
                             </div>
                         </div>
@@ -384,7 +395,7 @@
         </div>
     </div>
 </section>
- 
+
 
 <!-- Interactive Map Section -->
 <section id="college-map" class="college-map-section">
@@ -416,7 +427,8 @@
                         <div class="region-colleges">
                             <div class="college-interactive-card" data-college="iit-delhi">
                                 <div class="college-card-mini">
-                                    <img src="{% static 'img/home/iitd.png' %}" loading="lazy" alt="IIT Delhi" class="college-mini-logo">
+                                    <img src="{% static 'img/home/iitd.png' %}" loading="lazy" alt="IIT Delhi"
+                                        class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>IIT Delhi</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -429,7 +441,8 @@
 
                             <div class="college-interactive-card" data-college="dtu">
                                 <div class="college-card-mini">
-                                    <img src="https://upload.wikimedia.org/wikipedia/en/b/b5/DTU%2C_Delhi_official_logo.png" loading="lazy" alt="DTU" class="college-mini-logo">
+                                    <img src="https://upload.wikimedia.org/wikipedia/en/b/b5/DTU%2C_Delhi_official_logo.png"
+                                        loading="lazy" alt="DTU" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>DTU</h5>
                                         <span class="workshop-count">3 Workshops</span>
@@ -442,7 +455,8 @@
 
                             <div class="college-interactive-card" data-college="nsut">
                                 <div class="college-card-mini">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/NSUT_logo.png" loading="lazy" alt="NSUT" class="college-mini-logo">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/NSUT_logo.png"
+                                        loading="lazy" alt="NSUT" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>NSUT</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -455,7 +469,8 @@
 
                             <div class="college-interactive-card" data-college="gtbit-delhi">
                                 <div class="college-card-mini">
-                                    <img src="https://play-lh.googleusercontent.com/3AIeSG0MgjUjA-oOYOoSCu802l5Lv5D96brKajRdf01r2IavfOhcmrs_JhkSfhndyA" loading="lazy" alt="GTBIT Delhi" class="college-mini-logo">
+                                    <img src="https://play-lh.googleusercontent.com/3AIeSG0MgjUjA-oOYOoSCu802l5Lv5D96brKajRdf01r2IavfOhcmrs_JhkSfhndyA"
+                                        loading="lazy" alt="GTBIT Delhi" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>GTBIT Delhi</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -468,7 +483,8 @@
 
                             <div class="college-interactive-card" data-college="jims-noida">
                                 <div class="college-card-mini">
-                                    <img src="https://pbs.twimg.com/profile_images/1507587263865430022/df_OIGcI_400x400.jpg" loading="lazy" alt="JIMS Noida" class="college-mini-logo">
+                                    <img src="https://pbs.twimg.com/profile_images/1507587263865430022/df_OIGcI_400x400.jpg"
+                                        loading="lazy" alt="JIMS Noida" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>JIMS Noida</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -481,7 +497,8 @@
 
                             <div class="college-interactive-card" data-college="andc-delhi">
                                 <div class="college-card-mini">
-                                    <img src="https://www.andcollege.du.ac.in/assets/front/images/logo.png" loading="lazy" alt="ANDC Delhi" class="college-mini-logo">
+                                    <img src="https://www.andcollege.du.ac.in/assets/front/images/logo.png"
+                                        loading="lazy" alt="ANDC Delhi" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>ANDC Delhi</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -494,7 +511,8 @@
 
                             <div class="college-interactive-card" data-college="laxmibai-delhi">
                                 <div class="college-card-mini">
-                                    <img src="https://pbs.twimg.com/profile_images/1380766507471306753/S8W13WZC_400x400.jpg" loading="lazy" alt="Laxmibai Delhi" class="college-mini-logo">
+                                    <img src="https://pbs.twimg.com/profile_images/1380766507471306753/S8W13WZC_400x400.jpg"
+                                        loading="lazy" alt="Laxmibai Delhi" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>Laxmibai College</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -516,7 +534,8 @@
                         <div class="region-colleges">
                             <div class="college-interactive-card" data-college="gla-mathura">
                                 <div class="college-card-mini">
-                                    <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png" loading="lazy" alt="GLA Mathura" class="college-mini-logo">
+                                    <img src="https://upload.wikimedia.org/wikipedia/en/4/42/GLA_University_logo.png"
+                                        loading="lazy" alt="GLA Mathura" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>GLA University</h5>
                                         <span class="workshop-count">6 Workshops</span>
@@ -529,7 +548,8 @@
 
                             <div class="college-interactive-card" data-college="gl-bajaj">
                                 <div class="college-card-mini">
-                                    <img src="https://www.glbajajgroup.org/img/about-us/new-logo-glbajaj.webp" loading="lazy" alt="GL Bajaj" class="college-mini-logo">
+                                    <img src="https://www.glbajajgroup.org/img/about-us/new-logo-glbajaj.webp"
+                                        loading="lazy" alt="GL Bajaj" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>GL Bajaj Mathura</h5>
                                         <span class="workshop-count">2 Workshops</span>
@@ -542,7 +562,8 @@
 
                             <div class="college-interactive-card" data-college="bsa-mathura">
                                 <div class="college-card-mini">
-                                    <img src="https://bsapgcollege.ac.in/sources/images/logosmall-new.png" loading="lazy" alt="BSA Mathura" class="college-mini-logo">
+                                    <img src="https://bsapgcollege.ac.in/sources/images/logosmall-new.png"
+                                        loading="lazy" alt="BSA Mathura" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>BSA Mathura</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -564,7 +585,8 @@
                         <div class="region-colleges">
                             <div class="college-interactive-card" data-college="microsoft-gurugram">
                                 <div class="college-card-mini">
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" loading="lazy" alt="Microsoft Office Gurugram" class="college-mini-logo">
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+                                        loading="lazy" alt="Microsoft Office Gurugram" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>Microsoft Gurugram</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -574,7 +596,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="region-stats-card">
                                 <div class="stat-item">
                                     <i class="fas fa-building"></i>
@@ -603,7 +625,8 @@
                         <div class="region-colleges">
                             <div class="college-interactive-card" data-college="uem-jaipur">
                                 <div class="college-card-mini">
-                                    <img src="https://media.uem.edu.in/uploads/sites/7/2021/03/cropped-logo.png" loading="lazy" alt="UEM Jaipur" class="college-mini-logo">
+                                    <img src="https://media.uem.edu.in/uploads/sites/7/2021/03/cropped-logo.png"
+                                        loading="lazy" alt="UEM Jaipur" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>UEM</h5>
                                         <span class="workshop-count">2 Workshops</span>
@@ -613,7 +636,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="region-stats-card">
                                 <div class="stat-item">
                                     <i class="fas fa-city"></i>
@@ -641,7 +664,8 @@
                         <div class="region-colleges">
                             <div class="college-interactive-card" data-college="tulas-dehradun">
                                 <div class="college-card-mini">
-                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnl2tRFfKj7WvMWdHepuPUcNbLRg08oqCnNg&s" loading="lazy" alt="Tula's Institute Dehradun" class="college-mini-logo">
+                                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSnl2tRFfKj7WvMWdHepuPUcNbLRg08oqCnNg&s"
+                                        loading="lazy" alt="Tula's Institute Dehradun" class="college-mini-logo">
                                     <div class="college-mini-info">
                                         <h5>Tula's Institute</h5>
                                         <span class="workshop-count">1 Workshop</span>
@@ -651,7 +675,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="region-stats-card">
                                 <div class="stat-item">
                                     <i class="fas fa-mountain"></i>
@@ -683,7 +707,7 @@
                             </div>
                             <h5>Bring Angaar to Your Campus!</h5>
                             <!-- <p class="next-institute-tagline">Transform your students into tech innovators</p> -->
-                            
+
                             <div class="workshop-benefits">
                                 <div class="benefit-item">
                                     <i class="fas fa-fire"></i>
@@ -714,8 +738,8 @@
                             </a>
 
                             <div class="quick-contact-options">
-                                <a href="https://wa.me/918273619318?text=Hi%20Angaar%20Team!%20I'm%20interested%20in%20organizing%20a%20workshop%20at%20our%20institute." 
-                                   class="quick-contact-link whatsapp-link" target="_blank">
+                                <a href="https://wa.me/918273619318?text=Hi%20Angaar%20Team!%20I'm%20interested%20in%20organizing%20a%20workshop%20at%20our%20institute."
+                                    class="quick-contact-link whatsapp-link" target="_blank">
                                     <i class="fab fa-whatsapp"></i>
                                     WhatsApp
                                 </a>
@@ -732,7 +756,7 @@
                         </div>
                     </div>
                 </div>
-            </div>            
+            </div>
         </div>
 
         <!-- Map Statistics -->
@@ -799,7 +823,9 @@
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "I was struggling with C programming for months until I joined The Angaar Batch. The way they explain complex concepts with real-world examples is amazing. Now I'm confident in my coding skills and ready for any challenge!"
+                            "I was struggling with C programming for months until I joined The Angaar Batch. The way
+                            they explain complex concepts with real-world examples is amazing. Now I'm confident in my
+                            coding skills and ready for any challenge!"
                         </p>
                         <div class="testimonial-author">
                             <div class="author-avatar-circle">PS</div>
@@ -834,7 +860,9 @@
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "The free classes are just the beginning! The quality of education and the passion of the instructors is incredible. I went from zero coding knowledge to building my own web applications. Highly recommend to anyone serious about coding!"
+                            "The free classes are just the beginning! The quality of education and the passion of the
+                            instructors is incredible. I went from zero coding knowledge to building my own web
+                            applications. Highly recommend to anyone serious about coding!"
                         </p>
                         <div class="testimonial-author">
                             <div class="author-avatar-circle">AJ</div>
@@ -869,7 +897,9 @@
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "What sets The Angaar Batch apart is their approach to teaching. They don't just teach syntax, they teach you how to think like a programmer. The community is so supportive and the mentors are always there to help. Pure Angaar! 🔥"
+                            "What sets The Angaar Batch apart is their approach to teaching. They don't just teach
+                            syntax, they teach you how to think like a programmer. The community is so supportive and
+                            the mentors are always there to help. Pure Angaar! 🔥"
                         </p>
                         <div class="testimonial-author">
                             <div class="author-avatar-circle">SK</div>
@@ -904,7 +934,9 @@
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "I joined as a complete beginner and now I'm working as a Python developer! The step-by-step approach and practical projects helped me build a strong foundation. The Angaar Batch family is the best coding community out there!"
+                            "I joined as a complete beginner and now I'm working as a Python developer! The step-by-step
+                            approach and practical projects helped me build a strong foundation. The Angaar Batch family
+                            is the best coding community out there!"
                         </p>
                         <div class="testimonial-author">
                             <div class="author-avatar-circle">VG</div>
@@ -939,7 +971,9 @@
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "The energy and enthusiasm of The Angaar Batch is contagious! They make learning fun and engaging. I never thought I could understand programming concepts so easily. Now I'm building my own projects and loving every moment of it!"
+                            "The energy and enthusiasm of The Angaar Batch is contagious! They make learning fun and
+                            engaging. I never thought I could understand programming concepts so easily. Now I'm
+                            building my own projects and loving every moment of it!"
                         </p>
                         <div class="testimonial-author">
                             <div class="author-avatar-circle">MP</div>
@@ -974,7 +1008,9 @@
                             <i class="fas fa-quote-left"></i>
                         </div>
                         <p class="testimonial-text">
-                            "The Angaar Batch completely transformed my coding journey! From knowing nothing about programming to landing my first job as a software developer. The mentors are incredible and the community support is unmatched. Best decision ever! 🔥"
+                            "The Angaar Batch completely transformed my coding journey! From knowing nothing about
+                            programming to landing my first job as a software developer. The mentors are incredible and
+                            the community support is unmatched. Best decision ever! 🔥"
                         </p>
                         <div class="testimonial-author">
                             <div class="author-avatar-circle">RK</div>
@@ -1286,8 +1322,10 @@ print("Hello World")
                         <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600" alt="ChefAssist">
                         <div class="project-overlay">
                             <div class="project-links">
-                                <a href="https://chef-assist-frontend.vercel.app/" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i></a>
-                                <a href="https://github.com/Savant261/Flames-2025-Project-ChefAssist" target="_blank" class="project-link"><i class="fab fa-github"></i></a>
+                                <a href="https://chef-assist-frontend.vercel.app/" target="_blank"
+                                    class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="https://github.com/Savant261/Flames-2025-Project-ChefAssist" target="_blank"
+                                    class="project-link"><i class="fab fa-github"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1310,8 +1348,10 @@ print("Hello World")
                         <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600" alt="Fitlife">
                         <div class="project-overlay">
                             <div class="project-links">
-                                <a href="https://fitlife-frontend.vercel.app/" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i></a>
-                                <a href="https://github.com/PiyushRw/Fitlife" target="_blank" class="project-link"><i class="fab fa-github"></i></a>
+                                <a href="https://fitlife-frontend.vercel.app/" target="_blank" class="project-link"><i
+                                        class="fas fa-external-link-alt"></i></a>
+                                <a href="https://github.com/PiyushRw/Fitlife" target="_blank" class="project-link"><i
+                                        class="fab fa-github"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1334,8 +1374,10 @@ print("Hello World")
                         <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600" alt="Kidora">
                         <div class="project-overlay">
                             <div class="project-links">
-                                <a href="https://kidora.pythonanywhere.com/" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i></a>
-                                <a href="https://github.com/dikshaupadhyay0203/kidora" target="_blank" class="project-link"><i class="fab fa-github"></i></a>
+                                <a href="https://kidora.pythonanywhere.com/" target="_blank" class="project-link"><i
+                                        class="fas fa-external-link-alt"></i></a>
+                                <a href="https://github.com/dikshaupadhyay0203/kidora" target="_blank"
+                                    class="project-link"><i class="fab fa-github"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1358,8 +1400,10 @@ print("Hello World")
                         <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=600" alt="ChefAssist">
                         <div class="project-overlay">
                             <div class="project-links">
-                                <a href="https://chef-assist-frontend.vercel.app/" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i></a>
-                                <a href="https://github.com/Savant261/Flames-2025-Project-ChefAssist" target="_blank" class="project-link"><i class="fab fa-github"></i></a>
+                                <a href="https://chef-assist-frontend.vercel.app/" target="_blank"
+                                    class="project-link"><i class="fas fa-external-link-alt"></i></a>
+                                <a href="https://github.com/Savant261/Flames-2025-Project-ChefAssist" target="_blank"
+                                    class="project-link"><i class="fab fa-github"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1382,8 +1426,10 @@ print("Hello World")
                         <img src="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=600" alt="Fitlife">
                         <div class="project-overlay">
                             <div class="project-links">
-                                <a href="https://fitlife-frontend.vercel.app/" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i></a>
-                                <a href="https://github.com/PiyushRw/Fitlife" target="_blank" class="project-link"><i class="fab fa-github"></i></a>
+                                <a href="https://fitlife-frontend.vercel.app/" target="_blank" class="project-link"><i
+                                        class="fas fa-external-link-alt"></i></a>
+                                <a href="https://github.com/PiyushRw/Fitlife" target="_blank" class="project-link"><i
+                                        class="fab fa-github"></i></a>
                             </div>
                         </div>
                     </div>
@@ -1406,8 +1452,10 @@ print("Hello World")
                         <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=600" alt="Kidora">
                         <div class="project-overlay">
                             <div class="project-links">
-                                <a href="https://kidora.pythonanywhere.com/" target="_blank" class="project-link"><i class="fas fa-external-link-alt"></i></a>
-                                <a href="https://github.com/dikshaupadhyay0203/kidora" target="_blank" class="project-link"><i class="fab fa-github"></i></a>
+                                <a href="https://kidora.pythonanywhere.com/" target="_blank" class="project-link"><i
+                                        class="fas fa-external-link-alt"></i></a>
+                                <a href="https://github.com/dikshaupadhyay0203/kidora" target="_blank"
+                                    class="project-link"><i class="fab fa-github"></i></a>
                             </div>
                         </div>
                     </div>
@@ -2055,25 +2103,10 @@ print("Hello World")
         </div>
 
         <div class="whatsapp-groups" style="display: flex; flex-direction: column; gap: 15px;">
-            {% for group in whatsapp_groups %}
-            <a href="{{ group.whatsapp_link }}" target="_blank" class="whatsapp-group"
-                style="display: flex; align-items: center; padding: 16px 20px; background-color: rgba(255, 255, 255, 0.05); border-radius: 12px; text-decoration: none; transition: all 0.3s ease; border: 1px solid rgba(255, 255, 255, 0.1);">
-                <div class="group-icon"
-                    style="width: 50px; height: 50px; border-radius: 12px; background-color: rgba(255,96,38,0.1); display: flex; align-items: center; justify-content: center; margin-right: 15px;">
-                    <i class="{{ group.icon_class }}" style="font-size: 28px; color: {{ group.icon_color }};"></i>
-                </div>
-                <div style="flex-grow: 1;">
-                    <h4 style="margin: 0 0 5px; color: white; font-size: 18px; font-weight: 600;">{{ group.name }}
-                    </h4>
-                    <p style="margin: 0; color: #aaa; font-size: 14px;">{{ group.description }}</p>
-                </div>
-                <div class="group-arrow" style="color: {{ group.icon_color }};">
-                    <!-- <i class="fas fa-arrow-right"></i> -->
-                </div>
-            </a>
-            {% empty %}
-            <p style="color: #aaa; text-align: center; padding: 20px;">No WhatsApp groups available at the moment.</p>
-            {% endfor %}
+            <div class="whatsapp-groups" id="whatsappGroupsContainer"
+                style="display: flex; flex-direction: column; gap: 15px;">
+            </div>
+
         </div>
 
         <div class="whatsapp-features"
@@ -2530,13 +2563,13 @@ print("Hello World")
 
     function displayResult(result) {
         const outputContent = document.getElementById('outputContent');
-        
+
         // Status ID: 3 = Accepted, 4 = Wrong Answer, 5 = Time Limit Exceeded, 6 = Compilation Error, etc.
         if (result.status.id === 3) {
             // Success
             const output = result.stdout || '(no output)';
             const isCorrect = output.trim() === 'I am Angaari';
-            
+
             if (isCorrect) {
                 outputContent.innerHTML = `
                     <div style="color: #28a745;">
@@ -2549,7 +2582,7 @@ print("Hello World")
                         </div>
                     </div>
                 `;
-                
+
                 // Show success modal after a delay
                 setTimeout(() => {
                     document.getElementById('challengeSuccess').style.display = 'flex';
@@ -2689,14 +2722,14 @@ print("Hello World")`;
     // Detect scrollable college cards and add scroll indicator
     function detectScrollableCards() {
         const regionColleges = document.querySelectorAll('.region-colleges');
-        
+
         regionColleges.forEach(container => {
             // Check if content is scrollable
             if (container.scrollHeight > container.clientHeight) {
                 container.classList.add('has-scroll');
-                
+
                 // Remove indicator when user scrolls
-                container.addEventListener('scroll', function() {
+                container.addEventListener('scroll', function () {
                     if (this.scrollTop > 10) {
                         this.classList.add('scrolled');
                         this.classList.remove('has-scroll');
@@ -2845,11 +2878,11 @@ print("Hello World")`;
 </script>
 
 <script>
-// Global Workshop Email Function
-function openWorkshopEmail() {
-    const email = 'team@theangaarbatch.in';
-    const subject = 'Workshop Inquiry for Our Institute';
-    const body = `Hi Angaar Team,
+    // Global Workshop Email Function
+    function openWorkshopEmail() {
+        const email = 'team@theangaarbatch.in';
+        const subject = 'Workshop Inquiry for Our Institute';
+        const body = `Hi Angaar Team,
 
 I am interested in organizing a workshop at our institute.
 
@@ -2865,41 +2898,156 @@ Please share more details about the workshop and how we can collaborate.
 
 Thank you!`;
 
-    // Create mailto link
-    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    
-    // Open email client
-    window.location.href = mailtoLink;
-}
+        // Create mailto link
+        const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-// Video Modal Functions
-function openVideoModal(videoId) {
-    const modal = document.getElementById('videoModal');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    
-    // Here you can add video URL mapping when videos are ready
-    const videoPlaceholder = document.getElementById('videoPlaceholder');
-    videoPlaceholder.innerHTML = `
+        // Open email client
+        window.location.href = mailtoLink;
+    }
+
+    // Video Modal Functions
+    function openVideoModal(videoId) {
+        const modal = document.getElementById('videoModal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        // Here you can add video URL mapping when videos are ready
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        videoPlaceholder.innerHTML = `
         <i class="fas fa-video"></i>
         <p>Video: ${videoId}</p>
         <small>Video will be loaded here when available</small>
     `;
-}
-
-function closeVideoModal() {
-    const modal = document.getElementById('videoModal');
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-}
-
-// Close modal when clicking outside
-document.addEventListener('click', function(event) {
-    const modal = document.getElementById('videoModal');
-    if (event.target === modal) {
-        closeVideoModal();
     }
-});
+
+    function closeVideoModal() {
+        const modal = document.getElementById('videoModal');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close modal when clicking outside
+    document.addEventListener('click', function (event) {
+        const modal = document.getElementById('videoModal');
+        if (event.target === modal) {
+            closeVideoModal();
+        }
+    });
 </script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("/api/course-links/")
+            .then(response => response.json())
+            .then(data => {
+
+                /* =========================
+                   COURSE CARD BUTTONS
+                ========================= */
+
+                const cLink = document.getElementById("c-join-link");
+                if (cLink) {
+                    if (data.C) {
+                        cLink.href = data.C;
+                    } else {
+                        cLink.innerText = "Admissions Closed";
+                        cLink.style.pointerEvents = "none";
+                        cLink.style.opacity = "0.6";
+                    }
+                }
+
+                const pythonLink = document.getElementById("python-join-link");
+                if (pythonLink) {
+                    if (data.Python) {
+                        pythonLink.href = data.Python;
+                    } else {
+                        pythonLink.innerText = "Admissions Closed";
+                        pythonLink.style.pointerEvents = "none";
+                        pythonLink.style.opacity = "0.6";
+                    }
+                }
+
+                /* =========================
+                   WHATSAPP MODAL
+                ========================= */
+
+                const container = document.getElementById("whatsappGroupsContainer");
+                if (!container) return;
+
+                const courses = [
+                    {
+                        key: "C",
+                        name: "C Programming Free Classes",
+                        description: "Start from absolute basics",
+                        icon: "fab fa-c",
+                        color: "#00d9ff"
+                    },
+                    {
+                        key: "Python",
+                        name: "Python Programming Free Classes",
+                        description: "Beginner to advanced journey",
+                        icon: "fab fa-python",
+                        color: "#ffd43b"
+                    }
+                ];
+
+                courses.forEach(course => {
+                    if (!data[course.key]) return;
+
+                    const a = document.createElement("a");
+                    a.href = data[course.key];
+                    a.target = "_blank";
+                    a.className = "whatsapp-group";
+                    a.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    padding: 16px 20px;
+                    background-color: rgba(255,255,255,0.05);
+                    border-radius: 12px;
+                    text-decoration: none;
+                    border: 1px solid rgba(255,255,255,0.1);
+                    transition: all 0.3s ease;
+                `;
+
+                    a.innerHTML = `
+                    <div style="
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 12px;
+                        background-color: rgba(255,96,38,0.1);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 15px;
+                    ">
+                        <i class="${course.icon}" style="font-size: 28px; color: ${course.color};"></i>
+                    </div>
+                    <div style="flex-grow: 1;">
+                        <h4 style="margin: 0 0 5px; color: white; font-size: 18px;">
+                            ${course.name}
+                        </h4>
+                        <p style="margin: 0; color: #aaa; font-size: 14px;">
+                            ${course.description}
+                        </p>
+                    </div>
+                `;
+
+                    container.appendChild(a);
+                });
+
+                if (container.children.length === 0) {
+                    container.innerHTML = `
+                    <p style="color:#aaa; text-align:center;">
+                        No free classes available at the moment.
+                    </p>
+                `;
+                }
+            })
+            .catch(err => {
+                console.error("Failed to load WhatsApp links", err);
+            });
+    });
+</script>
+
 
 {% endblock %}

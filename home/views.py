@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as message
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, WhatsAppGroup
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, FreeClassWhatsappGroupLink
 from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models import Count
@@ -12,18 +12,28 @@ import requests
 import time
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-
-
+from django.http import JsonResponse
 from administration.models import Achievement
+
+
+def get_course_links(request):
+    courses = FreeClassWhatsappGroupLink.objects.filter(is_active=True)
+
+    data = {}
+    for course in courses:
+        data[course.course_code] = course.whatsapp_link
+
+
+    return JsonResponse(data)
+
+
 
 
 def home(request):
     # Get all active WhatsApp groups ordered by display_order
-    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True).order_by('display_order', 'name')
+    # whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True).order_by('display_order', 'name')
     
-    return render(request, "home/index.html", {
-        'whatsapp_groups': whatsapp_groups
-    })
+    return render(request, "home/index.html")
 
 def about(request):
     return render(request, "home/about.html")
