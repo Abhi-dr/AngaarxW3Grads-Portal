@@ -300,13 +300,15 @@ def render_next_mcq_question_in_sheet(request, sheet_id, question_id):
 @login_required
 def mcq_leaderboard(request, slug):
     """
-    Display leaderboard for MCQ sheet
+    Display leaderboard for MCQ sheet with optimized queries and pagination
     """
     try:
         sheet = get_object_or_404(Sheet, slug=slug, sheet_type="MCQ", is_approved=True)
         
-        # Get all students who have attempted questions in this sheet
-        student_stats = []
+        # Get pagination parameters
+        page = int(request.GET.get('page', 1))
+        page_size = int(request.GET.get('page_size', 50))
+        page_size = min(page_size, 100)  # Limit max page size
         
         # Get all approved questions in this sheet
         sheet_questions = sheet.mcq_questions.filter(is_approved=True)
@@ -316,50 +318,69 @@ def mcq_leaderboard(request, slug):
             context = {
                 'sheet': sheet,
                 'student_stats': [],
-                'total_questions': 0
+                'total_questions': 0,
+                'page_obj': None,
             }
             return render(request, 'student/mcq_leaderboard.html', context)
         
-        # Get all students who have made submissions
+        # Optimized query using aggregation - NO N+1 queries!
+        from django.db.models import Q, Count, Case, When, F, FloatField, ExpressionWrapper
+        
         students_with_submissions = Student.objects.filter(
             mcq_submissions__question__in=sheet_questions
+        ).annotate(
+            # Count correct answers
+            correct_answers=Count(
+                'mcq_submissions',
+                filter=Q(mcq_submissions__question__in=sheet_questions, mcq_submissions__is_correct=True),
+                distinct=True
+            ),
+            # Count total attempts
+            total_attempts=Count(
+                'mcq_submissions',
+                filter=Q(mcq_submissions__question__in=sheet_questions),
+                distinct=True
+            )
         ).distinct()
         
+        # Calculate accuracy and completion rate for each student
+        student_stats = []
         for student in students_with_submissions:
-            correct_answers = MCQSubmission.objects.filter(
-                student=student,
-                question__in=sheet_questions,
-                is_correct=True
-            ).count()
-            
-            total_attempts = MCQSubmission.objects.filter(
-                student=student,
-                question__in=sheet_questions
-            ).count()
-            
-            accuracy = (correct_answers / total_attempts * 100) if total_attempts > 0 else 0
-            completion_rate = (correct_answers / total_questions * 100) if total_questions > 0 else 0
+            accuracy = (student.correct_answers / student.total_attempts * 100) if student.total_attempts > 0 else 0
+            completion_rate = (student.correct_answers / total_questions * 100) if total_questions > 0 else 0
             
             student_stats.append({
                 'student': student,
-                'correct_answers': correct_answers,
-                'total_attempts': total_attempts,
+                'correct_answers': student.correct_answers,
+                'total_attempts': student.total_attempts,
                 'accuracy': round(accuracy, 1),
                 'completion_rate': round(completion_rate, 1),
-                'score': correct_answers  # Simple scoring based on correct answers
+                'score': student.correct_answers  # Simple scoring based on correct answers
             })
         
         # Sort by score (correct answers) descending, then by accuracy
         student_stats.sort(key=lambda x: (x['score'], x['accuracy']), reverse=True)
         
-        # Add rank
-        for i, stat in enumerate(student_stats, 1):
-            stat['rank'] = i
+        # Apply pagination
+        from django.core.paginator import Paginator
+        paginator = Paginator(student_stats, page_size)
+        
+        try:
+            page_obj = paginator.page(page)
+        except:
+            page_obj = paginator.page(paginator.num_pages)
+        
+        # Add rank to paginated results
+        start_rank = (page_obj.number - 1) * page_size + 1
+        for i, stat in enumerate(page_obj.object_list):
+            stat['rank'] = start_rank + i
         
         context = {
             'sheet': sheet,
-            'student_stats': student_stats,
+            'student_stats': page_obj.object_list,
             'total_questions': total_questions,
+            'page_obj': page_obj,
+            'paginator': paginator,
         }
         
         return render(request, 'student/mcq_leaderboard.html', context)

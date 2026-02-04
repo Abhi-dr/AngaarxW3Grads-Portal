@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
+from django.core.paginator import Paginator
+
 
 from accounts.models import Student, Administrator
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
@@ -519,6 +521,13 @@ def leaderboard(request, slug):
 
 from django.db.models import Count, Min, Max    
 def fetch_batch_leaderboard(request, slug):
+    
+    # Get pagination parameters
+    page = int(request.GET.get('page', 1))
+    page_size = int(request.GET.get('page_size', 50))
+    
+    # Limit page size to prevent abuse
+    page_size = min(page_size, 100)
         
     batch = get_object_or_404(Batch, slug=slug)
     sheets = batch.sheets.all()
@@ -594,10 +603,31 @@ def fetch_batch_leaderboard(request, slug):
     # Sort leaderboard by total score and earliest submission
     leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
     
+    # Apply pagination
+    paginator = Paginator(leaderboard, page_size)
+    
+    try:
+        paginated_leaderboard = paginator.page(page)
+    except:
+        # If page is out of range, return last page
+        paginated_leaderboard = paginator.page(paginator.num_pages)
+    
+    # Add rank to each entry (accounting for pagination)
+    start_rank = (paginated_leaderboard.number - 1) * page_size + 1
+    for idx, entry in enumerate(paginated_leaderboard.object_list):
+        entry['rank'] = start_rank + idx
 
     return JsonResponse({
-        'leaderboard': leaderboard,
-        'solved_question_counts': solved_question_counts
+        'leaderboard': list(paginated_leaderboard.object_list),
+        'solved_question_counts': solved_question_counts,
+        'pagination': {
+            'current_page': paginated_leaderboard.number,
+            'total_pages': paginator.num_pages,
+            'page_size': page_size,
+            'total_count': paginator.count,
+            'has_next': paginated_leaderboard.has_next(),
+            'has_previous': paginated_leaderboard.has_previous(),
+        }
     })
 
 
