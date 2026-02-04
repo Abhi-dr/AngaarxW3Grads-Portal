@@ -128,8 +128,12 @@ def dashboard(request):
     # Check birthday
     is_birthday = False
     try:
-        if student.dob:
-            if student.dob.day == timezone.now().day and student.dob.month == timezone.now().month:
+        # Get student profile if exists
+        student_profile = getattr(student, 'student', None)
+        dob = getattr(student_profile, 'dob', None) if student_profile else getattr(student, 'dob', None)
+        
+        if dob:
+            if dob.day == timezone.now().day and dob.month == timezone.now().month:
                 is_birthday = True
     except Exception as e:
         print(f"Error checking birthday: {e}")

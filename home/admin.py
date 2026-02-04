@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session, WhatsAppGroup
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
@@ -120,3 +120,102 @@ admin.site.register(FlamesTeam, FlamesTeamAdmin)
 admin.site.register(FlamesTeamMember, FlamesTeamMemberAdmin)
 admin.site.register(Session)
 
+
+# ================== WHATSAPP GROUP ===================
+
+@admin.register(WhatsAppGroup)
+class WhatsAppGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_active', 'display_order', 'created_at')
+    list_filter = ('is_active',)
+    search_fields = ('name', 'description')
+    ordering = ('display_order', 'name')
+    list_editable = ('is_active', 'display_order')
+
+
+# ================== FLARE REGISTRATION ===================
+from django.contrib import admin
+from import_export.admin import ImportExportModelAdmin
+
+from .flareModel import FlareRegistration
+from .resources import FlareRegistrationResource
+
+
+@admin.register(FlareRegistration)
+class FlareRegistrationAdmin(ImportExportModelAdmin):
+    resource_class = FlareRegistrationResource
+
+    list_display = (
+        'full_name',
+        'email',
+        'phone_number',
+        'occupation_status',
+        'get_courses',
+        'commitment',
+        'created_at'
+    )
+
+    list_filter = (
+        'occupation_status',
+        'commitment',
+        'created_at'
+    )
+
+    search_fields = (
+        'full_name',
+        'email',
+        'phone_number'
+    )
+
+    readonly_fields = (
+        'created_at',
+        'updated_at',
+        'get_courses_display',
+        'get_goals_display'
+    )
+
+    ordering = ('-created_at',)
+
+    fieldsets = (
+        ('Personal Information', {
+            'fields': ('email', 'full_name', 'phone_number')
+        }),
+        ('Academic / Professional Details', {
+            'fields': ('occupation_status', 'current_year')
+        }),
+        ('Course Interest', {
+            'fields': ('get_courses_display', 'courses_interested')
+        }),
+        ('Career Goals', {
+            'fields': ('get_goals_display', 'career_goals')
+        }),
+        ('Motivation & Commitment', {
+            'fields': ('motivation', 'commitment')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    # --------------------------
+    # Display Helpers
+    # --------------------------
+
+    def get_courses(self, obj):
+        courses = obj.get_courses_list()
+        return ", ".join(courses) if courses else "-"
+    get_courses.short_description = "Courses"
+
+    def get_courses_display(self, obj):
+        courses = obj.get_courses_list()
+        if courses:
+            return "\n".join([f"• {course}" for course in courses])
+        return "No courses selected"
+    get_courses_display.short_description = "Selected Courses"
+
+    def get_goals_display(self, obj):
+        goals = obj.get_career_goals_list()
+        if goals:
+            return "\n".join([f"• {goal}" for goal in goals])
+        return "No career goals selected"
+    get_goals_display.short_description = "Career Goals"

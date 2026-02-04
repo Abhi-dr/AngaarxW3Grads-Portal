@@ -1,0 +1,711 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}
+FLARE 1.0 Registration | Join the Tech Revolution
+{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/flames.css' %}">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        overflow-x: hidden;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+    }
+
+    .registration-container {
+        background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        padding: 80px 20px;
+        padding-top: 10%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .registration-bg-gradient {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background:
+            radial-gradient(circle at 20% 30%, rgba(255, 96, 38, 0.2) 0%, transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(255, 96, 38, 0.15) 0%, transparent 50%);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .registration-particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .form-wrapper {
+        max-width: 750px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+
+    .form-title {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .form-title i {
+        -webkit-text-fill-color: #ff6026;
+    }
+
+    .form-subtitle {
+        color: #aaa;
+        font-size: 1.1rem;
+        margin-top: 10px;
+    }
+
+    .registration-form {
+        background: rgba(30, 30, 30, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 50px;
+        backdrop-filter: blur(15px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    .form-group {
+        margin-bottom: 30px;
+    }
+
+    .form-label {
+        display: block;
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .form-label .required {
+        color: #ff6026;
+        margin-left: 3px;
+    }
+
+    .form-input,
+    .form-select,
+    .form-textarea {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(20, 20, 20, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: white;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+        outline: none;
+        border-color: #ff6026;
+        box-shadow: 0 0 0 3px rgba(255, 96, 38, 0.1);
+    }
+
+    .form-input::placeholder {
+        color: #666;
+    }
+
+    .form-textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+
+    /* Checkbox Group Styles */
+    .checkbox-group {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .checkbox-item {
+        position: relative;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        position: absolute;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    .checkbox-label {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        background: rgba(20, 20, 20, 0.8);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #ddd;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+    }
+
+    .checkbox-item input[type="checkbox"]:checked+.checkbox-label {
+        background: rgba(255, 96, 38, 0.15);
+        border-color: #ff6026;
+        color: white;
+    }
+
+    .checkbox-label::before {
+        content: '';
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-item input[type="checkbox"]:checked+.checkbox-label::before {
+        background: #ff6026;
+        border-color: #ff6026;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z'/%3E%3C/svg%3E");
+        background-size: 16px;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* Commitment Checkbox - Special Style */
+    .commitment-item {
+        margin-top: 10px;
+    }
+
+    .commitment-label {
+        padding: 16px;
+        background: rgba(255, 96, 38, 0.1);
+        border: 2px solid rgba(255, 96, 38, 0.3);
+        font-weight: 600;
+        color: white;
+    }
+
+    .commitment-item input[type="checkbox"]:checked+.commitment-label {
+        background: rgba(255, 96, 38, 0.2);
+        border-color: #ff6026;
+    }
+
+    /* Error Messages */
+    .error-message {
+        color: #ff4444;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: none;
+    }
+
+    .error-message.show {
+        display: block;
+    }
+
+    .form-input.error,
+    .form-select.error,
+    .form-textarea.error {
+        border-color: #ff4444;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #ff6026, #ff9a56);
+        border: none;
+        border-radius: 50px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(255, 96, 38, 0.4);
+        margin-top: 20px;
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(255, 96, 38, 0.5);
+    }
+
+    .submit-btn:disabled {
+        background: #555;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+
+    .submit-btn i {
+        margin-left: 8px;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+        display: none;
+        margin-left: 8px;
+    }
+
+    .submit-btn.loading .spinner {
+        display: inline-block;
+        animation: spin 1s linear infinite;
+    }
+
+    .submit-btn.loading .arrow-icon {
+        display: none;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Character Counter */
+    .char-counter {
+        text-align: right;
+        font-size: 0.8rem;
+        color: #888;
+        margin-top: 5px;
+    }
+
+    .char-counter.min-reached {
+        color: #4CAF50;
+    }
+
+    /* Hidden Field */
+    .hidden {
+        display: none;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .registration-container {
+            padding: 50px 20px;
+            padding-top: 18%;
+        }
+
+        .form-wrapper {
+            max-width: 100%;
+        }
+
+        .form-title {
+            font-size: 2.2rem;
+        }
+
+        .registration-form {
+            padding: 35px 25px;
+        }
+
+        .form-subtitle {
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .registration-container {
+            padding: 30px 15px;
+            padding-top: 18%;
+        }
+
+        .form-title {
+            font-size: 1.8rem;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-subtitle {
+            font-size: 0.9rem;
+        }
+
+        .registration-form {
+            padding: 25px 20px;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            font-size: 0.9rem;
+            padding: 11px 14px;
+        }
+
+        .checkbox-label {
+            font-size: 0.85rem;
+            padding: 10px 14px;
+        }
+
+        .submit-btn {
+            font-size: 1rem;
+            padding: 14px;
+        }
+    }
+
+    /* Server-side Messages */
+    .messages-container {
+        margin-bottom: 20px;
+    }
+
+    .alert {
+        background: rgba(255, 68, 68, 0.1);
+        border: 1px solid rgba(255, 68, 68, 0.3);
+        color: #ffcccc;
+        border-radius: 10px;
+        padding: 15px;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .alert-error,
+    .alert-danger {
+        background: rgba(255, 68, 68, 0.15);
+        border-color: #ff4444;
+        color: #ffdddd;
+    }
+
+    .alert-success {
+        background: rgba(76, 175, 80, 0.15);
+        border-color: #4CAF50;
+        color: #e8f5e9;
+    }
+
+    .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+        margin-left: auto;
+    }
+
+    @keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="registration-container">
+    <div class="registration-bg-gradient"></div>
+    <div class="registration-particles" id="particles-js"></div>
+
+    <div class="form-wrapper">
+        <div class="form-header">
+            <h1 class="form-title">
+                <i class="fas fa-fire"></i>
+                FLARE 1.0 Registration
+            </h1>
+            <p class="form-subtitle">
+                Join India's most practical tech training program. Fill out the form below to ignite your tech career!
+                🚀
+            </p>
+        </div>
+
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i> {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form class="registration-form" id="flareRegistrationForm" method="POST"
+            action="{% url 'flare_registration_submit' %}">
+            {% csrf_token %}
+
+            <!-- Email -->
+            <div class="form-group">
+                <label class="form-label">Email Address<span class="required">*</span></label>
+                <input type="email" name="email" class="form-input" placeholder="your.email@example.com" required>
+                <div class="error-message" id="email-error"></div>
+            </div>
+
+            <!-- Full Name -->
+            <div class="form-group">
+                <label class="form-label">Full Name<span class="required">*</span></label>
+                <input type="text" name="full_name" class="form-input" placeholder="Enter your full name" required>
+                <div class="error-message" id="name-error"></div>
+            </div>
+
+            <!-- Phone Number -->
+            <div class="form-group">
+                <label class="form-label">Phone Number<span class="required">*</span></label>
+                <input type="tel" name="phone_number" class="form-input" placeholder="9876543210" required>
+                <div class="error-message" id="phone-error"></div>
+            </div>
+
+            <!-- Occupation Status -->
+            <div class="form-group">
+                <label class="form-label">Current Occupation Status<span class="required">*</span></label>
+                <select name="occupation_status" class="form-select" id="occupationStatus" required>
+                    <option value="">-- Select Your Status --</option>
+                    <option value="school_student">School Student</option>
+                    <option value="undergrad_student">Undergraduation Student</option>
+                    <option value="postgrad_student">Post Graduation Student</option>
+                    <option value="working_professional">Working Professional</option>
+                    <option value="not_working">Currently Not Working Anywhere</option>
+                </select>
+                <div class="error-message" id="occupation-error"></div>
+            </div>
+
+            <!-- Current Year (Conditional) -->
+            <div class="form-group hidden" id="yearGroup">
+                <label class="form-label">Current Year of Study<span class="required">*</span></label>
+                <select name="current_year" class="form-select" id="currentYear">
+                    <option value="">-- Select Year --</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                    <option value="3rd Year">3rd Year</option>
+                    <option value="4th Year">4th Year</option>
+                    <option value="Final Year">Final Year</option>
+                    <option value="Post Graduation">Post Graduation</option>
+                </select>
+                <div class="error-message" id="year-error"></div>
+            </div>
+
+            <!-- Courses Interested -->
+            <div class="form-group">
+                <label class="form-label">Select the Course(s) You Are Interested In<span
+                        class="required">*</span></label>
+                <div class="checkbox-group" id="coursesGroup">
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="courses" value="Java + DSA" id="course1">
+                        <label class="checkbox-label" for="course1">Java + DSA</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="courses" value="Full Stack with Gen AI" id="course2">
+                        <label class="checkbox-label" for="course2">Full Stack with Gen AI</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="courses" value="Data Analytics" id="course3">
+                        <label class="checkbox-label" for="course3">Data Analytics</label>
+                    </div>
+                </div>
+                <div class="error-message" id="courses-error"></div>
+            </div>
+
+            <!-- Career Goals -->
+            <div class="form-group">
+                <label class="form-label">What are your primary future career goals?<span
+                        class="required">*</span></label>
+                <div class="checkbox-group" id="goalsGroup">
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="career_goals" value="Getting a Job in Tech" id="goal1">
+                        <label class="checkbox-label" for="goal1">Getting a Job in Tech</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="career_goals" value="Securing an Internship" id="goal2">
+                        <label class="checkbox-label" for="goal2">Securing an Internship</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="career_goals" value="Making a Career Switch/Transition" id="goal3">
+                        <label class="checkbox-label" for="goal3">Making a Career Switch/Transition</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="career_goals" value="Upskilling/Acquiring New Expertise"
+                            id="goal4">
+                        <label class="checkbox-label" for="goal4">Upskilling/Acquiring New Expertise</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" name="career_goals" value="Entrepreneurship/Starting a Venture"
+                            id="goal5">
+                        <label class="checkbox-label" for="goal5">Entrepreneurship/Starting a Venture</label>
+                    </div>
+                </div>
+                <div class="error-message" id="goals-error"></div>
+            </div>
+
+            <!-- Motivation -->
+            <div class="form-group">
+                <label class="form-label">What truly motivates you to achieve your goals? 🔥</label>
+                <textarea name="motivation" class="form-textarea" id="motivation"
+                    placeholder="Share your inner fire! Tell us what drives you..." required></textarea>
+                <div class="error-message" id="motivation-error"></div>
+            </div>
+
+            <!-- Commitment -->
+            <div class="form-group">
+                <label class="form-label">Commitment<span class="required">*</span></label>
+                <div class="checkbox-item commitment-item">
+                    <input type="checkbox" name="commitment" value="true" id="commitment" required>
+                    <label class="commitment-label" for="commitment">
+                        <i class="fas fa-fire" style="margin-right: 10px;"></i>
+                        Yes, I am ready to commit and bring the necessary change to achieve my goals 🔥
+                    </label>
+                </div>
+                <div class="error-message" id="commitment-error"></div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn" id="submitBtn">
+                <span>Ignite My Journey</span>
+                <i class="fas fa-arrow-right arrow-icon"></i>
+                <i class="fas fa-spinner spinner"></i>
+            </button>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initialize particles
+        particlesJS('particles-js', {
+            "particles": {
+                "number": { "value": 30, "density": { "enable": true, "value_area": 1000 } },
+                "color": { "value": "#ff6026" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.2, "random": true },
+                "size": { "value": 3, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#ff6026", "opacity": 0.15, "width": 1 },
+                "move": { "enable": true, "speed": 0.5, "direction": "none", "random": true, "out_mode": "out" }
+            },
+            "interactivity": { "detect_on": "canvas", "events": { "onhover": { "enable": false }, "onclick": { "enable": false }, "resize": true } },
+            "retina_detect": true
+        });
+
+        const form = document.getElementById('flareRegistrationForm');
+        const occupationSelect = document.getElementById('occupationStatus');
+        const yearGroup = document.getElementById('yearGroup');
+        const charCounter = document.getElementById('charCounter');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Show/hide year field based on occupation
+        occupationSelect.addEventListener('change', function () {
+            const value = this.value;
+            const isStudent = ['school_student', 'undergrad_student', 'postgrad_student'].includes(value);
+
+            if (isStudent) {
+                yearGroup.classList.remove('hidden');
+                yearGroup.querySelector('select').required = true;
+            } else {
+                yearGroup.classList.add('hidden');
+                yearGroup.querySelector('select').required = false;
+                yearGroup.querySelector('select').value = '';
+            }
+        });
+
+
+
+        // Form validation
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Clear previous errors
+            document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+            document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
+
+            let isValid = true;
+
+            // Email validation
+            const email = form.querySelector('[name="email"]');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email.value)) {
+                showError('email-error', 'Please enter a valid email address');
+                email.classList.add('error');
+                isValid = false;
+            }
+
+            // Phone validation
+            const phone = form.querySelector('[name="phone_number"]');
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(phone.value.trim())) {
+                showError('phone-error', 'Please enter a valid 10-digit phone number');
+                phone.classList.add('error');
+                isValid = false;
+            }
+
+            // Year validation (if visible)
+            if (!yearGroup.classList.contains('hidden')) {
+                const year = form.querySelector('[name="current_year"]');
+                if (!year.value.trim()) {
+                    showError('year-error', 'Please enter your current year of study');
+                    year.classList.add('error');
+                    isValid = false;
+                }
+            }
+
+            // Courses validation
+            const courses = form.querySelectorAll('[name="courses"]:checked');
+            if (courses.length === 0) {
+                showError('courses-error', 'Please select at least one course');
+                isValid = false;
+            }
+
+            // Career goals validation
+            const goals = form.querySelectorAll('[name="career_goals"]:checked');
+            if (goals.length === 0) {
+                showError('goals-error', 'Please select at least one career goal');
+                isValid = false;
+            }
+
+
+            // Commitment validation
+            const commitment = form.querySelector('[name="commitment"]');
+            if (!commitment.checked) {
+                showError('commitment-error', 'You must commit to the program to proceed');
+                isValid = false;
+            }
+
+            if (isValid) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+                submitBtn.querySelector('span').textContent = 'Submitting...';
+                form.submit();
+            }
+        });
+
+        function showError(id, message) {
+            const errorEl = document.getElementById(id);
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+        }
+    });
+</script>
+{% endblock %}

@@ -350,3 +350,39 @@ class Session(models.Model):
     
     def __str__(self):
         return f"{self.title} - {self.course.title}"
+
+
+# ======================== WHATSAPP GROUP MODEL ========================
+
+class WhatsAppGroup(models.Model):
+    """Model to store WhatsApp group information for dynamic management"""
+    
+    name = models.CharField(max_length=100, help_text="Name of the WhatsApp group (e.g., Python Masterclass)")
+    description = models.CharField(max_length=200, help_text="Short description of the group")
+    
+    whatsapp_link = models.URLField(help_text="WhatsApp group invitation link")
+    
+    icon_class = models.CharField(
+        max_length=50, 
+        default="fab fa-python",
+        help_text="Font Awesome icon class (e.g., fab fa-python, fas fa-code)"
+    )
+    icon_color = models.CharField(
+        max_length=20, 
+        default="#ff6026",
+        help_text="Color for the icon (e.g., #ff6026)"
+    )
+    
+    is_active = models.BooleanField(default=True, help_text="Whether this group is currently active")
+    display_order = models.IntegerField(default=0, help_text="Order in which groups are displayed (lower numbers first)")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['display_order', 'name']
+        verbose_name = "WhatsApp Group"
+        verbose_name_plural = "WhatsApp Groups"
+    
+    def __str__(self):
+        return self.name

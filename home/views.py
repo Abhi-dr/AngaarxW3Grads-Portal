@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages as message
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, WhatsAppGroup
 from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models import Count
@@ -18,7 +18,12 @@ from administration.models import Achievement
 
 
 def home(request):
-    return render(request, "home/index.html")
+    # Get all active WhatsApp groups ordered by display_order
+    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True).order_by('display_order', 'name')
+    
+    return render(request, "home/index.html", {
+        'whatsapp_groups': whatsapp_groups
+    })
 
 def about(request):
     return render(request, "home/about.html")
