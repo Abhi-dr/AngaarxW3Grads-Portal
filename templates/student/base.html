@@ -367,7 +367,16 @@
         }
 
         html.sidebar-collapsed-init .left-sidebar .brand-logo a.logo-img {
-            display: none;
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        html.sidebar-collapsed-init .left-sidebar .brand-logo a.logo-collapsed {
+            opacity: 1;
+            transform: scale(1);
+            position: static;
+            pointer-events: auto;
         }
 
         html.sidebar-collapsed-init .left-sidebar .brand-logo {
@@ -478,8 +487,36 @@
             display: none;
         }
 
+        /* Logo transition animations */
+        .brand-logo a.logo-img,
+        .brand-logo a.logo-collapsed {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .brand-logo a.logo-img {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .brand-logo a.logo-collapsed {
+            opacity: 0;
+            transform: scale(0.8);
+            position: absolute;
+            pointer-events: none;
+        }
+
+        /* When sidebar is collapsed */
         .left-sidebar.collapsed .brand-logo a.logo-img {
-            display: none;
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .left-sidebar.collapsed .brand-logo a.logo-collapsed {
+            opacity: 1;
+            transform: scale(1);
+            position: static;
+            pointer-events: auto;
         }
 
         .left-sidebar.collapsed .brand-logo {
@@ -505,39 +542,46 @@
             font-size: 1.3rem;
         }
 
-        /* Logout button styles */
+        /* Logout button styles - Improved Design */
         .sidebar-logout {
             margin-top: auto !important;
-            padding: 15px 0;
+            padding: 15px 5px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .sidebar-logout .sidebar-link {
-            background: rgba(139, 69, 69, 0.12) !important;
-            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.15), rgba(239, 68, 68, 0.1)) !important;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 10px;
             margin: 0 15px;
+            transition: all 0.3s ease;
         }
 
         .sidebar-logout .sidebar-link i {
-            color: #8b4545 !important;
+            color: #ef4444 !important;
+            font-size: 1.1rem;
         }
 
         .sidebar-logout .sidebar-link .hide-menu {
-            color: #8b4545 !important;
+            color: #ef4444 !important;
+            font-weight: 500;
         }
 
         .sidebar-logout .sidebar-link:hover {
-            background: rgba(139, 69, 69, 0.25) !important;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.25), rgba(239, 68, 68, 0.2)) !important;
+            border-color: rgba(239, 68, 68, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
         }
 
         .sidebar-logout .sidebar-link:hover i,
         .sidebar-logout .sidebar-link:hover .hide-menu {
-            color: #6b3030 !important;
+            color: #dc2626 !important;
         }
 
         .left-sidebar.collapsed .sidebar-logout {
             border-top: none;
-            padding: 15px 0;
+            padding: 15px 5px;
             margin-top: auto !important;
             position: absolute;
             bottom: 20px;
@@ -549,9 +593,11 @@
         }
 
         .left-sidebar.collapsed .sidebar-logout .sidebar-link {
-            background: rgba(139, 69, 69, 0.15) !important;
-            border-radius: 10px;
-            padding: 12px;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(239, 68, 68, 0.15)) !important;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 12px;
+            padding: 14px;
+            padding-right: 5px;
             margin: 0;
             width: auto;
             display: flex;
@@ -560,21 +606,25 @@
         }
 
         .left-sidebar.collapsed .sidebar-logout .sidebar-link i {
-            color: #8b4545 !important;
+            color: #ef4444 !important;
+            font-size: 1.3rem;
         }
 
         .left-sidebar.collapsed .sidebar-logout .sidebar-link:hover {
-            background: rgba(139, 69, 69, 0.25) !important;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(239, 68, 68, 0.25)) !important;
+            border-color: rgba(239, 68, 68, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
 
         .left-sidebar.collapsed .sidebar-logout .sidebar-link:hover i {
-            color: #6b3030 !important;
+            color: #dc2626 !important;
         }
 
         /* Collapse toggle button */
         .sidebar-toggle-btn {
             position: absolute;
-            top: 20px;
+            top: 70px;
             right: -18px;
             width: 36px;
             height: 36px;
@@ -706,6 +756,11 @@
                 display: none;
             }
 
+            /* Add smooth transition for mobile sidebar animation */
+            .left-sidebar {
+                transition: transform 0.3s ease-in-out;
+            }
+
             .left-sidebar.collapsed {
                 width: 270px;
             }
@@ -715,6 +770,16 @@
             .left-sidebar.collapsed .nav-small-cap span,
             .left-sidebar.collapsed .brand-logo a.logo-img {
                 display: block;
+            }
+
+            .left-sidebar.collapsed .brand-logo a.logo-collapsed {
+                display: none;
+            }
+
+            .left-sidebar.collapsed .brand-logo a.logo-img {
+                opacity: 1;
+                transform: scale(1);
+                pointer-events: auto;
             }
 
             .left-sidebar.collapsed .sidebar-link {
@@ -754,6 +819,10 @@
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                     <a href="{% url 'student' %}" class="text-nowrap logo-img">
                         <img src="{% static 'img/student/logo.png' %}" alt="" style="width: 100%;" />
+                    </a>
+                    <a href="{% url 'student' %}" class="text-nowrap logo-collapsed">
+                        <img src="{% static 'img/student/collapsed-logo2.png' %}" alt=""
+                            style="width: 70px; height: 70px;" />
                     </a>
                     <div class="close-btn d-block d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8"></i>
@@ -1338,10 +1407,6 @@
             addSidebarTooltips();
         });
 
-        // Event listener for mobile toggle button
-        sidebarCollapse.addEventListener('click', function () {
-            sidebar.classList.toggle('show');
-        });
 
         // Event listener for desktop toggle button
         if (sidebarToggleDesktop) {
@@ -1351,15 +1416,6 @@
             });
         }
 
-        // Event listener for clicks outside the sidebar (mobile only)
-        document.addEventListener('click', function (event) {
-            const target = event.target;
-            if (window.innerWidth < 1200) {
-                if (!sidebar.contains(target) && target !== sidebarCollapse) {
-                    closeSidebar();
-                }
-            }
-        });
 
         // Handle window resize
         window.addEventListener('resize', function () {
