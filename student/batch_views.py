@@ -7,7 +7,7 @@ from datetime import datetime
 from django.db.models import Q, Case, When, Value, CharField
 from django.http import JsonResponse
 
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage
 
 from django.db.models import Count, Min, Max
 
@@ -280,26 +280,15 @@ def student_batch_leaderboard(request, slug):
 
 # ==================================== FETCH LEADERBOARD ======================
 
-def student_fetch_batch_leaderboard(request, slug):    
-
-    print("\n\n\nFetching batch leaderboard\n\n\n")
-    
+def student_fetch_batch_leaderboard(request, slug):
     start = timezone.now()
-    
-    # Get pagination parameters
-    page = int(request.GET.get('page', 1))
-    page_size = int(request.GET.get('page_size', 10))
-    
-    # Limit page size to prevent abuse
-    page_size = min(page_size, 50)
-    
-    batch = get_object_or_404(Batch, slug=slug)
-    sheets = batch.sheets.all()
-    total_questions = Question.objects.filter(sheets__in=sheets).distinct()
 
-    # Aggregate submission data at the database level
+    batch = get_object_or_404(Batch, slug=slug)
+
+    sheet_ids = list(batch.sheets.values_list('id', flat=True))
+
     submissions = Submission.objects.filter(
-        question__in=total_questions,
+        question__sheets__id__in=sheet_ids,
         status='Accepted'
     ).values(
         'user_id', 'question_id', 'question__sheets__id'
@@ -308,8 +297,14 @@ def student_fetch_batch_leaderboard(request, slug):
         earliest_submission=Min('submitted_at')
     )
 
-    # Process aggregated data
+    user_ids_to_fetch = {sub['user_id'] for sub in submissions}
+    sheet_ids_to_fetch = {sub['question__sheets__id'] for sub in submissions}
+
+    student_map = Student.objects.in_bulk(user_ids_to_fetch)
+    sheet_map = Sheet.objects.in_bulk(sheet_ids_to_fetch)
+
     user_scores = {}
+
     for sub in submissions:
         user_id = sub['user_id']
         question_id = sub['question_id']
@@ -323,31 +318,32 @@ def student_fetch_batch_leaderboard(request, slug):
                 'sheet_breakdown': {}
             }
 
-        # Add score
         user_scores[user_id]['total_score'] += sub['max_score']
-        user_scores[user_id]['earliest_submission'] = min(
-            user_scores[user_id]['earliest_submission'], sub['earliest_submission']
-        )
+
+        if sub['earliest_submission'] < user_scores[user_id]['earliest_submission']:
+            user_scores[user_id]['earliest_submission'] = sub['earliest_submission']
+
         user_scores[user_id]['solved_questions'].add(question_id)
 
-        # Sheet breakdown
-        if sheet_id not in user_scores[user_id]['sheet_breakdown']:
-            user_scores[user_id]['sheet_breakdown'][sheet_id] = 0
-        user_scores[user_id]['sheet_breakdown'][sheet_id] += 1
+        user_scores[user_id]['sheet_breakdown'][sheet_id] = (
+            user_scores[user_id]['sheet_breakdown'].get(sheet_id, 0) + 1
+        )
 
-    # Format leaderboard
     leaderboard = []
     solved_question_counts = {}
 
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = student_map.get(user_id)
+        if not user:
+            continue
+
         solved_problems = len(data['solved_questions'])
 
-        # Map sheet IDs to sheet names
-        sheet_details = {
-            Sheet.objects.get(id=sheet_id).name: count
-            for sheet_id, count in data['sheet_breakdown'].items()
-        }
+        sheet_details = {}
+        for s_id, count in data['sheet_breakdown'].items():
+            sheet_obj = sheet_map.get(s_id)
+            if sheet_obj:
+                sheet_details[sheet_obj.name] = count
 
         leaderboard.append({
             'student': {
@@ -360,40 +356,46 @@ def student_fetch_batch_leaderboard(request, slug):
             'sheet_breakdown': sheet_details,
         })
 
-        if solved_problems not in solved_question_counts:
-            solved_question_counts[solved_problems] = 0
-        solved_question_counts[solved_problems] += 1
+        solved_question_counts[solved_problems] = (
+            solved_question_counts.get(solved_problems, 0) + 1
+        )
 
-    # Sort leaderboard by total score and earliest submission
-    leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
-    
-    # Apply pagination
-    paginator = Paginator(leaderboard, page_size)
-    
+    # =============================
+    # SORT BEFORE PAGINATION
+    # =============================
+    leaderboard.sort(
+        key=lambda x: (-x['total_score'], x['earliest_submission'])
+    )
+
+    # =============================
+    # ADD RANK TO ALL ENTRIES
+    # =============================
+    for idx, entry in enumerate(leaderboard, start=1):
+        entry['rank'] = idx
+
+    # =============================
+    # PAGINATION (PAGE SIZE = 10)
+    # =============================
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(leaderboard, 10)
+
     try:
-        paginated_leaderboard = paginator.page(page)
-    except:
-        # If page is out of range, return last page
-        paginated_leaderboard = paginator.page(paginator.num_pages)
-    
-    # Add rank to each entry (accounting for pagination)
-    start_rank = (paginated_leaderboard.number - 1) * page_size + 1
-    for idx, entry in enumerate(paginated_leaderboard.object_list):
-        entry['rank'] = start_rank + idx
-    
+        page_obj = paginator.page(page_number)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
     end = timezone.now()
-    
     print(f"Time taken: {end - start}")
 
     return JsonResponse({
-        'leaderboard': list(paginated_leaderboard.object_list),
-        'solved_question_counts': solved_question_counts,
+        'leaderboard': list(page_obj),
         'pagination': {
-            'current_page': paginated_leaderboard.number,
+            'current_page': page_obj.number,
+            'page_size': 10,
             'total_pages': paginator.num_pages,
-            'page_size': page_size,
-            'total_count': paginator.count,
-            'has_next': paginated_leaderboard.has_next(),
-            'has_previous': paginated_leaderboard.has_previous(),
-        }
+            'total_students': paginator.count,
+            'has_next': page_obj.has_next(),
+            'has_previous': page_obj.has_previous(),
+        },
+        'solved_question_counts': solved_question_counts
     })
