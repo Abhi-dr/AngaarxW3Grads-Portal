@@ -29,10 +29,16 @@ def my_batches(request):
 def fetch_my_batch_data(request):
     """API endpoint to fetch batch and course data as JSON"""
     try:
+        if not hasattr(request.user, 'student'):
+            return JsonResponse({
+                'success': False,
+                'error': 'User is not a student'
+            }, status=403)
         student = request.user.student
         
         # Fetch all batches with their enrollment status for the current student
-        all_batches = Batch.objects.annotate(
+        # Only fetch active batches (is_active=True)
+        all_batches = Batch.objects.filter(is_active=True).annotate(
                 enrollment_status=Case(
                     When(enrollment_requests__student=student, enrollment_requests__status='Accepted', then=Value('Accepted')),
                     When(enrollment_requests__student=student, enrollment_requests__status='Pending', then=Value('Pending')),
@@ -103,6 +109,8 @@ def fetch_my_batch_data(request):
         return JsonResponse(data)
     
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
             'error': str(e)

@@ -18,7 +18,7 @@ class Batch(models.Model):
     students = models.ManyToManyField(Student, related_name="batches", through="EnrollmentRequest")
     
     required_fields = models.JSONField(default=list, blank=True)
-
+    is_active = models.BooleanField(default=True)
     
     slug = models.SlugField(unique=True, blank=True, null=True)
     

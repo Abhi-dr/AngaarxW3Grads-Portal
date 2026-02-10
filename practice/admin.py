@@ -125,4 +125,6 @@ class EnrollmentRequestAdmin(admin.ModelAdmin):
 
 @admin.register(Batch)
 class BatchAdmin(admin.ModelAdmin):
-    list_display = ['name', 'description']
+    list_display = ['name', 'description', 'is_active']
+    list_filter = ['is_active']
+    list_editable = ['is_active']

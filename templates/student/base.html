@@ -256,6 +256,35 @@
         })();
     </script>
 
+    <script>
+        // Apply sidebar collapsed state immediately to prevent flashing
+        (function () {
+            if (window.innerWidth >= 1200 && localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.documentElement.classList.add('sidebar-collapsed-init');
+            }
+        })();
+    </script>
+
+    <style>
+        /* Apply collapsed state immediately via html class to prevent flash */
+        html.sidebar-collapsed-init .left-sidebar {
+            width: 70px !important;
+        }
+        html.sidebar-collapsed-init .left-sidebar .hide-menu,
+        html.sidebar-collapsed-init .left-sidebar .nav-small-cap-icon {
+            display: none !important;
+        }
+        html.sidebar-collapsed-init .left-sidebar .brand-logo a.logo-img {
+            display: none !important;
+        }
+        html.sidebar-collapsed-init .body-wrapper {
+            margin-left: 70px !important;
+        }
+        html.sidebar-collapsed-init .app-header {
+            width: calc(100% - 70px) !important;
+        }
+    </style>
+
     <style>
         .themeToggle {
             color: #bbb;
@@ -610,6 +639,11 @@
         /* Adjust body wrapper when sidebar is collapsed */
         .page-wrapper[data-sidebar-collapsed="true"] .body-wrapper {
             margin-left: 70px !important;
+        }
+
+        /* Adjust header width when sidebar is collapsed */
+        .page-wrapper[data-sidebar-collapsed="true"] .app-header {
+            width: calc(100% - 70px) !important;
         }
 
         /* Tooltip for collapsed sidebar items */
@@ -1273,6 +1307,8 @@
         document.addEventListener('DOMContentLoaded', function() {
             restoreSidebarState();
             addSidebarTooltips();
+            // Remove the init class now that proper JS has taken over
+            document.documentElement.classList.remove('sidebar-collapsed-init');
         });
 
         // Event listener for mobile toggle button
