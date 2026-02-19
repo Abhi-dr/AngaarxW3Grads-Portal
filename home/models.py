@@ -1,7 +1,8 @@
 from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
-from accounts.models import Student, Instructor
+from django.conf import settings
+from accounts.models import Student, Instructor  # proxy models — same table as CustomUser
 
 from datetime import datetime, timedelta
 
@@ -12,7 +13,7 @@ class Article(models.Model):
     title = models.CharField(max_length=100)
     content = RichTextUploadingField()
     thumbnail = models.ImageField(upload_to="thumbnails/")
-    likes = models.ManyToManyField(User, related_name='liked_articles', blank=True)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_articles', blank=True)
     
     slug = models.SlugField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -55,7 +56,7 @@ class Article(models.Model):
 
 class Comment(models.Model):
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -73,7 +74,7 @@ class FlamesCourse(models.Model):
     subtitle = models.CharField(max_length=255)
     description = models.TextField()
     
-    instructor = models.ManyToManyField(Instructor, related_name='flames_courses', blank=True)
+    instructor = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='flames_courses', blank=True)
     
     
     what_you_will_learn = models.TextField(help_text="Enter points separated by new lines")
@@ -169,7 +170,7 @@ class ReferralCode(models.Model):
 
 class FlamesRegistration(models.Model):
     
-    user = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True, related_name='flames_registrations')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='flames_registrations')
     team = models.ForeignKey('FlamesTeam', on_delete=models.SET_NULL, null=True, blank=True, related_name='registrations')
     
     course = models.ForeignKey(FlamesCourse, on_delete=models.CASCADE, related_name='registrations')
@@ -254,7 +255,7 @@ class FlamesRegistration(models.Model):
 
 class FlamesTeam(models.Model):
     name = models.CharField(max_length=100)
-    team_leader = models.ForeignKey(User, on_delete=models.CASCADE, related_name='led_flames_teams', null=True, blank=True)
+    team_leader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='led_flames_teams', null=True, blank=True)
     course = models.ForeignKey(FlamesCourse, on_delete=models.CASCADE, related_name='teams')
     created_at = models.DateTimeField(auto_now_add=True)
     is_auto_created = models.BooleanField(default=False)
@@ -269,7 +270,7 @@ class FlamesTeam(models.Model):
 # ================= FLAMES TEAM MEMBERS ======================
 
 class FlamesTeamMember(models.Model):
-    member = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True, related_name='flames_team_memberships')
+    member = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='flames_team_memberships')
     
     team = models.ForeignKey(FlamesTeam, on_delete=models.CASCADE, related_name='members')
     

@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
-from accounts.models import Student, Instructor
+from django.conf import settings
+from accounts.models import Student, Instructor  # proxy models — same table as CustomUser
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest
 from home.models import FlamesCourse
 from django.contrib import messages
@@ -45,8 +46,8 @@ class Notification(models.Model):
 # ======================================= Anonymous Message ========================================
 
 class Anonymous_Message(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    instructor = models.ForeignKey(Instructor, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    instructor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='received_messages')
     message = models.TextField()
     reply = models.TextField(blank=True, null=True)
     is_replied = models.BooleanField(default=False)
@@ -67,7 +68,7 @@ class Anonymous_Message(models.Model):
 # =========================================== FEEDBACK ============================================
 
 class Feedback(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     subject = models.CharField(max_length=255)
     message = models.TextField()
     
@@ -79,7 +80,7 @@ class Feedback(models.Model):
 # ====================================== AI Questions Asked ============================================
 
 class AIQuestion(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, blank=True, null=True)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     instructor = models.CharField(max_length=255, default="None")
     question = models.TextField(blank=True, null=True)
     answer = models.TextField(blank=True, null=True)
@@ -104,7 +105,7 @@ class Course(models.Model):
     name = models.CharField(max_length=100, db_index=True)  # Increased length and added index
 
     # instructors can be multiple for a single course
-    instructors = models.ManyToManyField('accounts.Instructor', related_name='courses', blank=True)
+    instructors = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='courses', blank=True)
     
     description = models.TextField(max_length=500)  # Increased length for better descriptions
     
@@ -147,7 +148,7 @@ class CourseSheet(models.Model):
     thumbnail = models.ImageField(upload_to='course_sheets/thumbnails/', blank=True, null=True)
     course = models.ManyToManyField(Course, related_name="course_sheets", blank=True)
     
-    created_by = models.ForeignKey(Instructor, on_delete=models.CASCADE, related_name="course_sheets", blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="course_sheets", blank=True, null=True)
     
     custom_order = models.JSONField(default=dict)  # Store order as {assignment_id: position}
 
@@ -232,7 +233,7 @@ class CourseRegistration(models.Model):
     ]
 
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    student = models.ForeignKey('accounts.Student', on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     
     registration_date = models.DateTimeField(auto_now_add=True)
 
@@ -374,8 +375,8 @@ class AssignmentSubmission(models.Model):
     )
     
     student = models.ForeignKey(
-        'accounts.Student', 
-        on_delete=models.CASCADE, 
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
         related_name='assignment_submissions'
     )
     

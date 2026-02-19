@@ -15,7 +15,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.contrib.auth import login as default_login
 
-from .models import Student, Instructor, Administrator, PasswordResetToken, EmailVerificationToken
+from .models import CustomUser, Student, Instructor, Administrator, PasswordResetToken, EmailVerificationToken
 from django.urls import reverse
 from django.utils.timezone import now
 from practice.models import Sheet
@@ -27,59 +27,54 @@ from django_ratelimit.decorators import ratelimit
 @ratelimit(key='post:username', rate='3/m', method=['POST'], block=False)
 def login(request):
     if request.user.is_authenticated:
-        # Redirect based on user type
-        if hasattr(request.user, 'student'):
-            return redirect('student')
-        elif hasattr(request.user, 'instructor'):
+        role = getattr(request.user, 'role', None)
+        if role == 'instructor':
             return redirect('instructor')
-        elif hasattr(request.user, 'administrator'):
+        elif role == 'admin':
             return redirect('administration')
         else:
-            return redirect('home')  # Default fallback
+            return redirect('student')
 
     if getattr(request, 'limited', False):
-        messages.error(request, "Too many login attempts for this Username. Please try again after 1 minute.")
+        messages.error(request, "Too many login attempts. Please try again after 1 minute.")
         return redirect('login')
 
     next_url = request.GET.get('next', '')
 
     if request.method == 'POST':
-        input_id = request.POST.get('username').strip().lower()
-        password = request.POST.get('password')
+        input_id = request.POST.get('username', '').strip().lower()
+        password = request.POST.get('password', '')
 
-        # Check for Student
-        student = Student.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
-        if student:
-            user = auth.authenticate(username=student.username, password=password)
-            if user:
-                auth.login(request, user)
-                return redirect(next_url if next_url else 'student')
-            messages.error(request, "Invalid Password")
-            return redirect("login")
+        # Look up the user by email OR username (case-insensitive)
+        user_obj = CustomUser.objects.filter(
+            Q(email__iexact=input_id) | Q(username__iexact=input_id)
+        ).first()
 
-        # Check for Instructor
-        instructor = Instructor.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
-        if instructor:
-            user = auth.authenticate(username=instructor.username, password=password)
-            if user:
-                auth.login(request, user)
-                return redirect(next_url if next_url else 'instructor')
-            messages.error(request, "Invalid Password")
-            return redirect("login")
+        if not user_obj:
+            messages.error(request, "No account found with that email or username.")
+            return redirect('login')
 
-        # Check for Administrator
-        administrator = Administrator.objects.filter(Q(username=input_id) | Q(email=input_id)).first()
-        if administrator:
-            user = auth.authenticate(username=administrator.username, password=password)
-            if user:
-                auth.login(request, user)
-                return redirect(next_url if next_url else 'administration')
-            messages.error(request, "Invalid Password")
-            return redirect("login")
+        # Authenticate using the email (USERNAME_FIELD on CustomUser)
+        # ModelBackend.authenticate() looks up by USERNAME_FIELD, so pass email=
+        user = auth.authenticate(request, username=user_obj.email, password=password)
 
-        # No matching user found
-        messages.error(request, "Invalid Username/Email or Password")
-        return redirect("login")
+        if user is None:
+            messages.error(request, "Invalid password. Please try again.")
+            return redirect('login')
+
+        if not user.is_active:
+            messages.error(request, "Your account is not active. Please verify your email.")
+            return redirect('login')
+
+        auth.login(request, user)
+
+        # Redirect based on role
+        if user.role == 'instructor':
+            return redirect(next_url if next_url else 'instructor')
+        elif user.role == 'admin':
+            return redirect(next_url if next_url else 'administration')
+        else:
+            return redirect(next_url if next_url else 'student')
 
     return render(request, 'accounts/login.html', {'next': next_url})
 
@@ -87,15 +82,13 @@ def login(request):
 
 def register(request):
     if request.user.is_authenticated:
-        # Redirect logged-in users to the dashboard
-        if hasattr(request.user, 'student'):
-            return redirect('student')
-        elif hasattr(request.user, 'instructor'):
+        role = getattr(request.user, 'role', None)
+        if role == 'instructor':
             return redirect('instructor')
-        elif hasattr(request.user, 'administrator'):
+        elif role == 'admin':
             return redirect('administration')
         else:
-            return redirect('home')  # Default fallback
+            return redirect('student')
 
     next_url = request.GET.get('next', '')
 
@@ -118,12 +111,11 @@ def register(request):
         if not result.get('success'):
             messages.error(request, "reCAPTCHA verification failed. Try again.")
             return redirect("register")
-        
 
-        username = request.POST.get("username").strip().lower()
-        first_name = request.POST.get("first_name").strip().title()
-        last_name = request.POST.get("last_name").strip().title()
-        email = request.POST.get("email").strip().lower()
+        username = request.POST.get("username", "").strip().lower()
+        first_name = request.POST.get("first_name", "").strip().title()
+        last_name = request.POST.get("last_name", "").strip().title()
+        email = request.POST.get("email", "").strip().lower()
         password = request.POST.get("password")
         confirm_password = request.POST.get("confirm_password")
 
@@ -131,35 +123,33 @@ def register(request):
             messages.error(request, "Passwords do not match!")
             return redirect("register")
 
-        # Optimized Query for checking existing username or email
-        if Student.objects.filter(Q(username=username) | Q(email=email)).exists():
+        # Check existing username or email across all CustomUser records
+        if CustomUser.objects.filter(Q(username=username) | Q(email=email)).exists():
             messages.error(request, "Username or Email already exists!")
             return redirect("register")
 
         try:
-            with transaction.atomic():  # Ensures rollback in case of failure
-                new_user = Student.objects.create(
+            with transaction.atomic():
+                new_user = CustomUser(
                     username=username,
                     first_name=first_name,
                     last_name=last_name,
                     email=email,
-                    is_active=False,  # Set inactive initially
+                    role='student',
+                    is_active=False,   # inactive until email verified
                     mobile_number='-',
-                    gender='Not Set'
+                    gender='Not Set',
+                    is_email_verified=False,
                 )
                 new_user.set_password(password)
                 new_user.save()
 
                 print(f"New user created: {new_user.username} with ID: {new_user.id}")
 
-                # Send Verification Email instead of Welcome Email
+                # Send verification email
                 send_verification_mail(new_user, request)
-                
-                # Do NOT login automatically
-                # auth.login(request, new_user, backend='django.contrib.auth.backends.ModelBackend')
-                
-                messages.success(request, "Account created! Please check your email to verify your account.")
 
+                messages.success(request, "Account created! Please check your email to verify your account.")
                 return render(request, "accounts/verification_sent.html", {"email": email})
 
         except Exception as e:
@@ -168,7 +158,7 @@ def register(request):
 
     return render(request, "accounts/register.html", {
         "next": next_url,
-        "RECAPTCHA_SITE_KEY":  os.getenv("RECAPTCHA_SITE_KEY")
+        "RECAPTCHA_SITE_KEY": os.getenv("RECAPTCHA_SITE_KEY")
     })
 
 
@@ -189,13 +179,8 @@ def logout(request):
 
 def check_username_availability(request):
     username = request.GET.get('username', '')
-    data = {'is_available': 
-        not (Student.objects.filter(username=username).exists() 
-        or Instructor.objects.filter(username=username).exists() 
-        or Administrator.objects.filter(username=username).exists())}
-    
+    data = {'is_available': not CustomUser.objects.filter(username=username).exists()}
     print(data)
-
     return JsonResponse(data)
 
 def check_username_exists(request):
@@ -238,11 +223,7 @@ def check_username_exists(request):
 # ====================== check email availability ====================
 def check_email_availability(request):
     email = request.GET.get('email', '')
-    data = {'is_available': 
-        not (Student.objects.filter(email=email).exists() 
-        or Instructor.objects.filter(email=email).exists() 
-        or Administrator.objects.filter(email=email).exists())}
-    
+    data = {'is_available': not CustomUser.objects.filter(email=email).exists()}
     return JsonResponse(data)
 
 # ====================== block student ====================
@@ -303,38 +284,25 @@ def get_active_sheet_timer(request):
 
 def verify_email(request, user_id, token):
     try:
-        user = Student.objects.get(pk=user_id)
-        # Assuming only one token per user, or filter by token hash if needed.
-        # But we are passing raw token which isn't stored. We verify hash.
-        # Wait, I implemented `is_valid` which compares hash.
-        # I should fetch the token object that corresponds to the user.
+        user = CustomUser.objects.get(pk=user_id)
         verification_token = EmailVerificationToken.objects.filter(user=user).first()
         
         if verification_token and verification_token.is_valid(token):
-            # Activate user
             user.is_active = True
+            user.is_email_verified = True
             user.save()
-            
-            # Invalidate token
             verification_token.invalidate()
-            
-            # Send welcome email now (since they are now active)
             send_welcome_mail(user.email, user.first_name)
-            
-            # Log the user in
             auth.login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-            
             messages.success(request, "Email verified successfully! Welcome to the dashboard.🔥")
             return redirect('student')
-        
         else:
             messages.error(request, 'Invalid or expired verification link!')
-            # return render(request, 'accounts/verification_failed.html')
-            return redirect('login') 
+            return redirect('login')
 
     except Exception as e:
-         messages.error(request, 'Invalid verification link!')
-         return redirect('login')
+        messages.error(request, 'Invalid verification link!')
+        return redirect('login')
 
 
 # ========================================
@@ -432,49 +400,38 @@ def send_verification_mail(user, request):
 
 def request_password_reset(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
+        email = request.POST.get('email', '').strip().lower()
         
         try:
-            user = Student.objects.get(email=email)
+            user = CustomUser.objects.get(email=email)
             
             # check if the user already has a valid token
-            if PasswordResetToken.objects.filter(user=user).exists():
-                token = PasswordResetToken.objects.get(user=user)
-                if token.expires_at > timezone.now():
-                    messages.error(request, 'A password reset link has already been sent to your email address!')
-                    return redirect('request_password_reset')
+            existing_token = PasswordResetToken.objects.filter(user=user).first()
+            if existing_token and existing_token.expires_at > timezone.now():
+                messages.error(request, 'A password reset link has already been sent to your email address!')
+                return redirect('request_password_reset')
             
             token = PasswordResetToken.create_token(user)
             from_email = 'noreply@theangaarbatch.in'
             subject = 'Reset Your Password'
+            from_email_full = f"The Angaar Batch <{from_email}>"
 
-            from_name = "The Angaar Batch "
-            from_email_full = f"{from_name} <{from_email}>"
-            
-            
             reset_link = request.build_absolute_uri(
                 f"/accounts/reset-password/{user.pk}/{token}/"
             )
 
-            
             html_message = render_to_string('accounts/reset_password_email.html', {
-            'user': user,
-            'reset_link': reset_link,
-            'current_year': timezone.now().year
-        })
+                'user': user,
+                'reset_link': reset_link,
+                'current_year': timezone.now().year
+            })
             plain_message = strip_tags(html_message)
             
-            send_mail(
-                subject, 
-                plain_message, 
-                from_email_full, 
-                [email], 
-                html_message=html_message
-            )
+            send_mail(subject, plain_message, from_email_full, [email], html_message=html_message)
 
             messages.success(request, 'Password reset link sent to your email address!')
             return redirect('login')
-        except Student.DoesNotExist:
+        except CustomUser.DoesNotExist:
             messages.error(request, 'No user found with that email address!')
             return redirect('request_password_reset')
             
@@ -483,9 +440,9 @@ def request_password_reset(request):
 
 def reset_password(request, user_id, token):
     try:
-        user = Student.objects.get(pk=user_id)
+        user = CustomUser.objects.get(pk=user_id)
         reset_token = PasswordResetToken.objects.filter(user=user).first()
-    except Student.DoesNotExist:
+    except CustomUser.DoesNotExist:
         reset_token = None
 
     if reset_token and reset_token.is_valid(token):
@@ -494,8 +451,10 @@ def reset_password(request, user_id, token):
             confirm_password = request.POST.get('confirm_password')
             if new_password == confirm_password:
                 user.set_password(new_password)
+                user.is_changed_password = True
                 user.save()
                 reset_token.invalidate()
+                messages.success(request, 'Password reset successfully! Please log in.')
                 return redirect('login')
         return render(request, 'accounts/reset_password.html')
     

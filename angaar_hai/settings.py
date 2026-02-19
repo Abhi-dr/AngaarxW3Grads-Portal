@@ -195,6 +195,9 @@ CKEDITOR_UPLOAD_PATH = "uploads/"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Custom user model — single identity table (Phase 1 migration)
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
 
 
 MESSAGE_TAGS = {
@@ -327,14 +330,13 @@ LOGIN_REDIRECT_URL = '/dashboard/'  # Changed to support all user types
 ACCOUNT_SIGNUP_REDIRECT_URL = '/dashboard/'  # Redirect after signup
 LOGOUT_REDIRECT_URL = '/'
 
-# Account settings
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # Google handles email verification
-ACCOUNT_USERNAME_REQUIRED = False    # We generate usernames automatically
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_UNIQUE_EMAIL = True
+# Account settings (allauth v0.60+)
+ACCOUNT_LOGIN_METHODS          = {'email'}         # replaces ACCOUNT_AUTHENTICATION_METHOD
+ACCOUNT_SIGNUP_FIELDS          = ['email*', 'password1*', 'password2*']  # replaces EMAIL_REQUIRED + USERNAME_REQUIRED
+ACCOUNT_EMAIL_VERIFICATION     = 'none'            # Google handles email verification
+ACCOUNT_UNIQUE_EMAIL           = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = 'username'
-ACCOUNT_USER_MODEL_EMAIL_FIELD = 'email'
+ACCOUNT_USER_MODEL_EMAIL_FIELD    = 'email'
 
 # Social account settings - FIXED FOR SMOOTH OAUTH
 SOCIALACCOUNT_AUTO_SIGNUP = True

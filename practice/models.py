@@ -1,11 +1,12 @@
 from django.db import models
+from django.conf import settings
 from datetime import datetime, timedelta
 from django.utils.timezone import now
-from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.fields import GenericRelation
 
+# NOTE: Student/Instructor are now proxy models of CustomUser (same table)
 from accounts.models import Student, Instructor
 
 # ============================== BATCH ======================================
@@ -15,7 +16,7 @@ class Batch(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
     thumbnail = models.ImageField(upload_to='batches/thumbnails/', blank=True, null=True)
-    students = models.ManyToManyField(Student, related_name="batches", through="EnrollmentRequest")
+    students = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="batches", through="EnrollmentRequest")
     
     required_fields = models.JSONField(default=list, blank=True)
 
@@ -67,7 +68,7 @@ class EnrollmentRequest(models.Model):
         ('Rejected', 'Rejected'),
     ]
     
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="enrollment_requests")
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="enrollment_requests")
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE, related_name="enrollment_requests")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
     request_date = models.DateTimeField(auto_now_add=True)
@@ -100,7 +101,7 @@ class Sheet(models.Model):
     thumbnail = models.ImageField(upload_to='sheets/thumbnails/', blank=True, null=True)
     batches = models.ManyToManyField(Batch, related_name="sheets", blank=True)
     
-    created_by = models.ForeignKey(Instructor, on_delete=models.CASCADE, related_name="sheets", blank=True, null=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sheets", blank=True, null=True)
     
     custom_order = models.JSONField(default=dict)  # Store order as {question_id: position}
     
@@ -303,7 +304,7 @@ class Question(models.Model):
     
     slug = models.SlugField(blank=True, null=True)
     
-    added_by = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="questions", blank=True, null=True)
+    added_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="questions", blank=True, null=True)
     is_approved = models.BooleanField(default=False)
     
     # Parent ID Concept
@@ -486,7 +487,7 @@ class Submission(models.Model):
         ('Compilation Error', 'Compilation Error'),
     ]
     
-    user = models.ForeignKey(Student, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="submissions")
     code = models.TextField()
     language = models.CharField(max_length=20)  # E.g., 'python', 'java', 'cpp'
@@ -529,7 +530,7 @@ class POD(models.Model):
 
 
 class Streak(models.Model):
-    user = models.ForeignKey(Student, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     current_streak = models.PositiveIntegerField(default=1)  # Current streak of consecutive submissions
     last_submission_date = models.DateField(null=True, blank=True)
     previous_streak = models.PositiveIntegerField(default=0)  # Streak before it was broken (for restore)
@@ -746,7 +747,7 @@ class MCQQuestion(models.Model):
 # ============================== MCQ Submission ==============================
 
 class MCQSubmission(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name="mcq_submissions")
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="mcq_submissions")
     question = models.ForeignKey(MCQQuestion, on_delete=models.CASCADE, related_name="submissions")
 
     selected_option = models.CharField(max_length=1, choices=[('A','A'),('B','B'),('C','C'),('D','D')])

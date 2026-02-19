@@ -1,13 +1,13 @@
 from django.db import models
 from django.utils import timezone
-from accounts.models import Student
+from django.conf import settings
 import re
 
 
 class HackathonTeam(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
-    leader = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='led_teams')
+    leader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='led_teams')
     members_limit = models.PositiveIntegerField(default=4)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -44,7 +44,7 @@ class HackathonTeam(models.Model):
 
 class TeamMember(models.Model):
     team = models.ForeignKey(HackathonTeam, on_delete=models.CASCADE, related_name='members')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='team_memberships')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='team_memberships')
     joined_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -56,7 +56,7 @@ class TeamMember(models.Model):
 
 class JoinRequest(models.Model):
     team = models.ForeignKey(HackathonTeam, on_delete=models.CASCADE, related_name='join_requests')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='team_requests')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='team_requests')
     message = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -76,7 +76,7 @@ class JoinRequest(models.Model):
 
 class TeamInvite(models.Model):
     team = models.ForeignKey(HackathonTeam, on_delete=models.CASCADE, related_name='team_invites')
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='team_invites')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='team_invites')
     message = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
