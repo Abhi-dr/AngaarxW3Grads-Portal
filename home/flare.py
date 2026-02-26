@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, WhatsAppGroup
+from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, FlamesRegistration, FreeClassWhatsappGroupLink
 from django.utils.timezone import now
 from datetime import timedelta
 from django.db.models import Count
@@ -19,7 +19,7 @@ from administration.models import Achievement
 # ======================================= FLARE REGISTRATION ================================
 
 def flare(request):
-    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True)
+    whatsapp_groups = FreeClassWhatsappGroupLink.objects.filter(is_active=True)
     return render(request, 'home/flare.html', {'whatsapp_groups': whatsapp_groups})
 
 

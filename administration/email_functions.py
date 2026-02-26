@@ -89,7 +89,7 @@ def admin_flames_emails(request):
         return redirect('admin_flames_emails')
     
     # Get active WhatsApp groups
-    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True)
+    whatsapp_groups = FreeClassWhatsappGroupLink.objects.filter(is_active=True)
     
     context = {
         'courses': courses,

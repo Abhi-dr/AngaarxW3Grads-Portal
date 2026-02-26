@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, \
-    FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session, WhatsAppGroup 
+    FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session, FreeClassWhatsappGroupLink
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
@@ -124,7 +124,7 @@ admin.site.register(Session)
 
 # ================== WHATSAPP GROUP ===================
 
-@admin.register(WhatsAppGroup)
+@admin.register(FreeClassWhatsappGroupLink)
 class WhatsAppGroupAdmin(admin.ModelAdmin):
     list_display = ("course_code", "whatsapp_link", "is_active")
     list_editable = ("whatsapp_link", "is_active")

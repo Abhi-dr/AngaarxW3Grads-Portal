@@ -12,7 +12,7 @@ from accounts.models import Student, Instructor
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
 from .event_models import Event, CertificateTemplate, Certificate
 from practice.models import POD, Submission, Batch, Question, Sheet, Streak
-from home.models import Alumni, ReferralCode, WhatsAppGroup
+from home.models import Alumni, ReferralCode, FreeClassWhatsappGroupLink
 from django.template import engines, Template, Context
 from weasyprint import HTML
 from django.http import HttpResponse
@@ -139,7 +139,7 @@ def dashboard(request):
         print(f"Error checking birthday: {e}")
 
     # Get active WhatsApp groups
-    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True)
+    whatsapp_groups = FreeClassWhatsappGroupLink.objects.filter(is_active=True)
 
     parameters = {
         "notifications": notifications,

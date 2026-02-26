@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from openpyxl import Workbook
-from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session, WhatsAppGroup
+from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session, FreeClassWhatsappGroupLink
 from accounts.models import Instructor, Student
 
 @login_required
@@ -728,7 +728,7 @@ def admin_flames_emails(request):
         return redirect('admin_flames_emails')
     
     # Get active WhatsApp groups
-    whatsapp_groups = WhatsAppGroup.objects.filter(is_active=True)
+    whatsapp_groups = FreeClassWhatsappGroupLink.objects.filter(is_active=True)
     
     context = {
         'courses': courses,
