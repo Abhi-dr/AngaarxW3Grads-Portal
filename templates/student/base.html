@@ -750,6 +750,11 @@
             margin-left: 70px !important;
         }
 
+        /* Adjust header width when sidebar is collapsed */
+        .page-wrapper[data-sidebar-collapsed="true"] .app-header {
+            width: calc(100% - 70px) !important;
+        }
+
         /* Tooltip for collapsed sidebar items */
         .left-sidebar.collapsed .sidebar-item {
             position: relative;
@@ -805,6 +810,17 @@
                 display: block;
             }
 
+            .left-sidebar.collapsed .sidebar-link {
+                justify-content: flex-start;
+                padding: 10px 15px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .page-wrapper .body-wrapper {
+                transition: margin-left 0.3s ease;
+            }
+
             .left-sidebar.collapsed .brand-logo a.logo-collapsed {
                 display: none;
             }
@@ -818,12 +834,6 @@
             .left-sidebar.collapsed .sidebar-link {
                 justify-content: flex-start;
                 padding: 10px 15px;
-            }
-        }
-
-        @media (min-width: 1200px) {
-            .page-wrapper .body-wrapper {
-                transition: margin-left 0.3s ease;
             }
         }
     </style>
@@ -853,14 +863,13 @@
                     <a href="{% url 'student' %}" class="text-nowrap logo-img">
                         <img src="{% static 'img/student/logo.png' %}" alt="" style="width: 100%;" />
                     </a>
-                    <<<<<<< HEAD=======<a href="{% url 'student' %}" class="text-nowrap logo-collapsed">
+                    <a href="{% url 'student' %}" class="text-nowrap logo-collapsed">
                         <img src="{% static 'img/student/collapsed-logo2.png' %}" alt=""
                             style="width: 70px; height: 70px;" />
-                        </a>
-                        >>>>>>> 0e9a598407a6494d8836a78d860a6ef8d9ae5a4c
-                        <div class="close-btn d-block d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
-                            <i class="ti ti-x fs-8"></i>
-                        </div>
+                    </a>
+                    <div class="close-btn d-block d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
+                        <i class="ti ti-x fs-8"></i>
+                    </div>
                 </div>
                 <!-- Sidebar navigation-->
                 <nav class="sidebar-nav scroll-sidebar" data-simplebar="">
@@ -1398,7 +1407,6 @@
         function toggleSidebarCollapse() {
             // Add animation class
             sidebarToggleDesktop.classList.add('animating');
-
             sidebar.classList.toggle('collapsed');
             const isCollapsed = sidebar.classList.contains('collapsed');
             mainWrapper.setAttribute('data-sidebar-collapsed', isCollapsed);
@@ -1441,7 +1449,10 @@
             addSidebarTooltips();
         });
 
-
+        // Event listener for mobile toggle button
+        sidebarCollapse.addEventListener('click', function () {
+            sidebar.classList.toggle('show');
+        });
         // Event listener for desktop toggle button
         if (sidebarToggleDesktop) {
             sidebarToggleDesktop.addEventListener('click', function (e) {
@@ -1450,6 +1461,15 @@
             });
         }
 
+        // Event listener for clicks outside the sidebar (mobile only)
+        document.addEventListener('click', function (event) {
+            const target = event.target;
+            if (window.innerWidth < 1200) {
+                if (sidebar && !sidebar.contains(target) && target !== sidebarCollapse) {
+                    closeSidebar();
+                }
+            }
+        });
 
         // Handle window resize
         window.addEventListener('resize', function () {

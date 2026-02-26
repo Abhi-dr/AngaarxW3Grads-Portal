@@ -354,9 +354,7 @@ class Session(models.Model):
 
 # ======================== WHATSAPP GROUP MODEL ========================
 
-from django.db import models
-
-class FreeClassWhatsappGroupLink(models.Model):
+class WhatsAppGroup(models.Model):
     COURSE_CHOICES = (
         ("Python", "Python Free Class"),
         ("C", "C Programming Free Class"),
@@ -375,8 +373,8 @@ class FreeClassWhatsappGroupLink(models.Model):
 
     class Meta:
         ordering = ['created_at']
-        verbose_name = "Free Class WhatsApp Group Link"
-        verbose_name_plural = "Free Class WhatsApp Group Links"
+        verbose_name = "WhatsApp Group Link"
+        verbose_name_plural = "WhatsApp Group Links"
 
     def __str__(self):
         return self.course_code
