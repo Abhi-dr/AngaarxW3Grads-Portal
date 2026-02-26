@@ -88,6 +88,9 @@ active
                 </table>
             </div>
 
+            <!-- Pagination controls -->
+            <div id="pagination-container" class="mt-4"></div>
+
         </div>
     </div>
 
@@ -96,6 +99,9 @@ active
             const leaderboardContainer = document.getElementById('leaderboard');
             const filterForm = document.getElementById('filter-form');
             const apiUrl = "{% url 'student_fetch_batch_leaderboard' batch.slug %}";
+
+            let currentPage = 1;
+            let totalPages = 1;
 
             leaderboardContainer.innerHTML = `
                         <tr>
@@ -106,17 +112,40 @@ active
                             </td>
                         </tr>`
 
-            async function fetchLeaderboard() {
-                const response = await fetch(apiUrl);
+            async function fetchLeaderboard(page = 1) {
+                // Show loading state
+                leaderboardContainer.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </td>
+                    </tr>`;
+
+                const response = await fetch(`${apiUrl}?page=${page}&page_size=10`);
                 const data = await response.json();
                 console.log(data);
+
+                currentPage = data.pagination.current_page;
+                totalPages = data.pagination.total_pages;
+
                 renderLeaderboard(data.leaderboard);
+                renderPagination(data.pagination);
             }
 
             function renderLeaderboard(leaderboard) {
                 leaderboardContainer.innerHTML = '';
 
-                leaderboard.forEach((entry, index) => {
+                if (leaderboard.length === 0) {
+                    leaderboardContainer.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted">No leaderboard data available</td>
+                        </tr>`;
+                    return;
+                }
+
+                leaderboard.forEach((entry) => {
                     let sheetDetails = '';
                     for (const [sheet, count] of Object.entries(entry.sheet_breakdown)) {
                         sheetDetails += `<p class="mb-0"><strong>${sheet}:</strong> ${count}</p>`;
@@ -125,7 +154,7 @@ active
                     const row = `
                     <tr>
                         <td class="border-bottom-0">
-                            <p class="fw-semibold mb-0">${index + 1}</p>
+                            <p class="fw-semibold mb-0">${entry.rank}</p>
                         </td>
                         <td class="border-bottom-0">
                             <p class="fw-semibold mb-0">${entry.student.name}</p>
@@ -150,9 +179,98 @@ active
                 });
             }
 
+            function renderPagination(pagination) {
+                const paginationContainer = document.getElementById('pagination-container');
+                if (!paginationContainer) return;
 
+                if (pagination.total_pages <= 1) {
+                    paginationContainer.innerHTML = '';
+                    return;
+                }
+
+                let paginationHTML = '<nav aria-label="Leaderboard pagination"><ul class="pagination justify-content-center mb-0">';
+
+                // Previous button
+                paginationHTML += `
+                    <li class="page-item ${!pagination.has_previous ? 'disabled' : ''}">
+                        <button class="page-link" onclick="changePage(${pagination.current_page - 1})" ${!pagination.has_previous ? 'disabled' : ''}>
+                            Previous
+                        </button>
+                    </li>`;
+
+                // Page numbers (show max 5 pages at a time)
+                const maxPagesToShow = 5;
+                let startPage = Math.max(1, pagination.current_page - Math.floor(maxPagesToShow / 2));
+                let endPage = Math.min(pagination.total_pages, startPage + maxPagesToShow - 1);
+
+                if (endPage - startPage < maxPagesToShow - 1) {
+                    startPage = Math.max(1, endPage - maxPagesToShow + 1);
+                }
+
+                // First page
+                if (startPage > 1) {
+                    paginationHTML += `
+                        <li class="page-item">
+                            <button class="page-link" onclick="changePage(1)">1</button>
+                        </li>`;
+                    if (startPage > 2) {
+                        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                    }
+                }
+
+                // Page numbers
+                for (let i = startPage; i <= endPage; i++) {
+                    paginationHTML += `
+                        <li class="page-item ${i === pagination.current_page ? 'active' : ''}">
+                            <button class="page-link" onclick="changePage(${i})">${i}</button>
+                        </li>`;
+                }
+
+                // Last page
+                if (endPage < pagination.total_pages) {
+                    if (endPage < pagination.total_pages - 1) {
+                        paginationHTML += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+                    }
+                    paginationHTML += `
+                        <li class="page-item">
+                            <button class="page-link" onclick="changePage(${pagination.total_pages})">${pagination.total_pages}</button>
+                        </li>`;
+                }
+
+                // Next button
+                paginationHTML += `
+                    <li class="page-item ${!pagination.has_next ? 'disabled' : ''}">
+                        <button class="page-link" onclick="changePage(${pagination.current_page + 1})" ${!pagination.has_next ? 'disabled' : ''}>
+                            Next
+                        </button>
+                    </li>`;
+
+                paginationHTML += '</ul></nav>';
+
+                // Add page info
+                paginationHTML += `
+                    <div class="text-center mt-3 text-muted">
+                        <small>Showing page ${pagination.current_page} of ${pagination.total_pages} (${pagination.total_count} total students)</small>
+                    </div>`;
+
+                paginationContainer.innerHTML = paginationHTML;
+            }
+
+            // Global function for pagination buttons
+            window.changePage = function (page) {
+                if (page >= 1 && page <= totalPages) {
+                    fetchLeaderboard(page);
+                    // Scroll to top of table
+                    document.querySelector('.card').scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+
+            const start = performance.now();
 
             fetchLeaderboard(); // Initial fetch
+
+            const end = performance.now();
+            console.log(`Leaderboard fetched and rendered in ${end - start} ms`);
         });
 
     </script>
