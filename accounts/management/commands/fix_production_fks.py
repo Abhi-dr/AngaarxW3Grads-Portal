@@ -125,7 +125,24 @@ class Command(BaseCommand):
                     if old_col in cols and 'customuser_id' not in cols:
                         self.stdout.write(f"Renaming '{old_col}' to 'customuser_id' in {t}...")
                         try:
+                            # Drop ALL FK constraints on this column first — MySQL
+                            # requires this before renaming a column that's in a FK.
+                            cursor.execute(f"""
+                                SELECT CONSTRAINT_NAME
+                                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                                WHERE TABLE_SCHEMA = DATABASE()
+                                  AND TABLE_NAME = '{t}'
+                                  AND COLUMN_NAME = '{old_col}'
+                                  AND REFERENCED_TABLE_NAME IS NOT NULL
+                            """)
+                            fks_to_drop = [row[0] for row in cursor.fetchall()]
+                            for fk in fks_to_drop:
+                                cursor.execute(f"ALTER TABLE {t} DROP FOREIGN KEY {fk};")
+                                self.stdout.write(f"  -> Dropped FK: {fk}")
+
+                            # Now rename & change type to BIGINT
                             cursor.execute(f"ALTER TABLE {t} CHANGE {old_col} customuser_id BIGINT NOT NULL;")
+
                             # Re-wire FK to accounts_customuser
                             new_fk = f"{t}_customuser_id_fk_customuser"[:64]
                             cursor.execute(f"ALTER TABLE {t} ADD CONSTRAINT {new_fk} FOREIGN KEY (customuser_id) REFERENCES accounts_customuser(id);")
@@ -137,6 +154,7 @@ class Command(BaseCommand):
                 except Exception as e:
                     self.stdout.write(self.style.WARNING(f"Table {t} not found or error: {e}"))
             cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
+
 
 
             # ──────────────────────────────────────────────────────────────────
