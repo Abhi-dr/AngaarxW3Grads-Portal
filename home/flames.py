@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.db import transaction
-from accounts.models import Student
+from accounts.models import CustomUser
 
 # ===================================== FLAMES PAGE ==============================
 
@@ -111,9 +111,9 @@ def register_flames(request, slug):
     course = get_object_or_404(FlamesCourse, slug=slug, is_active=True)
     
     # If user is logged in, check if they're already registered
-    if request.user.is_authenticated and hasattr(request.user, 'student'):
+    if request.user.is_authenticated and request.user.role == 'student':
         existing_registration = FlamesRegistration.objects.filter(
-            user=request.user.student,
+            user=request.user,
             course=course
         ).first()
         
@@ -165,14 +165,14 @@ def register_flames(request, slug):
         with transaction.atomic():
             # Check if user already exists
             student = None
-            user_exists = Student.objects.filter(email=email).exists()
+            user_exists = CustomUser.objects.filter(email=email).exists()
             
-            if request.user.is_authenticated and hasattr(request.user, 'student'):
+            if request.user.is_authenticated and request.user.role == 'student':
                 # Use the logged-in student
-                student = request.user.student
+                student = request.user
             elif user_exists:
                 # User exists but not logged in - we'll handle login later
-                student = Student.objects.get(email=email)
+                student = CustomUser.objects.get(email=email)
             else:
                 # Create a new student account
                 # Get username and password from form if provided
@@ -186,12 +186,12 @@ def register_flames(request, slug):
                     counter = 1
                     
                     # Ensure username is unique
-                    while Student.objects.filter(username=username).exists():
+                    while CustomUser.objects.filter(username=username).exists():
                         username = f"{base_username}{counter}"
                         counter += 1
                 
                 # Create the student with the provided or temporary password
-                student = Student.objects.create(
+                student = CustomUser.objects.create(
                     username=username,
                     email=email,
                     first_name=first_name,
@@ -206,7 +206,7 @@ def register_flames(request, slug):
                     student.set_password(password)
                 else:
                     # Set a temporary password if not provided
-                    temp_password = Student.objects.make_random_password()
+                    temp_password = CustomUser.objects.make_random_password()
                     student.set_password(temp_password)
                     # TODO: Send welcome email with temporary password
                 
@@ -256,7 +256,7 @@ def register_flames(request, slug):
                     if member_username:
                         try:
                             # Get the user by username
-                            member_student = Student.objects.get(username=member_username)
+                            member_student = CustomUser.objects.get(username=member_username)
                             
                             # Create team member record with actual student account
                             FlamesTeamMember.objects.create(
@@ -264,7 +264,7 @@ def register_flames(request, slug):
                                 member=member_student,
                                 is_leader=False
                             )
-                        except Student.DoesNotExist:
+                        except CustomUser.DoesNotExist:
                             # This shouldn't happen if front-end validation works correctly
                             messages.warning(request, f"User with username '{member_username}' was not found. They will not be added to the team.")
                 

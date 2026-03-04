@@ -16,7 +16,7 @@ import pandas as pd
 from django.http import HttpResponse
 from django.utils.timezone import make_naive
 
-from accounts.models import Student, Instructor
+from accounts.models import CustomUser
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 
 from django.views.decorators.cache import cache_control
@@ -47,7 +47,7 @@ def sheets(request):
 @staff_member_required(login_url='login')
 def add_sheet(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     batches = Batch.objects.all()
     
     if request.method == "POST":
@@ -87,7 +87,7 @@ def add_sheet(request):
 @staff_member_required(login_url='login')
 def edit_sheet(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
     batches = Batch.objects.all()
     
@@ -140,7 +140,7 @@ def delete_sheet(request, id):
 @staff_member_required(login_url='login')
 def sheet(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
     questions = sheet.get_ordered_questions()
     
@@ -190,7 +190,7 @@ def get_excluded_questions(request, sheet_id):
 @staff_member_required(login_url='login')
 def add_new_question(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     
     if request.method == "POST":
         title = request.POST.get('title')
@@ -302,7 +302,7 @@ def remove_question_from_sheet(request, sheet_id, question_id):
 def reorder(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
     questions = sheet.get_ordered_questions()
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     
     parameters = {
         "instructor": instructor,
@@ -380,7 +380,7 @@ def fetch_sheet_timer(request, sheet_id):
 @staff_member_required(login_url='login')
 def leaderboard(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
     
     parameters = {
@@ -430,7 +430,7 @@ def sheet_leaderboard(request, slug):
     # Format leaderboard data
     leaderboard = []
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
         solved_problems = len(data['solved_questions'])
 
@@ -492,7 +492,7 @@ def download_leaderboard_excel(request, slug):
     # Format leaderboard data for DataFrame
     leaderboard = []
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
         solved_problems = len(data['solved_questions'])
 
@@ -529,7 +529,7 @@ def download_leaderboard_excel(request, slug):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def test_cases(request, slug):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     
     question = Question.objects.get(slug=slug)
     
@@ -588,7 +588,7 @@ def add_test_case(request, slug):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_test_case(request, id):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     
     test_case = TestCase.objects.get(id=id)
     

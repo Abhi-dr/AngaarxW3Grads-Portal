@@ -10,7 +10,7 @@ from django.views.decorators.http import require_http_methods
 from django.core.paginator import Paginator
 from django.views.decorators.csrf import csrf_exempt
 from administration.models import Achievement
-from accounts.models import Student
+from accounts.models import CustomUser
 from django.db.models import Q
 
 # =================================== ALL ACHIEVEMENTS ===============================
@@ -101,7 +101,7 @@ def create_achievement(request):
                 'message': 'Missing required fields'
             }, status=400)
             
-        student = get_object_or_404(Student, id=data['student_id'])
+        student = get_object_or_404(CustomUser, id=data['student_id'])
         
         achievement = Achievement.objects.create(
             student=student,
@@ -147,7 +147,7 @@ def update_achievement(request, achievement_id):
         if 'date' in data:
             achievement.date = datetime.datetime.strptime(data['date'], '%Y-%m-%d').date()
         if 'student_id' in data:
-            student = get_object_or_404(Student, id=data['student_id'])
+            student = get_object_or_404(CustomUser, id=data['student_id'])
             achievement.student = student
             
         achievement.save()

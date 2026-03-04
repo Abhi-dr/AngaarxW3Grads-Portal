@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.db.models import Q
-from accounts.models import Administrator
+from accounts.models import CustomUser
 from django.conf import settings
 from django.http import JsonResponse
 import requests, time, re, json, base64
@@ -35,7 +35,7 @@ LANGUAGE_IDS = {
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def administrator_problems(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     unapproved_question_number = Question.objects.filter(is_approved=False).count()
     
     parameters = {
@@ -219,7 +219,7 @@ def delete_question(request, id):
 @admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_question(request, id):
-    administrator = get_object_or_404(Administrator, id=request.user.id)
+    administrator = get_object_or_404(CustomUser, id=request.user.id)
     question = get_object_or_404(Question, id=id)
     sheets = Sheet.objects.all().order_by('-id')
     recommended_questions = list(RecommendedQuestions.objects.filter(question=question).values("id", "title", "platform", "link"))
@@ -319,7 +319,7 @@ def edit_question(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def question_requests(request):
         
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     questions = Question.objects.filter(is_approved=False)
     
@@ -373,7 +373,7 @@ def reject_question(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def test_cases(request, slug):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     question = Question.objects.get(slug=slug)
     
@@ -487,7 +487,7 @@ def add_test_cases(request, slug):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_test_case(request, id):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     test_case = TestCase.objects.get(id=id)
     
@@ -597,7 +597,7 @@ def driver_code(request, slug):
 @admin_required
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def administrator_pod(request):
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     # Get all PODs with their associated batches
     pods = POD.objects.select_related('question', 'batch').filter(
@@ -648,7 +648,7 @@ HEADERS = {
 @admin_required
 def test_code(request, slug):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     question = get_object_or_404(Question, slug=slug)
     sample_test_cases = TestCase.objects.filter(question=question, is_sample=True)
     

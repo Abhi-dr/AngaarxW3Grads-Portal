@@ -12,7 +12,7 @@ from angaar_hai.custom_decorators import admin_required
 from django.db import transaction
 from django.urls import reverse
 
-from accounts.models import Student, Administrator
+from accounts.models import CustomUser
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest, RecommendedQuestions, TestCase, DriverCode, MCQQuestion, MCQSubmission, QuestionImage
 
 # ========================= SHEET WORK ==========================
@@ -31,7 +31,7 @@ def sheets(request):
 @staff_member_required(login_url='login')
 @admin_required
 def add_sheet(request):
-    administrator = get_object_or_404(Administrator, id=request.user.id)
+    administrator = get_object_or_404(CustomUser, id=request.user.id)
     batches = Batch.objects.all()
     
     if request.method == "POST":
@@ -71,7 +71,7 @@ def add_sheet(request):
 @staff_member_required(login_url='login')
 @admin_required
 def edit_sheet(request, slug):
-    administrator = get_object_or_404(Administrator, id=request.user.id)
+    administrator = get_object_or_404(CustomUser, id=request.user.id)
     sheet = get_object_or_404(Sheet, slug=slug)
     batches = Batch.objects.all()
     
@@ -130,7 +130,7 @@ def delete_sheet(request, id):
 @admin_required
 def administrator_pending_sheet(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     sheets = Sheet.objects.filter(is_approved=False).order_by("-id")
     
     parameters = {
@@ -161,7 +161,7 @@ def administrator_approve_sheet(request, id):
 @admin_required
 def sheet(request, slug):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
 
     questions = sheet.get_ordered_questions()    
@@ -215,7 +215,7 @@ def get_excluded_questions(request, sheet_id):
 @admin_required
 def add_new_question(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
 
     if request.method == "POST":
         title = request.POST.get('title')
@@ -474,7 +474,7 @@ def remove_question_from_sheet(request, sheet_id, question_id):
 def reorder(request, slug):
     sheet = get_object_or_404(Sheet, slug=slug)
     questions = sheet.get_ordered_questions()
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     parameters = {
         "administrator": administrator,
@@ -555,7 +555,7 @@ def fetch_sheet_timer(request, sheet_id):
 @admin_required
 def leaderboard(request, slug):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     sheet = Sheet.objects.get(slug=slug)
     
     parameters = {
@@ -617,7 +617,7 @@ def _get_coding_leaderboard(sheet):
     # Format leaderboard data
     leaderboard = []
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
         solved_problems = len(data['solved_questions'])
 
@@ -683,7 +683,7 @@ def _get_mcq_leaderboard(sheet):
     # Format leaderboard data
     leaderboard = []
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         total_score = len(data['correct_answers'])  # Number of correct answers
         solved_problems = len(data['solved_questions'])  # Total attempted
 
@@ -797,7 +797,7 @@ def _download_coding_leaderboard_excel(sheet, slug):
     # Format leaderboard data for DataFrame
     leaderboard = []
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         total_score = sum(data[qid] for qid in data if isinstance(qid, int))  # Sum scores for questions
         solved_problems = len(data['solved_questions'])
 
@@ -877,7 +877,7 @@ def _download_mcq_leaderboard_excel(sheet, slug):
     # Format leaderboard data for DataFrame
     leaderboard = []
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         total_score = len(data['correct_answers'])  # Number of correct answers
         solved_problems = len(data['solved_questions'])  # Total attempted
 

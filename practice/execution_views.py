@@ -12,7 +12,7 @@ from django.db.models import Q
 import base64
 import re
 
-from accounts.models import Student
+from accounts.models import CustomUser
 from .models import RecommendedQuestions
 
 from django.views.decorators.cache import cache_control
@@ -689,7 +689,7 @@ def send_output(request, token, slug):
         print("TOKEN ON SEND OUTPUT:", token)
         
         question = get_object_or_404(Question, slug=slug)
-        user = request.user.student            
+        user = request.user            
         
         body = json.loads(request.body)
         
@@ -829,7 +829,7 @@ def submit_code(request, slug):
             if not request.user.is_authenticated:
                 return JsonResponse({"error": "Authentication required."}, status=401)
                 
-            user = request.user.student
+            user = request.user
             
             # Validate inputs
             question = get_object_or_404(Question, slug=slug)
@@ -1056,7 +1056,7 @@ def custom_input(request, slug):
 def unlock_hint(request, question_id):
     if request.method == 'POST' and request.user.is_authenticated:
         question = get_object_or_404(Question, id=question_id)
-        student = request.user.student
+        student = request.user
 
         if question.hint:  # Check if the question has a hint
             if student.coins > 0:  # Check if the user has enough coins

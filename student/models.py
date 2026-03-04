@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
-from accounts.models import Student, Instructor  # proxy models — same table as CustomUser
+from accounts.models import CustomUser
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest
 from home.models import FlamesCourse
 from django.contrib import messages

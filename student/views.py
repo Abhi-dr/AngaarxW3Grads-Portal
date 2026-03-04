@@ -8,7 +8,10 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 
 
-from accounts.models import Student, Instructor
+# Phase 2: Student/Instructor are proxy models on the same table as CustomUser.
+# request.user IS already a CustomUser — all fields (coins, dob, role, etc.) are on it directly.
+# We still import Student for queryset filtering where it makes the intent clear.
+from accounts.models import CustomUser
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
 from .event_models import Event, CertificateTemplate, Certificate
 from practice.models import POD, Submission, Batch, Question, Sheet, Streak
@@ -126,15 +129,13 @@ def dashboard(request):
         ).first()
     
     # Check birthday
+    # WHY: Old code tried getattr(student, 'student', None) — that was the MTI reverse accessor.
+    # Now request.user IS CustomUser, so .dob is a direct field on it.
     is_birthday = False
     try:
-        # Get student profile if exists
-        student_profile = getattr(student, 'student', None)
-        dob = getattr(student_profile, 'dob', None) if student_profile else getattr(student, 'dob', None)
-        
-        if dob:
-            if dob.day == timezone.now().day and dob.month == timezone.now().month:
-                is_birthday = True
+        dob = request.user.dob   # directly on CustomUser — no proxy lookup needed
+        if dob and dob.day == timezone.now().day and dob.month == timezone.now().month:
+            is_birthday = True
     except Exception as e:
         print(f"Error checking birthday: {e}")
 
@@ -180,7 +181,9 @@ def notifications(request):
 @login_required(login_url="login")
 def anonymous_message(request):
     
-    my_messages = Anonymous_Message.objects.filter(student=request.user.student)
+    # WHY request.user not request.user.student:
+    # CustomUser IS the student now — the FK on Anonymous_Message points to CustomUser directly.
+    my_messages = Anonymous_Message.objects.filter(student=request.user)
     
     parameters = {
         "my_messages": my_messages
@@ -194,21 +197,23 @@ def anonymous_message(request):
 @login_required(login_url="login")
 def new_message(request):
 
-    courses = request.user.student.courses.all()
-    my_instructors = Instructor.objects.filter(course__in=courses).distinct()
-    
+    # request.user.courses: the ManyToMany 'courses' field is on CustomUser directly.
+    # CustomUser.objects.filter() still works — Instructor is a proxy of CustomUser.
+    courses = request.user.courses.all()
+    my_instructors = CustomUser.objects.filter(course__in=courses).distinct()
+
     if request.method == "POST":
         instructor_id = request.POST.get("instructor")
         message = request.POST.get("message")
-        
-        instructor = Instructor.objects.get(id=instructor_id)
-        
-        if Anonymous_Message.objects.filter(student=request.user.student, instructor=instructor, is_replied=False).exists():
+
+        instructor = CustomUser.objects.get(id=instructor_id)
+
+        if Anonymous_Message.objects.filter(student=request.user, instructor=instructor, is_replied=False).exists():
             messages.error(request, "You have already sent a message to this instructor! Wait until they reply!")
             return redirect("anonymous_message")
-        
+
         Anonymous_Message.objects.create(
-            student=request.user.student,
+            student=request.user,
             instructor=instructor,
             message=message
         )
@@ -229,7 +234,8 @@ def new_message(request):
 @login_required(login_url="login")
 def get_random_question(request):
     
-    student = request.user.student
+    # request.user IS the CustomUser — pass it directly. All Question/Submission FKs point to it.
+    student = request.user
     
     # Updated logic: Only include questions from practice sheets (not part of any batch)
     question = Question.objects.filter(
@@ -280,8 +286,9 @@ def my_profile(request):
 @login_required(login_url="login")
 def edit_profile(request):
     
-    # Access the student profile associated with the logged-in user
-    student = request.user.student
+    # WHY: No separate Student model row exists anymore.
+    # CustomUser has first_name, last_name, email, dob, linkedin_id, github_id, coins — all directly.
+    student = request.user  # CustomUser instance with all profile fields
 
     if request.method == "POST":
         coins_earned = 0  # Track how many coins the user earns during this update
@@ -356,8 +363,7 @@ def upload_profile(request):
 
     if request.method == 'POST':
 
-        # Access the student profile associated with the logged-in user
-        student = request.user.student
+        student = request.user  # CustomUser — profile_pic field is directly on it
 
         student.profile_pic = request.FILES['profile_pic']
         
@@ -376,8 +382,8 @@ def upload_profile(request):
 @login_required(login_url="login")
 def change_password(request):
         
-    # Access the student profile associated with the logged-in user
-    student = request.user.student
+    # CustomUser has set_password(), check_password(), is_changed_password directly.
+    student = request.user
     
     old_password = request.POST.get("old_password")
     new_password = request.POST.get("new_password")
@@ -412,8 +418,8 @@ def change_password(request):
 
 @login_required(login_url="login")
 def delete_account(request):
-    # Access the student profile associated with the logged-in user
-    student = request.user.student
+    # CustomUser — calling student.delete() deletes the CustomUser row (hard delete).
+    student = request.user
     
     if request.method == "POST":
     
@@ -442,7 +448,7 @@ def feedback(request):
         message = request.POST.get("message")
         
         Feedback.objects.create(
-            student=request.user.student,
+            student=request.user,  # FK on Feedback points to CustomUser (rewired in Phase 1)
             subject=subject,
             message=message
         )
@@ -464,7 +470,7 @@ def leveller(request):
 
 def restore_streak(request):
     if request.method == 'POST' and request.user.is_authenticated:
-        student = request.user.student
+        student = request.user  # CustomUser — Streak FK points to it, coins field is direct
         streak = Streak.get_user_streak(student)
         
         # Check if streak can be restored using the model method

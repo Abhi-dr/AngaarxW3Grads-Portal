@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
 
-from accounts.models import Student, Administrator
+from accounts.models import CustomUser
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 from django.db.models import Subquery, OuterRef
 from angaar_hai.custom_decorators import admin_required

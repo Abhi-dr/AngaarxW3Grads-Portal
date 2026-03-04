@@ -11,7 +11,7 @@ from django.core.paginator import Paginator, EmptyPage
 
 from django.db.models import Count, Min, Max
 
-from accounts.models import Student
+from accounts.models import CustomUser
 from student.models import Notification, Course
 from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest, MCQQuestion, MCQSubmission
 
@@ -29,7 +29,7 @@ def my_batches(request):
 def fetch_my_batch_data(request):
     """API endpoint to fetch batch and course data as JSON"""
     try:
-        student = request.user.student
+        student = request.user
         
         # Fetch all batches with their enrollment status for the current student
         all_batches = Batch.objects.annotate(
@@ -113,7 +113,7 @@ def fetch_my_batch_data(request):
 
 @login_required(login_url="login")
 def enroll_batch(request, id):
-    student = request.user.student
+    student = request.user
     batch = get_object_or_404(Batch, id=id)
 
     if EnrollmentRequest.objects.filter(student=student, batch=batch).exists():
@@ -145,7 +145,7 @@ def enroll_batch(request, id):
 @login_required(login_url="login")
 def batch(request, slug):
     batch = get_object_or_404(Batch, slug=slug)
-    student = request.user.student
+    student = request.user
     notifications = Notification.objects.filter(expiration_date__gt=timezone.now(), is_alert=True)
 
     
@@ -197,7 +197,7 @@ def my_sheet(request, slug):
     
     sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
     
-    enabled_questions = sheet.get_enabled_questions_for_user(request.user.student)
+    enabled_questions = sheet.get_enabled_questions_for_user(request.user)
 
     if sheet.sheet_type == "MCQ":
 
@@ -229,7 +229,7 @@ def my_sheet(request, slug):
 @login_required(login_url="login")
 def sheet_progress(request, sheet_id):
     sheet = get_object_or_404(Sheet, id=sheet_id)
-    student = request.user.student
+    student = request.user
     progress = sheet.get_progress(student)
 
     return JsonResponse({"progress": progress})
@@ -259,8 +259,8 @@ def fetch_sheet_questions(request, id):
             "difficulty_color": question.get_difficulty_level_color(),
             "youtube_link": question.youtube_link,
             "slug": question.slug,
-            "status": question.get_user_status(request.user.student),
-            "color": question.get_status_color(request.user.student)
+            "status": question.get_user_status(request.user),
+            "color": question.get_status_color(request.user)
         }
         for question in questions
     ]
@@ -300,7 +300,7 @@ def student_fetch_batch_leaderboard(request, slug):
     user_ids_to_fetch = {sub['user_id'] for sub in submissions}
     sheet_ids_to_fetch = {sub['question__sheets__id'] for sub in submissions}
 
-    student_map = Student.objects.in_bulk(user_ids_to_fetch)
+    student_map = CustomUser.objects.in_bulk(user_ids_to_fetch)
     sheet_map = Sheet.objects.in_bulk(sheet_ids_to_fetch)
 
     user_scores = {}

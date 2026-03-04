@@ -4,7 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
-from accounts.models import Administrator, Student, Instructor
+from accounts.models import CustomUser
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration, CourseSheet
 
 from django.contrib.contenttypes.models import ContentType
@@ -31,7 +31,7 @@ from practice.models import Streak
 # ======================================== MY JOVAC COURSE ======================================
 
 def jovacs(request):
-    instructor = get_object_or_404(Instructor, id=request.user.id)
+    instructor = get_object_or_404(CustomUser, id=request.user.id)
 
     # Get only courses where the logged-in instructor is assigned
     courses = Course.objects.filter(instructors=instructor, is_active=True)
@@ -106,7 +106,8 @@ def add_sheet(request, course_slug):
         name = request.POST.get('name')
         description = request.POST.get('description')
         thumbnail = request.FILES.get('thumbnail')
-        created_by = request.user.instructor if hasattr(request.user, 'instructor') else None
+        # created_by FK points to CustomUser — request.user IS the CustomUser (instructor)
+        created_by = request.user
 
         sheet = CourseSheet.objects.create(
             name=name,

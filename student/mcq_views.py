@@ -11,7 +11,7 @@ import json
 from django.db.models import Exists, OuterRef
 from django.core.paginator import Paginator
 from django.db.models import Count, Min, Max
-from accounts.models import Student
+from accounts.models import CustomUser
 from student.models import Notification, Course
 from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest, MCQQuestion, MCQSubmission, Streak
 from asgiref.sync import async_to_sync
@@ -68,8 +68,8 @@ def mcq_question_view(request, sheet_slug, slug):
     )
 
     try:
-        student = request.user.student
-    except Student.DoesNotExist:
+        student = request.user
+    except CustomUser.DoesNotExist:
         messages.error(request, "Student profile not found.")
         return redirect('some_error_page')
 
@@ -107,7 +107,7 @@ def submit_mcq_answer(request, slug):
         is_approved=True
     )
     
-    student = get_object_or_404(Student, id=request.user.id)
+    student = get_object_or_404(CustomUser, id=request.user.id)
     
     # Parse JSON data
     try:
@@ -191,7 +191,7 @@ def submit_mcq_answer(request, slug):
 #         current_question = get_object_or_404(MCQQuestion, slug=slug, is_approved=True)
         
 #         # Get student
-#         student = get_object_or_404(Student, user=request.user)
+#         student = request.user
         
 #         # Get questions from same sheet, excluding current question
 #         sheet_questions = MCQQuestion.objects.filter(
@@ -275,7 +275,7 @@ def render_next_mcq_question_in_sheet(request, sheet_id, question_id):
     current_question = get_object_or_404(MCQQuestion, id=question_id)
     
     # Get student
-    student = get_object_or_404(Student, id=request.user.id)
+    student = get_object_or_404(CustomUser, id=request.user.id)
     
     # Use the sheet's method to get next question
     next_question = sheet.get_next_question(current_question)
@@ -326,7 +326,7 @@ def mcq_leaderboard(request, slug):
         # Optimized query using aggregation - NO N+1 queries!
         from django.db.models import Q, Count, Case, When, F, FloatField, ExpressionWrapper
         
-        students_with_submissions = Student.objects.filter(
+        students_with_submissions = CustomUser.objects.filter(
             mcq_submissions__question__in=sheet_questions
         ).annotate(
             # Count correct answers
@@ -397,7 +397,7 @@ def mcq_sheet_progress(request, slug):
     """
     try:
         sheet = get_object_or_404(Sheet, slug=slug, sheet_type="MCQ", is_approved=True)
-        student = get_object_or_404(Student, user=request.user)
+        student = request.user
         
         # Get all questions in order
         questions = sheet.get_ordered_questions()

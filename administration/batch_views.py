@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.core.paginator import Paginator
 
 
-from accounts.models import Student, Administrator
+from accounts.models import CustomUser
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 from django.db.models import Subquery, OuterRef
 from angaar_hai.custom_decorators import admin_required
@@ -26,7 +26,7 @@ import json
 @admin_required
 def batches(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     batches = Batch.objects.all()
     
     parameters = {
@@ -44,7 +44,7 @@ def batches(request):
 @staff_member_required(login_url='login')
 @admin_required
 def add_batch(request):
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     if request.method == "POST":
         name = request.POST.get('name')
@@ -81,7 +81,7 @@ def add_batch(request):
 @admin_required
 def enrollment_requests(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     total_pending_requests = EnrollmentRequest.objects.filter(status="Pending").count()
     
     parameters = {
@@ -249,7 +249,7 @@ def reject_enrollment(request, id):
 @admin_required
 def batch(request, slug):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     batch = Batch.objects.get(slug=slug)
     
     # Fetch all the sheets for this batch
@@ -357,7 +357,7 @@ def set_pod(request, slug):
 @admin_required
 def view_submissions(request, slug):
     question = get_object_or_404(Question, slug=slug)
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     parameters = {
         "question": question,
@@ -374,7 +374,7 @@ def view_submissions(request, slug):
 @admin_required
 def batch_enrollment_requests(request, slug):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     batch = Batch.objects.get(slug=slug)
     total_pending_requests = EnrollmentRequest.objects.filter(batch=batch, status="Pending").count()
     
@@ -576,7 +576,7 @@ def fetch_batch_leaderboard(request, slug):
     solved_question_counts = {}
 
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         solved_problems = len(data['solved_questions'])
 
         # Map sheet IDs to sheet names
@@ -683,7 +683,7 @@ def download_batch_leaderboard_excel(request, slug):
     # Format leaderboard data for DataFrame
     leaderboard = []
     for user_id, data in user_scores.items():
-        user = Student.objects.get(id=user_id)
+        user = CustomUser.objects.get(id=user_id)
         solved_problems = len(data['solved_questions'])
 
         # Convert timezone-aware datetime to naive

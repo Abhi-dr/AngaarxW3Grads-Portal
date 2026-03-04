@@ -29,7 +29,7 @@ Student -> Send Messages
 
     {% endfor %}
 
-    
+
 
     <div class="row">
         <div class="d-flex align-items-stretch">
@@ -82,7 +82,7 @@ Student -> Send Messages
                                     </td>
                                     <td class="border-bottom-0">
                                         <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="{{ message.message }}">{{ message.message|truncatechars:20 }}</h6>
+                                            title="{{ message.message }}">{{ message.message|truncatechars:20 }}</h6>
                                         <span class="fw-normal"></span>
                                     </td>
 
@@ -103,13 +103,13 @@ Student -> Send Messages
                                 <tr class="alert alert-success alert-dismissible fade show">
                                     {% else %}
                                 <tr class="alert alert-danger alert-dismissible fade show">
-                                {% endif %}
+                                    {% endif %}
                                     <td class="border-bottom-0">
                                         <h6 class="fw-semibold mb-0">{{ message.instructor.first_name|title }}:</h6>
                                     </td>
                                     <td class="border-bottom-0">
                                         <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                        title="{{ message.reply }}">{{ message.reply|truncatechars:20 }}</h6>
+                                            title="{{ message.reply }}">{{ message.reply|truncatechars:20 }}</h6>
                                         <span class="fw-normal"></span>
                                     </td>
 
@@ -122,8 +122,7 @@ Student -> Send Messages
                                     <td class="border-bottom-0">
                                         <div class="d-flex align-items-center gap-2">
                                             {% if message.is_replied %}
-                                            <span
-                                                class="badge bg-success">Replied</span>
+                                            <span class="badge bg-success">Replied</span>
                                             {% else %}
                                             <span class="badge bg-danger">Not Replied
                                                 Yet</span>
@@ -147,7 +146,7 @@ Student -> Send Messages
                         {% endif %}
 
                     </div>
-                    
+
                 </div>
 
 
@@ -157,7 +156,7 @@ Student -> Send Messages
 
     </div>
 
-    
+
 
 </div>
 

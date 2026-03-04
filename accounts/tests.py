@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
-from .models import Student, EmailVerificationToken
+from .models import CustomUser, EmailVerificationToken
 from django.core import mail
 
 class EmailVerificationTests(TestCase):
@@ -24,7 +24,7 @@ class EmailVerificationTests(TestCase):
         self.assertTemplateUsed(response, 'accounts/verification_sent.html')
 
         # 3. Check user created but inactive
-        user = Student.objects.get(username='testuser')
+        user = CustomUser.objects.get(username='testuser')
         self.assertFalse(user.is_active)
 
         # 4. Check email sent
@@ -38,7 +38,7 @@ class EmailVerificationTests(TestCase):
 
     def test_verification_activates_user(self):
         # 1. Create a user manually (inactive)
-        user = Student.objects.create(
+        user = CustomUser.objects.create(
             username='verifyuser',
             email='verify@example.com',
             first_name='Verify',
@@ -66,7 +66,7 @@ class EmailVerificationTests(TestCase):
         self.assertIn('Welcome', mail.outbox[0].subject)
 
     def test_invalid_token_fails(self):
-        user = Student.objects.create(username='failuser', email='fail@example.com', is_active=False)
+        user = CustomUser.objects.create(username='failuser', email='fail@example.com', is_active=False)
         invalid_url = reverse('verify_email', args=[user.pk, 'invalidtoken'])
         
         response = self.client.get(invalid_url)

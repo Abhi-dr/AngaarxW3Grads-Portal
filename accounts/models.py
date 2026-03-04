@@ -148,58 +148,13 @@ class CustomUser(AbstractUser):
 
 
 # =============================================================================
-# BACKWARD-COMPAT PROXY MODELS
-# These let ALL existing views / querysets work without any change
-# during Phase 1.  Remove them in Phase 2 after view layer is cleaned up.
+# Phase 2 note: Student, Instructor, Administrator proxy models REMOVED.
+# Use CustomUser directly with role-based filtering:
+#
+#   CustomUser.objects.filter(role='student')   — or — CustomUser.students.all()
+#   CustomUser.objects.filter(role='instructor') — or — CustomUser.instructors.all()
+#   CustomUser.objects.filter(role='admin')      — or — CustomUser.admins.all()
 # =============================================================================
-
-class Student(CustomUser):
-    """
-    Proxy model — behaves exactly like old Student(User).
-    All FK relations, QuerySets, and view code using Student still work.
-    """
-    objects = StudentManager()
-
-    class Meta:
-        proxy               = True
-        verbose_name        = 'Student'
-        verbose_name_plural = 'Students'
-
-    def save(self, *args, **kwargs):
-        self.role = 'student'
-        super().save(*args, **kwargs)
-
-
-class Instructor(CustomUser):
-    """
-    Proxy model — behaves exactly like old Instructor(User).
-    """
-    objects = InstructorManager()
-
-    class Meta:
-        proxy               = True
-        verbose_name        = 'Instructor'
-        verbose_name_plural = 'Instructors'
-
-    def save(self, *args, **kwargs):
-        self.role = 'instructor'
-        super().save(*args, **kwargs)
-
-
-class Administrator(CustomUser):
-    """
-    Proxy model — behaves exactly like old Administrator(User).
-    """
-    objects = AdminManager()
-
-    class Meta:
-        proxy               = True
-        verbose_name        = 'Administrator'
-        verbose_name_plural = 'Administrators'
-
-    def save(self, *args, **kwargs):
-        self.role = 'admin'
-        super().save(*args, **kwargs)
 
 
 # =============================================================================

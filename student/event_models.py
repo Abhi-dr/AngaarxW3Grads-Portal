@@ -6,7 +6,7 @@ from django.conf import settings
 from django.utils import timezone
 from weasyprint import HTML
 
-from accounts.models import Student 
+from accounts.models import CustomUser
 
 
 class Event(models.Model):
@@ -65,7 +65,7 @@ class Certificate(models.Model):
         help_text="Auto-generated: EVENTCODE + STUDENTPK"
     )
     event = models.ForeignKey(Event, on_delete=models.PROTECT, related_name="certificates")
-    student = models.ForeignKey(Student, on_delete=models.PROTECT, related_name="certificates")
+    student = models.ForeignKey(CustomUser, on_delete=models.PROTECT, related_name="certificates")
     issued_date = models.DateField(default=timezone.now)
     approved = models.BooleanField(default=False)
 

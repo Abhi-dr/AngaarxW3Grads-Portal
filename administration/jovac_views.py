@@ -4,7 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
-from accounts.models import Administrator, Student, Instructor
+from accounts.models import CustomUser
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration, CourseSheet
 
 from django.contrib.contenttypes.models import ContentType
@@ -158,7 +158,7 @@ def edit_sheet(request, course_slug, sheet_slug):
 @admin_required
 def add_course(request):
 
-    instructors = Instructor.objects.all()
+    instructors = CustomUser.objects.all()
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -174,7 +174,7 @@ def add_course(request):
         course.save()
 
         for instructor_id in my_instructors:
-            instructor = Instructor.objects.get(id=instructor_id)
+            instructor = CustomUser.objects.get(id=instructor_id)
             course.instructors.add(instructor)
 
         course.thumbnail = thumbnail
@@ -196,7 +196,7 @@ def add_course(request):
 @admin_required
 def edit_course(request, slug):
     course = Course.objects.get(slug=slug)
-    instructors = Instructor.objects.all()
+    instructors = CustomUser.objects.all()
 
     if request.method == 'POST':
         course.name = request.POST.get('name')
@@ -209,7 +209,7 @@ def edit_course(request, slug):
         # Clear existing instructors and add the new ones
         course.instructors.clear()
         for instructor_id in selected_instructors:
-            instructor = Instructor.objects.get(id=instructor_id)
+            instructor = CustomUser.objects.get(id=instructor_id)
             course.instructors.add(instructor)
 
         course.save()
@@ -235,7 +235,7 @@ def add_sheet(request, course_slug):
         name = request.POST.get('name')
         description = request.POST.get('description')
         thumbnail = request.FILES.get('thumbnail')
-        created_by = request.user.instructor if hasattr(request.user, 'instructor') else None
+        created_by = request.user  # CustomUser IS the admin — no proxy lookup needed
 
         sheet = CourseSheet.objects.create(
             name=name,
@@ -473,7 +473,7 @@ def view_submissions(request, id):
 def reorder_assignments(request, slug):
     course_sheet = get_object_or_404(CourseSheet, slug=slug)
     assignments = course_sheet.get_ordered_assignments()
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = request.user  # CustomUser with role='admin' — no separate table
 
     return render(request, 'administration/jovac/reorder.html', {
         "administrator": administrator,

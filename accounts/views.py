@@ -15,7 +15,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.contrib.auth import login as default_login
 
-from .models import CustomUser, Student, Instructor, Administrator, PasswordResetToken, EmailVerificationToken
+from .models import CustomUser, PasswordResetToken, EmailVerificationToken
 from django.urls import reverse
 from django.utils.timezone import now
 from practice.models import Sheet
@@ -188,7 +188,7 @@ def check_username_exists(request):
     username = request.GET.get('username')
     course_id = request.GET.get('course_id')
     
-    student = Student.objects.filter(username=username).first()
+    student = CustomUser.objects.filter(username=username).first()
     exists = student is not None
     
     response_data = {'exists': exists}
@@ -231,7 +231,7 @@ def check_email_availability(request):
 @login_required(login_url="login")
 @staff_member_required(login_url="login")
 def block_student(request, id):
-    student = Student.objects.get(id=id)
+    student = CustomUser.objects.get(id=id)
     student.is_active = not student.is_active
     student.save()
     
@@ -244,7 +244,7 @@ def block_student(request, id):
 @login_required(login_url="login")
 @staff_member_required(login_url="login")
 def unblock_student(request, id):
-    student = Student.objects.get(id=id)
+    student = CustomUser.objects.get(id=id)
     student.is_active = not student.is_active
     student.save()
     
@@ -468,7 +468,7 @@ def reset_password(request, user_id, token):
 def get_students_api(request):
     """API endpoint to get list of students for administrator use."""
     try:
-        students = Student.objects.filter(is_active=True).values('id', "first_name", "last_name", 'username', 'email')
+        students = CustomUser.objects.filter(is_active=True).values('id', "first_name", "last_name", 'username', 'email')
         # sort by first_name
         students = students.order_by('first_name')
         return JsonResponse({
@@ -487,7 +487,7 @@ def get_students_api(request):
 
 import openpyxl
 from django.http import HttpResponse
-from .models import Student
+from .models import CustomUser
 
 
 def export_students_excel(request):
@@ -500,7 +500,7 @@ def export_students_excel(request):
     ws.append(["Full Name", "Email", "Mobile Number"])
 
     # Query only required fields & only students with phone numbers
-    students = Student.objects.filter(
+    students = CustomUser.objects.filter(
         mobile_number__isnull=False
     ).exclude(
         mobile_number=""

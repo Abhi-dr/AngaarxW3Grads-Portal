@@ -4,7 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
-from accounts.models import Instructor, Student
+from accounts.models import CustomUser
 from student.models import Notification, Anonymous_Message, Feedback
 from practice.models import Sheet, Submission, Question
 from django.http import JsonResponse, HttpResponse
@@ -20,7 +20,7 @@ import io
 @staff_member_required(login_url='login')
 def index(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     latest_sheet = Sheet.objects.latest('id')
     
     # get the total number of submissions happened today only
@@ -41,7 +41,7 @@ def index(request):
 @staff_member_required(login_url='login')
 def instructor_profile(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     
     parameters = {
         "instructor": instructor
@@ -55,7 +55,7 @@ def instructor_profile(request):
 @staff_member_required(login_url='login')
 def edit_instructor_profile(request):
     
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     
     if request.method == "POST":
         instructor.first_name = request.POST.get("first_name")
@@ -90,7 +90,7 @@ def upload_instructor_profile(request):
 
     if request.method == 'POST':
 
-        instructor = Instructor.objects.get(id=request.user.id)
+        instructor = CustomUser.objects.get(id=request.user.id)
 
         instructor.profile_pic = request.FILES['profile_pic']
         
@@ -111,7 +111,7 @@ def upload_instructor_profile(request):
 @staff_member_required(login_url='login')
 def change_instructor_password(request):
         
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     
     if instructor.check_password(request.POST.get("old_password")):
         
@@ -139,7 +139,7 @@ def change_instructor_password(request):
 @staff_member_required(login_url='login')
 def attendance_visualizer(request):
     """Attendance visualizer view for instructors"""
-    instructor = Instructor.objects.get(id=request.user.id)
+    instructor = CustomUser.objects.get(id=request.user.id)
     
     parameters = {
         "instructor": instructor

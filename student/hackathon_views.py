@@ -8,7 +8,7 @@ from django.db import IntegrityError
 from django.core.paginator import Paginator
 
 from .hackathon_models import HackathonTeam, TeamMember, JoinRequest, TeamInvite
-from accounts.models import Student
+from accounts.models import CustomUser
 
 import json
 
@@ -16,7 +16,7 @@ import json
 @login_required(login_url="login")
 def hackathon_dashboard(request):
     """Main view for the hackathon team maker dashboard"""
-    student = request.user.student
+    student = request.user
     
     # Check if student is already a team leader
     led_team = HackathonTeam.objects.filter(leader=student).first()
@@ -50,7 +50,7 @@ def hackathon_dashboard(request):
 @login_required(login_url="login")
 def create_team(request):
     """View for creating a new hackathon team"""
-    student = request.user.student
+    student = request.user
     
     # Check if student is already a team leader or member
     if HackathonTeam.objects.filter(leader=student).exists():
@@ -132,7 +132,7 @@ def create_team(request):
 @login_required(login_url="login")
 def manage_team(request, slug):
     """View for managing a hackathon team (for team leaders)"""
-    student = request.user.student
+    student = request.user
     team = get_object_or_404(HackathonTeam, slug=slug)
     
     # Check if student is the team leader
@@ -163,7 +163,7 @@ def manage_team(request, slug):
 @login_required(login_url="login")
 def update_team(request, slug):
     """AJAX view for updating team details"""
-    student = request.user.student
+    student = request.user
     team = get_object_or_404(HackathonTeam, slug=slug)
     
     # Check if student is the team leader
@@ -191,7 +191,7 @@ def update_team(request, slug):
 @login_required(login_url="login")
 def delete_team(request, team_id):
     """AJAX view for deleting a team"""
-    student = request.user.student
+    student = request.user
     team = get_object_or_404(HackathonTeam, id=team_id)
     
     # Check if student is the team leader
@@ -211,7 +211,7 @@ def delete_team(request, team_id):
 @login_required(login_url="login")
 def list_teams(request):
     """View for listing all available teams"""
-    student = request.user.student
+    student = request.user
     
     # Get query parameters for filtering
     search_query = request.GET.get('search', '')
@@ -293,7 +293,7 @@ def list_teams(request):
 @login_required(login_url="login")
 def team_detail(request, slug):
     """View for displaying team details"""
-    student = request.user.student
+    student = request.user
     team = get_object_or_404(HackathonTeam, slug=slug)
     
     # Get team members
@@ -366,7 +366,7 @@ def team_detail(request, slug):
 @login_required(login_url="login")
 def send_join_request(request, team_id):
     """AJAX view for sending a join request to a team"""
-    student = request.user.student
+    student = request.user
     team = get_object_or_404(HackathonTeam, id=team_id)
     
     # Check if team is open for join requests
@@ -409,7 +409,7 @@ def send_join_request(request, team_id):
 @login_required(login_url="login")
 def cancel_join_request(request, request_id):
     """AJAX view for canceling a join request"""
-    student = request.user.student
+    student = request.user
     join_request = get_object_or_404(JoinRequest, id=request_id, student=student)
     
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -430,7 +430,7 @@ def handle_join_request(request, request_id, action):
     join_request = get_object_or_404(JoinRequest, id=request_id)
     
     # Check if user is team leader
-    if request.user.student != join_request.team.leader:
+    if request.user != join_request.team.leader:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'}, status=403)
     
     if join_request.status != 'pending':
@@ -475,7 +475,7 @@ def handle_join_request(request, request_id, action):
 @login_required(login_url="login")
 def remove_team_member(request, team_id, member_id):
     """AJAX view for removing a team member"""
-    student = request.user.student
+    student = request.user
     team = get_object_or_404(HackathonTeam, id=team_id)
     
     # Check if student is the team leader
@@ -494,7 +494,7 @@ def remove_team_member(request, team_id, member_id):
 @login_required(login_url="login")
 def leave_team(request, team_id):
     """AJAX view for leaving a team"""
-    student = request.user.student
+    student = request.user
     team = get_object_or_404(HackathonTeam, id=team_id)
     
     # Check if student is a team member
@@ -534,11 +534,11 @@ def search_students(request):
     team_id = request.GET.get('team_id', None)
     
     if query:
-        students = Student.objects.filter(
+        students = CustomUser.objects.filter(
             Q(first_name__icontains=query) | 
             Q(last_name__icontains=query) | 
             Q(email__icontains=query)
-        ).exclude(id=request.user.student.id)
+        ).exclude(id=request.user.id)
         
         results = []
         for student in students:
@@ -556,7 +556,7 @@ def search_students(request):
 @login_required(login_url="login")
 def send_team_invite(request, team_id):
     """AJAX view for sending a team invite"""
-    student = request.user.student
+    student = request.user
     team = get_object_or_404(HackathonTeam, id=team_id)
     
     if request.method == 'POST':
@@ -569,7 +569,7 @@ def send_team_invite(request, team_id):
             messages.error(request, 'Student ID is required')
             return redirect('manage_team', slug=team.slug)
         
-        invited_student = get_object_or_404(Student, id=student_id)
+        invited_student = get_object_or_404(CustomUser, id=student_id)
         
         # Check if student is already in a team
         if TeamMember.objects.filter(student=invited_student).exists():
@@ -630,7 +630,7 @@ def handle_team_invite(request, invite_id, action):
         return JsonResponse({'status': 'error', 'message': 'Invalid action'})
     
     invite = get_object_or_404(TeamInvite, id=invite_id)
-    if request.user.student != invite.student:
+    if request.user != invite.student:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'})
     
     if invite.status != 'pending':
@@ -676,7 +676,7 @@ def handle_team_invite(request, invite_id, action):
 def cancel_team_invite(request, invite_id):
    
     invite = get_object_or_404(TeamInvite, id=invite_id)
-    if request.user.student != invite.team.leader:
+    if request.user != invite.team.leader:
         return JsonResponse({'status': 'error', 'message': 'Unauthorized'})
     
     if invite.status != 'pending':

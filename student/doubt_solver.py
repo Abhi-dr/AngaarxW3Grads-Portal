@@ -36,7 +36,7 @@ def ask_doubt_ajax(request):
         try:
             answer = get_answer(instructor, question)
             
-            question_obj = AIQuestion(student=request.user.student, question=question, answer=answer, instructor=instructor)
+            question_obj = AIQuestion(student=request.user, question=question, answer=answer, instructor=instructor)
             question_obj.save()
             
             return JsonResponse({"success": True, "answer": answer})

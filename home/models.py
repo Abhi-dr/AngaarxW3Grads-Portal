@@ -2,7 +2,7 @@ from django.db import models
 from ckeditor_uploader.fields import RichTextUploadingField
 from django.contrib.auth.models import User
 from django.conf import settings
-from accounts.models import Student, Instructor  # proxy models — same table as CustomUser
+from accounts.models import CustomUser
 
 from datetime import datetime, timedelta
 

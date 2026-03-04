@@ -4,7 +4,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.db.models import Q
-from accounts.models import Administrator, Student, Instructor
+from accounts.models import CustomUser
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
 
 # Helper function for instructor authorization
@@ -36,7 +36,7 @@ from practice.models import Streak
 @admin_required
 def index(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     latest_sheet = Sheet.objects.latest('id')
     
     todays_submissions = Submission.get_todays_total_submissions()
@@ -48,7 +48,7 @@ def index(request):
     # today = timezone.now().date()
 
     # # Filter users who logged in today
-    # users_today = Student.objects.filter(last_login__date=today)
+    # users_today = CustomUser.objects.filter(last_login__date=today)
 
     # # Get the count of such users
     # total_users_today = users_today.count()
@@ -58,7 +58,7 @@ def index(request):
     
     # sessions = Session.objects.filter(administrator=administrator, recorded_session_link=None).order_by("-session_time")
     
-    # total_enrolled_students = Student.objects.filter(courses__administrator=administrator).distinct().count()
+    # total_enrolled_students = CustomUser.objects.filter(courses__administrator=administrator).distinct().count()
     # total_sessions = Session.objects.filter(administrator=administrator).count()
     
     # course = Course.objects.get(administrator=administrator)
@@ -87,7 +87,7 @@ def index(request):
     
     # sessions = Session.objects.filter(administrator=administrator, recorded_session_link=None).order_by("-session_time")
     
-    # total_enrolled_students = Student.objects.filter(courses__administrator=administrator).distinct().count()
+    # total_enrolled_students = CustomUser.objects.filter(courses__administrator=administrator).distinct().count()
     # total_sessions = Session.objects.filter(administrator=administrator).count()
     
     # course = Course.objects.get(administrator=administrator)
@@ -125,7 +125,7 @@ def fetch_all_students(request):
     page_size = int(request.GET.get('page_size', 10))
     
     # Base QuerySet
-    students = Student.objects.all().distinct().order_by('-id')
+    students = CustomUser.objects.all().distinct().order_by('-id')
     
     # Apply search filter if query is present
     if query:
@@ -195,7 +195,7 @@ def all_students(request):
     
     # get the student count who are inactive from last 3 months
     three_months_ago = timezone.now() - timedelta(days=90)
-    inactive_students = Student.objects.filter(last_login__lt=three_months_ago, is_active=True)
+    inactive_students = CustomUser.objects.filter(last_login__lt=three_months_ago, is_active=True)
     
     parameters = {
         "inactive_students": inactive_students,
@@ -227,13 +227,13 @@ def change_password(request, student_id):
 @admin_required
 def all_instructors(request):    
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
 
-    instructors = Instructor.objects.all().order_by("-id")
+    instructors = CustomUser.objects.all().order_by("-id")
     
     query = request.POST.get("query")
     if query:
-        instructors = Instructor.objects.filter(
+        instructors = CustomUser.objects.filter(
             Q(id__icontains=query) |
             Q(first_name__icontains=query) | 
             Q(last_name__icontains=query) | 
@@ -265,11 +265,11 @@ def add_instructor(request):
             last_name = request.POST.get("last_name").strip()
             email = request.POST.get("email").strip()
 
-            if Instructor.objects.filter(username=username).exists():
+            if CustomUser.objects.filter(username=username).exists():
                 messages.error(request, "Username is already taken. Please choose a different one.")
                 return redirect("add_instructor")
             
-            if Instructor.objects.filter(email=email).exists():
+            if CustomUser.objects.filter(email=email).exists():
                 messages.error(request, "Email is already registered. Please use a different email.")
                 return redirect("add_instructor")
 
@@ -301,7 +301,7 @@ def add_instructor(request):
 @admin_required
 def feedbacks(request):
         
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     feedbacks = Feedback.objects.all().order_by("-id")
     
@@ -321,7 +321,7 @@ def feedbacks(request):
 @admin_required
 def administrator_anonymous_message(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     my_messages = Anonymous_Message.objects.filter(administrator=administrator)
     
@@ -340,7 +340,7 @@ def administrator_anonymous_message(request):
 @admin_required
 def reply_message(request, id):
         
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     message = Anonymous_Message.objects.get(id=id)
     
@@ -369,7 +369,7 @@ def reply_message(request, id):
 @admin_required
 def edit_reply(request, id):
         
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     message = Anonymous_Message.objects.get(id=id)
     
@@ -399,7 +399,7 @@ def edit_reply(request, id):
 @admin_required
 def administrator_profile(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     parameters = {
         "administrator": administrator
@@ -414,7 +414,7 @@ def administrator_profile(request):
 @admin_required
 def edit_administrator_profile(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     if request.method == "POST":
         administrator.first_name = request.POST.get("first_name")
@@ -448,7 +448,7 @@ def upload_administrator_profile(request):
 
     if request.method == 'POST':
 
-        administrator = Administrator.objects.get(id=request.user.id)
+        administrator = CustomUser.objects.get(id=request.user.id)
 
         administrator.profile_pic = request.FILES['profile_pic']
         
@@ -469,7 +469,7 @@ def upload_administrator_profile(request):
 @admin_required
 def change_administrator_password(request):
         
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     if administrator.check_password(request.POST.get("old_password")):
         
@@ -500,7 +500,7 @@ def change_administrator_password(request):
 @admin_required
 def notifications(request):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     notifications = Notification.objects.all().order_by("-expiration_date")
     
     if request.method == "POST":
@@ -567,7 +567,7 @@ def delete_notification(request, id):
 @admin_required
 def edit_notification(request, id):
     
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     notification = Notification.objects.get(id=id)
     
@@ -608,14 +608,14 @@ def edit_notification(request, id):
 @staff_member_required(login_url='login')
 def view_student_profile(request, id):
     parameters = {
-        "student": Student.objects.get(id=id)
+        "student": CustomUser.objects.get(id=id)
     }
     return render(request, "administration/view_student_profile.html", parameters)
 
 @login_required(login_url='login')
 def fetch_view_student_profile(request,id):
 
-    student = Student.objects.get(id=id)
+    student = CustomUser.objects.get(id=id)
     streak = Streak.objects.filter(user=student).first()
     submissions = Submission.objects.filter(user=student).order_by("-id")[:10]
     enrolled_batches = student.batches.all().order_by("-id")
@@ -676,13 +676,13 @@ def get_user_stats(request):
         today_end = today_start + timezone.timedelta(days=1)
         
         # Query for new user registrations today
-        users_registered_today = Student.objects.filter(date_joined__gte=today_start, date_joined__lt=today_end).count()
+        users_registered_today = CustomUser.objects.filter(date_joined__gte=today_start, date_joined__lt=today_end).count()
         
         # Query for users who logged in today
-        users_logged_in_today = Student.objects.filter(last_login__gte=today_start, last_login__lt=today_end).count()
+        users_logged_in_today = CustomUser.objects.filter(last_login__gte=today_start, last_login__lt=today_end).count()
         
         # Query for students who has their birthday today
-        students_birthday_today = Student.objects.filter(dob__day=today_start.day, dob__month=today_start.month)
+        students_birthday_today = CustomUser.objects.filter(dob__day=today_start.day, dob__month=today_start.month)
         
         # Query for total flames registrations
         total_flames_registrations = FlamesRegistration.objects.all().count()
@@ -718,7 +718,7 @@ import io
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 def attendance_visualizer(request):
-    administrator = Administrator.objects.get(id=request.user.id)
+    administrator = CustomUser.objects.get(id=request.user.id)
     
     parameters = {
         "administrator": administrator

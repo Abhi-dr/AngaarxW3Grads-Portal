@@ -7,7 +7,7 @@ from django.contrib import admin
 from import_export.admin import ImportMixin
 from import_export import resources, fields
 from import_export.results import RowResult
-from accounts.models import Student
+from accounts.models import CustomUser
 from import_export.widgets import ForeignKeyWidget
 
 
@@ -248,8 +248,8 @@ class CertificateImportResource(resources.ModelResource):
             raise Exception("Missing email field")
 
         try:
-            student = Student.objects.get(email__iexact=email)
-        except Student.DoesNotExist:
+            student = CustomUser.objects.get(email__iexact=email)
+        except CustomUser.DoesNotExist:
             # Skip row if student not found
             row["skip_reason"] = "Student not found"
             return

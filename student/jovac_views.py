@@ -10,7 +10,7 @@ from django.contrib.contenttypes.models import ContentType
 import sys
 import traceback
 
-from accounts.models import Student, Instructor
+from accounts.models import CustomUser
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course, CourseRegistration, CourseSheet
 from practice.models import POD, Submission, Question, Sheet, Streak
 from home.models import Alumni, ReferralCode
@@ -51,7 +51,7 @@ def jovac(request, slug):
 
 @login_required(login_url="login")
 def enroll_jovac(request, slug):
-    student = request.user.student
+    student = request.user
 
     course = get_object_or_404(Course, slug=slug)
 
@@ -75,7 +75,7 @@ def enroll_jovac(request, slug):
 
 @login_required(login_url="login")
 def jovac_sheet(request, course_slug, sheet_slug):
-    student = request.user.student
+    student = request.user
     course = get_object_or_404(Course, slug=course_slug)
     instructors = course.instructors.all()
     course_ct = ContentType.objects.get_for_model(Course)
@@ -123,7 +123,7 @@ def jovac_sheet(request, course_slug, sheet_slug):
 #     Display assignments from both Course and FlamesCourse models
 #     """
 #     # Access the student profile associated with the logged-in user
-#     student = request.user.student
+#     student = request.user
 #     current_time = timezone.now()
     
 #     # Simple approach: get all assignments regardless of course type
@@ -210,7 +210,7 @@ def submit_assignment(request, assignment_id):
     Submit assignment response in a simplified manner
     """
     assignment = get_object_or_404(Assignment, id=assignment_id)
-    student = Student.objects.get(id=request.user.id)
+    student = CustomUser.objects.get(id=request.user.id)
     
     # Check if student can access this assignment
     can_access = False
@@ -331,7 +331,7 @@ def view_jovac_tutorial(request, id):
 
     
     # Check if the user is enrolled in the course
-    student = request.user.student
+    student = request.user
     
     if not CourseRegistration.objects.filter(student=student, course=course).exists():
         messages.error(request, "You are not enrolled in this course")
@@ -396,7 +396,7 @@ def view_submission(request, assignment_id):
     Display a student's submission for an assignment with simplified approach
     """
     assignment = get_object_or_404(Assignment, id=assignment_id)
-    student = Student.objects.get(id=request.user.id)
+    student = CustomUser.objects.get(id=request.user.id)
     
     # Check if student can access this assignment
     can_access = False
@@ -461,7 +461,7 @@ def delete_submission(request, submission_id):
     assignment = submission.assignment
     
     # Verify the submission belongs to the current user
-    if submission.student != request.user.student:
+    if submission.student != request.user:
         messages.error(request, "You cannot delete another student's submission")
         return redirect('student_jovac', slug=assignment.course.slug)
         

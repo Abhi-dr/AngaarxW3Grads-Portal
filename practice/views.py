@@ -12,7 +12,7 @@ from django.db.models import Q
 import base64
 import re
 
-from accounts.models import Student
+from accounts.models import CustomUser
 from .models import RecommendedQuestions
 
 from django.views.decorators.cache import cache_control
@@ -41,7 +41,7 @@ def sheet(request, slug):
         
     sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
     
-    enabled_questions = sheet.get_enabled_questions_for_user(request.user.student)
+    enabled_questions = sheet.get_enabled_questions_for_user(request.user)
     
     user_submissions = {
         submission.question.id: submission for submission in Submission.objects.filter(user=request.user, question__in=enabled_questions)
@@ -94,7 +94,7 @@ def fetch_recommended_questions(request, slug):
 @login_required(login_url="login")
 def my_submissions(request, slug):
     question = get_object_or_404(Question, slug=slug)
-    submissions = Submission.objects.filter(user=request.user.student, question=question).order_by('-submitted_at')
+    submissions = Submission.objects.filter(user=request.user, question=question).order_by('-submitted_at')
     
     parameters = {
         'question': question,
@@ -112,7 +112,7 @@ def my_submissions(request, slug):
 @login_required(login_url="login")
 def add_question(request):
     
-    student_added_questions = Question.objects.filter(added_by=request.user.student)
+    student_added_questions = Question.objects.filter(added_by=request.user)
     
     if request.method == 'POST':
         
@@ -123,7 +123,7 @@ def add_question(request):
         difficulty_level = request.POST.get('difficulty_level')
         
         question = Question(
-            added_by = request.user.student,
+            added_by = request.user,
             title=title,
             scenario=scenario,
             description=description,

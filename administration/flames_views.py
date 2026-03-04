@@ -7,7 +7,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from openpyxl import Workbook
 from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session
-from accounts.models import Instructor, Student
+from accounts.models import CustomUser
 
 @login_required
 def flames_courses(request):
@@ -173,7 +173,7 @@ def admin_add_course(request):
         is_active = 'is_active' in request.POST
         
         try:
-            instructor = Instructor.objects.get(name=instructor_name)
+            instructor = CustomUser.objects.get(name=instructor_name)
         except:
             instructor = None
         
@@ -197,7 +197,7 @@ def admin_add_course(request):
         return redirect('admin_flames_courses')
     
     # Get data for form
-    instructors = Instructor.objects.all()
+    instructors = CustomUser.objects.all()
     
     context = {
         'instructors': instructors,
@@ -230,7 +230,7 @@ def admin_edit_course(request, course_id):
         is_active = 'is_active' in request.POST
         
         try:
-            instructor = Instructor.objects.get(name=instructor_name)
+            instructor = CustomUser.objects.get(name=instructor_name)
         except:
             instructor = None
         
@@ -253,7 +253,7 @@ def admin_edit_course(request, course_id):
         return redirect('admin_flames_courses')
     
     # Get data for form
-    instructors = Instructor.objects.all()
+    instructors = CustomUser.objects.all()
     
     context = {
         'course': course,

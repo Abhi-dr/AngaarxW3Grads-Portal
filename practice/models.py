@@ -7,7 +7,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.fields import GenericRelation
 
 # NOTE: Student/Instructor are now proxy models of CustomUser (same table)
-from accounts.models import Student, Instructor
+from accounts.models import CustomUser
 
 # ============================== BATCH ======================================
 

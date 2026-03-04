@@ -13,7 +13,7 @@ def course_detail(request, slug):
     
     # Check if the user has already registered for this course
     existing_registration = FlamesRegistration.objects.filter(
-        user=request.user.student,
+        user=request.user,
         course=course
     ).first()
     
@@ -34,7 +34,7 @@ def student_flames_register(request, slug):
     
     # Check if the user has already registered for this course
     existing_registration = FlamesRegistration.objects.filter(
-        user=request.user.student,
+        user=request.user,
         course=course
     ).first()
     
@@ -56,7 +56,7 @@ def student_flames_register(request, slug):
         
         # Create the registration
         registration = FlamesRegistration(
-            user=request.user.student,
+            user=request.user,
             course=course,
             year=year,
             message=message,
@@ -86,7 +86,7 @@ def student_flames_register(request, slug):
             # Add the user as the first team member (team leader)
             FlamesTeamMember.objects.create(
                 team=team,
-                member=request.user.student,
+                member=request.user,
                 is_leader=True
             )
             
@@ -96,8 +96,8 @@ def student_flames_register(request, slug):
                 
                 if member_username:
                     # Get the student account for this username
-                    from accounts.models import Student
-                    member_student = Student.objects.filter(username=member_username).first()
+                    from accounts.models import CustomUser
+                    member_student = CustomUser.objects.filter(username=member_username).first()
                     
                     if member_student:
                         # Create team member with the student's information

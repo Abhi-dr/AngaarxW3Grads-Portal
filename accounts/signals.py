@@ -12,7 +12,7 @@ from allauth.socialaccount.signals import pre_social_login, social_account_added
 from allauth.socialaccount.models import SocialAccount
 from allauth.account.signals import user_signed_up
 
-from .models import Student, Instructor, Administrator
+from .models import CustomUser
 
 logger = logging.getLogger(__name__)
 
@@ -58,55 +58,16 @@ def user_signed_up_handler(sender, request, user, sociallogin=None, **kwargs):
     print(f"DEBUG: user_signed_up_handler called for {user.email}")
     """
     Handle user signup via social login.
-    This creates a Student profile for users who sign up via Google.
+    NOTE: In Phase 2, CustomSocialAccountAdapter (adapters.py) handles setting defaults
+    and saving the CustomUser instance. We no longer use proxy class conversions here.
     """
     if not sociallogin:
-        # This is a regular signup, not social login
         return
         
-    try:
-        with transaction.atomic():
-            # Check if Student profile already exists
-            if Student.objects.filter(pk=user.pk).exists():
-                logger.info(f"Student profile already exists for: {user.username}")
-                return
-            
-            # Get social account data
-            social_account = sociallogin.account
-            
-            if social_account.provider == 'google':
-                # Convert the User instance to a Student instance
-                # Since Student inherits from User (multi-table inheritance),
-                # we need to create a Student record that points to the existing User
-                user.__class__ = Student
-                
-                # Set Student-specific fields
-                user.mobile_number = '-'
-                user.gender = 'Not Set'
-                user.college = None
-                user.dob = None
-                user.is_changed_password = False
-                user.profile_pic = '/student_profile/default.jpg'
-                user.linkedin_id = None
-                user.github_id = None
-                user.coins = 100
-                
-                # Save as Student
-                user.save()
-                
-                # Refresh from database to ensure Student instance
-                student = Student.objects.get(pk=user.pk)
-                
-                # Welcome email is sent from adapters.py save_user method
-                # No need to send it here to avoid duplication
-                
-                # Success message
-                messages.success(request, f"🔥 Welcome to Angaar, {student.first_name}! Your account is ready.")
-                
-                logger.info(f"New student created via Google OAuth: {student.username} ({student.email})")
-                
-    except Exception as e:
-        logger.error(f"Error in user_signed_up_handler: {e}", exc_info=True)
+    if sociallogin.account.provider == 'google':
+        # Welcome email handled by adapter, we just show a message.
+        messages.success(request, f"🔥 Welcome to Angaar, {user.first_name}! Your account is ready.")
+        logger.info(f"New student verified via Google OAuth: {user.username} ({user.email})")
 
 
 def validate_google_oauth_settings():
@@ -144,11 +105,11 @@ def user_logged_in_handler(sender, request, user, **kwargs):
     """
     try:
         # Log the login
-        if hasattr(user, 'student'):
+        if getattr(user, 'role', None) == 'student':
             logger.info(f"Student logged in: {user.username}")
-        elif hasattr(user, 'instructor'):
+        elif getattr(user, 'role', None) == 'instructor':
             logger.info(f"Instructor logged in: {user.username}")
-        elif hasattr(user, 'administrator'):
+        elif getattr(user, 'role', None) == 'admin':
             logger.info(f"Administrator logged in: {user.username}")
             
     except Exception as e:
