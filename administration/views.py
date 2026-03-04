@@ -125,7 +125,7 @@ def fetch_all_students(request):
     page_size = int(request.GET.get('page_size', 10))
     
     # Base QuerySet
-    students = CustomUser.objects.all().distinct().order_by('-id')
+    students = CustomUser.objects.filter(role='student').distinct().order_by('-id')
     
     # Apply search filter if query is present
     if query:
@@ -212,7 +212,7 @@ def change_password(request, student_id):
         try:
             data = json.loads(request.body)
             new_password = data.get('new_password')
-            student = User.objects.get(id=student_id)
+            student = CustomUser.objects.get(id=student_id)
             student.set_password(new_password)
             student.save()
             return JsonResponse({'success': True, 'message': 'Password changed successfully'})
@@ -229,11 +229,13 @@ def all_instructors(request):
     
     administrator = CustomUser.objects.get(id=request.user.id)
 
-    instructors = CustomUser.objects.all().order_by("-id")
+    instructors = CustomUser.objects.filter(role='instructor').order_by("-id")
     
     query = request.POST.get("query")
     if query:
         instructors = CustomUser.objects.filter(
+            role='instructor'
+        ).filter(
             Q(id__icontains=query) |
             Q(first_name__icontains=query) | 
             Q(last_name__icontains=query) | 
@@ -273,16 +275,16 @@ def add_instructor(request):
                 messages.error(request, "Email is already registered. Please use a different email.")
                 return redirect("add_instructor")
 
-            instructor = Instructor()
-            instructor.username = username
-            instructor.gender = gender
-            instructor.first_name = first_name
-            instructor.last_name = last_name
-            instructor.email = email
-            instructor.is_staff = True
-            
+            instructor = CustomUser(
+                username=username,
+                gender=gender,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                is_staff=True,
+                role='instructor'
+            )
             instructor.set_password(password)
-            
             instructor.save()
 
             messages.success(request, f"Instructor {first_name} {last_name} added successfully!")

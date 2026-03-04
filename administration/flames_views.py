@@ -197,7 +197,7 @@ def admin_add_course(request):
         return redirect('admin_flames_courses')
     
     # Get data for form
-    instructors = CustomUser.objects.all()
+    instructors = CustomUser.objects.filter(role='instructor')
     
     context = {
         'instructors': instructors,
@@ -253,7 +253,7 @@ def admin_edit_course(request, course_id):
         return redirect('admin_flames_courses')
     
     # Get data for form
-    instructors = CustomUser.objects.all()
+    instructors = CustomUser.objects.filter(role='instructor')
     
     context = {
         'course': course,

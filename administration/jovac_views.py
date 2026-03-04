@@ -158,7 +158,7 @@ def edit_sheet(request, course_slug, sheet_slug):
 @admin_required
 def add_course(request):
 
-    instructors = CustomUser.objects.all()
+    instructors = CustomUser.objects.filter(role='instructor')
 
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -196,7 +196,7 @@ def add_course(request):
 @admin_required
 def edit_course(request, slug):
     course = Course.objects.get(slug=slug)
-    instructors = CustomUser.objects.all()
+    instructors = CustomUser.objects.filter(role='instructor')
 
     if request.method == 'POST':
         course.name = request.POST.get('name')
