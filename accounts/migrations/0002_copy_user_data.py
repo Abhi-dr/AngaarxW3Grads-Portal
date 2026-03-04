@@ -12,6 +12,11 @@ def copy_users_to_customuser(apps, schema_editor):
     preserving PKs exactly. Merges all fields from Student/Instructor/Administrator.
     """
     with schema_editor.connection.cursor() as cursor:
+        # Prevent crash on fresh databases where auth_user was never created
+        cursor.execute("SHOW TABLES LIKE 'auth_user'")
+        if not cursor.fetchone():
+            print("\nℹ️  'auth_user' table does not exist (fresh database). Skipping data copy.")
+            return
 
         # Safety check: no duplicate emails in auth_user
         cursor.execute("""

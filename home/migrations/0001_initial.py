@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 ('icon_color', models.CharField(help_text='Color for the course card', max_length=200)),
                 ('button_color', models.CharField(help_text='Color for the course button', max_length=200)),
                 ('whatsapp_group_link', models.URLField(blank=True, null=True)),
-                ('instructor', models.ManyToManyField(blank=True, related_name='flames_courses', to='accounts.instructor')),
+                ('instructor', models.ManyToManyField(blank=True, related_name='flames_courses', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
@@ -113,7 +113,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('is_leader', models.BooleanField(default=False)),
-                ('member', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='flames_team_memberships', to='accounts.student')),
+                ('member', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='flames_team_memberships', to=settings.AUTH_USER_MODEL)),
                 ('team', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='members', to='home.flamesteam')),
             ],
         ),
@@ -135,7 +135,7 @@ class Migration(migrations.Migration):
                 ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='registrations', to='home.flamescourse')),
                 ('referral_code', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='registrations', to='home.referralcode')),
                 ('team', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='registrations', to='home.flamesteam')),
-                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='flames_registrations', to='accounts.student')),
+                ('user', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='flames_registrations', to=settings.AUTH_USER_MODEL)),
             ],
         ),
         migrations.CreateModel(
