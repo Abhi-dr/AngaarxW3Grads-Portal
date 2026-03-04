@@ -45,13 +45,13 @@ def login(request):
         input_id = request.POST.get('username', '').strip().lower()
         password = request.POST.get('password', '')
 
-        # Look up the user by email OR username (case-insensitive)
+        # Look up the user by email ONLY (case-insensitive)
         user_obj = CustomUser.objects.filter(
-            Q(email__iexact=input_id) | Q(username__iexact=input_id)
+            email__iexact=input_id
         ).first()
 
         if not user_obj:
-            messages.error(request, "No account found with that email or username.")
+            messages.error(request, "No account found with that email.")
             return redirect('login')
 
         # Authenticate using the email (USERNAME_FIELD on CustomUser)

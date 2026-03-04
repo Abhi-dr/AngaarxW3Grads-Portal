@@ -108,34 +108,36 @@ class Command(BaseCommand):
                     self.stdout.write("  -> accounts_customuser already has all auth_user rows. No copy needed.")
 
             # ──────────────────────────────────────────────────────────────────
-            # STEP 2: Rename M2M columns (user_id → customuser_id)
+            # STEP 2: Rename M2M columns to customuser_id
+            # Each entry: (table, old_column_name)
             # ──────────────────────────────────────────────────────────────────
-            m2m_tables = [
-                'home_article_likes',
-                'home_flamescourse_instructor',
-                'student_course_instructors'
+            m2m_renames = [
+                ('home_article_likes', 'user_id'),
+                ('home_flamescourse_instructor', 'user_id'),
+                # student_course_instructors uses 'instructor_id' (not user_id)
+                ('student_course_instructors', 'instructor_id'),
             ]
-            for t in m2m_tables:
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
+            for t, old_col in m2m_renames:
                 try:
                     cursor.execute(f"SHOW COLUMNS FROM {t};")
                     cols = [row[0] for row in cursor.fetchall()]
-                    if 'user_id' in cols and 'customuser_id' not in cols:
-                        self.stdout.write(f"Renaming 'user_id' to 'customuser_id' in {t}...")
+                    if old_col in cols and 'customuser_id' not in cols:
+                        self.stdout.write(f"Renaming '{old_col}' to 'customuser_id' in {t}...")
                         try:
-                            cursor.execute(f"ALTER TABLE {t} RENAME COLUMN user_id TO customuser_id;")
-                            self.stdout.write(self.style.SUCCESS(f"  -> Success via RENAME COLUMN"))
+                            cursor.execute(f"ALTER TABLE {t} CHANGE {old_col} customuser_id BIGINT NOT NULL;")
+                            # Re-wire FK to accounts_customuser
+                            new_fk = f"{t}_customuser_id_fk_customuser"[:64]
+                            cursor.execute(f"ALTER TABLE {t} ADD CONSTRAINT {new_fk} FOREIGN KEY (customuser_id) REFERENCES accounts_customuser(id);")
+                            self.stdout.write(self.style.SUCCESS(f"  -> Renamed and rewired to accounts_customuser"))
                         except Exception as e:
-                            self.stdout.write(self.style.WARNING(f"  -> RENAME COLUMN failed: {e}. Trying CHANGE..."))
-                            cursor.execute(f"SHOW COLUMNS FROM {t} LIKE 'user_id';")
-                            col_type = cursor.fetchone()[1]
-                            cursor.execute(f"SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='{t}' AND COLUMN_NAME='user_id' AND REFERENCED_TABLE_NAME IS NOT NULL;")
-                            fk = cursor.fetchone()
-                            if fk:
-                                cursor.execute(f"ALTER TABLE {t} DROP FOREIGN KEY {fk[0]};")
-                            cursor.execute(f"ALTER TABLE {t} CHANGE user_id customuser_id {col_type};")
-                            self.stdout.write(self.style.SUCCESS(f"  -> Success via CHANGE"))
+                            self.stdout.write(self.style.ERROR(f"  -> Failed: {e}"))
+                    elif 'customuser_id' in cols:
+                        self.stdout.write(f"  -> {t}.customuser_id already exists, skipping.")
                 except Exception as e:
-                    self.stdout.write(self.style.ERROR(f"Error checking table {t}: {e}"))
+                    self.stdout.write(self.style.WARNING(f"Table {t} not found or error: {e}"))
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
+
 
             # ──────────────────────────────────────────────────────────────────
             # STEP 3: Rewire Built-in FK Constraints
