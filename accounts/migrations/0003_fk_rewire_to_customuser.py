@@ -17,20 +17,41 @@ class Migration(migrations.Migration):
             managers=[
             ],
         ),
-        migrations.RenameIndex(
-            model_name='customuser',
-            new_name='accounts_cu_role_666d59_idx',
-            old_name='accounts_cu_role_idx',
+        # These were RenameIndex operations that renamed indexes FROM:
+        #   accounts_cu_role_idx -> accounts_cu_role_666d59_idx
+        #   accounts_cu_email_idx -> accounts_cu_email_5ce40b_idx
+        #   accounts_cu_active_role_idx -> accounts_cu_is_acti_55c1cd_idx
+        # On fresh databases, 0001_initial now creates the indexes with the final names,
+        # so this migration just updates Django's internal state without touching the DB.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RenameIndex(
+                    model_name='customuser',
+                    new_name='accounts_cu_role_666d59_idx',
+                    old_name='accounts_cu_role_idx',
+                ),
+            ],
+            database_operations=[],
         ),
-        migrations.RenameIndex(
-            model_name='customuser',
-            new_name='accounts_cu_email_5ce40b_idx',
-            old_name='accounts_cu_email_idx',
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RenameIndex(
+                    model_name='customuser',
+                    new_name='accounts_cu_email_5ce40b_idx',
+                    old_name='accounts_cu_email_idx',
+                ),
+            ],
+            database_operations=[],
         ),
-        migrations.RenameIndex(
-            model_name='customuser',
-            new_name='accounts_cu_is_acti_55c1cd_idx',
-            old_name='accounts_cu_active_role_idx',
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.RenameIndex(
+                    model_name='customuser',
+                    new_name='accounts_cu_is_acti_55c1cd_idx',
+                    old_name='accounts_cu_active_role_idx',
+                ),
+            ],
+            database_operations=[],
         ),
         migrations.AlterField(
             model_name='customuser',

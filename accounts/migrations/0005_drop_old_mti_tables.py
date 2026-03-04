@@ -41,6 +41,10 @@ class Migration(migrations.Migration):
         # model got its own table with a user_ptr_id FK to auth_user.
         # They are now empty and unused.
         migrations.RunSQL(
+            sql="SET FOREIGN_KEY_CHECKS = 0;",
+            reverse_sql="",
+        ),
+        migrations.RunSQL(
             sql="DROP TABLE IF EXISTS accounts_student;",
             reverse_sql="-- Cannot recreate old MTI table after drop (irreversible)",
         ),
@@ -51,5 +55,9 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql="DROP TABLE IF EXISTS accounts_administrator;",
             reverse_sql="-- Cannot recreate old MTI table after drop (irreversible)",
+        ),
+        migrations.RunSQL(
+            sql="SET FOREIGN_KEY_CHECKS = 1;",
+            reverse_sql="",
         ),
     ]

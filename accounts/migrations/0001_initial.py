@@ -126,15 +126,15 @@ class Migration(migrations.Migration):
         # ── Indexes ───────────────────────────────────────────────────────────
         migrations.AddIndex(
             model_name='customuser',
-            index=models.Index(fields=['role'],              name='accounts_cu_role_idx'),
+            index=models.Index(fields=['role'],              name='accounts_cu_role_666d59_idx'),
         ),
         migrations.AddIndex(
             model_name='customuser',
-            index=models.Index(fields=['email'],             name='accounts_cu_email_idx'),
+            index=models.Index(fields=['email'],             name='accounts_cu_email_5ce40b_idx'),
         ),
         migrations.AddIndex(
             model_name='customuser',
-            index=models.Index(fields=['is_active', 'role'], name='accounts_cu_active_role_idx'),
+            index=models.Index(fields=['is_active', 'role'], name='accounts_cu_is_acti_55c1cd_idx'),
         ),
 
         # ── PasswordResetToken (FK → CustomUser) ──────────────────────────────
