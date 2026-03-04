@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.RunSQL(
             sql="""
                 ALTER TABLE student_courseregistration
-                ADD INDEX idx_coursereg_student_course (student_id, course_id, is_active),
+                ADD INDEX idx_coursereg_student_course (student_id, course_id, status),
                 ALGORITHM=INPLACE, LOCK=NONE
             """,
             reverse_sql="ALTER TABLE student_courseregistration DROP INDEX idx_coursereg_student_course",
