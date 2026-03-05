@@ -113,8 +113,8 @@ class Command(BaseCommand):
             # ──────────────────────────────────────────────────────────────────
             m2m_renames = [
                 ('home_article_likes', 'user_id'),
-                ('home_flamescourse_instructor', 'user_id'),
-                # student_course_instructors uses 'instructor_id' (not user_id)
+                # Both of these used 'instructor_id' (not 'user_id') in the old schema
+                ('home_flamescourse_instructor', 'instructor_id'),
                 ('student_course_instructors', 'instructor_id'),
             ]
             cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
@@ -156,50 +156,58 @@ class Command(BaseCommand):
             cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
 
 
-
             # ──────────────────────────────────────────────────────────────────
-            # STEP 3: Rewire Built-in FK Constraints
+            # STEP 3: Dynamically rewire ALL FKs pointing to old proxy tables
+            # Covers: accounts_student, accounts_instructor,
+            #         accounts_administrator, and auth_user
             # ──────────────────────────────────────────────────────────────────
-            query = """
-            SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME
-            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
-            WHERE REFERENCED_TABLE_SCHEMA = DATABASE() AND REFERENCED_TABLE_NAME = 'auth_user';
-            """
-            cursor.execute(query)
-            rows = cursor.fetchall()
+            old_referenced_tables = (
+                'auth_user',
+                'accounts_student',
+                'accounts_instructor',
+                'accounts_administrator',
+            )
+            placeholders = ', '.join(['%s'] * len(old_referenced_tables))
+            cursor.execute(f"""
+                SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND REFERENCED_TABLE_NAME IN ({placeholders})
+            """, list(old_referenced_tables))
+            all_fks = cursor.fetchall()
 
-            tables_to_rewire = [
-                'account_emailaddress',
-                'django_admin_log',
-                'home_article_likes',
-                'home_comment',
-                'home_flamesteam',
-                'socialaccount_socialaccount'
-            ]
+            if not all_fks:
+                self.stdout.write("  -> No FKs pointing to old tables found. Already clean!")
+            else:
+                self.stdout.write(f"\nFound {len(all_fks)} FK(s) to rewire to accounts_customuser...")
+                cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
 
-            for row in rows:
-                table_name, col_name, constraint_name = row[0], row[1], row[2]
-                if table_name in tables_to_rewire:
-                    self.stdout.write(f"Rewiring {table_name}.{col_name} (Constraint: {constraint_name})")
+                for table_name, col_name, constraint_name, ref_table in all_fks:
+                    self.stdout.write(f"  Rewiring {table_name}.{col_name} -> {ref_table} (FK: {constraint_name})")
                     try:
-                        cursor.execute(f"ALTER TABLE {table_name} DROP FOREIGN KEY {constraint_name};")
-                    except Exception as e:
-                        self.stdout.write(self.style.WARNING(f"  -> Error dropping old FK: {e}"))
+                        # Drop old FK
+                        cursor.execute(f"ALTER TABLE `{table_name}` DROP FOREIGN KEY `{constraint_name}`;")
 
-                    cursor.execute(f"SELECT IS_NULLABLE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='{table_name}' AND COLUMN_NAME='{col_name}';")
-                    col_info = cursor.fetchone()
-                    null_str = 'NULL' if col_info and col_info[0] == 'YES' else 'NOT NULL'
+                        # Widen column to BIGINT if needed
+                        cursor.execute(f"""
+                            SELECT DATA_TYPE, IS_NULLABLE
+                            FROM INFORMATION_SCHEMA.COLUMNS
+                            WHERE TABLE_SCHEMA = DATABASE()
+                              AND TABLE_NAME = '{table_name}'
+                              AND COLUMN_NAME = '{col_name}'
+                        """)
+                        col_info = cursor.fetchone()
+                        if col_info and col_info[0].lower() != 'bigint':
+                            null_str = 'NULL' if col_info[1] == 'YES' else 'NOT NULL'
+                            cursor.execute(f"ALTER TABLE `{table_name}` MODIFY `{col_name}` BIGINT {null_str};")
 
-                    try:
-                        cursor.execute(f"ALTER TABLE {table_name} MODIFY {col_name} BIGINT {null_str};")
+                        # Add new FK to accounts_customuser
+                        new_fk_name = f"{table_name}_{col_name}_fk_cu"[:64]
+                        cursor.execute(f"ALTER TABLE `{table_name}` ADD CONSTRAINT `{new_fk_name}` FOREIGN KEY (`{col_name}`) REFERENCES `accounts_customuser`(`id`);")
+                        self.stdout.write(self.style.SUCCESS(f"    -> OK"))
                     except Exception as e:
-                        self.stdout.write(self.style.ERROR(f"  -> Error modifying column type: {e}"))
+                        self.stdout.write(self.style.ERROR(f"    -> Error: {e}"))
 
-                    new_fk_name = f"{table_name}_{col_name}_fk_customuser"[:64]
-                    try:
-                        cursor.execute(f"ALTER TABLE {table_name} ADD CONSTRAINT {new_fk_name} FOREIGN KEY ({col_name}) REFERENCES accounts_customuser(id);")
-                        self.stdout.write(self.style.SUCCESS(f"  -> Successfully rewired constraint to accounts_customuser!"))
-                    except Exception as e:
-                        self.stdout.write(self.style.ERROR(f"  -> Error adding new FK: {e}"))
+                cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
 
         self.stdout.write(self.style.SUCCESS("\nSchema alignment complete! Your production database is now synced."))

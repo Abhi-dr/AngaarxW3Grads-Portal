@@ -316,7 +316,7 @@ JUDGE0_CALLBACK_URL = "https://1b49f750e5d68e7a9c33c24612db101e.serveo.net/judge
 SITE_ID = 1
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.EmailOnlyBackend',
+    'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
