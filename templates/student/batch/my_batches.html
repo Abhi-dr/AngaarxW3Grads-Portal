@@ -16,15 +16,15 @@ Dashboard | My Courses
     .transition-icon {
         transition: transform 0.3s ease;
     }
-    
+
     .card-header[aria-expanded="true"] .transition-icon {
         transform: rotate(180deg);
     }
-    
+
     .collapse {
         transition: height 0.35s ease;
     }
-    
+
     /* College Dropdown Styling - Dark Mode Compatible */
     .college-dropdown {
         padding: 0.4rem 0.5rem;
@@ -39,43 +39,43 @@ Dashboard | My Courses
         scrollbar-width: thin;
         scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
     }
-    
+
     .college-dropdown::-webkit-scrollbar {
         width: 6px;
     }
-    
+
     .college-dropdown::-webkit-scrollbar-track {
         background: transparent;
     }
-    
+
     .college-dropdown::-webkit-scrollbar-thumb {
         background-color: rgba(255, 255, 255, 0.3);
         border-radius: 10px;
     }
-    
+
     .college-dropdown:focus {
         border-color: #0d6efd;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
         outline: none;
         background-color: rgba(255, 255, 255, 0.08);
     }
-    
+
     .college-dropdown option {
         padding: 0.6rem;
         cursor: pointer;
         background-color: var(--bs-body-bg, #212529);
-        
+
     }
 
     [data-bs-theme="dark"] select>option {
-    color: #ffffff;
+        color: #ffffff;
     }
-    
+
     .college-dropdown option:hover,
     .college-dropdown option:checked {
         background-color: rgba(13, 110, 253, 0.2);
     }
-    
+
     .college-dropdown option[value="other"] {
         border-top: 1px solid rgba(255, 255, 255, 0.2);
         margin-top: 0.25rem;
@@ -84,7 +84,7 @@ Dashboard | My Courses
         color: #0d6efd;
         background: linear-gradient(135deg, rgba(13, 110, 253, 0.1), rgba(13, 110, 253, 0.05));
     }
-    
+
     /* Custom Input for Manual Entry */
     .college-custom-input {
         border: 2px solid #28a745;
@@ -95,38 +95,48 @@ Dashboard | My Courses
         background-color: rgba(40, 167, 69, 0.08);
         color: inherit;
     }
-    
+
     .college-custom-input:focus {
         border-color: #28a745;
         box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
         outline: none;
         background-color: rgba(40, 167, 69, 0.12);
     }
-    
+
     .college-custom-input::placeholder {
         color: rgba(255, 255, 255, 0.5);
         font-style: italic;
     }
-    
+
     /* Invalid State Styling */
     .college-dropdown.is-invalid,
     .college-custom-input.is-invalid {
         border-color: #dc3545;
         animation: shake 0.3s ease;
     }
-    
+
     .college-dropdown.is-invalid:focus,
     .college-custom-input.is-invalid:focus {
         border-color: #dc3545;
         box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
     }
-    
+
     @keyframes shake {
-        0%, 100% { transform: translateX(0); }
-        25% { transform: translateX(-5px); }
-        75% { transform: translateX(5px); }
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-5px);
+        }
+
+        75% {
+            transform: translateX(5px);
+        }
     }
-    
+
     /* Search Input Styling - Dark Mode */
     .college-search-input {
         padding: 0.6rem 0.75rem;
@@ -137,29 +147,29 @@ Dashboard | My Courses
         background: rgba(255, 255, 255, 0.05);
         color: inherit;
     }
-    
+
     .college-search-input:focus {
         border-color: #0d6efd;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
         outline: none;
         background: rgba(255, 255, 255, 0.08);
     }
-    
+
     .college-search-input::placeholder {
         color: rgb(255, 255, 255);
     }
-    
+
     .search-icon {
         color: rgba(255, 255, 255, 0.6);
     }
-    
+
     /* Input Group Styling for Dark Mode */
     .input-group-text {
         background-color: rgba(255, 255, 255, 0.05);
         border-color: rgba(255, 255, 255, 0.2);
         color: inherit;
     }
-    
+
     /* Results Count Badge */
     .search-results-badge {
         display: inline-block;
@@ -175,31 +185,30 @@ Dashboard | My Courses
     /* ================================================ */
     /* IMAGE LAZY LOADING & OPTIMIZATION STYLES */
     /* ================================================ */
-    
+
     /* Skeleton Loader for Images */
     .image-skeleton {
         position: relative;
         overflow: hidden;
-        background: linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.05) 25%,
-            rgba(255, 255, 255, 0.1) 50%,
-            rgba(255, 255, 255, 0.05) 75%
-        );
+        background: linear-gradient(90deg,
+                rgba(255, 255, 255, 0.05) 25%,
+                rgba(255, 255, 255, 0.1) 50%,
+                rgba(255, 255, 255, 0.05) 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
         min-height: 200px;
     }
-    
+
     @keyframes shimmer {
         0% {
             background-position: -200% 0;
         }
+
         100% {
             background-position: 200% 0;
         }
     }
-    
+
     /* Image Container for Lazy Loading */
     .lazy-image-container {
         position: relative;
@@ -207,7 +216,7 @@ Dashboard | My Courses
         overflow: hidden;
         background-color: rgba(255, 255, 255, 0.05);
     }
-    
+
     /* Lazy Load Images - Hidden Initially */
     .lazy-image {
         opacity: 0;
@@ -216,18 +225,18 @@ Dashboard | My Courses
         height: auto;
         display: block;
     }
-    
+
     /* Loaded State */
     .lazy-image.loaded {
         opacity: 1;
     }
-    
+
     /* Error State for Broken Images */
     .lazy-image.error {
         opacity: 0.5;
         filter: grayscale(100%);
     }
-    
+
     /* Placeholder for Missing Images */
     .image-placeholder {
         display: flex;
@@ -238,7 +247,7 @@ Dashboard | My Courses
         color: rgba(255, 255, 255, 0.5);
         font-size: 3rem;
     }
-    
+
     /* Optimize Image Rendering */
     .card-img-top {
         image-rendering: -webkit-optimize-contrast;
@@ -247,14 +256,14 @@ Dashboard | My Courses
         transform: translateZ(0);
         will-change: transform;
     }
-    
+
     /* Card Hover Performance Optimization */
     .card {
         transform: translateZ(0);
         backface-visibility: hidden;
         will-change: transform;
     }
-    
+
     /* Loading Spinner for Images */
     .image-loading-spinner {
         position: absolute;
@@ -269,24 +278,30 @@ Dashboard | My Courses
         animation: spin 1s linear infinite;
         z-index: 1;
     }
-    
+
     @keyframes spin {
-        0% { transform: translate(-50%, -50%) rotate(0deg); }
-        100% { transform: translate(-50%, -50%) rotate(360deg); }
+        0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+
+        100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+        }
     }
-    
+
     /* Fade In Animation */
     @keyframes fadeIn {
         from {
             opacity: 0;
             transform: scale(0.95);
         }
+
         to {
             opacity: 1;
             transform: scale(1);
         }
     }
-    
+
     .fade-in {
         animation: fadeIn 0.3s ease-in-out;
     }
@@ -331,39 +346,40 @@ Dashboard | My Courses
         <!-- ===============================================================================================-->
 
         <div class="card mb-4" id="jovac-section" style="display: none;">
-        <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#jovacArchiveSection" aria-expanded="false" aria-controls="jovacArchiveSection">
-            <div class="d-flex justify-content-between align-items-center">
-                <h3 class="heading">
-                    <span class="fw-semibold">J O V A C 📁</span>
-                    <span class="fs-4 text-muted"> | Archived Courses
-                    </span>
-                    <small class="badge bg-secondary ms-2">Archived</small>
-                </h3>
-                
-                <i class="fas fa-chevron-down transition-icon" id="jovacToggleIcon"></i>
-            </div>
-        </div>
-        
-        <div class="collapse" id="jovacArchiveSection">
-            <div class="card-body">
-                <!-- =========================================== APPROVED JOVAC COURSES =========================== -->
-                <div class="row row-cols-1 row-cols-md-3 g-4" id="approved-courses-container">
-                    <!-- Courses will be loaded dynamically via AJAX -->
-                </div>
-                
-                <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="pending-courses-container">
-                    <!-- Pending courses will be loaded dynamically via AJAX -->
-                </div>
-                
-                <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="rejected-courses-container">
-                    <!-- Rejected courses will be loaded dynamically via AJAX -->
-                </div>
-                
-                <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="other-courses-container">
-                    <!-- Other courses will be loaded dynamically via AJAX -->
+            <div class="card-header" style="cursor: pointer;" data-bs-toggle="collapse"
+                data-bs-target="#jovacArchiveSection" aria-expanded="false" aria-controls="jovacArchiveSection">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="heading">
+                        <span class="fw-semibold">J O V A C 📁</span>
+                        <span class="fs-4 text-muted"> | Archived Courses
+                        </span>
+                        <small class="badge bg-secondary ms-2">Archived</small>
+                    </h3>
+
+                    <i class="fas fa-chevron-down transition-icon" id="jovacToggleIcon"></i>
                 </div>
             </div>
-        </div>
+
+            <div class="collapse" id="jovacArchiveSection">
+                <div class="card-body">
+                    <!-- =========================================== APPROVED JOVAC COURSES =========================== -->
+                    <div class="row row-cols-1 row-cols-md-3 g-4" id="approved-courses-container">
+                        <!-- Courses will be loaded dynamically via AJAX -->
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="pending-courses-container">
+                        <!-- Pending courses will be loaded dynamically via AJAX -->
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="rejected-courses-container">
+                        <!-- Rejected courses will be loaded dynamically via AJAX -->
+                    </div>
+
+                    <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="other-courses-container">
+                        <!-- Other courses will be loaded dynamically via AJAX -->
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ===============================================================================================-->
@@ -404,11 +420,11 @@ Dashboard | My Courses
         <div class="row row-cols-1 row-cols-md-3 g-4" id="pending-batches-container">
             <!-- Pending batches will be loaded dynamically via AJAX -->
         </div>
-        
+
         <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="rejected-batches-container">
             <!-- Rejected batches will be loaded dynamically via AJAX -->
         </div>
-        
+
         <div class="row row-cols-1 row-cols-md-3 g-4 mt-2" id="other-batches-container">
             <!-- Other batches will be loaded dynamically via AJAX -->
         </div>
@@ -450,9 +466,9 @@ Dashboard | My Courses
         // Handle JOVAC archive section toggle
         const jovacToggle = document.querySelector('[data-bs-target="#jovacArchiveSection"]');
         const jovacIcon = document.getElementById('jovacToggleIcon');
-        
+
         if (jovacToggle) {
-            jovacToggle.addEventListener('click', function() {
+            jovacToggle.addEventListener('click', function () {
                 const isExpanded = this.getAttribute('aria-expanded') === 'true';
                 jovacIcon.style.transform = isExpanded ? 'rotate(0deg)' : 'rotate(180deg)';
             });
@@ -466,7 +482,7 @@ Dashboard | My Courses
             "IIT Gandhinagar", "IIT Ropar", "IIT Patna", "IIT Bhubaneswar", "IIT Jodhpur",
             "IIT Mandi", "IIT Palakkad", "IIT Tirupati", "IIT Dhanbad", "IIT Jammu",
             "IIT Goa", "IIT Dharwad", "IIT Bhilai",
-            
+
             // NITs
             "NIT Trichy", "NIT Surathkal", "NIT Warangal", "NIT Calicut", "NIT Rourkela",
             "NIT Durgapur", "NIT Jaipur", "NIT Kurukshetra", "NIT Silchar", "NIT Hamirpur",
@@ -474,15 +490,15 @@ Dashboard | My Courses
             "NIT Agartala", "NIT Arunachal Pradesh", "NIT Delhi", "NIT Goa", "NIT Meghalaya",
             "NIT Manipur", "NIT Mizoram", "NIT Nagaland", "NIT Patna", "NIT Puducherry",
             "NIT Sikkim", "NIT Srinagar", "NIT Uttarakhand", "NIT Andhra Pradesh",
-            
+
             // IIITs
             "IIIT Hyderabad", "IIIT Allahabad", "IIIT Bangalore", "IIIT Delhi",
             "IIIT Gwalior", "IIIT Jabalpur", "IIIT Kota", "IIIT Vadodara",
             "IIIT Pune", "IIIT Kancheepuram", "IIIT Lucknow", "IIIT Nagpur",
-            
+
             // DTU/NSUT
             "Delhi Technological University (DTU)", "Netaji Subhas University of Technology (NSUT)",
-            
+
             // Other Major Universities - Delhi NCR
             "Indraprastha Institute of Information Technology Delhi (IIIT-D)",
             "Guru Gobind Singh Indraprastha University (GGSIPU)",
@@ -501,7 +517,7 @@ Dashboard | My Courses
             "Greater Noida Institute of Technology (GNIOT)",
             "Galgotias College of Engineering and Technology",
 
-            
+
             // Uttar Pradesh
             "GLA University Mathura", "GL Bajaj Institute of Technology and Management Mathura",
             "BSA College of Engineering and Technology Mathura",
@@ -510,45 +526,45 @@ Dashboard | My Courses
             "IET Lucknow", "KNIT Sultanpur", "MMMUT Gorakhpur",
             "BIT Mesra", "HBTU Kanpur", "Galgotias University",
             "Sharda University", "Aligarh Muslim University",
-            
+
             // Maharashtra
             "VJTI Mumbai", "COEP Pune", "PICT Pune", "SPIT Mumbai",
             "DJ Sanghvi College of Engineering", "KJ Somaiya College of Engineering",
             "Sardar Patel Institute of Technology", "Ramrao Adik Institute of Technology",
             "MIT Pune", "VIT Pune", "IIIT Pune",
-            
+
             // Karnataka
             "RVCE Bangalore", "BMS College of Engineering", "PES University",
             "MS Ramaiah Institute of Technology", "Dayananda Sagar College of Engineering",
             "JSS Science and Technology University", "NMIT Bangalore",
-            
+
             // Tamil Nadu
             "Anna University", "PSG College of Technology", "Thiagarajar College of Engineering",
             "SSN College of Engineering", "SRM University", "VIT Vellore",
             "Amrita Vishwa Vidyapeetham",
-            
+
             // Telangana
             "BITS Pilani Hyderabad Campus", "Vasavi College of Engineering",
             "CVR College of Engineering", "CBIT Hyderabad",
             "Osmania University", "JNTUH",
-            
+
             // Rajasthan
             "BITS Pilani", "Manipal University Jaipur", "Poornima University",
             "LNM Institute of Information Technology", "MBM Engineering College Jodhpur",
             "UEM Jaipur",
-            
+
             // Uttarakhand
             "Tula's Institute Dehradun", "Graphic Era University",
             "DIT University", "UPES Dehradun",
-            
+
             // Gujarat
             "DAIICT Gandhinagar", "Nirma University", "LDCE Ahmedabad",
             "SVNIT Surat", "GEC Gandhinagar",
-            
+
             // West Bengal
             "Jadavpur University", "Heritage Institute of Technology",
             "Techno India", "Kalyani Government Engineering College",
-            
+
             // Other States
             "Thapar University Patiala", "Chitkara University",
             "LPU Jalandhar", "PEC Chandigarh",
@@ -580,7 +596,7 @@ Dashboard | My Courses
                 extraFieldsContainer.innerHTML = "";
                 requiredFields.forEach(field => {
                     let label = field.replace(/_/g, " ").toUpperCase();
-                    
+
                     // Special handling for college_name field
                     if (field.toLowerCase() === 'college_name') {
                         extraFieldsContainer.innerHTML += `
@@ -640,19 +656,19 @@ Dashboard | My Courses
                     const fieldName = searchInput.id.replace('college_search_', '');
                     const dropdown = document.getElementById(`college_select_${fieldName}`);
                     const resultsBadge = document.getElementById(`results_badge_${fieldName}`);
-                    
-                    searchInput.addEventListener('input', function() {
+
+                    searchInput.addEventListener('input', function () {
                         const searchTerm = this.value.toLowerCase().trim();
                         const options = dropdown.querySelectorAll('option');
                         let visibleCount = 0;
-                        
+
                         options.forEach(option => {
                             if (option.value === '' || option.value === 'other') {
                                 // Always show the placeholder and "Other" option
                                 option.style.display = '';
                                 return;
                             }
-                            
+
                             const collegeText = option.textContent.toLowerCase();
                             if (collegeText.includes(searchTerm)) {
                                 option.style.display = '';
@@ -661,7 +677,7 @@ Dashboard | My Courses
                                 option.style.display = 'none';
                             }
                         });
-                        
+
                         // Update results badge
                         if (searchTerm.length > 0) {
                             resultsBadge.style.display = 'inline-block';
@@ -669,10 +685,10 @@ Dashboard | My Courses
                         } else {
                             resultsBadge.style.display = 'none';
                         }
-                        
+
                         // Auto-select if only one college matches
                         if (visibleCount === 1 && searchTerm.length > 2) {
-                            const visibleOption = Array.from(options).find(opt => 
+                            const visibleOption = Array.from(options).find(opt =>
                                 opt.style.display !== 'none' && opt.value !== '' && opt.value !== 'other'
                             );
                             if (visibleOption) {
@@ -685,9 +701,9 @@ Dashboard | My Courses
                             }
                         }
                     });
-                    
+
                     // Clear search when dropdown is selected
-                    dropdown.addEventListener('change', function() {
+                    dropdown.addEventListener('change', function () {
                         searchInput.value = '';
                         resultsBadge.style.display = 'none';
                         // Reset all options visibility
@@ -696,15 +712,15 @@ Dashboard | My Courses
                             option.style.display = '';
                         });
                     });
-                    
+
                     // Keyboard navigation: Enter key to focus dropdown
-                    searchInput.addEventListener('keydown', function(e) {
+                    searchInput.addEventListener('keydown', function (e) {
                         if (e.key === 'Enter') {
                             e.preventDefault();
-                            const visibleOptions = Array.from(dropdown.querySelectorAll('option')).filter(opt => 
+                            const visibleOptions = Array.from(dropdown.querySelectorAll('option')).filter(opt =>
                                 opt.style.display !== 'none' && opt.value !== '' && opt.value !== 'other'
                             );
-                            
+
                             if (visibleOptions.length === 1) {
                                 // Auto-select the only visible option
                                 dropdown.value = visibleOptions[0].value;
@@ -720,14 +736,14 @@ Dashboard | My Courses
                         }
                     });
                 });
-                
+
                 // Add event listeners for college dropdown changes
                 const collegeDropdowns = document.querySelectorAll('.college-dropdown');
                 collegeDropdowns.forEach(dropdown => {
-                    dropdown.addEventListener('change', function() {
+                    dropdown.addEventListener('change', function () {
                         const fieldName = this.name;
                         const customInput = document.getElementById(`college_custom_${fieldName}`);
-                        
+
                         if (this.value === 'other') {
                             // Show custom input and make it required
                             customInput.style.display = 'block';
@@ -751,7 +767,7 @@ Dashboard | My Courses
         });
 
         // Form validation on submit
-        enrollForm.addEventListener('submit', function(e) {
+        enrollForm.addEventListener('submit', function (e) {
             const collegeDropdowns = document.querySelectorAll('.college-dropdown');
             let isValid = true;
             let errorMessage = '';
@@ -759,7 +775,7 @@ Dashboard | My Courses
             collegeDropdowns.forEach(dropdown => {
                 const fieldName = dropdown.name;
                 const customInput = document.getElementById(`college_custom_${fieldName}`);
-                
+
                 // Check if both dropdown and custom input are empty
                 if ((!dropdown.value || dropdown.value === '') && (!customInput.value || customInput.value.trim() === '')) {
                     isValid = false;
@@ -785,14 +801,14 @@ Dashboard | My Courses
     // ========================================
     // AJAX API CALL TO LOAD BATCH DATA
     // ========================================
-    
+
     function loadBatchData() {
         // Show loading, hide error and main content
         document.getElementById('loading-container').style.display = 'block';
         document.getElementById('error-container').style.display = 'none';
         document.getElementById('main-content').style.display = 'none';
 
-        fetch('/dashboard/api/fetch_my_batch_data/', {
+        fetch('/dashboard/api/v1/batches/', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -800,42 +816,42 @@ Dashboard | My Courses
             },
             credentials: 'same-origin'
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (!data.success) {
-                throw new Error(data.error || 'Unknown error occurred');
-            }
-            
-            // Hide loading and show main content
-            document.getElementById('loading-container').style.display = 'none';
-            document.getElementById('main-content').style.display = 'block';
-            
-            // Render the data
-            renderBatches(data.batches);
-            renderCourses(data.courses);
-        })
-        .catch(error => {
-            console.error('Error loading batch data:', error);
-            
-            // Show error state
-            document.getElementById('loading-container').style.display = 'none';
-            document.getElementById('error-container').style.display = 'block';
-            document.getElementById('error-message').textContent = error.message || 'Failed to load course data. Please try again.';
-        });
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(data.error || 'Unknown error occurred');
+                }
+
+                // Hide loading and show main content
+                document.getElementById('loading-container').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+
+                // Render the data
+                renderBatches(data.batches);
+                renderCourses(data.courses);
+            })
+            .catch(error => {
+                console.error('Error loading batch data:', error);
+
+                // Show error state
+                document.getElementById('loading-container').style.display = 'none';
+                document.getElementById('error-container').style.display = 'block';
+                document.getElementById('error-message').textContent = error.message || 'Failed to load course data. Please try again.';
+            });
     }
 
     // ========================================
     // LAZY LOADING HELPER FUNCTION
     // ========================================
-    
+
     function initializeLazyLoading() {
         const lazyImages = document.querySelectorAll('.lazy-image');
-        
+
         if ('IntersectionObserver' in window) {
             // Use Intersection Observer for better performance
             const imageObserver = new IntersectionObserver((entries, observer) => {
@@ -843,37 +859,37 @@ Dashboard | My Courses
                     if (entry.isIntersecting) {
                         const img = entry.target;
                         const src = img.getAttribute('data-src');
-                        
+
                         if (src) {
                             // Create new image to preload
                             const tempImg = new Image();
-                            
-                            tempImg.onload = function() {
+
+                            tempImg.onload = function () {
                                 img.src = src;
                                 img.classList.add('loaded');
                                 img.classList.add('fade-in');
-                                
+
                                 // Remove skeleton loader
                                 const skeleton = img.previousElementSibling;
                                 if (skeleton && skeleton.classList.contains('image-skeleton')) {
                                     skeleton.style.display = 'none';
                                 }
                             };
-                            
-                            tempImg.onerror = function() {
+
+                            tempImg.onerror = function () {
                                 img.classList.add('error');
                                 img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23333" width="200" height="200"/%3E%3Ctext fill="%23666" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EThumbnail Error%3C/text%3E%3C/svg%3E';
-                                
+
                                 // Remove skeleton loader
                                 const skeleton = img.previousElementSibling;
                                 if (skeleton && skeleton.classList.contains('image-skeleton')) {
                                     skeleton.style.display = 'none';
                                 }
                             };
-                            
+
                             tempImg.src = src;
                         }
-                        
+
                         observer.unobserve(img);
                     }
                 });
@@ -881,7 +897,7 @@ Dashboard | My Courses
                 rootMargin: '50px', // Start loading 50px before entering viewport
                 threshold: 0.01
             });
-            
+
             lazyImages.forEach(img => imageObserver.observe(img));
         } else {
             // Fallback for browsers without Intersection Observer
@@ -898,28 +914,28 @@ Dashboard | My Courses
     // ========================================
     // RENDER BATCHES FUNCTION
     // ========================================
-    
+
     function renderBatches(batches) {
         const { student_batches, pending_batches, rejected_batches, other_batches } = batches;
-        
+
         // Render student batches
         const studentBatchesContainer = document.getElementById('student-batches-container');
         studentBatchesContainer.innerHTML = '';
-        
+
         if (student_batches && student_batches.length > 0) {
             document.getElementById('my-courses-header').style.display = 'block';
             student_batches.forEach(batch => {
                 studentBatchesContainer.innerHTML += createStudentBatchCard(batch);
             });
         }
-        
+
         // Show all courses header if there are any non-student batches
-        if ((pending_batches && pending_batches.length > 0) || 
-            (rejected_batches && rejected_batches.length > 0) || 
+        if ((pending_batches && pending_batches.length > 0) ||
+            (rejected_batches && rejected_batches.length > 0) ||
             (other_batches && other_batches.length > 0)) {
             document.getElementById('all-courses-header').style.display = 'block';
         }
-        
+
         // Render pending batches
         const pendingBatchesContainer = document.getElementById('pending-batches-container');
         pendingBatchesContainer.innerHTML = '';
@@ -928,7 +944,7 @@ Dashboard | My Courses
                 pendingBatchesContainer.innerHTML += createPendingBatchCard(batch);
             });
         }
-        
+
         // Render rejected batches
         const rejectedBatchesContainer = document.getElementById('rejected-batches-container');
         rejectedBatchesContainer.innerHTML = '';
@@ -937,7 +953,7 @@ Dashboard | My Courses
                 rejectedBatchesContainer.innerHTML += createRejectedBatchCard(batch);
             });
         }
-        
+
         // Render other batches
         const otherBatchesContainer = document.getElementById('other-batches-container');
         otherBatchesContainer.innerHTML = '';
@@ -945,11 +961,11 @@ Dashboard | My Courses
             other_batches.forEach(batch => {
                 otherBatchesContainer.innerHTML += createOtherBatchCard(batch);
             });
-            
+
             // Re-attach enroll button event listeners
             attachEnrollButtonListeners();
         }
-        
+
         // Initialize lazy loading for batch images
         setTimeout(() => initializeLazyLoading(), 100);
     }
@@ -957,18 +973,18 @@ Dashboard | My Courses
     // ========================================
     // RENDER COURSES FUNCTION
     // ========================================
-    
+
     function renderCourses(courses) {
         const { approved_courses, pending_courses, rejected_courses, other_courses } = courses;
-        
+
         // Show JOVAC section if there are any courses
-        if ((approved_courses && approved_courses.length > 0) || 
-            (pending_courses && pending_courses.length > 0) || 
-            (rejected_courses && rejected_courses.length > 0) || 
+        if ((approved_courses && approved_courses.length > 0) ||
+            (pending_courses && pending_courses.length > 0) ||
+            (rejected_courses && rejected_courses.length > 0) ||
             (other_courses && other_courses.length > 0)) {
             document.getElementById('jovac-section').style.display = 'block';
         }
-        
+
         // Render approved courses
         const approvedCoursesContainer = document.getElementById('approved-courses-container');
         approvedCoursesContainer.innerHTML = '';
@@ -977,7 +993,7 @@ Dashboard | My Courses
                 approvedCoursesContainer.innerHTML += createApprovedCourseCard(course);
             });
         }
-        
+
         // Render pending courses
         const pendingCoursesContainer = document.getElementById('pending-courses-container');
         pendingCoursesContainer.innerHTML = '';
@@ -986,7 +1002,7 @@ Dashboard | My Courses
                 pendingCoursesContainer.innerHTML += createPendingCourseCard(course);
             });
         }
-        
+
         // Render rejected courses
         const rejectedCoursesContainer = document.getElementById('rejected-courses-container');
         rejectedCoursesContainer.innerHTML = '';
@@ -995,7 +1011,7 @@ Dashboard | My Courses
                 rejectedCoursesContainer.innerHTML += createRejectedCourseCard(course);
             });
         }
-        
+
         // Render other courses
         const otherCoursesContainer = document.getElementById('other-courses-container');
         otherCoursesContainer.innerHTML = '';
@@ -1004,7 +1020,7 @@ Dashboard | My Courses
                 otherCoursesContainer.innerHTML += createOtherCourseCard(course);
             });
         }
-        
+
         // Initialize lazy loading for course images
         setTimeout(() => initializeLazyLoading(), 100);
     }
@@ -1012,7 +1028,7 @@ Dashboard | My Courses
     // ========================================
     // BATCH CARD TEMPLATES
     // ========================================
-    
+
     function createStudentBatchCard(batch) {
         return `
             <div class="col-md-3">
@@ -1032,7 +1048,7 @@ Dashboard | My Courses
             </div>
         `;
     }
-    
+
     function createPendingBatchCard(batch) {
         return `
             <div class="col-md-3">
@@ -1049,7 +1065,7 @@ Dashboard | My Courses
             </div>
         `;
     }
-    
+
     function createRejectedBatchCard(batch) {
         return `
             <div class="col-md-3">
@@ -1066,10 +1082,10 @@ Dashboard | My Courses
             </div>
         `;
     }
-    
+
     function createOtherBatchCard(batch) {
         const hasRequiredFields = batch.required_fields && batch.required_fields.length > 0;
-        const enrollButton = hasRequiredFields 
+        const enrollButton = hasRequiredFields
             ? `<button class="btn btn-success w-100 enroll-btn" data-bs-toggle="modal"
                     data-bs-target="#enrollModal" data-batch-id="${batch.id}"
                     data-batch-name="${batch.name}" data-required-fields='${JSON.stringify(batch.required_fields)}'>
@@ -1077,7 +1093,7 @@ Dashboard | My Courses
                </button>
                <p class="text-success mt-2">Require Extra Info!</p>`
             : `<a href="/dashboard/enroll_course/${batch.id}/" class="btn btn-success w-100">Enroll Now</a>`;
-        
+
         return `
             <div class="col-md-3">
                 <div class="card">
@@ -1099,7 +1115,7 @@ Dashboard | My Courses
     // ========================================
     // COURSE CARD TEMPLATES
     // ========================================
-    
+
     function createApprovedCourseCard(course) {
         return `
             <div class="col-md-3">
@@ -1123,7 +1139,7 @@ Dashboard | My Courses
             </div>
         `;
     }
-    
+
     function createPendingCourseCard(course) {
         return `
             <div class="col-md-3">
@@ -1144,7 +1160,7 @@ Dashboard | My Courses
             </div>
         `;
     }
-    
+
     function createRejectedCourseCard(course) {
         return `
             <div class="col-md-3">
@@ -1164,7 +1180,7 @@ Dashboard | My Courses
             </div>
         `;
     }
-    
+
     function createOtherCourseCard(course) {
         return `
             <div class="col-md-3">
@@ -1191,10 +1207,10 @@ Dashboard | My Courses
     // ========================================
     // RE-ATTACH EVENT LISTENERS
     // ========================================
-    
+
     function attachEnrollButtonListeners() {
         const enrollButtons = document.querySelectorAll(".enroll-btn");
-        
+
         enrollButtons.forEach(button => {
             button.addEventListener("click", function () {
                 const batchId = this.getAttribute("data-batch-id");
@@ -1217,7 +1233,7 @@ Dashboard | My Courses
                 extraFieldsContainer.innerHTML = "";
                 requiredFields.forEach(field => {
                     let label = field.replace(/_/g, " ").toUpperCase();
-                    
+
                     // Special handling for college_name field
                     if (field.toLowerCase() === 'college_name') {
                         extraFieldsContainer.innerHTML += `
@@ -1287,18 +1303,18 @@ Dashboard | My Courses
             const fieldName = searchInput.id.replace('college_search_', '');
             const dropdown = document.getElementById(`college_select_${fieldName}`);
             const resultsBadge = document.getElementById(`results_badge_${fieldName}`);
-            
-            searchInput.addEventListener('input', function() {
+
+            searchInput.addEventListener('input', function () {
                 const searchTerm = this.value.toLowerCase().trim();
                 const options = dropdown.querySelectorAll('option');
                 let visibleCount = 0;
-                
+
                 options.forEach(option => {
                     if (option.value === '' || option.value === 'other') {
                         option.style.display = '';
                         return;
                     }
-                    
+
                     const collegeText = option.textContent.toLowerCase();
                     if (collegeText.includes(searchTerm)) {
                         option.style.display = '';
@@ -1307,16 +1323,16 @@ Dashboard | My Courses
                         option.style.display = 'none';
                     }
                 });
-                
+
                 if (searchTerm.length > 0) {
                     resultsBadge.style.display = 'inline-block';
                     resultsBadge.innerHTML = `<i class="fas fa-check-circle"></i> ${visibleCount} found`;
                 } else {
                     resultsBadge.style.display = 'none';
                 }
-                
+
                 if (visibleCount === 1 && searchTerm.length > 2) {
-                    const visibleOption = Array.from(options).find(opt => 
+                    const visibleOption = Array.from(options).find(opt =>
                         opt.style.display !== 'none' && opt.value !== '' && opt.value !== 'other'
                     );
                     if (visibleOption) {
@@ -1328,15 +1344,15 @@ Dashboard | My Courses
                     }
                 }
             });
-            
-            dropdown.addEventListener('change', function() {
+
+            dropdown.addEventListener('change', function () {
                 searchInput.value = '';
                 resultsBadge.style.display = 'none';
                 const options = dropdown.querySelectorAll('option');
                 options.forEach(option => {
                     option.style.display = '';
                 });
-                
+
                 const customInput = document.getElementById(`college_custom_${fieldName}`);
                 if (this.value === 'other') {
                     customInput.style.display = 'block';
@@ -1350,14 +1366,14 @@ Dashboard | My Courses
                     this.required = true;
                 }
             });
-            
-            searchInput.addEventListener('keydown', function(e) {
+
+            searchInput.addEventListener('keydown', function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const visibleOptions = Array.from(dropdown.querySelectorAll('option')).filter(opt => 
+                    const visibleOptions = Array.from(dropdown.querySelectorAll('option')).filter(opt =>
                         opt.style.display !== 'none' && opt.value !== '' && opt.value !== 'other'
                     );
-                    
+
                     if (visibleOptions.length === 1) {
                         dropdown.value = visibleOptions[0].value;
                         dropdown.dispatchEvent(new Event('change'));

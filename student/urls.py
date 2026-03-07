@@ -2,6 +2,8 @@ from django.urls import path, include
 from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views, mcq_views
 
 urlpatterns = [
+    path("api/v1/", include("student.api.urls")),
+    
     path("", views.dashboard, name="student"),
 
     path("my-certificates", views.my_certificates, name = "my_certificates"),
