@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'home.apps.HomeConfig',
     'student.apps.StudentConfig',
+    'rest_framework',
     'administration.apps.AdministrationConfig',
     'practice.apps.PracticeConfig',
     'instructor.apps.InstructorConfig',
@@ -206,6 +207,24 @@ MESSAGE_TAGS = {
     messages.SUCCESS: 'alert-success',
     messages.WARNING: 'alert-warning',
     messages.ERROR: 'alert-danger',
+}
+
+
+# ===================== Django REST Framework ========================
+
+REST_FRAMEWORK = {
+    # Use Django's standard session-based auth for web requests
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    # Require login for all API endpoints by default
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    # Return JSON on validation errors
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
 }
 
 

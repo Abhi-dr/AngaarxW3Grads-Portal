@@ -1,9 +1,7 @@
 {% extends "student/base.html" %}
 {% load static %}
 
-{% block title %}
-Student -> Feedback
-{% endblock %}
+{% block title %}Student → Feedback{% endblock %}
 
 {% block body %}
 
@@ -15,61 +13,143 @@ Student -> Feedback
     </div>
   </div>
 
-  {% for message in messages %}
+  <!-- Toast notification (replaces full-page flash messages) -->
+  <div id="feedback-toast-wrap" style="position:fixed;top:1.2rem;right:1.2rem;z-index:9999;min-width:300px;"></div>
 
-  <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-    <strong>{{ message.tag }}</strong> {{ message }}
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-
-  {% endfor %}
-
-  <div class="card">
+  <div class="card mt-3">
     <div class="card-body">
-      <form method="post">
-
+      <form id="feedback-form">
         {% csrf_token %}
 
         <div class="row flex-row">
 
           <div class="mb-3 col-6">
-            <label for="exampleInputEmail1" class="form-label">Name</label>
-            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-              value="{{ user.first_name }} {{ user.last_name }}" disabled>
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" value="{{ user.first_name }} {{ user.last_name }}" disabled>
           </div>
 
           <div class="mb-3 col-6">
-            <label for="exampleInputEmail1" class="form-label">Email address</label>
-            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-              value="{{ user.email }}" disabled>
-            <div id="emailHelp" class="form-text">Your Email will not be shared</div>
+            <label class="form-label">Email address</label>
+            <input type="email" class="form-control" value="{{ user.email }}" disabled>
+            <div class="form-text">Your Email will not be shared</div>
           </div>
 
         </div>
 
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label">Subject <small style="color: red;">*</small></label>
-          <input type="text" class="form-control" id="exampleInputEmail1" name="subject" aria-describedby="emailHelp"
-            required placeholder="Enter the subject" maxlength="50">
+          <label for="fb-subject" class="form-label">
+            Subject <small style="color:red;">*</small>
+          </label>
+          <input type="text" class="form-control" id="fb-subject" name="subject" required
+            placeholder="Enter the subject" maxlength="255">
+          <div class="invalid-feedback" id="err-subject"></div>
         </div>
 
         <div class="mb-3">
-          <label for="feedback" class="form-label">Feedback <small style="color: red;">*</small> </label>
-          <textarea rows="5" class="form-control" id="exampleInputPassword1" name="message" required
+          <label for="fb-message" class="form-label">
+            Feedback <small style="color:red;">*</small>
+          </label>
+          <textarea rows="5" class="form-control" id="fb-message" name="message" required
             placeholder="Your Feedback is valuable for us..."></textarea>
+          <div class="invalid-feedback" id="err-message"></div>
         </div>
 
-        <!-- <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="exampleCheck1">
-          <label class="form-check-label" for="exampleCheck1">Confirmation</label>
-          <label class="form-check-label" for="exampleCheck1">Terms & Policies</label>
-        </div> -->
-
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" id="fb-submit-btn" class="btn btn-primary">
+          <span id="fb-btn-text">Submit</span>
+          <span id="fb-btn-spinner" class="spinner-border spinner-border-sm ms-1 d-none" role="status"></span>
+        </button>
 
       </form>
     </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    const API_URL = "{% url 'api_feedback' %}";
+    const CSRF_TOKEN = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // ── Toast helper ────────────────────────────────────────────────
+    function showToast(message, type = 'success') {
+      const wrap = document.getElementById('feedback-toast-wrap');
+      const bg = type === 'success' ? 'text-bg-success' : 'text-bg-danger';
+      const toast = document.createElement('div');
+      toast.className = `alert ${bg} alert-dismissible fade show shadow`;
+      toast.setAttribute('role', 'alert');
+      toast.innerHTML = `
+      <strong>${type === 'success' ? '✅' : '❌'}</strong> ${message}
+      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+      wrap.appendChild(toast);
+      setTimeout(() => toast.remove(), 5000);
+    }
+
+    // ── Field error helper ──────────────────────────────────────────
+    function clearErrors() {
+      ['fb-subject', 'fb-message'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove('is-invalid');
+      });
+    }
+
+    function setFieldError(fieldId, errorId, msg) {
+      const el = document.getElementById(fieldId);
+      const err = document.getElementById(errorId);
+      el.classList.add('is-invalid');
+      err.textContent = msg;
+    }
+
+    // ── Form submit ─────────────────────────────────────────────────
+    document.getElementById('feedback-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      clearErrors();
+
+      const btnText = document.getElementById('fb-btn-text');
+      const btnSpinner = document.getElementById('fb-btn-spinner');
+      const submitBtn = document.getElementById('fb-submit-btn');
+
+      // Show loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Submitting…';
+      btnSpinner.classList.remove('d-none');
+
+      const payload = {
+        subject: document.getElementById('fb-subject').value.trim(),
+        message: document.getElementById('fb-message').value.trim(),
+      };
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF_TOKEN,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showToast(data.message || 'Feedback submitted! Thank you 🙏', 'success');
+          document.getElementById('feedback-form').reset();
+        } else {
+          // Show field-level errors from DRF
+          if (data.subject) setFieldError('fb-subject', 'err-subject', data.subject[0]);
+          if (data.message) setFieldError('fb-message', 'err-message', data.message[0]);
+          if (data.non_field_errors) showToast(data.non_field_errors[0], 'error');
+          if (!data.subject && !data.message) showToast('Something went wrong. Please try again.', 'error');
+        }
+
+      } catch (err) {
+        showToast('Network error. Please check your connection.', 'error');
+      } finally {
+        // Restore button
+        submitBtn.disabled = false;
+        btnText.textContent = 'Submit';
+        btnSpinner.classList.add('d-none');
+      }
+    });
+  })();
+</script>
 
 {% endblock %}

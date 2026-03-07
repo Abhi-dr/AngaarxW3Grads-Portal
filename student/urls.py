@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views, mcq_views
+from .api import ProfileAPIView, ChangePasswordAPIView, UploadProfilePictureAPIView, FeedbackAPIView
 
 urlpatterns = [
     path("", views.dashboard, name="student"),
@@ -37,6 +38,15 @@ urlpatterns = [
     # ======================== REFERRALS WORK ========================
     path("my-referrals/", views.my_referrals, name="my_referrals"),
     
+]
+
+# ============================= PROFILE REST API ==============================
+
+urlpatterns += [
+    path("api/profile/",                  ProfileAPIView.as_view(),              name="api_profile"),
+    path("api/profile/change-password/",  ChangePasswordAPIView.as_view(),       name="api_change_password"),
+    path("api/profile/upload-picture/",   UploadProfilePictureAPIView.as_view(), name="api_upload_picture"),
+    path("api/feedback/",                 FeedbackAPIView.as_view(),             name="api_feedback"),
 ]
 
 # ========================================= FLAMES WORK =========================================
