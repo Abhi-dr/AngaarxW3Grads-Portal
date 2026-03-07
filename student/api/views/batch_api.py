@@ -40,7 +40,7 @@ class BatchListView(APIView):
             if b.enrollment_status not in ['Accepted', 'Pending', 'Rejected']
         ]
 
-        # Course Data
+        # jovac Data
         all_courses = Course.objects.annotate(
             registration_status=Case(
                 When(courseregistration__student=student, courseregistration__status='Approved', then=Value('Approved')),
