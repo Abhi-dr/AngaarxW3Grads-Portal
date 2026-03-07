@@ -3,6 +3,8 @@ from . import batch_views, views, doubt_solver, hackathon_views, flames_views, c
 from .api import ProfileAPIView, ChangePasswordAPIView, UploadProfilePictureAPIView, FeedbackAPIView
 
 urlpatterns = [
+    path("api/v1/", include("student.api.urls")),
+    
     path("", views.dashboard, name="student"),
 
     path("my-certificates", views.my_certificates, name = "my_certificates"),

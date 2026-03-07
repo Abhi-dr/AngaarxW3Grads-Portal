@@ -2,6 +2,7 @@ from django.urls import path, include
 from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views, mcq_views
 
 urlpatterns = [
+    path('api/v1/', include('administration.api.urls')),
     path("", views.index, name="administration"),
     
     path("view_student_profile/<int:id>", views.view_student_profile, name="administration_view_student_profile"),

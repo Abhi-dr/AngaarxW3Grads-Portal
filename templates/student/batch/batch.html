@@ -260,7 +260,6 @@ active
 
 <div class="container-fluid">
 
-
     {% for message in messages %}
 
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
@@ -307,59 +306,16 @@ active
                             <h5 class="card-title mb-9 fw-semibold">POD ⛅</h5>
                             <div class="row align-items-center">
                                 <div class="col-8">
-                                    <h4 class="fw-semibold mb-3">{{ pod.question.title|truncatewords:4 }}</h4>
-                                    <div class="d-flex align-items-center pb-1">
-
-                                        {% if pod %}
-
-                                        {% if pod|is_solved_by_user:user %}
-                                        <span
-                                            class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-check text-success"></i>
-                                        </span>
-                                        <p class="s-3 mb-0">Problem Solved!</p>
-                                        {% else %}
-                                        <span
-                                            class="me-2 rounded-circle bg-danger round-20 d-flex align-items-center text-dark justify-content-center">
-                                            ❌
-                                        </span>
-                                        <p class="s-3 mb-0">Not Solved</p>
-                                        {% endif %}
-
-                                        {% else %}
-                                        <span
-                                            class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-arrow-right text-danger"></i>
-                                        </span>
-                                        <p class="s-3 mb-0">Not Available</p>
-                                        {% endif %}
-
+                                    <h4 class="fw-semibold mb-3" id="pod-title">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                                    </h4>
+                                    <div class="d-flex align-items-center pb-1" id="pod-status">
+                                        <!-- POD Status injected via JS -->
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="d-flex justify-content-end">
-
-                                        {% if pod %}
-
-                                        <a href="{% url 'problem' pod.question.slug %}" target="_blank">
-
-                                            {% if pod|is_solved_by_user:user %}
-                                            <div
-                                                class="text-white bg-success rounded-circle p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-check fs-6"></i>
-                                                <span>Done</span>
-                                            </div>
-
-                                            {% else %}
-                                            <div
-                                                class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-arrow-right fs-6"></i>
-                                                <span>Go</span>
-                                            </div>
-                                            {% endif %}
-                                        </a>
-
-                                        {% endif %}
+                                    <div class="d-flex justify-content-end" id="pod-action-button">
+                                        <!-- POD Button injected via JS -->
                                     </div>
                                 </div>
                             </div>
@@ -379,39 +335,14 @@ active
                             <h5 class="card-title mb-8 fw-semibold">Questions Completed 🏆</h5>
                             <div class="row align-items-center">
                                 <div class="col-8">
-                                    <h4 class="fw-semibold mb-3">
-                                        {{ solved_questions }}🔥
+                                    <h4 class="fw-semibold mb-3" id="questions-completed">
+                                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                     </h4>
-                                    <div class="d-flex align-items-center mb-3">
-
-                                        {% if questions_left == 0 %}
-
-                                        <p class="text-success me-1 fs-3 mb-0">
-                                            <strong>More coming soon!</strong>
-                                        </p>
-
-                                        {% else %}
-
-                                        <a href="#">
-                                            <p class="text-danger me-1 fs-3 mb-0 d-inline">
-                                                <strong>{{ questions_left }}</strong>
-                                            </p>
-                                            <p class="text-danger fs-3 mb-0 d-inline">Questions left</p>
-                                        </a>
-
-                                        {% endif %}
+                                    <div class="d-flex align-items-center mb-3" id="questions-left-container">
+                                        <!-- questions left injected via JS -->
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-4">
-                                            <!-- <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span> -->
-
-                                            {% if total_questions_solved_percentage == 100 %}
-                                            <button class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">All
-                                                Solved</button>
-
-                                            {% endif %}
-                                        </div>
-
+                                    <div class="d-flex align-items-center" id="all-solved-container">
+                                        <div class="me-4"></div>
                                     </div>
                                 </div>
                                 <div class="col-4">
@@ -420,7 +351,7 @@ active
 
 
                                             <div class="progress-bar css">
-                                                <progress id="css" min="0" max="100" value="{{ progress }}"></progress>
+                                                <progress id="css-progress" min="0" max="100" value="0"></progress>
 
                                             </div>
 
@@ -449,45 +380,21 @@ active
         </div>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4" id="sheets-container">
 
-        {% for sheet in sheets %}
-
+        <!-- Sheets loaded dynamically. Skeleton loaders for initial DOM presentation. -->
         <div class="col-md-3">
-            <h5 class="card-title fw-semibold mb-0"></h5>
             <div class="card">
-
-                {% if sheet.is_enabled %}
-                <a href="{% url 'my_sheet' sheet.slug %}">
-                    {% endif %}
-                    <div class="lazy-image-container">
-                        <div class="image-skeleton"></div>
-                        <img data-src="{{ sheet.thumbnail.url }}" class="card-img-top lazy-image" alt="{{ sheet.name }}"
-                            loading="lazy" />
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            {{ sheet.name }}🔥
-                        </h5>
-                        <p class="card-text mb-2">
-                            Total Sawal : {{ sheet.get_total_questions }}
-                        </p>
-                        <!-- <p class="card-text text-black mb-1">
-                            Total Registrations: {{ company.job_set.all }}
-                        </p> -->
-
-                        {% if sheet.is_enabled %}
-                        <a href="{% url 'my_sheet' sheet.slug %}" class="btn btn-outline-secondary w-100">Continue
-                            Solving</a>
-                        {% else %}
-                        <a href="#" class="btn btn-outline-light-danger w-100 disabled">Currently Unavailable</a>
-                        {% endif %}
-                    </div>
-                </a>
+                <div class="lazy-image-container">
+                    <div class="image-skeleton"></div>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading...
+                    </h5>
+                </div>
             </div>
         </div>
-
-        {% endfor %}
 
     </div>
 
@@ -495,9 +402,106 @@ active
 
 <script>
     // ========================================
-    // LAZY LOADING FOR SHEET IMAGES
+    // FETCH BATCH DATA VIA DRF API
     // ========================================
     document.addEventListener('DOMContentLoaded', function () {
+        const batchSlug = "{{ batch.slug }}"; // Keep this from context for routing
+
+        fetch(`/dashboard/api/v1/batch/${batchSlug}/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error("Error loading batch:", data.error);
+                    return;
+                }
+
+                // Update POD
+                if (data.pod) {
+                    document.getElementById("pod-title").textContent = data.pod.question_title;
+                    const podStatus = document.getElementById("pod-status");
+                    if (data.pod.is_solved_by_user) {
+                        podStatus.innerHTML = `<span class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                                            <i class="ti ti-check text-success"></i>
+                                        </span>
+                                        <p class="s-3 mb-0">Problem Solved!</p>`;
+                        document.getElementById("pod-action-button").innerHTML = `<a href="/practice/problem/${data.pod.question_slug}" target="_blank">
+                                            <div class="text-white bg-success rounded-circle p-6 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-check fs-6"></i>
+                                                <span>Done</span>
+                                            </div>
+                                        </a>`;
+                    } else {
+                        podStatus.innerHTML = `<span class="me-2 rounded-circle bg-danger round-20 d-flex align-items-center text-dark justify-content-center">❌</span><p class="s-3 mb-0">Not Solved</p>`;
+                        document.getElementById("pod-action-button").innerHTML = `<a href="/practice/problem/${data.pod.question_slug}" target="_blank">
+                                            <div class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                                                <i class="ti ti-arrow-right fs-6"></i>
+                                                <span>Go</span>
+                                            </div>
+                                        </a>`;
+                    }
+                } else {
+                    document.getElementById("pod-title").textContent = "No POD Today";
+                    document.getElementById("pod-status").innerHTML = `<span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center"><i class="ti ti-arrow-right text-danger"></i></span><p class="s-3 mb-0">Not Available</p>`;
+                    document.getElementById("pod-action-button").innerHTML = ``;
+                }
+
+                // Update Progress
+                document.getElementById("questions-completed").textContent = `${data.solved_questions}🔥`;
+                if (data.questions_left === 0 && data.total_questions > 0) {
+                    document.getElementById("questions-left-container").innerHTML = `<p class="text-success me-1 fs-3 mb-0"><strong>More coming soon!</strong></p>`;
+                    document.getElementById("all-solved-container").innerHTML = `<div class="me-4"><button class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">All Solved</button></div>`;
+                } else {
+                    document.getElementById("questions-left-container").innerHTML = `<p class="text-danger me-1 fs-3 mb-0 d-inline"><strong>${data.questions_left}</strong></p>&nbsp;<p class="text-danger fs-3 mb-0 d-inline">Questions left</p>`;
+                }
+
+                document.getElementById("css-progress").value = data.progress_percentage;
+
+                // Render Sheets
+                const sheetsContainer = document.getElementById("sheets-container");
+                sheetsContainer.innerHTML = "";
+                let sheetsHtml = "";
+                data.sheets.forEach(sheet => {
+                    let sheetLink = sheet.is_enabled ? `/dashboard/sheet/${sheet.slug}/` : "#";
+                    let actionButton = sheet.is_enabled ? `<a href="${sheetLink}" class="btn btn-outline-secondary w-100">Continue Solving</a>` : `<a href="#" class="btn btn-outline-light-danger w-100 disabled">Currently Unavailable</a>`;
+
+                    sheetsHtml += `
+        <div class="col-md-3">
+            <div class="card">
+                ${sheet.is_enabled ? `<a href="${sheetLink}">` : ''}
+                    <div class="lazy-image-container">
+                        <div class="image-skeleton"></div>
+                        <img data-src="${sheet.thumbnail}" class="card-img-top lazy-image" alt="${sheet.name}"
+                            loading="lazy" />
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">${sheet.name}🔥</h5>
+                        <p class="card-text mb-2">Total Sawal : ${sheet.total_questions}</p>
+                        ${actionButton}
+                    </div>
+                ${sheet.is_enabled ? `</a>` : ''}
+            </div>
+        </div>
+                `;
+                });
+                sheetsContainer.innerHTML = sheetsHtml;
+
+                // Kick off lazy loading images
+                setTimeout(initializeLazyLoading, 100);
+            })
+            .catch(err => console.error("Error fetching batch details", err));
+    });
+
+    // ========================================
+    // LAZY LOADING FOR SHEET IMAGES
+    // ========================================
+    function initializeLazyLoading() {
         const lazyImages = document.querySelectorAll('.lazy-image');
 
         if ('IntersectionObserver' in window) {
@@ -561,7 +565,7 @@ active
                 }
             });
         }
-    });
+    }
 </script>
 
 {% endblock %}

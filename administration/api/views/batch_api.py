@@ -1,0 +1,41 @@
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
+from practice.models import Batch
+from administration.api.serializers.batch_serializers import BatchAdminSerializer
+from administration.api.permissions import IsAdministratorOrInstructor
+
+class BatchAdminViewSet(viewsets.ModelViewSet):
+    """
+    CRUD API for Administrators to manage Batches.
+    Supports GET, POST, PUT, PATCH, DELETE.
+    Handles Multipart data for thumbnail image uploads.
+    """
+    queryset = Batch.objects.all().order_by('-id')
+    serializer_class = BatchAdminSerializer
+    permission_classes = [IsAdministratorOrInstructor]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+    lookup_field = 'slug'
+
+    def create(self, request, *args, **kwargs):
+        # The serializer handles validation and saving, including the thumbnail
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response({'success': True, 'data': serializer.data}, status=status.HTTP_201_CREATED)
+        return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            self.perform_update(serializer)
+            return Response({'success': True, 'data': serializer.data})
+        return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({'success': True, 'message': 'Batch deleted successfully'}, status=status.HTTP_200_OK)

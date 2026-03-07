@@ -2,7 +2,7 @@ from django.urls import path, include
 from . import sheet_views, batch_views, views, jovac_views
 
 urlpatterns = [
-
+    path('api/v1/', include('instructor.api.urls')),
     path("", views.index, name="instructor"),
 
 
