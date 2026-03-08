@@ -1,8 +1,3 @@
-"""
-JOVAC API Views
-Handles REST API endpoints for JOVAC course management
-"""
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated

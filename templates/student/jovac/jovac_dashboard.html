@@ -199,195 +199,215 @@ Dashboard | J O V A C
 
 {% block myjs %}
 <script>
-    /* JOVAC Dashboard v3.0 - {{ cache_bust|default:"latest" }} */
-    console.log('JOVAC Dashboard script loaded - Version 3.0!');
-    
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('DOMContentLoaded event fired!');
-        fetchJOVACCourses();
-    });
+console.log('JOVAC Dashboard script loaded');
 
-    async function fetchJOVACCourses() {
-        try {
-            console.log('Fetching JOVAC courses...');
-            const response = await fetch('/dashboard/api/v1/jovac/courses/', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                credentials: 'same-origin'
-            });
+document.addEventListener('DOMContentLoaded', function () {
+    fetchJOVACCourses();
+});
 
-            console.log('Response status:', response.status);
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error('API Error Response:', errorText);
-                alert(`API Error: ${response.status} - Check console for details`);
-                throw new Error(`Failed to fetch courses: ${response.status}`);
-            }
-
-            const data = await response.json();
-            console.log('Received data:', data);
-            
-            // Hide loading spinner
-            const spinner = document.getElementById('loading-spinner');
-            if (spinner) {
-                spinner.style.display = 'none';
-            }
-
-            if (data.success && data.courses) {
-                console.log('Rendering courses...');
-                renderCourses(data.courses);
-            } else {
-                console.log('No courses found, showing empty state');
-                showEmptyState();
-            }
-        } catch (error) {
-            console.error('Error fetching JOVAC courses:', error);
-            alert(`Error: ${error.message}`);
-            const spinner = document.getElementById('loading-spinner');
-            if (spinner) {
-                spinner.style.display = 'none';
-            }
-            showEmptyState();
-        }
-    }
-
-    function renderCourses(courses) {
-        const { my_courses, available_courses } = courses;
-
-        let hasAnyCourses = false;
-
-        // Render My Courses (Enrolled/Approved)
-        if (my_courses && my_courses.length > 0) {
-            hasAnyCourses = true;
-            document.getElementById('my-courses-section').style.display = 'block';
-            document.getElementById('my-courses-count').textContent = my_courses.length;
-            const container = document.getElementById('my-courses-container');
-            container.innerHTML = '';
-            my_courses.forEach(course => {
-                container.innerHTML += createEnrolledCourseCard(course);
-            });
-        }
-
-        // Render Available Courses (Pending, Rejected, Not Enrolled)
-        if (available_courses && available_courses.length > 0) {
-            hasAnyCourses = true;
-            document.getElementById('available-courses-section').style.display = 'block';
-            document.getElementById('available-courses-count').textContent = available_courses.length;
-            const container = document.getElementById('available-courses-container');
-            container.innerHTML = '';
-            available_courses.forEach(course => {
-                container.innerHTML += createAvailableCourseCard(course);
-            });
-        }
-
-        if (!hasAnyCourses) {
-            showEmptyState();
-        }
-
-        // Initialize lazy loading
-        setTimeout(() => initializeLazyLoading(), 100);
-    }
-
-    function createEnrolledCourseCard(course) {
-        return `
-            <div class="col">
-                <div class="card course-card">
-                    <div class="position-absolute top-0 end-0 m-2">
-                        <span class="badge bg-success">Enrolled</span>
-                    </div>
-                    <a href="/dashboard/jovac/${course.slug}/" class="text-decoration-none">
-                        <div class="lazy-image-container">
-                            <div class="image-skeleton"></div>
-                            <img data-src="${course.thumbnail}" class="lazy-image" alt="${course.name}" loading="lazy" />
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title">${course.name} 📁</h5>
-                            <p class="card-text text-muted small">By: ${course.instructor_names}</p>
-                            <div class="btn btn-primary w-100">View Course</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        `;
-    }
-
-    function createAvailableCourseCard(course) {
-        // Only shows courses that are truly available (Not Enrolled)
-        return 
-            <div class="col">
-                <div class="card course-card">
-                    <div class="position-absolute top-0 end-0 m-2">
-                        <span class="badge bg-secondary">Available</span>
-                    </div>
-                    <div class="lazy-image-container">
-                        <div class="image-skeleton"></div>
-                        <img data-src="${course.thumbnail}" class="lazy-image" alt="${course.name}" loading="lazy" />
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">${course.name} 📁</h5>
-                        <p class="card-text text-muted small">By: ${course.instructor_names}</p>
-                        <a href="/dashboard/enroll_jovac/${course.slug}/" class="btn btn-outline-primary w-100">Request Enrollment</a>
-                    </div>
-                </div>
-            </div>
-        ;
-    }
-                </div>
-            </div>
-        ;
-    }
-
-    function showEmptyState() {
-        document.getElementById('empty-state').style.display = 'block';
-    }
-
-    function initializeLazyLoading() {
-        const lazyImages = document.querySelectorAll('.lazy-image');
-        
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    const src = img.getAttribute('data-src');
-                    
-                    if (src) {
-                        img.src = src;
-                        img.onload = () => {
-                            img.setAttribute('data-loaded', 'true');
-                            const skeleton = img.previousElementSibling;
-                            if (skeleton && skeleton.classList.contains('image-skeleton')) {
-                                skeleton.style.display = 'none';
-                            }
-                        };
-                        observer.unobserve(img);
-                    }
-                }
-            });
-        }, {
-            rootMargin: '50px'
+async function fetchJOVACCourses() {
+    try {
+        const response = await fetch('/dashboard/api/v1/jovac/courses/', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            credentials: 'same-origin'
         });
 
-        lazyImages.forEach(img => imageObserver.observe(img));
+        if (!response.ok) {
+            throw new Error(`Failed to fetch courses: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        document.getElementById('loading-spinner').style.display = 'none';
+
+        if (data.success && data.courses) {
+            renderCourses(data.courses);
+        } else {
+            showEmptyState();
+        }
+
+    } catch (error) {
+        console.error(error);
+        document.getElementById('loading-spinner').style.display = 'none';
+        showEmptyState();
+    }
+}
+
+function renderCourses(courses) {
+
+    const { my_courses, available_courses } = courses;
+
+    let hasAnyCourses = false;
+
+    if (my_courses && my_courses.length > 0) {
+
+        hasAnyCourses = true;
+
+        document.getElementById('my-courses-section').style.display = 'block';
+        document.getElementById('my-courses-count').textContent = my_courses.length;
+
+        const container = document.getElementById('my-courses-container');
+        container.innerHTML = '';
+
+        my_courses.forEach(course => {
+            container.innerHTML += createEnrolledCourseCard(course);
+        });
     }
 
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
+    if (available_courses && available_courses.length > 0) {
+
+        hasAnyCourses = true;
+
+        document.getElementById('available-courses-section').style.display = 'block';
+        document.getElementById('available-courses-count').textContent = available_courses.length;
+
+        const container = document.getElementById('available-courses-container');
+        container.innerHTML = '';
+
+        available_courses.forEach(course => {
+            container.innerHTML += createAvailableCourseCard(course);
+        });
+    }
+
+    if (!hasAnyCourses) {
+        showEmptyState();
+    }
+
+    setTimeout(() => initializeLazyLoading(), 100);
+}
+
+
+function createEnrolledCourseCard(course) {
+
+    return `
+    <div class="col">
+        <div class="card course-card">
+
+            <div class="position-absolute top-0 end-0 m-2">
+                <span class="badge bg-success">Enrolled</span>
+            </div>
+
+            <a href="/dashboard/jovac/${course.slug}/" class="text-decoration-none">
+
+                <div class="lazy-image-container">
+                    <div class="image-skeleton"></div>
+                    <img data-src="${course.thumbnail}" class="lazy-image" alt="${course.name}" loading="lazy">
+                </div>
+
+                <div class="card-body">
+                    <h5 class="card-title">${course.name} 📁</h5>
+                    <p class="card-text text-muted small">By: ${course.instructor_names}</p>
+                    <div class="btn btn-primary w-100">View Course</div>
+                </div>
+
+            </a>
+
+        </div>
+    </div>
+    `;
+}
+
+
+function createAvailableCourseCard(course) {
+
+    return `
+    <div class="col">
+        <div class="card course-card">
+
+            <div class="position-absolute top-0 end-0 m-2">
+                <span class="badge bg-secondary">Available</span>
+            </div>
+
+            <div class="lazy-image-container">
+                <div class="image-skeleton"></div>
+                <img data-src="${course.thumbnail}" class="lazy-image" alt="${course.name}" loading="lazy">
+            </div>
+
+            <div class="card-body">
+                <h5 class="card-title">${course.name} 📁</h5>
+                <p class="card-text text-muted small">By: ${course.instructor_names}</p>
+
+                <a href="/dashboard/enroll_jovac/${course.slug}/"
+                   class="btn btn-outline-primary w-100">
+                   Request Enrollment
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+    `;
+}
+
+
+function showEmptyState() {
+    document.getElementById('empty-state').style.display = 'block';
+}
+
+
+function initializeLazyLoading() {
+
+    const lazyImages = document.querySelectorAll('.lazy-image');
+
+    const imageObserver = new IntersectionObserver((entries, observer) => {
+
+        entries.forEach(entry => {
+
+            if (entry.isIntersecting) {
+
+                const img = entry.target;
+                const src = img.getAttribute('data-src');
+
+                if (src) {
+
+                    img.src = src;
+
+                    img.onload = () => {
+                        img.setAttribute('data-loaded', 'true');
+
+                        const skeleton = img.previousElementSibling;
+
+                        if (skeleton && skeleton.classList.contains('image-skeleton')) {
+                            skeleton.style.display = 'none';
+                        }
+                    };
+
+                    observer.unobserve(img);
                 }
             }
-        }
-        return cookieValue;
-    }
-</script>
+        });
 
+    }, { rootMargin: '50px' });
+
+    lazyImages.forEach(img => imageObserver.observe(img));
+}
+
+
+function getCookie(name) {
+
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== '') {
+
+        const cookies = document.cookie.split(';');
+
+        for (let i = 0; i < cookies.length; i++) {
+
+            const cookie = cookies[i].trim();
+
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+</script>
 {% endblock myjs %}

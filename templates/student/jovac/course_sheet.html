@@ -86,9 +86,8 @@ active
     <div class="card w-100 d-none" id="search-container">
         <div class="card-body p-4">
             <div class="input-group">
-                <input type="text" class="form-control" id="search-input" 
-                       placeholder="Search by ID, Title, Description or Type"
-                       aria-label="Search assignments">
+                <input type="text" class="form-control" id="search-input"
+                    placeholder="Search by ID, Title, Description or Type" aria-label="Search assignments">
                 <button class="btn btn-outline-secondary" type="button" id="search-button">Search</button>
                 <button class="btn btn-outline-danger" type="button" id="clear-button">Clear</button>
             </div>
@@ -152,14 +151,15 @@ active
 
     document.addEventListener('DOMContentLoaded', function () {
         fetchAssignments();
-        
-        // Search functionality
+
+        const searchInput = document.getElementById('search-input');
+
         document.getElementById('search-button').addEventListener('click', performSearch);
         document.getElementById('clear-button').addEventListener('click', clearSearch);
-        document.getElementById('search-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
+
+        // LIVE SEARCH
+        searchInput.addEventListener('input', function () {
+            performSearch();
         });
     });
 
@@ -184,11 +184,11 @@ active
                 allAssignments = data.assignments;
                 filteredAssignments = allAssignments;
                 renderAssignments(allAssignments);
-                
+
                 // Hide loading and show content
                 document.getElementById('loading-container').classList.add('d-none');
                 document.getElementById('search-container').classList.remove('d-none');
-                
+
                 if (allAssignments.length > 0) {
                     document.getElementById('assignments-container').classList.remove('d-none');
                 } else {
@@ -227,10 +227,10 @@ active
 
     function createAssignmentRow(assignment) {
         const tr = document.createElement('tr');
-        
+
         // Truncate title
-        const truncatedTitle = assignment.title.length > 30 
-            ? assignment.title.substring(0, 30) + '...' 
+        const truncatedTitle = assignment.title.length > 30
+            ? assignment.title.substring(0, 30) + '...'
             : assignment.title;
 
         let typeCell, deadlineCell, linkCell, actionCell;
@@ -244,23 +244,23 @@ active
                     </div>
                 </td>
             `;
-            
+
             deadlineCell = `
                 <td class="border-bottom-0">
                     <p class="fw-semibold mb-0">-</p>
                 </td>
             `;
-            
+
             linkCell = `
                 <td class="border-bottom-0">
                     <p class="fw-semibold mb-0">
-                        ${assignment.tutorial_link 
-                            ? `<a href="${assignment.tutorial_link}" target="_blank"><i class="fa fa-youtube-play"></i></a>` 
-                            : '-'}
+                        ${assignment.tutorial_link
+                    ? `<a href="${assignment.tutorial_link}" target="_blank"><i class="fa fa-youtube-play"></i></a>`
+                    : '-'}
                     </p>
                 </td>
             `;
-            
+
             actionCell = `
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
@@ -277,7 +277,7 @@ active
                     </div>
                 </td>
             `;
-            
+
             deadlineCell = `
                 <td class="border-bottom-0">
                     <p class="fw-semibold mb-0">
@@ -286,7 +286,7 @@ active
                     </p>
                 </td>
             `;
-            
+
             linkCell = `
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
@@ -294,7 +294,7 @@ active
                     </div>
                 </td>
             `;
-            
+
             // Action button logic
             let actionButton;
             if (assignment.is_submitted) {
@@ -304,7 +304,7 @@ active
             } else {
                 actionButton = `<a href="/dashboard/submit_assignment/${assignment.id}" class="btn btn-outline-primary mx-1">Submit Assignment</a>`;
             }
-            
+
             actionCell = `
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
@@ -334,24 +334,25 @@ active
 
     function performSearch() {
         const query = document.getElementById('search-input').value.toLowerCase().trim();
-        
-        if (!query) {
+
+        if (query === '') {
             clearSearch();
             return;
         }
 
         filteredAssignments = allAssignments.filter(assignment => {
-            return assignment.id.toString().includes(query) ||
-                   assignment.title.toLowerCase().includes(query) ||
-                   (assignment.description && assignment.description.toLowerCase().includes(query)) ||
-                   assignment.assignment_type.toLowerCase().includes(query);
+            return (
+                assignment.id.toString().includes(query) ||
+                assignment.title.toLowerCase().includes(query) ||
+                (assignment.description && assignment.description.toLowerCase().includes(query)) ||
+                (assignment.assignment_type && assignment.assignment_type.toLowerCase().includes(query))
+            );
         });
 
         renderAssignments(filteredAssignments);
-        
-        // Show search results text
+
         const resultsText = document.getElementById('search-results-text');
-        resultsText.textContent = ` | Search Results for "${query}"`;
+        resultsText.textContent = ` | Showing ${filteredAssignments.length} result(s) for "${query}"`;
         resultsText.classList.remove('d-none');
     }
 
@@ -359,7 +360,7 @@ active
         document.getElementById('search-input').value = '';
         filteredAssignments = allAssignments;
         renderAssignments(allAssignments);
-        
+
         // Hide search results text
         document.getElementById('search-results-text').classList.add('d-none');
     }
