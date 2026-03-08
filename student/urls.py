@@ -121,6 +121,32 @@ urlpatterns += [
 
     path("sheet/<slug:slug>/", batch_views.my_sheet, name="my_sheet"),
     path("<slug:slug>/leaderboard", batch_views.student_batch_leaderboard, name="student_batch_leaderboard"),
+]
+
+# ============================== JOVAC WORK (BEFORE BATCH CATCH-ALL) ==============================
+
+urlpatterns += [
+    # Main JOVAC dashboard (must come before jovac/<slug:slug>/)
+    path("jovac/", jovac_views.jovac_dashboard, name="jovac_dashboard"),
+    
+    # JOVAC tutorial and assignment routes (more specific patterns first)
+    path("jovac/tutorial/<int:id>/", jovac_views.view_jovac_tutorial, name="view_jovac_tutorial"),
+    path("jovac/assignment/<int:id>/next", jovac_views.get_next_jovac_assignment, name="get_next_jovac_assignment"),
+    
+    # JOVAC course routes (less specific, slug-based patterns)
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>/", jovac_views.jovac_sheet, name="student_jovac_sheet"),
+    path("jovac/<slug:slug>/", jovac_views.jovac, name="student_jovac"),
+    path("enroll_jovac/<slug:slug>/", jovac_views.enroll_jovac, name="student_enroll_jovac"),
+
+    # Assignment management
+    path("submit_assignment/<int:assignment_id>", jovac_views.submit_assignment, name="submit_assignment"),
+    path("assignments/<int:assignment_id>/submission", jovac_views.view_submission, name="view_submission"),
+    path("delete_submission/<int:submission_id>", jovac_views.delete_submission, name="delete_submission"),
+]
+
+# ============================== BATCH CATCH-ALL (KEEP THIS LAST) ==============================
+
+urlpatterns += [
     path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
 ]
 
@@ -135,25 +161,7 @@ urlpatterns += [
 ]
     # path('mcq/leaderboard/<slug:slug>/', mcq_views.mcq_leaderboard, name='mcq_leaderboard'),
     # path('mcq/progress/<slug:slug>/', mcq_views.mcq_sheet_progress, name='mcq_sheet_progress'),
-    # path('mcq/<slug:slug>/recommended/', mcq_views.fetch_recommended_mcq_questions, name='fetch_recommended_mcq_questions'),
+    # path('mcq/<slug:slug>/recommended/', mcq_views.fetch_recommended_mcq_questions, name='fetch_recommended_mcq_questions')
 
-# ============================== JOVAC WORK ==============================
-
-urlpatterns += [
-
-    path("enroll_jovac/<slug:slug>/", jovac_views.enroll_jovac, name="student_enroll_jovac"),
-    path("jovac/<slug:slug>/", jovac_views.jovac, name="student_jovac"),
-    path("jovac/<slug:course_slug>/<slug:sheet_slug>", jovac_views.jovac_sheet, name="student_jovac_sheet"),
-    path("jovac/tutorial/<int:id>/", jovac_views.view_jovac_tutorial, name="view_jovac_tutorial"),
-    path("jovac/assignment/<int:id>/next", jovac_views.get_next_jovac_assignment, name="get_next_jovac_assignment"),
-
-
-    # path("assignments", jovac_views.assignments, name="assignments"),
-    path("submit_assignment/<int:assignment_id>", jovac_views.submit_assignment, name="submit_assignment"),
-    path("assignments/<int:assignment_id>/submission", jovac_views.view_submission, name="view_submission"),
-    path("delete_submission/<int:submission_id>", jovac_views.delete_submission, name="delete_submission"),
-
-
-
-]
+# ============================== END OF URLS ==============================
 

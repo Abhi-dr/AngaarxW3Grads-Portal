@@ -6,8 +6,8 @@ from django.db.models import Case, When, Value, CharField
 
 from student.api.permissions import IsStudent
 from practice.models import Batch, EnrollmentRequest, Sheet
-from student.models import Course, Notification
-from student.api.serializers.batch_serializers import BatchListSerializer, CourseListSerializer
+from student.models import Notification
+from student.api.serializers.batch_serializers import BatchListSerializer
 from student.api.serializers.sheet_serializers import SheetListSerializer
 
 class BatchListView(APIView):
@@ -40,27 +40,6 @@ class BatchListView(APIView):
             if b.enrollment_status not in ['Accepted', 'Pending', 'Rejected']
         ]
 
-        # jovac Data
-        all_courses = Course.objects.annotate(
-            registration_status=Case(
-                When(courseregistration__student=student, courseregistration__status='Approved', then=Value('Approved')),
-                When(courseregistration__student=student, courseregistration__status='Pending', then=Value('Pending')),
-                When(courseregistration__student=student, courseregistration__status='Rejected', then=Value('Rejected')),
-                default=Value('Not Enrolled'),
-                output_field=CharField(),
-            )
-        ).prefetch_related('instructors').distinct()
-
-        approved_courses = all_courses.filter(registration_status='Approved')
-        pending_courses = all_courses.filter(registration_status='Pending')
-        rejected_courses = all_courses.filter(registration_status='Rejected')
-        
-        other_courses = [
-            c for c in all_courses 
-            if c.registration_status not in ['Approved', 'Pending', 'Rejected']
-        ]
-        
-
         return Response({
             "success": True,
             "batches": {
@@ -68,12 +47,6 @@ class BatchListView(APIView):
                 "pending_batches": BatchListSerializer(pending_batches, many=True).data,
                 "rejected_batches": BatchListSerializer(rejected_batches, many=True).data,
                 "other_batches": BatchListSerializer(other_batches, many=True).data,
-            },
-            "courses": {
-                "approved_courses": CourseListSerializer(approved_courses, many=True).data,
-                "pending_courses": CourseListSerializer(pending_courses, many=True).data,
-                "rejected_courses": CourseListSerializer(rejected_courses, many=True).data,
-                "other_courses": CourseListSerializer(other_courses, many=True).data,
             }
         })
 

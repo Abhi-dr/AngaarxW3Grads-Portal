@@ -22,6 +22,15 @@ from django.db.models import Max, Sum
 # =======================================================================================================
 
 @login_required(login_url="login")
+def jovac_dashboard(request):
+    """
+    Main JOVAC dashboard page - displays all JOVAC courses
+    Fetches data via REST API
+    """
+    return render(request, 'student/jovac/jovac_dashboard.html')
+
+
+@login_required(login_url="login")
 def jovac(request, slug):
     course = get_object_or_404(Course, slug=slug)
     instructors = course.instructors.all()
