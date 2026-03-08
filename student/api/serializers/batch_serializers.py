@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from practice.models import Batch
-from student.models import Course
+from student.models import Course, CourseSheet
 
 class BatchListSerializer(serializers.ModelSerializer):
     enrollment_status = serializers.CharField(read_only=True, default='Not Enrolled')
@@ -19,3 +19,15 @@ class CourseListSerializer(serializers.ModelSerializer):
         
     def get_instructor_names(self, obj):
         return obj.get_instructor_names()
+
+class CourseSheetSerializer(serializers.ModelSerializer):
+    thumbnail_url = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = CourseSheet
+        fields = ['id', 'name', 'slug', 'description', 'thumbnail_url', 'is_enabled']
+        
+    def get_thumbnail_url(self, obj):
+        if obj.thumbnail:
+            return obj.thumbnail.url
+        return None

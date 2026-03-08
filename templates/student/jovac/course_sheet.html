@@ -10,17 +10,29 @@ active
 {% endblock %}
 
 {% block extra_css %}
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <style>
     .fa-youtube-play {
         font-size: 220%;
-        color: red
+        color: red;
     }
 
     .text-color {
         color: white;
+    }
+
+    /* Loading Spinner */
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 3rem;
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
     }
 
     [data-bs-theme="dark"] {
@@ -35,7 +47,6 @@ active
         }
     }
 </style>
-
 {% endblock %}
 
 {% block body %}
@@ -50,24 +61,6 @@ active
                     🔥</span>
             </h3>
         </div>
-        <!-- <div class="row mt-n3">
-            <div class="col-md-5 mx-auto">
-                <a href="{% url 'administrator_add_assignment' course.slug sheet.slug %}"
-                    class="btn btn-outline-primary button mt-n2 mb-3 w-100 ">Add Assignment</a>
-
-            </div>
-            <div class="col-md-5 mx-auto">
-                <a href="{% url 'administrator_edit_jovac_sheet' course.slug sheet.slug %}"
-                    class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Edit Sheet</a>
-            </div>
-
-            
-            <div class="col-md-3 mx-auto">
-                <a href="{% url 'administrator_jovac_enrollment_requests' course.slug %}"
-                    class="btn btn-outline-secondary button mt-n2 mb-3 w-100 ">Enrollment Requests</a>
-            </div>
-        </div> -->
-
     </div>
 
     {% for message in messages %}
@@ -77,207 +70,320 @@ active
     </div>
     {% endfor %}
 
-
-    <!-- ========================== SEARCH BAR ==================================== -->
-
-    <div class="card w-100">
-        <div class="card-body p-4">
-            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
-            <form method="post">
-
-                {% csrf_token %}
-
-                <div class="input-group">
-
-                    {% if query %}
-
-                    <input type="text" class="form-control" placeholder="Search by ID, Title, Description or Type"
-                        aria-label="Search by ID, Title, Description or Type" aria-describedby="button-addon2"
-                        name="query" value="{{ query }}">
-
-                    {% else %}
-
-                    <input type="text" class="form-control" placeholder="Search by ID, Title, Description or Type"
-                        aria-label="Search by ID, Title, Description or Type" aria-describedby="button-addon2"
-                        name="query">
-
-                    {% endif %}
-
-                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
-                    <!-- make a button to clear the search -->
-                    <a href="#" class="btn btn-outline-danger">Clear</a>
-                </div>
-            </form>
+    <!-- Loading Spinner -->
+    <div id="loading-container" class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading assignments...</span>
         </div>
     </div>
 
-    <!-- ================================= ASSIGNMENT TABLE ================================== -->
+    <!-- Error Message -->
+    <div id="error-container" class="alert alert-danger d-none" role="alert">
+        <strong>Error:</strong> <span id="error-message"></span>
+    </div>
 
-    <div class="card w-100">
+    <!-- Search Bar -->
+    <div class="card w-100 d-none" id="search-container">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Angaari Assignments 🔥
-                {% if query %}
-                <span class="fs-6"> | Search Results for "{{ query }}"</span>
-                {% endif %}
+            <div class="input-group">
+                <input type="text" class="form-control" id="search-input" 
+                       placeholder="Search by ID, Title, Description or Type"
+                       aria-label="Search assignments">
+                <button class="btn btn-outline-secondary" type="button" id="search-button">Search</button>
+                <button class="btn btn-outline-danger" type="button" id="clear-button">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assignments Table -->
+    <div class="card w-100 d-none" id="assignments-container">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">
+                Angaari Assignments 🔥
+                <span class="fs-6 d-none" id="search-results-text"></span>
             </h5>
             <div class="table-responsive">
                 <table class="table text-nowrap mb-0 align-middle">
                     <thead class="text-dark fs-4">
-
                         <tr>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    #
-                                </h6>
+                                <h6 class="fw-semibold mb-0">#</h6>
                             </th>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Title🗒️
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Title🗒️</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Type❔
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Type❔</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Deadline⏰
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Link🔗
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Deadline⏰</h6>
                             </th>
                             <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#2
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Link🔗</h6>
                             </th>
-
+                            <th class="border-bottom-0 justify-content-center">
+                                <h6 class="fw-semibold mb-0">Action#2</h6>
+                            </th>
                         </tr>
                     </thead>
-
                     <tbody id="assignmentTableBody">
-
-                        {% for assignment in assignments %}
-
-                        <tr>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ assignment.id }}</h6>
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ assignment.title }}">{{ assignment.title|truncatechars:30 }}</h6>
-
-                            </td>
-
-                            {% if assignment.is_tutorial %}
-
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-secondary">
-                                        Tutorial
-                                    </span>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    -
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    {% if assignment.tutorial_link %}
-                                    <a href="{{ assignment.tutorial_link }}" target="_blank">
-                                        <i class="fa fa-youtube-play"></i></a>
-                                    {% else %}
-                                        {% if assignment.id in submitted_assignments %}
-                                        <a href="{% url 'view_submission' assignment.id %}"
-                                            class="btn btn-outline-success mx-1">View Submission</a>
-                                        {% elif assignment.due_date < current_time %} <button
-                                            class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>
-                                        {% else %}
-                                        -
-                                        {% endif %}
-                                    {% endif %}
-                                </p>
-                            </td>
-
-                            {% else %}
-
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <p class="mb-0 fw-normal">{{ assignment.assignment_type }} Type</p>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    <span> {{ assignment.due_date|date }} </span>
-                                    <br>
-                                    <span style="font-weight: bold; color: black;">
-                                        @{{ assignment.due_date|time }} </span>
-                                    </span>
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="text-muted fw-normal">-</span>
-                                </div>
-                            </td>
-
-                            {% endif %}
-
-
-
-
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <!-- <a class="btn btn-outline-dark edit-btn"
-                                        href="{% url 'administrator_edit_assignment' assignment.id %}">Edit</a> -->
-                                    {% if assignment.is_tutorial %}
-                                    <a class="btn btn-success delete-btn"
-                                        href="{% url 'view_jovac_tutorial' assignment.id %}">View More</a>
-                                    {% else %}
-                                    {% if assignment.id in submitted_assignments %}
-                                    <a href="{% url 'view_submission' assignment.id %}"
-                                        class="btn btn-outline-success mx-1">View Submission</a>
-                                    {% elif assignment.due_date < current_time %} <button
-                                        class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>
-                                        {% else %}
-                                        <a href="{% url 'submit_assignment' assignment.id %}"
-                                            class="btn btn-outline-primary mx-1" id="viewbtn">Submit Assignment</a>
-                                        {% endif %}
-                                        {% endif %}
-                                </div>
-                            </td>
-
-
-                        </tr>
-                        {% endfor %}
-
+                        <!-- Assignments will be dynamically loaded here -->
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 
-
+    <!-- Empty State -->
+    <div id="empty-state" class="card d-none">
+        <div class="card-body text-center py-5">
+            <i class="ti ti-clipboard-off" style="font-size: 4rem; opacity: 0.3;"></i>
+            <h4 class="mt-3">No Assignments Available</h4>
+            <p class="text-muted">There are no assignments for this sheet yet.</p>
+        </div>
+    </div>
 </div>
 
+<script>
+    const courseSlug = '{{ course.slug }}';
+    const sheetSlug = '{{ sheet.slug }}';
+    let allAssignments = [];
+    let filteredAssignments = [];
 
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchAssignments();
+        
+        // Search functionality
+        document.getElementById('search-button').addEventListener('click', performSearch);
+        document.getElementById('clear-button').addEventListener('click', clearSearch);
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    });
+
+    async function fetchAssignments() {
+        try {
+            const response = await fetch(`/dashboard/api/v1/jovac/courses/${courseSlug}/sheets/${sheetSlug}/assignments/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch assignments');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                allAssignments = data.assignments;
+                filteredAssignments = allAssignments;
+                renderAssignments(allAssignments);
+                
+                // Hide loading and show content
+                document.getElementById('loading-container').classList.add('d-none');
+                document.getElementById('search-container').classList.remove('d-none');
+                
+                if (allAssignments.length > 0) {
+                    document.getElementById('assignments-container').classList.remove('d-none');
+                } else {
+                    document.getElementById('empty-state').classList.remove('d-none');
+                }
+            } else {
+                throw new Error(data.error || 'Unknown error occurred');
+            }
+
+        } catch (error) {
+            console.error('Error fetching assignments:', error);
+            showError('Unable to load assignments. Please try again later.');
+        }
+    }
+
+    function renderAssignments(assignments) {
+        const tbody = document.getElementById('assignmentTableBody');
+        tbody.innerHTML = '';
+
+        if (assignments.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-4">
+                        <p class="text-muted mb-0">No assignments found</p>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        assignments.forEach(assignment => {
+            const row = createAssignmentRow(assignment);
+            tbody.appendChild(row);
+        });
+    }
+
+    function createAssignmentRow(assignment) {
+        const tr = document.createElement('tr');
+        
+        // Truncate title
+        const truncatedTitle = assignment.title.length > 30 
+            ? assignment.title.substring(0, 30) + '...' 
+            : assignment.title;
+
+        let typeCell, deadlineCell, linkCell, actionCell;
+
+        if (assignment.is_tutorial) {
+            // Tutorial row
+            typeCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary">Tutorial</span>
+                    </div>
+                </td>
+            `;
+            
+            deadlineCell = `
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">-</p>
+                </td>
+            `;
+            
+            linkCell = `
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">
+                        ${assignment.tutorial_link 
+                            ? `<a href="${assignment.tutorial_link}" target="_blank"><i class="fa fa-youtube-play"></i></a>` 
+                            : '-'}
+                    </p>
+                </td>
+            `;
+            
+            actionCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a class="btn btn-success" href="/dashboard/jovac/tutorial/${assignment.id}/">View More</a>
+                    </div>
+                </td>
+            `;
+        } else {
+            // Regular assignment row
+            typeCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <p class="mb-0 fw-normal">${assignment.assignment_type} Type</p>
+                    </div>
+                </td>
+            `;
+            
+            deadlineCell = `
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">
+                        <span>${assignment.due_date_formatted || '-'}</span>
+                        ${assignment.due_time_formatted ? `<br><span style="font-weight: bold; color: black;">@${assignment.due_time_formatted}</span>` : ''}
+                    </p>
+                </td>
+            `;
+            
+            linkCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted fw-normal">-</span>
+                    </div>
+                </td>
+            `;
+            
+            // Action button logic
+            let actionButton;
+            if (assignment.is_submitted) {
+                actionButton = `<a href="/dashboard/assignments/${assignment.id}/submission" class="btn btn-outline-success mx-1">View Submission</a>`;
+            } else if (assignment.is_overdue) {
+                actionButton = `<button class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>`;
+            } else {
+                actionButton = `<a href="/dashboard/submit_assignment/${assignment.id}" class="btn btn-outline-primary mx-1">Submit Assignment</a>`;
+            }
+            
+            actionCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        ${actionButton}
+                    </div>
+                </td>
+            `;
+        }
+
+        tr.innerHTML = `
+            <td class="border-bottom-0">
+                <h6 class="fw-semibold mb-0">${assignment.id}</h6>
+            </td>
+            <td class="border-bottom-0">
+                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${assignment.title}">
+                    ${truncatedTitle}
+                </h6>
+            </td>
+            ${typeCell}
+            ${deadlineCell}
+            ${linkCell}
+            ${actionCell}
+        `;
+
+        return tr;
+    }
+
+    function performSearch() {
+        const query = document.getElementById('search-input').value.toLowerCase().trim();
+        
+        if (!query) {
+            clearSearch();
+            return;
+        }
+
+        filteredAssignments = allAssignments.filter(assignment => {
+            return assignment.id.toString().includes(query) ||
+                   assignment.title.toLowerCase().includes(query) ||
+                   (assignment.description && assignment.description.toLowerCase().includes(query)) ||
+                   assignment.assignment_type.toLowerCase().includes(query);
+        });
+
+        renderAssignments(filteredAssignments);
+        
+        // Show search results text
+        const resultsText = document.getElementById('search-results-text');
+        resultsText.textContent = ` | Search Results for "${query}"`;
+        resultsText.classList.remove('d-none');
+    }
+
+    function clearSearch() {
+        document.getElementById('search-input').value = '';
+        filteredAssignments = allAssignments;
+        renderAssignments(allAssignments);
+        
+        // Hide search results text
+        document.getElementById('search-results-text').classList.add('d-none');
+    }
+
+    function showError(message) {
+        document.getElementById('loading-container').classList.add('d-none');
+        document.getElementById('error-container').classList.remove('d-none');
+        document.getElementById('error-message').textContent = message;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
 
 {% endblock %}

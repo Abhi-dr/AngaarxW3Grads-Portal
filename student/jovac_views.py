@@ -27,34 +27,25 @@ def jovac_dashboard(request):
     Main JOVAC dashboard page - displays all JOVAC courses
     Fetches data via REST API
     """
-    return render(request, 'student/jovac/jovac_dashboard.html')
+    import time
+    context = {
+        'cache_bust': int(time.time())  # Force cache refresh
+    }
+    return render(request, 'student/jovac/jovac_dashboard.html', context)
 
 
 @login_required(login_url="login")
 def jovac(request, slug):
+    """
+    JOVAC course detail page - displays all sheets for a course
+    Sheets are fetched via REST API
+    """
     course = get_object_or_404(Course, slug=slug)
     instructors = course.instructors.all()
-
-    content_type = ContentType.objects.get_for_model(Course)
-    
-    # assignments = Assignment.objects.filter(
-    #     content_type=content_type,
-    #     object_id=course.id
-    # )
-
-    # submitted_assignment_ids = AssignmentSubmission.objects.filter(
-    #     assignment__content_type=content_type,
-    #     assignment__object_id=course.id
-    #     ).values_list('assignment_id', flat=True)
-    
-    course_sheets = CourseSheet.objects.filter(course=course)
 
     context = {
         'course': course,
         'instructors': instructors,
-        "course_sheets": course_sheets,
-        # 'assignments': assignments,
-        # "submitted_assignments": submitted_assignment_ids,
     }
     return render(request, 'student/jovac/jovac_sheets.html', context)
 
@@ -66,8 +57,16 @@ def enroll_jovac(request, slug):
 
     existing_registration = CourseRegistration.objects.filter(student=student, course=course).first()
     if existing_registration:
-        messages.info(request, f"You have already {existing_registration.status.lower()} this course.")
-        return redirect('my_batches')  # or wherever you want to redirect
+        if existing_registration.status == 'Approved':
+            messages.info(request, f"You are already enrolled in this course.")
+        elif existing_registration.status == 'Pending':
+            messages.warning(request, f"Your enrollment request is already pending approval.")
+        elif existing_registration.status == 'Rejected':
+            # Update the rejected registration to pending again
+            existing_registration.status = 'Pending'
+            existing_registration.save()
+            messages.success(request, "Your enrollment request has been resubmitted for approval!")
+        return redirect('jovac_dashboard')
 
     # Create new course registration with status 'Pending'
     CourseRegistration.objects.create(
@@ -76,46 +75,25 @@ def enroll_jovac(request, slug):
         status='Pending'
     )
 
-    messages.success(request, "Your enrollment request in this JOVAC has been submitted successfully!")
-    return redirect('my_batches')
+    messages.success(request, "Your enrollment request has been submitted successfully!")
+    return redirect('jovac_dashboard')
 
 
 # ======================================== JOVAC SHEETS ======================================
 
 @login_required(login_url="login")
 def jovac_sheet(request, course_slug, sheet_slug):
+    """
+    JOVAC course sheet detail page - displays assignments
+    Assignments are fetched via REST API
+    """
     student = request.user
     course = get_object_or_404(Course, slug=course_slug)
-    instructors = course.instructors.all()
-    course_ct = ContentType.objects.get_for_model(Course)
-
-    course_sheet = CourseSheet.objects.get(course = course, slug=sheet_slug)
-
-    assignments = course_sheet.get_ordered_assignments()
-
-    submissions = AssignmentSubmission.objects.filter(student=student)
-
-    submitted_assignment_ids = list(submissions.values_list('assignment_id', flat=True))
-
-
-    print(assignments)
-
-    query = request.POST.get("query")
-    if query:
-        assignments = Assignment.objects.filter(
-            Q(id__icontains=query) |
-            Q(title__icontains=query) |
-            Q(description__icontains=query)|
-            Q(assignment_type__icontains=query)
-            )
-
+    course_sheet = get_object_or_404(CourseSheet, course=course, slug=sheet_slug)
 
     parameters = {
         "course": course,
         "sheet": course_sheet,
-        "instructors": instructors,
-        "assignments": assignments,
-        "submitted_assignments": submitted_assignment_ids,
     }
 
     return render(request, "student/jovac/course_sheet.html", parameters)

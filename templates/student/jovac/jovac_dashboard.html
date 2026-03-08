@@ -1,14 +1,15 @@
 {% extends 'student/base.html' %}
 
 {% load custom_filters %}
+<!-- JOVAC Dashboard v3.0 {{ cache_bust|default:"latest" }} -->
 
 {% block jovac_active %}
 active
-{% endblock %}
+{% endblock jovac_active %}
 
 {% block title %}
 Dashboard | J O V A C
-{% endblock %}
+{% endblock title %}
 
 {% block extra_css %}
 <style>
@@ -116,13 +117,13 @@ Dashboard | J O V A C
         border-bottom-color: rgba(255, 255, 255, 0.1);
     }
 </style>
-{% endblock %}
+{% endblock extra_css %}
 
 {% block body %}
 
 <div class="container-fluid">
     <!-- Page Header -->
-    <div class="card">
+    <!-- <div class="card">
         <div class="card-body">
             <h3 class="heading">
                 <span class="fw-semibold">J O V A C 📁</span>
@@ -130,7 +131,7 @@ Dashboard | J O V A C
             </h3>
             <p class="text-muted mb-0">Explore archived programming courses and tutorials</p>
         </div>
-    </div>
+    </div> -->
 
     <!-- Messages -->
     {% for message in messages %}
@@ -147,69 +148,35 @@ Dashboard | J O V A C
         </div>
     </div>
 
-    <!-- ============================= APPROVED COURSES ============================= -->
-    <div id="approved-section" style="display: none;">
+    <!-- ============================= MY COURSES ============================= -->
+    <div id="my-courses-section" style="display: none;">
         <div class="card mb-4">
             <div class="card-body">
                 <div class="section-header">
                     <h4 class="fw-semibold mb-0">
-                        <i class="ti ti-check-circle text-success"></i> My JOVAC Courses
-                        <span class="badge bg-success" id="approved-count">0</span>
+                        <i class="ti ti-check-circle text-success"></i> My Courses
+                        <span class="badge bg-success" id="my-courses-count">0</span>
                     </h4>
                 </div>
-                <div class="row row-cols-1 row-cols-md-3 g-4" id="approved-courses-container">
-                    <!-- Approved courses will be loaded here -->
+                <div class="row row-cols-1 row-cols-md-3 g-4" id="my-courses-container">
+                    <!-- My enrolled courses will be loaded here -->
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ============================= PENDING COURSES ============================= -->
-    <div id="pending-section" style="display: none;">
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="section-header">
-                    <h4 class="fw-semibold mb-0">
-                        <i class="ti ti-clock text-warning"></i> Pending Enrollments
-                        <span class="badge bg-warning" id="pending-count">0</span>
-                    </h4>
-                </div>
-                <div class="row row-cols-1 row-cols-md-3 g-4" id="pending-courses-container">
-                    <!-- Pending courses will be loaded here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================= ALL COURSES ============================= -->
-    <div id="all-courses-section" style="display: none;">
+    <!-- ============================= AVAILABLE COURSES ============================= -->
+    <div id="available-courses-section" style="display: none;">
         <div class="card mb-4">
             <div class="card-body">
                 <div class="section-header">
                     <h4 class="fw-semibold mb-0">
                         <i class="ti ti-book"></i> Available Courses
-                        <span class="badge bg-primary" id="other-count">0</span>
+                        <span class="badge bg-primary" id="available-courses-count">0</span>
                     </h4>
                 </div>
-                <div class="row row-cols-1 row-cols-md-3 g-4" id="other-courses-container">
-                    <!-- Other courses will be loaded here -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ============================= REJECTED COURSES ============================= -->
-    <div id="rejected-section" style="display: none;">
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="section-header">
-                    <h4 class="fw-semibold mb-0">
-                        <i class="ti ti-x-circle text-danger"></i> Rejected Enrollments
-                        <span class="badge bg-danger" id="rejected-count">0</span>
-                    </h4>
-                </div>
-                <div class="row row-cols-1 row-cols-md-3 g-4" id="rejected-courses-container">
-                    <!-- Rejected courses will be loaded here -->
+                <div class="row row-cols-1 row-cols-md-3 g-4" id="available-courses-container">
+                    <!-- Available courses will be loaded here -->
                 </div>
             </div>
         </div>
@@ -228,13 +195,21 @@ Dashboard | J O V A C
 
 </div>
 
+{% endblock body %}
+
+{% block myjs %}
 <script>
+    /* JOVAC Dashboard v3.0 - {{ cache_bust|default:"latest" }} */
+    console.log('JOVAC Dashboard script loaded - Version 3.0!');
+    
     document.addEventListener('DOMContentLoaded', function () {
+        console.log('DOMContentLoaded event fired!');
         fetchJOVACCourses();
     });
 
     async function fetchJOVACCourses() {
         try {
+            console.log('Fetching JOVAC courses...');
             const response = await fetch('/dashboard/api/v1/jovac/courses/', {
                 method: 'GET',
                 headers: {
@@ -244,77 +219,68 @@ Dashboard | J O V A C
                 credentials: 'same-origin'
             });
 
+            console.log('Response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error('Failed to fetch courses');
+                const errorText = await response.text();
+                console.error('API Error Response:', errorText);
+                alert(`API Error: ${response.status} - Check console for details`);
+                throw new Error(`Failed to fetch courses: ${response.status}`);
             }
 
             const data = await response.json();
+            console.log('Received data:', data);
             
             // Hide loading spinner
-            document.getElementById('loading-spinner').style.display = 'none';
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) {
+                spinner.style.display = 'none';
+            }
 
             if (data.success && data.courses) {
+                console.log('Rendering courses...');
                 renderCourses(data.courses);
             } else {
+                console.log('No courses found, showing empty state');
                 showEmptyState();
             }
         } catch (error) {
             console.error('Error fetching JOVAC courses:', error);
-            document.getElementById('loading-spinner').style.display = 'none';
+            alert(`Error: ${error.message}`);
+            const spinner = document.getElementById('loading-spinner');
+            if (spinner) {
+                spinner.style.display = 'none';
+            }
             showEmptyState();
         }
     }
 
     function renderCourses(courses) {
-        const { approved_courses, pending_courses, rejected_courses, other_courses } = courses;
+        const { my_courses, available_courses } = courses;
 
         let hasAnyCourses = false;
 
-        // Render Approved Courses
-        if (approved_courses && approved_courses.length > 0) {
+        // Render My Courses (Enrolled/Approved)
+        if (my_courses && my_courses.length > 0) {
             hasAnyCourses = true;
-            document.getElementById('approved-section').style.display = 'block';
-            document.getElementById('approved-count').textContent = approved_courses.length;
-            const container = document.getElementById('approved-courses-container');
+            document.getElementById('my-courses-section').style.display = 'block';
+            document.getElementById('my-courses-count').textContent = my_courses.length;
+            const container = document.getElementById('my-courses-container');
             container.innerHTML = '';
-            approved_courses.forEach(course => {
-                container.innerHTML += createApprovedCourseCard(course);
+            my_courses.forEach(course => {
+                container.innerHTML += createEnrolledCourseCard(course);
             });
         }
 
-        // Render Pending Courses
-        if (pending_courses && pending_courses.length > 0) {
+        // Render Available Courses (Pending, Rejected, Not Enrolled)
+        if (available_courses && available_courses.length > 0) {
             hasAnyCourses = true;
-            document.getElementById('pending-section').style.display = 'block';
-            document.getElementById('pending-count').textContent = pending_courses.length;
-            const container = document.getElementById('pending-courses-container');
+            document.getElementById('available-courses-section').style.display = 'block';
+            document.getElementById('available-courses-count').textContent = available_courses.length;
+            const container = document.getElementById('available-courses-container');
             container.innerHTML = '';
-            pending_courses.forEach(course => {
-                container.innerHTML += createPendingCourseCard(course);
-            });
-        }
-
-        // Render Other Courses
-        if (other_courses && other_courses.length > 0) {
-            hasAnyCourses = true;
-            document.getElementById('all-courses-section').style.display = 'block';
-            document.getElementById('other-count').textContent = other_courses.length;
-            const container = document.getElementById('other-courses-container');
-            container.innerHTML = '';
-            other_courses.forEach(course => {
-                container.innerHTML += createOtherCourseCard(course);
-            });
-        }
-
-        // Render Rejected Courses
-        if (rejected_courses && rejected_courses.length > 0) {
-            hasAnyCourses = true;
-            document.getElementById('rejected-section').style.display = 'block';
-            document.getElementById('rejected-count').textContent = rejected_courses.length;
-            const container = document.getElementById('rejected-courses-container');
-            container.innerHTML = '';
-            rejected_courses.forEach(course => {
-                container.innerHTML += createRejectedCourseCard(course);
+            available_courses.forEach(course => {
+                container.innerHTML += createAvailableCourseCard(course);
             });
         }
 
@@ -326,7 +292,7 @@ Dashboard | J O V A C
         setTimeout(() => initializeLazyLoading(), 100);
     }
 
-    function createApprovedCourseCard(course) {
+    function createEnrolledCourseCard(course) {
         return `
             <div class="col">
                 <div class="card course-card">
@@ -349,50 +315,9 @@ Dashboard | J O V A C
         `;
     }
 
-    function createPendingCourseCard(course) {
-        return `
-            <div class="col">
-                <div class="card course-card">
-                    <div class="position-absolute top-0 end-0 m-2">
-                        <span class="badge bg-warning">Pending</span>
-                    </div>
-                    <div class="lazy-image-container">
-                        <div class="image-skeleton"></div>
-                        <img data-src="${course.thumbnail}" class="lazy-image" alt="${course.name}" loading="lazy" style="opacity: 0.7;" />
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">${course.name} 📁</h5>
-                        <p class="card-text text-muted small">By: ${course.instructor_names}</p>
-                        <button class="btn btn-outline-warning w-100" disabled>Approval Pending</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    function createRejectedCourseCard(course) {
-        return `
-            <div class="col">
-                <div class="card course-card">
-                    <div class="position-absolute top-0 end-0 m-2">
-                        <span class="badge bg-danger">Rejected</span>
-                    </div>
-                    <div class="lazy-image-container">
-                        <div class="image-skeleton"></div>
-                        <img data-src="${course.thumbnail}" class="lazy-image" alt="${course.name}" loading="lazy" style="opacity: 0.6;" />
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title text-muted">${course.name} 📁</h5>
-                        <p class="card-text text-muted small">By: ${course.instructor_names}</p>
-                        <button class="btn btn-outline-danger w-100" disabled>Request Rejected</button>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    function createOtherCourseCard(course) {
-        return `
+    function createAvailableCourseCard(course) {
+        // Only shows courses that are truly available (Not Enrolled)
+        return 
             <div class="col">
                 <div class="card course-card">
                     <div class="position-absolute top-0 end-0 m-2">
@@ -409,7 +334,11 @@ Dashboard | J O V A C
                     </div>
                 </div>
             </div>
-        `;
+        ;
+    }
+                </div>
+            </div>
+        ;
     }
 
     function showEmptyState() {
@@ -461,4 +390,4 @@ Dashboard | J O V A C
     }
 </script>
 
-{% endblock %}
+{% endblock myjs %}

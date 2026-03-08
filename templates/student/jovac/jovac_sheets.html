@@ -9,35 +9,55 @@ JOVAC | {{ course.name }}
 active
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Loading Spinner */
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 3rem;
+    }
+
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+
+    /* Lazy Loading Styles */
+    .lazy-image {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .lazy-image[data-loaded="true"] {
+        opacity: 1;
+    }
+
+    /* Card hover effect */
+    .sheet-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        height: 100%;
+    }
+
+    .sheet-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 
 <div class="container-fluid">
     <div class="card">
         <div class="card-body">
             <h3 class="heading">
-                <span class="fw-semibold">{{ course.name }}🔥</span>
+                <span class="fw-semibold" id="course-name">{{ course.name }}🔥</span>
                 <span class="fs-4"> | 🔥By:
-                    {{ course.get_instructor_names }}🔥</span>
+                    <span id="instructor-names">{{ course.get_instructor_names }}</span>🔥</span>
             </h3>
         </div>
-        <!-- <div class="row mt-n3">
-
-            <div class="col-md-3 mx-auto">
-                <a href="{% url 'administrator_add_jovac_sheet' course.slug %}"
-                    class="btn btn-outline-success button mt-n2 mb-3 w-100 ">Add Sheet</a>
-            </div>
-
-            <div class="col-md-3 mx-auto">
-                <a href="{% url 'administrator_edit_jovac' course.slug %}"
-                    class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Edit Course</a>
-            </div>
-
-            <div class="col-md-3 mx-auto">
-                <a href="{% url 'administrator_jovac_enrollment_requests' course.slug %}"
-                    class="btn btn-outline-secondary button mt-n2 mb-3 w-100 ">Enrollment Requests</a>
-            </div>
-        </div> -->
-
     </div>
 
     {% for message in messages %}
@@ -47,47 +67,166 @@ active
     </div>
     {% endfor %}
 
-    <!-- ================================= SESSIONS TABLE ================================== -->
-
-    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container">
-
-        {% for sheet in course_sheets %}
-        <div class="col-md-3">
-
-            <div class="card">
-
-                <!-- Thumbnail with lazy loading -->
-                <a href="{% url 'student_jovac_sheet' course.slug sheet.slug %}">
-                    <img src="{{ sheet.thumbnail.url }}" class="card-img-top lazy-load" alt="${sheet.name}">
-                </a>
-
-                <div class="card-body">
-                    <h5 class="card-title">{{ sheet.name }}🔥</h5>
-
-                    <!-- <p class="ca   rd-text mb-1">Total Assignments: {{ course.get_total_assignments }}</p> -->
-
-                    {% if sheet.is_enabled %}
-                    <span class="badge bg-success">
-                        Enabled
-                    </span>
-
-                    {% else %}
-                    <span class="badge bg-danger">
-                        Disabled
-                    </span>
-                    {% endif %}
-
-                    <a href="{% url 'student_jovac_sheet' course.slug sheet.slug %}" class="btn btn-outline-secondary w-100 mt-2">View
-                        More</a>
-                </div>
-            </div>
-
+    <!-- Loading Spinner -->
+    <div id="loading-container" class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading sheets...</span>
         </div>
-        {% endfor %}
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-container" class="alert alert-danger d-none" role="alert">
+        <strong>Error:</strong> <span id="error-message"></span>
+    </div>
+
+    <!-- Sheets Container -->
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4 d-none" id="sheets-container">
+        <!-- Sheets will be dynamically loaded here -->
     </div>
 
 </div>
 
+<script>
+    const courseSlug = '{{ course.slug }}';
 
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchCourseSheets();
+    });
+
+    async function fetchCourseSheets() {
+        try {
+            const response = await fetch(`/dashboard/api/v1/jovac/courses/${courseSlug}/sheets/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch course sheets');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderSheets(data.sheets, data.course);
+                // Hide loading spinner and show sheets
+                document.getElementById('loading-container').classList.add('d-none');
+                document.getElementById('sheets-container').classList.remove('d-none');
+            } else {
+                throw new Error(data.error || 'Unknown error occurred');
+            }
+
+        } catch (error) {
+            console.error('Error fetching course sheets:', error);
+            showError('Unable to load course sheets. Please try again later.');
+        }
+    }
+
+    function renderSheets(sheets, course) {
+        const container = document.getElementById('sheets-container');
+        container.innerHTML = '';
+
+        if (sheets.length === 0) {
+            container.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        No sheets available for this course yet.
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        sheets.forEach(sheet => {
+            const sheetCard = createSheetCard(sheet, course);
+            container.appendChild(sheetCard);
+        });
+
+        // Initialize lazy loading for images
+        initializeLazyLoading();
+    }
+
+    function createSheetCard(sheet, course) {
+        const col = document.createElement('div');
+        col.className = 'col-md-3';
+
+        const enabledBadge = sheet.is_enabled
+            ? '<span class="badge bg-success">Enabled</span>'
+            : '<span class="badge bg-danger">Disabled</span>';
+
+        const thumbnailUrl = sheet.thumbnail_url || '{% static "img/default-sheet.png" %}';
+
+        col.innerHTML = `
+            <div class="card sheet-card">
+                <a href="/dashboard/jovac/${course.slug}/${sheet.slug}/">
+                    <img src="${thumbnailUrl}" 
+                         class="card-img-top lazy-image" 
+                         alt="${sheet.name}"
+                         data-loaded="false">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">${sheet.name}🔥</h5>
+                    ${enabledBadge}
+                    <a href="/dashboard/jovac/${course.slug}/${sheet.slug}/" 
+                       class="btn btn-outline-secondary w-100 mt-2">View More</a>
+                </div>
+            </div>
+        `;
+
+        return col;
+    }
+
+    function initializeLazyLoading() {
+        const images = document.querySelectorAll('.lazy-image[data-loaded="false"]');
+
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.addEventListener('load', () => {
+                            img.setAttribute('data-loaded', 'true');
+                        });
+                        // Image already has src, just trigger load
+                        if (img.complete) {
+                            img.setAttribute('data-loaded', 'true');
+                        }
+                        observer.unobserve(img);
+                    }
+                });
+            });
+
+            images.forEach(img => imageObserver.observe(img));
+        } else {
+            // Fallback for browsers that don't support IntersectionObserver
+            images.forEach(img => img.setAttribute('data-loaded', 'true'));
+        }
+    }
+
+    function showError(message) {
+        document.getElementById('loading-container').classList.add('d-none');
+        document.getElementById('error-container').classList.remove('d-none');
+        document.getElementById('error-message').textContent = message;
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
 
 {% endblock %}
