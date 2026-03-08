@@ -210,3 +210,111 @@ class FeedbackAPIView(APIView):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ═══════════════════════════════════════════════════════════════════
+# My Certificates View  — GET
+# ═══════════════════════════════════════════════════════════════════
+
+class MyCertificatesAPIView(APIView):
+    """
+    GET /dashboard/api/certificates/
+    
+    Returns list of all certificates for the authenticated student.
+    Includes event details and certificate view URL.
+    """
+    
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        from student.event_models import Certificate
+        from student.serializers import CertificateSerializer
+        
+        certificates = Certificate.objects.filter(
+            student=request.user
+        ).select_related('event').order_by('-issued_date')
+        
+        serializer = CertificateSerializer(
+            certificates,
+            many=True,
+            context={"request": request}
+        )
+        
+        return Response(
+            {
+                "count": certificates.count(),
+                "certificates": serializer.data
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+# ═══════════════════════════════════════════════════════════════════
+# View Certificate Detail  — GET
+# ═══════════════════════════════════════════════════════════════════
+
+class ViewCertificateAPIView(APIView):
+    """
+    GET /dashboard/api/certificate/<int:id>/
+    
+    Returns detailed certificate data including rendered HTML template.
+    Certificate must belong to the authenticated student.
+    """
+    
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request, id):
+        from student.event_models import Certificate
+        from django.template import Template, Context
+        from django.shortcuts import get_object_or_404
+        from django.template.loader import render_to_string
+        
+        # Get certificate and ensure it belongs to current user
+        certificate = get_object_or_404(
+            Certificate.objects.select_related('event', 'event__certificate_template', 'student'),
+            id=id,
+            student=request.user
+        )
+        
+        # Prepare context for template rendering
+        template_context = {
+            'certificate': certificate,
+            'event': certificate.event,
+            'student': request.user,
+        }
+        
+        # Check if event has custom template
+        if certificate.event.certificate_template and certificate.event.certificate_template.html_template:
+            # Render custom template from database
+            template = Template(certificate.event.certificate_template.html_template)
+            context = Context(template_context)
+            rendered_html = template.render(context)
+        else:
+            # Render default template
+            rendered_html = render_to_string(
+                'student/flames/certificate_template.html',
+                template_context,
+                request=request
+            )
+        
+        # Prepare response data
+        response_data = {
+            'certificate': {
+                'id': certificate.id,
+                'certificate_id': certificate.certificate_id,
+                'issued_date': certificate.issued_date,
+                'approved': certificate.approved,
+            },
+            'event': {
+                'name': certificate.event.name,
+                'code': certificate.event.code,
+            },
+            'student': {
+                'first_name': request.user.first_name,
+                'last_name': request.user.last_name,
+                'username': request.user.username,
+            },
+            'rendered_html': rendered_html,
+        }
+        
+        return Response(response_data, status=status.HTTP_200_OK)

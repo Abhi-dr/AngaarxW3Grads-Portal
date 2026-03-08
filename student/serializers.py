@@ -148,3 +148,34 @@ class FeedbackSerializer(serializers.Serializer):
             student=self.context["request"].user,
             **validated_data,
         )
+
+
+# ─────────────────────────────────────────────────────────────────
+# 5. Certificate Serializer
+# ─────────────────────────────────────────────────────────────────
+
+class CertificateSerializer(serializers.Serializer):
+    """
+    Read-only serializer for Certificate records.
+    Returns certificate details with related event information.
+    """
+    id = serializers.IntegerField(read_only=True)
+    certificate_id = serializers.CharField(read_only=True)
+    issued_date = serializers.DateField(read_only=True)
+    approved = serializers.BooleanField(read_only=True)
+    
+    # Event nested data
+    event_name = serializers.CharField(source='event.name', read_only=True)
+    event_code = serializers.CharField(source='event.code', read_only=True)
+    
+    # Certificate view URL
+    view_url = serializers.SerializerMethodField(read_only=True)
+    
+    def get_view_url(self, obj):
+        from django.urls import reverse
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(
+                reverse('student_view_certificate', kwargs={'id': obj.id})
+            )
+        return reverse('student_view_certificate', kwargs={'id': obj.id})

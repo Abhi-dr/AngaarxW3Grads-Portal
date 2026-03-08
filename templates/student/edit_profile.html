@@ -7,36 +7,54 @@ Student -> Edit Profile
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+<style>
+    .profile-loading {
+        text-align: center;
+        padding: 50px;
+        min-height: 400px;
+    }
+
+    #editProfileContent {
+        display: none;
+    }
+
+    #editProfileContent.loaded {
+        display: block;
+    }
+</style>
 {% endblock %}
 
 {% block body %}
 <div class="container-fluid">
 
-    {% for message in messages %}
-    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-        <strong>{{ message.tag }}</strong> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endfor %}
+    <!-- Alert Messages Container -->
+    <div id="alertContainer"></div>
 
-    <div class="card">
+    <!-- Loading State -->
+    <div id="loadingState" class="profile-loading">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Loading profile...</p>
+    </div>
+
+    <!-- Edit Profile Content -->
+    <div class="card" id="editProfileContent">
         <div class="container-xl px-4">
             <hr class="mt-0">
             <div class="row">
                 <div class="col-xl-4">
                     <div class="card mb-4 mb-xl-0">
-                        <form action="{% url 'upload_profile' %}" method="post" enctype="multipart/form-data">
-                            {% csrf_token %}
+                        <form id="uploadProfilePicForm">
                             <div class="card-header">Profile Picture</div>
                             <div class="card-body text-center">
-                                <img style="max-width: 100%; width: 90%;"
-                                    class="img-account-profile rounded-circle mb-2" src="{{ student.profile_pic.url }}"
-                                    alt="">
+                                <img id="profilePicPreview" style="max-width: 100%; width: 90%;"
+                                    class="img-account-profile rounded-circle mb-2" src="" alt="">
                                 <div class="small font-italic text-muted mb-4">JPG or PNG, no larger than 5MB</div>
                                 <input class="form-control" type="file" id="formFile" name="profile_pic"
                                     accept=".webp, .png, .jpg, .jpeg" required />
                                 <br>
-                                <button class="btn btn-primary" type="submit">Update</button>
+                                <button class="btn btn-primary" type="submit" id="uploadBtn">Update</button>
                             </div>
                         </form>
                     </div>
@@ -45,86 +63,78 @@ Student -> Edit Profile
                     <div class="card mb-4">
                         <div class="card-header">Your Details</div>
                         <div class="card-body">
-                            <form method="post">
-                                {% csrf_token %}
+                            <form id="editProfileForm">
                                 <div class="mb-3">
                                     <label class="small mb-1" for="inputUsername">Username</label>
-                                    <input class="form-control" id="inputUsername" type="text"
-                                        value="{{ student.username }}" disabled>
+                                    <input class="form-control" id="inputUsername" type="text" disabled>
                                 </div>
 
                                 <div class="row gx-3 mb-3">
                                     <div class="col-md-6">
                                         <label class="small mb-1" for="inputFirstName">First name</label>
-                                        <input type="text" class="form-control" value="{{ student.first_name }}"
-                                            aria-label="first_name" name="first_name" maxlength="20" required>
+                                        <input type="text" class="form-control" id="inputFirstName"
+                                            name="first_name" maxlength="20" required>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="small mb-1" for="inputLastName">Last name</label>
                                         <input class="form-control" id="inputLastName" type="text"
-                                            placeholder="Enter your last name" name="last_name"
-                                            value="{{ student.last_name }}" maxlength="20">
+                                            placeholder="Enter your last name" name="last_name" maxlength="20">
                                     </div>
                                 </div>
 
                                 <div class="row mb-3">
                                     <div class="col-md-6">
-                                        <label class="small mb-1" for="inputUsername">Email Address</label>
-                                        <input class="form-control" id="inputUsername" type="email" name="email"
-                                            value="{{ student.email }}" maxlength="40">
+                                        <label class="small mb-1" for="inputEmail">Email Address</label>
+                                        <input class="form-control" id="inputEmail" type="email" name="email" maxlength="40">
                                     </div>
                                     <div class="col-md-6">
                                         <label class="small mb-1" for="inputPhone">Phone number</label>
                                         <input class="form-control" id="inputPhone" type="text"
                                             placeholder="Enter your phone number" name="mobile_number"
-                                            title="Phone Number must be numeric" value="{{ student.mobile_number }}"
-                                            maxlength="10" minlength="10" />
+                                            title="Phone Number must be numeric" maxlength="10" minlength="10" />
                                     </div>
                                 </div>
 
                                 <div class="row gx-3 mb-3">
                                     <div class="col-md-6">
-                                        <label class="small mb-1" for="inputLocation">Gender</label>
-                                        <select class="form-select form-control" name="gender" id="gender" required>
-                                            <option value="Male" {% if student.gender == "Male" %}selected{% endif %}>Male
-                                            </option>
-                                            <option value="Female" {% if student.gender == "Female" %}selected{% endif %}>
-                                                Female</option>
+                                        <label class="small mb-1" for="inputGender">Gender</label>
+                                        <select class="form-select form-control" name="gender" id="inputGender" required>
+                                            <option value="Male">Male</option>
+                                            <option value="Female">Female</option>
                                             <option value="Other">Other</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="small mb-1" for="inputLocation">College/University</label>
-                                        <select name="college" id="college" class="form-select form-control" required>
-                                            <option value="GLA University" {% if student.college == "GLA University" %}selected{% endif %}>GLA University</option>
-                                            <option value="GL Bajaj, Mathura" {% if student.college == "GL Bajaj, Mathura" %}selected{% endif %}>GL Bajaj, Mathura</option>
-                                            <option value="LPU, Jalandhar" {% if student.college == "LPU, Jalandhar" %}selected{% endif %}>LPU, Jalandhar</option>
-                                            <option value="Other" {% if student.college == "Other" %}selected{% endif %}>Other</option>
+                                        <label class="small mb-1" for="inputCollege">College/University</label>
+                                        <select name="college" id="inputCollege" class="form-select form-control" required>
+                                            <option value="GLA University">GLA University</option>
+                                            <option value="GL Bajaj, Mathura">GL Bajaj, Mathura</option>
+                                            <option value="LPU, Jalandhar">LPU, Jalandhar</option>
+                                            <option value="Other">Other</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="mb-3">
-                                    <label class="small mb-1" for="inputUsername">LinkedIn</label>
-                                    <input class="form-control" id="inputUsername" type="text" name="linkedin_id"
-                                        value="{{ student.linkedin_id }}" placeholder="Enter your LinkedIn ID">
+                                    <label class="small mb-1" for="inputLinkedIn">LinkedIn</label>
+                                    <input class="form-control" id="inputLinkedIn" type="text" name="linkedin_id"
+                                        placeholder="Enter your LinkedIn ID">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="small mb-1" for="inputUsername">GitHub</label>
-                                    <input class="form-control" id="inputUsername" type="text" name="github_id"
-                                        value="{{ student.github_id }}" placeholder="Enter your GitHub ID">
+                                    <label class="small mb-1" for="inputGitHub">GitHub</label>
+                                    <input class="form-control" id="inputGitHub" type="text" name="github_id"
+                                        placeholder="Enter your GitHub ID">
                                 </div>
 
                                 <div class="row gx-3 mb-3">
                                     <div class="col-md-6">
-                                        <label class="small mb-1" for="inputPhone">Date of Birth</label>
-                                        <input class="form-control" id="inputPhone" type="date" name="dob"
-                                            placeholder="Enter your date of birth" value="{{ student.dob }}">
+                                        <label class="small mb-1" for="inputDob">Date of Birth</label>
+                                        <input class="form-control" id="inputDob" type="date" name="dob"
+                                            placeholder="Enter your date of birth">
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="small mb-1" for="inputBirthday">Date of joining</label>
-                                        <input class="form-control" id="inputBirthday" type="text"
-                                            value="{{ student.date_joined }}" disabled>
+                                        <label class="small mb-1" for="inputDateJoined">Date of joining</label>
+                                        <input class="form-control" id="inputDateJoined" type="text" disabled>
                                     </div>
                                 </div>
 
@@ -162,11 +172,199 @@ Student -> Edit Profile
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-
-
 
 <script>
+    let profileData = null;
+    let croppedBlob = null;
+
+    // Load profile data from API
+    async function loadProfile() {
+        const loadingState = document.getElementById('loadingState');
+        const editProfileContent = document.getElementById('editProfileContent');
+
+        try {
+            const response = await fetch('/dashboard/api/profile/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            profileData = await response.json();
+            
+            // Hide loading
+            loadingState.style.display = 'none';
+            editProfileContent.classList.add('loaded');
+
+            // Populate the form
+            populateForm(profileData);
+
+        } catch (error) {
+            console.error('Error loading profile:', error);
+            loadingState.style.display = 'none';
+            showAlert('danger', 'Failed to load profile. Please refresh the page.');
+        }
+    }
+
+    function populateForm(data) {
+        // Profile Picture
+        document.getElementById('profilePicPreview').src = data.profile_pic_url || '/static/img/default-avatar.png';
+        
+        // Form fields
+        document.getElementById('inputUsername').value = data.username || '';
+        document.getElementById('inputFirstName').value = data.first_name || '';
+        document.getElementById('inputLastName').value = data.last_name || '';
+        document.getElementById('inputEmail').value = data.email || '';
+        document.getElementById('inputPhone').value = data.mobile_number || '';
+        document.getElementById('inputGender').value = data.gender || 'Male';
+        document.getElementById('inputCollege').value = data.college || 'GLA University';
+        document.getElementById('inputLinkedIn').value = data.linkedin_id || '';
+        document.getElementById('inputGitHub').value = data.github_id || '';
+        document.getElementById('inputDob').value = data.dob || '';
+        
+        // Date joined (formatted)
+        if (data.id) {
+            document.getElementById('inputDateJoined').value = new Date().toLocaleDateString();
+        }
+    }
+
+    function showAlert(type, message) {
+        const alertContainer = document.getElementById('alertContainer');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type} alert-dismissible fade show`;
+        alert.innerHTML = `
+            <strong>${message}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        alertContainer.appendChild(alert);
+        
+        // Auto dismiss after 5 seconds
+        setTimeout(() => {
+            alert.remove();
+        }, 5000);
+
+        // Scroll to top to see alert
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Edit Profile Form Handler
+    document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/dashboard/api/profile/', {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(data)
+            });
+
+            const responseData = await response.json();
+
+            if (response.ok) {
+                showAlert('success', responseData.message || 'Profile updated successfully!');
+                // Reload profile data
+                await loadProfile();
+            } else {
+                const errorMsg = Object.values(responseData).flat().join(' ');
+                showAlert('danger', errorMsg || 'Failed to update profile.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('danger', 'An error occurred. Please try again.');
+        }
+    });
+
+    // Upload Profile Picture Form Handler
+    document.getElementById('uploadProfilePicForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const fileInput = document.getElementById('formFile');
+        const file = croppedBlob || fileInput.files[0];
+        
+        if (!file) {
+            showAlert('warning', 'Please select a file.');
+            return;
+        }
+
+        // Check file size (5MB limit)
+        if (file.size > 5242880) {
+            showAlert('danger', 'Profile picture must be smaller than 5MB.');
+            return;
+        }
+
+        const uploadBtn = document.getElementById('uploadBtn');
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Uploading...';
+
+        const formData = new FormData();
+        formData.append('profile_pic', file);
+
+        try {
+            const response = await fetch('/dashboard/api/profile/upload-picture/', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                credentials: 'same-origin',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                showAlert('success', data.message || 'Profile picture updated successfully!');
+                // Update the preview
+                document.getElementById('profilePicPreview').src = data.profile_pic;
+                // Clear the file input
+                fileInput.value = '';
+                croppedBlob = null;
+            } else {
+                showAlert('danger', data.error || 'Failed to upload profile picture.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('danger', 'An error occurred. Please try again.');
+        } finally {
+            uploadBtn.disabled = false;
+            uploadBtn.textContent = 'Update';
+        }
+    });
+
+    // Get CSRF token
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Load profile when page loads
+    document.addEventListener('DOMContentLoaded', loadProfile);
+
+    // Cropper.js functionality
     document.addEventListener('DOMContentLoaded', function () {
         const formFile = document.getElementById('formFile');
         const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
@@ -198,11 +396,7 @@ Student -> Edit Profile
             });
 
             canvas.toBlob(function (blob) {
-                const newFile = new File([blob], formFile.files[0].name, { type: "image/jpeg" });
-                const dataTransfer = new DataTransfer();
-                dataTransfer.items.add(newFile);
-                formFile.files = dataTransfer.files;
-
+                croppedBlob = new File([blob], formFile.files[0].name, { type: "image/jpeg" });
                 cropperModal.hide();
             });
         });

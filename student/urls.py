@@ -1,6 +1,13 @@
 from django.urls import path, include
 from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views, mcq_views
-from .api import ProfileAPIView, ChangePasswordAPIView, UploadProfilePictureAPIView, FeedbackAPIView
+from .api import (
+    ProfileAPIView, 
+    ChangePasswordAPIView, 
+    UploadProfilePictureAPIView, 
+    FeedbackAPIView,
+    MyCertificatesAPIView,
+    ViewCertificateAPIView
+)
 
 urlpatterns = [
     path("api/v1/", include("student.api.urls")),
@@ -48,6 +55,8 @@ urlpatterns += [
     path("api/profile/",                  ProfileAPIView.as_view(),              name="api_profile"),
     path("api/profile/change-password/",  ChangePasswordAPIView.as_view(),       name="api_change_password"),
     path("api/profile/upload-picture/",   UploadProfilePictureAPIView.as_view(), name="api_upload_picture"),
+    path("api/certificates/",             MyCertificatesAPIView.as_view(),       name="api_certificates"),
+    path("api/certificate/<int:id>/",     ViewCertificateAPIView.as_view(),      name="api_view_certificate"),
     path("api/feedback/",                 FeedbackAPIView.as_view(),             name="api_feedback"),
 ]
 

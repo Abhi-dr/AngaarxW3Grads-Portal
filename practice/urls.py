@@ -10,7 +10,7 @@ urlpatterns = [
     # path("<slug:slug>/", views.sheet , name="sheet"),
     path("playground", views.playground, name="playground"),
     
-    path("my_submissions/<slug:slug>/", views.my_submissions, name="my_submissions"),
+    path("my-submissions/<slug:slug>/", views.my_submissions, name="my_submissions"),
     
 
     

@@ -89,45 +89,119 @@ active
             </div>
         </div>
 
-        <div class="row">
-            {% for certificate in my_certificates %}
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Event: <strong>{{ certificate.event.name }}</strong></h5>
-                        <p class="card-text">
-                            Id: <strong>
-                                <span class="certificate-id"
-                                    onclick="copyCertificateId('{{ certificate.certificate_id }}')"
-                                    title="Click to copy certificate ID">
-                                    {{ certificate.certificate_id }}
-                                </span>
-                            </strong>
-                        </p>
-                        <a href="{% url 'student_view_certificate' certificate.id %}" class="btn btn-primary">View
-                            Certificate</a>
-                    </div>
-                    <div class="card-footer">
-                        <small class="text-muted">Issued on
-                            {{ certificate.issued_date|date:"F d, Y" }}</small>
-                    </div>
-                </div>
+        <!-- Loading spinner -->
+        <div id="loadingSpinner" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
             </div>
-            {% empty %}
-            <div class="col-12">
-                <div class="no-registrations">
-                    <i class="fas fa-certificate"></i>
-                    <h4>No Certificates Found</h4>
-                    <p>You haven't earned any certificates yet.</p>
-                    <button class="tab-button btn-primary" data-tab="available" style="border-radius: 4px;">Explore
-                        Available Programs</button>
-                </div>
-            </div>
-            {% endfor %}
+            <p class="mt-3">Loading certificates...</p>
+        </div>
+
+        <!-- Certificates container -->
+        <div class="row" id="certificatesContainer" style="display: none;">
+            <!-- Certificates will be dynamically loaded here -->
         </div>
     </div>
 
     <script>
+        // Fetch certificates from API
+        async function loadCertificates() {
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const certificatesContainer = document.getElementById('certificatesContainer');
+
+            try {
+                const response = await fetch('/dashboard/api/certificates/', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    credentials: 'same-origin'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Hide loading spinner
+                loadingSpinner.style.display = 'none';
+                certificatesContainer.style.display = 'flex';
+
+                if (data.certificates && data.certificates.length > 0) {
+                    // Render certificates
+                    renderCertificates(data.certificates);
+                } else {
+                    // Show no certificates message
+                    certificatesContainer.innerHTML = `
+                        <div class="col-12">
+                            <div class="no-registrations">
+                                <i class="fas fa-certificate"></i>
+                                <h4>No Certificates Found</h4>
+                                <p>You haven't earned any certificates yet.</p>
+                                <button class="tab-button btn-primary" data-tab="available" style="border-radius: 4px;">Explore
+                                    Available Programs</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading certificates:', error);
+                loadingSpinner.style.display = 'none';
+                certificatesContainer.style.display = 'flex';
+                certificatesContainer.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Failed to load certificates. Please refresh the page.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderCertificates(certificates) {
+            const container = document.getElementById('certificatesContainer');
+            container.innerHTML = '';
+
+            certificates.forEach(certificate => {
+                const issuedDate = new Date(certificate.issued_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+
+                const certificateCard = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Event: <strong>${certificate.event_name}</strong></h5>
+                                <p class="card-text">
+                                    Id: <strong>
+                                        <span class="certificate-id"
+                                            onclick="copyCertificateId('${certificate.certificate_id}')"
+                                            title="Click to copy certificate ID">
+                                            ${certificate.certificate_id}
+                                        </span>
+                                    </strong>
+                                </p>
+                                <a href="${certificate.view_url}" class="btn btn-primary">View Certificate</a>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">Issued on ${issuedDate}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML += certificateCard;
+            });
+        }
+
+        // Load certificates when page loads
+        document.addEventListener('DOMContentLoaded', loadCertificates);
+
         function copyCertificateId(certificateId) {
             // Create a temporary text area element
             const textArea = document.createElement('textarea');

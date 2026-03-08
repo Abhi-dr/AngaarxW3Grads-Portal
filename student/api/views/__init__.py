@@ -4,6 +4,8 @@ from .profile import (
     ChangePasswordAPIView,
     UploadProfilePictureAPIView,
     FeedbackAPIView,
+    MyCertificatesAPIView,
+    ViewCertificateAPIView,
 )
 
 __all__ = [
@@ -11,4 +13,6 @@ __all__ = [
     'ChangePasswordAPIView',
     'UploadProfilePictureAPIView',
     'FeedbackAPIView',
+    'MyCertificatesAPIView',
+    'ViewCertificateAPIView',
 ]

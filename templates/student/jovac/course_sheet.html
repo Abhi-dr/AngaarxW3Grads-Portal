@@ -52,21 +52,17 @@ active
 {% block body %}
 
 <div class="container-fluid">
-    <!-- Back Button -->
-    <div class="mb-3">
-        <button onclick="window.history.back()" class="btn btn-link text-decoration-none p-0" style="font-size: 1.5rem;">
-            <i class="ti ti-arrow-left"></i>
-        </button>
-    </div>
-
     <div class="card">
-        <div class="card-body">
-            <h3 class="heading">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <h3 class="heading mb-0">
                 <span class="fw-semibold">{{ course.name }}🔥</span>
                 <span class="fs-4"> | 🔥By:
                     {{ course.get_instructor_names }}
                     🔥</span>
             </h3>
+            <button onclick="window.history.back()" class="btn btn-link text-decoration-none p-0" style="font-size: 1.5rem;">
+                <i class="ti ti-arrow-left"></i>
+            </button>
         </div>
     </div>
 

@@ -14,13 +14,35 @@ Student | My Profile
 
   #change_password.show {
     max-height: 500px;
-    /* Set a reasonable max-height value to transition smoothly */
+  }
+
+  .profile-loading {
+    text-align: center;
+    padding: 50px;
+    min-height: 400px;
+  }
+
+  .profile-skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+  }
+
+  @keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  #profileContent {
+    display: none;
+  }
+
+  #profileContent.loaded {
+    display: block;
   }
 </style>
 
-
 {% endblock %}
-
 
 {% block body %}
 
@@ -32,24 +54,26 @@ Student | My Profile
 
       <button class="btn badge text-bg-light-danger w-md-10 px-4 ms-auto">
         <span class="fw-bold text-black">
-          Total Score: <strong> {{ total_score }}🔥 </strong>
+          Total Score: <strong id="totalScore">-🔥</strong>
         </span>
       </button>
-
     </div>
   </div>
 </div>
 
-{% for message in messages %}
+<!-- Alert Messages Container -->
+<div id="alertContainer"></div>
 
-<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-  <strong>{{ message.tag }}</strong> {{ message }}
-  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<!-- Loading State -->
+<div id="loadingState" class="profile-loading">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+  <p class="mt-3">Loading profile...</p>
 </div>
 
-{% endfor %}
-
-<div class="container">
+<!-- Profile Content -->
+<div class="container" id="profileContent">
 
   <!-- <div class="row mt-n4 justify-content-center">
     <div class="row text-center justify-content-center">
@@ -103,22 +127,17 @@ Student | My Profile
     <div class="col-lg-4">
       <div class="card mb-2">
         <div class="card-body text-center">
-          <img src="{{ user.profile_pic.url }}" alt="avatar" class="rounded-circle img-fluid" style="width: 150px;" />
-          <h4 class="my-3">
-            Student ID: {{ user.id }}
-          </h4>
-          <h5 class="my-3">
-            {{ user.first_name }} {{ user.last_name }}
-          </h5>
-          <p class="mb-1">
-            <b>{{ user.username }} </b> |
-            <b>{{ user.get_profile_score }}% </b> Profile Completed
+          <img id="profilePic" src="" alt="avatar" class="rounded-circle img-fluid" style="width: 150px;" />
+          <h4 class="my-3" id="studentId">Student ID: -</h4>
+          <h5 class="my-3" id="studentName">-</h5>
+          <p class="mb-1" id="studentInfo">
+            <b>-</b> | <b>-% </b> Profile Completed
           </p>
-          <p class="mb-4">{{ user.college }}</p>
+          <p class="mb-4" id="college">-</p>
           <div class="d-flex justify-content-center mb-2">
-            <a type="button" href="{% url 'edit_profile' %}" class="btn btn-outline-primary ms-1 w-100">
-              Change Profile Photo</span>
-            </a>
+            <button type="button" class="btn btn-outline-primary ms-1 w-100" data-bs-toggle="modal" data-bs-target="#uploadPictureModal">
+              Change Profile Photo
+            </button>
           </div>
 
           <div class="d-flex justify-content-center mb-2">
@@ -126,7 +145,6 @@ Student | My Profile
               class="btn btn-success ms-1 w-100">
               Change Password
             </button>
-
           </div>
 
           <div class="d-flex justify-content-center mb-2">
@@ -134,9 +152,7 @@ Student | My Profile
               data-bs-target="#deleteAccountModal">
               Delete Account
             </button>
-
           </div>
-
         </div>
       </div>
 
@@ -145,33 +161,26 @@ Student | My Profile
 
       <div class="card mb-4" id="change_password">
         <div class="card-body text-center">
-          <h5 class="mt-n3">
-            Change Password
-          </h5>
+          <h5 class="mt-n3">Change Password</h5>
 
-          <form action="{% url 'change_password' %}" method="POST">
-            {% csrf_token %}
+          <form id="changePasswordForm">
             <div class="mb-3">
-              <input type="password" name="old_password" id="password" class="form-control"
-                placeholder="Old Password" />
+              <input type="password" name="old_password" id="old_password" class="form-control"
+                placeholder="Old Password" required />
             </div>
 
-
             <div class="mb-3">
-              <input type="password" name="new_password" class="form-control" placeholder="New Password" />
+              <input type="password" name="new_password" id="new_password" class="form-control" placeholder="New Password" required />
             </div>
 
-
             <div class="mb-3">
-              <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" />
+              <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Confirm Password" required />
             </div>
             <button type="submit" class="btn btn-outline-success w-100">
               Change Password
             </button>
-
+          </form>
         </div>
-
-
       </div>
 
 
@@ -197,8 +206,8 @@ Student | My Profile
               </div>
             </div>
             <div class="modal-footer">
-              <form action="{% url 'delete_account' %}" method="POST" id="deleteAccountForm">
-                {% csrf_token %}
+              <form id="deleteAccountForm">
+                <input type="hidden" id="deleteUsername" name="username" />
                 <button type="submit" class="btn btn-outline-danger" id="submitDeleteBtn" disabled>Yes, Delete My
                   Account</button>
               </form>
@@ -228,13 +237,7 @@ Student | My Profile
               <p class="mb-0">Name</p>
             </div>
             <div class="col-sm-9">
-              <p class="mb-0">
-                {{ user.first_name }} {{ user.last_name }}
-                {% if not user.first_name or not user.last_name %}
-                <span class="text-success float-end">(+5 <img id="coin-icon" class="mt-n1"
-                    src="{% static 'img/student/coin.png' %}" alt="">)</span>
-                {% endif %}
-              </p>
+              <p class="mb-0" id="profileName">-</p>
             </div>
           </div>
           <hr />
@@ -245,9 +248,7 @@ Student | My Profile
               <p class="mb-0">Email</p>
             </div>
             <div class="col-sm-9">
-              <p class="mb-0">
-                {{ user.email }}
-              </p>
+              <p class="mb-0" id="profileEmail">-</p>
             </div>
           </div>
           <hr />
@@ -258,13 +259,7 @@ Student | My Profile
               <p class="mb-0">Phone</p>
             </div>
             <div class="col-sm-9">
-              <p class="mb-0">
-                +91 {{ user.mobile_number }}
-                {% if not user.mobile_number %}
-                <span class="text-success float-end">(+10 <img id="coin-icon" class="mt-n1"
-                    src="{% static 'img/student/coin.png' %}" alt="">)</span>
-                {% endif %}
-              </p>
+              <p class="mb-0" id="profilePhone">-</p>
             </div>
           </div>
           <hr />
@@ -274,15 +269,8 @@ Student | My Profile
             <div class="col-sm-3">
               <p class="mb-0">LinkedIn</p>
             </div>
-            <div class="col-sm-9">
-              {% if not user.linkedin_id %}
-              <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
-              <span class="text-success float-end">(+20 <img id="coin-icon" class="mt-n1"
-                  src="{% static 'img/student/coin.png' %}" alt="">)</span>
-              {% else %}
-              <a href="{{ user.linkedin_id }}" target="_blank" class="btn btn-outline-secondary mb-0">
-                {{ user.linkedin_id }}</a>
-              {% endif %}
+            <div class="col-sm-9" id="linkedinContainer">
+              -
             </div>
           </div>
           <hr />
@@ -292,15 +280,8 @@ Student | My Profile
             <div class="col-sm-3">
               <p class="mb-0">GitHub</p>
             </div>
-            <div class="col-sm-9">
-              {% if not user.github_id %}
-              <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
-              <span class="text-success float-end">(+20 <img id="coin-icon" class="mt-n1"
-                  src="{% static 'img/student/coin.png' %}" alt="">)</span>
-              {% else %}
-              <a href="{{ user.github_id }}" target="_blank" class="btn btn-outline-dark mb-0">
-                {{ user.github_id }}</a>
-              {% endif %}
+            <div class="col-sm-9" id="githubContainer">
+              -
             </div>
           </div>
           <hr />
@@ -311,9 +292,7 @@ Student | My Profile
               <p class="mb-0">Gender</p>
             </div>
             <div class="col-sm-9">
-              <p class="mb-0">
-                {{ user.gender }}
-              </p>
+              <p class="mb-0" id="profileGender">-</p>
             </div>
           </div>
           <hr />
@@ -323,14 +302,8 @@ Student | My Profile
             <div class="col-sm-3">
               <p class="mb-0">Janamdin🥳</p>
             </div>
-            <div class="col-sm-9">
-              {% if not user.dob %}
-              <button class="btn btn-dark text-white mb-0">Not Available☹</button>
-              <span class="text-success float-end">(+10 <img id="coin-icon" class="mt-n1"
-                  src="{% static 'img/student/coin.png' %}" alt="">)</span>
-              {% else %}
-              <p class="mb-0">{{ user.dob }}</p>
-              {% endif %}
+            <div class="col-sm-9" id="dobContainer">
+              -
             </div>
           </div>
           <hr />
@@ -345,7 +318,306 @@ Student | My Profile
 </div>
 </div>
 
+<!-- Upload Picture Modal -->
+<div class="modal fade" id="uploadPictureModal" tabindex="-1" aria-labelledby="uploadPictureModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="uploadPictureModalLabel">Upload Profile Picture</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="uploadProfilePictureForm">
+          <div class="mb-3">
+            <label for="profilePictureInput" class="form-label">Choose a picture</label>
+            <input type="file" class="form-control" id="profilePictureInput" accept=".webp, .png, .jpg, .jpeg" required>
+            <div class="form-text">JPG, PNG or WEBP. Maximum size: 5MB</div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="uploadPictureBtn">Upload</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
+  let profileData = null;
+  const coinIcon = `<img id="coin-icon" class="mt-n1" src="{% static 'img/student/coin.png' %}" alt="">`;
+
+  // Load profile data from API
+  async function loadProfile() {
+    const loadingState = document.getElementById('loadingState');
+    const profileContent = document.getElementById('profileContent');
+
+    try {
+      const response = await fetch('/dashboard/api/profile/', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        credentials: 'same-origin'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      profileData = await response.json();
+      
+      // Hide loading
+      loadingState.style.display = 'none';
+      profileContent.classList.add('loaded');
+
+      // Populate the UI
+      populateProfile(profileData);
+
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      loadingState.style.display = 'none';
+      showAlert('danger', 'Failed to load profile. Please refresh the page.');
+    }
+  }
+
+  function populateProfile(data) {
+    // Profile Picture
+    document.getElementById('profilePic').src = data.profile_pic_url || '/static/img/default-avatar.png';
+    
+    // Student Info
+    document.getElementById('studentId').textContent = `Student ID: ${data.id}`;
+    document.getElementById('studentName').textContent = `${data.first_name || ''} ${data.last_name || ''}`;
+    document.getElementById('studentInfo').innerHTML = `<b>${data.username}</b> | <b>${data.profile_score}%</b> Profile Completed`;
+    document.getElementById('college').textContent = data.college || '-';
+    document.getElementById('totalScore').textContent = `${data.coins}🔥`;
+
+    // Name with coin reward
+    let nameText = `${data.first_name || ''} ${data.last_name || ''}`;
+    if (!data.first_name || !data.last_name) {
+      nameText += ` <span class="text-success float-end">(+5 ${coinIcon})</span>`;
+    }
+    document.getElementById('profileName').innerHTML = nameText;
+
+    // Email
+    document.getElementById('profileEmail').textContent = data.email;
+
+    // Phone with coin reward
+    let phoneText = data.mobile_number ? `+91 ${data.mobile_number}` : '-';
+    if (!data.mobile_number) {
+      phoneText += ` <span class="text-success float-end">(+10 ${coinIcon})</span>`;
+    }
+    document.getElementById('profilePhone').innerHTML = phoneText;
+
+    // LinkedIn
+    const linkedinContainer = document.getElementById('linkedinContainer');
+    if (!data.linkedin_id) {
+      linkedinContainer.innerHTML = `
+        <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
+        <span class="text-success float-end">(+20 ${coinIcon})</span>
+      `;
+    } else {
+      linkedinContainer.innerHTML = `
+        <a href="${data.linkedin_id}" target="_blank" class="btn btn-outline-secondary mb-0">${data.linkedin_id}</a>
+      `;
+    }
+
+    // GitHub
+    const githubContainer = document.getElementById('githubContainer');
+    if (!data.github_id) {
+      githubContainer.innerHTML = `
+        <a href="{% url 'edit_profile' %}" class="btn btn-dark mb-0">Not Available</a>
+        <span class="text-success float-end">(+20 ${coinIcon})</span>
+      `;
+    } else {
+      githubContainer.innerHTML = `
+        <a href="${data.github_id}" target="_blank" class="btn btn-outline-dark mb-0">${data.github_id}</a>
+      `;
+    }
+
+    // Gender
+    document.getElementById('profileGender').textContent = data.gender || '-';
+
+    // DOB
+    const dobContainer = document.getElementById('dobContainer');
+    if (!data.dob) {
+      dobContainer.innerHTML = `
+        <button class="btn btn-dark text-white mb-0">Not Available☹</button>
+        <span class="text-success float-end">(+10 ${coinIcon})</span>
+      `;
+    } else {
+      dobContainer.innerHTML = `<p class="mb-0">${new Date(data.dob).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>`;
+    }
+  }
+
+  function showAlert(type, message) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${type} alert-dismissible fade show`;
+    alert.innerHTML = `
+      <strong>${message}</strong>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    alertContainer.appendChild(alert);
+    
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+      alert.remove();
+    }, 5000);
+  }
+
+  // Change Password Form Handler
+  document.getElementById('changePasswordForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+      old_password: document.getElementById('old_password').value,
+      new_password: document.getElementById('new_password').value,
+      confirm_password: document.getElementById('confirm_password').value
+    };
+
+    try {
+      const response = await fetch('/dashboard/api/profile/change-password/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showAlert('success', data.message || 'Password changed successfully!');
+        document.getElementById('changePasswordForm').reset();
+        display_change_password(); // Close the form
+      } else {
+        const errorMsg = Object.values(data).flat().join(' ');
+        showAlert('danger', errorMsg || 'Failed to change password.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showAlert('danger', 'An error occurred. Please try again.');
+    }
+  });
+
+  // Delete Account Form Handler
+  document.getElementById('deleteAccountForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const username = document.getElementById('usernameInput').value;
+
+    try {
+      const response = await fetch('/dashboard/api/profile/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ username: username })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showAlert('success', 'Account deleted successfully. Redirecting...');
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 2000);
+      } else {
+        const errorMsg = Object.values(data).flat().join(' ');
+        showAlert('danger', errorMsg || 'Failed to delete account.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showAlert('danger', 'An error occurred. Please try again.');
+    }
+  });
+
+  // Get CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  // Load profile when page loads
+  document.addEventListener('DOMContentLoaded', loadProfile);
+
+  // Upload Profile Picture Handler
+  document.getElementById('uploadPictureBtn').addEventListener('click', async function() {
+    const fileInput = document.getElementById('profilePictureInput');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+      showAlert('warning', 'Please select a file.');
+      return;
+    }
+
+    // Check file size (5MB limit)
+    if (file.size > 5242880) {
+      showAlert('danger', 'Profile picture must be smaller than 5MB.');
+      return;
+    }
+
+    const uploadBtn = document.getElementById('uploadPictureBtn');
+    uploadBtn.disabled = true;
+    uploadBtn.textContent = 'Uploading...';
+
+    const formData = new FormData();
+    formData.append('profile_pic', file);
+
+    try {
+      const response = await fetch('/dashboard/api/profile/upload-picture/', {
+        method: 'POST',
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        credentials: 'same-origin',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showAlert('success', data.message || 'Profile picture updated successfully!');
+        // Update the profile picture
+        document.getElementById('profilePic').src = data.profile_pic;
+        // Close the modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('uploadPictureModal'));
+        modal.hide();
+        // Clear the file input
+        fileInput.value = '';
+        // Reload profile to update picture URL
+        await loadProfile();
+      } else {
+        showAlert('danger', data.error || 'Failed to upload profile picture.');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showAlert('danger', 'An error occurred. Please try again.');
+    } finally {
+      uploadBtn.disabled = false;
+      uploadBtn.textContent = 'Upload';
+    }
+  });
+
   function display_change_password() {
     var box = document.getElementById("change_password");
     var btn = document.getElementById("change_password_btn");
@@ -375,17 +647,13 @@ Student | My Profile
     var username = document.getElementById('usernameInput').value.trim();
     var submitBtn = document.getElementById('submitDeleteBtn');
 
-    // Check if the entered username matches the logged-in user's username
-    // Replace "currentUsername" with the actual username variable from Django template
-    var currentUsername = "{{ user.username }}";
-
-    if (username === currentUsername) {
-      submitBtn.disabled = false;  // Enable the submit button if the username matches
+    // Check if entered username matches (will check against profileData)
+    if (profileData && username === profileData.username) {
+      submitBtn.disabled = false;
     } else {
-      submitBtn.disabled = true;  // Disable the submit button if the username does not match
+      submitBtn.disabled = true;
     }
   });
-
 </script>
 
 
