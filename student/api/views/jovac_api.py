@@ -6,9 +6,9 @@ from django.db.models import Case, When, Value, CharField
 from django.utils import timezone
 
 from student.api.permissions import IsStudent
-from student.models import Course, CourseRegistration, CourseSheet, AssignmentSubmission
+from student.models import Course, CourseRegistration, CourseSheet, AssignmentSubmission, Assignment
 from student.api.serializers.batch_serializers import CourseListSerializer, CourseSheetSerializer
-from student.api.serializers.assignment_serializers import AssignmentListSerializer
+from student.api.serializers.assignment_serializers import AssignmentListSerializer, AssignmentDetailSerializer
 
 
 class JOVACListView(APIView):
@@ -148,3 +148,35 @@ class JOVACSheetAssignmentsView(APIView):
             },
             "current_time": current_time.isoformat(),
         })
+
+
+class JOVACTutorialDetailView(APIView):
+    """
+    Returns detailed information about a specific JOVAC tutorial/assignment.
+    GET /dashboard/api/v1/jovac/tutorial/<int:id>/
+    """
+    permission_classes = [IsAuthenticated, IsStudent]
+
+    def get(self, request, id):
+        student = request.user
+        
+        # Get the tutorial by ID
+        tutorial = get_object_or_404(Assignment, id=id)
+        course = tutorial.course
+        
+        # Check if the user is enrolled in the course
+        if not CourseRegistration.objects.filter(student=student, course=course).exists():
+            return Response({
+                "success": False,
+                "error": "You are not enrolled in this course",
+                "code": "NOT_ENROLLED"
+            }, status=403)
+        
+        # Serialize the tutorial data
+        tutorial_data = AssignmentDetailSerializer(tutorial).data
+        
+        return Response({
+            "success": True,
+            "tutorial": tutorial_data,
+        })
+

@@ -39,6 +39,12 @@ Student -> Submit Assignment
 
 {% block body %}
 <div class="container-fluid">
+    <!-- Back Button -->
+    <div class="mb-3">
+        <button onclick="window.history.back()" class="btn btn-link text-decoration-none p-0" style="font-size: 1.5rem;">
+            <i class="ti ti-arrow-left"></i>
+        </button>
+    </div>
 
     {% for message in messages %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">

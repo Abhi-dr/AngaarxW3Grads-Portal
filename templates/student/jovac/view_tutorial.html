@@ -2,47 +2,169 @@
 {% load static %}
 
 {% block title %}
-{{ assignment.title }} | Tutorial
+Tutorial | JOVAC
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    .loading-spinner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 5rem;
+    }
 
+    .spinner-border {
+        width: 3rem;
+        height: 3rem;
+    }
+</style>
+{% endblock %}
 
 {% block body %}
 <div class="container-fluid">
-    <div class="card shadow">
-        <div class="card-body">
-            <h2 class="card-title mb-3">{{ tutorial.title }}</h2>
+    <!-- Loading Spinner -->
+    <div id="loading-container" class="loading-spinner">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading tutorial...</span>
+        </div>
+    </div>
 
-            <!-- Buttons at the top -->
-            <button class="btn btn-danger" onclick="history.back()">Previous</button>
-            <a class="btn btn-success float-end" href="{% url 'get_next_jovac_assignment' tutorial.id %}">Next</a>
+    <!-- Error Message -->
+    <div id="error-container" class="alert alert-danger d-none" role="alert">
+        <strong>Error:</strong> <span id="error-message"></span>
+    </div>
 
-            <hr>
+    <!-- Tutorial Content (hidden until loaded) -->
+    <div id="tutorial-container" class="d-none">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title mb-3" id="tutorial-title">Loading...</h2>
 
-             <!-- Embedded YouTube Video -->
-            {% if tutorial.tutorial_link %}
-            <div class="ratio ratio-16x9 mb-3">
-                <iframe src="https://www.youtube.com/embed/{{ youtube_video_id }}"
-                        title="Tutorial Video"
-                        allowfullscreen
-                        class=" rounded rounded-3"
-                        frameborder="0"></iframe>
+                <!-- Buttons at the top -->
+                <button class="btn btn-danger" onclick="history.back()">Previous</button>
+                <a class="btn btn-success float-end" id="next-button" href="#">Next</a>
+
+                <hr>
+
+                <!-- Embedded YouTube Video -->
+                <div id="video-container" class="d-none">
+                    <div class="ratio ratio-16x9 mb-3">
+                        <iframe id="youtube-iframe"
+                                src=""
+                                title="Tutorial Video"
+                                allowfullscreen
+                                class="rounded rounded-3"
+                                frameborder="0"></iframe>
+                    </div>
+                    <hr>
+                </div>
+
+                <!-- Render HTML content -->
+                <div id="tutorial-content"></div>
+
+                <hr>
+
+                <!-- Buttons at the bottom -->
+                <button class="btn btn-danger" onclick="history.back()">Previous</button>
+                <a class="btn btn-success float-end" id="next-button-bottom" href="#">Next</a>
             </div>
-            {% endif %}
-
-            <hr>
-
-            <!-- Render HTML content -->
-            <div id="tutorial-content">
-                {{ tutorial.content|safe }}
-            </div>
-
-            <hr>
-
-            <!-- Buttons at the bottom -->
-            <button class="btn btn-danger" onclick="history.back()">Previous</button>
-            <a class="btn btn-success float-end" href="{% url 'get_next_jovac_assignment' tutorial.id %}">Next</a>
         </div>
     </div>
 </div>
 {% endblock %}
+
+{% block myjs %}
+<script>
+    // Get tutorial ID from URL
+    const tutorialId = window.location.pathname.split('/').filter(Boolean).pop();
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchTutorialData();
+    });
+
+    async function fetchTutorialData() {
+        try {
+            const response = await fetch(`/dashboard/api/v1/jovac/tutorial/${tutorialId}/`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                credentials: 'same-origin'
+            });
+
+            if (!response.ok) {
+                if (response.status === 403) {
+                    throw new Error('You are not enrolled in this course');
+                }
+                throw new Error('Failed to load tutorial');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                renderTutorial(data.tutorial);
+                
+                // Hide loading and show content
+                document.getElementById('loading-container').classList.add('d-none');
+                document.getElementById('tutorial-container').classList.remove('d-none');
+            } else {
+                throw new Error(data.error || 'Unknown error occurred');
+            }
+
+        } catch (error) {
+            console.error('Error fetching tutorial:', error);
+            showError(error.message || 'Unable to load tutorial. Please try again later.');
+        }
+    }
+
+    function renderTutorial(tutorial) {
+        // Set title
+        document.getElementById('tutorial-title').textContent = tutorial.title;
+        document.title = `${tutorial.title} | Tutorial`;
+        
+        // Set next button URLs
+        const nextUrl = `/dashboard/jovac/assignment/${tutorial.id}/next`;
+        document.getElementById('next-button').href = nextUrl;
+        document.getElementById('next-button-bottom').href = nextUrl;
+        
+        // Show YouTube video if available
+        if (tutorial.youtube_video_id && tutorial.tutorial_link) {
+            const videoContainer = document.getElementById('video-container');
+            const iframe = document.getElementById('youtube-iframe');
+            iframe.src = `https://www.youtube.com/embed/${tutorial.youtube_video_id}`;
+            videoContainer.classList.remove('d-none');
+        }
+        
+        // Render HTML content
+        if (tutorial.content) {
+            document.getElementById('tutorial-content').innerHTML = tutorial.content;
+        } else {
+            document.getElementById('tutorial-content').innerHTML = '<p class="text-muted">No content available.</p>';
+        }
+    }
+
+    function showError(message) {
+        document.getElementById('loading-container').classList.add('d-none');
+        document.getElementById('tutorial-container').classList.add('d-none');
+        document.getElementById('error-message').textContent = message;
+        document.getElementById('error-container').classList.remove('d-none');
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock myjs %}

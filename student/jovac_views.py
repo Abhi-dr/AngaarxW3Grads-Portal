@@ -308,33 +308,14 @@ def run_evaluation(assignment: Assignment, submission: AssignmentSubmission):
 # =========================================== VIEW TUTORIAL =============================================
 
 @login_required(login_url="login")
+@login_required(login_url="login")
 def view_jovac_tutorial(request, id):
     """
     View a JOVAC tutorial
+    Data is fetched via REST API
     """
-    # Get the tutorial by ID
-    tutorial = get_object_or_404(Assignment, id=id)
-    course = tutorial.course
-
-    
-    # Check if the user is enrolled in the course
-    student = request.user
-    
-    if not CourseRegistration.objects.filter(student=student, course=course).exists():
-        messages.error(request, "You are not enrolled in this course")
-        return redirect('my_batches')
-    
-    youtube_video_id = tutorial.tutorial_link.replace("https://www.youtube.com/watch?v=", "")
-
-    # Render the tutorial page
-    parameters = {
-        'tutorial': tutorial,
-        'course': course,
-        'student': student,
-        "youtube_video_id": youtube_video_id,
-    }
-    
-    return render(request, 'student/jovac/view_tutorial.html', parameters)
+    # Just render the template - all data will be fetched via JavaScript
+    return render(request, 'student/jovac/view_tutorial.html', {'tutorial_id': id})
 
 @login_required(login_url="login")
 def get_next_jovac_assignment(request, id):
