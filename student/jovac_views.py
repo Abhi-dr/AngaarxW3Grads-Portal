@@ -59,23 +59,21 @@ def enroll_jovac(request, slug):
     if existing_registration:
         if existing_registration.status == 'Approved':
             messages.info(request, f"You are already enrolled in this course.")
-        elif existing_registration.status == 'Pending':
-            messages.warning(request, f"Your enrollment request is already pending approval.")
-        elif existing_registration.status == 'Rejected':
-            # Update the rejected registration to pending again
-            existing_registration.status = 'Pending'
+        elif existing_registration.status in ['Pending', 'Rejected']:
+            # Instantly upgrade them to Approved
+            existing_registration.status = 'Approved'
             existing_registration.save()
-            messages.success(request, "Your enrollment request has been resubmitted for approval!")
+            messages.success(request, f"You have automatically been enrolled in {course.name}!")
         return redirect('jovac_dashboard')
 
-    # Create new course registration with status 'Pending'
+    # Create new course registration directly with status 'Approved'
     CourseRegistration.objects.create(
         student=student,
         course=course,
-        status='Pending'
+        status='Approved'
     )
 
-    messages.success(request, "Your enrollment request has been submitted successfully!")
+    messages.success(request, f"You have successfully enrolled in {course.name}!")
     return redirect('jovac_dashboard')
 
 

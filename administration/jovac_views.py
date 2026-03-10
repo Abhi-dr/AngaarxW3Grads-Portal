@@ -250,35 +250,6 @@ def add_sheet(request, course_slug):
 
     return render(request, 'administration/jovac/add_sheet.html', {'course': course})
 
-# ========================================= Enrollment Requests =============================
-
-def enrollment_requests(request, slug):
-    course = get_object_or_404(Course, slug=slug)
-    pending_requests = CourseRegistration.objects.filter(course=course, status='pending')
-
-    parameters = {
-        "course": course,
-        "pending_requests": pending_requests,
-        "total_pending_requests": pending_requests.count(),
-    }
-
-    return render(request, 'administration/jovac/enrollment_requests.html', parameters)
-
-# ============================= APPROVE ENROLLMENT REQUEST =============================
-
-@login_required(login_url='login')
-@staff_member_required(login_url='login')
-def approve_enrollment_request(request, id):
-    registration = get_object_or_404(CourseRegistration, id=id)
-    
-    # Update the registration status and save it
-    registration.status = 'Approved'
-    registration.save()
-
-    return redirect(reverse('administrator_jovac_enrollment_requests', args=[registration.course.slug]))
-
-
-
 
 # ================================================================================================
 # ========================================= ASSIGNMENTS WORK =====================================
