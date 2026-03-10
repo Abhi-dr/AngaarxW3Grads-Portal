@@ -138,7 +138,7 @@ Student -> Edit Profile
                                     </div>
                                 </div>
 
-                                <button class="btn btn-success w-100" type="submit">Save changes</button>
+                                <button class="btn btn-success w-100" id="saveProfileBtn" type="submit">Save changes</button>
                             </form>
                         </div>
                     </div>
@@ -257,20 +257,27 @@ Student -> Edit Profile
     document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        const saveBtn = document.getElementById('saveProfileBtn');
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Updating...';
+
         const formData = new FormData(this);
         const data = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch('/dashboard/api/profile/', {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                credentials: 'same-origin',
-                body: JSON.stringify(data)
-            });
+            const [response] = await Promise.all([
+                fetch('/dashboard/api/profile/', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(data)
+                }),
+                new Promise(resolve => setTimeout(resolve, 2000))
+            ]);
 
             const responseData = await response.json();
 
@@ -285,6 +292,9 @@ Student -> Edit Profile
         } catch (error) {
             console.error('Error:', error);
             showAlert('danger', 'An error occurred. Please try again.');
+        } finally {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = 'Save changes';
         }
     });
 
