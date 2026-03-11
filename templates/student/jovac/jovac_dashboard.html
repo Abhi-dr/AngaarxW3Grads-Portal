@@ -49,6 +49,7 @@ Dashboard | J O V A C
         0% {
             background-position: -200% 0;
         }
+
         100% {
             background-position: 200% 0;
         }
@@ -188,91 +189,91 @@ Dashboard | J O V A C
 
 {% block myjs %}
 <script>
-console.log('JOVAC Dashboard script loaded');
+    console.log('JOVAC Dashboard script loaded');
 
-document.addEventListener('DOMContentLoaded', function () {
-    fetchJOVACCourses();
-});
+    document.addEventListener('DOMContentLoaded', function () {
+        fetchJOVACCourses();
+    });
 
-async function fetchJOVACCourses() {
-    try {
-        const response = await fetch('/dashboard/api/v1/jovac/courses/', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': getCookie('csrftoken')
-            },
-            credentials: 'same-origin'
-        });
+    async function fetchJOVACCourses() {
+        try {
+            const response = await fetch('/dashboard/api/v1/jovac/courses/', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                credentials: 'same-origin'
+            });
 
-        if (!response.ok) {
-            throw new Error(`Failed to fetch courses: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch courses: ${response.status}`);
+            }
+
+            const data = await response.json();
+
+            document.getElementById('loading-spinner').style.display = 'none';
+
+            if (data.success && data.courses) {
+                renderCourses(data.courses);
+            } else {
+                showEmptyState();
+            }
+
+        } catch (error) {
+            console.error(error);
+            document.getElementById('loading-spinner').style.display = 'none';
+            showEmptyState();
+        }
+    }
+
+    function renderCourses(courses) {
+
+        const { my_courses, available_courses } = courses;
+
+        let hasAnyCourses = false;
+
+        if (my_courses && my_courses.length > 0) {
+
+            hasAnyCourses = true;
+
+            document.getElementById('my-courses-section').style.display = 'block';
+            document.getElementById('my-courses-count').textContent = my_courses.length;
+
+            const container = document.getElementById('my-courses-container');
+            container.innerHTML = '';
+
+            my_courses.forEach(course => {
+                container.innerHTML += createEnrolledCourseCard(course);
+            });
         }
 
-        const data = await response.json();
+        if (available_courses && available_courses.length > 0) {
 
-        document.getElementById('loading-spinner').style.display = 'none';
+            hasAnyCourses = true;
 
-        if (data.success && data.courses) {
-            renderCourses(data.courses);
-        } else {
+            document.getElementById('available-courses-section').style.display = 'block';
+            document.getElementById('available-courses-count').textContent = available_courses.length;
+
+            const container = document.getElementById('available-courses-container');
+            container.innerHTML = '';
+
+            available_courses.forEach(course => {
+                container.innerHTML += createAvailableCourseCard(course);
+            });
+        }
+
+        if (!hasAnyCourses) {
             showEmptyState();
         }
 
-    } catch (error) {
-        console.error(error);
-        document.getElementById('loading-spinner').style.display = 'none';
-        showEmptyState();
-    }
-}
-
-function renderCourses(courses) {
-
-    const { my_courses, available_courses } = courses;
-
-    let hasAnyCourses = false;
-
-    if (my_courses && my_courses.length > 0) {
-
-        hasAnyCourses = true;
-
-        document.getElementById('my-courses-section').style.display = 'block';
-        document.getElementById('my-courses-count').textContent = my_courses.length;
-
-        const container = document.getElementById('my-courses-container');
-        container.innerHTML = '';
-
-        my_courses.forEach(course => {
-            container.innerHTML += createEnrolledCourseCard(course);
-        });
+        setTimeout(() => initializeLazyLoading(), 100);
     }
 
-    if (available_courses && available_courses.length > 0) {
 
-        hasAnyCourses = true;
+    function createEnrolledCourseCard(course) {
 
-        document.getElementById('available-courses-section').style.display = 'block';
-        document.getElementById('available-courses-count').textContent = available_courses.length;
-
-        const container = document.getElementById('available-courses-container');
-        container.innerHTML = '';
-
-        available_courses.forEach(course => {
-            container.innerHTML += createAvailableCourseCard(course);
-        });
-    }
-
-    if (!hasAnyCourses) {
-        showEmptyState();
-    }
-
-    setTimeout(() => initializeLazyLoading(), 100);
-}
-
-
-function createEnrolledCourseCard(course) {
-
-    return `
+        return `
     <div class="col">
         <div class="card course-card">
 
@@ -298,12 +299,12 @@ function createEnrolledCourseCard(course) {
         </div>
     </div>
     `;
-}
+    }
 
 
-function createAvailableCourseCard(course) {
+    function createAvailableCourseCard(course) {
 
-    return `
+        return `
     <div class="col">
         <div class="card course-card">
 
@@ -322,7 +323,7 @@ function createAvailableCourseCard(course) {
 
                 <a href="/dashboard/enroll_jovac/${course.slug}/"
                    class="btn btn-outline-primary w-100">
-                   Request Enrollment
+                   Enroll Now
                 </a>
 
             </div>
@@ -330,73 +331,73 @@ function createAvailableCourseCard(course) {
         </div>
     </div>
     `;
-}
-
-
-function showEmptyState() {
-    document.getElementById('empty-state').style.display = 'block';
-}
-
-
-function initializeLazyLoading() {
-
-    const lazyImages = document.querySelectorAll('.lazy-image');
-
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-
-        entries.forEach(entry => {
-
-            if (entry.isIntersecting) {
-
-                const img = entry.target;
-                const src = img.getAttribute('data-src');
-
-                if (src) {
-
-                    img.src = src;
-
-                    img.onload = () => {
-                        img.setAttribute('data-loaded', 'true');
-
-                        const skeleton = img.previousElementSibling;
-
-                        if (skeleton && skeleton.classList.contains('image-skeleton')) {
-                            skeleton.style.display = 'none';
-                        }
-                    };
-
-                    observer.unobserve(img);
-                }
-            }
-        });
-
-    }, { rootMargin: '50px' });
-
-    lazyImages.forEach(img => imageObserver.observe(img));
-}
-
-
-function getCookie(name) {
-
-    let cookieValue = null;
-
-    if (document.cookie && document.cookie !== '') {
-
-        const cookies = document.cookie.split(';');
-
-        for (let i = 0; i < cookies.length; i++) {
-
-            const cookie = cookies[i].trim();
-
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
     }
 
-    return cookieValue;
-}
+
+    function showEmptyState() {
+        document.getElementById('empty-state').style.display = 'block';
+    }
+
+
+    function initializeLazyLoading() {
+
+        const lazyImages = document.querySelectorAll('.lazy-image');
+
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+
+            entries.forEach(entry => {
+
+                if (entry.isIntersecting) {
+
+                    const img = entry.target;
+                    const src = img.getAttribute('data-src');
+
+                    if (src) {
+
+                        img.src = src;
+
+                        img.onload = () => {
+                            img.setAttribute('data-loaded', 'true');
+
+                            const skeleton = img.previousElementSibling;
+
+                            if (skeleton && skeleton.classList.contains('image-skeleton')) {
+                                skeleton.style.display = 'none';
+                            }
+                        };
+
+                        observer.unobserve(img);
+                    }
+                }
+            });
+
+        }, { rootMargin: '50px' });
+
+        lazyImages.forEach(img => imageObserver.observe(img));
+    }
+
+
+    function getCookie(name) {
+
+        let cookieValue = null;
+
+        if (document.cookie && document.cookie !== '') {
+
+            const cookies = document.cookie.split(';');
+
+            for (let i = 0; i < cookies.length; i++) {
+
+                const cookie = cookies[i].trim();
+
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+
+        return cookieValue;
+    }
 </script>
 {% endblock myjs %}

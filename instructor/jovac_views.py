@@ -157,54 +157,6 @@ def edit_sheet(request, course_slug, sheet_slug):
     return render(request, 'instructor/jovac/edit_sheet.html', context)
 
 
-# ========================================= Enrollment Requests =============================
-
-def enrollment_requests(request, slug):
-    course = get_object_or_404(Course, slug=slug)
-    pending_requests = CourseRegistration.objects.filter(course=course, status='pending')
-
-    parameters = {
-        "course": course,
-        "pending_requests": pending_requests,
-        "total_pending_requests": pending_requests.count(),
-    }
-
-    return render(request, 'instructor/jovac/enrollment_requests.html', parameters)
-
-
-# ============================= APPROVE ENROLLMENT REQUEST =============================
-
-@login_required(login_url='login')
-@staff_member_required(login_url='login')
-def approve_enrollment_request(request, id):
-    registration = get_object_or_404(CourseRegistration, id=id)
-    
-    # Update the registration status and save it
-    registration.status = 'Approved'
-    registration.save()
-
-    return redirect(reverse('instructor_jovac_enrollment_requests', args=[registration.course.slug]))
-
-
-# ============================= APPROVE ALL ENROLLMENT REQUESTS =============================
-
-@login_required(login_url='login')
-@staff_member_required(login_url='login')
-def approve_all_jovac_enrollment_requests(request, id):
-    course = get_object_or_404(Course, id=id)
-    
-    # Get all pending registrations for the course
-    pending_registrations = CourseRegistration.objects.filter(course=course, status='pending')
-    
-    # Update each registration to 'Approved'
-    for registration in pending_registrations:
-        registration.status = 'Approved'
-        registration.save()
-
-    messages.success(request, "All enrollment requests approved successfully.")
-    
-    return redirect(reverse('instructor_jovac_enrollment_requests', args=[course.slug]))
-
 
 # ================================================================================================
 # ========================================= ASSIGNMENTS WORK =====================================

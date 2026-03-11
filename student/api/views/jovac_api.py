@@ -21,22 +21,25 @@ class JOVACListView(APIView):
     def get(self, request):
         student = request.user
         
-        # JOVAC Course Data with registration status
-        all_courses = Course.objects.annotate(
-            registration_status=Case(
-                When(courseregistration__student=student, courseregistration__status='Approved', then=Value('Approved')),
-                When(courseregistration__student=student, courseregistration__status='Pending', then=Value('Pending')),
-                When(courseregistration__student=student, courseregistration__status='Rejected', then=Value('Rejected')),
-                default=Value('Not Enrolled'),
-                output_field=CharField(),
-            )
-        ).prefetch_related('instructors').distinct()
-
-        # My Courses: Only approved/enrolled courses
-        my_courses = all_courses.filter(registration_status='Approved')
+        # Get IDs of courses the student is enrolled in or has interacted with
+        enrolled_course_ids = CourseRegistration.objects.filter(
+            student=student, 
+            status='Approved'
+        ).values_list('course_id', flat=True)
         
-        # Available Courses: Only courses not enrolled/requested
-        available_courses = all_courses.filter(registration_status='Not Enrolled')
+        all_interacted_course_ids = CourseRegistration.objects.filter(
+            student=student
+        ).values_list('course_id', flat=True)
+
+        my_courses = Course.objects.filter(id__in=enrolled_course_ids).prefetch_related('instructors').distinct()
+        available_courses = Course.objects.exclude(id__in=all_interacted_course_ids).filter(is_active=True).prefetch_related('instructors').distinct()
+        
+        # Manually attach registration_status attributes so the Serializer method field reads them correctly
+        for course in my_courses:
+            course.registration_status = 'Approved'
+            
+        for course in available_courses:
+            course.registration_status = 'Not Enrolled'
 
         return Response({
             "success": True,
