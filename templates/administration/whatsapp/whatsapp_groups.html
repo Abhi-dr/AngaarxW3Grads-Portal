@@ -1,0 +1,244 @@
+{% extends 'administration/base.html' %}
+
+{% block title %}Administration | WhatsApp Group Links{% endblock %}
+
+{% block body %}
+
+<div class="container-fluid">
+
+    {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="heading">
+                <span class="fw-semibold">W H A T S A P P &nbsp; G R O U P S 🔥</span>
+                <span class="fs-4"> | Free Class Links</span>
+            </h3>
+        </div>
+    </div>
+
+    {% if available_choices %}
+    <div class="row mb-3">
+        <div class="col-md-4 mx-auto">
+            <button class="btn btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#addModal">
+                <i class="ti ti-plus me-1"></i> Add WhatsApp Group Link
+            </button>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if groups %}
+    <div class="row g-4">
+        {% for group in groups %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 border {% if group.is_active %}border-success{% else %}border-secondary{% endif %}">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        {% if group.course_code == "Python" %}
+                        <i class="fab fa-python text-warning me-2"></i>
+                        {% else %}
+                        <i class="ti ti-code text-info me-2"></i>
+                        {% endif %}
+                        {{ group.get_course_code_display }}
+                    </h5>
+                    <span class="badge {% if group.is_active %}bg-success{% else %}bg-secondary{% endif %}">
+                        {% if group.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <p class="mb-1 text-muted small">WhatsApp Link:</p>
+                    <a href="{{ group.whatsapp_link }}" target="_blank" class="d-block text-break small mb-3"
+                        style="word-break: break-all;">
+                        {{ group.whatsapp_link }}
+                    </a>
+                    <p class="mb-0 text-muted small">
+                        Last updated: {{ group.updated_at|date:"d M Y, H:i" }}
+                    </p>
+                </div>
+                <div class="card-footer d-flex gap-2">
+                    <button class="btn btn-outline-primary btn-sm flex-grow-1"
+                        data-bs-toggle="modal"
+                        data-bs-target="#editModal{{ group.pk }}">
+                        <i class="ti ti-edit me-1"></i> Edit
+                    </button>
+                    <button class="btn btn-sm toggle-btn {% if group.is_active %}btn-outline-secondary{% else %}btn-outline-success{% endif %}"
+                        data-pk="{{ group.pk }}"
+                        data-active="{{ group.is_active|yesno:'true,false' }}"
+                        title="{% if group.is_active %}Deactivate{% else %}Activate{% endif %}">
+                        {% if group.is_active %}
+                        <i class="ti ti-toggle-right"></i>
+                        {% else %}
+                        <i class="ti ti-toggle-left"></i>
+                        {% endif %}
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal{{ group.pk }}"
+                        title="Delete">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Modal for {{ group.course_code }} -->
+        <div class="modal fade" id="editModal{{ group.pk }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="post" action="{% url 'admin_edit_whatsapp_group' group.pk %}">
+                        {% csrf_token %}
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit — {{ group.get_course_code_display }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Course</label>
+                                <input type="text" class="form-control" value="{{ group.get_course_code_display }}" disabled>
+                            </div>
+                            <div class="mb-3">
+                                <label for="whatsapp_link_{{ group.pk }}" class="form-label fw-semibold">
+                                    WhatsApp Link <span class="text-danger">*</span>
+                                </label>
+                                <input type="url" class="form-control" id="whatsapp_link_{{ group.pk }}"
+                                    name="whatsapp_link" value="{{ group.whatsapp_link }}" required
+                                    placeholder="https://chat.whatsapp.com/...">
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="is_active_{{ group.pk }}"
+                                    name="is_active" {% if group.is_active %}checked{% endif %}>
+                                <label class="form-check-label" for="is_active_{{ group.pk }}">Active</label>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal for {{ group.course_code }} -->
+        <div class="modal fade" id="deleteModal{{ group.pk }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete the WhatsApp link for
+                            <strong>{{ group.get_course_code_display }}</strong>?
+                        </p>
+                        <p class="text-muted small">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <form method="post" action="{% url 'admin_delete_whatsapp_group' group.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="ti ti-trash me-1"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="ti ti-brand-whatsapp" style="font-size: 3rem; color: #25D366;"></i>
+            <p class="mt-3 text-muted">No WhatsApp group links added yet.</p>
+            {% if available_choices %}
+            <button class="btn btn-success mt-2" data-bs-toggle="modal" data-bs-target="#addModal">
+                <i class="ti ti-plus me-1"></i> Add First Link
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Modal -->
+{% if available_choices %}
+<div class="modal fade" id="addModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'admin_add_whatsapp_group' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Add WhatsApp Group Link</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="course_code" class="form-label fw-semibold">
+                            Course <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select" id="course_code" name="course_code" required>
+                            <option value="">-- Select Course --</option>
+                            {% for code, label in available_choices %}
+                            <option value="{{ code }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="whatsapp_link" class="form-label fw-semibold">
+                            WhatsApp Link <span class="text-danger">*</span>
+                        </label>
+                        <input type="url" class="form-control" id="whatsapp_link" name="whatsapp_link"
+                            required placeholder="https://chat.whatsapp.com/...">
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="is_active_new" name="is_active" checked>
+                        <label class="form-check-label" for="is_active_new">Active</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="ti ti-plus me-1"></i> Add Link
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+document.querySelectorAll('.toggle-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        const pk = this.dataset.pk;
+        const toggleUrl = `/administration/whatsapp-groups/${pk}/toggle/`;
+
+        fetch(toggleUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                // Reload to reflect changes cleanly
+                location.reload();
+            }
+        })
+        .catch(err => console.error('Toggle failed', err));
+    });
+});
+</script>
+
+{% endblock %}

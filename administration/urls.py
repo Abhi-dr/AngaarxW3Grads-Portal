@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views, mcq_views
+from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views, mcq_views, whatsapp_views
 
 urlpatterns = [
     path('api/v1/', include('administration.api.urls')),
@@ -264,6 +264,18 @@ urlpatterns += [
     path('alumni/update-referral-code/<int:code_id>/', alumni_views.update_referral_code, name='update_referral_code'),
     path('alumni/stats/', alumni_views.alumni_stats, name='alumni_stats'),
     path('alumni/list-ajax/', alumni_views.alumni_list_ajax, name='alumni_list_ajax'),
+]
+
+# JOVAC Work
+
+# ========================= WHATSAPP GROUP LINKS WORK ==========================
+
+urlpatterns += [
+    path('whatsapp-groups/', whatsapp_views.whatsapp_groups, name='admin_whatsapp_groups'),
+    path('whatsapp-groups/add/', whatsapp_views.add_whatsapp_group, name='admin_add_whatsapp_group'),
+    path('whatsapp-groups/<int:pk>/edit/', whatsapp_views.edit_whatsapp_group, name='admin_edit_whatsapp_group'),
+    path('whatsapp-groups/<int:pk>/delete/', whatsapp_views.delete_whatsapp_group, name='admin_delete_whatsapp_group'),
+    path('whatsapp-groups/<int:pk>/toggle/', whatsapp_views.toggle_whatsapp_group, name='admin_toggle_whatsapp_group'),
 ]
 
 # JOVAC Work
