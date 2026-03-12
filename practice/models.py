@@ -20,7 +20,8 @@ class Batch(models.Model):
     
     required_fields = models.JSONField(default=list, blank=True)
 
-    
+    is_active = models.BooleanField(default=True, db_index=True)
+
     slug = models.SlugField(unique=True, blank=True, null=True)
     
     def __str__(self):

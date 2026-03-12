@@ -31,7 +31,7 @@ class JOVACListView(APIView):
             student=student
         ).values_list('course_id', flat=True)
 
-        my_courses = Course.objects.filter(id__in=enrolled_course_ids).prefetch_related('instructors').distinct()
+        my_courses = Course.objects.filter(id__in=enrolled_course_ids, is_active=True).prefetch_related('instructors').distinct()
         available_courses = Course.objects.exclude(id__in=all_interacted_course_ids).filter(is_active=True).prefetch_related('instructors').distinct()
         
         # Manually attach registration_status attributes so the Serializer method field reads them correctly

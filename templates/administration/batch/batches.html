@@ -1217,12 +1217,25 @@ body.dark {
                 </div>
                 <div class="course-card-body">
                     <h5 class="course-card-title">${batch.name}</h5>
+                    <div class="mb-2">
+                        <span class="badge ${batch.is_active ? 'bg-success' : 'bg-danger'}" id="status-badge-${batch.slug}">
+                            ${batch.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </div>
                     <div class="course-card-footer">
                         <a href="/administration/batch/${batch.slug}/" class="btn-view-course">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             View
                         </a>
                         <div class="course-card-actions">
+                            <button class="btn-card-action ${batch.is_active ? 'delete' : 'edit'}" id="toggle-btn-${batch.slug}"
+                                onclick="toggleBatchActive('${batch.slug}', this)"
+                                title="${batch.is_active ? 'Deactivate' : 'Activate'} Course">
+                                ${batch.is_active
+                                    ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64A9 9 0 1 1 5.64 19.36"/><line x1="12" y1="2" x2="12" y2="12"/></svg>'
+                                    : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+                                }
+                            </button>
                             <button class="btn-card-action edit" onclick="openEditModal('${encodedBatch}')" title="Edit Course">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             </button>
@@ -1430,6 +1443,41 @@ body.dark {
             deleteTargetSlug = null;
         }
     });
+
+    // ================== TOGGLE ACTIVE ==================
+    async function toggleBatchActive(slug, btn) {
+        btn.disabled = true;
+        try {
+            const res = await fetch(`${API_URL}${slug}/toggle-active/`, {
+                method: 'PATCH',
+                headers: { 'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json' },
+            });
+            const data = await res.json();
+            if (data.success) {
+                const badge = document.getElementById('status-badge-' + slug);
+                if (data.is_active) {
+                    badge.textContent = 'Active';
+                    badge.className = 'badge bg-success';
+                    btn.title = 'Deactivate Course';
+                    btn.className = 'btn-card-action delete';
+                    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64A9 9 0 1 1 5.64 19.36"/><line x1="12" y1="2" x2="12" y2="12"/></svg>';
+                } else {
+                    badge.textContent = 'Inactive';
+                    badge.className = 'badge bg-danger';
+                    btn.title = 'Activate Course';
+                    btn.className = 'btn-card-action edit';
+                    btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+                }
+                showAlert(`Course ${data.is_active ? 'activated' : 'deactivated'} successfully.`, 'success');
+            } else {
+                showAlert('Failed to update course status.', 'danger');
+            }
+        } catch (e) {
+            showAlert('Network error while updating status.', 'danger');
+        } finally {
+            btn.disabled = false;
+        }
+    }
 </script>
 
 {% endblock %}

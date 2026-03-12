@@ -11,5 +11,5 @@ class BatchAdminSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Batch
-        fields = ['id', 'name', 'slug', 'description', 'thumbnail', 'required_fields']
+        fields = ['id', 'name', 'slug', 'description', 'thumbnail', 'required_fields', 'is_active']
         read_only_fields = ['id', 'slug']

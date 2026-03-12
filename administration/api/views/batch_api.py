@@ -1,10 +1,11 @@
 from rest_framework import viewsets, status
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from practice.models import Batch
 from administration.api.serializers.batch_serializers import BatchAdminSerializer
-from administration.api.permissions import IsAdministratorOrInstructor
+from administration.api.permissions import IsAdministratorOrInstructor, IsAdministrator
 
 class BatchAdminViewSet(viewsets.ModelViewSet):
     """
@@ -25,6 +26,19 @@ class BatchAdminViewSet(viewsets.ModelViewSet):
             self.perform_create(serializer)
             return Response({'success': True, 'data': serializer.data}, status=status.HTTP_201_CREATED)
         return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['patch'], url_path='toggle-active', permission_classes=[IsAdministrator])
+    def toggle_active(self, request, slug=None):
+        """PATCH .../batches/<slug>/toggle-active/  — flip is_active"""
+        batch = self.get_object()
+        batch.is_active = not batch.is_active
+        batch.save(update_fields=['is_active'])
+        return Response({
+            'success': True,
+            'slug': batch.slug,
+            'is_active': batch.is_active,
+            'message': f'Course {"activated" if batch.is_active else "deactivated"} successfully.',
+        }, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)

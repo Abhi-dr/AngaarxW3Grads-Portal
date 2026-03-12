@@ -74,20 +74,22 @@ Administration | JOVAC
 
                     <p class="card-text mb-1">Total Assignments: {{ course.get_total_assignments }}</p>
 
-                    {% if course.is_active %}
-                    <span class="badge bg-success">
-                        Active
+                    <span class="badge {% if course.is_active %}bg-success{% else %}bg-danger{% endif %} mb-2"
+                          id="status-badge-{{ course.slug }}">
+                        {% if course.is_active %}Active{% else %}Inactive{% endif %}
                     </span>
-
-                    {% else %}
-                    <span class="badge bg-danger">
-                        Inactive
-                    </span>
-                    {% endif %}
 
                     <a href="{% url 'administrator_jovac' course.slug %}"
-                        class="btn btn-outline-secondary w-100 mt-2">View
-                        More</a>
+                        class="btn btn-outline-secondary w-100 mt-2">View More</a>
+
+                    <button
+                        class="btn {% if course.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %} w-100 mt-2 toggle-btn"
+                        id="toggle-btn-{{ course.slug }}"
+                        data-slug="{{ course.slug }}"
+                        data-active="{{ course.is_active|yesno:'true,false' }}"
+                        onclick="toggleCourseActive('{{ course.slug }}', this)">
+                        {% if course.is_active %}Deactivate{% else %}Activate{% endif %}
+                    </button>
                 </div>
             </div>
 
@@ -96,4 +98,49 @@ Administration | JOVAC
     </div>
 </div>
 
+{% endblock %}
+
+{% block myjs %}
+<script>
+function toggleCourseActive(slug, btn) {
+    btn.disabled = true;
+    const originalText = btn.textContent.trim();
+    btn.textContent = 'Saving...';
+
+    fetch(`/administration/api/v1/courses/${slug}/toggle-active/`, {
+        method: 'PATCH',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const badge = document.getElementById('status-badge-' + slug);
+            if (data.is_active) {
+                badge.textContent = 'Active';
+                badge.className = 'badge bg-success mb-2';
+                btn.textContent = 'Deactivate';
+                btn.className = 'btn btn-outline-danger w-100 mt-2 toggle-btn';
+            } else {
+                badge.textContent = 'Inactive';
+                badge.className = 'badge bg-danger mb-2';
+                btn.textContent = 'Activate';
+                btn.className = 'btn btn-outline-success w-100 mt-2 toggle-btn';
+            }
+        } else {
+            alert('Failed to update course status.');
+            btn.textContent = originalText;
+        }
+    })
+    .catch(() => {
+        alert('Network error. Please try again.');
+        btn.textContent = originalText;
+    })
+    .finally(() => {
+        btn.disabled = false;
+    });
+}
+</script>
 {% endblock %}

@@ -104,7 +104,7 @@ class CustomUser(AbstractUser):
     # Required for email-based login
     # email is already declared with unique=True above — satisfies auth.W004
     USERNAME_FIELD  = 'email'
-    REQUIRED_FIELDS = ['username']   # username kept for allauth compatibility
+    REQUIRED_FIELDS = []   # username is auto-generated; not needed for createsuperuser
 
     # Managers
     objects     = CustomUserManager()

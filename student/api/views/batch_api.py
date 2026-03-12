@@ -20,8 +20,8 @@ class BatchListView(APIView):
     def get(self, request):
         student = request.user
         
-        # Batch Data
-        all_batches = Batch.objects.annotate(
+        # Batch Data — only show active courses to students
+        all_batches = Batch.objects.filter(is_active=True).annotate(
             enrollment_status=Case(
                 When(enrollment_requests__student=student, enrollment_requests__status='Accepted', then=Value('Accepted')),
                 When(enrollment_requests__student=student, enrollment_requests__status='Pending', then=Value('Pending')),

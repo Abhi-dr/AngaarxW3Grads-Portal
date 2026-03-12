@@ -38,78 +38,58 @@ def index(request):
     
     administrator = CustomUser.objects.get(id=request.user.id)
     latest_sheet = Sheet.objects.latest('id')
-    
+
     todays_submissions = Submission.get_todays_total_submissions()
-    
-    # get the total number of submissions happened today only
-    # today = datetime.date.today()
-    # total_submissions_today = Submission.objects.filter(submitted_at__date=today).count()
-    
-    # today = timezone.now().date()
 
-    # # Filter users who logged in today
-    # users_today = CustomUser.objects.filter(last_login__date=today)
-
-    # # Get the count of such users
-    # total_users_today = users_today.count()
-    
-    # last_3_questions = Question.objects.order_by('-created_at')[:3]
-
-    
-    # sessions = Session.objects.filter(administrator=administrator, recorded_session_link=None).order_by("-session_time")
-    
-    # total_enrolled_students = CustomUser.objects.filter(courses__administrator=administrator).distinct().count()
-    # total_sessions = Session.objects.filter(administrator=administrator).count()
-    
-    # course = Course.objects.get(administrator=administrator)
-    
-    # if total_sessions == 0:
-    #     total_completed_sessions_percentage = 0
-    # else:
-    #     total_completed_sessions_percentage = int((Session.objects.filter(administrator=administrator, is_completed=True).count() / total_sessions) * 100)
-    
     parameters = {
         "administrator": administrator,
         "latest_sheet": latest_sheet,
-        
         "todays_submissions": todays_submissions,
-        # "total_enrolled_students": total_enrolled_students,
-        # "total_sessions": total_sessions,
-        # "sessions": sessions,
-        # "total_completed_sessions_percentage": total_completed_sessions_percentage,
-        # "course": course
-    }
-    
-    return render(request, "administration/index.html", parameters)
-    
-    # last_3_questions = Question.objects.order_by('-created_at')[:3]
-
-    
-    # sessions = Session.objects.filter(administrator=administrator, recorded_session_link=None).order_by("-session_time")
-    
-    # total_enrolled_students = CustomUser.objects.filter(courses__administrator=administrator).distinct().count()
-    # total_sessions = Session.objects.filter(administrator=administrator).count()
-    
-    # course = Course.objects.get(administrator=administrator)
-    
-    # if total_sessions == 0:
-    #     total_completed_sessions_percentage = 0
-    # else:
-    #     total_completed_sessions_percentage = int((Session.objects.filter(administrator=administrator, is_completed=True).count() / total_sessions) * 100)
-    
-    parameters = {
-        "administrator": administrator,
-        "latest_sheet": latest_sheet,
-        # "total_enrolled_students": total_enrolled_students,
-        # "total_sessions": total_sessions,
-        # "sessions": sessions,
-        # "total_completed_sessions_percentage": total_completed_sessions_percentage,
-        # "course": course
     }
     
     return render(request, "administration/index.html", parameters)
 
-# ================================================================================================
+
+# ======================================== DASHBOARD CHART APIs ======================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def api_dashboard_submissions(request):
+    """Returns last 5 days submission counts as JSON."""
+    today = timezone.now().date()
+    last_5_days = [today - timedelta(days=i) for i in range(4, -1, -1)]
+    labels = [d.strftime('%d %b') for d in last_5_days]
+    data = []
+    for d in last_5_days:
+        start = timezone.make_aware(datetime.datetime.combine(d, datetime.time.min))
+        end   = timezone.make_aware(datetime.datetime.combine(d, datetime.time.max))
+        data.append(Submission.objects.filter(submitted_at__gte=start, submitted_at__lte=end).count())
+    total = Submission.objects.count()
+    today_start = timezone.make_aware(datetime.datetime.combine(today, datetime.time.min))
+    today_end   = timezone.make_aware(datetime.datetime.combine(today, datetime.time.max))
+    today_count = Submission.objects.filter(submitted_at__gte=today_start, submitted_at__lte=today_end).count()
+    return JsonResponse({'labels': labels, 'data': data, 'total': total, 'today_count': today_count})
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def api_dashboard_registrations(request):
+    """Returns last 5 days new student registrations as JSON."""
+    today = timezone.now().date()
+    last_5_days = [today - timedelta(days=i) for i in range(4, -1, -1)]
+    labels = [d.strftime('%d %b') for d in last_5_days]
+    data = []
+    for d in last_5_days:
+        start = timezone.make_aware(datetime.datetime.combine(d, datetime.time.min))
+        end   = timezone.make_aware(datetime.datetime.combine(d, datetime.time.max))
+        data.append(CustomUser.objects.filter(date_joined__gte=start, date_joined__lte=end, role='student').count())
+    total = CustomUser.objects.filter(role='student', is_active=True).count()
+    today_start = timezone.make_aware(datetime.datetime.combine(today, datetime.time.min))
+    today_end   = timezone.make_aware(datetime.datetime.combine(today, datetime.time.max))
+    active_today = CustomUser.objects.filter(last_login__gte=today_start, last_login__lte=today_end, role='student').count()
+    return JsonResponse({'labels': labels, 'data': data, 'total': total, 'active_today': active_today})
 # ========================================= DATA WORK ============================================
 # ================================================================================================
 
@@ -670,6 +650,8 @@ def fetch_view_student_profile(request,id):
     return JsonResponse({"student": data})
 
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
 def get_user_stats(request):
     """Get user statistics for the admin dashboard"""
     if request.method == 'GET':

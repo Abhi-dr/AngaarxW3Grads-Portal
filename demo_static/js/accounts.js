@@ -28,89 +28,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===============================================================
 
     const state = {
-        username: false,
         email: false,
         password: false,
         confirmPassword: false
     };
 
     const elements = {
-        usernameInput: document.getElementById('username'),
         emailInput: document.getElementById('email'),
         passwordInput: document.getElementById('password'),
         confirmPasswordInput: document.getElementById('confirm-password'),
         submitBtn: document.getElementById('signup-button'),
-        usernameFeedback: document.getElementById('username-feedback'),
         emailFeedback: document.getElementById('email-feedback'),
         passwordMatchError: document.getElementById('password-match'),
         form: document.querySelector('form')
     };
 
     const urls = {
-        checkUsername: elements.form.getAttribute('data-check-username-url'),
         checkEmail: elements.form.getAttribute('data-check-email-url')
     };
 
-    // AbortControllers for cancelling pending requests
-    let usernameController = null;
+    // AbortController for cancelling pending requests
     let emailController = null;
 
     // ===============================================================
     // VALIDATION LOGIC
     // ===============================================================
-
-    /**
-     * Validates Username
-     * Constraints: > 4 chars, no spaces, no special chars (alphanumeric only)
-     */
-    async function checkUsername() {
-        const username = elements.usernameInput.value;
-        const feedback = elements.usernameFeedback;
-
-        // Reset state
-        state.username = false;
-        updateSubmitButton();
-
-        // client-side validation
-        if (username.length > 0 && username.length < 4) {
-            feedback.innerHTML = "<span class='error'>Username must be at least 4 characters</span>";
-            return;
-        } else if (username.length === 0) {
-            feedback.innerHTML = "";
-            return;
-        }
-
-        const usernameRegex = /^[a-zA-Z0-9]+$/;
-        if (!usernameRegex.test(username)) {
-            feedback.innerHTML = "<span class='error'>Username must be alphanumeric (no spaces/symbols)</span>";
-            return;
-        }
-
-        // Server-side check
-        if (usernameController) usernameController.abort(); // Cancel previous request
-        usernameController = new AbortController();
-
-        try {
-            const response = await fetch(`${urls.checkUsername}?username=${encodeURIComponent(username)}`, {
-                signal: usernameController.signal
-            });
-            const data = await response.json();
-
-            if (data.is_available) {
-                feedback.innerHTML = "<span class='success'>Username is available</span>";
-                state.username = true;
-            } else {
-                feedback.innerHTML = "<span class='error'>Username is taken</span>";
-                state.username = false;
-            }
-        } catch (error) {
-            if (error.name === 'AbortError') return; // Ignore aborted requests
-            feedback.innerHTML = "<span class='error'>Error checking availability</span>";
-            console.error(error);
-        } finally {
-            updateSubmitButton();
-        }
-    }
 
     /**
      * Validates Email
@@ -223,7 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateSubmitButton() {
-        const isValid = state.username && state.email && state.password && state.confirmPassword;
+        const isValid = state.email && state.password && state.confirmPassword;
         elements.submitBtn.disabled = !isValid;
         elements.submitBtn.textContent = isValid ? "Register" : "Register";
 
@@ -237,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // EVENT LISTENERS
     // ===============================================================
 
-    elements.usernameInput.addEventListener('input', debounce(checkUsername, 300));
     elements.emailInput.addEventListener('input', debounce(checkEmail, 300));
     elements.passwordInput.addEventListener('input', checkPassword);
     elements.confirmPasswordInput.addEventListener('input', checkPassword);

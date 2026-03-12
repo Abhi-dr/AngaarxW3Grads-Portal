@@ -4,6 +4,10 @@ from . import problem_views, jovac_views, views, question_generator, batch_views
 urlpatterns = [
     path('api/v1/', include('administration.api.urls')),
     path("", views.index, name="administration"),
+
+    # Dashboard chart APIs
+    path("api/dashboard/submissions/", views.api_dashboard_submissions, name="api_dashboard_submissions"),
+    path("api/dashboard/registrations/", views.api_dashboard_registrations, name="api_dashboard_registrations"),
     
     path("view_student_profile/<int:id>", views.view_student_profile, name="administration_view_student_profile"),
     path("fetch_view_student_profile/<int:id>", views.fetch_view_student_profile, name="fetch_view_student_profile"),

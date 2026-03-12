@@ -112,7 +112,6 @@ def register(request):
             messages.error(request, "reCAPTCHA verification failed. Try again.")
             return redirect("register")
 
-        username = request.POST.get("username", "").strip().lower()
         first_name = request.POST.get("first_name", "").strip().title()
         last_name = request.POST.get("last_name", "").strip().title()
         email = request.POST.get("email", "").strip().lower()
@@ -123,26 +122,24 @@ def register(request):
             messages.error(request, "Passwords do not match!")
             return redirect("register")
 
-        # Check existing username or email across all CustomUser records
-        if CustomUser.objects.filter(Q(username=username) | Q(email=email)).exists():
-            messages.error(request, "Username or Email already exists!")
+        # Check existing email across all CustomUser records
+        if CustomUser.objects.filter(email=email).exists():
+            messages.error(request, "Email already exists!")
             return redirect("register")
 
         try:
             with transaction.atomic():
-                new_user = CustomUser(
-                    username=username,
+                new_user = CustomUser.objects.create_user(
+                    email=email,
+                    password=password,
                     first_name=first_name,
                     last_name=last_name,
-                    email=email,
                     role='student',
                     is_active=False,   # inactive until email verified
                     mobile_number='-',
                     gender='Not Set',
                     is_email_verified=False,
                 )
-                new_user.set_password(password)
-                new_user.save()
 
                 print(f"New user created: {new_user.username} with ID: {new_user.id}")
 
