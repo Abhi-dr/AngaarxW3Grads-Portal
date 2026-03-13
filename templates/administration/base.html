@@ -138,11 +138,343 @@
     </style>
 
     <script>
-        document.addEventListener('DOMContentLoaded', (event) => {
+        (function () {
             const theme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-bs-theme', theme);
-        });
+
+            const isCollapsed = localStorage.getItem('adminSidebarCollapsed') === 'true';
+            if (isCollapsed && window.innerWidth >= 1200) {
+                document.documentElement.classList.add('admin-sidebar-collapsed-init');
+            }
+        })();
     </script>
+
+    <style>
+        html.admin-sidebar-collapsed-init .left-sidebar {
+            width: 70px;
+        }
+
+        html.admin-sidebar-collapsed-init .left-sidebar .hide-menu,
+        html.admin-sidebar-collapsed-init .left-sidebar .nav-small-cap-icon,
+        html.admin-sidebar-collapsed-init .left-sidebar .nav-small-cap span {
+            display: none;
+        }
+
+        html.admin-sidebar-collapsed-init .left-sidebar .brand-logo a.logo-img {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        html.admin-sidebar-collapsed-init .left-sidebar .brand-logo a.logo-collapsed {
+            opacity: 1;
+            transform: scale(1);
+            position: static;
+            pointer-events: auto;
+        }
+
+        html.admin-sidebar-collapsed-init .left-sidebar .brand-logo {
+            justify-content: center;
+        }
+
+        html.admin-sidebar-collapsed-init .left-sidebar .sidebar-link {
+            justify-content: center;
+            padding: 12px 10px;
+        }
+
+        html.admin-sidebar-collapsed-init .left-sidebar .nav-small-cap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        html.admin-sidebar-collapsed-init .left-sidebar .nav-small-cap::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        html.admin-sidebar-collapsed-init .page-wrapper .body-wrapper {
+            margin-left: 70px !important;
+        }
+
+        .page-wrapper .body-wrapper {
+            transition: margin-left 0.3s ease;
+        }
+
+        .left-sidebar {
+            width: 270px;
+            overflow: visible !important;
+            transition: width 0.3s ease, transform 0.3s ease;
+            position: relative;
+        }
+
+        .left-sidebar.collapsed {
+            width: 70px;
+        }
+
+        .left-sidebar.collapsed .hide-menu,
+        .left-sidebar.collapsed .nav-small-cap-icon,
+        .left-sidebar.collapsed .nav-small-cap span {
+            display: none;
+        }
+
+        .left-sidebar.collapsed .nav-small-cap {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px 0;
+            min-height: 20px;
+        }
+
+        .left-sidebar.collapsed .nav-small-cap::before {
+            content: '';
+            display: block;
+            width: 40px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .brand-logo a.logo-img,
+        .brand-logo a.logo-collapsed {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .brand-logo a.logo-img {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .brand-logo a.logo-collapsed {
+            opacity: 0;
+            transform: scale(0.8);
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .left-sidebar.collapsed .brand-logo {
+            justify-content: center;
+        }
+
+        .left-sidebar.collapsed .brand-logo a.logo-img {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        .left-sidebar.collapsed .brand-logo a.logo-collapsed {
+            opacity: 1;
+            transform: scale(1);
+            position: static;
+            pointer-events: auto;
+        }
+
+        .left-sidebar.collapsed .sidebar-link {
+            justify-content: center;
+            padding: 12px 10px;
+            position: relative;
+        }
+
+        .left-sidebar.collapsed .sidebar-link i {
+            margin-right: 0;
+            font-size: 20px;
+        }
+
+        .left-sidebar.collapsed .sidebar-item {
+            position: relative;
+        }
+
+        .left-sidebar.collapsed .sidebar-link[data-title]::after {
+            content: attr(data-title);
+            position: fixed;
+            left: 80px;
+            background: #2d3748;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 99999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+            pointer-events: none;
+        }
+
+        .left-sidebar.collapsed .sidebar-link[data-title]:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-toggle-btn {
+            position: absolute;
+            top: 70px;
+            right: -18px;
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 50%;
+            background: #5d87ff;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 101;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-toggle-btn:hover {
+            background: #4570ea;
+            transform: scale(1.08);
+            box-shadow: 0 5px 15px rgba(93, 135, 255, 0.35);
+        }
+
+        .sidebar-toggle-btn i {
+            color: #fff;
+            font-size: 18px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .toggle-icon-expanded {
+            display: block;
+        }
+
+        .toggle-icon-collapsed {
+            display: none;
+            position: absolute;
+        }
+
+        .left-sidebar.collapsed .toggle-icon-expanded {
+            display: none;
+        }
+
+        .left-sidebar.collapsed .toggle-icon-collapsed {
+            display: block;
+            position: static;
+        }
+
+        @keyframes adminSidebarTogglePulse {
+            0% {
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(93, 135, 255, 0.8), 0 0 30px rgba(93, 135, 255, 0.35);
+            }
+
+            100% {
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        @keyframes adminSidebarIconBounce {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.25);
+            }
+        }
+
+        .sidebar-toggle-btn.animating {
+            animation: adminSidebarTogglePulse 0.35s ease-out;
+        }
+
+        .sidebar-toggle-btn.animating i {
+            animation: adminSidebarIconBounce 0.3s ease-out;
+        }
+
+        .page-wrapper[data-sidebar-collapsed="true"] .body-wrapper {
+            margin-left: 70px !important;
+        }
+
+        @media (max-width: 1199px) {
+            .sidebar-toggle-btn {
+                display: none !important;
+            }
+        }
+    </style>
+
+    <style>
+        .themeToggle {
+            color: #bbb;
+            width: 3em;
+        }
+
+        .st-sunMoonThemeToggleBtn {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput {
+            opacity: 0;
+            width: 55%;
+            aspect-ratio: 1;
+        }
+
+        .st-sunMoonThemeToggleBtn svg {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.4s ease;
+            transform: rotate(40deg);
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunMoon {
+            transform-origin: center center;
+            transition: inherit;
+            transform: scale(1);
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay {
+            transform-origin: center center;
+            transform: scale(0);
+        }
+
+        .st-sunMoonThemeToggleBtn svg mask>circle {
+            transition: transform 0.64s cubic-bezier(0.41, 0.64, 0.32, 1.575);
+            transform: translate(0px, 0px);
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay2 { animation-delay: 0.05s !important; }
+        .st-sunMoonThemeToggleBtn svg .sunRay3 { animation-delay: 0.1s !important; }
+        .st-sunMoonThemeToggleBtn svg .sunRay4 { animation-delay: 0.17s !important; }
+        .st-sunMoonThemeToggleBtn svg .sunRay5 { animation-delay: 0.25s !important; }
+        .st-sunMoonThemeToggleBtn svg .sunRay6 { animation-delay: 0.29s !important; }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg {
+            transform: rotate(90deg);
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg mask>circle {
+            transform: translate(16px, -3px);
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunMoon {
+            transform: scale(0.55);
+        }
+
+        .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg .sunRay {
+            animation: showRay1832 0.4s ease 0s 1 forwards;
+        }
+
+        @keyframes showRay1832 {
+            0%  { transform: scale(0); }
+            100%{ transform: scale(1); }
+        }
+    </style>
 
     {% block extra_css %}
 
@@ -160,13 +492,20 @@
         data-sidebar-position="fixed" data-header-position="fixed">
         <!-- Sidebar Start -->
         <aside class="left-sidebar" id="sidebar">
+            <button class="sidebar-toggle-btn d-none d-xl-flex" id="sidebarToggleDesktop" title="Toggle Sidebar">
+                <i class="ti ti-chevron-left toggle-icon-expanded"></i>
+                <i class="ti ti-menu-2 toggle-icon-collapsed"></i>
+            </button>
             <!-- Sidebar scroll-->
             <div>
                 <div class="brand-logo d-flex align-items-center justify-content-between">
                     <a href="{% url 'administration' %}" class="text-nowrap logo-img">
                         <img src="{% static 'img/student/logo.png' %}" alt="" style="width: 100%;" />
                     </a>
-                    <div class="close-btn d-block  d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
+                    <a href="{% url 'administration' %}" class="text-nowrap logo-collapsed">
+                        <img src="{% static 'img/student/collapsed-logo2.png' %}" alt="" style="width: 64px; height: 64px;" />
+                    </a>
+                    <div class="close-btn d-block d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8"></i>
                     </div>
                 </div>
@@ -284,7 +623,7 @@
                             </a>
                         </li>
 
-                        <li class="sidebar-item">
+                        <!-- <li class="sidebar-item">
                             <a class="sidebar-link {% block enrollment_request_active %} {% endblock %}"
                                 href="{% url 'administrator_enrollment_requests' %}" aria-expanded="false">
                                 <span>
@@ -293,7 +632,7 @@
                                 <span class="hide-menu">Enrollment Requests</span>
 
                             </a>
-                        </li>
+                        </li> -->
 
 
                         <!-- ========================= EXTRA LEARNING ============================= -->
@@ -442,10 +781,26 @@
                     <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
                         <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
 
-                            <button id="theme-toggle" class="btn mx-2">Light Mode</button>
+                            <label for="themeToggle" class="themeToggle st-sunMoonThemeToggleBtn" type="checkbox">
+                                <input type="checkbox" id="themeToggle" class="themeToggleInput" />
+                                <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" stroke="none">
+                                    <mask id="moon-mask">
+                                        <rect x="0" y="0" width="20" height="20" fill="white"></rect>
+                                        <circle cx="11" cy="3" r="8" fill="black"></circle>
+                                    </mask>
+                                    <circle class="sunMoon" cx="10" cy="10" r="8" mask="url(#moon-mask)"></circle>
+                                    <g>
+                                        <circle class="sunRay sunRay1" cx="18" cy="10" r="1.5"></circle>
+                                        <circle class="sunRay sunRay2" cx="14" cy="16.928" r="1.5"></circle>
+                                        <circle class="sunRay sunRay3" cx="6" cy="16.928" r="1.5"></circle>
+                                        <circle class="sunRay sunRay4" cx="2" cy="10" r="1.5"></circle>
+                                        <circle class="sunRay sunRay5" cx="6" cy="3.1718" r="1.5"></circle>
+                                        <circle class="sunRay sunRay6" cx="14" cy="3.1718" r="1.5"></circle>
+                                    </g>
+                                </svg>
+                            </label>
 
-
-                            <a href="{% url 'logout' %}" class="btn btn-outline-danger ">
+                            <a href="{% url 'logout' %}" class="btn btn-outline-danger ms-3">
                                 <i class="ti ti-logout"></i>
                             </a>
                             <li class="nav-item dropdown">
@@ -575,26 +930,103 @@
     <script src="{% static 'js/dashboard/libs/simplebar/dist/simplebar.js' %}"></script>
 
     <script>
-        // Get references to the sidebar and the toggle button
         const sidebar = document.getElementById('sidebar');
         const sidebarCollapse = document.getElementById('sidebarCollapse');
+        const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop');
+        const mainWrapper = document.getElementById('main-wrapper');
+        const adminSidebarStorageKey = 'adminSidebarCollapsed';
 
-        // Function to close the sidebar
         function closeSidebar() {
-            sidebar.classList.remove('show');
+            if (sidebar) {
+                sidebar.classList.remove('show');
+            }
         }
 
-        // Event listener for clicks on the toggle button
-        sidebarCollapse.addEventListener('click', function () {
-            sidebar.classList.toggle('show');
+        function setDesktopSidebarState(isCollapsed) {
+            if (!sidebar || !mainWrapper) {
+                return;
+            }
+
+            if (window.innerWidth < 1200) {
+                sidebar.classList.remove('collapsed');
+                mainWrapper.removeAttribute('data-sidebar-collapsed');
+                return;
+            }
+
+            sidebar.classList.toggle('collapsed', isCollapsed);
+            if (isCollapsed) {
+                mainWrapper.setAttribute('data-sidebar-collapsed', 'true');
+            } else {
+                mainWrapper.removeAttribute('data-sidebar-collapsed');
+            }
+        }
+
+        function toggleSidebarCollapse() {
+            if (!sidebarToggleDesktop || !sidebar) {
+                return;
+            }
+
+            sidebarToggleDesktop.classList.add('animating');
+            const isCollapsed = !sidebar.classList.contains('collapsed');
+            setDesktopSidebarState(isCollapsed);
+            localStorage.setItem(adminSidebarStorageKey, String(isCollapsed));
+
+            setTimeout(() => {
+                sidebarToggleDesktop.classList.remove('animating');
+            }, 300);
+        }
+
+        function restoreSidebarState() {
+            const isCollapsed = localStorage.getItem(adminSidebarStorageKey) === 'true';
+            setDesktopSidebarState(isCollapsed);
+        }
+
+        function addSidebarTooltips() {
+            const sidebarLinks = document.querySelectorAll('.sidebar-link');
+            sidebarLinks.forEach(link => {
+                const hideMenu = link.querySelector('.hide-menu');
+                if (hideMenu) {
+                    link.setAttribute('data-title', hideMenu.textContent.trim());
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            addSidebarTooltips();
+
+            if (document.documentElement.classList.contains('admin-sidebar-collapsed-init')) {
+                setDesktopSidebarState(true);
+                document.documentElement.classList.remove('admin-sidebar-collapsed-init');
+            } else {
+                restoreSidebarState();
+            }
         });
 
-        // Event listener for clicks outside the sidebar
+        if (sidebarCollapse) {
+            sidebarCollapse.addEventListener('click', function (event) {
+                event.stopPropagation();
+                sidebar.classList.toggle('show');
+            });
+        }
+
+        if (sidebarToggleDesktop) {
+            sidebarToggleDesktop.addEventListener('click', function (event) {
+                event.stopPropagation();
+                toggleSidebarCollapse();
+            });
+        }
+
         document.addEventListener('click', function (event) {
             const target = event.target;
-            if (!sidebar.contains(target) && target !== sidebarCollapse) {
+            const isHeaderToggle = target.closest('#headerCollapse');
+
+            if (window.innerWidth < 1200 && sidebar && !sidebar.contains(target) && !isHeaderToggle) {
                 closeSidebar();
             }
+        });
+
+        window.addEventListener('resize', function () {
+            restoreSidebarState();
         });
     </script>
 
@@ -608,30 +1040,18 @@
     <script>
 
 
-        document.addEventListener('DOMContentLoaded', (event) => {
-            const themeToggleButton = document.getElementById('theme-toggle');
-            themeToggleButton.innerHTML = localStorage.getItem('theme') === 'dark' ? 'Light Mode' : 'Dark Mode';
-            themeToggleButton.classList.add(localStorage.getItem('theme') === 'dark' ? 'btn-outline-light' : 'btn-outline-dark');
-
-
-            themeToggleButton.addEventListener('click', () => {
+        document.addEventListener('DOMContentLoaded', function () {
+            const themeToggleCheckbox = document.getElementById('themeToggle');
+            if (themeToggleCheckbox) {
                 const currentTheme = document.documentElement.getAttribute('data-bs-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-bs-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
+                themeToggleCheckbox.checked = (currentTheme === 'light');
 
-                if (newTheme === 'dark') {
-                    themeToggleButton.innerHTML = 'Light Mode';
-                    themeToggleButton.classList.remove('btn-outline-dark');
-                    themeToggleButton.classList.add('btn-outline-light');
-                } else {
-                    themeToggleButton.innerHTML = 'Dark Mode';
-                    themeToggleButton.classList.add('btn-outline-dark');
-                    themeToggleButton.classList.remove('btn-outline-light');
-                }
-
-
-            });
+                themeToggleCheckbox.addEventListener('change', function () {
+                    const newTheme = themeToggleCheckbox.checked ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-bs-theme', newTheme);
+                    localStorage.setItem('theme', newTheme);
+                });
+            }
         });
 
     </script>

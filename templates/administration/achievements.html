@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.min.css">
 
 
 <style>
@@ -23,6 +24,67 @@
 
     .a-card:hover {
         transform: translateY(-5px);
+    }
+
+    .student-select-wrapper .ts-wrapper.single .ts-control {
+        min-height: calc(1.5em + 0.75rem + 2px);
+        border-radius: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        border-color: var(--bs-border-color);
+        box-shadow: none;
+    }
+
+    .student-select-wrapper .ts-wrapper.focus .ts-control {
+        border-color: rgba(13, 110, 253, 0.55);
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+
+    .student-select-wrapper .ts-dropdown {
+        border-radius: 0.9rem;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+        overflow: hidden;
+        z-index: 2000;
+    }
+
+    .student-option {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .student-option__name {
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .student-option__meta {
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .ts-dropdown .option {
+        padding: 0.75rem 0.9rem;
+    }
+
+    .ts-dropdown .active {
+        background: rgba(13, 110, 253, 0.08);
+        color: inherit;
+    }
+
+    .loader {
+        position: fixed;
+        top: 6rem;
+        right: 1.5rem;
+        z-index: 1085;
+        margin: 0;
+        pointer-events: none;
+    }
+
+    .loader .spinner-border {
+        width: 2.4rem;
+        height: 2.4rem;
+        border-width: 0.24rem;
     }
 </style>
 
@@ -92,9 +154,12 @@
                         <input type="hidden" id="achievementId" value="">
                         <div class="mb-3">
                             <label for="studentId" class="form-label">Student</label>
+                            <div class="student-select-wrapper">
                             <select class="form-select" id="studentId" required>
                                 <option value="">Select Student</option>
                             </select>
+                            </div>
+                            <div class="form-text">Search by name or username, then pick the student from the dropdown list.</div>
                         </div>
                         <div class="mb-3">
                             <label for="title" class="form-label">Title</label>
@@ -154,17 +219,53 @@
 
 {% block myjs %}
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
 <script>
     let currentPage = 1;
     let selectedAchievementId = null;
     let achievementsCount = 0;
+    let studentSelect = null;
+    let shouldRefreshAchievementsAfterModalClose = false;
 
     // Load achievements on page load
     document.addEventListener('DOMContentLoaded', () => {
+        initializeStudentSelect();
         loadAchievements();
         loadStudents();
         setupEventListeners();
     });
+
+    function initializeStudentSelect() {
+        studentSelect = new TomSelect('#studentId', {
+            valueField: 'id',
+            labelField: 'label',
+            searchField: ['label', 'name', 'username'],
+            sortField: [{ field: 'name', direction: 'asc' }],
+            options: [],
+            create: false,
+            maxOptions: 8,
+            hideSelected: true,
+            allowEmptyOption: true,
+            openOnFocus: true,
+            placeholder: 'Search and select student',
+            render: {
+                option: function (data, escape) {
+                    return `
+                        <div class="student-option">
+                            <span class="student-option__name">${escape(data.name)}</span>
+                            <span class="student-option__meta">@${escape(data.username)}</span>
+                        </div>
+                    `;
+                },
+                item: function (data, escape) {
+                    return `<div>${escape(data.label)}</div>`;
+                },
+                no_results: function (_, escape) {
+                    return `<div class="py-3 px-3 text-muted">${escape('No student found')}</div>`;
+                }
+            }
+        });
+    }
 
     function setupEventListeners() {
         // Search functionality - on keyup instead of just enter
@@ -194,6 +295,15 @@
             document.getElementById('achievementForm').reset();
             document.getElementById('achievementId').value = '';
             document.getElementById('achievementModalLabel').textContent = 'Add Achievement';
+            if (studentSelect) {
+                studentSelect.close();
+                studentSelect.clear(true);
+                studentSelect.blur();
+            }
+            if (shouldRefreshAchievementsAfterModalClose) {
+                shouldRefreshAchievementsAfterModalClose = false;
+                loadAchievements();
+            }
         });
 
         // Confirm delete
@@ -283,7 +393,7 @@
                 <div class="text-center mb-3 mt-n3">
                     <img src="${achievement.student.profile_pic}" alt="${achievement.student.username}" 
                         class="rounded-circle" width="110" height="110"
-                        loading="lazy" onerror="this.src='/static/img/student/default.jpg'">
+                        loading="lazy" onerror="this.onerror=null; this.src='/static/img/student/default-avatar.svg';">
                 </div>
 
                 <div class="d-flex justify-content-between align-items-start mb-2">
@@ -350,14 +460,27 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    const select = document.getElementById('studentId');
-                    select.innerHTML = '<option value="">Select Student</option>';
-                    data.students.forEach(student => {
-                        const option = document.createElement('option');
-                        option.value = student.id;
-                        option.textContent = student.first_name + ' ' + student.last_name + ' (' + student.username + ')';
-                        select.appendChild(option);
-                    });
+                    const selectedStudentId = studentSelect ? studentSelect.getValue() : '';
+                    const studentOptions = data.students
+                        .map(student => {
+                            const fullName = [student.first_name, student.last_name].filter(Boolean).join(' ').trim() || student.username;
+                            return {
+                                id: String(student.id),
+                                name: fullName,
+                                username: student.username,
+                                label: `${fullName} (${student.username})`
+                            };
+                        })
+                        .sort((firstStudent, secondStudent) => firstStudent.name.localeCompare(secondStudent.name));
+
+                    if (studentSelect) {
+                        studentSelect.clearOptions();
+                        studentSelect.addOptions(studentOptions);
+                        if (selectedStudentId && studentSelect.options[selectedStudentId]) {
+                            studentSelect.setValue(selectedStudentId, true);
+                        }
+                        studentSelect.refreshOptions(false);
+                    }
                 }
             })
             .catch(error => showToast('Error loading students', 'error'));
@@ -366,7 +489,7 @@
     function saveAchievement() {
         const achievementId = document.getElementById('achievementId').value;
         const data = {
-            student_id: document.getElementById('studentId').value,
+            student_id: studentSelect ? studentSelect.getValue() : document.getElementById('studentId').value,
             title: document.getElementById('title').value,
             description: document.getElementById('description').value,
             achievement_type: document.getElementById('achievementType').value,
@@ -398,8 +521,11 @@
             .then(data => {
                 if (data.status === 'success') {
                     showToast('Achievement saved successfully', 'success');
+                    shouldRefreshAchievementsAfterModalClose = true;
+                    if (studentSelect) {
+                        studentSelect.close();
+                    }
                     $('#achievementModal').modal('hide');
-                    loadAchievements();
                 } else {
                     showToast(data.message, 'error');
                 }
@@ -418,7 +544,21 @@
                 if (data.status === 'success') {
                     const achievement = data.data;
                     document.getElementById('achievementId').value = achievement.id;
-                    document.getElementById('studentId').value = achievement.student.id;
+                    if (studentSelect) {
+                        const selectedStudentId = String(achievement.student.id);
+                        if (!studentSelect.options[selectedStudentId]) {
+                            const studentName = achievement.student.name || achievement.student.username;
+                            studentSelect.addOption({
+                                id: selectedStudentId,
+                                name: studentName,
+                                username: achievement.student.username,
+                                label: `${studentName} (${achievement.student.username})`
+                            });
+                        }
+                        studentSelect.setValue(selectedStudentId, true);
+                    } else {
+                        document.getElementById('studentId').value = achievement.student.id;
+                    }
                     document.getElementById('title').value = achievement.title;
                     document.getElementById('description').value = achievement.description;
                     document.getElementById('achievementType').value = achievement.achievement_type;

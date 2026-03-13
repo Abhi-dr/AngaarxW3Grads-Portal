@@ -13,6 +13,30 @@ from administration.models import Achievement
 from accounts.models import CustomUser
 from django.db.models import Q
 
+
+DEFAULT_PROFILE_PIC_URL = '/static/img/student/default-avatar.svg'
+
+
+def get_student_profile_pic_url(student):
+    profile_pic = getattr(student, 'profile_pic', None)
+    if not profile_pic:
+        return DEFAULT_PROFILE_PIC_URL
+
+    profile_pic_name = (getattr(profile_pic, 'name', '') or '').lstrip('/')
+    if not profile_pic_name or profile_pic_name == 'student_profile/default.jpg':
+        return DEFAULT_PROFILE_PIC_URL
+
+    try:
+        if hasattr(profile_pic, 'storage') and not profile_pic.storage.exists(profile_pic_name):
+            return DEFAULT_PROFILE_PIC_URL
+    except Exception:
+        return DEFAULT_PROFILE_PIC_URL
+
+    try:
+        return profile_pic.url
+    except Exception:
+        return DEFAULT_PROFILE_PIC_URL
+
 # =================================== ALL ACHIEVEMENTS ===============================
 
 @staff_member_required
@@ -48,7 +72,7 @@ def get_achievements(request):
                     'id': achievement.student.id,
                     'username': achievement.student.username,
                     'name': achievement.student.first_name + ' ' + achievement.student.last_name,
-                    'profile_pic': achievement.student.profile_pic.url if achievement.student.profile_pic else '/static/img/student/default.jpg'
+                    'profile_pic': get_student_profile_pic_url(achievement.student)
                 },
                 'title': achievement.title,
                 'description': achievement.description,
@@ -74,8 +98,9 @@ def get_achievement(request, achievement_id):
             'id': achievement.id,
             'student': {
                 'id': achievement.student.id,
+                'name': (achievement.student.first_name + ' ' + achievement.student.last_name).strip() or achievement.student.username,
                 'username': achievement.student.username,
-                'profile_pic': achievement.student.profile_pic.url if achievement.student.profile_pic else '/static/img/student/default.jpg'
+                'profile_pic': get_student_profile_pic_url(achievement.student)
             },
             'title': achievement.title,
             'description': achievement.description,
@@ -118,7 +143,7 @@ def create_achievement(request):
                 'student': {
                     'id': student.id,
                     'username': student.username,
-                    'profile_pic': student.profile_pic.url if student.profile_pic else '/static/img/student/default.jpg'
+                    'profile_pic': get_student_profile_pic_url(student)
                 },
                 'title': achievement.title,
                 'description': achievement.description,
@@ -159,7 +184,7 @@ def update_achievement(request, achievement_id):
                 'student': {
                     'id': achievement.student.id,
                     'username': achievement.student.username,
-                    'profile_pic': achievement.student.profile_pic.url if achievement.student.profile_pic else '/static/img/student/default.jpg'
+                    'profile_pic': get_student_profile_pic_url(achievement.student)
                 },
                 'title': achievement.title,
                 'description': achievement.description,
