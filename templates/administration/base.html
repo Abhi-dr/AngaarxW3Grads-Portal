@@ -1,4 +1,4 @@
-{% load static %}
+﻿{% load static %}
 
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
@@ -12,7 +12,7 @@
     </title>
 
     <link rel="icon"
-        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>🔥</text></svg>">
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%2210 0 100 100%22><text y=%22.90em%22 font-size=%2290%22>%F0%9F%94%A5</text></svg>">
 
     <!-- <link rel="shortcut icon" type="image/png" href="{% static 'img/dashboardimages/logos/favicon.png' %}" /> -->
     <link rel="stylesheet" href="{% static 'css/student/dashboard/styles.min.css' %}" />
@@ -25,11 +25,13 @@
         [data-bs-theme="dark"] .form-control {
             color: #f0f0f0;
         }
+
         .dropdown-item:hover i,
         .dropdown-item:hover p {
             color: black;
             /* Set the text and icon color to black on hover */
         }
+
         .star {
             color: red;
             display: inline;
@@ -132,7 +134,7 @@
             /* Darker background on hover */
         }
 
-        .body-wrapper>.container-fluid{
+        .body-wrapper>.container-fluid {
             max-width: 100%;
         }
     </style>
@@ -377,6 +379,7 @@
         }
 
         @keyframes adminSidebarIconBounce {
+
             0%,
             100% {
                 transform: scale(1);
@@ -402,6 +405,22 @@
         @media (max-width: 1199px) {
             .sidebar-toggle-btn {
                 display: none !important;
+            }
+        }
+
+        /* Fix header width when sidebar is collapsed (sidebar shrinks from 270px to 70px) */
+        @media (min-width: 1200px) {
+            #main-wrapper[data-layout="vertical"][data-header-position="fixed"] .app-header {
+                transition: width 0.3s ease, left 0.3s ease;
+            }
+
+            /* When sidebar has .collapsed class */
+            #sidebar.collapsed~.body-wrapper .app-header,
+            /* When page-wrapper has data-sidebar-collapsed="true" */
+            .page-wrapper[data-sidebar-collapsed="true"] #main-wrapper[data-layout="vertical"][data-header-position="fixed"] .app-header,
+            /* Target via parent selector */
+            #main-wrapper[data-layout="vertical"][data-header-position="fixed"][data-sidebar-collapsed="true"] .app-header {
+                width: calc(100% - 70px) !important;
             }
         }
     </style>
@@ -448,11 +467,25 @@
             transform: translate(0px, 0px);
         }
 
-        .st-sunMoonThemeToggleBtn svg .sunRay2 { animation-delay: 0.05s !important; }
-        .st-sunMoonThemeToggleBtn svg .sunRay3 { animation-delay: 0.1s !important; }
-        .st-sunMoonThemeToggleBtn svg .sunRay4 { animation-delay: 0.17s !important; }
-        .st-sunMoonThemeToggleBtn svg .sunRay5 { animation-delay: 0.25s !important; }
-        .st-sunMoonThemeToggleBtn svg .sunRay6 { animation-delay: 0.29s !important; }
+        .st-sunMoonThemeToggleBtn svg .sunRay2 {
+            animation-delay: 0.05s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay3 {
+            animation-delay: 0.1s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay4 {
+            animation-delay: 0.17s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay5 {
+            animation-delay: 0.25s !important;
+        }
+
+        .st-sunMoonThemeToggleBtn svg .sunRay6 {
+            animation-delay: 0.29s !important;
+        }
 
         .st-sunMoonThemeToggleBtn .themeToggleInput:checked+svg {
             transform: rotate(90deg);
@@ -471,8 +504,13 @@
         }
 
         @keyframes showRay1832 {
-            0%  { transform: scale(0); }
-            100%{ transform: scale(1); }
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
     </style>
 
@@ -482,7 +520,8 @@
 
     <!-- Add jQuery before other scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap JS is loaded at the bottom via dashboard libs, don't load twice -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script> -->
 
 </head>
 
@@ -503,7 +542,8 @@
                         <img src="{% static 'img/student/logo.png' %}" alt="" style="width: 100%;" />
                     </a>
                     <a href="{% url 'administration' %}" class="text-nowrap logo-collapsed">
-                        <img src="{% static 'img/student/collapsed-logo2.png' %}" alt="" style="width: 64px; height: 64px;" />
+                        <img src="{% static 'img/student/collapsed-logo2.png' %}" alt=""
+                            style="width: 64px; height: 64px;" />
                     </a>
                     <div class="close-btn d-block d-xl-none sidebartoggler cursor-pointer" id="sidebarCollapse">
                         <i class="ti ti-x fs-8"></i>
@@ -522,7 +562,7 @@
                                 <span>
                                     <i class="ti ti-layout-dashboard"></i>
                                 </span>
-                                <span class="hide-menu">🔥 Dashboard 🔥</span>
+                                <span class="hide-menu">Dashboard</span>
 
                             </a>
                         </li>
@@ -541,8 +581,7 @@
                         {% endcomment %}
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link"
-                             href="{% url 'administrator_jovacs' %}"  {% block jovac_active %} {% endblock %} aria-expanded="false">
+                            <a class="sidebar-link" href="{% url 'administrator_jovacs' %}" {% block jovac_active %}{% endblock %} aria-expanded="false">
                                 <span>
                                     <i class="ti ti-copy"></i>
                                 </span>
@@ -551,7 +590,7 @@
                         </li>
 
 
-                        
+
 
                         <li class="sidebar-item">
                             <a class="sidebar-link {% block problem_active %} {% endblock %}"
@@ -650,9 +689,10 @@
                                 <span class="hide-menu">Students</span>
                             </a>
                         </li>
-                        
+
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block instructor_active %} {% endblock %}" href="{% url 'administrator_all_instructors' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block instructor_active %} {% endblock %}"
+                                href="{% url 'administrator_all_instructors' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-user-plus"></i>
                                 </span>
@@ -670,7 +710,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block whatsapp_active %} {% endblock %}" href="{% url 'admin_whatsapp_groups' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block whatsapp_active %} {% endblock %}"
+                                href="{% url 'admin_whatsapp_groups' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-brand-whatsapp"></i>
                                 </span>
@@ -679,7 +720,8 @@
                         </li>
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link {% block alumni_active %} {% endblock %}" href="{% url 'alumni_management' %}" aria-expanded="false">
+                            <a class="sidebar-link {% block alumni_active %} {% endblock %}"
+                                href="{% url 'alumni_management' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-star"></i>
                                 </span>
@@ -726,7 +768,8 @@
 
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'administrator_notifications' %}" aria-expanded="false">
+                            <a class="sidebar-link" href="{% url 'administrator_notifications' %}"
+                                aria-expanded="false">
                                 <span>
                                     <i class="ti ti-alert-circle"></i>
                                 </span>
@@ -839,7 +882,7 @@
             {% block body %}
             {% endblock %}
 
-            <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top">↑</button>
+            <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top">â†‘</button>
 
         </div>
     </div>
@@ -911,7 +954,7 @@
             var sessionId = button.getAttribute('data-session-id')
             var modalBodyInput = uploadRecordedSessionModal.querySelector('.modal-body input#session_id')
             var modalBodyTopic = uploadRecordedSessionModal.querySelector('.modal-header span#session-topic')
-            modalBodyTopic.innerHTML = " for " + button.getAttribute('session-topic') + "🔥"
+            modalBodyTopic.innerHTML = " for " + button.getAttribute('session-topic') + "\uD83D\uDD25"
 
             modalBodyInput.value = sessionId
         })

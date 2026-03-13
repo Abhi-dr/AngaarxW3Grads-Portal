@@ -5,8 +5,75 @@
 
 {% block extra_css %}
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.min.css">
+<link rel="stylesheet" type="text/css"
+    href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.min.css">
 
+<!-- Override tom-select's bootstrap5 CSS that breaks dark theme -->
+<style>
+    /* Force body background to stay consistent in dark mode (prevents tom-select from overriding) */
+    [data-bs-theme="dark"] body {
+        background: linear-gradient(to bottom right, #000000, #4f4f4f) !important;
+        background-repeat: no-repeat !important;
+        background-attachment: fixed !important;
+    }
+
+    [data-bs-theme="dark"] {
+        --bs-body-bg: #212529;
+        --bs-body-color: #f0f0f0;
+        --bs-card-bg: #2b3035;
+        --bs-card-color: #f0f0f0;
+        --bs-border-color: #495057;
+    }
+
+    [data-bs-theme="dark"] .card {
+        background-color: var(--bs-card-bg) !important;
+        color: var(--bs-card-color);
+        border-color: var(--bs-border-color);
+    }
+
+    [data-bs-theme="dark"] .modal-content {
+        background-color: #2b3035;
+        color: #f0f0f0;
+    }
+
+    /* Tom-select selected text: white in dark, black in light */
+    [data-bs-theme="dark"] .ts-wrapper .ts-control,
+    [data-bs-theme="dark"] .ts-wrapper .ts-control input,
+    [data-bs-theme="dark"] .ts-wrapper .ts-control .item {
+        color: #f0f0f0 !important;
+        background-color: #2b3035 !important;
+        border-color: #495057 !important;
+    }
+
+    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown {
+        background-color: #2b3035 !important;
+        border-color: #495057 !important;
+    }
+
+    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown .option {
+        color: #f0f0f0 !important;
+    }
+
+    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown .active {
+        background: rgba(93, 135, 255, 0.2) !important;
+        color: #fff !important;
+    }
+
+    [data-bs-theme="dark"] .student-option__name {
+        color: #f0f0f0 !important;
+    }
+
+    [data-bs-theme="dark"] .student-option__meta {
+        color: #adb5bd !important;
+    }
+
+    /* Light theme tom-select - ensure black text */
+    [data-bs-theme="light"] .ts-wrapper .ts-control,
+    [data-bs-theme="light"] .ts-wrapper .ts-control input,
+    [data-bs-theme="light"] .ts-wrapper .ts-control .item {
+        color: #000 !important;
+    }
+</style>
 
 <style>
     .description-truncate {
@@ -155,19 +222,22 @@
                         <div class="mb-3">
                             <label for="studentId" class="form-label">Student</label>
                             <div class="student-select-wrapper">
-                            <select class="form-select" id="studentId" required>
-                                <option value="">Select Student</option>
-                            </select>
+                                <select class="form-select" id="studentId" required>
+                                    <option value="">Select Student</option>
+                                </select>
                             </div>
-                            <div class="form-text">Search by name or username, then pick the student from the dropdown list.</div>
+                            <div class="form-text">Search by name or username, then pick the student from the dropdown
+                                list.</div>
                         </div>
                         <div class="mb-3">
                             <label for="title" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="title" placeholder="Enter a title here..." required>
+                            <input type="text" class="form-control" id="title" placeholder="Enter a title here..."
+                                required>
                         </div>
                         <div class="mb-3">
                             <label for="description" class="form-label">Description</label>
-                            <textarea class="form-control" id="description" rows="3" placeholder="Any description?" required></textarea>
+                            <textarea class="form-control" id="description" rows="3" placeholder="Any description?"
+                                required></textarea>
                         </div>
                         <div class="mb-3">
                             <label for="achievementType" class="form-label">Achievement Type</label>
@@ -178,7 +248,7 @@
                                 <option class="text-black" value="Placed">Placed</option>
                                 <option class="text-black" value="Hackathon">Hackathon</option>
                                 <option class="text-black" value="Technical">Technical</option>
-                                <option class="text-black" value="Extracurricular">Extra-Curricular</option>    
+                                <option class="text-black" value="Extracurricular">Extra-Curricular</option>
                                 <option class="text-black" value="Other">Other</option>
                             </select>
                         </div>
