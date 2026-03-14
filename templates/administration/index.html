@@ -173,11 +173,6 @@ Administration | Home
                         <div class="card-body p-4">
                             <h5 class="card-title mb-3 fw-semibold">Registrations — Last 5 Days 👥</h5>
                             <canvas id="registrationsChart" height="130"></canvas>
-                            <div class="mt-3 d-flex align-items-center">
-                                <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                                <span class="fs-2 me-3">Total Active Students:</span>
-                                <span class="fw-bold fs-3" id="totalRegistrations">—</span>
-                            </div>
                             <div class="mt-2 d-flex align-items-center">
                                 <span class="round-8 bg-light-success rounded-circle me-2 d-inline-block"></span>
                                 <span class="fs-2 me-3">Active Students Today:</span>
@@ -681,16 +676,19 @@ Administration | Home
         });
 
     // Fetch registrations data from API
+    const totalRegistrationsEl = document.getElementById('totalRegistrations');
+    const activeStudentsTodayEl = document.getElementById('activeStudentsToday');
+
     fetch("{% url 'api_dashboard_registrations' %}")
         .then(r => r.json())
         .then(d => {
             updateChart(registrationsChart, d.labels, d.data);
-            document.getElementById('totalRegistrations').textContent = d.total;
-            document.getElementById('activeStudentsToday').textContent = d.active_today;
+            if (totalRegistrationsEl) totalRegistrationsEl.textContent = d.total;
+            if (activeStudentsTodayEl) activeStudentsTodayEl.textContent = d.active_today;
         })
         .catch(() => {
-            document.getElementById('totalRegistrations').textContent = 'Error';
-            document.getElementById('activeStudentsToday').textContent = 'Error';
+            if (totalRegistrationsEl) totalRegistrationsEl.textContent = 'Error';
+            if (activeStudentsTodayEl) activeStudentsTodayEl.textContent = 'Error';
         });
 
     // Fetch today's user stats
