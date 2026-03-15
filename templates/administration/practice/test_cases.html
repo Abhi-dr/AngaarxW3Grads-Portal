@@ -1,394 +1,432 @@
 {% extends "administration/base.html" %}
 {% load static %}
 
-{% block title %}
-{{ question.title }} | Test Cases
-{% endblock %}
+{% block title %}{{ question.title }} | Test Cases{% endblock %}
 
-{% block problem_active %}
-active
+{% block problem_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .skeleton-row td {
+        height: 38px;
+        background: linear-gradient(90deg, #e0e0e0 25%, #f4f4f4 50%, #e0e0e0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.2s infinite;
+        border-radius: 4px;
+    }
+
+    @keyframes shimmer {
+        0% {
+            background-position: 200% 0
+        }
+
+        100% {
+            background-position: -200% 0
+        }
+    }
+
+    [data-bs-theme="dark"] .skeleton-row td {
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.2s infinite;
+    }
+
+    pre.tc-text {
+        max-height: 80px;
+        overflow: auto;
+        font-size: 0.8rem;
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+</style>
 {% endblock %}
 
 {% block body %}
-
 <div class="container-fluid">
 
-    <nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider:'>';">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item pe-auto"><a href="{% url 'administrator_problems' %}">Question Set</a></li>
-            <li class="breadcrumb-item pe-auto">{{ question.title }}</li>
-
-            </li>
-            <li class="breadcrumb-item active" aria-current="page">Test Cases</li>
+            <li class="breadcrumb-item"><a href="{% url 'administrator_problems' %}">Question Set</a></li>
+            <li class="breadcrumb-item">{{ question.title }}</li>
+            <li class="breadcrumb-item active">Test Cases</li>
         </ol>
     </nav>
 
-    <div class="card">
-
-
-        <div class="card-body position-relative">
-            <h3 class="heading">
-                <span class="fw-semibold">Test Cases for {{ question.title }}</span>
-                <span class="fs-4"> | 🔥Total: {{ test_cases.count }}🔥</span>
-            </h3>
-           
-        </div>
-
-
-        <div class="row mx-2">
-
-            <div class="col-md-4 mb-3">
-                <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal"
-                    data-bs-target="#addTestCaseModal">
-                    Add Test Case
-                </button>
+    <!-- Header Card -->
+    <div class="card mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3 class="heading mb-0">
+                    <span class="fw-semibold">Test Cases</span>
+                    <span class="fs-5 text-muted"> | {{ question.title }}</span>
+                </h3>
+                <span class="text-muted small">Total: <strong id="tcCount">—</strong></span>
             </div>
-
-            <div class="col-md-4 mb-3">
-                <button type="button" class="btn btn-outline-warning w-100" data-bs-toggle="modal"
-                    data-bs-target="#addTestCaseUsingJsonModal">
-                    Add Test Case using JSON
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tcModal" onclick="openAddTC()">
+                    <i class="ti ti-plus me-1"></i>Add Test Case
                 </button>
-            </div>
-
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'driver_code' question.slug %}" class="btn btn-outline-warning w-100">
-                    Driver Code
+                <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#jsonModal">
+                    <i class="ti ti-json me-1"></i>Add via JSON
+                </button>
+                <a href="{% url 'driver_code' question.slug %}" class="btn btn-outline-secondary">
+                    <i class="ti ti-code me-1"></i>Driver Code
                 </a>
             </div>
-
         </div>
-
     </div>
 
     {% for message in messages %}
-
-    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-        <strong>{{ message.tag }}</strong> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert {{ message.tags }} alert-dismissible fade show">
+        {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-
     {% endfor %}
-    <!-- ================================= SESSIONS TABLE ================================== -->
 
+    <!-- Test Cases Table -->
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Test Cases 🔥
-                {% if query %}
-                <span class="fs-6"> | Search Results for "{{ query }}"</span>
-                {% endif %}
-            </h5>
+            <h5 class="card-title fw-semibold mb-4">Test Cases 🔥</h5>
             <div class="table-responsive">
-                <table class="table text-nowrap mb-0 align-middle">
-                    <thead class=" fs-4">
-
+                <table class="table mb-0 align-middle">
+                    <thead class="fs-6">
                         <tr>
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    #
-                                </h6>
+                            <th class="border-bottom-0" style="width:40px">
+                                <h6 class="fw-semibold mb-0">#</h6>
                             </th>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Input
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Input</h6>
                             </th>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Expected
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Expected Output</h6>
                             </th>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Explaination
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Explanation</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Sample
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Sample</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#1
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Actions</h6>
                             </th>
-
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#2
-                                </h6>
-                            </th>
-
-
-
                         </tr>
                     </thead>
-
-                    <tbody>
-
-                        {% for test_case in test_cases %}
-
-                        <tr>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
-                            </td>
-                            <td class="border-bottom-0">
-
-                                {% if test_case.input_data %}
-
-                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ test_case.input_data }}">{{ test_case.input_data|linebreaksbr|truncatechars:10 }}</h6>
-
-                                {% else %}
-
-                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ question.title }}">No Input Data</h6>
-
-                                {% endif %}
-
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    <!-- <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap"
-                                        data-bs-toggle="modal" data-bs-target="#questionModal" style="width: 50%;"
-                                        data-title="{{ test_case.input_data }}"
-                                        data-description="{{ test_case.expected_output|linebreaksbr }}"
-                                        title="{{ test_case.input_data }}">View</button> -->
-                                    {{ test_case.expected_output|linebreaksbr }}
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-
-                                    {% if test_case.explaination %}
-                                    {{ test_case.explaination|linebreaksbr|truncatechars:10 }}
-                                    {% else %}
-                                    -
-                                    {% endif %}
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    {% if test_case.is_sample %}
-                                    <span class="badge bg-success">Yes</span>
-                                    {% else %}
-                                    <span class="badge bg-danger">No</span>
-                                    {% endif %}
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'edit_test_case' test_case.id %}"
-                                        class="btn btn-outline-secondary float-end">Modify</a>
-                                </div>
-                            </td>
-
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'delete_test_case' test_case.id %}" class="btn btn-danger float-end"
-                                        onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
-
-                                </div>
-                            </td>
-
+                    <tbody id="tcTableBody">
+                        {% for i in "12345" %}
+                        <tr class="skeleton-row">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
-
                         {% endfor %}
-
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
-
-
-    {% autoescape off %}
-    <!-- Add Test Case Modal -->
-    <div class="modal fade" id="addTestCaseModal" tabindex="-1" aria-labelledby="addTestCaseModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addTestCaseModalLabel">Add Test Case</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="addTestCaseForm" method="POST">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="inputData" class="form-label">Input Data</label>
-                            <textarea class="form-control" id="inputData" placeholder="Enter the input here..."
-                                name="input_data" rows="3"></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expectedOutput" class="form-label">Expected Output</label>
-                            <div class="star">*</div>
-                            <textarea class="form-control" id="expectedOutput"
-                                placeholder="Enter the expected output here..." name="expected_output" rows="3"
-                                required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="expectedOutput" class="form-label">Explaination</label>
-                            <textarea class="form-control" id="expectedOutput"
-                                placeholder="Enter the explaination here..." name="explaination" rows="3"></textarea>
-                        </div>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="isSample" name="is_sample">
-                            <label class="form-check-label" for="isSample">Is Sample Test Case?</label>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Add Test Case</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {% endautoescape %}
-
-
-    {% autoescape off %}
-    <!-- Add Test Case Modal  using JSON-->
-    <div class="modal fade" id="addTestCaseUsingJsonModal" tabindex="-1" aria-labelledby="addTestCaseUsingJsonModal"
-        aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addTestCaseModalLabel">Add Test Case</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form id="addTestCaseUsingJsonForm" method="POST">
-                    {% csrf_token %}
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="inputData" class="form-label">Input Data</label>
-                            <div class="star">*</div>
-                            <textarea class="form-control" id="inputData" placeholder="Enter the Input JSON here..."
-                                name="json_data" rows="15" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Add Test Cases</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    {% endautoescape %}
-
 
 </div>
 
+<!-- ============ ADD / EDIT TEST CASE MODAL ============ -->
+<div class="modal fade" id="tcModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tcModalLabel">Add Test Case</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="tcId" value="">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Input Data</label>
+                        <textarea class="form-control font-monospace" id="tcInput" rows="5"
+                            placeholder="Enter test input..."></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Expected Output <span class="text-danger">*</span></label>
+                        <textarea class="form-control font-monospace" id="tcOutput" rows="5"
+                            placeholder="Enter expected output..." required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Explanation</label>
+                        <textarea class="form-control" id="tcExplanation" rows="2"
+                            placeholder="Optional: explain this test case..."></textarea>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="tcIsSample">
+                            <label class="form-check-label" for="tcIsSample">Is Sample Test Case (visible to
+                                students)</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="tcFormError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveTcBtn" onclick="saveTC()">
+                    <span id="tcBtnText">Save Test Case</span>
+                    <span id="tcBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+                <button type="button" class="btn btn-outline-primary" id="saveAndAddAnotherBtn" onclick="saveTC(true)">
+                    Save &amp; Add Another
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ ADD VIA JSON MODAL ============ -->
+<div class="modal fade" id="jsonModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Test Cases via JSON</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Format: <code>{"1": {"Input": "...", "Output": "..."}, "2": {...}}</code>
+                </p>
+                <textarea class="form-control font-monospace" id="jsonInput" rows="14"
+                    placeholder='{"1": {"Input": "3\n1 2 3", "Output": "6"}}'></textarea>
+                <div id="jsonError" class="alert alert-danger mt-3 d-none"></div>
+                <div id="jsonSuccess" class="alert alert-success mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-warning" id="addJsonBtn" onclick="addViaJson()">
+                    <span id="jsonBtnText">Add Test Cases</span>
+                    <span id="jsonBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal fade" id="deleteTcModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger">🗑️ Delete Test Case</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">Are you sure you want to delete test case <strong id="deleteTcIdLabel">#</strong>?
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteTcBtn" onclick="confirmDeleteTC()">Yes,
+                    Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block myjs %}
 <script>
-    document.getElementById('addTestCaseForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-    
-        const form = event.target;
-        const formData = new FormData(form);
-        const questionSlug = "{{ question.slug }}";
-    
-        fetch("{% url 'add_test_case' question.slug %}", {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    // Show success message (you could use a toast notification here instead of alert)
-                    alert(data.message + " The modal will remain open for adding more test cases.");
-    
-                    // Update the test cases table dynamically
-                    const newRow = `
-                    <tr>
-                        <td class="border-bottom-0"> <h6 class="fw-semibold mb-0">${data.test_case.id}</h6> </td>
-                        <td>${data.test_case.input_data}</td>
-                        <td>${data.test_case.expected_output}</td>
-                        <td>${data.test_case.is_sample ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>'}</td>
-                        <td>
-                            <a href="/edit-test-case/${data.test_case.id}/" class="btn btn-outline-secondary">Modify</a>
-                        </td>
-                        <td>
-                            <a href="/delete-test-case/${data.test_case.id}/" class="btn btn-danger">Delete</a>
-                        </td>
-                    </tr>
-                `;
-                    document.querySelector('table tbody').insertAdjacentHTML('beforeend', newRow);
-    
-                    // Reset the form fields for next entry
-                    form.reset();
-                    
-                    // Optional: Focus on the first input field for better user experience
-                    const firstInput = form.querySelector('input, textarea');
-                    if (firstInput) firstInput.focus();
-                    
-                    // Note: We're NOT closing the modal here to allow adding multiple test cases
-                } else {
-                    alert(data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+    const CSRF = '{{ csrf_token }}';
+    const Q_SLUG = '{{ question.slug }}';
+    const TC_API = `/administration/api/v1/test-cases/`;
+    let tcCache = [];
+    let pendingDelTc = null;
+
+    // ==================== LOAD TEST CASES ====================
+    async function loadTC() {
+        try {
+            const res = await fetch(`${TC_API}?question_slug=${Q_SLUG}`, { headers: { 'X-CSRFToken': CSRF } });
+            const data = await res.json();
+            tcCache = data.results || data;
+            document.getElementById('tcCount').textContent = tcCache.length;
+            renderTC(tcCache);
+        } catch (e) {
+            document.getElementById('tcTableBody').innerHTML =
+                `<tr><td colspan="6" class="text-danger">Failed to load test cases.</td></tr>`;
+        }
+    }
+
+    function esc(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function renderTC(tcs) {
+        const tbody = document.getElementById('tcTableBody');
+        if (!tcs.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No test cases yet. Add your first one!</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = tcs.map((tc, i) => `
+    <tr id="tc-row-${tc.id}">
+      <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${i + 1}</h6></td>
+      <td class="border-bottom-0"><pre class="tc-text">${esc(tc.input_data) || '<span class="text-muted">—</span>'}</pre></td>
+      <td class="border-bottom-0"><pre class="tc-text">${esc(tc.expected_output)}</pre></td>
+      <td class="border-bottom-0"><small>${esc(tc.explaination) || '—'}</small></td>
+      <td class="border-bottom-0">
+        <span class="badge ${tc.is_sample ? 'bg-success' : 'bg-secondary'}">${tc.is_sample ? 'Yes' : 'No'}</span>
+      </td>
+      <td class="border-bottom-0">
+        <div class="d-flex gap-1">
+          <button class="btn btn-sm btn-outline-secondary" onclick="openEditTC(${tc.id})">Edit</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="openDeleteTC(${tc.id})">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+    }
+
+    // ==================== ADD MODAL ====================
+    function openAddTC() {
+        document.getElementById('tcModalLabel').textContent = 'Add Test Case';
+        document.getElementById('tcBtnText').textContent = 'Save Test Case';
+        document.getElementById('tcId').value = '';
+        document.getElementById('tcInput').value = '';
+        document.getElementById('tcOutput').value = '';
+        document.getElementById('tcExplanation').value = '';
+        document.getElementById('tcIsSample').checked = false;
+        document.getElementById('tcFormError').classList.add('d-none');
+    }
+
+    // ==================== EDIT MODAL ====================
+    function openEditTC(id) {
+        const tc = tcCache.find(t => t.id === id);
+        if (!tc) return;
+        document.getElementById('tcModalLabel').textContent = `Edit Test Case #${id}`;
+        document.getElementById('tcBtnText').textContent = 'Update';
+        document.getElementById('tcId').value = tc.id;
+        document.getElementById('tcInput').value = tc.input_data || '';
+        document.getElementById('tcOutput').value = tc.expected_output;
+        document.getElementById('tcExplanation').value = tc.explaination || '';
+        document.getElementById('tcIsSample').checked = tc.is_sample;
+        document.getElementById('tcFormError').classList.add('d-none');
+        new bootstrap.Modal(document.getElementById('tcModal')).show();
+    }
+
+    // ==================== SAVE TEST CASE ====================
+    async function saveTC(keepOpen = false) {
+        const id = document.getElementById('tcId').value;
+        const isEdit = !!id;
+        const output = document.getElementById('tcOutput').value.trim();
+        const errEl = document.getElementById('tcFormError');
+        errEl.classList.add('d-none');
+
+        if (!output) { errEl.textContent = 'Expected output is required.'; errEl.classList.remove('d-none'); return; }
+
+        const payload = {
+            expected_output: output,
+            input_data: document.getElementById('tcInput').value,
+            explaination: document.getElementById('tcExplanation').value,
+            is_sample: document.getElementById('tcIsSample').checked,
+            question_slug: Q_SLUG,
+        };
+
+        const btn = document.getElementById('saveTcBtn');
+        btn.disabled = true;
+        document.getElementById('tcBtnSpinner').classList.remove('d-none');
+
+        try {
+            const url = isEdit ? `${TC_API}${id}/` : TC_API;
+            const method = isEdit ? 'PATCH' : 'POST';
+            const res = await fetch(url, {
+                method, headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
             });
-    });
-    
-    // Add a separate close button handler if you have a specific close button in your modal
-    document.getElementById('closeModalBtn')?.addEventListener('click', function() {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addTestCaseModal'));
-        modal.hide();
-    });
-
-    document.getElementById('addTestCaseUsingJsonForm').addEventListener('submit', function (event) {
-        event.preventDefault();
-
-        const form = event.target;
-        const formData = new FormData(form);
-        const questionSlug = "{{ question.slug }}";
-        const modal = bootstrap.Modal.getInstance(document.getElementById('addTestCaseUsingJsonModal'));
-
-        fetch("{% url 'add_test_cases_using_json_case' question.slug %}", {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: formData
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.status === 'success') {
-                    alert(data.message);
-                    // Reset the form
-                    form.reset();
-                    modal.hide()
-                    window.location.reload();
+            const data = await res.json();
+            if (data.success || res.ok) {
+                if (keepOpen) {
+                    // Reset for next entry but keep modal open
+                    document.getElementById('tcInput').value = '';
+                    document.getElementById('tcOutput').value = '';
+                    document.getElementById('tcExplanation').value = '';
+                    document.getElementById('tcIsSample').checked = false;
                 } else {
-                    modal.hide()
-                    alert(data.message);
+                    bootstrap.Modal.getInstance(document.getElementById('tcModal')).hide();
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred. Please try again.');
+                await loadTC();
+            } else {
+                const msgs = data.errors ? Object.values(data.errors).flat().join(' ') : (data.error || 'Save failed.');
+                errEl.textContent = msgs; errEl.classList.remove('d-none');
+            }
+        } catch (e) {
+            errEl.textContent = 'Network error.'; errEl.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            document.getElementById('tcBtnSpinner').classList.add('d-none');
+        }
+    }
+
+    // ==================== JSON BULK ADD ====================
+    async function addViaJson() {
+        const jsonText = document.getElementById('jsonInput').value.trim();
+        const errEl = document.getElementById('jsonError');
+        const succEl = document.getElementById('jsonSuccess');
+        errEl.classList.add('d-none'); succEl.classList.add('d-none');
+
+        let parsed;
+        try { parsed = JSON.parse(jsonText); } catch (e) {
+            errEl.textContent = `Invalid JSON: ${e.message}`; errEl.classList.remove('d-none'); return;
+        }
+
+        const btn = document.getElementById('addJsonBtn');
+        btn.disabled = true;
+        document.getElementById('jsonBtnSpinner').classList.remove('d-none');
+
+        try {
+            const res = await fetch("{% url 'add_test_cases_using_json_case' question.slug %}", {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': CSRF },
+                body: (() => { const fd = new FormData(); fd.append('json_data', jsonText); return fd; })(),
             });
-    });
+            const data = await res.json();
+            if (data.status === 'success') {
+                succEl.textContent = data.message; succEl.classList.remove('d-none');
+                document.getElementById('jsonInput').value = '';
+                await loadTC();
+                setTimeout(() => bootstrap.Modal.getInstance(document.getElementById('jsonModal'))?.hide(), 1500);
+            } else {
+                errEl.textContent = data.message; errEl.classList.remove('d-none');
+            }
+        } catch (e) {
+            errEl.textContent = 'Network error.'; errEl.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            document.getElementById('jsonBtnSpinner').classList.add('d-none');
+        }
+    }
+
+    // ==================== DELETE ====================
+    function openDeleteTC(id) {
+        pendingDelTc = id;
+        document.getElementById('deleteTcIdLabel').textContent = `#${id}`;
+        new bootstrap.Modal(document.getElementById('deleteTcModal')).show();
+    }
+
+    async function confirmDeleteTC() {
+        if (!pendingDelTc) return;
+        const btn = document.getElementById('confirmDeleteTcBtn');
+        btn.disabled = true; btn.textContent = 'Deleting…';
+        try {
+            const res = await fetch(`${TC_API}${pendingDelTc}/`, {
+                method: 'DELETE', headers: { 'X-CSRFToken': CSRF }
+            });
+            if (res.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('deleteTcModal')).hide();
+                tcCache = tcCache.filter(t => t.id !== pendingDelTc);
+                renderTC(tcCache);
+                document.getElementById('tcCount').textContent = tcCache.length;
+                pendingDelTc = null;
+            } else {
+                alert('Delete failed.');
+            }
+        } catch (e) { alert('Delete failed.'); }
+        finally { btn.disabled = false; btn.textContent = 'Yes, Delete'; }
+    }
+
+    loadTC();
 </script>
-
-
-
 {% endblock %}
