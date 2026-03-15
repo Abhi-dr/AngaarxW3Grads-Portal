@@ -93,11 +93,24 @@ class CourseAdminViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['get'], url_path='sheets')
     def sheets(self, request, slug=None):
-        """GET /api/v1/courses/<slug>/sheets/ — list all sheets for a course"""
+        """GET /api/v1/courses/<slug>/sheets/ — list sheets in custom order"""
         course = self.get_object()
-        course_sheets = CourseSheet.objects.filter(course=course).order_by('id')
+        course_sheets = course.get_ordered_sheets()
         serializer = CourseSheetAdminSerializer(course_sheets, many=True, context={'request': request})
         return Response({'success': True, 'sheets': serializer.data})
+
+    @action(detail=True, methods=['patch'], url_path='reorder-sheets')
+    def reorder_sheets(self, request, slug=None):
+        """PATCH /api/v1/courses/<slug>/reorder-sheets/ — save custom sheet order.
+        Body: {"order": [sheet_id, sheet_id, ...]}
+        """
+        course = self.get_object()
+        order = request.data.get('order', [])
+        if not isinstance(order, list):
+            return Response({'success': False, 'error': 'order must be a list of sheet IDs.'}, status=400)
+        course.sheet_order = {str(sheet_id): idx for idx, sheet_id in enumerate(order)}
+        course.save(update_fields=['sheet_order'])
+        return Response({'success': True, 'message': 'Sheet order saved successfully.'})
 
     @action(detail=True, methods=['get'], url_path='instructors')
     def instructors(self, request, slug=None):

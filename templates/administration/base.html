@@ -581,7 +581,7 @@
                         {% endcomment %}
 
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="{% url 'administrator_jovacs' %}" {% block jovac_active %}{% endblock %} aria-expanded="false">
+                            <a class="sidebar-link" href="{% url 'administrator_jovacs' %}" {% block jovac_active %} {% endblock %} aria-expanded="false">
                                 <span>
                                     <i class="ti ti-copy"></i>
                                 </span>
@@ -659,6 +659,16 @@
                                 </span>
                                 <span class="hide-menu">FLAMES</span>
 
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item">
+                            <a class="sidebar-link {% block events_active %}{% endblock %}"
+                                href="{% url 'administrator_events' %}" aria-expanded="false">
+                                <span>
+                                    <i class="ti ti-certificate"></i>
+                                </span>
+                                <span class="hide-menu">Certificates</span>
                             </a>
                         </li>
 

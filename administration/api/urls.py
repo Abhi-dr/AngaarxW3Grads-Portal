@@ -10,6 +10,11 @@ from administration.api.views.jovac_api import (
     TestCaseAdminViewSet,
     DriverCodeAdminViewSet,
 )
+from administration.api.views.event_api import (
+    EventAdminViewSet,
+    CertificateTemplateAdminViewSet,
+    CertificateAdminViewSet,
+)
 
 router = DefaultRouter()
 router.register(r'batches', BatchAdminViewSet, basename='admin-batch')
@@ -19,6 +24,9 @@ router.register(r'course-sheets', CourseSheetAdminViewSet, basename='admin-cours
 router.register(r'assignments', AssignmentAdminViewSet, basename='admin-assignment')
 router.register(r'test-cases', TestCaseAdminViewSet, basename='admin-test-case')
 router.register(r'driver-codes', DriverCodeAdminViewSet, basename='admin-driver-code')
+router.register(r'events', EventAdminViewSet, basename='admin-event')
+router.register(r'certificate-templates', CertificateTemplateAdminViewSet, basename='admin-cert-template')
+router.register(r'certificates', CertificateAdminViewSet, basename='admin-certificate')
 
 urlpatterns = [
     path('', include(router.urls)),

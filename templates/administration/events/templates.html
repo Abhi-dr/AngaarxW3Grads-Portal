@@ -1,0 +1,333 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}Certificate Templates{% endblock %}
+{% block events_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .template-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 16px;
+        border: 1px solid var(--cp-border, #e2e8f0);
+        background: var(--cp-bg-card, #ffffff);
+    }
+
+    .template-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+        border-color: var(--cp-accent-light, #c7d2fe);
+    }
+
+    .html-preview-container {
+        height: 220px; 
+        overflow: hidden; 
+        background: #f8f9fa;
+        position: relative;
+        border-radius: 8px;
+    }
+
+    .html-preview-iframe {
+        width: 400%; 
+        height: 400%; /* 400% of 220px is 880px, perfect for certs */
+        transform: scale(0.25); 
+        transform-origin: top left; 
+        border: none; 
+        pointer-events: none; 
+        overflow: hidden;
+    }
+
+    .preview-fade-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 40px;
+        background: linear-gradient(to bottom, transparent, #f8f9fa);
+        z-index: 10;
+        pointer-events: none;
+    }
+
+    [data-bs-theme="dark"] .html-preview-container {
+        background: #1e293b;
+    }
+
+    [data-bs-theme="dark"] .preview-fade-overlay {
+        background: linear-gradient(to bottom, transparent, #1e293b);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+
+    <div
+        class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 bg-body p-4 rounded-4 shadow-sm border border-light text-body">
+        <div>
+            <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                <div class="bg-warning bg-opacity-10 text-warning p-2 rounded-circle"><i
+                        class="ti ti-template fs-4"></i></div> Certificate Templates
+            </h3>
+            <p class="text-muted mb-0">Manage reusable HTML templates for event certificates.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'administrator_events' %}"
+                class="btn btn-outline-secondary rounded-pill px-4 fw-semibold shadow-sm">
+                <i class="ti ti-arrow-left me-1"></i>Back
+            </a>
+            <button class="btn btn-primary rounded-pill px-4 shadow fw-semibold" onclick="openAddModal()">
+                <i class="ti ti-plus me-1"></i>New Template
+            </button>
+        </div>
+    </div>
+
+    <div id="alertBox" class="alert d-none mb-4 border-0 shadow-sm rounded-3"></div>
+
+    <div id="templatesContainer" class="row g-4">
+        <div class="col-12 text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="templateModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 bg-body text-body">
+                <div class="modal-header border-0 bg-body-tertiary p-4 pb-3">
+                    <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="templateModalLabel">
+                        <i class="ti ti-code text-primary fs-4"></i> New Template
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div id="templateFormError" class="alert alert-danger d-none border-0 shadow-sm rounded-3 small">
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-5">
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold">Template Name <span
+                                        class="text-danger">*</span></label>
+                                <input type="text" class="form-control bg-body-secondary border-0 text-body" id="tName"
+                                    placeholder="e.g. Standard Workshop Cert">
+                            </div>
+
+                            <div class="alert alert-info border-0 shadow-sm rounded-3">
+                                <h6 class="fw-bold"><i class="ti ti-info-circle me-1"></i> Variables You Can Use</h6>
+                                <p class="small mb-2">Use these exact placeholders in your HTML:</p>
+                                <ul class="mb-0 small font-monospace">
+                                    <li>{{ student_name }}</li>
+                                    <li>{{ event_name }}</li>
+                                    <li>{{ issued_date }}</li>
+                                    <li>{{ certificate_id }}</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-md-7">
+                            <label class="form-label fw-semibold">HTML Content <span
+                                    class="text-danger">*</span></label>
+                            <textarea class="form-control bg-dark text-light font-monospace border-0" id="tHtml"
+                                rows="18" placeholder="Paste your certificate HTML here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary fw-bold px-4 shadow-sm" id="saveTemplateBtn"
+                        onclick="saveTemplate()">
+                        <span id="saveTemplateBtnText">Save Template</span>
+                        <span id="saveTemplateSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 text-center bg-body text-body">
+                <div class="modal-body p-5">
+                    <div class="fs-1 text-danger mb-3"><i class="ti ti-alert-circle"></i></div>
+                    <h4 class="fw-bold mb-3">Delete Template?</h4>
+                    <p class="mb-1 fs-5" id="deleteTemplateName"></p>
+                    <p class="text-muted small">Are you sure? Existing events using this template will automatically
+                        fallback to the default styling.</p>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0 justify-content-center bg-body-tertiary">
+                    <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger px-4 fw-bold shadow-sm" id="confirmDeleteBtn"
+                        onclick="confirmDelete()">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+    const CSRF = '{{ csrf_token }}';
+    const BASE = '/administration/api/v1';
+    let editingId = null, deletingId = null;
+
+    async function loadTemplates() {
+        try {
+            const res = await fetch(`${BASE}/certificate-templates/`);
+            const data = await res.json();
+            const container = document.getElementById('templatesContainer');
+            container.innerHTML = '';
+
+            if (!data.results || data.results.length === 0) {
+                container.innerHTML = `
+          <div class="col-12 text-center py-5">
+            <div class="bg-body-tertiary rounded-circle d-inline-flex p-4 mb-3 text-muted"><i class="ti ti-file-code display-4"></i></div>
+            <h4 class="fw-bold">No templates found</h4>
+            <p class="text-muted">Create custom HTML layouts for your certificates.</p>
+            <button class="btn btn-primary rounded-pill px-4 shadow-sm mt-2" onclick="openAddModal()">Create First Template</button>
+          </div>`;
+                return;
+            }
+
+            data.results.forEach(t => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-xl-4';
+
+                const templateHTML = t.html_template || '';
+                
+                // Escape & and " to safely embed HTML inside an iframe srcdoc attribute
+                const safeSrcDoc = templateHTML
+                    .replace(/&/g, '&amp;')
+                    .replace(/"/g, '&quot;');
+
+                col.innerHTML = `
+          <div class="card template-card h-100 p-1">
+            <div class="card-body d-flex flex-column p-4">
+              <div class="d-flex align-items-start justify-content-between mb-3">
+                <h5 class="fw-bold mb-0 text-body">${t.name}</h5>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-secondary rounded-circle p-2 text-muted" data-bs-toggle="dropdown" style="width:32px;height:32px;">⋮</button>
+                  <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                    <li><button class="dropdown-item py-2" onclick="openEditModal(${t.id})"><i class="ti ti-pencil me-2 text-primary"></i> Edit</button></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><button class="dropdown-item py-2 text-danger" onclick="openDeleteModal(${t.id},'${t.name.replace(/'/g, "\\'")}')"><i class="ti ti-trash me-2 text-danger"></i> Delete</button></li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div class="html-preview-container border">
+                <iframe class="html-preview-iframe" srcdoc="${safeSrcDoc}" scrolling="no" tabindex="-1"></iframe>
+                <div class="preview-fade-overlay"></div>
+              </div>
+
+            </div>
+          </div>`;
+                container.appendChild(col);
+            });
+        } catch (e) {
+            document.getElementById('templatesContainer').innerHTML = '<div class="col-12 text-danger text-center py-4">Error loading templates.</div>';
+        }
+    }
+
+    function openAddModal() {
+        editingId = null;
+        document.getElementById('templateModalLabel').innerHTML = '<i class="ti ti-code-plus text-primary fs-4"></i> New Template';
+        document.getElementById('saveTemplateBtnText').textContent = 'Save Template';
+        document.getElementById('tName').value = '';
+        document.getElementById('tHtml').value = '';
+        document.getElementById('templateFormError').classList.add('d-none');
+        new bootstrap.Modal(document.getElementById('templateModal')).show();
+    }
+
+    async function openEditModal(id) {
+        editingId = id;
+        const res = await fetch(`${BASE}/certificate-templates/${id}/`);
+        const t = await res.json();
+        document.getElementById('templateModalLabel').innerHTML = '<i class="ti ti-pencil text-primary fs-4"></i> Edit Template';
+        document.getElementById('saveTemplateBtnText').textContent = 'Save Changes';
+        document.getElementById('tName').value = t.name || '';
+        document.getElementById('tHtml').value = t.html_template || '';
+        document.getElementById('templateFormError').classList.add('d-none');
+        new bootstrap.Modal(document.getElementById('templateModal')).show();
+    }
+
+    async function saveTemplate() {
+        const body = {
+            name: document.getElementById('tName').value.trim(),
+            html_template: document.getElementById('tHtml').value.trim(),
+        };
+        const errEl = document.getElementById('templateFormError');
+        errEl.classList.add('d-none');
+
+        const btn = document.getElementById('saveTemplateBtn');
+        btn.disabled = true;
+        document.getElementById('saveTemplateSpinner').classList.remove('d-none');
+
+        const url = editingId ? `${BASE}/certificate-templates/${editingId}/` : `${BASE}/certificate-templates/`;
+        const method = editingId ? 'PATCH' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify(body),
+            });
+            const data = await res.json();
+            if (data.success || res.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('templateModal')).hide();
+
+                const alertBox = document.getElementById('alertBox');
+                alertBox.className = 'alert alert-success border-0 shadow-sm rounded-3 mb-4';
+                alertBox.innerHTML = `<i class="ti ti-check me-2"></i> Template successfully ${editingId ? 'updated' : 'created'}!`;
+                alertBox.classList.remove('d-none');
+                setTimeout(() => alertBox.classList.add('d-none'), 3000);
+
+                loadTemplates();
+            } else {
+                const msgs = data.errors ? Object.entries(data.errors).map(([k, v]) => `${k}: ${v}`).join(', ') : data.error || 'Failed';
+                errEl.innerHTML = `<i class="ti ti-alert-triangle me-1"></i> ${msgs}`;
+                errEl.classList.remove('d-none');
+            }
+        } catch (e) {
+            errEl.innerHTML = `<i class="ti ti-wifi-off me-1"></i> Network error.`;
+            errEl.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            document.getElementById('saveTemplateSpinner').classList.add('d-none');
+        }
+    }
+
+    function openDeleteModal(id, name) {
+        deletingId = id;
+        document.getElementById('deleteTemplateName').textContent = name;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    async function confirmDelete() {
+        const btn = document.getElementById('confirmDeleteBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Deleting...';
+
+        try {
+            await fetch(`${BASE}/certificate-templates/${deletingId}/`, {
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': CSRF },
+            });
+            bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+
+            const alertBox = document.getElementById('alertBox');
+            alertBox.className = 'alert alert-info border-0 shadow-sm rounded-3 mb-4';
+            alertBox.innerHTML = `<i class="ti ti-trash me-2"></i> Template has been deleted.`;
+            alertBox.classList.remove('d-none');
+            setTimeout(() => alertBox.classList.add('d-none'), 3000);
+
+            loadTemplates();
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = 'Yes, Delete';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadTemplates);
+</script>
+{% endblock %}
