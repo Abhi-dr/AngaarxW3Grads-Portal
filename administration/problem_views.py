@@ -6,11 +6,11 @@ from django.db.models import Q
 from accounts.models import CustomUser
 from django.conf import settings
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
 import requests, time, re, json, base64
 from django.db import transaction
 from django.utils.safestring import mark_safe
-
-from django.views.decorators.csrf import csrf_exempt
 
 from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode, RecommendedQuestions, MCQQuestion, QuestionImage
 from django.views.decorators.cache import cache_control
@@ -504,8 +504,13 @@ def edit_test_case(request, id):
         test_case.is_sample = is_sample
 
         test_case.save()
-        
-        
+
+        # Clear relevant Django cache so updates take effect immediately
+        try:
+            cache.clear()
+        except Exception:
+            pass
+
         messages.success(request, 'Test case updated successfully')
         return redirect('test_cases', slug=test_case.question.slug)
     
@@ -559,14 +564,19 @@ def driver_code(request, slug):
         question.show_complete_driver_code = show_complete_code
         question.save()
 
-
         # Check if a driver code already exists for the given language
         existing_code = DriverCode.objects.filter(question=question, language_id=language_id).first()
         if existing_code:
             existing_code.visible_driver_code = visible_driver_code
             existing_code.complete_driver_code = complete_driver_code
-
             existing_code.save()
+
+            # Clear relevant Django cache so updates take effect immediately
+            try:
+                cache.clear()
+            except Exception:
+                pass
+
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} updated successfully."})
         else:
             driver_code = DriverCode(
@@ -576,6 +586,13 @@ def driver_code(request, slug):
                 complete_driver_code=complete_driver_code,
             )
             driver_code.save()
+
+            # Clear relevant Django cache so updates take effect immediately
+            try:
+                cache.clear()
+            except Exception:
+                pass
+
             return JsonResponse({"success": True, "message": f"Driver code for {question.title} added successfully."})
 
 
