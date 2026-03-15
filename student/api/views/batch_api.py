@@ -1,14 +1,29 @@
+from datetime import datetime
+from django.utils.timezone import now
+from django.db.models import Case, When, Value, CharField, Q
+from django.shortcuts import get_object_or_404
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
-from django.db.models import Case, When, Value, CharField
 
+# Make sure these import paths match your project structure
 from student.api.permissions import IsStudent
-from practice.models import Batch, EnrollmentRequest, Sheet
 from student.models import Notification
 from student.api.serializers.batch_serializers import BatchListSerializer
-from student.api.serializers.sheet_serializers import SheetListSerializer
+from student.api.serializers.sheet_serializers import SheetListSerializer, PODSerializer
+
+from practice.models import (
+    Batch, 
+    EnrollmentRequest, 
+    Sheet, 
+    Question, 
+    MCQQuestion, 
+    POD, 
+    Submission, 
+    MCQSubmission
+)
+
 
 class BatchListView(APIView):
     """
@@ -54,6 +69,7 @@ class BatchListView(APIView):
 class BatchDetailView(APIView):
     """
     Returns detailed information about a single batch, including its sheets and progress.
+    Optimized to eliminate N+1 queries.
     """
     permission_classes = [IsAuthenticated, IsStudent]
 
@@ -65,33 +81,70 @@ class BatchDetailView(APIView):
         if not EnrollmentRequest.objects.filter(student=student, batch=batch, status='Accepted').exists():
             return Response({"error": "Not enrolled in this batch."}, status=403)
             
-        sheets = Sheet.objects.filter(batches=batch, is_approved=True).order_by('id')
+        # 1. Fetch only ACTIVE sheets (Approved, Enabled, and within time limits)
+        active_conditions = Q(batches=batch, is_approved=True, is_enabled=True)
+        active_conditions &= (Q(start_time__isnull=True) | Q(start_time__lte=now()))
+        active_conditions &= (Q(end_time__isnull=True) | Q(end_time__gte=now()))
         
-        # Calculate raw progress
-        total_questions = 0
-        solved_questions = 0
-        for sheet in sheets:
-            total_questions += sheet.get_total_questions()
-            solved_questions += sheet.get_solved_questions(student)
+        active_sheets = Sheet.objects.filter(active_conditions).order_by('id')
+        
+        # 2. Calculate Total Questions globally across all active sheets
+        total_coding = Question.objects.filter(
+            sheets__in=active_sheets, 
+            is_approved=True
+        ).distinct().count()
+        
+        total_mcq = MCQQuestion.objects.filter(
+            sheet__in=active_sheets, 
+            is_approved=True
+        ).distinct().count()
+        
+        total_questions = total_coding + total_mcq
+        
+        # 3. Calculate Solved Questions globally
+        solved_coding = Submission.objects.filter(
+            user=student,
+            status='Accepted',
+            question__sheets__in=active_sheets,
+            question__is_approved=True
+        ).values('question').distinct().count()
+        
+        solved_mcq = MCQSubmission.objects.filter(
+            student=student,
+            is_correct=True,
+            question__sheet__in=active_sheets,
+            question__is_approved=True
+        ).values('question').distinct().count()
             
+        solved_questions = solved_coding + solved_mcq
+        
+        # 4. Final Math
         progress = (solved_questions / total_questions * 100) if total_questions > 0 else 0
         questions_left = total_questions - solved_questions
         
-        sheet_data = SheetListSerializer(sheets, many=True).data
+        # 5. Serialize Sheets
+        sheet_data = SheetListSerializer(active_sheets, many=True).data
         
-        # POD Data
-        from practice.models import POD, Submission, MCQSubmission
-        from datetime import datetime
-        from student.api.serializers.sheet_serializers import PODSerializer
-        
+        # 6. POD Data
         pod_data = None
-        pod = POD.objects.filter(batch=batch, date=datetime.now().date()).first()
+        pod = POD.objects.filter(batch=batch, date=now().date()).first()
+        
         if pod:
             pod_serializer = PODSerializer(pod).data
-            # Check if solved
-            is_solved = Submission.objects.filter(user=student, question_id=pod.question.id, status='Accepted').exists()
+            
+            # Check if solved (either Coding or MCQ)
+            is_solved = Submission.objects.filter(
+                user=student, 
+                question_id=pod.question.id, 
+                status='Accepted'
+            ).exists()
+            
             if not is_solved:
-                is_solved = MCQSubmission.objects.filter(student=student, question_id=pod.question.id, is_correct=True).exists()
+                is_solved = MCQSubmission.objects.filter(
+                    student=student, 
+                    question_id=pod.question.id, 
+                    is_correct=True
+                ).exists()
                 
             pod_serializer['is_solved_by_user'] = is_solved
             pod_data = pod_serializer

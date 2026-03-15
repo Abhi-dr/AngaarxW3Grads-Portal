@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from datetime import datetime, timedelta
+from django.utils import timezone
 from django.utils.timezone import now
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -23,21 +24,24 @@ class Batch(models.Model):
     is_active = models.BooleanField(default=True, db_index=True)
 
     slug = models.SlugField(unique=True, blank=True, null=True)
-    
+
+    # Custom display order for sheets within this batch {sheet_id: position}
+    sheet_order = models.JSONField(default=dict, blank=True)
+
     def __str__(self):
         return self.name
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             text = ""
-        
+
             for word in self.name.split():
                 if word.isalnum():
                     text += word + "-"
                 else:
                     word = ''.join(e for e in word if e.isalnum())
                     text += word + "-"
-            
+
             # Generate base slug
             base_slug = text.lower().strip("-")
             slug = base_slug
@@ -50,13 +54,20 @@ class Batch(models.Model):
 
             self.slug = slug
         super(Batch, self).save(*args, **kwargs)
-        
-        
+
     def get_today_pod_for_batch(self):
         return self.pods.filter(date=datetime.now().date()).first()
 
     def get_total_enrollments(self):
         return self.enrollment_requests.filter(status='Accepted').count()
+
+    def get_ordered_sheets(self):
+        """Return sheets ordered by sheet_order, fallback to pk."""
+        sheets = list(self.sheets.all())
+        if self.sheet_order:
+            sheets.sort(key=lambda s: self.sheet_order.get(str(s.id), 9999))
+        return sheets
+    
 
 
 # ============================== ENROLLMENT REQUEST =========================
@@ -192,16 +203,17 @@ class Sheet(models.Model):
         return self.mcq_questions.filter(is_approved=True).count()
     
     def get_solved_questions(self, student):
+        """Fixed to only count approved questions to prevent >100% progress bugs"""
         if self.sheet_type == "Coding":
             return Submission.objects.filter(
                 user=student,
-                question__in=self.questions.all(),
+                question__in=self.questions.filter(is_approved=True),
                 status='Accepted'
             ).values('question').distinct().count()
         elif self.sheet_type == "MCQ":
             return MCQSubmission.objects.filter(
                 student=student,
-                question__in=self.mcq_questions.all(),
+                question__in=self.mcq_questions.filter(is_approved=True),
                 is_correct=True
             ).values('question').distinct().count()
         else:
@@ -541,7 +553,7 @@ class Streak(models.Model):
         Update streak for any successful question submission (coding or MCQ).
         This method is called whenever a user successfully solves any question.
         """
-        today = datetime.now().date()
+        today = timezone.localdate()
         
         # If this is the first submission ever
         if self.last_submission_date is None:
@@ -574,12 +586,12 @@ class Streak(models.Model):
         self.save()
 
     def can_restore_streak(self):
-        """Check if user can restore their streak (missed exactly 1 day)"""
-        today = datetime.now().date()
+        """Check if user can restore their streak after missing exactly 1 day."""
+        today = timezone.localdate()
         return (
-            self.last_submission_date == today - timedelta(days=2) and 
-            self.current_streak == 0 and 
-            self.previous_streak > 0
+            self.current_streak == 0 and
+            self.previous_streak > 0 and
+            self.last_submission_date in {today, today - timedelta(days=1)}
         )
 
     def restore_streak(self):
@@ -588,7 +600,7 @@ class Streak(models.Model):
         This continues the streak as if they never missed a day.
         """
         if self.can_restore_streak():
-            today = datetime.now().date()
+            today = timezone.localdate()
             # Restore to the previous streak value + 1 (as if they solved yesterday)
             self.current_streak = self.previous_streak + 1
             self.previous_streak = 0  # Clear previous streak after restore
@@ -619,7 +631,7 @@ class Streak(models.Model):
         """
         Check if user has solved any question today.
         """
-        today = datetime.now().date()
+        today = timezone.localdate()
         return self.last_submission_date == today
 
     def __str__(self):

@@ -78,7 +78,22 @@ def jovac(request, slug):
 
     return render(request, "administration/jovac/course.html", parameters)
 
-# ======================================== JOVAC SHEETS ======================================
+# ======================================== JOVAC REORDER SHEETS ======================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def reorder_jovac_sheets(request, slug):
+    """Render the drag-and-drop sheet reorder page for a JOVAC course."""
+    course = get_object_or_404(Course, slug=slug)
+    sheets = course.get_ordered_sheets()
+    parameters = {
+        "course": course,
+        "sheets": sheets,
+    }
+    return render(request, "administration/jovac/reorder_sheets.html", parameters)
+
+
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')

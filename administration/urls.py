@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views, mcq_views, whatsapp_views
+from . import problem_views, jovac_views, views, question_generator, batch_views, sheet_views, article_views, sheet_apis, achievers, flames_views, alumni_views, mcq_views, whatsapp_views, event_views
 
 urlpatterns = [
     path('api/v1/', include('administration.api.urls')),
@@ -114,6 +114,7 @@ urlpatterns += [
     path("reject_enrollment/<int:id>", batch_views.reject_enrollment, name="administrator_reject_enrollment"),
     
     path("batch/<slug:slug>/", batch_views.batch, name="administrator_batch"),
+    path("batch/<slug:slug>/students-json/", batch_views.batch_students_json, name="administrator_batch_students_json"),
     
     path("administrator_set_pod_for_batch/<slug:slug>/", batch_views.administrator_set_pod_for_batch, name="administrator_pod_for_batch"),
     path('fetch-questions/', batch_views.fetch_questions, name='administrator_fetch_pod_questions_for_batch'),
@@ -304,8 +305,17 @@ urlpatterns += [
     path("submissions/<int:id>/", jovac_views.view_submissions, name="view_assignment_submissions"),
     path("delete_assignment/<int:id>/", jovac_views.delete_assignment, name="administrator_delete_assignment"),
 
+
     path('course-sheet/<slug:slug>/reorder/', jovac_views.reorder_assignments, name='reorder_course_sheet_assignments'),
     path('course-sheet/<int:id>/update-order/', jovac_views.update_assignment_order, name='update_course_sheet_order'),
 
+    # Sheet reorder pages
+    path('jovac/<slug:slug>/reorder-sheets/', jovac_views.reorder_jovac_sheets, name='administrator_jovac_reorder_sheets'),
+    path('batch/<slug:slug>/reorder-sheets/', batch_views.reorder_batch_sheets, name='administrator_batch_reorder_sheets'),
+
+    # Events & Certificates
+    path('events/', event_views.events, name='administrator_events'),
+    path('events/templates/', event_views.certificate_templates, name='administrator_certificate_templates'),
+    path('events/<int:pk>/', event_views.event_detail, name='administrator_event_detail'),
 
 ]

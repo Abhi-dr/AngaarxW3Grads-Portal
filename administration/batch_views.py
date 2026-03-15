@@ -150,6 +150,40 @@ def administrator_fetch_enrollments_of_batch(request, slug):
 
     return JsonResponse({"success": True, "data": response_data}, status=200)
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def batch_students_json(request, slug):
+    """
+    Returns a simple list of accepted students for a batch. 
+    Used by the events/certificates mass-assign UI.
+    """
+    batch = get_object_or_404(Batch, slug=slug)
+    enrollments = EnrollmentRequest.objects.select_related('student').filter(batch=batch, status="Accepted")
+    
+    sheets = list(batch.get_ordered_sheets())
+    total_batch_questions = sum(sheet.get_total_questions() for sheet in sheets)
+    
+    students_data = []
+    for req in enrollments:
+        if req.student:
+            solved = 0
+            if total_batch_questions > 0:
+                solved = sum(sheet.get_solved_questions(req.student) for sheet in sheets)
+                
+            progress = (solved / total_batch_questions * 100) if total_batch_questions > 0 else 0
+            
+            students_data.append({
+                "id": req.student.id,
+                "first_name": req.student.first_name,
+                "last_name": req.student.last_name,
+                "email": req.student.email,
+                "full_name": f"{req.student.first_name} {req.student.last_name}".strip(),
+                "progress_percentage": round(progress, 1)
+            })
+            
+    return JsonResponse(students_data, safe=False)
+
 # ================================ APPROVE ALL ENROLLMENT REQUESTS ====================
 
 @login_required(login_url='login')
@@ -251,15 +285,14 @@ def batch(request, slug):
     
     administrator = CustomUser.objects.get(id=request.user.id)
     batch = Batch.objects.get(slug=slug)
-    
-    # Fetch all the sheets for this batch
-    sheets = batch.sheets.all().order_by("-id")
-        
+
+    # Fetch sheets in custom order
+    sheets = batch.get_ordered_sheets()
+
     try:
         pod = POD.objects.get(batch=batch, date=datetime.date.today())
     except POD.DoesNotExist:
         pod = None
-    
 
     parameters = {
         "administrator": administrator,
@@ -267,8 +300,25 @@ def batch(request, slug):
         "sheets": sheets,
         "pod": pod
     }
-    
+
     return render(request, 'administration/batch/batch.html', parameters)
+
+# =============================== REORDER BATCH SHEETS ==============================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def reorder_batch_sheets(request, slug):
+    """Render the drag-and-drop sheet reorder page for a Batch."""
+    batch = get_object_or_404(Batch, slug=slug)
+    sheets = batch.get_ordered_sheets()
+    parameters = {
+        "batch": batch,
+        "sheets": sheets,
+    }
+    return render(request, 'administration/batch/reorder_sheets.html', parameters)
+
+
 
 # =============================== SET POD FOR BATCH ==============================
 

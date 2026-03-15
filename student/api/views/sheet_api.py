@@ -22,6 +22,8 @@ class SheetDetailView(APIView, StandardResultsSetPagination):
     def get(self, request, slug):
         student = request.user
         sheet = get_object_or_404(Sheet, slug=slug, is_approved=True)
+
+        print(sheet.get_progress(student))
         
         if not sheet.is_enabled:
             return Response({"error": "This sheet is not disabled."}, status=403)

@@ -120,18 +120,28 @@ class Course(models.Model):
     is_active = models.BooleanField(default=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True, blank=True, null=True)
-    
+
+    # Custom display order for sheets within this course {sheet_id: position}
+    sheet_order = models.JSONField(default=dict, blank=True)
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         return self.name or "Unnamed Course"
-    
+
     def get_instructor_names(self):
         return ' and '.join([str(instructor.first_name) + " " + str(instructor.last_name) for instructor in self.instructors.all()])
-    
+
+    def get_ordered_sheets(self):
+        """Return course sheets ordered by sheet_order, fallback to pk."""
+        sheets = list(self.course_sheets.all())
+        if self.sheet_order:
+            sheets.sort(key=lambda s: self.sheet_order.get(str(s.id), 9999))
+        return sheets
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = 'Course'

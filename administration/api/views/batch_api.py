@@ -40,6 +40,19 @@ class BatchAdminViewSet(viewsets.ModelViewSet):
             'message': f'Course {"activated" if batch.is_active else "deactivated"} successfully.',
         }, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['patch'], url_path='reorder-sheets', permission_classes=[IsAdministrator])
+    def reorder_sheets(self, request, slug=None):
+        """PATCH .../batches/<slug>/reorder-sheets/ — save custom sheet order.
+        Body: {"order": [sheet_id, sheet_id, ...]}
+        """
+        batch = self.get_object()
+        order = request.data.get('order', [])
+        if not isinstance(order, list):
+            return Response({'success': False, 'error': 'order must be a list of sheet IDs.'}, status=400)
+        batch.sheet_order = {str(sheet_id): idx for idx, sheet_id in enumerate(order)}
+        batch.save(update_fields=['sheet_order'])
+        return Response({'success': True, 'message': 'Sheet order saved successfully.'})
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
@@ -53,3 +66,4 @@ class BatchAdminViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         self.perform_destroy(instance)
         return Response({'success': True, 'message': 'Batch deleted successfully'}, status=status.HTTP_200_OK)
+

@@ -1,0 +1,270 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}Events & Certificates{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+        <div>
+            <h3 class="fw-semibold mb-0">Events 🎓</h3>
+            <p class="text-muted mb-0 small">Manage events and issue certificates to students.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{% url 'administrator_certificate_templates' %}" class="btn btn-outline-secondary">
+                <i class="ti ti-template me-1"></i>Templates
+            </a>
+            <button class="btn btn-primary" onclick="openAddModal()">
+                <i class="ti ti-plus me-1"></i>New Event
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <div id="alertBox" class="alert d-none mb-3"></div>
+
+    <!-- Events Grid -->
+    <div id="eventsContainer" class="row g-3">
+        <!-- skeleton loaders -->
+        <div class="col-md-4" id="skeletonRow">
+            <div class="card" style="animation: pulse 1.5s infinite;">
+                <div class="card-body">
+                    <div class="bg-secondary rounded mb-2" style="height:18px;width:60%;opacity:.3"></div>
+                    <div class="bg-secondary rounded mb-2" style="height:14px;width:40%;opacity:.2"></div>
+                    <div class="bg-secondary rounded" style="height:14px;width:80%;opacity:.15"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= ADD / EDIT EVENT MODAL ============= -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">New Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="eventFormError" class="alert alert-danger d-none"></div>
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Event Name *</label>
+                            <input type="text" class="form-control" id="eName">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Code * <small class="text-muted">(e.g. FLAMES25)</small></label>
+                            <input type="text" class="form-control" id="eCode" style="text-transform:uppercase">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Start Date *</label>
+                            <input type="date" class="form-control" id="eStartDate">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">End Date *</label>
+                            <input type="date" class="form-control" id="eEndDate">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="eDesc" rows="3"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Certificate Template (optional)</label>
+                            <select class="form-select" id="eCertTemplate">
+                                <option value="">— None —</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveEventBtn" onclick="saveEvent()">
+                        <span id="saveEventBtnText">Save Event</span>
+                        <span id="saveEventSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= DELETE CONFIRM MODAL ============= -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Delete Event</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete <strong id="deleteEventName"></strong>?
+                    <div class="text-danger small mt-1">This will NOT delete already-issued certificates.</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Yes,
+                        Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+    const CSRF = '{{ csrf_token }}';
+    const BASE = '/administration/api/v1';
+    let editingId = null, deletingId = null;
+
+    // ── Load Events ────────────────────────────────────────────────
+    async function loadEvents() {
+        const res = await fetch(`${BASE}/events/`);
+        const data = await res.json();
+        document.getElementById('eventsContainer').innerHTML = '';
+        if (!data.results || data.results.length === 0) {
+            document.getElementById('eventsContainer').innerHTML = `
+      <div class="col-12 text-center py-5 text-muted">
+        <i class="ti ti-calendar-off fs-1 d-block mb-2"></i>No events yet. Create your first one!
+      </div>`;
+            return;
+        }
+        data.results.forEach(ev => {
+            const col = document.createElement('div');
+            col.className = 'col-md-4';
+            col.innerHTML = `
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <div class="d-flex align-items-start justify-content-between mb-2">
+            <div>
+              <h5 class="fw-semibold mb-0">${ev.name}</h5>
+              <span class="badge bg-dark text-light">${ev.code}</span>
+            </div>
+            <div class="dropdown">
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">⋮</button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><button class="dropdown-item" onclick="openEditModal(${ev.id})">✏️ Edit</button></li>
+                <li><button class="dropdown-item text-danger" onclick="openDeleteModal(${ev.id},'${ev.name.replace(/'/g, "\\'")}')">🗑 Delete</button></li>
+              </ul>
+            </div>
+          </div>
+          <p class="text-muted small mb-2">${ev.description || 'No description'}</p>
+          <div class="text-muted small mb-3">
+            📅 ${ev.start_date} → ${ev.end_date}<br>
+            🎓 <strong>${ev.certificate_count}</strong> certificate(s) issued
+          </div>
+          <a href="/administration/events/${ev.id}/" class="btn btn-outline-primary btn-sm w-100">
+            <i class="ti ti-certificate me-1"></i>Manage Certificates
+          </a>
+        </div>
+      </div>`;
+            document.getElementById('eventsContainer').appendChild(col);
+        });
+    }
+
+    // ── Certificate Templates (for select) ────────────────────────
+    async function loadTemplates() {
+        const res = await fetch(`${BASE}/certificate-templates/`);
+        const data = await res.json();
+        const sel = document.getElementById('eCertTemplate');
+        sel.innerHTML = '<option value="">— None —</option>';
+        if (data.results) {
+            data.results.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id; opt.textContent = t.name;
+                sel.appendChild(opt);
+            });
+        }
+    }
+
+    // ── Modal: Add ────────────────────────────────────────────────
+    function openAddModal() {
+        editingId = null;
+        document.getElementById('eventModalLabel').textContent = 'New Event';
+        document.getElementById('saveEventBtnText').textContent = 'Save Event';
+        ['eName', 'eCode', 'eStartDate', 'eEndDate', 'eDesc'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('eCertTemplate').value = '';
+        document.getElementById('eventFormError').classList.add('d-none');
+        loadTemplates();
+        new bootstrap.Modal(document.getElementById('eventModal')).show();
+    }
+
+    // ── Modal: Edit ───────────────────────────────────────────────
+    async function openEditModal(id) {
+        editingId = id;
+        const res = await fetch(`${BASE}/events/${id}/`);
+        const ev = await res.json();
+        document.getElementById('eventModalLabel').textContent = 'Edit Event';
+        document.getElementById('saveEventBtnText').textContent = 'Update Event';
+        document.getElementById('eName').value = ev.name || '';
+        document.getElementById('eCode').value = ev.code || '';
+        document.getElementById('eStartDate').value = ev.start_date || '';
+        document.getElementById('eEndDate').value = ev.end_date || '';
+        document.getElementById('eDesc').value = ev.description || '';
+        await loadTemplates();
+        document.getElementById('eCertTemplate').value = ev.certificate_template || '';
+        document.getElementById('eventFormError').classList.add('d-none');
+        new bootstrap.Modal(document.getElementById('eventModal')).show();
+    }
+
+    // ── Save (create/update) ──────────────────────────────────────
+    async function saveEvent() {
+        const body = {
+            name: document.getElementById('eName').value.trim(),
+            code: document.getElementById('eCode').value.trim().toUpperCase(),
+            start_date: document.getElementById('eStartDate').value,
+            end_date: document.getElementById('eEndDate').value,
+            description: document.getElementById('eDesc').value,
+            certificate_template: document.getElementById('eCertTemplate').value || null,
+        };
+        const errEl = document.getElementById('eventFormError');
+        errEl.classList.add('d-none');
+
+        const btn = document.getElementById('saveEventBtn');
+        btn.disabled = true;
+        document.getElementById('saveEventSpinner').classList.remove('d-none');
+
+        const url = editingId ? `${BASE}/events/${editingId}/` : `${BASE}/events/`;
+        const method = editingId ? 'PATCH' : 'POST';
+
+        try {
+            const res = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify(body),
+            });
+            const data = await res.json();
+            if (data.success || res.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('eventModal')).hide();
+                loadEvents();
+            } else {
+                const msgs = data.errors ? Object.entries(data.errors).map(([k, v]) => `${k}: ${v}`).join(', ') : data.error || 'Failed';
+                errEl.textContent = msgs; errEl.classList.remove('d-none');
+            }
+        } finally {
+            btn.disabled = false;
+            document.getElementById('saveEventSpinner').classList.add('d-none');
+        }
+    }
+
+    // ── Delete ────────────────────────────────────────────────────
+    function openDeleteModal(id, name) {
+        deletingId = id;
+        document.getElementById('deleteEventName').textContent = name;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    async function confirmDelete() {
+        await fetch(`${BASE}/events/${deletingId}/`, {
+            method: 'DELETE',
+            headers: { 'X-CSRFToken': CSRF },
+        });
+        bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+        loadEvents();
+    }
+
+    document.addEventListener('DOMContentLoaded', loadEvents);
+</script>
+{% endblock %}
