@@ -196,19 +196,21 @@
 
                     <li class="nav-item mx-1">
 
-                        {% if user_type == 'student' %}
+                        
+
+                        {% if user.role == 'student' %}
 
                         <a href="{% url 'student' %}">
                             <button style="width: 100%;">Dashboard</button>
                         </a>
 
-                        {% elif user_type == 'administrator' %}
+                        {% elif user.role == 'admin' %}
 
                         <a href="{% url 'administration' %}">
                             <button style="width: 100%;">Dashboard</button>
                         </a>
 
-                        {% elif user_type == 'instructor' %}
+                        {% elif user.role == 'instructor' %}
 
                         <a href="{% url 'instructor' %}">
                             <button style="width: 100%;">Dashboard</button>

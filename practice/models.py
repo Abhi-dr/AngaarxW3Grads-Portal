@@ -24,21 +24,24 @@ class Batch(models.Model):
     is_active = models.BooleanField(default=True, db_index=True)
 
     slug = models.SlugField(unique=True, blank=True, null=True)
-    
+
+    # Custom display order for sheets within this batch {sheet_id: position}
+    sheet_order = models.JSONField(default=dict, blank=True)
+
     def __str__(self):
         return self.name
-    
+
     def save(self, *args, **kwargs):
         if not self.slug:
             text = ""
-        
+
             for word in self.name.split():
                 if word.isalnum():
                     text += word + "-"
                 else:
                     word = ''.join(e for e in word if e.isalnum())
                     text += word + "-"
-            
+
             # Generate base slug
             base_slug = text.lower().strip("-")
             slug = base_slug
@@ -51,13 +54,20 @@ class Batch(models.Model):
 
             self.slug = slug
         super(Batch, self).save(*args, **kwargs)
-        
-        
+
     def get_today_pod_for_batch(self):
         return self.pods.filter(date=datetime.now().date()).first()
 
     def get_total_enrollments(self):
         return self.enrollment_requests.filter(status='Accepted').count()
+
+    def get_ordered_sheets(self):
+        """Return sheets ordered by sheet_order, fallback to pk."""
+        sheets = list(self.sheets.all())
+        if self.sheet_order:
+            sheets.sort(key=lambda s: self.sheet_order.get(str(s.id), 9999))
+        return sheets
+    
 
 
 # ============================== ENROLLMENT REQUEST =========================
@@ -193,16 +203,17 @@ class Sheet(models.Model):
         return self.mcq_questions.filter(is_approved=True).count()
     
     def get_solved_questions(self, student):
+        """Fixed to only count approved questions to prevent >100% progress bugs"""
         if self.sheet_type == "Coding":
             return Submission.objects.filter(
                 user=student,
-                question__in=self.questions.all(),
+                question__in=self.questions.filter(is_approved=True),
                 status='Accepted'
             ).values('question').distinct().count()
         elif self.sheet_type == "MCQ":
             return MCQSubmission.objects.filter(
                 student=student,
-                question__in=self.mcq_questions.all(),
+                question__in=self.mcq_questions.filter(is_approved=True),
                 is_correct=True
             ).values('question').distinct().count()
         else:

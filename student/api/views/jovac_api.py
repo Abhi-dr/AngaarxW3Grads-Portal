@@ -95,10 +95,10 @@ class JOVACCourseSheetsView(APIView):
 
     def get(self, request, slug):
         course = get_object_or_404(Course, slug=slug)
-        
-        # Get all course sheets for this course
-        course_sheets = CourseSheet.objects.filter(course=course).order_by('id')
-        
+
+        # Respect custom sheet ordering set by administrators
+        course_sheets = course.get_ordered_sheets()
+
         return Response({
             "success": True,
             "sheets": CourseSheetSerializer(course_sheets, many=True).data,

@@ -1,286 +1,414 @@
 {% extends "administration/base.html" %}
 {% load static %}
 
-{% block title %}
-{{ course.name }} | Sheets
-{% endblock %}
+{% block title %}{{ course.name }} | {{ sheet.name }}{% endblock %}
 
-{% block jovac_active %}
-active
-{% endblock %}
+{% block jovac_active %}active{% endblock %}
 
 {% block extra_css %}
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-
 <style>
     .fa-youtube-play {
-        font-size: 220%;
-        color: red
+        font-size: 1.6rem;
+        color: red;
     }
 
-    .text-color {
-        color: white;
+    .skeleton-row td {
+        height: 40px;
+        background: linear-gradient(90deg, #e0e0e0 25%, #f4f4f4 50%, #e0e0e0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.2s infinite;
+        border-radius: 4px;
     }
 
-    [data-bs-theme="dark"] {
-        .fa-youtube-play {
-            font-size: 220%;
-            color: red;
+    @keyframes shimmer {
+        0% {
+            background-position: 200% 0
         }
 
-        .text-color {
-            color: rgb(33, 33, 33);
-            font-weight: 500;
+        100% {
+            background-position: -200% 0
         }
+    }
+
+    [data-bs-theme="dark"] .skeleton-row td {
+        background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.2s infinite;
     }
 </style>
-
 {% endblock %}
 
 {% block body %}
-
 <div class="container-fluid">
-    <div class="card">
-        <div class="card-body">
-            <h3 class="heading">
-                <span class="fw-semibold">{{ course.name }}🔥</span>
-                <span class="fs-4"> | 🔥By:
-                    {{ course.get_instructor_names }}
-                    🔥</span>
-            </h3>
-        </div>
-        <div class="row mt-n3">
-            <div class="col-md-5 mx-auto">
-                <a href="{% url 'administrator_add_assignment' course.slug sheet.slug %}"
-                    class="btn btn-outline-primary button mt-n2 mb-3 w-100 ">Add Assignment</a>
 
+    <!-- Header -->
+    <div class="card mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3 class="heading mb-0">
+                    <span class="fw-semibold">{{ course.name }} 🔥</span>
+                    <span class="fs-5 text-muted"> | By: {{ course.get_instructor_names }}</span>
+                </h3>
+                <p class="text-muted mb-0 mt-1">Sheet: <strong>{{ sheet.name }}</strong></p>
             </div>
-            <div class="col-md-5 mx-auto">
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignmentModal"
+                    onclick="openAddModal()">
+                    <i class="ti ti-plus me-1"></i>Add Assignment
+                </button>
                 <a href="{% url 'administrator_edit_jovac_sheet' course.slug sheet.slug %}"
-                    class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Edit Sheet</a>
+                    class="btn btn-outline-warning">
+                    <i class="ti ti-pencil me-1"></i>Edit Sheet
+                </a>
+                <a href="{% url 'reorder_course_sheet_assignments' sheet.slug %}" class="btn btn-outline-secondary">
+                    <i class="ti ti-arrows-sort me-1"></i>Reorder
+                </a>
             </div>
-
-            <div class="col-md-5 mx-auto">
-                <a href="{% url 'reorder_course_sheet_assignments' sheet.slug %}"
-                    class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Reorder</a>
-            </div>
-
-            <!-- 
-            <div class="col-md-3 mx-auto">            </div> -->
         </div>
-
     </div>
 
     {% for message in messages %}
-    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-        <strong>{{ message.tag }}</strong> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <div class="alert {{ message.tags }} alert-dismissible fade show">
+        {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     {% endfor %}
 
-
-    <!-- ========================== SEARCH BAR ==================================== -->
-
+    <!-- Assignments Table -->
     <div class="card w-100">
         <div class="card-body p-4">
-            <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
-            <form method="post">
-
-                {% csrf_token %}
-
-                <div class="input-group">
-
-                    {% if query %}
-
-                    <input type="text" class="form-control" placeholder="Search by ID, Title, Description or Type"
-                        aria-label="Search by ID, Title, Description or Type" aria-describedby="button-addon2"
-                        name="query" value="{{ query }}">
-
-                    {% else %}
-
-                    <input type="text" class="form-control" placeholder="Search by ID, Title, Description or Type"
-                        aria-label="Search by ID, Title, Description or Type" aria-describedby="button-addon2"
-                        name="query">
-
-                    {% endif %}
-
-                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
-                    <!-- make a button to clear the search -->
-                    <a href="#" class="btn btn-outline-danger">Clear</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ================================= ASSIGNMENT TABLE ================================== -->
-
-    <div class="card w-100">
-        <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Angaari Assignments 🔥
-                {% if query %}
-                <span class="fs-6"> | Search Results for "{{ query }}"</span>
-                {% endif %}
-            </h5>
+            <h5 class="card-title fw-semibold mb-4">Assignments 🔥</h5>
             <div class="table-responsive">
                 <table class="table text-nowrap mb-0 align-middle">
-                    <thead class="text-dark fs-4">
-
+                    <thead class="text-dark fs-6">
                         <tr>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    #
-                                </h6>
+                                <h6 class="fw-semibold mb-0">#</h6>
                             </th>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Title🗒️
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Title</h6>
                             </th>
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Description📝
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Type</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Type❔
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Deadline</h6>
                             </th>
-
                             <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Deadline⏰
-                                </h6>
+                                <h6 class="fw-semibold mb-0">Status</h6>
                             </th>
-
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#1
-                                </h6>
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">Actions</h6>
                             </th>
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#2
-                                </h6>
-                            </th>
-
                         </tr>
                     </thead>
-
                     <tbody id="assignmentTableBody">
-
-                        {% for assignment in assignments %}
-
-                        <tr>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ assignment.id }}</h6>
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ assignment.title }}">{{ assignment.title|truncatechars:10 }}</h6>
-
-                            </td>
-
-                            {% if assignment.is_tutorial %}
-
-                            <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal">
-                                    -
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-secondary">
-                                        Tutorial
-                                    </span>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    -
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    {% if assignment.tutorial_link %}
-                                    <a href="{{ assignment.tutorial_link }}" target="_blank">
-                                        <i class="fa fa-youtube-play"></i></a>
-                                    {% else %}
-                                    <span class="text-muted fw-normal">No Tutorial Link</span>
-                                    {% endif %}
-                                </p>
-                            </td>
-
-                            {% else %}
-
-                            <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ assignment.description }}">
-                                    {{ assignment.description|truncatechars:30 }}
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <p class="mb-0 fw-normal">{{ assignment.assignment_type }} Type</p>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    <span> {{ assignment.due_date|date }} </span>
-                                    <br>
-                                    <span style="font-weight: bold; color: black;">
-                                        @{{ assignment.due_date|time }} </span>
-                                    </span>
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'view_assignment_submissions' assignment.id %}"
-                                        class="btn btn-info float-end">View Submission✅
-                                    </a>
-
-                                </div>
-                            </td>
-
-                            {% endif %}
-
-
-
-
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a class="btn btn-outline-dark edit-btn"
-                                        href="{% url 'administrator_edit_assignment' assignment.id %}">Edit</a>
-                                    <a class="btn btn-outline-danger delete-btn"
-                                        href="{% url 'administrator_delete_assignment' assignment.id %}">Delete</a>
-                                </div>
-                            </td>
-
-
+                        <!-- Skeleton rows -->
+                        {% for i in "12345" %}
+                        <tr class="skeleton-row">
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
-
                         {% endfor %}
-
                     </tbody>
                 </table>
             </div>
-
         </div>
     </div>
 
-
 </div>
 
+<!-- ============ ADD / EDIT ASSIGNMENT MODAL ============ -->
+<div class="modal fade" id="assignmentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignmentModalLabel">Add Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="assignmentId" value="">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="assignTitle"
+                            placeholder="e.g. Binary Search Problem">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Type</label>
+                        <select class="form-select" id="assignType">
+                            <option value="Coding">Coding</option>
+                            <option value="Text">Text</option>
+                            <option value="File">File</option>
+                            <option value="Image">Image</option>
+                            <option value="Link">Link</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="assignDesc" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Due Date</label>
+                        <input type="datetime-local" class="form-control" id="assignDueDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Max Score</label>
+                        <input type="number" class="form-control" id="assignMaxScore" value="100" min="0">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold">Status</label>
+                        <select class="form-select" id="assignStatus">
+                            <option value="Draft">Draft</option>
+                            <option value="Published">Published</option>
+                            <option value="Archived">Archived</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="assignIsTutorial">
+                            <label class="form-check-label">Is Tutorial (Video only, no submission)</label>
+                        </div>
+                    </div>
+                    <div class="col-12" id="tutorialLinkRow">
+                        <label class="form-label fw-semibold">Tutorial Link (YouTube)</label>
+                        <input type="url" class="form-control" id="assignTutorialLink"
+                            placeholder="https://youtube.com/...">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Instructions</label>
+                        <textarea class="form-control" id="assignInstructions" rows="2"
+                            placeholder="Detailed instructions for students…"></textarea>
+                    </div>
+                </div>
+                <div id="assignFormError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveAssignBtn" onclick="saveAssignment()">
+                    <span id="assignBtnText">Save</span>
+                    <span id="assignBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal fade" id="deleteAssignModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-danger">🗑️ Delete Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete <strong id="deleteAssignNameLabel"></strong>?
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteAssignBtn"
+                    onclick="confirmDeleteAssignment()">Yes, Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
+{% block myjs %}
+<script>
+    const CSRF = '{{ csrf_token }}';
+    const COURSE_SLUG = '{{ course.slug }}';
+    const SHEET_SLUG = '{{ sheet.slug }}';
+    const API_SHEET = `/administration/api/v1/course-sheets/${SHEET_SLUG}/assignments/`;
+    const API_ASSIGN = `/administration/api/v1/assignments/`;
+    let pendingDeleteId = null;
+    let assignmentsCache = [];
+
+    // ==================== LOAD ASSIGNMENTS ====================
+    async function loadAssignments() {
+        try {
+            const res = await fetch(API_SHEET, { headers: { 'X-CSRFToken': CSRF } });
+            const data = await res.json();
+            assignmentsCache = data.assignments || [];
+            renderAssignments(assignmentsCache);
+        } catch (e) {
+            document.getElementById('assignmentTableBody').innerHTML =
+                `<tr><td colspan="6" class="text-danger">Failed to load assignments.</td></tr>`;
+        }
+    }
+
+    function formatDate(dt) {
+        if (!dt) return '—';
+        const d = new Date(dt);
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+            + ' @' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function renderAssignments(assignments) {
+        const tbody = document.getElementById('assignmentTableBody');
+        if (!assignments.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No assignments yet.</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = assignments.map((a, i) => `
+    <tr id="assign-row-${a.id}">
+      <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${i + 1}</h6></td>
+      <td class="border-bottom-0">
+        <span data-bs-toggle="tooltip" title="${a.title}">
+          ${a.title.length > 25 ? a.title.substring(0, 25) + '…' : a.title}
+        </span>
+      </td>
+      <td class="border-bottom-0">
+        <span class="badge ${a.is_tutorial ? 'bg-secondary' : 'bg-primary'}">${a.is_tutorial ? 'Tutorial' : a.assignment_type}</span>
+      </td>
+      <td class="border-bottom-0">${formatDate(a.due_date)}</td>
+      <td class="border-bottom-0">
+        <span class="badge ${a.status === 'Published' ? 'bg-success' : a.status === 'Archived' ? 'bg-secondary' : 'bg-warning text-dark'}">${a.status}</span>
+      </td>
+      <td class="border-bottom-0">
+        <div class="d-flex gap-1">
+          ${a.is_tutorial && a.tutorial_link
+                ? `<a href="${a.tutorial_link}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-youtube-play"></i></a>`
+                : `<a href="/administration/submissions/${a.id}/" class="btn btn-sm btn-info">Submissions</a>`}
+          <button class="btn btn-sm btn-outline-dark" onclick="openEditAssignment(${a.id})">Edit</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${a.title.replace(/'/g, "\\'")}')">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+        // init tooltips
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+    }
+
+    // ==================== MODALS ====================
+    function openAddModal() {
+        document.getElementById('assignmentModalLabel').textContent = 'Add Assignment';
+        document.getElementById('assignBtnText').textContent = 'Save';
+        document.getElementById('assignmentId').value = '';
+        document.getElementById('assignTitle').value = '';
+        document.getElementById('assignDesc').value = '';
+        document.getElementById('assignType').value = 'Coding';
+        document.getElementById('assignStatus').value = 'Draft';
+        document.getElementById('assignMaxScore').value = '100';
+        document.getElementById('assignDueDate').value = '';
+        document.getElementById('assignIsTutorial').checked = false;
+        document.getElementById('assignTutorialLink').value = '';
+        document.getElementById('assignInstructions').value = '';
+        document.getElementById('assignFormError').classList.add('d-none');
+        toggleTutorialRow();
+    }
+
+    function openEditAssignment(id) {
+        const a = assignmentsCache.find(a => a.id === id);
+        if (!a) return;
+        document.getElementById('assignmentModalLabel').textContent = 'Edit Assignment';
+        document.getElementById('assignBtnText').textContent = 'Update';
+        document.getElementById('assignmentId').value = a.id;
+        document.getElementById('assignTitle').value = a.title;
+        document.getElementById('assignDesc').value = a.description || '';
+        document.getElementById('assignType').value = a.assignment_type;
+        document.getElementById('assignStatus').value = a.status;
+        document.getElementById('assignMaxScore').value = a.max_score || 100;
+        const dd = a.due_date ? new Date(a.due_date).toISOString().slice(0, 16) : '';
+        document.getElementById('assignDueDate').value = dd;
+        document.getElementById('assignIsTutorial').checked = a.is_tutorial;
+        document.getElementById('assignTutorialLink').value = a.tutorial_link || '';
+        document.getElementById('assignInstructions').value = a.instructions || '';
+        document.getElementById('assignFormError').classList.add('d-none');
+        toggleTutorialRow();
+        new bootstrap.Modal(document.getElementById('assignmentModal')).show();
+    }
+
+    document.getElementById('assignIsTutorial').addEventListener('change', toggleTutorialRow);
+    function toggleTutorialRow() {
+        const show = document.getElementById('assignIsTutorial').checked;
+        document.getElementById('tutorialLinkRow').style.display = show ? '' : 'none';
+    }
+
+    // ==================== SAVE ASSIGNMENT ====================
+    async function saveAssignment() {
+        const id = document.getElementById('assignmentId').value;
+        const isEdit = !!id;
+        const errEl = document.getElementById('assignFormError');
+        errEl.classList.add('d-none');
+
+        const title = document.getElementById('assignTitle').value.trim();
+        if (!title) { errEl.textContent = 'Title is required.'; errEl.classList.remove('d-none'); return; }
+
+        const payload = {
+            title,
+            description: document.getElementById('assignDesc').value,
+            assignment_type: document.getElementById('assignType').value,
+            status: document.getElementById('assignStatus').value,
+            max_score: document.getElementById('assignMaxScore').value,
+            due_date: document.getElementById('assignDueDate').value || null,
+            is_tutorial: document.getElementById('assignIsTutorial').checked,
+            tutorial_link: document.getElementById('assignTutorialLink').value || null,
+            instructions: document.getElementById('assignInstructions').value,
+            course_slug: COURSE_SLUG,
+            sheet_slug: SHEET_SLUG,
+        };
+
+        const btn = document.getElementById('saveAssignBtn');
+        btn.disabled = true;
+        document.getElementById('assignBtnSpinner').classList.remove('d-none');
+
+        try {
+            const url = isEdit ? `/administration/api/v1/assignments/${id}/` : `/administration/api/v1/assignments/`;
+            const method = isEdit ? 'PATCH' : 'POST';
+            const res = await fetch(url, {
+                method, headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (data.success || res.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('assignmentModal')).hide();
+                await loadAssignments();
+            } else {
+                const msgs = data.errors ? Object.values(data.errors).flat().join(' ') : (data.error || 'Save failed.');
+                errEl.textContent = msgs; errEl.classList.remove('d-none');
+            }
+        } catch (e) {
+            errEl.textContent = 'Network error.'; errEl.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            document.getElementById('assignBtnSpinner').classList.add('d-none');
+        }
+    }
+
+    // ==================== DELETE ASSIGNMENT ====================
+    function openDeleteAssign(id, name) {
+        pendingDeleteId = id;
+        document.getElementById('deleteAssignNameLabel').textContent = name;
+        new bootstrap.Modal(document.getElementById('deleteAssignModal')).show();
+    }
+
+    async function confirmDeleteAssignment() {
+        if (!pendingDeleteId) return;
+        const btn = document.getElementById('confirmDeleteAssignBtn');
+        btn.disabled = true; btn.textContent = 'Deleting…';
+        try {
+            const res = await fetch(`/administration/api/v1/assignments/${pendingDeleteId}/`, {
+                method: 'DELETE', headers: { 'X-CSRFToken': CSRF }
+            });
+            if (res.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('deleteAssignModal')).hide();
+                document.getElementById(`assign-row-${pendingDeleteId}`)?.remove();
+                assignmentsCache = assignmentsCache.filter(a => a.id !== pendingDeleteId);
+                pendingDeleteId = null;
+            } else {
+                alert('Delete failed.');
+            }
+        } catch (e) { alert('Delete failed.'); }
+        finally { btn.disabled = false; btn.textContent = 'Yes, Delete'; }
+    }
+
+    toggleTutorialRow();
+    loadAssignments();
+</script>
 {% endblock %}

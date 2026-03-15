@@ -1,0 +1,912 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}{{ event.name }} | Certificates{% endblock %}
+{% block events_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-modern {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    }
+
+    .table-modern thead th {
+        background-color: var(--cp-bg-card-hover, #f8faff);
+        color: var(--cp-text-secondary, #475569);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        padding: 1rem 1.5rem;
+        border-bottom: 2px solid var(--cp-border, #e2e8f0);
+    }
+
+    .table-modern tbody tr {
+        transition: all 0.2s;
+        background-color: var(--cp-bg-card, #ffffff);
+    }
+
+    .table-modern tbody tr:hover {
+        background-color: var(--cp-bg-card-hover, #f8faff);
+    }
+
+    .table-modern tbody td {
+        padding: 1rem 1.5rem;
+        vertical-align: middle;
+        color: var(--cp-text-primary, #0f172a);
+        border-bottom: 1px solid var(--cp-border, #e2e8f0);
+    }
+
+    .table-modern tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .custom-tab-btn {
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        color: var(--cp-text-secondary, #475569);
+        transition: all 0.2s;
+        background: transparent;
+        border: 1px solid transparent;
+    }
+
+    .custom-tab-btn.active {
+        background-color: var(--cp-accent-light, #eef2ff);
+        color: var(--cp-accent, #4f46e5);
+        border-color: var(--cp-accent, #4f46e5);
+    }
+
+    .custom-tab-btn:hover:not(.active) {
+        background-color: var(--cp-bg-card-hover, #f8faff);
+    }
+
+    /* Custom Theme Classes for Light/Dark Mode Switching */
+    .header-card {
+        background: var(--cp-header-gradient, linear-gradient(135deg, #f8faff 0%, #f0f4ff 100%));
+    }
+
+    .text-theme-primary {
+        color: var(--cp-text-primary, #0f172a);
+    }
+
+    .text-theme-secondary {
+        color: var(--cp-text-secondary, #475569);
+    }
+
+    .custom-card-bg {
+        background-color: var(--cp-bg-input, #f7f8fc);
+        border-color: var(--cp-border, #e2e8f0);
+    }
+
+    .custom-textarea {
+        background-color: var(--cp-bg-card, #fff);
+    }
+
+    /* Dark Mode Overrides */
+    [data-bs-theme="dark"] .table-modern thead th {
+        background-color: var(--cp-bg-header, #161b27);
+        border-bottom-color: var(--cp-border, #1e2a3a);
+        color: #94a3b8;
+    }
+
+    [data-bs-theme="dark"] .table-modern tbody tr {
+        background-color: var(--cp-bg-card, #161b27);
+    }
+
+    [data-bs-theme="dark"] .table-modern tbody td {
+        border-bottom-color: var(--cp-border, #1e2a3a);
+        color: #e2e8f0;
+    }
+
+    [data-bs-theme="dark"] .table-modern tbody tr:hover {
+        background-color: var(--cp-bg-card-hover, #1c2333);
+    }
+
+    [data-bs-theme="dark"] .header-card {
+        background: linear-gradient(135deg, #161b27 0%, #1e2a3a 100%);
+    }
+
+    [data-bs-theme="dark"] .text-theme-primary {
+        color: #f8faff !important;
+    }
+
+    [data-bs-theme="dark"] .text-theme-secondary {
+        color: #94a3b8 !important;
+    }
+
+    [data-bs-theme="dark"] .custom-card-bg {
+        background-color: #1e2a3a !important;
+        border-color: #334155 !important;
+    }
+
+    [data-bs-theme="dark"] .custom-textarea {
+        background-color: #0f172a !important;
+        color: #f8faff !important;
+    }
+
+    [data-bs-theme="dark"] .hover-bg-light:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+
+    <div class="card border-0 shadow-sm mb-4 header-card">
+        <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2 p-4">
+            <div>
+                <h3 class="fw-bold mb-1 text-theme-primary">🎓 {{ event.name }}</h3>
+                <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+                    <span class="badge" style="background-color: var(--cp-accent, #4f46e5); font-size: 0.85rem;">{{
+                        event.code }}</span>
+                    <span class="text-theme-secondary"><i class="ti ti-calendar-event me-1"></i> {{ event.start_date }}
+                        &rarr; {{ event.end_date }}</span>
+                </div>
+            </div>
+            <a href="{% url 'administrator_events' %}"
+                class="btn btn-outline-secondary rounded-pill px-4 fw-semibold shadow-sm">
+                <i class="ti ti-arrow-left me-1"></i>Back to Events
+            </a>
+        </div>
+    </div>
+
+    <div id="alertBox" class="alert d-none mb-4 shadow-sm border-0 rounded-4"></div>
+
+    <div class="d-flex gap-2 mb-4 overflow-auto pb-2" id="certTabs">
+        <button class="custom-tab-btn active d-flex align-items-center gap-2" id="tab-list" onclick="showTab('list')">
+            <i class="ti ti-list text-primary"></i> Issued <span class="badge bg-primary rounded-pill"
+                id="certCountBadge">0</span>
+        </button>
+        <button class="custom-tab-btn d-flex align-items-center gap-2" id="tab-individual"
+            onclick="showTab('individual')">
+            <i class="ti ti-user-plus text-success"></i> Individual
+        </button>
+        <button class="custom-tab-btn d-flex align-items-center gap-2" id="tab-mass" onclick="showTab('mass')">
+            <i class="ti ti-users-plus text-warning"></i> Mass Assign
+        </button>
+        <button class="custom-tab-btn d-flex align-items-center gap-2" id="tab-csv" onclick="showTab('csv')">
+            <i class="ti ti-file-spreadsheet text-info"></i> CSV/Excel Upload
+        </button>
+    </div>
+
+    <div id="panel-list">
+        <div class="table-responsive">
+            <table class="table-modern">
+                <thead>
+                    <tr>
+                        <th width="5%">#</th>
+                        <th width="20%">Certificate ID</th>
+                        <th width="25%">Student</th>
+                        <th width="20%">Issued On</th>
+                        <th width="15%">Status</th>
+                        <th width="15%" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="certTableBody">
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+                            <div class="spinner-border text-primary me-2" role="status"></div>
+                            <span class="text-muted fw-medium">Loading certificates...</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-3" id="certPagination"
+            style="display: none !important;">
+            <div class="small text-muted">Showing total <span id="certPaginationCount">0</span> certificates</div>
+            <div class="btn-group shadow-sm">
+                <button class="btn btn-outline-secondary btn-sm" id="btnPrevPage"
+                    onclick="loadCertificates(prevPageUrl)">
+                    <i class="ti ti-chevron-left"></i> Prev
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" id="btnNextPage"
+                    onclick="loadCertificates(nextPageUrl)">
+                    Next <i class="ti ti-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="panel-individual" class="d-none">
+        <div class="card border-0 shadow-sm rounded-4 text-body bg-body">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-success-subtle p-3 rounded-circle text-success"><i class="ti ti-user-plus fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Search and Assign Certificate</h5>
+                </div>
+
+                <div class="position-relative" style="max-width: 500px">
+                    <div class="input-group input-group-lg shadow-sm rounded-3">
+                        <span class="input-group-text bg-body-tertiary border-end-0 text-muted"><i
+                                class="ti ti-search"></i></span>
+                        <input type="text" class="form-control border-start-0 ps-0 bg-body text-body"
+                            id="studentSearchInput" placeholder="Type name or email…" oninput="searchStudents()">
+                        <button class="btn border bg-body-tertiary text-body" onclick="clearSearch()"
+                            title="Clear">✕</button>
+                    </div>
+                    <div id="searchResults" class="list-group position-absolute w-100 shadow mt-2 z-3 bg-body"
+                        style="max-height: 350px; overflow-y: auto; display: none;"></div>
+                </div>
+
+                <div id="individualStatus" class="alert d-none mt-4 border-0 shadow-sm rounded-3"
+                    style="max-width: 500px"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="panel-mass" class="d-none">
+        <div class="card border-0 shadow-sm rounded-4 text-body bg-body">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-warning-subtle p-3 rounded-circle text-warning"><i class="ti ti-users-plus fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Mass Assign Certificates</h5>
+                </div>
+
+                <div class="row g-5">
+                    <div class="col-12">
+                        <div class="p-4 rounded-4 h-100 border text-body custom-card-bg">
+                            <h6 class="fw-bold mb-3 d-flex align-items-center gap-2">
+                                <div class="badge bg-primary rounded-circle p-2"><i class="ti ti-users"></i></div>
+                                Select Students from Batch
+                            </h6>
+                            <div class="d-flex gap-2 flex-wrap mb-3">
+                                <select class="form-select border-0 shadow-sm bg-body text-body" id="batchSelect"
+                                    style="flex: 1; max-width: 400px;">
+                                    <option value="">Select a batch…</option>
+                                </select>
+                                <button class="btn btn-primary shadow-sm px-4" onclick="loadBatchStudents()">Load
+                                    Students</button>
+                            </div>
+                            <div id="batchStudentList" class="d-none bg-body p-3 rounded-3 shadow-sm border mt-3">
+                                <div
+                                    class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-3 border-bottom">
+                                    <span class="fw-semibold text-primary"><span id="batchStudentCount">0</span>
+                                        selected</span>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <label
+                                                class="form-label small mb-0 fw-semibold text-muted text-nowrap">Filter
+                                                Progress &ge;</label>
+                                            <input type="range" class="form-range" id="progressFilterRange" min="0"
+                                                max="100" step="5" value="0" style="width: 120px;"
+                                                oninput="updateRangeLabel()" onchange="applyProgressFilter()">
+                                            <span id="progressFilterLabel"
+                                                class="badge bg-secondary font-monospace">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                    <table class="table table-hover table-modern mb-0" id="batchStudentsTable">
+                                        <thead class="sticky-top bg-body z-1">
+                                            <tr>
+                                                <th width="5%"><input class="form-check-input m-0" type="checkbox"
+                                                        id="selectAllCb" checked onchange="toggleAllBatchStudents()">
+                                                </th>
+                                                <th width="35%" class="cursor-pointer"
+                                                    onclick="sortBatchStudents('name')" style="user-select: none;">Name
+                                                    <i class="ti ti-arrows-sort text-muted ms-1"></i>
+                                                </th>
+                                                <th width="35%" class="cursor-pointer"
+                                                    onclick="sortBatchStudents('email')" style="user-select: none;">
+                                                    Email <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
+                                                <th width="25%" class="cursor-pointer text-end"
+                                                    onclick="sortBatchStudents('progress')" style="user-select: none;">
+                                                    Completion <i class="ti ti-arrows-sort text-muted ms-1"></i></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="batchCheckboxes"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-5 pt-4 border-top border-secondary-subtle">
+                    <div id="massStatus" class="alert d-none mb-4 border-0 shadow-sm rounded-3"></div>
+                    <button class="btn btn-primary btn-lg px-5 rounded-pill shadow" onclick="massAssign()">
+                        <span id="massAssignText"><i class="ti ti-send me-2"></i>Assign Selected Certificates</span>
+                        <span id="massAssignSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="panel-csv" class="d-none">
+        <div class="card border-0 shadow-sm rounded-4 text-body bg-body">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-info-subtle p-3 rounded-circle text-info"><i class="ti ti-file-spreadsheet fs-4"></i>
+                    </div>
+                    <h5 class="fw-bold mb-0">Bulk Assign via CSV/Excel</h5>
+                </div>
+
+                <div class="row g-4 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-4 border border-info border-opacity-25 bg-info bg-opacity-10 rounded-4">
+                            <h6 class="fw-bold text-info"><i class="ti ti-info-circle me-1"></i> Format Requirements
+                            </h6>
+                            <p class="mb-2 text-body small">Your file must include these columns:</p>
+                            <ul class="mb-0 text-body small fw-medium">
+                                <li><code>email</code> (Student's registered email)</li>
+                                <li><code>event_id</code> (Use <strong>{{ event.id }}</strong> for this event)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-4 border border-dashed rounded-4 text-center border-secondary" id="uploadZone"
+                            style="border-width: 2px;">
+                            <i class="ti ti-cloud-upload text-muted display-4 mb-3 d-block"></i>
+                            <label for="csvFileInput"
+                                class="btn btn-outline-secondary border shadow-sm px-4 mb-2 cursor-pointer">
+                                Choose File (.csv, .xlsx)
+                            </label>
+                            <input type="file" id="csvFileInput" class="d-none" accept=".csv, .xlsx, .xls"
+                                onchange="updateFileName()">
+                            <p id="fileNameDisplay" class="text-muted small mb-0 mt-2">No file selected</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="csvStatus" class="alert d-none mb-4 border-0 shadow-sm rounded-3"></div>
+                <button class="btn btn-info text-white btn-lg px-5 rounded-pill shadow-sm" onclick="uploadCsv()">
+                    <span id="csvAssignText"><i class="ti ti-upload me-2"></i>Upload and Assign</span>
+                    <span id="csvAssignSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deleteCertModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden bg-body text-body">
+                <div class="modal-header bg-danger text-white border-0 p-4">
+                    <h5 class="modal-title fw-bold"><i class="ti ti-alert-triangle me-2"></i>Revoke Certificate</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="fs-1 text-danger mb-3"><i class="ti ti-trash"></i></div>
+                    <p class="fs-5 mb-1">Revoke certificate <strong id="deleteCertId" class="text-body"></strong>?</p>
+                    <p class="text-muted">Student: <strong id="deleteCertStudent" class="text-body"></strong></p>
+                    <div class="alert alert-danger mb-0 mt-3 border-0 py-2 small">This action cannot be undone.</div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0 justify-content-center">
+                    <button type="button" class="btn btn-secondary fw-bold px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger fw-bold px-4 shadow-sm" onclick="deleteCert()">Yes,
+                        Revoke</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+    const CSRF = '{{ csrf_token }}';
+    const EVENT_ID = "{{ event.id }}";
+    const BASE = '/administration/api/v1';
+    let deletingCertId = null;
+    let searchTimer = null;
+    let batchStudents = [];
+
+    // ─── Tab Switching ─────────────────────────────────────────────
+    function showTab(name) {
+        ['list', 'individual', 'mass', 'csv'].forEach(t => {
+            document.getElementById('panel-' + t).classList.add('d-none');
+            document.getElementById('tab-' + t).classList.remove('active');
+        });
+        document.getElementById('panel-' + name).classList.remove('d-none');
+        document.getElementById('tab-' + name).classList.add('active');
+    }
+
+    let prevPageUrl = null;
+    let nextPageUrl = null;
+
+    // ─── Certificates List ─────────────────────────────────────────
+    async function loadCertificates(url = `${BASE}/certificates/?event_id=${EVENT_ID}`) {
+        const res = await fetch(url);
+        const data = await res.json();
+        const rows = data.results || [];
+
+        // update pagination links
+        prevPageUrl = data.previous;
+        nextPageUrl = data.next;
+        document.getElementById('btnPrevPage').disabled = !prevPageUrl;
+        document.getElementById('btnNextPage').disabled = !nextPageUrl;
+
+        document.getElementById('certPagination').style.setProperty("display", (prevPageUrl || nextPageUrl) ? 'flex' : 'none', "important");
+        document.getElementById('certPaginationCount').textContent = data.count || rows.length;
+        document.getElementById('certCountBadge').textContent = data.count || rows.length;
+
+        const tbody = document.getElementById('certTableBody');
+        if (rows.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted"><div class="fs-1 mb-3">📄</div><h5 class="fw-medium">No certificates issued yet</h5><p class="mb-0">Use the tabs above to assign certificates.</p></td></tr>';
+            return;
+        }
+        tbody.innerHTML = rows.map((c, i) => `
+    <tr>
+      <td class="text-muted fw-medium">${i + 1}</td>
+      <td><span class="badge bg-body-secondary text-body border font-monospace px-2 py-1 fs-6">${c.certificate_id}</span></td>
+      <td>
+        <div class="fw-bold">${c.student_name}</div>
+        <div class="text-muted small">${c.student_email}</div>
+      </td>
+      <td>
+        <div class="d-flex align-items-center gap-1 text-muted">
+            <i class="ti ti-calendar-time"></i> ${c.issued_date.substring(0, 10)}
+        </div>
+      </td>
+      <td>
+        <span class="badge rounded-pill px-3 py-2 ${c.approved ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}">
+          <i class="ti ${c.approved ? 'ti-check' : 'ti-clock'} me-1"></i> ${c.approved ? 'Approved' : 'Pending'}
+        </span>
+      </td>
+      <td class="text-center">
+        <button class="btn btn-sm ${c.approved ? 'btn-outline-secondary text-warning' : 'btn-success text-white'} border shadow-sm me-1 rounded-3"
+          onclick="toggleApproved(${c.id})" title="${c.approved ? 'Unapprove' : 'Approve'}">
+          <i class="ti ${c.approved ? 'ti-x' : 'ti-check'}"></i>
+        </button>
+        <button class="btn btn-sm btn-danger text-white shadow-sm rounded-3 px-2"
+          onclick="openDeleteCert(${c.id},'${c.certificate_id}','${c.student_name.replace(/'/g, "\\'")}')" title="Revoke">
+          <i class="ti ti-trash"></i>
+        </button>
+      </td>
+    </tr>`).join('');
+    }
+
+    // ─── Toggle Approved ──────────────────────────────────────────
+    async function toggleApproved(certId) {
+        const res = await fetch(`${BASE}/certificates/${certId}/toggle-approved/`, {
+            method: 'PATCH', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: '{}',
+        });
+        if (res.ok) loadCertificates();
+    }
+
+    // ─── Delete Certificate ────────────────────────────────────────
+    function openDeleteCert(id, certId, studentName) {
+        deletingCertId = id;
+        document.getElementById('deleteCertId').textContent = certId;
+        document.getElementById('deleteCertStudent').textContent = studentName;
+        new bootstrap.Modal(document.getElementById('deleteCertModal')).show();
+    }
+
+    async function deleteCert() {
+        await fetch(`${BASE}/certificates/${deletingCertId}/`, {
+            method: 'DELETE', headers: { 'X-CSRFToken': CSRF },
+        });
+        bootstrap.Modal.getInstance(document.getElementById('deleteCertModal')).hide();
+        loadCertificates();
+    }
+
+    // ─── Individual Search & Assign ────────────────────────────────
+    function searchStudents() {
+        const q = document.getElementById('studentSearchInput').value.trim();
+        const resDiv = document.getElementById('searchResults');
+        clearTimeout(searchTimer);
+        if (q.length < 2) {
+            resDiv.innerHTML = '';
+            resDiv.style.display = 'none';
+            return;
+        }
+
+        searchTimer = setTimeout(async () => {
+            resDiv.innerHTML = '<div class="p-3 text-center text-muted"><div class="spinner-border spinner-border-sm me-2"></div>Searching...</div>';
+            resDiv.style.display = 'block';
+
+            try {
+                const res = await fetch(`${BASE}/certificates/search-students/?q=${encodeURIComponent(q)}`);
+                const data = await res.json();
+                const students = data.students || [];
+
+                if (students.length) {
+                    resDiv.innerHTML = students.map(s => `
+              <button class="list-group-item list-group-item-action bg-body text-body d-flex justify-content-between align-items-center border-start-0 border-end-0 border-top-0 py-3"
+                onclick="assignIndividual(${s.id},'${s.full_name.replace(/'/g, "\\'")}')">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width:40px;height:40px;font-weight:bold">${s.full_name.charAt(0).toUpperCase()}</div>
+                  <div class="text-start">
+                    <div class="fw-bold text-body">${s.full_name}</div>
+                    <div class="text-muted small">${s.email}</div>
+                  </div>
+                </div>
+                <span class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">Assign</span>
+              </button>`).join('');
+                } else {
+                    resDiv.innerHTML = '<div class="p-4 text-center text-muted"><i class="ti ti-user-off fs-1 mb-2 d-block"></i>No students found.</div>';
+                }
+            } catch (e) {
+                resDiv.innerHTML = '<div class="p-3 text-danger">Error fetching results.</div>';
+            }
+        }, 350);
+    }
+
+    function clearSearch() {
+        document.getElementById('studentSearchInput').value = '';
+        const resDiv = document.getElementById('searchResults');
+        resDiv.innerHTML = '';
+        resDiv.style.display = 'none';
+    }
+
+    async function assignIndividual(studentId, name) {
+        const statusEl = document.getElementById('individualStatus');
+        clearSearch();
+
+        statusEl.className = 'alert alert-info mt-4 border-0 shadow-sm rounded-3';
+        statusEl.innerHTML = '<div class="spinner-border spinner-border-sm me-2"></div>Assigning...';
+        statusEl.classList.remove('d-none');
+
+        try {
+            const res = await fetch(`${BASE}/certificates/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ event: EVENT_ID, student: studentId }),
+            });
+            const data = await res.json();
+            if (data.success || res.status === 201) {
+                statusEl.className = 'alert alert-success mt-4 border-0 shadow-sm rounded-3 d-flex align-items-center gap-2';
+                statusEl.innerHTML = `<i class="ti ti-check bg-body-tertiary text-success p-1 rounded-circle"></i> <b>${name}</b> has been assigned effectively.`;
+                loadCertificates();
+            } else {
+                statusEl.className = 'alert alert-danger mt-4 border-0 shadow-sm rounded-3 d-flex align-items-center gap-2';
+                statusEl.innerHTML = `<i class="ti ti-alert-triangle fs-5"></i> ${data.error || 'Failed to assign.'}`;
+            }
+        } catch (e) {
+            statusEl.className = 'alert alert-danger mt-4 border-0 shadow-sm rounded-3';
+            statusEl.textContent = 'Network error during allocation.';
+        }
+    }
+
+    // ─── Batches Loader (for Mass Assign) ─────────────────────────
+    async function loadBatches() {
+        const res = await fetch(`${BASE}/batches/?page_size=100`);
+        const data = await res.json();
+        const sel = document.getElementById('batchSelect');
+        (data.results || []).forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.slug; opt.textContent = b.name;
+            sel.appendChild(opt);
+        });
+    }
+
+    async function loadBatchStudents() {
+        const slug = document.getElementById('batchSelect').value;
+        if (!slug) return;
+
+        const listDiv = document.getElementById('batchStudentList');
+        listDiv.classList.remove('d-none');
+        document.getElementById('batchCheckboxes').innerHTML = '<div class="text-center p-3 text-primary"><div class="spinner-border spinner-border-sm me-2"></div>Loading students...</div>';
+
+        try {
+            const eRes = await fetch(`/administration/batch/${slug}/students-json/`);
+            if (!eRes.ok) {
+                document.getElementById('batchCheckboxes').innerHTML = '<div class="text-danger p-2">Failed to load students mapping for this course.</div>';
+                return;
+            }
+            const students = await eRes.json();
+            batchStudents = students;
+            document.getElementById('batchStudentCount').textContent = students.length;
+
+            if (students.length === 0) {
+                document.getElementById('batchCheckboxes').innerHTML = '<div class="text-muted p-2 text-center">No active students in this batch.</div>';
+                return;
+            }
+
+            renderBatchStudentsTable(students);
+
+            // Re-apply filter
+            applyProgressFilter();
+        } catch (e) {
+            document.getElementById('batchCheckboxes').innerHTML = '<tr><td colspan="4" class="text-danger p-3 text-center">Error connecting to server.</td></tr>';
+        }
+    }
+
+    let currentSortCol = 'name';
+    let currentSortAsc = true;
+
+    function renderBatchStudentsTable(studentsList) {
+        document.getElementById('batchCheckboxes').innerHTML = studentsList.map(s => {
+            const prog = s.progress_percentage || 0;
+            const isOver95 = prog >= 95;
+            const progressBadge = isOver95
+                ? `<span class="badge bg-success">${prog}%</span>`
+                : `<span class="badge bg-secondary">${prog}%</span>`;
+            return `
+        <tr class="align-middle batch-student-row">
+            <td><input class="form-check-input batch-student-cb m-0" type="checkbox" value="${s.id}" data-progress="${prog}" data-original-id="${s.id}" checked onchange="updateBatchCount()"></td>
+            <td class="fw-medium">${s.first_name} ${s.last_name}</td>
+            <td class="text-muted small">${s.email}</td>
+            <td class="text-end">${progressBadge}</td>
+        </tr>`;
+        }).join('');
+    }
+
+    function sortBatchStudents(col) {
+        if (currentSortCol === col) {
+            currentSortAsc = !currentSortAsc;
+        } else {
+            currentSortCol = col;
+            currentSortAsc = true;
+        }
+
+        batchStudents.sort((a, b) => {
+            let valA, valB;
+            if (col === 'name') {
+                valA = (a.first_name + ' ' + a.last_name).toLowerCase();
+                valB = (b.first_name + ' ' + b.last_name).toLowerCase();
+            } else if (col === 'email') {
+                valA = (a.email || '').toLowerCase();
+                valB = (b.email || '').toLowerCase();
+            } else if (col === 'progress') {
+                valA = a.progress_percentage || 0;
+                valB = b.progress_percentage || 0;
+            }
+
+            if (valA < valB) return currentSortAsc ? -1 : 1;
+            if (valA > valB) return currentSortAsc ? 1 : -1;
+            return 0;
+        });
+
+        const checkedMap = {};
+        document.querySelectorAll('.batch-student-cb').forEach(cb => {
+            checkedMap[cb.value] = cb.checked;
+        });
+
+        renderBatchStudentsTable(batchStudents);
+
+        document.querySelectorAll('.batch-student-cb').forEach(cb => {
+            if (checkedMap[cb.value] !== undefined) {
+                cb.checked = checkedMap[cb.value];
+            }
+        });
+
+        if (document.getElementById('progressFilterRange').value > 0) {
+            applyProgressFilterVisuals();
+        } else {
+            document.querySelectorAll('.batch-student-row').forEach(tr => tr.classList.remove('opacity-50'));
+        }
+    }
+
+    function applyProgressFilterVisuals() {
+        const threshold = parseInt(document.getElementById('progressFilterRange').value);
+        const cbs = document.querySelectorAll('.batch-student-cb');
+        cbs.forEach(cb => {
+            const prog = parseFloat(cb.dataset.progress);
+            if (prog < threshold) {
+                cb.closest('tr').classList.add('opacity-50');
+            } else {
+                cb.closest('tr').classList.remove('opacity-50');
+            }
+        });
+    }
+
+    function toggleAllBatchStudents() {
+        const selectAllChecked = document.getElementById('selectAllCb').checked;
+        const threshold = parseInt(document.getElementById('progressFilterRange').value);
+        const cbs = document.querySelectorAll('.batch-student-cb');
+
+        cbs.forEach(cb => {
+            if (parseFloat(cb.dataset.progress) >= threshold) {
+                cb.checked = selectAllChecked;
+            } else {
+                cb.checked = false;
+            }
+        });
+        updateBatchCount();
+    }
+
+    function updateRangeLabel() {
+        const val = parseInt(document.getElementById('progressFilterRange').value);
+        document.getElementById('progressFilterLabel').textContent = val + '%';
+        if (val > 0) {
+            document.getElementById('progressFilterLabel').className = 'badge bg-primary font-monospace';
+        } else {
+            document.getElementById('progressFilterLabel').className = 'badge bg-secondary font-monospace';
+        }
+    }
+
+    function applyProgressFilter() {
+        const threshold = parseInt(document.getElementById('progressFilterRange').value);
+        const cbs = document.querySelectorAll('.batch-student-cb');
+        cbs.forEach(cb => {
+            const prog = parseFloat(cb.dataset.progress);
+            cb.checked = prog >= threshold;
+        });
+
+        applyProgressFilterVisuals();
+
+        // update selectAllCb state
+        let allValidChecked = true;
+        cbs.forEach(cb => {
+            if (parseFloat(cb.dataset.progress) >= threshold && !cb.checked) allValidChecked = false;
+        });
+        document.getElementById('selectAllCb').checked = allValidChecked;
+
+        updateBatchCount();
+    }
+
+    function updateBatchCount() {
+        const totalChecked = document.querySelectorAll('.batch-student-cb:checked').length;
+        document.getElementById('batchStudentCount').textContent = totalChecked;
+
+        // sync main checkbox
+        const threshold = parseInt(document.getElementById('progressFilterRange').value);
+        const cbs = document.querySelectorAll('.batch-student-cb');
+        let allValidChecked = true;
+        let hasValid = false;
+        cbs.forEach(cb => {
+            if (parseFloat(cb.dataset.progress) >= threshold) {
+                hasValid = true;
+                if (!cb.checked) allValidChecked = false;
+            }
+        });
+        document.getElementById('selectAllCb').checked = hasValid ? allValidChecked : false;
+    }
+
+    // ─── Mass Assign ───────────────────────────────────────────────
+    async function massAssign() {
+        const statusEl = document.getElementById('massStatus');
+        statusEl.classList.add('d-none');
+
+        // Collect IDs: from checked batch students only (manual IDs removed)
+        const cbxs = document.querySelectorAll('.batch-student-cb:checked');
+        const checkedIds = [...cbxs].map(cb => parseInt(cb.value));
+        const allIds = checkedIds;
+
+        if (allIds.length === 0) {
+            statusEl.className = 'alert alert-warning border-0 shadow-sm rounded-3 d-flex align-items-center gap-2';
+            statusEl.innerHTML = '<i class="ti ti-alert-circle fs-5"></i> No students selected or entered.';
+            statusEl.classList.remove('d-none');
+            return;
+        }
+
+        const btn = document.getElementById('massAssignText');
+        const spinner = document.getElementById('massAssignSpinner');
+        btn.innerHTML = '<i class="ti ti-loader me-2"></i>Processing...';
+        spinner.classList.remove('d-none');
+
+        try {
+            const res = await fetch(`${BASE}/certificates/mass-assign/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify({ event_id: EVENT_ID, student_ids: allIds }),
+            });
+            const data = await res.json();
+
+            btn.innerHTML = '<i class="ti ti-send me-2"></i>Assign Selected Certificates';
+            spinner.classList.add('d-none');
+
+            if (data.success) {
+                statusEl.className = 'alert alert-success border-0 shadow-sm rounded-3';
+                statusEl.innerHTML = `
+            <div class="d-flex align-items-center gap-2 mb-2"><i class="ti ti-check bg-body-tertiary text-success p-1 rounded-circle"></i> <b>Mass Assignment Complete</b></div>
+            <ul class="mb-0 small ps-4">
+                <li>${data.created} certificate(s) issued successfully.</li>
+                <li>${data.skipped_duplicates} existing certificate(s) skipped.</li>
+                ${data.errors.length ? `<li class="text-danger">${data.errors.length} error(s) encountered.</li>` : ''}
+            </ul>`;
+                cbxs.forEach(cb => cb.checked = false);
+                document.getElementById('batchStudentCount').textContent = '0';
+                loadCertificates();
+            } else {
+                statusEl.className = 'alert alert-danger border-0 shadow-sm rounded-3';
+                statusEl.textContent = data.error || 'Mass assign failed.';
+            }
+            statusEl.classList.remove('d-none');
+        } catch (e) {
+            console.error("Mass assign error:", e);
+            statusEl.className = 'alert alert-danger border-0 shadow-sm rounded-3';
+            statusEl.innerHTML = '<i class="ti ti-alert-triangle me-2"></i>Network error while interacting with API.';
+            statusEl.classList.remove('d-none');
+
+            btn.innerHTML = '<i class="ti ti-send me-2"></i>Assign Selected Certificates';
+            spinner.classList.add('d-none');
+        }
+    }
+
+    // ─── CSV Upload ────────────────────────────────────────────────
+    function updateFileName() {
+        const input = document.getElementById('csvFileInput');
+        const display = document.getElementById('fileNameDisplay');
+        if (input.files.length > 0) {
+            display.innerHTML = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 rounded-pill"><i class="ti ti-file me-1"></i> ${input.files[0].name} (${(input.files[0].size / 1024).toFixed(1)} KB)</span>`;
+        } else {
+            display.innerHTML = 'No file selected';
+        }
+    }
+
+    async function uploadCsv() {
+        const fileInput = document.getElementById('csvFileInput');
+        const statusEl = document.getElementById('csvStatus');
+
+        if (fileInput.files.length === 0) {
+            statusEl.className = 'alert alert-warning border-0 shadow-sm rounded-3 d-flex align-items-center gap-2';
+            statusEl.innerHTML = '<i class="ti ti-alert-circle fs-5"></i> Please select a CSV or Excel file first.';
+            statusEl.classList.remove('d-none');
+            return;
+        }
+
+        const btn = document.getElementById('csvAssignText');
+        const spinner = document.getElementById('csvAssignSpinner');
+        btn.innerHTML = '<i class="ti ti-loader me-2"></i>Uploading...';
+        spinner.classList.remove('d-none');
+        statusEl.classList.add('d-none');
+
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const res = await fetch(`${BASE}/certificates/mass-assign-csv/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF },
+                body: formData
+            });
+
+            const data = await res.json();
+
+            btn.innerHTML = '<i class="ti ti-upload me-2"></i>Upload and Assign';
+            spinner.classList.add('d-none');
+
+            if (data.success) {
+                statusEl.className = 'alert alert-success border-0 shadow-sm rounded-3';
+                let html = `
+                <div class="d-flex align-items-center gap-2 mb-2 fw-bold text-success"><i class="ti ti-check fs-5"></i> Processing Complete</div>
+                <div class="row g-2 small">
+                    <div class="col-sm-6"><i class="ti ti-certificate text-success"></i> Issued: <b>${data.created}</b></div>
+                    <div class="col-sm-6"><i class="ti ti-copy text-warning"></i> Duplicates skipped: <b>${data.skipped_duplicates}</b></div>
+                </div>`;
+
+                if (data.not_found_emails && data.not_found_emails.length > 0) {
+                    html += `
+                <hr class="my-2 border-success border-opacity-25">
+                <div class="text-danger mb-1 fw-bold"><i class="ti ti-user-x"></i> Emails Not Found (${data.not_found_emails.length}):</div>
+                <div class="bg-body-secondary rounded p-2 text-danger font-monospace" style="max-height:100px;overflow-y:auto;font-size:0.75rem;">
+                    ${data.not_found_emails.join('<br>')}
+                </div>`;
+                }
+                if (data.errors && data.errors.length > 0) {
+                    html += `
+                <hr class="my-2 border-success border-opacity-25">
+                <div class="text-danger mb-1 fw-bold"><i class="ti ti-alert-triangle"></i> Data Errors (${data.errors.length}):</div>
+                <div class="bg-body-secondary rounded p-2 text-danger font-monospace" style="max-height:100px;overflow-y:auto;font-size:0.75rem;">
+                    ${data.errors.join('<br>')}
+                </div>`;
+                }
+
+                statusEl.innerHTML = html;
+                fileInput.value = '';
+                document.getElementById('fileNameDisplay').innerHTML = 'No file selected';
+                loadCertificates();
+            } else {
+                statusEl.className = 'alert alert-danger border-0 shadow-sm rounded-3 d-flex align-items-center gap-2';
+                statusEl.innerHTML = `<i class="ti ti-alert-triangle fs-5"></i> ${data.error || 'Failed to process file.'}`;
+            }
+            statusEl.classList.remove('d-none');
+        } catch (err) {
+            btn.innerHTML = '<i class="ti ti-upload me-2"></i>Upload and Assign';
+            spinner.classList.add('d-none');
+            statusEl.className = 'alert alert-danger border-0 shadow-sm rounded-3 d-flex align-items-center gap-2';
+            statusEl.innerHTML = `<i class="ti ti-wifi-off fs-5"></i> Network error during file upload.`;
+            statusEl.classList.remove('d-none');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadCertificates();
+        loadBatches();
+    });
+</script>
+{% endblock %}
