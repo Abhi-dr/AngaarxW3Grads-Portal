@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from datetime import datetime, timedelta
+from django.utils import timezone
 from django.utils.timezone import now
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
@@ -541,7 +542,7 @@ class Streak(models.Model):
         Update streak for any successful question submission (coding or MCQ).
         This method is called whenever a user successfully solves any question.
         """
-        today = datetime.now().date()
+        today = timezone.localdate()
         
         # If this is the first submission ever
         if self.last_submission_date is None:
@@ -574,12 +575,12 @@ class Streak(models.Model):
         self.save()
 
     def can_restore_streak(self):
-        """Check if user can restore their streak (missed exactly 1 day)"""
-        today = datetime.now().date()
+        """Check if user can restore their streak after missing exactly 1 day."""
+        today = timezone.localdate()
         return (
-            self.last_submission_date == today - timedelta(days=2) and 
-            self.current_streak == 0 and 
-            self.previous_streak > 0
+            self.current_streak == 0 and
+            self.previous_streak > 0 and
+            self.last_submission_date in {today, today - timedelta(days=1)}
         )
 
     def restore_streak(self):
@@ -588,7 +589,7 @@ class Streak(models.Model):
         This continues the streak as if they never missed a day.
         """
         if self.can_restore_streak():
-            today = datetime.now().date()
+            today = timezone.localdate()
             # Restore to the previous streak value + 1 (as if they solved yesterday)
             self.current_streak = self.previous_streak + 1
             self.previous_streak = 0  # Clear previous streak after restore
@@ -619,7 +620,7 @@ class Streak(models.Model):
         """
         Check if user has solved any question today.
         """
-        today = datetime.now().date()
+        today = timezone.localdate()
         return self.last_submission_date == today
 
     def __str__(self):
