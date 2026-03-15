@@ -149,7 +149,8 @@ def administrator_fetch_enrollments_of_batch(request, slug):
         response_data.append(entry)
 
     return JsonResponse({"success": True, "data": response_data}, status=200)
-
+from django.db.models import Count
+    
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 @admin_required
@@ -157,30 +158,63 @@ def batch_students_json(request, slug):
     """
     Returns a simple list of accepted students for a batch. 
     Used by the events/certificates mass-assign UI.
+    Optimized to use bulk aggregations to prevent 500 timeouts on 3000+ batches.
     """
     batch = get_object_or_404(Batch, slug=slug)
     enrollments = EnrollmentRequest.objects.select_related('student').filter(batch=batch, status="Accepted")
     
+    # Pre-fetch the requested students
+    students = [req.student for req in enrollments if req.student]
+    student_ids = [s.id for s in students]
+    
+    # Accumulate all relevant questions to count against
     sheets = list(batch.get_ordered_sheets())
-    total_batch_questions = sum(sheet.get_total_questions() for sheet in sheets)
+    coding_question_ids = []
+    mcq_question_ids = []
+    
+    for sheet in sheets:
+        if sheet.sheet_type == "Coding":
+            coding_question_ids.extend(list(sheet.questions.filter(is_approved=True).values_list('id', flat=True)))
+        elif sheet.sheet_type == "MCQ":
+            mcq_question_ids.extend(list(sheet.mcq_questions.filter(is_approved=True).values_list('id', flat=True)))
+            
+    total_batch_questions = len(coding_question_ids) + len(mcq_question_ids)
+    
+    # Run 2 bulk aggregation queries instead of N+1 per-student queries
+    coding_solves = {}
+    if coding_question_ids and student_ids:
+        # Avoid circular import, Submission is already imported above
+        aggs = Submission.objects.filter(
+            user_id__in=student_ids,
+            question_id__in=coding_question_ids,
+            status='Accepted'
+        ).values('user_id').annotate(solved_count=Count('question_id', distinct=True))
+        coding_solves = {item['user_id']: item['solved_count'] for item in aggs}
+        
+    mcq_solves = {}
+    if mcq_question_ids and student_ids:
+        # Need to import MCQSubmission if not already present
+        from practice.models import MCQSubmission
+        aggs = MCQSubmission.objects.filter(
+            student_id__in=student_ids,
+            question_id__in=mcq_question_ids,
+            is_correct=True
+        ).values('student_id').annotate(solved_count=Count('question_id', distinct=True))
+        mcq_solves = {item['student_id']: item['solved_count'] for item in aggs}
     
     students_data = []
-    for req in enrollments:
-        if req.student:
-            solved = 0
-            if total_batch_questions > 0:
-                solved = sum(sheet.get_solved_questions(req.student) for sheet in sheets)
-                
-            progress = (solved / total_batch_questions * 100) if total_batch_questions > 0 else 0
-            
-            students_data.append({
-                "id": req.student.id,
-                "first_name": req.student.first_name,
-                "last_name": req.student.last_name,
-                "email": req.student.email,
-                "full_name": f"{req.student.first_name} {req.student.last_name}".strip(),
-                "progress_percentage": round(progress, 1)
-            })
+    for student in students:
+        solved = coding_solves.get(student.id, 0) + mcq_solves.get(student.id, 0)
+        progress = (solved / total_batch_questions * 100) if total_batch_questions > 0 else 0
+        
+        students_data.append({
+            "id": student.id,
+            "first_name": student.first_name,
+            "last_name": student.last_name,
+            "email": student.email,
+            "full_name": f"{student.first_name} {student.last_name}".strip(),
+            "progress_percentage": round(progress, 1)
+        })
             
     return JsonResponse(students_data, safe=False)
 
