@@ -72,7 +72,7 @@ class JOVACCourseDetailView(APIView):
             registration_status = registration.status
         
         # Get course sheets
-        sheets = course.sheets.filter(is_active=True).order_by('order', 'id')
+        sheets = course.sheets.filter(is_enabled=True).order_by('order', 'id')
         
         course_data = CourseListSerializer(course).data
         course_data['registration_status'] = registration_status
@@ -97,7 +97,7 @@ class JOVACCourseSheetsView(APIView):
         course = get_object_or_404(Course, slug=slug)
 
         # Respect custom sheet ordering set by administrators
-        course_sheets = course.get_ordered_sheets()
+        course_sheets = course.get_ordered_sheets_enabled()
 
         return Response({
             "success": True,
@@ -105,7 +105,6 @@ class JOVACCourseSheetsView(APIView):
             "course": {
                 "name": course.name,
                 "slug": course.slug,
-                "instructor_names": course.get_instructor_names(),
             }
         })
 
@@ -122,28 +121,60 @@ class JOVACSheetAssignmentsView(APIView):
         course = get_object_or_404(Course, slug=course_slug)
         course_sheet = get_object_or_404(CourseSheet, course=course, slug=sheet_slug)
         
-        # Get ordered assignments
-        assignments = course_sheet.get_ordered_assignments()
+        # Get ordered mixed items
+        items = course_sheet.get_ordered_items()
         
         # Get submitted assignment IDs for this student
         submitted_assignment_ids = AssignmentSubmission.objects.filter(
             student=student
         ).values_list('assignment_id', flat=True)
         
-        # Add is_submitted flag to each assignment
-        for assignment in assignments:
-            assignment.is_submitted = assignment.id in submitted_assignment_ids
+        from student.api.serializers.assignment_serializers import AssignmentListSerializer
+        
+        serialized_items = []
+        for item in items:
+            obj = item['obj']
+            if item['type'] == 'Assignment':
+                # Add is_submitted flag
+                obj.is_submitted = obj.id in submitted_assignment_ids
+                data = AssignmentListSerializer(obj).data
+            elif item['type'] == 'MCQ':
+                data = {
+                    'id': obj.id,
+                    'title': obj.question_text[:100] + ('...' if len(obj.question_text) > 100 else ''),
+                    'slug': obj.slug,
+                    'difficulty_level': obj.difficulty_level,
+                    'is_tutorial': False,
+                    'is_submitted': False, # Update this later if MCQ submissions are tracked here
+                    'assignment_type': 'MCQ Question'
+                }
+            elif item['type'] == 'Coding':
+                data = {
+                    'id': obj.id,
+                    'title': obj.title,
+                    'slug': obj.slug,
+                    'difficulty_level': obj.difficulty_level,
+                    'is_tutorial': False,
+                    'is_submitted': False, # Update this later if Coding submissions are tracked here
+                    'assignment_type': 'Coding Question'
+                }
+            
+            serialized_items.append({
+                'item_id': item['item_id'],
+                'type': item['type'],
+                'pk': item['pk'],
+                'data': data
+            })
         
         # Get current time for deadline checks
         current_time = timezone.now()
         
         return Response({
             "success": True,
-            "assignments": AssignmentListSerializer(assignments, many=True).data,
+            "items": serialized_items,
             "course": {
                 "name": course.name,
                 "slug": course.slug,
-                "instructor_names": course.get_instructor_names(),
             },
             "sheet": {
                 "name": course_sheet.name,

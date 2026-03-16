@@ -19,14 +19,14 @@ class Batch(models.Model):
     thumbnail = models.ImageField(upload_to='batches/thumbnails/', blank=True, null=True)
     students = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="batches", through="EnrollmentRequest")
     
-    required_fields = models.JSONField(default=list, blank=True)
+    required_fields = models.JSONField(default=list, blank=True, null=True)
 
     is_active = models.BooleanField(default=True, db_index=True)
 
     slug = models.SlugField(unique=True, blank=True, null=True)
 
     # Custom display order for sheets within this batch {sheet_id: position}
-    sheet_order = models.JSONField(default=dict, blank=True)
+    sheet_order = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
         return self.name

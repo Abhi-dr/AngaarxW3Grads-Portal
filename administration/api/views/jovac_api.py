@@ -166,13 +166,87 @@ class CourseSheetAdminViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response({'success': True, 'message': 'Sheet deleted successfully.'}, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['get'], url_path='assignments')
-    def assignments(self, request, slug=None):
-        """GET /api/v1/course-sheets/<slug>/assignments/ — list all assignments for a sheet"""
+    @action(detail=True, methods=['get'], url_path='items')
+    def items(self, request, slug=None):
+        """GET /api/v1/course-sheets/<slug>/items/ — list all mixed items (assignments, mcqs, coding)"""
         sheet = self.get_object()
-        assignments = sheet.get_ordered_assignments()
-        serializer = AssignmentAdminSerializer(assignments, many=True, context={'request': request})
-        return Response({'success': True, 'assignments': serializer.data})
+        from administration.api.serializers.jovac_serializers import CourseSheetMixedItemSerializer
+        items = sheet.get_ordered_items()
+        serializer = CourseSheetMixedItemSerializer(items, many=True, context={'request': request})
+        return Response({'success': True, 'items': serializer.data})
+        
+    @action(detail=True, methods=['patch'], url_path='reorder-items')
+    def reorder_items(self, request, slug=None):
+        """PATCH /api/v1/course-sheets/<slug>/reorder-items/ — save custom item order.
+        Body: {"order": ["assignment_1", "mcq_5", "coding_9", ...]}
+        """
+        sheet = self.get_object()
+        order = request.data.get('order', [])
+        if not isinstance(order, list):
+            return Response({'success': False, 'error': 'order must be a list of item IDs (e.g. assignment_1).'}, status=400)
+        sheet.custom_order = {str(item_id): idx for idx, item_id in enumerate(order)}
+        sheet.save(update_fields=['custom_order'])
+        return Response({'success': True, 'message': 'Item order saved successfully.'})
+
+    @action(detail=True, methods=['post'], url_path='link-item')
+    def link_item(self, request, slug=None):
+        """POST /api/v1/course-sheets/<slug>/link-item/
+        Body: {"type": "MCQ" | "Coding", "item_id": 123}
+        Links an existing question to this sheet. Assignments are linked in their own create endpoint.
+        """
+        sheet = self.get_object()
+        item_type = request.data.get('type')
+        item_id = request.data.get('item_id')
+        
+        if not item_type or not item_id:
+            return Response({'success': False, 'error': 'type and item_id are required'}, status=400)
+            
+        if item_type == 'MCQ':
+            from practice.models import MCQQuestion
+            q = get_object_or_404(MCQQuestion, id=item_id)
+            sheet.mcq_questions.add(q)
+            return Response({'success': True, 'message': 'MCQ linked successfully'})
+        elif item_type == 'Coding':
+            from practice.models import Question
+            q = get_object_or_404(Question, id=item_id)
+            sheet.coding_questions.add(q)
+            return Response({'success': True, 'message': 'Coding question linked successfully'})
+        return Response({'success': False, 'error': 'Invalid type. Use MCQ or Coding.'}, status=400)
+
+    @action(detail=True, methods=['post'], url_path='unlink-item')
+    def unlink_item(self, request, slug=None):
+        """POST /api/v1/course-sheets/<slug>/unlink-item/
+        Body: {"type": "Assignment" | "MCQ" | "Coding", "item_id": 123}
+        Unlinks an item from the sheet.
+        """
+        sheet = self.get_object()
+        item_type = request.data.get('type')
+        item_id = request.data.get('item_id')
+        
+        if not item_type or not item_id:
+            return Response({'success': False, 'error': 'type and item_id are required'}, status=400)
+            
+        if item_type == 'Assignment':
+            a = get_object_or_404(Assignment, id=item_id)
+            a.course_sheets.remove(sheet)
+        elif item_type == 'MCQ':
+            from practice.models import MCQQuestion
+            q = get_object_or_404(MCQQuestion, id=item_id)
+            sheet.mcq_questions.remove(q)
+        elif item_type == 'Coding':
+            from practice.models import Question
+            q = get_object_or_404(Question, id=item_id)
+            sheet.coding_questions.remove(q)
+        else:
+            return Response({'success': False, 'error': 'Invalid type'}, status=400)
+            
+        # Clean up order dictionary
+        full_key = f"{item_type.lower()}_{item_id}" if item_type != 'Assignment' else f"assignment_{item_id}"
+        if full_key in sheet.custom_order:
+            del sheet.custom_order[full_key]
+            sheet.save(update_fields=['custom_order'])
+            
+        return Response({'success': True, 'message': 'Item unlinked successfully'})
 
 
 # ============================================================
@@ -227,6 +301,37 @@ class AssignmentAdminViewSet(viewsets.ModelViewSet):
         self.perform_destroy(instance)
         return Response({'success': True, 'message': 'Assignment deleted successfully.'}, status=status.HTTP_200_OK)
 
+
+# ============================================================
+# MCQQuestion CRUD ViewSet
+# ============================================================
+
+class MCQQuestionAdminViewSet(viewsets.ModelViewSet):
+    """
+    CRUD for MCQ Questions from within JOVAC module.
+    """
+    from practice.models import MCQQuestion
+    queryset = MCQQuestion.objects.all().order_by('-created_at')
+    from administration.api.serializers.jovac_serializers import MCQQuestionAdminSerializer
+    serializer_class = MCQQuestionAdminSerializer
+    permission_classes = [IsAdministratorOrInstructor]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+
+# ============================================================
+# Question (Coding) CRUD ViewSet
+# ============================================================
+
+class QuestionAdminViewSet(viewsets.ModelViewSet):
+    """
+    CRUD for Coding Questions from within JOVAC module.
+    """
+    from practice.models import Question
+    queryset = Question.objects.all().order_by('-id')
+    from administration.api.serializers.jovac_serializers import QuestionAdminSerializer
+    serializer_class = QuestionAdminSerializer
+    permission_classes = [IsAdministratorOrInstructor]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
 # ============================================================
 # TestCase CRUD ViewSet

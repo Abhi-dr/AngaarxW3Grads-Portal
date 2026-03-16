@@ -115,6 +115,71 @@ class AssignmentAdminSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
 
+# ====================================================
+# Mixed Item
+# ====================================================
+
+class CourseSheetMixedItemSerializer(serializers.Serializer):
+    item_id = serializers.CharField()
+    type = serializers.CharField()
+    pk = serializers.IntegerField()
+    obj = serializers.SerializerMethodField()
+    
+    def get_obj(self, instance):
+        obj = instance['obj']
+        if instance['type'] == 'Assignment':
+            return AssignmentAdminSerializer(obj, context=self.context).data
+        elif instance['type'] == 'MCQ':
+            return {
+                'id': obj.id,
+                'title': getattr(obj, 'question_text', '')[:100] + ('...' if len(getattr(obj, 'question_text', '')) > 100 else ''),
+                'slug': obj.slug,
+                'is_approved': obj.is_approved,
+                'difficulty_level': obj.difficulty_level,
+                'type': 'MCQ'
+            }
+        elif instance['type'] == 'Coding':
+            return {
+                'id': obj.id,
+                'title': obj.title,
+                'slug': obj.slug,
+                'is_approved': obj.is_approved,
+                'difficulty_level': obj.difficulty_level,
+                'type': 'Coding'
+            }
+        return {}
+
+
+
+from practice.models import Question, MCQQuestion
+
+# ====================================================
+# MCQQuestion
+# ====================================================
+
+class MCQQuestionAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MCQQuestion
+        fields = [
+            'id', 'question_text', 'option_a', 'option_b', 'option_c', 'option_d',
+            'correct_option', 'explanation', 'tags', 'difficulty_level', 'slug', 'is_approved'
+        ]
+        read_only_fields = ['slug']
+
+# ====================================================
+# Question (Coding)
+# ====================================================
+
+class QuestionAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Question
+        fields = [
+            'id', 'title', 'scenario', 'description', 'constraints',
+            'input_format', 'output_format', 'cpu_time_limit', 'memory_limit',
+            'show_complete_driver_code', 'difficulty_level', 'youtube_link',
+            'position', 'hint', 'slug', 'is_approved'
+        ]
+        read_only_fields = ['slug', 'position']
 
 # ====================================================
 # TestCase
