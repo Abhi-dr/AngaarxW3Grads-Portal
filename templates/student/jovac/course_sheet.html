@@ -90,7 +90,7 @@ active
         <div class="card-body p-4">
             <div class="input-group">
                 <input type="text" class="form-control" id="search-input"
-                    placeholder="Search by ID, Title, Description or Type" aria-label="Search assignments">
+                    placeholder="Search by ID, title, description, difficulty or type" aria-label="Search sheet items">
                 <button class="btn btn-outline-secondary" type="button" id="search-button">Search</button>
                 <button class="btn btn-outline-danger" type="button" id="clear-button">Clear</button>
             </div>
@@ -101,7 +101,7 @@ active
     <div class="card w-100 d-none" id="assignments-container">
         <div class="card-body p-4">
             <h5 class="card-title fw-semibold mb-4">
-                Angaari Assignments 🔥
+                JOVAC Sheet Items 🔥
                 <span class="fs-6 d-none" id="search-results-text"></span>
             </h5>
             <div class="table-responsive">
@@ -140,8 +140,8 @@ active
     <div id="empty-state" class="card d-none">
         <div class="card-body text-center py-5">
             <i class="ti ti-clipboard-off" style="font-size: 4rem; opacity: 0.3;"></i>
-            <h4 class="mt-3">No Assignments Available</h4>
-            <p class="text-muted">There are no assignments for this sheet yet.</p>
+            <h4 class="mt-3">No Sheet Items Available</h4>
+            <p class="text-muted">There are no items for this sheet yet.</p>
         </div>
     </div>
 </div>
@@ -149,8 +149,8 @@ active
 <script>
     const courseSlug = '{{ course.slug }}';
     const sheetSlug = '{{ sheet.slug }}';
-    let allAssignments = [];
-    let filteredAssignments = [];
+    let allItems = [];
+    let filteredItems = [];
 
     document.addEventListener('DOMContentLoaded', function () {
         fetchAssignments();
@@ -184,15 +184,15 @@ active
             const data = await response.json();
 
             if (data.success) {
-                allAssignments = data.assignments;
-                filteredAssignments = allAssignments;
-                renderAssignments(allAssignments);
+                allItems = data.items || [];
+                filteredItems = allItems;
+                renderAssignments(allItems);
 
                 // Hide loading and show content
                 document.getElementById('loading-container').classList.add('d-none');
-                document.getElementById('search-container').classList.remove('d-none');
 
-                if (allAssignments.length > 0) {
+                if (allItems.length > 0) {
+                    document.getElementById('search-container').classList.remove('d-none');
                     document.getElementById('assignments-container').classList.remove('d-none');
                 } else {
                     document.getElementById('empty-state').classList.remove('d-none');
@@ -207,38 +207,42 @@ active
         }
     }
 
-    function renderAssignments(assignments) {
+    function renderAssignments(items) {
         const tbody = document.getElementById('assignmentTableBody');
         tbody.innerHTML = '';
 
-        if (assignments.length === 0) {
+        if (items.length === 0) {
             tbody.innerHTML = `
                 <tr>
                     <td colspan="6" class="text-center py-4">
-                        <p class="text-muted mb-0">No assignments found</p>
+                        <p class="text-muted mb-0">No sheet items found</p>
                     </td>
                 </tr>
             `;
             return;
         }
 
-        assignments.forEach(assignment => {
-            const row = createAssignmentRow(assignment);
+        items.forEach(item => {
+            const row = createAssignmentRow(item);
             tbody.appendChild(row);
         });
+
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
     }
 
-    function createAssignmentRow(assignment) {
+    function createAssignmentRow(item) {
+        const entry = item.data || {};
         const tr = document.createElement('tr');
 
         // Truncate title
-        const truncatedTitle = assignment.title.length > 30
-            ? assignment.title.substring(0, 30) + '...'
-            : assignment.title;
+        const title = entry.title || 'Untitled';
+        const truncatedTitle = title.length > 30
+            ? title.substring(0, 30) + '...'
+            : title;
 
         let typeCell, deadlineCell, linkCell, actionCell;
 
-        if (assignment.is_tutorial) {
+        if (item.type === 'Assignment' && entry.is_tutorial) {
             // Tutorial row
             typeCell = `
                 <td class="border-bottom-0">
@@ -257,8 +261,8 @@ active
             linkCell = `
                 <td class="border-bottom-0">
                     <p class="fw-semibold mb-0">
-                        ${assignment.tutorial_link
-                    ? `<a href="${assignment.tutorial_link}" target="_blank"><i class="fa fa-youtube-play"></i></a>`
+                        ${entry.tutorial_link
+                    ? `<a href="${entry.tutorial_link}" target="_blank" rel="noopener noreferrer"><i class="fa fa-youtube-play"></i></a>`
                     : '-'}
                     </p>
                 </td>
@@ -267,16 +271,16 @@ active
             actionCell = `
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
-                        <a class="btn btn-success" href="/dashboard/jovac/tutorial/${assignment.id}/">View More</a>
+                        <a class="btn btn-success" href="/dashboard/jovac/tutorial/${entry.id}/">View More</a>
                     </div>
                 </td>
             `;
-        } else {
+        } else if (item.type === 'Assignment') {
             // Regular assignment row
             typeCell = `
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
-                        <p class="mb-0 fw-normal">${assignment.assignment_type} Type</p>
+                        <p class="mb-0 fw-normal">${entry.assignment_type} Type</p>
                     </div>
                 </td>
             `;
@@ -284,8 +288,8 @@ active
             deadlineCell = `
                 <td class="border-bottom-0">
                     <p class="fw-semibold mb-0">
-                        <span>${assignment.due_date_formatted || '-'}</span>
-                        ${assignment.due_time_formatted ? `<br><span style="font-weight: bold; color: black;">@${assignment.due_time_formatted}</span>` : ''}
+                        <span>${entry.due_date_formatted || '-'}</span>
+                        ${entry.due_time_formatted ? `<br><span style="font-weight: bold; color: black;">@${entry.due_time_formatted}</span>` : ''}
                     </p>
                 </td>
             `;
@@ -300,12 +304,12 @@ active
 
             // Action button logic
             let actionButton;
-            if (assignment.is_submitted) {
-                actionButton = `<a href="/dashboard/assignments/${assignment.id}/submission" class="btn btn-outline-success mx-1">View Submission</a>`;
-            } else if (assignment.is_overdue) {
+            if (entry.is_submitted) {
+                actionButton = `<a href="/dashboard/assignments/${entry.id}/submission" class="btn btn-outline-success mx-1">View Submission</a>`;
+            } else if (entry.is_overdue) {
                 actionButton = `<button class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>`;
             } else {
-                actionButton = `<a href="/dashboard/submit_assignment/${assignment.id}" class="btn btn-outline-primary mx-1">Submit Assignment</a>`;
+                actionButton = `<a href="/dashboard/submit_assignment/${entry.id}" class="btn btn-outline-primary mx-1">Submit Assignment</a>`;
             }
 
             actionCell = `
@@ -315,14 +319,74 @@ active
                     </div>
                 </td>
             `;
+        } else if (item.type === 'MCQ') {
+            typeCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-warning text-dark">MCQ Question</span>
+                    </div>
+                </td>
+            `;
+
+            deadlineCell = `
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">-</p>
+                </td>
+            `;
+
+            linkCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-light text-dark">${entry.difficulty_level || 'N/A'}</span>
+                    </div>
+                </td>
+            `;
+
+            actionCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a class="btn btn-outline-primary mx-1" href="/dashboard/sheet/${sheetSlug}/${entry.slug}/">Open MCQ</a>
+                    </div>
+                </td>
+            `;
+        } else {
+            typeCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-info">Coding Question</span>
+                    </div>
+                </td>
+            `;
+
+            deadlineCell = `
+                <td class="border-bottom-0">
+                    <p class="fw-semibold mb-0">-</p>
+                </td>
+            `;
+
+            linkCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-light text-dark">${entry.difficulty_level || 'N/A'}</span>
+                    </div>
+                </td>
+            `;
+
+            actionCell = `
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <a class="btn btn-outline-primary mx-1" href="/practice/problem/${entry.slug}/">Solve Problem</a>
+                    </div>
+                </td>
+            `;
         }
 
         tr.innerHTML = `
             <td class="border-bottom-0">
-                <h6 class="fw-semibold mb-0">${assignment.id}</h6>
+                <h6 class="fw-semibold mb-0">${item.pk}</h6>
             </td>
             <td class="border-bottom-0">
-                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${assignment.title}">
+                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${title}">
                     ${truncatedTitle}
                 </h6>
             </td>
@@ -343,26 +407,29 @@ active
             return;
         }
 
-        filteredAssignments = allAssignments.filter(assignment => {
+        filteredItems = allItems.filter(item => {
+            const entry = item.data || {};
             return (
-                assignment.id.toString().includes(query) ||
-                assignment.title.toLowerCase().includes(query) ||
-                (assignment.description && assignment.description.toLowerCase().includes(query)) ||
-                (assignment.assignment_type && assignment.assignment_type.toLowerCase().includes(query))
+                item.pk.toString().includes(query) ||
+                (entry.title && entry.title.toLowerCase().includes(query)) ||
+                (entry.description && entry.description.toLowerCase().includes(query)) ||
+                (entry.assignment_type && entry.assignment_type.toLowerCase().includes(query)) ||
+                (entry.difficulty_level && entry.difficulty_level.toLowerCase().includes(query)) ||
+                item.type.toLowerCase().includes(query)
             );
         });
 
-        renderAssignments(filteredAssignments);
+        renderAssignments(filteredItems);
 
         const resultsText = document.getElementById('search-results-text');
-        resultsText.textContent = ` | Showing ${filteredAssignments.length} result(s) for "${query}"`;
+        resultsText.textContent = ` | Showing ${filteredItems.length} result(s) for "${query}"`;
         resultsText.classList.remove('d-none');
     }
 
     function clearSearch() {
         document.getElementById('search-input').value = '';
-        filteredAssignments = allAssignments;
-        renderAssignments(allAssignments);
+        filteredItems = allItems;
+        renderAssignments(allItems);
 
         // Hide search results text
         document.getElementById('search-results-text').classList.add('d-none');

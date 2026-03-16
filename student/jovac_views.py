@@ -306,7 +306,6 @@ def run_evaluation(assignment: Assignment, submission: AssignmentSubmission):
 # =========================================== VIEW TUTORIAL =============================================
 
 @login_required(login_url="login")
-@login_required(login_url="login")
 def view_jovac_tutorial(request, id):
     """
     View a JOVAC tutorial
@@ -323,12 +322,11 @@ def get_next_jovac_assignment(request, id):
     # Get the current assignment
     course_sheet = get_object_or_404(CourseSheet, assignments__id=id)
     current_assignment = get_object_or_404(Assignment, id=id)
-    
-    next_assignment = course_sheet.get_next_assignment(current_assignment)
 
-    if not next_assignment:
+    next_item = course_sheet.get_next_item(f'assignment_{current_assignment.id}')
+
+    if not next_item:
         messages.error(request, "No more assignments available in this course sheet.")
-        course = course_sheet.course.first()
         if current_assignment.is_tutorial:
             # If the current assignment is a tutorial, redirect to the course sheet
             return redirect('view_jovac_tutorial', id=current_assignment.id)
@@ -338,20 +336,18 @@ def get_next_jovac_assignment(request, id):
 
 
     else:
+        if next_item['type'] == 'MCQ':
+            return redirect('mcq_question', sheet_slug=course_sheet.slug, slug=next_item['obj'].slug)
+
+        if next_item['type'] == 'Coding':
+            return redirect('problem', slug=next_item['obj'].slug)
+
+        next_assignment = next_item['obj']
         if next_assignment.is_tutorial:
             # If the next assignment is a tutorial, redirect to the tutorial view
             return redirect('view_jovac_tutorial', id=next_assignment.id)
         else:
-            # Otherwise, redirect to the assignment submission page
-            # Ensure the course slug is passed correctly
-            if next_assignment.content_type.model == 'course':
-                course_slug = next_assignment.course.slug
-            else:
-                course_slug = course_sheet.course.slug
-            
             return redirect('submit_assignment', assignment_id=next_assignment.id)
-            
-        # Redirect to the assignment submission page
 
 
 # =========================================== VIEW SUBMISSION =============================================
@@ -441,4 +437,3 @@ def delete_submission(request, submission_id):
     messages.success(request, "Submission deleted successfully.")
     
     return redirect('student_jovac', slug=assignment.course.slug)
-

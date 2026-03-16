@@ -100,7 +100,7 @@ class AIQuestion(models.Model):
 # =================================================== Course ==========================================
 
 
-class Course(models.Model):
+class Course(models.Model): # Called as JOVAC in HTML
     
     name = models.CharField(max_length=100, db_index=True)  # Increased length and added index
 

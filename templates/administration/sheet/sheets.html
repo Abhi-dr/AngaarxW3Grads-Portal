@@ -1,6 +1,6 @@
 {% extends 'administration/base.html' %}
-
 {% load custom_filters %}
+{% load static %}
 
 {% block sheet_active %}
 active
@@ -10,1355 +10,469 @@ active
 Administration | Sheets
 {% endblock %}
 
-{% block body %}
+{% block extra_css %}
+<style>
+    /* Adaptive Skeleton Loaders using Bootstrap 5 variables */
+    .skeleton-card {
+        background: var(--bs-body-bg);
+        border: 1px solid var(--bs-border-color-translucent);
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
 
-<div class="container-fluid sheets-page">
+    .skeleton-img, .skeleton-line {
+        background: linear-gradient(90deg, var(--bs-secondary-bg) 25%, var(--bs-tertiary-bg) 50%, var(--bs-secondary-bg) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+    }
+
+    .skeleton-img {
+        height: 230px;
+    }
+
+    .skeleton-line {
+        height: 14px;
+        border-radius: 4px;
+        margin: 8px 12px;
+    }
+
+    .skeleton-line.short {
+        width: 60%;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0 }
+        100% { background-position: -200% 0 }
+    }
+
+    .sheet-card .card-img-top {
+        height: 230px;
+        object-fit: cover;
+    }
+    
+    .border-dashed {
+        border-style: dashed !important;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
 
     {% csrf_token %}
 
-    <!-- Page Header -->
-    <div class="page-header mb-4">
-        <div class="page-header-inner">
-            <div class="page-header-content">
-                <div class="page-header-text">
-                    <div class="page-badge">
-                        <span class="badge-dot"></span>
-                        Resource Management
-                    </div>
-                    <h1 class="page-title">All Sheets</h1>
-                    <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a href="{% url 'administration' %}" class="breadcrumb-link">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2" class="me-1">
-                                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                                        <polyline points="9 22 9 12 15 12 15 22" />
-                                    </svg>
-                                    Dashboard
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">Sheets</li>
-                        </ol>
-                    </nav>
-                </div>
+    <div id="alertContainer"></div>
+
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h3 class="heading mb-0">
+                    <span class="fw-semibold">All Sheets</span>
+                </h3>
+                <p class="text-body-secondary mb-0 small">Resource Management Dashboard</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{% url 'administrator_pending_sheet' %}" class="btn-secondary-action">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="12 6 12 12 15 15" />
-                    </svg>
+                <a href="{% url 'administrator_pending_sheet' %}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 15 15"/></svg>
                     Pending Review
                 </a>
-                <button class="btn-primary-action" data-bs-toggle="modal" data-bs-target="#sheetModal"
-                    onclick="openAddModal()">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2.5">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
+                <button class="btn btn-primary d-inline-flex align-items-center gap-2" id="addSheetBtn" data-bs-toggle="modal" data-bs-target="#sheetModal" onclick="openAddModal()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> 
                     New Sheet
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Alert Container -->
-    <div id="alert-container"></div>
-
-    <!-- Grid -->
-    <div class="cp-grid" id="sheets-container">
-        <!-- Skeleton Loading State -->
-        <div class="loading-state" id="loading-spinner">
-            <div class="loading-grid">
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-                <div class="skeleton-card"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ADD / EDIT SHEET MODAL -->
-    <div class="modal fade" id="sheetModal" tabindex="-1" aria-labelledby="sheetModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg cp-modal-dialog">
-            <div class="modal-content cp-modal-content">
-                <form id="sheetForm">
-                    <div class="cp-modal-header">
-                        <div class="modal-header-inner">
-                            <div class="modal-icon-wrap">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
-                                    <line x1="16" y1="13" x2="8" y2="13" />
-                                    <line x1="16" y1="17" x2="8" y2="17" />
-                                    <polyline points="10 9 9 9 8 9" />
-                                </svg>
-                            </div>
-                            <div>
-                                <h5 class="modal-title-text" id="sheetModalLabel">Add New Sheet</h5>
-                                <p class="modal-subtitle">Configure module settings and resources</p>
-                            </div>
-                        </div>
-                        <button type="button" class="modal-close-btn" data-bs-dismiss="modal" aria-label="Close">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5">
-                                <line x1="18" y1="6" x2="6" y2="18" />
-                                <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                        </button>
-                    </div>
-
-                    <div class="cp-modal-body">
-                        <input type="hidden" id="sheetSlug" name="slug">
-
-                        <div class="row g-3">
-                            <div class="col-md-8">
-                                <div class="form-group-styled">
-                                    <label for="name" class="form-label-styled">
-                                        Sheet Name
-                                        <span class="required-star">*</span>
-                                    </label>
-                                    <input type="text" class="form-input-styled" id="name" name="name"
-                                        placeholder="e.g. Arrays and Strings" required>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group-styled">
-                                    <label for="sheet_type" class="form-label-styled">Type</label>
-                                    <select class="form-input-styled" id="sheet_type" name="sheet_type">
-                                        <option value="Coding">Coding</option>
-                                        <option value="MCQ">MCQ</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group-styled">
-                            <label for="description" class="form-label-styled">Description</label>
-                            <textarea class="form-input-styled form-textarea-styled" id="description" name="description"
-                                rows="3" placeholder="Brief overview of the topics covered..."></textarea>
-                        </div>
-
-                        <div class="form-group-styled">
-                            <label for="thumbnail" class="form-label-styled">
-                                Thumbnail Image
-                                <span class="required-star" id="req-thumb-star">*</span>
-                            </label>
-                            <div class="file-upload-zone" id="file-upload-zone"
-                                onclick="document.getElementById('thumbnail').click()">
-                                <input type="file" class="file-input-hidden" id="thumbnail" name="thumbnail"
-                                    accept="image/*" onchange="handleFileSelect(this)">
-                                <div class="file-upload-content" id="file-upload-content">
-                                    <div class="file-upload-icon">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" stroke-width="1.5">
-                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                                            <polyline points="17 8 12 3 7 8" />
-                                            <line x1="12" y1="3" x2="12" y2="15" />
-                                        </svg>
-                                    </div>
-                                    <p class="file-upload-text">Click to upload image</p>
-                                    <p class="file-upload-hint" id="thumbnail-help">PNG, JPG or WEBP. Required for new
-                                        sheets.</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <div class="form-group-styled">
-                                    <label for="start_time" class="form-label-styled">Start Time (Optional)</label>
-                                    <input type="datetime-local" class="form-input-styled" id="start_time"
-                                        name="start_time">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group-styled">
-                                    <label for="end_time" class="form-label-styled">End Time (Optional)</label>
-                                    <input type="datetime-local" class="form-input-styled" id="end_time"
-                                        name="end_time">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Checkboxes Row -->
-                        <div class="d-flex gap-4 mt-2">
-                            <div class="form-check form-switch custom-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="is_enabled"
-                                    name="is_enabled" checked>
-                                <label class="form-check-label fw-semibold" for="is_enabled">Public/Enabled</label>
-                            </div>
-                            <div class="form-check form-switch custom-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="is_sequential"
-                                    name="is_sequential">
-                                <label class="form-check-label fw-semibold" for="is_sequential">Sequential
-                                    Progression</label>
-                            </div>
-                            <div class="form-check form-switch custom-switch">
-                                <input class="form-check-input" type="checkbox" role="switch" id="is_approved"
-                                    name="is_approved" checked>
-                                <label class="form-check-label fw-semibold" for="is_approved">Approved</label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="cp-modal-footer">
-                        <button type="button" class="btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn-modal-save" id="saveSheetBtn">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2.5">
-                                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
-                                <polyline points="17 21 17 13 7 13 7 21" />
-                                <polyline points="7 3 7 8 15 8" />
-                            </svg>
-                            Save Sheet
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- DELETE CONFIRMATION MODAL -->
-    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm cp-modal-dialog">
-            <div class="modal-content cp-modal-content">
-                <div class="delete-modal-body">
-                    <div class="delete-icon-wrap">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="1.5">
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
-                            <line x1="10" y1="11" x2="10" y2="17" />
-                            <line x1="14" y1="11" x2="14" y2="17" />
-                        </svg>
-                    </div>
-                    <h4 class="delete-modal-title">Delete Sheet?</h4>
-                    <p class="delete-modal-text">You're about to permanently delete <strong
-                            id="deleteSheetName"></strong>. This action cannot be undone.</p>
-                </div>
-                <div class="delete-modal-footer">
-                    <button type="button" class="btn-delete-cancel" data-bs-dismiss="modal">Keep</button>
-                    <button type="button" class="btn-delete-confirm" id="confirmDeleteBtn">Yes, Delete</button>
+    <div class="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4" id="sheetsGrid">
+        {% for i in "12345678" %}
+        <div class="col skeleton-item">
+            <div class="card skeleton-card h-100">
+                <div class="skeleton-img"></div>
+                <div class="card-body p-3">
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line" style="height:30px;margin-top:12px;"></div>
                 </div>
             </div>
         </div>
+        {% endfor %}
     </div>
 
 </div>
 
-<!-- REUSE CSS GLOBALS FROM batches.html style template but scoped cleanly -->
-<style>
-    :root,
-    [data-bs-theme="light"] {
-        --cp-bg-page: #f4f6fb;
-        --cp-bg-card: #ffffff;
-        --cp-bg-card-hover: #f8faff;
-        --cp-bg-header: #ffffff;
-        --cp-bg-modal: #ffffff;
-        --cp-bg-input: #f7f8fc;
-        --cp-bg-input-focus: #ffffff;
-        --cp-bg-skeleton: #e8ecf4;
-        --cp-bg-skeleton-shine: #f4f6fb;
-        --cp-bg-upload: #f7f9ff;
-        --cp-bg-upload-hover: #eef2ff;
-        --cp-bg-delete-icon: #fff1f0;
-
-        --cp-text-primary: #0f172a;
-        --cp-text-secondary: #475569;
-        --cp-text-muted: #94a3b8;
-        --cp-text-breadcrumb: #64748b;
-        --cp-text-badge: #4f46e5;
-        --cp-text-delete-icon: #ef4444;
-
-        --cp-border: #e2e8f0;
-        --cp-border-card: #e8edf5;
-        --cp-border-input: #dde3ef;
-        --cp-border-input-focus: #6366f1;
-        --cp-border-upload: #c7d2f5;
-
-        --cp-accent: #4f46e5;
-        --cp-accent-hover: #4338ca;
-        --cp-accent-light: #eef2ff;
-        --cp-accent-glow: rgba(79, 70, 229, 0.15);
-
-        --cp-danger: #ef4444;
-        --cp-danger-hover: #dc2626;
-        --cp-danger-light: #fff1f0;
-
-        --cp-shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(15, 23, 42, 0.06);
-        --cp-shadow-card-hover: 0 8px 32px rgba(79, 70, 229, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08);
-        --cp-shadow-modal: 0 24px 64px rgba(15, 23, 42, 0.16);
-        --cp-shadow-btn: 0 4px 14px rgba(79, 70, 229, 0.35);
-
-        --cp-badge-dot: #eab308;
-        --cp-header-gradient: linear-gradient(135deg, #fdfbfa 0%, #fffdf0 100%);
-        --cp-header-border: #fef08a;
-    }
-
-    [data-bs-theme="dark"],
-    .dark,
-    [data-theme="dark"] {
-        --cp-bg-page: #0d1117;
-        --cp-bg-card: #161b27;
-        --cp-bg-card-hover: #1c2333;
-        --cp-bg-header: #161b27;
-        --cp-bg-modal: #161b27;
-        --cp-bg-input: #1c2333;
-        --cp-bg-input-focus: #202737;
-        --cp-bg-skeleton: #1c2333;
-        --cp-bg-skeleton-shine: #222b3e;
-        --cp-bg-upload: #1a2236;
-        --cp-bg-upload-hover: #1e2a47;
-        --cp-bg-delete-icon: #2d1515;
-
-        --cp-text-primary: #f0f4ff;
-        --cp-text-secondary: #94a3b8;
-        --cp-text-muted: #4a5568;
-        --cp-text-breadcrumb: #64748b;
-        --cp-text-badge: #fbbf24;
-        --cp-text-delete-icon: #f87171;
-
-        --cp-border: #1e2a3a;
-        --cp-border-card: #1e2a3a;
-        --cp-border-input: #2a3548;
-        --cp-border-input-focus: #6366f1;
-        --cp-border-upload: #2a3f6b;
-
-        --cp-accent: #6366f1;
-        --cp-accent-hover: #818cf8;
-        --cp-accent-light: #1e2547;
-        --cp-accent-glow: rgba(99, 102, 241, 0.2);
-
-        --cp-danger: #f87171;
-        --cp-danger-hover: #ef4444;
-        --cp-danger-light: #2d1515;
-
-        --cp-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
-        --cp-shadow-card-hover: 0 8px 32px rgba(99, 102, 241, 0.2), 0 2px 8px rgba(0, 0, 0, 0.3);
-        --cp-shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.5);
-
-        --cp-badge-dot: #eab308;
-        --cp-header-gradient: linear-gradient(135deg, #161b27 0%, #1a1e16 100%);
-        --cp-header-border: #423b1c;
-    }
-
-    body.dark-mode {
-        --cp-bg-page: #0d1117;
-        --cp-bg-card: #161b27;
-    }
-
-    .sheets-page {
-        padding-bottom: 48px;
-    }
-
-    /* HEADER */
-    .page-header {
-        background: var(--cp-header-gradient);
-        border: 1px solid var(--cp-header-border);
-        border-radius: 16px;
-        padding: 28px 32px;
-        margin-top: 8px;
-    }
-
-    .page-header-inner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 16px;
-    }
-
-    .page-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--cp-text-badge);
-        margin-bottom: 6px;
-    }
-
-    .badge-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--cp-badge-dot);
-        box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.25);
-        animation: pulse-dot-yellow 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-dot-yellow {
-
-        0%,
-        100% {
-            box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.25);
-        }
-
-        50% {
-            box-shadow: 0 0 0 5px rgba(234, 179, 8, 0.1);
-        }
-    }
-
-    .page-title {
-        font-size: 26px;
-        font-weight: 800;
-        color: var(--cp-text-primary);
-        margin: 0 0 8px;
-        letter-spacing: -0.5px;
-    }
-
-    .breadcrumb {
-        padding: 0;
-        margin: 0;
-    }
-
-    .breadcrumb-item {
-        font-size: 13px;
-        color: var(--cp-text-breadcrumb);
-    }
-
-    .breadcrumb-link {
-        color: var(--cp-text-breadcrumb) !important;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        transition: color 0.2s;
-    }
-
-    .breadcrumb-link:hover {
-        color: var(--cp-accent) !important;
-    }
-
-    .breadcrumb-item.active {
-        color: var(--cp-text-secondary);
-    }
-
-    /* BUTTONS */
-    .btn-primary-action,
-    .btn-secondary-action {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        border-radius: 12px;
-        padding: 12px 22px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        text-decoration: none;
-    }
-
-    .btn-primary-action {
-        background: var(--cp-accent);
-        color: #ffffff;
-        border: none;
-        box-shadow: var(--cp-shadow-btn);
-    }
-
-    .btn-primary-action:hover {
-        background: var(--cp-accent-hover);
-        transform: translateY(-1px);
-        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.45);
-        color: #fff;
-    }
-
-    .btn-secondary-action {
-        background: var(--cp-bg-input);
-        color: var(--cp-text-primary);
-        border: 1px solid var(--cp-border);
-    }
-
-    .btn-secondary-action:hover {
-        background: var(--cp-border);
-        transform: translateY(-1px);
-        color: var(--cp-text-primary);
-    }
-
-    /* ALERT */
-    #alert-container .alert {
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 500;
-        padding: 14px 18px;
-        margin-bottom: 16px;
-        border: 1px solid transparent;
-    }
-
-    #alert-container .alert-success {
-        background: #f0fdf4;
-        color: #166534;
-        border-color: #bbf7d0;
-    }
-
-    #alert-container .alert-danger {
-        background: var(--cp-danger-light);
-        color: var(--cp-danger);
-        border-color: rgba(239, 68, 68, 0.2);
-    }
-
-    .dark #alert-container .alert-success {
-        background: #052e16;
-        color: #86efac;
-        border-color: #14532d;
-    }
-
-    /* GRID & CARDS */
-    .cp-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-    }
-
-    .cp-card {
-        background: var(--cp-bg-card);
-        border: 1px solid var(--cp-border-card);
-        border-radius: 16px;
-        overflow: hidden;
-        box-shadow: var(--cp-shadow-card);
-        transition: all 0.3s ease;
-        display: flex;
-        flex-direction: column;
-        animation: cardFadeIn 0.35s ease both;
-    }
-
-    .cp-card:hover {
-        box-shadow: var(--cp-shadow-card-hover);
-        border-color: rgba(99, 102, 241, 0.25);
-        transform: translateY(-3px);
-        background: var(--cp-bg-card-hover);
-    }
-
-    .card-thumb-wrap {
-        position: relative;
-        width: 100%;
-        padding-top: 52%;
-        background: var(--cp-bg-skeleton);
-        overflow: hidden;
-    }
-
-    .card-thumb-wrap img {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-    }
-
-    .cp-card:hover .card-thumb-wrap img {
-        transform: scale(1.04);
-    }
-
-    .card-thumb-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent 60%);
-        opacity: 0;
-        transition: opacity 0.3s;
-    }
-
-    .cp-card:hover .card-thumb-overlay {
-        opacity: 1;
-    }
-
-    .card-type-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        background: rgba(0, 0, 0, 0.65);
-        backdrop-filter: blur(4px);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 20px;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .card-body-styled {
-        padding: 18px 20px 16px;
-        display: flex;
-        flex-direction: column;
-        flex: 1;
-    }
-
-    .card-title-styled {
-        font-size: 16px;
-        font-weight: 700;
-        color: var(--cp-text-primary);
-        margin: 0 0 6px;
-    }
-
-    .card-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        margin-bottom: 12px;
-    }
-
-    .meta-row {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 13px;
-        color: var(--cp-text-secondary);
-    }
-
-    .meta-icon {
-        opacity: 0.7;
-    }
-
-    .status-capsules {
-        display: flex;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-bottom: 16px;
-    }
-
-    .capsule {
-        display: inline-flex;
-        align-items: center;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
-    }
-
-    .capsule.success {
-        background: rgba(34, 197, 94, 0.15);
-        color: #16a34a;
-    }
-
-    .capsule.danger {
-        background: rgba(239, 68, 68, 0.15);
-        color: #dc2626;
-    }
-
-    .capsule.info {
-        background: var(--cp-accent-light);
-        color: var(--cp-accent);
-    }
-
-    .dark .capsule.success {
-        background: rgba(34, 197, 94, 0.2);
-        color: #4ade80;
-    }
-
-    .dark .capsule.danger {
-        background: rgba(239, 68, 68, 0.2);
-        color: #f87171;
-    }
-
-    .dark .capsule.info {
-        background: rgba(99, 102, 241, 0.2);
-        color: #a5b4fc;
-    }
-
-    .card-footer-actions {
-        margin-top: auto;
-        padding-top: 14px;
-        border-top: 1px solid var(--cp-border);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .btn-view {
-        background: var(--cp-accent-light);
-        color: var(--cp-accent);
-        font-size: 13px;
-        font-weight: 600;
-        padding: 7px 14px;
-        border-radius: 8px;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.2s;
-    }
-
-    .btn-view:hover {
-        background: var(--cp-accent);
-        color: #fff;
-    }
-
-    .action-btns {
-        display: flex;
-        gap: 6px;
-    }
-
-    .btn-icon {
-        width: 34px;
-        height: 34px;
-        border-radius: 8px;
-        border: 1px solid var(--cp-border);
-        background: var(--cp-bg-input);
-        color: var(--cp-text-secondary);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .btn-icon.edit:hover {
-        background: var(--cp-accent-light);
-        border-color: rgba(99, 102, 241, 0.3);
-        color: var(--cp-accent);
-    }
-
-    .btn-icon.delete:hover {
-        background: var(--cp-danger-light);
-        border-color: rgba(239, 68, 68, 0.3);
-        color: var(--cp-danger);
-    }
-
-    /* SKELETON / EMPTY */
-    .loading-state,
-    .empty-state {
-        grid-column: 1 / -1;
-    }
-
-    .loading-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-    }
-
-    .skeleton-card {
-        height: 310px;
-        background: var(--cp-bg-card);
-        border-radius: 16px;
-        border: 1px solid var(--cp-border-card);
-        overflow: hidden;
-        position: relative;
-    }
-
-    .skeleton-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, var(--cp-bg-skeleton) 25%, var(--cp-bg-skeleton-shine) 50%, var(--cp-bg-skeleton) 75%);
-        background-size: 200% 100%;
-        animation: shimmer 1.6s infinite;
-    }
-
-    @keyframes shimmer {
-        to {
-            background-position: -200% 0;
-        }
-    }
-
-    @keyframes cardFadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(12px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 64px 24px;
-        background: var(--cp-bg-card);
-        border: 1px dashed var(--cp-border);
-        border-radius: 16px;
-    }
-
-    .empty-icon {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-        background: var(--cp-accent-light);
-        color: var(--cp-accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 20px;
-    }
-
-    .empty-state h5 {
-        color: var(--cp-text-primary);
-        font-weight: 700;
-        margin-bottom: 8px;
-    }
-
-    .empty-state p {
-        color: var(--cp-text-muted);
-        margin-bottom: 24px;
-    }
-
-    /* MODALS */
-    .modal-backdrop {
-        background: rgba(0, 0, 0, 0.6) !important;
-        backdrop-filter: blur(4px);
-    }
-
-    .cp-modal-dialog .modal-content {
-        background: var(--cp-bg-modal) !important;
-        border: 1px solid var(--cp-border) !important;
-        border-radius: 20px !important;
-        box-shadow: var(--cp-shadow-modal) !important;
-    }
-
-    .cp-modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 24px 28px 20px;
-        border-bottom: 1px solid var(--cp-border);
-    }
-
-    .modal-header-inner {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-    }
-
-    .modal-icon-wrap {
-        width: 42px;
-        height: 42px;
-        border-radius: 12px;
-        background: var(--cp-accent-light);
-        color: var(--cp-accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .modal-title-text {
-        font-size: 17px;
-        font-weight: 700;
-        color: var(--cp-text-primary);
-        margin: 0 0 2px;
-    }
-
-    .modal-subtitle {
-        font-size: 12px;
-        color: var(--cp-text-muted);
-        margin: 0;
-    }
-
-    .modal-close-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 10px;
-        border: 1px solid var(--cp-border);
-        background: var(--cp-bg-input);
-        color: var(--cp-text-secondary);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .modal-close-btn:hover {
-        background: var(--cp-danger-light);
-        color: var(--cp-danger);
-        border-color: rgba(239, 68, 68, 0.3);
-    }
-
-    .cp-modal-body {
-        padding: 24px 28px;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .cp-modal-footer {
-        padding: 18px 28px;
-        border-top: 1px solid var(--cp-border);
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-    }
-
-    /* FORMS */
-    .form-group-styled {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-    }
-
-    .form-label-styled {
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--cp-text-secondary);
-    }
-
-    .required-star {
-        color: #ef4444;
-    }
-
-    .form-input-styled {
-        width: 100%;
-        padding: 11px 14px;
-        background: var(--cp-bg-input);
-        border: 1px solid var(--cp-border-input);
-        border-radius: 10px;
-        font-size: 14px;
-        color: var(--cp-text-primary);
-        outline: none;
-        transition: all 0.2s;
-    }
-
-    .form-input-styled:focus {
-        background: var(--cp-bg-input-focus);
-        border-color: var(--cp-border-input-focus);
-        box-shadow: 0 0 0 3px var(--cp-accent-glow);
-    }
-
-    .form-textarea-styled {
-        resize: vertical;
-    }
-
-    .custom-switch {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 0;
-        margin: 0;
-    }
-
-    .custom-switch .form-check-input {
-        width: 36px;
-        height: 20px;
-        border-radius: 20px;
-        margin: 0;
-        cursor: pointer;
-    }
-
-    .custom-switch .form-check-label {
-        cursor: pointer;
-        font-size: 13px;
-        color: var(--cp-text-secondary);
-        margin: 0;
-    }
-
-    .file-upload-zone {
-        background: var(--cp-bg-upload);
-        border: 2px dashed var(--cp-border-upload);
-        border-radius: 12px;
-        padding: 24px;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-
-    .file-upload-zone:hover {
-        background: var(--cp-bg-upload-hover);
-        border-color: var(--cp-accent);
-    }
-
-    .file-input-hidden {
-        display: none;
-    }
-
-    .file-upload-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: var(--cp-accent-light);
-        color: var(--cp-accent);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 10px;
-    }
-
-    .file-upload-text {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--cp-text-secondary);
-        margin: 0 0 4px;
-    }
-
-    .file-upload-hint {
-        font-size: 12px;
-        color: var(--cp-text-muted);
-        margin: 0;
-    }
-
-    /* BTNS IN MODAL */
-    .btn-modal-cancel {
-        padding: 10px 20px;
-        background: var(--cp-bg-input);
-        border: 1px solid var(--cp-border-input);
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--cp-text-secondary);
-        cursor: pointer;
-    }
-
-    .btn-modal-cancel:hover {
-        background: var(--cp-border);
-    }
-
-    .btn-modal-save {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 22px;
-        background: var(--cp-accent);
-        color: #fff;
-        border: none;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        box-shadow: var(--cp-shadow-btn);
-    }
-
-    .btn-modal-save:hover {
-        background: var(--cp-accent-hover);
-    }
-
-    /* DELETE */
-    .delete-modal-body {
-        padding: 32px 28px 24px;
-        text-align: center;
-    }
-
-    .delete-icon-wrap {
-        width: 64px;
-        height: 64px;
-        border-radius: 16px;
-        background: var(--cp-bg-delete-icon);
-        color: var(--cp-text-delete-icon);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 16px;
-    }
-
-    .delete-modal-title {
-        font-size: 18px;
-        font-weight: 700;
-        color: var(--cp-text-primary);
-        margin: 0 0 8px;
-    }
-
-    .delete-modal-text {
-        font-size: 14px;
-        color: var(--cp-text-secondary);
-    }
-
-    .delete-modal-footer {
-        padding: 0 28px 28px;
-        display: flex;
-        gap: 10px;
-    }
-
-    .btn-delete-cancel,
-    .btn-delete-confirm {
-        flex: 1;
-        padding: 11px;
-        border-radius: 10px;
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
-        border: none;
-    }
-
-    .btn-delete-cancel {
-        background: var(--cp-bg-input);
-        border: 1px solid var(--cp-border-input);
-        color: var(--cp-text-secondary);
-    }
-
-    .btn-delete-confirm {
-        background: var(--cp-danger);
-        color: #fff;
-        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
-    }
-
-    .spinner-inline {
-        width: 16px;
-        height: 16px;
-        border: 2px solid rgba(255, 255, 255, 0.4);
-        border-top-color: #fff;
-        border-radius: 50%;
-        animation: spin 0.6s linear infinite;
-        display: inline-block;
-    }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-</style>
-
+<div class="modal fade" id="sheetModal" tabindex="-1" aria-labelledby="sheetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content shadow">
+            <div class="modal-header border-bottom">
+                <div>
+                    <h5 class="modal-title fw-bold" id="sheetModalLabel">Add New Sheet</h5>
+                    <small class="text-body-secondary d-block" id="sheetModalSub">Configure module settings and resources</small>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sheetForm" enctype="multipart/form-data" novalidate>
+                    <input type="hidden" id="sheetSlug" value="">
+
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Sheet Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="sheetName" placeholder="e.g. Arrays and Strings" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Type</label>
+                            <select class="form-select" id="sheetType">
+                                <option value="Coding">Coding</option>
+                                <option value="MCQ">MCQ</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Description</label>
+                            <textarea class="form-control" id="sheetDesc" rows="3" placeholder="Brief overview of the topics covered..."></textarea>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Thumbnail <span class="text-danger" id="reqThumbStar">*</span></label>
+                            <input type="file" class="form-control" id="sheetThumbnail" accept="image/*">
+                            <div class="form-text">PNG, JPG or WEBP. Required for new sheets.</div>
+                            <div id="thumbnailPreviewWrap" class="mt-2 d-none">
+                                <img id="thumbnailPreview" src="" alt="Preview" style="max-height:140px;border-radius:8px;object-fit:cover;">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Start Time (Optional)</label>
+                            <input type="datetime-local" class="form-control" id="startTime">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">End Time (Optional)</label>
+                            <input type="datetime-local" class="form-control" id="endTime">
+                        </div>
+
+                        <div class="col-12 mt-3">
+                            <div class="d-flex flex-wrap gap-4 p-3 bg-body-tertiary rounded border">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="isEnabled" checked>
+                                    <label class="form-check-label fw-semibold" for="isEnabled">Public/Enabled</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="isSequential">
+                                    <label class="form-check-label fw-semibold" for="isSequential">Sequential Progression</label>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="isApproved" checked>
+                                    <label class="form-check-label fw-semibold" for="isApproved">Approved</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sheetFormError" class="alert alert-danger mt-3 mb-0 d-none"></div>
+                </form>
+            </div>
+            <div class="modal-footer border-top">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveSheetBtn" onclick="saveSheet()">
+                    <span id="saveBtnText">Save Sheet</span>
+                    <span id="saveBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content shadow">
+            <div class="modal-body text-center p-4">
+                <div class="text-danger mb-3">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                        <line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>
+                    </svg>
+                </div>
+                <h5 class="modal-title mb-2">Delete Sheet?</h5>
+                <p class="text-body-secondary mb-4">You're about to permanently delete <strong id="deleteSheetNameLabel" class="text-body"></strong>. This cannot be undone.</p>
+                <div class="d-flex gap-2 w-100">
+                    <button type="button" class="btn btn-secondary w-50" data-bs-dismiss="modal">Keep</button>
+                    <button type="button" class="btn btn-danger w-50" id="confirmDeleteBtn" onclick="confirmDelete()">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block myjs %}
 <script>
-    const API_URL = '/administration/api/v1/sheets/';
-    let bsSheetModal, bsDeleteModal;
-    let deleteTargetSlug = null;
-
-    document.addEventListener("DOMContentLoaded", () => {
-        bsSheetModal = new bootstrap.Modal(document.getElementById('sheetModal'));
-        bsDeleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
-        document.getElementById('sheetForm').addEventListener('submit', handleSheetSubmit);
-        fetchSheets();
-    });
+    const API_BASE = '/administration/api/v1/sheets/';
+    let pendingDeleteSlug = null;
 
     function getCsrfToken() {
         return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
 
     function showAlert(msg, type = 'success') {
-        const container = document.getElementById('alert-container');
-        const icon = type === 'success'
-            ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
-            : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
-        container.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center gap-2">${icon} ${msg}<button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button></div>`;
+        const container = document.getElementById('alertContainer');
+        container.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show shadow-sm" role="alert">
+                ${msg}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
         setTimeout(() => { container.innerHTML = ''; }, 5000);
     }
 
-    // ================== FETCH ==================
-    async function fetchSheets() {
+    // ==================== LOAD SHEETS ====================
+    async function loadSheets() {
         try {
-            const res = await fetch(API_URL);
-            const raw = await res.json();
-            let sheets = raw.results || raw;
-            if (!Array.isArray(sheets)) sheets = [];
-            renderSheets(sheets);
+            const res = await fetch(API_BASE);
+            const data = await res.json();
+            renderSheets(data.results || data);
         } catch (e) {
-            console.error(e);
-            document.getElementById('loading-spinner').style.display = 'none';
-            showAlert('Failed to load sheets from API.', 'danger');
+            document.getElementById('sheetsGrid').innerHTML = 
+                `<div class="col-12"><div class="alert alert-danger">Failed to load sheets. Please refresh.</div></div>`;
         }
     }
 
     function renderSheets(sheets) {
-        const container = document.getElementById('sheets-container');
-        document.getElementById('loading-spinner').style.display = 'none';
-
-        if (sheets.length === 0) {
-            container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
-                <h5>No sheets found</h5>
-                <p>Create a resource module to get started.</p>
-                <button class="btn-primary-action" data-bs-toggle="modal" data-bs-target="#sheetModal" onclick="openAddModal()">Add First Sheet</button>
-            </div>`;
+        const grid = document.getElementById('sheetsGrid');
+        if (!sheets || sheets.length === 0) {
+            grid.innerHTML = `
+                <div class="col-12">
+                    <div class="bg-body-tertiary border border-dashed rounded text-center p-5">
+                        <h5 class="text-body">No sheets found</h5>
+                        <p class="text-body-secondary mb-3">Create a resource module to get started.</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sheetModal" onclick="openAddModal()">Add First Sheet</button>
+                    </div>
+                </div>`;
             return;
         }
 
-        container.innerHTML = '';
-        sheets.forEach((s, idx) => {
-            const encoded = encodeURIComponent(JSON.stringify(s));
-
-            // Format dates
+        grid.innerHTML = sheets.map(s => {
             const startTimeStr = s.start_time ? new Date(s.start_time).toLocaleDateString() : 'Immediate';
             const endTimeStr = s.end_time ? new Date(s.end_time).toLocaleDateString() : 'Never';
-
-            // Generate batches string safely
+            
             const batchesStr = (s.batches_info && s.batches_info.length > 0)
                 ? s.batches_info.map(b => b.name).join(', ')
                 : 'All Open';
 
-            const card = document.createElement('div');
-            card.className = 'cp-card';
-            card.style.animationDelay = `${idx * 40}ms`;
-            card.innerHTML = `
-                <div class="card-thumb-wrap">
-                    <img src="${s.thumbnail || '/static/default-thumbnail.jpg'}" alt="${s.name}" loading="lazy">
-                    <div class="card-thumb-overlay"></div>
-                    <div class="card-type-badge">${s.sheet_type}</div>
-                </div>
-                <div class="card-body-styled">
-                    <h5 class="card-title-styled">${s.name}</h5>
-                    
-                    <div class="card-meta">
-                        <div class="meta-row" title="Linked Batches">
-                            <svg class="meta-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            <span class="text-truncate">${batchesStr}</span>
-                        </div>
-                        <div class="meta-row" title="Timeline">
-                            <svg class="meta-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                            <span>${startTimeStr} - ${endTimeStr}</span>
-                        </div>
+            return `
+            <div class="col" id="sheet-card-${s.slug}">
+                <div class="card sheet-card h-100 shadow-sm">
+                    <div class="position-relative">
+                        <img src="${s.thumbnail || '/static/default-thumbnail.jpg'}" 
+                             loading="lazy" 
+                             class="card-img-top border-bottom" 
+                             alt="${s.name}">
+                        <span class="position-absolute top-0 end-0 m-2 badge text-bg-dark bg-opacity-75 border border-light border-opacity-25 backdrop-blur">
+                            ${s.sheet_type}
+                        </span>
                     </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold mb-3 text-truncate" title="${s.name}">${s.name}</h5>
+                        
+                        <div class="d-flex flex-column gap-1 mb-3">
+                            <div class="d-flex align-items-center gap-2 text-body-secondary small text-truncate" title="Linked Batches">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                <span class="text-truncate">${batchesStr}</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 text-body-secondary small" title="Timeline">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                <span>${startTimeStr} - ${endTimeStr}</span>
+                            </div>
+                        </div>
 
-                    <div class="status-capsules">
-                        ${s.is_enabled ? '<span class="capsule success">Public</span>' : '<span class="capsule danger">Disabled</span>'}
-                        ${s.is_approved ? '<span class="capsule success">Approved</span>' : '<span class="capsule info">Pending Review</span>'}
-                        ${s.is_sequential ? '<span class="capsule info">Storyline</span>' : ''}
-                    </div>
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            ${s.is_enabled ? '<span class="badge text-bg-success">Public</span>' : '<span class="badge text-bg-danger">Disabled</span>'}
+                            ${s.is_approved ? '<span class="badge text-bg-success">Approved</span>' : '<span class="badge text-bg-info">Pending Review</span>'}
+                            ${s.is_sequential ? '<span class="badge text-bg-primary">Sequential</span>' : ''}
+                        </div>
 
-                    <div class="card-footer-actions">
-                        <a href="/administration/sheet/${s.slug}/" class="btn-view">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            Manage
-                        </a>
-                        <div class="action-btns">
-                            <button class="btn-icon edit" onclick="openEditModal('${encoded}')" title="Edit Properties"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                            <button class="btn-icon delete" onclick="openDeleteModal('${s.slug}', '${s.name.replace(/'/g, "\\'")}')" title="Delete Sheet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+                        <div class="d-flex gap-2 mt-auto flex-wrap pt-2 border-top">
+                            <a href="/administration/sheet/${s.slug}/" class="btn btn-sm btn-outline-primary flex-fill fw-medium">Manage</a>
+                            <button class="btn btn-sm btn-outline-secondary px-3" onclick="openEditModal(${JSON.stringify(s).replace(/"/g, '&quot;')})">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger px-3" onclick="openDeleteModal('${s.slug}', '${s.name.replace(/'/g, "\\'")}')">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
-            `;
-            container.appendChild(card);
-        });
+            </div>`;
+        }).join('');
     }
 
-    // ================== FILE UPLOAD ==================
-    function handleFileSelect(input) {
-        const zone = document.getElementById('file-upload-content');
-        if (input.files.length > 0) {
-            const file = input.files[0];
-            zone.innerHTML = `<div class="file-upload-icon" style="background:#f0fdf4;color:#16a34a;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg></div><p class="file-upload-text">${file.name}</p><p class="file-upload-hint">${(file.size / 1024).toFixed(0)} KB</p>`;
-        }
-    }
-
-    // ================== ADD / EDIT MODAL ==================
+    // ==================== DATE FORMATTER ====================
     function formatDateTimeForInput(isoString) {
         if (!isoString) return '';
         const d = new Date(isoString);
-        // Ensure format YYYY-MM-DDThh:mm for datetime-local
         return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     }
 
+    // ==================== ADD / EDIT MODAL ====================
     function openAddModal() {
-        document.getElementById('sheetForm').reset();
-        document.getElementById('sheetSlug').value = '';
         document.getElementById('sheetModalLabel').textContent = 'Add New Sheet';
-        document.getElementById('saveSheetBtn').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Sheet`;
-
-        document.getElementById('thumbnail').required = true;
-        document.getElementById('req-thumb-star').style.display = 'inline';
-        document.getElementById('file-upload-content').innerHTML = `<div class="file-upload-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><p class="file-upload-text">Click to upload image</p><p class="file-upload-hint">PNG, JPG or WEBP. Required for new sheets.</p>`;
+        document.getElementById('sheetModalSub').textContent = 'Configure module settings and resources';
+        document.getElementById('saveBtnText').textContent = 'Save Sheet';
+        document.getElementById('sheetSlug').value = '';
+        document.getElementById('sheetForm').reset();
+        
+        // Reset defaults
+        document.getElementById('isEnabled').checked = true;
+        document.getElementById('isApproved').checked = true;
+        
+        document.getElementById('reqThumbStar').style.display = 'inline';
+        document.getElementById('sheetThumbnail').required = true;
+        document.getElementById('thumbnailPreviewWrap').classList.add('d-none');
+        document.getElementById('sheetFormError').classList.add('d-none');
     }
 
-    function openEditModal(encoded) {
-        const s = JSON.parse(decodeURIComponent(encoded));
-        document.getElementById('sheetSlug').value = s.slug;
-        document.getElementById('name').value = s.name;
-        document.getElementById('description').value = s.description || '';
-        document.getElementById('sheet_type').value = s.sheet_type;
-        document.getElementById('start_time').value = formatDateTimeForInput(s.start_time);
-        document.getElementById('end_time').value = formatDateTimeForInput(s.end_time);
-
-        document.getElementById('is_enabled').checked = s.is_enabled;
-        document.getElementById('is_sequential').checked = s.is_sequential;
-        document.getElementById('is_approved').checked = s.is_approved;
-
+    function openEditModal(s) {
         document.getElementById('sheetModalLabel').textContent = 'Edit Sheet';
-        document.getElementById('saveSheetBtn').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Sheet`;
+        document.getElementById('sheetModalSub').textContent = 'Update properties for this sheet';
+        document.getElementById('saveBtnText').textContent = 'Update Sheet';
+        document.getElementById('sheetSlug').value = s.slug;
+        
+        document.getElementById('sheetName').value = s.name;
+        document.getElementById('sheetDesc').value = s.description || '';
+        document.getElementById('sheetType').value = s.sheet_type;
+        document.getElementById('startTime').value = formatDateTimeForInput(s.start_time);
+        document.getElementById('endTime').value = formatDateTimeForInput(s.end_time);
 
-        document.getElementById('thumbnail').required = false;
-        document.getElementById('req-thumb-star').style.display = 'none';
-        document.getElementById('file-upload-content').innerHTML = `<div class="file-upload-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><p class="file-upload-text">Click to change</p><p class="file-upload-hint">Leave empty to keep existing image</p>`;
+        document.getElementById('isEnabled').checked = s.is_enabled;
+        document.getElementById('isSequential').checked = s.is_sequential;
+        document.getElementById('isApproved').checked = s.is_approved;
 
-        bsSheetModal.show();
+        document.getElementById('sheetFormError').classList.add('d-none');
+        document.getElementById('reqThumbStar').style.display = 'none';
+        document.getElementById('sheetThumbnail').required = false;
+
+        if (s.thumbnail) {
+            document.getElementById('thumbnailPreview').src = s.thumbnail;
+            document.getElementById('thumbnailPreviewWrap').classList.remove('d-none');
+        } else {
+            document.getElementById('thumbnailPreviewWrap').classList.add('d-none');
+        }
+
+        new bootstrap.Modal(document.getElementById('sheetModal')).show();
     }
 
-    async function handleSheetSubmit(e) {
-        e.preventDefault();
-        const slug = document.getElementById('sheetSlug').value;
-        const isEdit = slug !== '';
-        // Same URL endpoint for both Admin and Instructor
-        const url = isEdit ? `${API_URL}${slug}/` : API_URL;
-        const method = isEdit ? 'PATCH' : 'POST';
-
-        const formData = new FormData();
-        formData.append('name', document.getElementById('name').value);
-        formData.append('description', document.getElementById('description').value);
-        formData.append('sheet_type', document.getElementById('sheet_type').value);
-
-        if (document.getElementById('start_time').value) formData.append('start_time', document.getElementById('start_time').value);
-        if (document.getElementById('end_time').value) formData.append('end_time', document.getElementById('end_time').value);
-
-        formData.append('is_enabled', document.getElementById('is_enabled').checked);
-        formData.append('is_sequential', document.getElementById('is_sequential').checked);
-        formData.append('is_approved', document.getElementById('is_approved').checked);
-
-        const fileInput = document.getElementById('thumbnail');
-        if (fileInput.files.length > 0) {
-            formData.append('thumbnail', fileInput.files[0]);
+    // ==================== THUMBNAIL PREVIEW ====================
+    document.getElementById('sheetThumbnail').addEventListener('change', function () {
+        const file = this.files[0];
+        if (file) {
+            document.getElementById('thumbnailPreview').src = URL.createObjectURL(file);
+            document.getElementById('thumbnailPreviewWrap').classList.remove('d-none');
         }
+    });
+
+    // ==================== SAVE SHEET ====================
+    async function saveSheet() {
+        const slug = document.getElementById('sheetSlug').value.trim();
+        const name = document.getElementById('sheetName').value.trim();
+        const isEdit = !!slug;
+        const errEl = document.getElementById('sheetFormError');
+        errEl.classList.add('d-none');
+
+        if (!name) { 
+            errEl.textContent = 'Sheet name is required.'; 
+            errEl.classList.remove('d-none'); 
+            return; 
+        }
+
+        const fd = new FormData();
+        fd.append('name', name);
+        fd.append('description', document.getElementById('sheetDesc').value);
+        fd.append('sheet_type', document.getElementById('sheetType').value);
+
+        if (document.getElementById('startTime').value) fd.append('start_time', document.getElementById('startTime').value);
+        if (document.getElementById('endTime').value) fd.append('end_time', document.getElementById('endTime').value);
+
+        fd.append('is_enabled', document.getElementById('isEnabled').checked);
+        fd.append('is_sequential', document.getElementById('isSequential').checked);
+        fd.append('is_approved', document.getElementById('isApproved').checked);
+        
+        const thumb = document.getElementById('sheetThumbnail').files[0];
+        if (thumb) fd.append('thumbnail', thumb);
 
         const btn = document.getElementById('saveSheetBtn');
-        const origHTML = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner-inline"></span> Saving...';
         btn.disabled = true;
+        document.getElementById('saveBtnSpinner').classList.remove('d-none');
 
         try {
-            const res = await fetch(url, {
-                method: method,
-                headers: { 'X-CSRFToken': getCsrfToken() },
-                body: formData
+            const url = isEdit ? `${API_BASE}${slug}/` : API_BASE;
+            const method = isEdit ? 'PATCH' : 'POST';
+            
+            const res = await fetch(url, { 
+                method, 
+                headers: { 'X-CSRFToken': getCsrfToken() }, 
+                body: fd 
             });
-
+            
             const data = await res.json();
-            if (res.ok && (data.id || data.slug)) {
-                bsSheetModal.hide();
+
+            if (res.ok && (data.success === true || data.id || data.slug)) {
+                bootstrap.Modal.getInstance(document.getElementById('sheetModal')).hide();
                 showAlert(isEdit ? 'Sheet updated successfully!' : 'Sheet created successfully!');
-                const container = document.getElementById('sheets-container');
-                container.innerHTML = '<div class="loading-state"><div class="loading-grid"><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div></div></div>';
-                fetchSheets();
+                await loadSheets();
             } else {
-                showAlert('Error: ' + JSON.stringify(data.errors || data), 'danger');
+                const msgs = data.errors ? JSON.stringify(data.errors) : (data.error || 'Failed to save.');
+                errEl.textContent = msgs; 
+                errEl.classList.remove('d-none');
             }
-        } catch (err) {
-            console.error(err);
-            showAlert('A network error occurred.', 'danger');
+        } catch (e) {
+            errEl.textContent = 'Network error. Please try again.'; 
+            errEl.classList.remove('d-none');
         } finally {
-            btn.innerHTML = origHTML;
             btn.disabled = false;
+            document.getElementById('saveBtnSpinner').classList.add('d-none');
         }
     }
 
-    // ================== DELETE MODAL ==================
+    // ==================== DELETE ====================
     function openDeleteModal(slug, name) {
-        deleteTargetSlug = slug;
-        document.getElementById('deleteSheetName').textContent = name;
-        bsDeleteModal.show();
+        pendingDeleteSlug = slug;
+        document.getElementById('deleteSheetNameLabel').textContent = name;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
     }
 
-    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-        if (!deleteTargetSlug) return;
+    async function confirmDelete() {
+        if (!pendingDeleteSlug) return;
+        
         const btn = document.getElementById('confirmDeleteBtn');
-        const origHTML = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner-inline"></span> Deleting...';
-        btn.disabled = true;
-
+        btn.disabled = true; 
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Deleting...';
+        
         try {
-            const res = await fetch(`${API_URL}${deleteTargetSlug}/`, {
-                method: 'DELETE',
+            const res = await fetch(`${API_BASE}${pendingDeleteSlug}/`, {
+                method: 'DELETE', 
                 headers: { 'X-CSRFToken': getCsrfToken() }
             });
+            
             if (res.ok) {
-                bsDeleteModal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('deleteModal')).hide();
+                document.getElementById(`sheet-card-${pendingDeleteSlug}`)?.remove();
                 showAlert('Sheet deleted successfully.', 'success');
-                fetchSheets();
+                pendingDeleteSlug = null;
+                
+                // Refresh if empty
+                if(document.querySelectorAll('.sheet-card').length === 0) loadSheets();
             } else {
                 showAlert('Failed to delete sheet.', 'danger');
             }
-        } catch (e) {
-            showAlert('Network error.', 'danger');
-        } finally {
-            btn.innerHTML = origHTML;
-            btn.disabled = false;
-            deleteTargetSlug = null;
+        } catch (e) { 
+            showAlert('Network error during deletion.', 'danger');
+        } finally { 
+            btn.disabled = false; 
+            btn.textContent = 'Yes, Delete'; 
         }
-    });
-</script>
+    }
 
+    // Init
+    document.addEventListener("DOMContentLoaded", loadSheets);
+</script>
 {% endblock %}

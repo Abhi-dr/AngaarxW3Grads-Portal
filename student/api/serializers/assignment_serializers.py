@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from urllib.parse import parse_qs, urlparse
+
 from student.models import Assignment, AssignmentSubmission
 
 
@@ -82,7 +84,21 @@ class AssignmentDetailSerializer(serializers.ModelSerializer):
     
     def get_youtube_video_id(self, obj):
         if obj.tutorial_link:
-            return obj.tutorial_link.replace("https://www.youtube.com/watch?v=", "")
+            parsed = urlparse(obj.tutorial_link)
+            normalized_netloc = parsed.netloc.replace('www.', '')
+
+            if normalized_netloc == 'youtu.be':
+                return parsed.path.lstrip('/') or None
+
+            if normalized_netloc in {'youtube.com', 'm.youtube.com', 'youtube-nocookie.com'}:
+                query_video_id = parse_qs(parsed.query).get('v', [None])[0]
+                if query_video_id:
+                    return query_video_id
+
+                path_parts = [part for part in parsed.path.split('/') if part]
+                if len(path_parts) >= 2 and path_parts[0] in {'embed', 'shorts', 'live'}:
+                    return path_parts[1]
+
         return None
     
     def get_course_name(self, obj):

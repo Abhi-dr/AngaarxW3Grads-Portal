@@ -50,7 +50,6 @@ def jovacs(request):
 def jovac(request, slug):
     course = get_object_or_404(Course, slug=slug)
     instructors = course.instructors.all()
-    course_ct = ContentType.objects.get_for_model(Course)
 
     course_sheets = CourseSheet.objects.filter(course = course)
 
@@ -101,29 +100,15 @@ def reorder_jovac_sheets(request, slug):
 def jovac_sheet(request, course_slug, sheet_slug):
     course = get_object_or_404(Course, slug=course_slug)
     instructors = course.instructors.all()
-    course_ct = ContentType.objects.get_for_model(Course)
-
     course_sheet = CourseSheet.objects.get(course = course, slug=sheet_slug)
-
-    assignments = course_sheet.get_ordered_assignments()
-
-    print(assignments)
-
-    query = request.POST.get("query")
-    if query:
-        assignments = Assignment.objects.filter(
-            Q(id__icontains=query) |
-            Q(title__icontains=query) |
-            Q(description__icontains=query)|
-            Q(assignment_type__icontains=query)
-            )
+    # Legacy server-side assignment loading is intentionally disabled here.
+    # The administration sheet detail page now loads mixed sheet items via the JOVAC API.
 
 
     parameters = {
         "course": course,
         "sheet": course_sheet,
         "instructors": instructors,
-        "assignments": assignments,
     }
 
     return render(request, "administration/jovac/course_sheet.html", parameters)
