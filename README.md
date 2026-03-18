@@ -1,108 +1,153 @@
-# Local Setup Guide
+# JOVAC Navigation and MCQ Change Log
 
-## Todo
-## Prerequisites
+This document summarizes the work completed for JOVAC Previous/Next navigation, MCQ flow fixes, routing reliability, and related API/model/template updates.
 
-Before you begin, ensure you have met the following requirements:
-- You have installed the latest version of [Python](https://www.python.org/)
-- You have a working [Git](https://git-scm.com/) installation
-- You have a code editor like [VS Code](https://code.visualstudio.com/)
+## Scope of Work
 
-## Installation
+1. Fixed one-by-one Previous/Next behavior for JOVAC tutorial and assignment pages.
+2. Ensured navigation follows the configured mixed order in each `CourseSheet`.
+3. Preserved sheet context using `?sheet=<sheet_slug>` so navigation is deterministic.
+4. Improved JOVAC MCQ handling for rendering, submission, and page navigation.
+5. Added response and page-level no-cache protections to reduce stale data issues.
+6. Aligned model field state with migrations to keep migration checks clean.
 
-Follow these steps to set up the project locally:
+## Files Changed and What Changed
 
-1. **Clone the repository:**
-    ```bash
-    git clone https://github.com/your-username/AngaarxW3Grads-Portal.git
-    ```
-2. **Navigate to the project directory:**
-    ```bash
-    cd AngaarxW3Grads-Portal
-    ```
-3. **Create a virtual environment:**
-    ```bash
-    python -m venv venv
-    ```
-4. **Activate the virtual environment:**
-    - On Windows:
-        ```bash
-        venv\Scripts\activate
-        ```
-    - On macOS/Linux:
-        ```bash
-        source venv/bin/activate
-        ```
-5. **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+### `student/models.py`
 
-## Running the Project
+- Added `CourseSheet.get_previous_item(self, current_item_id)`.
+- This complements the existing `get_next_item()` and enables true backward navigation through mixed ordered items.
 
-To run the project locally, use the following command:
-```bash
-python manage.py runserver
-```
-The application should now be running on [http://localhost:8000](http://localhost:8000).
+### `student/jovac_views.py`
 
-## Testing
+- Added `cache_control(no_cache=True, no_store=True, must_revalidate=True)` to `jovac_sheet`.
+- Updated `submit_assignment`:
+  - Reads `sheet` from query params.
+  - Falls back to assignment's first related sheet if query is missing.
+  - Passes `sheet_slug` to template context.
+- Refactored `get_next_jovac_assignment`:
+  - Resolves target `CourseSheet` from `?sheet=` when available.
+  - Uses `course_sheet.get_next_item(...)` to move by configured sheet order.
+  - Supports redirection by item type (Tutorial, Assignment, MCQ, Coding).
+  - Keeps `?sheet=` on assignment/tutorial redirects.
+  - Handles end-of-sheet gracefully.
+- Added new `get_previous_jovac_assignment`:
+  - Resolves `CourseSheet` with `?sheet=`.
+  - Uses `course_sheet.get_previous_item(...)`.
+  - Redirects by item type and preserves `?sheet=`.
+  - Handles start-of-sheet gracefully.
 
-To run tests, use the following command:
-```bash
-python manage.py test
-```
+### `student/urls.py`
 
-## Contributing
+- Added route:
+  - `jovac/assignment/<int:id>/previous` -> `get_previous_jovac_assignment`.
+- Reordered URL groups so MCQ routes are defined before the generic batch catch-all route.
 
-To contribute to this project, follow these steps:
+### `templates/student/jovac/view_tutorial.html`
 
-1. Fork the repository.
-2. Create a new branch:
-    ```bash
-    git checkout -b feature-branch
-    ```
-3. Make your changes and commit them:
-    ```bash
-    git commit -m 'Add some feature'
-    ```
-4. Push to the branch:
-    ```bash
-    git push origin feature-branch
-    ```
-5. Create a pull request.
+- Replaced history-based Previous button (`history.back()`) with explicit Previous URL.
+- Updated top and bottom navigation controls to explicit Previous/Next anchors.
+- Added client-side query parsing to preserve `sheet` context in both URLs.
 
-## Contact
+### `templates/student/jovac/submit_assignment.html`
 
-If you have any questions, please contact [your-email@example.com](mailto:your-email@example.com).
+- Replaced history-based Previous button (`history.back()`) with explicit Previous URL.
+- Updated both top and bottom controls to use:
+  - Previous: `get_previous_jovac_assignment`
+  - Next: `get_next_jovac_assignment`
+- Preserves `?sheet={{ sheet_slug }}` when available.
 
-## License
+### `templates/student/jovac/course_sheet.html`
 
-This project is licensed under the [MIT License](LICENSE).
+- Updated assignment list API fetch to reduce stale responses:
+  - Added timestamp query (`?t=...`).
+  - Added fetch option `cache: 'no-store'`.
+- Updated action links to propagate context:
+  - Tutorial link now includes `?sheet=<sheetSlug>`.
+  - Submit Assignment link now includes `?sheet=<sheetSlug>`.
+- Updated MCQ action URL construction:
+  - Uses item-level `sheet_slug` fallback.
+  - Added safe handling when MCQ slug is missing.
 
-## Additional Setup Steps
+### `student/api/views/jovac_api.py`
 
-### Setting Up Environment Variables
+- Added `sheet_slug` to serialized MCQ items so frontend can build correct MCQ URLs.
+- Added no-cache response headers on assignment list API response:
+  - `Cache-Control: no-store, no-cache, must-revalidate, max-age=0`
+  - `Pragma: no-cache`
+  - `Expires: 0`
 
-1. **Create a `.env` file** in the root directory of the project and add the necessary environment variables. Here is an example of what your `.env` file might look like:
-    ```env
-    DEBUG=True
-    SECRET_KEY=your_secret_key
-    DATABASE_URL=your_database_url
-    ```
+### `student/mcq_views.py`
 
-### Handling Redis Error on Windows
+- Added cache-control decorators to reduce stale MCQ page/submit behavior.
+- Enhanced `mcq_question_view` to support both contexts:
+  - Batch sheet MCQs.
+  - JOVAC `CourseSheet` MCQs.
+- Added JOVAC-aware access checks using `CourseSheet` enabled/approved state.
+- Added explicit `previous_question_url` and `next_question_url` generation.
+- For JOVAC MCQ page navigation, uses MCQ-only sequence inside current `CourseSheet`.
+- Chooses template dynamically:
+  - JOVAC -> `student/jovac/mcq_question.html`
+  - Batch -> `student/batch/mcq/problem.html`
+- Updated `submit_mcq_answer` to fetch by slug without strict `is_approved=True` filter, supporting JOVAC flow.
 
-If you encounter a Redis error on Windows, you will need to set up Windows Subsystem for Linux (WSL). Follow the instructions in the [WSL Installation Guide](https://docs.microsoft.com/en-us/windows/wsl/install) to install WSL and set up Redis.
+### `templates/student/jovac/mcq_question.html` (new file)
 
-### Setting Up Database Connection
+- Added dedicated JOVAC MCQ page template.
+- Includes:
+  - Question display and options.
+  - Submit answer flow (AJAX).
+  - Explanation and result messaging.
+  - Previous/Next question controls.
+  - Reset behavior to avoid stale browser state.
 
-1. **Use MySQL Workbench** or any other database management tool to set up the database connection. Ensure that the credentials in your `.env` file match the database configuration.
+### `administration/api/serializers/jovac_serializers.py`
 
-### Installing Requirements
+- Updated `MCQQuestionAdminSerializer` fields to include `sheet`.
+- Added `create()` override to enforce `is_approved=True` for admin-created JOVAC MCQs.
 
-Make sure to install the required dependencies:
-```bash
-pip install -r requirements.txt
-```
+### `administration/api/views/jovac_api.py`
 
+- Added custom `create()` in `MCQQuestionAdminViewSet` to support JOVAC MCQ creation.
+- Ensures a placeholder sheet (`jovac-mcq-storage`) exists and is enabled/approved.
+- Injects that sheet ID into serializer input before creating MCQ.
+- Returns consistent success payload.
+
+### `practice/models.py`
+
+- Updated `MCQQuestion.sheet` to:
+  - `blank=True, null=True`
+- Purpose: align model definition with current migration state and remove migration check mismatch.
+
+## Validation and Testing Run
+
+### Completed Checks
+
+1. `python manage.py check`
+   - Passed (no issues).
+2. `python manage.py makemigrations --check --dry-run --noinput`
+   - Passed after model alignment (no pending changes).
+3. Navigation consistency smoke check (all sheets/items)
+   - Checked sheets: 13
+   - Checked items: 296
+   - Navigation adjacency errors: 0
+4. Route smoke checks for JOVAC pages/endpoints
+   - Key routes responded successfully (expected 200/302 by endpoint type).
+   - Previous/Next endpoint redirects preserved `?sheet=` context.
+
+### Automated Tests
+
+- Ran: `python manage.py test student administration practice --verbosity 2 --noinput`
+- Result: 26 tests executed, 25 passed, 1 failed.
+- Remaining failure:
+  - Test: `student.tests_profile_api.ProfileAPITests.test_patch_profile_valid`
+  - Issue: `coins_earned` assertion expected `> 0`, actual value `0`.
+  - Note: this appears unrelated to JOVAC Previous/Next navigation changes.
+
+## Current Outcome
+
+- JOVAC tutorial/assignment Previous and Next now navigate deterministically one-by-one.
+- Sheet context is preserved across page transitions.
+- JOVAC MCQ routing/rendering path is improved and integrated with sheet-aware behavior.
+- Migration consistency checks are clean.
+- One unrelated profile API test remains to be fixed if full green test suite is required.

@@ -143,6 +143,7 @@ class JOVACSheetAssignmentsView(APIView):
                     'id': obj.id,
                     'title': obj.question_text[:100] + ('...' if len(obj.question_text) > 100 else ''),
                     'slug': obj.slug,
+                    'sheet_slug': course_sheet.slug,
                     'difficulty_level': obj.difficulty_level,
                     'is_tutorial': False,
                     'is_submitted': False, # Update this later if MCQ submissions are tracked here
@@ -169,7 +170,7 @@ class JOVACSheetAssignmentsView(APIView):
         # Get current time for deadline checks
         current_time = timezone.now()
         
-        return Response({
+        response = Response({
             "success": True,
             "items": serialized_items,
             "course": {
@@ -182,6 +183,11 @@ class JOVACSheetAssignmentsView(APIView):
             },
             "current_time": current_time.isoformat(),
         })
+
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
 
 
 class JOVACTutorialDetailView(APIView):

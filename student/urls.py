@@ -140,6 +140,7 @@ urlpatterns += [
     
     # JOVAC tutorial and assignment routes (more specific patterns first)
     path("jovac/tutorial/<int:id>/", jovac_views.view_jovac_tutorial, name="view_jovac_tutorial"),
+    path("jovac/assignment/<int:id>/previous", jovac_views.get_previous_jovac_assignment, name="get_previous_jovac_assignment"),
     path("jovac/assignment/<int:id>/next", jovac_views.get_next_jovac_assignment, name="get_next_jovac_assignment"),
     
     # JOVAC course routes (less specific, slug-based patterns)
@@ -153,20 +154,19 @@ urlpatterns += [
     path("delete_submission/<int:submission_id>", jovac_views.delete_submission, name="delete_submission"),
 ]
 
-# ============================== BATCH CATCH-ALL (KEEP THIS LAST) ==============================
-
-urlpatterns += [
-    path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
-]
-
-# ============================== MCQ WORK ==============================
+# ============================== MCQ WORK (MUST BE BEFORE BATCH CATCH-ALL) ==============================
 
 urlpatterns += [
     # urls.py
     path('sheet/<slug:sheet_slug>/<slug:slug>/', mcq_views.mcq_question_view, name='mcq_question'),
-
     path('mcq/<slug:slug>/submit/', mcq_views.submit_mcq_answer, name='submit_mcq_answer'),
     path('mcq/next/<int:sheet_id>/<int:question_id>/', mcq_views.render_next_mcq_question_in_sheet, name='render_next_mcq_question_in_sheet'),
+]
+
+# ============================== BATCH CATCH-ALL (KEEP THIS LAST) ==============================
+
+urlpatterns += [
+    path("<slug:slug>/", batch_views.batch, name="batch"),  # Keep this last as it's the most generic
 ]
     # path('mcq/leaderboard/<slug:slug>/', mcq_views.mcq_leaderboard, name='mcq_leaderboard'),
     # path('mcq/progress/<slug:slug>/', mcq_views.mcq_sheet_progress, name='mcq_sheet_progress'),
