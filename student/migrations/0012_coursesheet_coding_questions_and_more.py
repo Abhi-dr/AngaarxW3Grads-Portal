@@ -11,14 +11,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='coursesheet',
-            name='coding_questions',
-            field=models.ManyToManyField(blank=True, related_name='course_sheets', to='practice.question'),
-        ),
-        migrations.AddField(
-            model_name='coursesheet',
-            name='mcq_questions',
-            field=models.ManyToManyField(blank=True, related_name='course_sheets', to='practice.mcqquestion'),
-        ),
     ]
