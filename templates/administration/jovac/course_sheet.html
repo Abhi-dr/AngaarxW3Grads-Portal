@@ -217,11 +217,13 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header border-0">
-                <h5 class="modal-title text-danger">🗑️ Unlink Item</h5>
+                <h5 class="modal-title text-danger" id="deleteAssignModalTitle">🗑️ Unlink Item</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to unlink <strong id="deleteAssignNameLabel"></strong> from this sheet?
+                <span id="deleteAssignMessagePrefix">Are you sure you want to unlink</span>
+                <strong id="deleteAssignNameLabel"></strong>
+                <span id="deleteAssignMessageSuffix">from this sheet?</span>
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -237,10 +239,11 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Create MCQ Question</h5>
+                <h5 class="modal-title" id="mcqModalLabel">Create MCQ Question</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="mcqId" value="">
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label fw-semibold">Question Text <span class="text-danger">*</span></label>
@@ -383,6 +386,7 @@
     const API_SHEET = `/administration/api/v1/course-sheets/${SHEET_SLUG}/items/`;
     let pendingDeleteId = null;
     let pendingDeleteType = null;
+    let pendingDeleteMode = 'unlink';
     let sheetItemsCache = [];
 
     // ==================== LOAD SHEET ITEMS ====================
@@ -443,9 +447,16 @@
                 badgeHtml = `<span class="badge ${type === 'Coding' ? 'bg-info' : 'bg-warning text-dark'}">${type} Question</span>`;
                 dateHtml = '—';
                 statusBadge = `<span class="badge ${a.is_approved ? 'bg-success' : 'bg-secondary'}">${a.is_approved ? 'Approved' : 'Draft'}</span>`;
-                actionHtml = `
-                    <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${(a.title || a.question_text || '').replace(/'/g, "\\'")}')">Unlink</button>
-                `;
+                if (type === 'MCQ') {
+                    actionHtml = `
+                        <button class="btn btn-sm btn-outline-dark" onclick="openEditMcq(${a.id})">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteMcq(${a.id}, '${(a.title || a.question_text || '').replace(/'/g, "\\'")}')">Delete</button>
+                    `;
+                } else {
+                    actionHtml = `
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${(a.title || a.question_text || '').replace(/'/g, "\\'")}')">Unlink</button>
+                    `;
+                }
             }
 
             return `
@@ -567,36 +578,73 @@
     }
 
     // ==================== REMOVE/UNLINK ITEM ====================
+    function resetDeleteModalText() {
+        document.getElementById('deleteAssignModalTitle').textContent = '🗑️ Unlink Item';
+        document.getElementById('deleteAssignMessagePrefix').textContent = 'Are you sure you want to unlink';
+        document.getElementById('deleteAssignMessageSuffix').textContent = 'from this sheet?';
+        document.getElementById('confirmDeleteAssignBtn').textContent = 'Yes, Unlink';
+    }
+
     function openDeleteAssign(id, type, name) {
         pendingDeleteId = id;
         pendingDeleteType = type;
+        pendingDeleteMode = 'unlink';
+        resetDeleteModalText();
         document.getElementById('deleteAssignNameLabel').textContent = name;
+        new bootstrap.Modal(document.getElementById('deleteAssignModal')).show();
+    }
+
+    function openDeleteMcq(id, name) {
+        pendingDeleteId = id;
+        pendingDeleteType = 'MCQ';
+        pendingDeleteMode = 'delete';
+        document.getElementById('deleteAssignModalTitle').textContent = '🗑️ Delete MCQ Question';
+        document.getElementById('deleteAssignMessagePrefix').textContent = 'Are you sure you want to permanently delete';
+        document.getElementById('deleteAssignNameLabel').textContent = name;
+        document.getElementById('deleteAssignMessageSuffix').textContent = '? This cannot be undone.';
+        document.getElementById('confirmDeleteAssignBtn').textContent = 'Yes, Delete';
         new bootstrap.Modal(document.getElementById('deleteAssignModal')).show();
     }
 
     async function confirmDeleteAssignment() {
         if (!pendingDeleteId || !pendingDeleteType) return;
         const btn = document.getElementById('confirmDeleteAssignBtn');
-        btn.disabled = true; btn.textContent = 'Removing…';
+        btn.disabled = true;
+        btn.textContent = pendingDeleteMode === 'delete' ? 'Deleting…' : 'Removing…';
         try {
-            const res = await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/unlink-item/`, {
-                method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item_id: pendingDeleteId, type: pendingDeleteType })
-            });
+            let res;
+            if (pendingDeleteMode === 'delete' && pendingDeleteType === 'MCQ') {
+                res = await fetch(`/administration/api/v1/mcq-questions/${pendingDeleteId}/`, {
+                    method: 'DELETE', headers: { 'X-CSRFToken': CSRF }
+                });
+            } else {
+                res = await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/unlink-item/`, {
+                    method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item_id: pendingDeleteId, type: pendingDeleteType })
+                });
+            }
+
             if (res.ok) {
                 bootstrap.Modal.getInstance(document.getElementById('deleteAssignModal')).hide();
                 await loadSheetItems();
                 pendingDeleteId = null;
                 pendingDeleteType = null;
+                pendingDeleteMode = 'unlink';
             } else {
-                alert('Unlink failed.');
+                alert(pendingDeleteMode === 'delete' ? 'Delete failed.' : 'Unlink failed.');
             }
-        } catch (e) { alert('Unlink failed.'); }
-        finally { btn.disabled = false; btn.textContent = 'Yes, Unlink'; }
+        } catch (e) { alert(pendingDeleteMode === 'delete' ? 'Delete failed.' : 'Unlink failed.'); }
+        finally {
+            btn.disabled = false;
+            resetDeleteModalText();
+        }
     }
 
     // ==================== SAVE MCQ ====================
     function openAddMcqModal() {
+        document.getElementById('mcqModalLabel').textContent = 'Create MCQ Question';
+        document.getElementById('mcqBtnText').textContent = 'Save & Link';
+        document.getElementById('mcqId').value = '';
         document.getElementById('mcqText').value = '';
         document.getElementById('mcqA').value = '';
         document.getElementById('mcqB').value = '';
@@ -607,9 +655,44 @@
         document.getElementById('mcqFormError').classList.add('d-none');
     }
 
+    async function openEditMcq(id) {
+        const errEl = document.getElementById('mcqFormError');
+        openAddMcqModal();
+        document.getElementById('mcqModalLabel').textContent = 'Edit MCQ Question';
+        document.getElementById('mcqBtnText').textContent = 'Update Question';
+        document.getElementById('mcqId').value = id;
+
+        try {
+            const res = await fetch(`/administration/api/v1/mcq-questions/${id}/`, {
+                headers: { 'X-CSRFToken': CSRF }
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to load MCQ question details.');
+            }
+
+            const data = await res.json();
+            document.getElementById('mcqText').value = data.question_text || '';
+            document.getElementById('mcqA').value = data.option_a || '';
+            document.getElementById('mcqB').value = data.option_b || '';
+            document.getElementById('mcqC').value = data.option_c || '';
+            document.getElementById('mcqD').value = data.option_d || '';
+            document.getElementById('mcqCorrect').value = data.correct_option || 'A';
+            document.getElementById('mcqDiff').value = data.difficulty_level || 'Easy';
+
+            new bootstrap.Modal(document.getElementById('mcqModal')).show();
+        } catch (e) {
+            errEl.textContent = 'Failed to load MCQ details.';
+            errEl.classList.remove('d-none');
+            alert('Failed to load MCQ details.');
+        }
+    }
+
     async function saveMcq() {
         const errEl = document.getElementById('mcqFormError');
         errEl.classList.add('d-none');
+        const mcqId = document.getElementById('mcqId').value;
+        const isEdit = !!mcqId;
 
         const qt = document.getElementById('mcqText').value.trim();
         const oa = document.getElementById('mcqA').value.trim();
@@ -630,22 +713,33 @@
         btn.disabled = true; document.getElementById('mcqBtnSpinner').classList.remove('d-none');
 
         try {
-            // Create MCQ
-            const res = await fetch(`/administration/api/v1/mcq-questions/`, {
-                method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+            const url = isEdit ? `/administration/api/v1/mcq-questions/${mcqId}/` : `/administration/api/v1/mcq-questions/`;
+            const method = isEdit ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method, headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
-            const data = await res.json();
+
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (_) {
+                data = {};
+            }
+
             if (res.ok) {
-                // Link it
-                await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/link-item/`, {
-                    method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'MCQ', item_id: data.data?.id || data.id })
-                });
+                if (!isEdit) {
+                    await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/link-item/`, {
+                        method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'MCQ', item_id: data.data?.id || data.id })
+                    });
+                }
                 bootstrap.Modal.getInstance(document.getElementById('mcqModal')).hide();
                 await loadSheetItems();
             } else {
-                errEl.textContent = 'Save failed.'; errEl.classList.remove('d-none');
+                errEl.textContent = data.error || 'Save failed.';
+                errEl.classList.remove('d-none');
             }
         } catch (e) { errEl.textContent = 'Network error.'; errEl.classList.remove('d-none'); }
         finally { btn.disabled = false; document.getElementById('mcqBtnSpinner').classList.add('d-none'); }

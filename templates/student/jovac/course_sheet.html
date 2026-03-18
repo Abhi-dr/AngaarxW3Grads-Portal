@@ -168,13 +168,14 @@ active
 
     async function fetchAssignments() {
         try {
-            const response = await fetch(`/dashboard/api/v1/jovac/courses/${courseSlug}/sheets/${sheetSlug}/assignments/`, {
+            const response = await fetch(`/dashboard/api/v1/jovac/courses/${courseSlug}/sheets/${sheetSlug}/assignments/?t=${Date.now()}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': getCookie('csrftoken')
                 },
-                credentials: 'same-origin'
+                credentials: 'same-origin',
+                cache: 'no-store'
             });
 
             if (!response.ok) {
@@ -271,7 +272,7 @@ active
             actionCell = `
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
-                        <a class="btn btn-success" href="/dashboard/jovac/tutorial/${entry.id}/">View More</a>
+                        <a class="btn btn-success" href="/dashboard/jovac/tutorial/${entry.id}/?sheet=${encodeURIComponent(sheetSlug)}">View More</a>
                     </div>
                 </td>
             `;
@@ -309,7 +310,7 @@ active
             } else if (entry.is_overdue) {
                 actionButton = `<button class="btn btn-outline-danger mx-1" disabled>Deadline Passed</button>`;
             } else {
-                actionButton = `<a href="/dashboard/submit_assignment/${entry.id}" class="btn btn-outline-primary mx-1">Submit Assignment</a>`;
+                actionButton = `<a href="/dashboard/submit_assignment/${entry.id}?sheet=${encodeURIComponent(sheetSlug)}" class="btn btn-outline-primary mx-1">Submit Assignment</a>`;
             }
 
             actionCell = `
@@ -320,6 +321,9 @@ active
                 </td>
             `;
         } else if (item.type === 'MCQ') {
+            const mcqQuestionUrl = `/dashboard/sheet/${entry.sheet_slug || sheetSlug}/${entry.slug}/`;
+            const showMcqButton = Boolean(entry.slug);
+
             typeCell = `
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
@@ -345,7 +349,9 @@ active
             actionCell = `
                 <td class="border-bottom-0">
                     <div class="d-flex align-items-center gap-2">
-                        <a class="btn btn-outline-primary mx-1" href="/dashboard/sheet/${sheetSlug}/${entry.slug}/">Open MCQ</a>
+                        ${showMcqButton
+                    ? `<a class="btn btn-primary" href="${mcqQuestionUrl}">View Question</a>`
+                    : `<span class="text-muted">-</span>`}
                     </div>
                 </td>
             `;
@@ -456,5 +462,7 @@ active
         return cookieValue;
     }
 </script>
+
+<!-- MCQ functionality removed -->
 
 {% endblock %}

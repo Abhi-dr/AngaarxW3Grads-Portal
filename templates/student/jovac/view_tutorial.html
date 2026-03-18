@@ -42,8 +42,10 @@ Tutorial | JOVAC
                 <h2 class="card-title mb-3" id="tutorial-title">Loading...</h2>
 
                 <!-- Buttons at the top -->
-                <button class="btn btn-danger" onclick="history.back()">Previous</button>
-                <a class="btn btn-success float-end" id="next-button" href="#">Next</a>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <a class="btn btn-outline-danger" id="previous-button" href="#">Previous</a>
+                    <a class="btn btn-success" id="next-button" href="#">Next</a>
+                </div>
 
                 <hr>
 
@@ -66,8 +68,10 @@ Tutorial | JOVAC
                 <hr>
 
                 <!-- Buttons at the bottom -->
-                <button class="btn btn-danger" onclick="history.back()">Previous</button>
-                <a class="btn btn-success float-end" id="next-button-bottom" href="#">Next</a>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <a class="btn btn-outline-danger" id="previous-button-bottom" href="#">Previous</a>
+                    <a class="btn btn-success" id="next-button-bottom" href="#">Next</a>
+                </div>
             </div>
         </div>
     </div>
@@ -123,9 +127,18 @@ Tutorial | JOVAC
         // Set title
         document.getElementById('tutorial-title').textContent = tutorial.title;
         document.title = `${tutorial.title} | Tutorial`;
+
+        const queryParams = new URLSearchParams(window.location.search);
+        const sheetSlug = queryParams.get('sheet');
+        const sheetSuffix = sheetSlug ? `?sheet=${encodeURIComponent(sheetSlug)}` : '';
         
+        // Set previous button URLs
+        const previousUrl = `/dashboard/jovac/assignment/${tutorial.id}/previous${sheetSuffix}`;
+        document.getElementById('previous-button').href = previousUrl;
+        document.getElementById('previous-button-bottom').href = previousUrl;
+
         // Set next button URLs
-        const nextUrl = `/dashboard/jovac/assignment/${tutorial.id}/next`;
+        const nextUrl = `/dashboard/jovac/assignment/${tutorial.id}/next${sheetSuffix}`;
         document.getElementById('next-button').href = nextUrl;
         document.getElementById('next-button-bottom').href = nextUrl;
         

@@ -56,9 +56,9 @@ Student -> Submit Assignment
     <div class="card" id="card-title-2">
         <div class="card-header ">
             <h5 class="card-title"><strong>({{ assignment.course_name }}) Title:</strong> {{ assignment.title }}</h5>
-            <div class="">
-                <button class="btn btn-danger" onclick="history.back()">Previous</button>
-                <a class="btn btn-success float-end" href="{% url 'get_next_jovac_assignment' assignment.id %}">Next</a>
+            <div class="d-flex justify-content-between align-items-center">
+                <a class="btn btn-outline-danger" href="{% url 'get_previous_jovac_assignment' assignment.id %}{% if sheet_slug %}?sheet={{ sheet_slug }}{% endif %}">Previous</a>
+                <a class="btn btn-success" href="{% url 'get_next_jovac_assignment' assignment.id %}{% if sheet_slug %}?sheet={{ sheet_slug }}{% endif %}">Next</a>
             </div>
         </div>
 
@@ -163,9 +163,9 @@ Student -> Submit Assignment
                     onclick="return confirm('Are you sure?')">Submit</button>
             </form>
 
-            <div class="mt-4">
-                <button class="btn btn-danger" onclick="history.back()">Previous</button>
-                <a class="btn btn-success float-end" href="{% url 'get_next_jovac_assignment' assignment.id %}">Next</a>
+            <div class="mt-4 d-flex justify-content-between align-items-center">
+                <a class="btn btn-outline-danger" href="{% url 'get_previous_jovac_assignment' assignment.id %}{% if sheet_slug %}?sheet={{ sheet_slug }}{% endif %}">Previous</a>
+                <a class="btn btn-success" href="{% url 'get_next_jovac_assignment' assignment.id %}{% if sheet_slug %}?sheet={{ sheet_slug }}{% endif %}">Next</a>
             </div>
 
         </div>
