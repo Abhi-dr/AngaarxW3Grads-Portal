@@ -7,10 +7,12 @@ from datetime import datetime
 from django.db.models import Q, Case, When, Value, CharField
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import cache_control
 import json
 from django.db.models import Exists, OuterRef
 from django.core.paginator import Paginator
 from django.db.models import Count, Min, Max
+from django.urls import reverse
 from accounts.models import CustomUser
 from student.models import Notification, Course
 from practice.models import Submission, Question, Sheet, Batch,EnrollmentRequest, MCQQuestion, MCQSubmission, Streak
@@ -56,11 +58,14 @@ def _validate_question_access(request, student, mcq_question):
 # ================================ MCQ QUESTION VIEW ================================
 
 @login_required(login_url='login')
+@login_required
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def mcq_question_view(request, sheet_slug, slug):
     """
     Display MCQ question page, optimized for performance and clarity.
+    Handles both Sheet (batch) and CourseSheet (JOVAC) MCQ questions.
     """
-    # Use select_related to pre-fetch the sheet, avoiding an extra query.
+    # Get the MCQ question by slug
     mcq_question = get_object_or_404(
         MCQQuestion.objects.select_related('sheet'), 
         slug=slug, 
@@ -73,39 +78,139 @@ def mcq_question_view(request, sheet_slug, slug):
         messages.error(request, "Student profile not found.")
         return redirect('some_error_page')
 
-    access_error_response = _validate_question_access(request, student, mcq_question)
-    if access_error_response:
-        return access_error_response
+    # Check if this MCQ belongs to a practice Sheet or a student CourseSheet
+    is_jovac_mcq = False
+    from student.models import CourseSheet
+    
+    # Try to find which CourseSheet contains this MCQ
+    course_sheet = None
+    if mcq_question.course_sheets.exists():
+        # Find the CourseSheet matching the sheet_slug parameter
+        course_sheet = get_object_or_404(
+            CourseSheet,
+            slug=sheet_slug,
+            mcq_questions=mcq_question
+        )
+        is_jovac_mcq = True
+
+    # Validate access
+    if is_jovac_mcq and course_sheet:
+        # JOVAC MCQ validation (simplified - just check if sheet is approved)
+        if not course_sheet.is_approved or not course_sheet.is_enabled:
+            messages.error(request, "This sheet is not accessible.")
+            course = course_sheet.course.all().first()
+            if course:
+                return redirect('student_jovac', slug=course.slug)
+            return redirect('jovac_dashboard')
+    else:
+        # Batch MCQ validation
+        access_error_response = _validate_question_access(request, student, mcq_question)
+        if access_error_response:
+            return access_error_response
 
     previous_submission = MCQSubmission.objects.filter(
         student=student,
         question=mcq_question
     ).first()
+
+    previous_question_url = None
+    next_question_url = None
+
+    if is_jovac_mcq and course_sheet:
+        # For JOVAC MCQ page navigation, move only across MCQs in this sheet.
+        ordered_mcq_slugs = list(
+            MCQQuestion.objects.filter(course_sheets=course_sheet, is_approved=True)
+            .order_by('id')
+            .values_list('slug', flat=True)
+        )
+
+        if mcq_question.slug in ordered_mcq_slugs:
+            current_index = ordered_mcq_slugs.index(mcq_question.slug)
+            if current_index > 0:
+                previous_question_url = reverse(
+                    'mcq_question',
+                    kwargs={
+                        'sheet_slug': course_sheet.slug,
+                        'slug': ordered_mcq_slugs[current_index - 1]
+                    }
+                )
+            if current_index < len(ordered_mcq_slugs) - 1:
+                next_question_url = reverse(
+                    'mcq_question',
+                    kwargs={
+                        'sheet_slug': course_sheet.slug,
+                        'slug': ordered_mcq_slugs[current_index + 1]
+                    }
+                )
+    else:
+        ordered_mcq_slugs = list(
+            MCQQuestion.objects.filter(sheet=mcq_question.sheet, is_approved=True)
+            .order_by('id')
+            .values_list('slug', flat=True)
+        )
+        if mcq_question.slug in ordered_mcq_slugs and mcq_question.sheet and mcq_question.sheet.slug:
+            current_index = ordered_mcq_slugs.index(mcq_question.slug)
+            if current_index > 0:
+                previous_question_url = reverse(
+                    'mcq_question',
+                    kwargs={
+                        'sheet_slug': mcq_question.sheet.slug,
+                        'slug': ordered_mcq_slugs[current_index - 1]
+                    }
+                )
+            if current_index < len(ordered_mcq_slugs) - 1:
+                next_question_url = reverse(
+                    'mcq_question',
+                    kwargs={
+                        'sheet_slug': mcq_question.sheet.slug,
+                        'slug': ordered_mcq_slugs[current_index + 1]
+                    }
+                )
     
     tag_list = [tag.strip() for tag in (mcq_question.tags or '').split(',') if tag.strip()]
 
     context = {
         'mcq_question': mcq_question,
-        'sheet': mcq_question.sheet,
+        'sheet': mcq_question.sheet if not is_jovac_mcq else course_sheet,
+        'course_sheet': course_sheet if is_jovac_mcq else None,
+        'is_jovac_mcq': is_jovac_mcq,
         'previous_submission': previous_submission,
+        'previous_question_url': previous_question_url,
+        'next_question_url': next_question_url,
         "tag_list": tag_list,
     }
     
-    return render(request, 'student/batch/mcq/problem.html', context)
+    # Add course_slug for JOVAC breadcrumbs
+    if is_jovac_mcq and course_sheet:
+        course = course_sheet.course.all().first()
+        if course:
+            context['course_slug'] = course.slug
+    
+    # Use JOVAC template if it's a JOVAC question, otherwise use batch template
+    if is_jovac_mcq:
+        return render(request, 'student/jovac/mcq_question.html', context)
+    else:
+        return render(request, 'student/batch/mcq/problem.html', context)
 
 # ================================ SUBMIT MCQ ANSWER ================================
 
 @login_required
 @require_http_methods(["POST"])
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def submit_mcq_answer(request, slug):
     """
-    Handle MCQ answer submission
+    Handle MCQ answer submission.
+    For JOVAC MCQs, approval status is not strictly enforced since they're 
+    managed by CourseSheet, not Sheet approval.
     """
-    mcq_question = get_object_or_404(
-        MCQQuestion.objects.select_related('sheet'), 
-        slug=slug, 
-        is_approved=True
-    )
+    # Get MCQ - don't require is_approved=True since JOVAC MCQs use CourseSheet approval
+    try:
+        mcq_question = MCQQuestion.objects.select_related('sheet').get(slug=slug)
+    except MCQQuestion.DoesNotExist:
+        return JsonResponse({
+            'error': 'MCQ Question not found',
+            'is_correct': False
+        }, status=404)
     
     student = get_object_or_404(CustomUser, id=request.user.id)
     

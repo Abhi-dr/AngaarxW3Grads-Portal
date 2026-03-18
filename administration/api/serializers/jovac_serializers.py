@@ -161,10 +161,15 @@ class MCQQuestionAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = MCQQuestion
         fields = [
-            'id', 'question_text', 'option_a', 'option_b', 'option_c', 'option_d',
+            'id', 'sheet', 'question_text', 'option_a', 'option_b', 'option_c', 'option_d',
             'correct_option', 'explanation', 'tags', 'difficulty_level', 'slug', 'is_approved'
         ]
         read_only_fields = ['slug']
+    
+    def create(self, validated_data):
+        """Ensure is_approved is always True for JOVAC MCQs"""
+        validated_data['is_approved'] = True
+        return super().create(validated_data)
 
 # ====================================================
 # Question (Coding)

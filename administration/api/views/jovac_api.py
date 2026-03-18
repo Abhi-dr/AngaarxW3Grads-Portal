@@ -317,6 +317,46 @@ class MCQQuestionAdminViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdministratorOrInstructor]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
+    def create(self, request, *args, **kwargs):
+        """
+        Create MCQ for JOVAC. JOVAC MCQs are stored with a dummy 'sheet' 
+        since they're linked via CourseSheet.mcq_questions M2M relationship.
+        """
+        from practice.models import Sheet
+        
+        # Get or create a default JOVAC sheet for storing JOVAC-created MCQs
+        jovac_sheet, created = Sheet.objects.get_or_create(
+            name='JOVAC MCQ Storage',
+            slug='jovac-mcq-storage',
+            defaults={
+                'sheet_type': 'MCQ',
+                'description': 'Placeholder sheet for JOVAC MCQ storage',
+                'is_enabled': True,
+                'is_approved': True,
+            }
+        )
+        
+        # If sheet already exists but is disabled, enable it
+        if not created and (not jovac_sheet.is_enabled or not jovac_sheet.is_approved):
+            jovac_sheet.is_enabled = True
+            jovac_sheet.is_approved = True
+            jovac_sheet.save()
+        
+        # Add the sheet to the request data for serialization
+        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        data['sheet'] = jovac_sheet.id
+        
+        # Create serializer with updated data
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        
+        return Response({
+            'success': True,
+            'data': serializer.data,
+            'id': serializer.instance.id
+        }, status=status.HTTP_201_CREATED)
+
 
 # ============================================================
 # Question (Coding) CRUD ViewSet

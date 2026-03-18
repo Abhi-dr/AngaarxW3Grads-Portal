@@ -240,6 +240,23 @@ class CourseSheet(models.Model):
         
         return items[current_index + 1]
 
+    def get_previous_item(self, current_item_id):
+        """Get the previous mixed item based on custom order."""
+        items = self.get_ordered_items()
+        if not items:
+            return None
+
+        current_index = -1
+        for i, item in enumerate(items):
+            if item['item_id'] == current_item_id or (item['type'] == 'Assignment' and str(item['pk']) == current_item_id):
+                current_index = i
+                break
+
+        if current_index <= 0:
+            return None
+
+        return items[current_index - 1]
+
     
     class Meta:
         verbose_name = 'Course Sheet'

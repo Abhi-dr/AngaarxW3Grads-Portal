@@ -682,7 +682,7 @@ class RecommendedQuestions(models.Model):
 # ============================== MCQ Question ================================
 
 class MCQQuestion(models.Model):
-    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, related_name="mcq_questions")
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, related_name="mcq_questions", blank=True, null=True)
 
     question_text = models.TextField()
 
