@@ -100,7 +100,7 @@ class AIQuestion(models.Model):
 # =================================================== Course ==========================================
 
 
-class Course(models.Model):
+class Course(models.Model): # Called as JOVAC in HTML
     
     name = models.CharField(max_length=100, db_index=True)  # Increased length and added index
 
@@ -141,6 +141,13 @@ class Course(models.Model):
         if self.sheet_order:
             sheets.sort(key=lambda s: self.sheet_order.get(str(s.id), 9999))
         return sheets
+    
+    def get_ordered_sheets_enabled(self):
+        """Return course sheets ordered by sheet_order, fallback to pk."""
+        sheets = list(self.course_sheets.filter(is_enabled = True))
+        if self.sheet_order:
+            sheets.sort(key=lambda s: self.sheet_order.get(str(s.id), 9999))
+        return sheets
 
     class Meta:
         ordering = ['-created_at']
@@ -160,9 +167,13 @@ class CourseSheet(models.Model):
     
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="course_sheets", blank=True, null=True)
     
-    custom_order = models.JSONField(default=dict)  # Store order as {assignment_id: position}
+    # Generic ordering for mixed items: {"assignment_1": 0, "mcq_5": 1, "coding_9": 2}
+    custom_order = models.JSONField(default=dict)  
 
-    
+    # Polymorphic-style relationships
+    mcq_questions = models.ManyToManyField('practice.MCQQuestion', related_name="course_sheets", blank=True)
+    coding_questions = models.ManyToManyField('practice.Question', related_name="course_sheets", blank=True)
+
     # Is sheet enabled or not
     is_enabled = models.BooleanField(default=True)
     
@@ -172,32 +183,79 @@ class CourseSheet(models.Model):
         """Checks if the sheet is active based on the current time."""
         return self.is_enabled and (self.start_time <= now() <= self.end_time)
         
-    
     def get_ordered_assignments(self):
-        # Get questions in the custom order
+        """Legacy method for backward compatibility. Use get_ordered_items() instead."""
         assignments = list(self.assignments.all())
         if self.custom_order:
-            assignments.sort(key=lambda q: self.custom_order.get(str(q.id), 0))
+            assignments.sort(key=lambda q: self.custom_order.get(f"assignment_{q.id}", self.custom_order.get(str(q.id), 9999)))
         return assignments
+
+    def get_ordered_items(self):
+        """
+        Returns a sorted list of dictionaries representing all mixed assignments,
+        MCQ questions, and Coding questions within this sheet.
+        """
+        items = []
+        for a in self.assignments.all():
+            items.append({'item_id': f'assignment_{a.id}', 'type': 'Assignment', 'pk': a.id, 'obj': a})
+            
+        for m in self.mcq_questions.all():
+            items.append({'item_id': f'mcq_{m.id}', 'type': 'MCQ', 'pk': m.id, 'obj': m})
+            
+        for c in self.coding_questions.all():
+            items.append({'item_id': f'coding_{c.id}', 'type': 'Coding', 'pk': c.id, 'obj': c})
+            
+        if self.custom_order:
+            def get_sort_index(x):
+                # Check for new format like "assignment_12"
+                if x['item_id'] in self.custom_order:
+                    return self.custom_order[x['item_id']]
+                # Fallback to legacy format like "12" but only for Assignments
+                if x['type'] == 'Assignment' and str(x['pk']) in self.custom_order:
+                    return self.custom_order[str(x['pk'])]
+                # Items not explicitly ordered go to the end
+                return 9999
+                
+            items.sort(key=get_sort_index)
+            
+        return items
     
     
 
-    def get_next_assignment(self, current_assignment):
-        """Get the next assignment based on custom order."""
-        assignments = self.get_ordered_assignments()
-        if not assignments:
+    def get_next_item(self, current_item_id):
+        """Get the next mixed item based on custom order."""
+        items = self.get_ordered_items()
+        if not items:
             return None
         
-        current_index = assignments.index(current_assignment)
+        # current_item_id expected to be like 'assignment_1' or 'mcq_5'
+        current_index = -1
+        for i, item in enumerate(items):
+            if item['item_id'] == current_item_id or (item['type'] == 'Assignment' and str(item['pk']) == current_item_id):
+                current_index = i
+                break
 
-        # If current assignment is the last one, return None
-        if current_index == len(assignments) - 1:
+        if current_index == -1 or current_index == len(items) - 1:
             return None
         
+        return items[current_index + 1]
 
-        if current_index + 1 < len(assignments):
-            return assignments[current_index + 1]
-        return None
+    def get_previous_item(self, current_item_id):
+        """Get the previous mixed item based on custom order."""
+        items = self.get_ordered_items()
+        if not items:
+            return None
+
+        current_index = -1
+        for i, item in enumerate(items):
+            if item['item_id'] == current_item_id or (item['type'] == 'Assignment' and str(item['pk']) == current_item_id):
+                current_index = i
+                break
+
+        if current_index <= 0:
+            return None
+
+        return items[current_index - 1]
 
     
     class Meta:

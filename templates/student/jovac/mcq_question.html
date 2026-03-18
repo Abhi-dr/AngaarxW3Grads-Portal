@@ -1,0 +1,538 @@
+{% extends 'student/base.html' %}
+{% load static %}
+
+{% block title %}Q: {{ mcq_question.question_text|truncatewords:5 }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        overflow-y: auto !important;
+    }
+
+    .mcq-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 96px 20px 24px;
+    }
+
+    .mcq-question-box {
+        background-color: #f8f9fa;
+        border-left: 5px solid #0d6efd;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        color: #000;
+    }
+
+    .mcq-question-box h4 {
+        color: #000;
+    }
+
+    .mcq-question-text,
+    .mcq-question-text p {
+        color: #000 !important;
+        margin-bottom: 0;
+    }
+
+    .option-btn {
+        width: 100%;
+        text-align: left;
+        padding: 15px 18px;
+        border: 2px solid #e0e0e0;
+        border-radius: 6px;
+        margin: 12px 0;
+        background: white;
+        color: #000 !important;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 15px;
+        line-height: 1.5;
+    }
+
+    .option-btn strong {
+        color: #000 !important;
+    }
+
+    .option-btn:hover:not(:disabled) {
+        border-color: #0d6efd;
+        background-color: #f0f6ff;
+        transform: translateX(3px);
+    }
+
+    .option-btn.selected {
+        border-color: #0d6efd;
+        background-color: #cfe2ff;
+        color: #000 !important;
+        font-weight: 500;
+    }
+
+    .option-btn.correct {
+        border-color: #198754;
+        background-color: #d1e7dd;
+        color: #000 !important;
+    }
+
+    .option-btn.incorrect {
+        border-color: #dc3545;
+        background-color: #f8d7da;
+        color: #000 !important;
+    }
+
+    .option-btn:disabled {
+        cursor: not-allowed;
+        color: #000 !important;
+        opacity: 1;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 12px 20px;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        background-color: #0b5ed7;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+    }
+
+    .submit-btn:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+
+    .explanation-box {
+        background-color: #d1ecf1;
+        border-left: 5px solid #0c5460;
+        padding: 15px 20px;
+        border-radius: 6px;
+        margin-top: 20px;
+        color: #0c5460;
+    }
+
+    .explanation-box strong {
+        color: #0c5460;
+    }
+
+    .badge {
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .result-message {
+        padding: 15px 20px;
+        border-radius: 6px;
+        margin: 15px 0;
+        font-weight: 500;
+        border-left: 5px solid;
+    }
+
+    .result-message.correct {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border-color: #198754;
+    }
+
+    .result-message.incorrect {
+        background-color: #f8d7da;
+        color: #842029;
+        border-color: #dc3545;
+    }
+
+    .question-image {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 15px 0;
+        border: 1px solid #e0e0e0;
+        padding: 8px;
+    }
+
+    .question-images {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .tags-container {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+    }
+
+    .tag {
+        background-color: #e8f1f5;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #0c63e4;
+        border: 1px solid #b6d4ee;
+    }
+
+    .breadcrumb {
+        background-color: transparent;
+        padding: 0 0 10px 0;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .breadcrumb .breadcrumb-item a {
+        color: #0d6efd;
+        text-decoration: none;
+    }
+
+    .breadcrumb .breadcrumb-item a:hover {
+        text-decoration: underline;
+    }
+
+    .breadcrumb .breadcrumb-item.active {
+        color: #6c757d;
+    }
+
+    .options-section {
+        margin: 30px 0;
+        padding: 20px 0;
+        color: #000;
+    }
+
+    .result-message strong {
+        font-size: 16px;
+    }
+
+    #navigation-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    #navigation-buttons .btn {
+        flex: 1;
+        min-width: 150px;
+    }
+
+    @media (max-width: 768px) {
+        .mcq-container {
+            padding: 88px 15px 20px;
+        }
+        
+        .mcq-question-box {
+            padding: 15px;
+        }
+
+        .option-btn {
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+
+        #navigation-buttons {
+            flex-direction: column;
+        }
+
+        #navigation-buttons .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="mcq-container">
+    <!-- Question Information -->
+    <div class="row mb-3">
+        <div class="col-md-8">
+            <h5 class="fw-semibold">
+                <span class="badge bg-{{ mcq_question.get_difficulty_level_color }} text-color">
+                    {{ mcq_question.difficulty_level }}
+                </span>
+                MCQ Question
+            </h5>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <small class="text-muted">
+                Created: {{ mcq_question.created_at|date:"M d, Y" }}
+            </small>
+        </div>
+    </div>
+
+    <!-- Main Question Box -->
+    <div class="mcq-question-box">
+        <div class="mcq-question-text mb-3">{{ mcq_question.question_text|linebreaks }}</div>
+
+        <!-- Question Images -->
+        {% if mcq_question.images.all %}
+        <div class="question-images mb-3">
+            {% for img in mcq_question.images.all %}
+            <div class="image-container mb-2">
+                <img src="{{ img.image.url }}" alt="Question Image" class="question-image">
+                {% if img.caption %}
+                <small class="text-muted d-block mt-1">{{ img.caption }}</small>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Tags -->
+        {% if tag_list %}
+        <div class="tags-container">
+            {% for tag in tag_list %}
+            <span class="tag">{{ tag }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Result Message (shown after submission) -->
+    <div id="result-message" style="display: none;"></div>
+
+    <!-- Options Section -->
+    <div class="options-section">
+        <h5 class="mb-3">Choose your answer:</h5>
+        <div class="options">
+            <button class="option-btn" data-option="A" onclick="selectOption('A')">
+                <strong>A.</strong> {{ mcq_question.option_a }}
+            </button>
+            <button class="option-btn" data-option="B" onclick="selectOption('B')">
+                <strong>B.</strong> {{ mcq_question.option_b }}
+            </button>
+            <button class="option-btn" data-option="C" onclick="selectOption('C')">
+                <strong>C.</strong> {{ mcq_question.option_c }}
+            </button>
+            <button class="option-btn" data-option="D" onclick="selectOption('D')">
+                <strong>D.</strong> {{ mcq_question.option_d }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <button class="submit-btn mt-3" id="submit-btn" onclick="submitAnswer()" disabled>
+        Submit Answer
+    </button>
+
+    <!-- Explanation (shown after submission) -->
+    <div id="explanation-section" style="display: none;"></div>
+
+    <!-- Navigation Buttons -->
+    <div id="navigation-buttons" style="margin-top: 30px; display: flex; gap: 10px; flex-wrap: wrap;">
+        {% if previous_question_url %}
+        <a class="btn btn-outline-secondary" href="{{ previous_question_url }}">
+            <i class="fas fa-arrow-left"></i> Previous
+        </a>
+        {% else %}
+        <button class="btn btn-outline-secondary" disabled>
+            <i class="fas fa-arrow-left"></i> Previous
+        </button>
+        {% endif %}
+
+        <button class="btn btn-primary" onclick="location.reload()">
+            <i class="fas fa-redo"></i> Try Again
+        </button>
+
+        {% if next_question_url %}
+        <a class="btn btn-success" href="{{ next_question_url }}">
+            Next <i class="fas fa-arrow-right"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Initialize variables - FRESH for each page load
+    let selectedOption = null;
+    let submitted = false;
+    const questionSlug = '{{ mcq_question.slug }}';
+
+    // Store current question slug to detect if we're viewing a different question
+    let currentQuestionSlug = questionSlug;
+
+    // Complete page state reset function
+    function resetPageState() {
+        // Reset all state variables
+        selectedOption = null;
+        submitted = false;
+        currentQuestionSlug = questionSlug;
+        
+        // Clear all option buttons
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected', 'correct', 'incorrect');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        });
+        
+        // Clear result messages
+        const resultDiv = document.getElementById('result-message');
+        if (resultDiv) {
+            resultDiv.innerHTML = '';
+            resultDiv.style.display = 'none';
+            resultDiv.className = '';
+        }
+        
+        // Clear explanation
+        const explanationDiv = document.getElementById('explanation-section');
+        if (explanationDiv) {
+            explanationDiv.innerHTML = '';
+            explanationDiv.style.display = 'none';
+        }
+        
+        // Reset submit button
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'Submit Answer';
+            submitBtn.style.display = 'block';
+            submitBtn.style.opacity = '1';
+        }
+    }
+
+    function selectOption(option) {
+        // Safety check - ensure we're on the right question
+        if (currentQuestionSlug !== questionSlug) {
+            resetPageState();
+        }
+        if (submitted) return; // Don't allow changing answer after submission
+        selectedOption = option;
+        updateOptionUI();
+    }
+
+    function updateOptionUI() {
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('selected', 'correct', 'incorrect');
+            if (btn.dataset.option === selectedOption) {
+                if (!submitted) {
+                    btn.classList.add('selected');
+                }
+            }
+        });
+
+        // Enable submit button only if option is selected and not submitted
+        const submitBtn = document.getElementById('submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = !selectedOption || submitted;
+        }
+    }
+
+    function submitAnswer() {
+        if (!selectedOption) {
+            alert('Please select an option first!');
+            return;
+        }
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Submitting...';
+
+        const formData = JSON.stringify({
+            selected_option: selectedOption
+        });
+
+        fetch(`{% url 'submit_mcq_answer' mcq_question.slug %}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            submitted = true;
+            updateOptionUI();
+            displayResult(data);
+            submitBtn.style.display = 'none';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = 'Submit Answer';
+            alert('Error submitting answer. Please check your connection and try again.');
+        });
+    }
+
+    function displayResult(data = null) {
+        const correctOption = data ? data.correct_option : '{{ mcq_question.correct_option }}';
+        const isCorrect = data ? data.is_correct : false;
+        
+        // Show result message
+        const resultDiv = document.getElementById('result-message');
+        resultDiv.className = `result-message ${isCorrect ? 'correct' : 'incorrect'}`;
+        resultDiv.innerHTML = `<strong>${isCorrect ? '✔️ Correct!' : '❌ Incorrect!'}</strong><br>${isCorrect ? 'Well done!' : 'The correct answer is <strong>' + correctOption + '</strong>.'}`;
+        resultDiv.style.display = 'block';
+
+        // Scroll to result
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        // Show correct answer highlight
+        document.querySelectorAll('.option-btn').forEach(btn => {
+            btn.classList.remove('correct', 'incorrect');
+            if (btn.dataset.option === correctOption) {
+                btn.classList.add('correct');
+            }
+        });
+
+        // Show explanation
+        const explanationDiv = document.getElementById('explanation-section');
+        if ('{{ mcq_question.explanation }}') {
+            explanationDiv.innerHTML = `
+                <div class="explanation-box">
+                    <strong>📚 Explanation:</strong>
+                    <p class="mt-2 mb-0">{{ mcq_question.explanation|linebreaks }}</p>
+                </div>
+            `;
+            explanationDiv.style.display = 'block';
+        }
+
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Always reset first to ensure clean state
+        resetPageState();
+
+        // Update UI to reflect current state
+        updateOptionUI();
+    });
+
+    // Reset page state when returning from another page (browser back button)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted) {
+            // Page was restored from cache (back button)
+            resetPageState();
+            updateOptionUI();
+        }
+    });
+
+    // Handle keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (submitted) return;
+        
+        const optionMap = { 'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D' };
+        const key = e.key.toLowerCase();
+        
+        if (optionMap[key]) {
+            e.preventDefault();
+            selectOption(optionMap[key]);
+        } else if (e.key === 'Enter' && selectedOption && !submitted) {
+            e.preventDefault();
+            submitAnswer();
+        }
+    });
+</script>
+{% endblock %}

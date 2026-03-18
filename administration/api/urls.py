@@ -9,6 +9,8 @@ from administration.api.views.jovac_api import (
     AssignmentAdminViewSet,
     TestCaseAdminViewSet,
     DriverCodeAdminViewSet,
+    MCQQuestionAdminViewSet,
+    QuestionAdminViewSet,
 )
 from administration.api.views.event_api import (
     EventAdminViewSet,
@@ -22,6 +24,8 @@ router.register(r'sheets', SheetAdminViewSet, basename='admin-sheet')
 router.register(r'courses', CourseAdminViewSet, basename='admin-course')
 router.register(r'course-sheets', CourseSheetAdminViewSet, basename='admin-course-sheet')
 router.register(r'assignments', AssignmentAdminViewSet, basename='admin-assignment')
+router.register(r'mcq-questions', MCQQuestionAdminViewSet, basename='admin-mcq-question')
+router.register(r'coding-questions', QuestionAdminViewSet, basename='admin-coding-question')
 router.register(r'test-cases', TestCaseAdminViewSet, basename='admin-test-case')
 router.register(r'driver-codes', DriverCodeAdminViewSet, basename='admin-driver-code')
 router.register(r'events', EventAdminViewSet, basename='admin-event')

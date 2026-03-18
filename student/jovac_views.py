@@ -5,8 +5,10 @@ from accounts.views import logout as account_logout
 from django.utils import timezone
 from django.db.models import Q
 from django.http import JsonResponse
+from django.views.decorators.cache import cache_control
 from datetime import datetime, timedelta
 from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
 import sys
 import traceback
 
@@ -80,6 +82,7 @@ def enroll_jovac(request, slug):
 # ======================================== JOVAC SHEETS ======================================
 
 @login_required(login_url="login")
+@cache_control(no_cache=True, no_store=True, must_revalidate=True)
 def jovac_sheet(request, course_slug, sheet_slug):
     """
     JOVAC course sheet detail page - displays assignments
@@ -264,10 +267,16 @@ def submit_assignment(request, assignment_id):
     
     # Add course name to assignment for template
     assignment.course_name = course_name
+
+    sheet_slug = request.GET.get('sheet')
+    if not sheet_slug:
+        first_sheet = assignment.course_sheets.first()
+        sheet_slug = first_sheet.slug if first_sheet else None
     
     parameters = {
         "assignment": assignment,
-        "student": student
+        "student": student,
+        "sheet_slug": sheet_slug,
     }
     
     return render(request, "student/jovac/submit_assignment.html", parameters)
@@ -306,7 +315,6 @@ def run_evaluation(assignment: Assignment, submission: AssignmentSubmission):
 # =========================================== VIEW TUTORIAL =============================================
 
 @login_required(login_url="login")
-@login_required(login_url="login")
 def view_jovac_tutorial(request, id):
     """
     View a JOVAC tutorial
@@ -320,38 +328,65 @@ def get_next_jovac_assignment(request, id):
     """
     Get the next assignment for a JOVAC course
     """
-    # Get the current assignment
-    course_sheet = get_object_or_404(CourseSheet, assignments__id=id)
     current_assignment = get_object_or_404(Assignment, id=id)
-    
-    next_assignment = course_sheet.get_next_assignment(current_assignment)
+    sheet_slug = request.GET.get('sheet')
 
-    if not next_assignment:
-        messages.error(request, "No more assignments available in this course sheet.")
-        course = course_sheet.course.first()
-        if current_assignment.is_tutorial:
-            # If the current assignment is a tutorial, redirect to the course sheet
-            return redirect('view_jovac_tutorial', id=current_assignment.id)
-        else:
-            # Otherwise, redirect to the course sheet
-            return redirect('submit_assignment', assignment_id=current_assignment.id)
-
-
+    if sheet_slug:
+        course_sheet = get_object_or_404(CourseSheet, slug=sheet_slug, assignments__id=id)
     else:
-        if next_assignment.is_tutorial:
-            # If the next assignment is a tutorial, redirect to the tutorial view
-            return redirect('view_jovac_tutorial', id=next_assignment.id)
-        else:
-            # Otherwise, redirect to the assignment submission page
-            # Ensure the course slug is passed correctly
-            if next_assignment.content_type.model == 'course':
-                course_slug = next_assignment.course.slug
-            else:
-                course_slug = course_sheet.course.slug
-            
-            return redirect('submit_assignment', assignment_id=next_assignment.id)
-            
-        # Redirect to the assignment submission page
+        course_sheet = current_assignment.course_sheets.first() or get_object_or_404(CourseSheet, assignments__id=id)
+
+    next_item = course_sheet.get_next_item(f'assignment_{current_assignment.id}')
+
+    if not next_item:
+        messages.info(request, "This is the last item in this sheet.")
+        if current_assignment.is_tutorial:
+            return redirect(f"{reverse('view_jovac_tutorial', kwargs={'id': current_assignment.id})}?sheet={course_sheet.slug}")
+        return redirect(f"{reverse('submit_assignment', kwargs={'assignment_id': current_assignment.id})}?sheet={course_sheet.slug}")
+
+    if next_item['type'] == 'MCQ':
+        return redirect('mcq_question', sheet_slug=course_sheet.slug, slug=next_item['obj'].slug)
+
+    if next_item['type'] == 'Coding':
+        return redirect('problem', slug=next_item['obj'].slug)
+
+    next_assignment = next_item['obj']
+    if next_assignment.is_tutorial:
+        return redirect(f"{reverse('view_jovac_tutorial', kwargs={'id': next_assignment.id})}?sheet={course_sheet.slug}")
+    return redirect(f"{reverse('submit_assignment', kwargs={'assignment_id': next_assignment.id})}?sheet={course_sheet.slug}")
+
+
+@login_required(login_url="login")
+def get_previous_jovac_assignment(request, id):
+    """
+    Get the previous item for a JOVAC sheet based on mixed custom order.
+    """
+    current_assignment = get_object_or_404(Assignment, id=id)
+    sheet_slug = request.GET.get('sheet')
+
+    if sheet_slug:
+        course_sheet = get_object_or_404(CourseSheet, slug=sheet_slug, assignments__id=id)
+    else:
+        course_sheet = current_assignment.course_sheets.first() or get_object_or_404(CourseSheet, assignments__id=id)
+
+    previous_item = course_sheet.get_previous_item(f'assignment_{current_assignment.id}')
+
+    if not previous_item:
+        messages.info(request, "This is the first item in this sheet.")
+        if current_assignment.is_tutorial:
+            return redirect(f"{reverse('view_jovac_tutorial', kwargs={'id': current_assignment.id})}?sheet={course_sheet.slug}")
+        return redirect(f"{reverse('submit_assignment', kwargs={'assignment_id': current_assignment.id})}?sheet={course_sheet.slug}")
+
+    if previous_item['type'] == 'MCQ':
+        return redirect('mcq_question', sheet_slug=course_sheet.slug, slug=previous_item['obj'].slug)
+
+    if previous_item['type'] == 'Coding':
+        return redirect('problem', slug=previous_item['obj'].slug)
+
+    previous_assignment = previous_item['obj']
+    if previous_assignment.is_tutorial:
+        return redirect(f"{reverse('view_jovac_tutorial', kwargs={'id': previous_assignment.id})}?sheet={course_sheet.slug}")
+    return redirect(f"{reverse('submit_assignment', kwargs={'assignment_id': previous_assignment.id})}?sheet={course_sheet.slug}")
 
 
 # =========================================== VIEW SUBMISSION =============================================
@@ -441,4 +476,3 @@ def delete_submission(request, submission_id):
     messages.success(request, "Submission deleted successfully.")
     
     return redirect('student_jovac', slug=assignment.course.slug)
-

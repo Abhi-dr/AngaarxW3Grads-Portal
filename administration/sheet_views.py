@@ -632,15 +632,15 @@ def _get_coding_leaderboard(sheet):
         }
         
         # Add additional enrollment data
-        if user_id in enrollment_data:
-            student_entry['additional_data'] = enrollment_data[user_id]
+        # if user_id in enrollment_data:
+        #     student_entry['additional_data'] = enrollment_data[user_id]
         
         leaderboard.append(student_entry)
 
     leaderboard.sort(key=lambda x: (-x['total_score'], x['earliest_submission']))
     return JsonResponse({
         'leaderboard': leaderboard,
-        'additional_fields': batch_fields
+        # 'additional_fields': batch_fields
     })
 
 def _get_mcq_leaderboard(sheet):

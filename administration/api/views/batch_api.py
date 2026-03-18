@@ -60,6 +60,8 @@ class BatchAdminViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             self.perform_update(serializer)
             return Response({'success': True, 'data': serializer.data})
+        
+        print({'success': False, 'errors': serializer.errors})
         return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         
     def destroy(self, request, *args, **kwargs):

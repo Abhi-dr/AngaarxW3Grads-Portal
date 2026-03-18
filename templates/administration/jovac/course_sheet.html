@@ -53,12 +53,26 @@
                 <p class="text-muted mb-0 mt-1">Sheet: <strong>{{ sheet.name }}</strong></p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#assignmentModal"
-                    onclick="openAddModal()">
-                    <i class="ti ti-plus me-1"></i>Add Assignment
-                </button>
-                <a href="{% url 'administrator_edit_jovac_sheet' course.slug sheet.slug %}"
-                    class="btn btn-outline-warning">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <i class="ti ti-plus me-1"></i>Add Item
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assignmentModal"
+                                onclick="openAddModal()">Assignment / Tutorial</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mcqModal"
+                                onclick="openAddMcqModal()">MCQ Question</a></li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#codingModal"
+                                onclick="openAddCodingModal()">Coding Question</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#linkItemModal"
+                                onclick="openLinkModal()">Link Existing MCQ/Coding</a></li>
+                    </ul>
+                </div>
+                <a href="{% url 'administrator_edit_jovac_sheet' course.slug sheet.slug %}" class="btn btn-outline-warning">
                     <i class="ti ti-pencil me-1"></i>Edit Sheet
                 </a>
                 <a href="{% url 'reorder_course_sheet_assignments' sheet.slug %}" class="btn btn-outline-secondary">
@@ -77,7 +91,7 @@
     <!-- Assignments Table -->
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Assignments 🔥</h5>
+            <h5 class="card-title fw-semibold mb-4">Sheet Items 🔥</h5>
             <div class="table-responsive">
                 <table class="table text-nowrap mb-0 align-middle">
                     <thead class="text-dark fs-6">
@@ -203,20 +217,165 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header border-0">
-                <h5 class="modal-title text-danger">🗑️ Delete Assignment</h5>
+                <h5 class="modal-title text-danger" id="deleteAssignModalTitle">🗑️ Unlink Item</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete <strong id="deleteAssignNameLabel"></strong>?
+                <span id="deleteAssignMessagePrefix">Are you sure you want to unlink</span>
+                <strong id="deleteAssignNameLabel"></strong>
+                <span id="deleteAssignMessageSuffix">from this sheet?</span>
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-danger" id="confirmDeleteAssignBtn"
-                    onclick="confirmDeleteAssignment()">Yes, Delete</button>
+                    onclick="confirmDeleteAssignment()">Yes, Unlink</button>
             </div>
         </div>
     </div>
 </div>
+
+<!-- ============ ADD MCQ MODAL ============ -->
+<div class="modal fade" id="mcqModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mcqModalLabel">Create MCQ Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="mcqId" value="">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Question Text <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="mcqText" rows="2"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Option A <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="mcqA">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Option B <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="mcqB">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Option C <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="mcqC">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Option D <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="mcqD">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Correct Option <span class="text-danger">*</span></label>
+                        <select class="form-select" id="mcqCorrect">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Difficulty</label>
+                        <select class="form-select" id="mcqDiff">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="mcqFormError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveMcqBtn" onclick="saveMcq()">
+                    <span id="mcqBtnText">Save & Link</span>
+                    <span id="mcqBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ ADD CODING MODAL ============ -->
+<div class="modal fade" id="codingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Coding Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="codeTitle">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold">Difficulty</label>
+                        <select class="form-select" id="codeDiff">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="codeDesc" rows="4"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted">Note: To add Test Cases and advanced driver code, create this here and
+                            then edit it from the Practice Questions dashboard.</small>
+                    </div>
+                </div>
+                <div id="codeFormError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCodingBtn" onclick="saveCoding()">
+                    <span id="codeBtnText">Save & Link</span>
+                    <span id="codeBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ LINK ITEM MODAL ============ -->
+<div class="modal fade" id="linkItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Link Existing Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
+                        <select class="form-select" id="linkType">
+                            <option value="MCQ">MCQ Question</option>
+                            <option value="Coding">Coding Question</option>
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Question ID <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="linkId" placeholder="e.g. 15">
+                        <small class="text-muted">Enter the ID of the existing question you want to link.</small>
+                    </div>
+                </div>
+                <div id="linkFormError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveLinkBtn" onclick="saveLink()">
+                    <span id="linkBtnText">Link Item</span>
+                    <span id="linkBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block myjs %}
@@ -224,21 +383,29 @@
     const CSRF = '{{ csrf_token }}';
     const COURSE_SLUG = '{{ course.slug }}';
     const SHEET_SLUG = '{{ sheet.slug }}';
-    const API_SHEET = `/administration/api/v1/course-sheets/${SHEET_SLUG}/assignments/`;
-    const API_ASSIGN = `/administration/api/v1/assignments/`;
+    const API_SHEET = `/administration/api/v1/course-sheets/${SHEET_SLUG}/items/`;
     let pendingDeleteId = null;
-    let assignmentsCache = [];
+    let pendingDeleteType = null;
+    let pendingDeleteMode = 'unlink';
+    let sheetItemsCache = [];
 
-    // ==================== LOAD ASSIGNMENTS ====================
-    async function loadAssignments() {
+    // ==================== LOAD SHEET ITEMS ====================
+    async function loadSheetItems() {
         try {
             const res = await fetch(API_SHEET, { headers: { 'X-CSRFToken': CSRF } });
+            if (!res.ok) {
+                throw new Error('Failed to load sheet items.');
+            }
             const data = await res.json();
-            assignmentsCache = data.assignments || [];
-            renderAssignments(assignmentsCache);
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load sheet items.');
+            }
+
+            sheetItemsCache = data.items || [];
+            renderAssignments(sheetItemsCache);
         } catch (e) {
             document.getElementById('assignmentTableBody').innerHTML =
-                `<tr><td colspan="6" class="text-danger">Failed to load assignments.</td></tr>`;
+                `<tr><td colspan="6" class="text-danger">Failed to load sheet items.</td></tr>`;
         }
     }
 
@@ -249,45 +416,73 @@
             + ' @' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
     }
 
-    function renderAssignments(assignments) {
+    function renderAssignments(items) {
         const tbody = document.getElementById('assignmentTableBody');
-        if (!assignments.length) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No assignments yet.</td></tr>`;
+        if (!items.length) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">No items yet.</td></tr>`;
             return;
         }
-        tbody.innerHTML = assignments.map((a, i) => `
-    <tr id="assign-row-${a.id}">
-      <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${i + 1}</h6></td>
-      <td class="border-bottom-0">
-        <span data-bs-toggle="tooltip" title="${a.title}">
-          ${a.title.length > 25 ? a.title.substring(0, 25) + '…' : a.title}
-        </span>
-      </td>
-      <td class="border-bottom-0">
-        <span class="badge ${a.is_tutorial ? 'bg-secondary' : 'bg-primary'}">${a.is_tutorial ? 'Tutorial' : a.assignment_type}</span>
-      </td>
-      <td class="border-bottom-0">${formatDate(a.due_date)}</td>
-      <td class="border-bottom-0">
-        <span class="badge ${a.status === 'Published' ? 'bg-success' : a.status === 'Archived' ? 'bg-secondary' : 'bg-warning text-dark'}">${a.status}</span>
-      </td>
-      <td class="border-bottom-0">
-        <div class="d-flex gap-1">
-          ${a.is_tutorial && a.tutorial_link
-                ? `<a href="${a.tutorial_link}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-youtube-play"></i></a>`
-                : `<a href="/administration/submissions/${a.id}/" class="btn btn-sm btn-info">Submissions</a>`}
-          <button class="btn btn-sm btn-outline-dark" onclick="openEditAssignment(${a.id})">Edit</button>
-          <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${a.title.replace(/'/g, "\\'")}')">Delete</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
+        tbody.innerHTML = items.map((item, i) => {
+            const a = item.obj;
+            const type = item.type;
+            const isAssignment = type === 'Assignment';
+
+            let badgeHtml = '';
+            let dateHtml = '—';
+            let statusBadge = '';
+            let actionHtml = '';
+
+            if (isAssignment) {
+                badgeHtml = `<span class="badge ${a.is_tutorial ? 'bg-secondary' : 'bg-primary'}">${a.is_tutorial ? 'Tutorial' : a.assignment_type}</span>`;
+                dateHtml = formatDate(a.due_date);
+                statusBadge = `<span class="badge ${a.status === 'Published' ? 'bg-success' : a.status === 'Archived' ? 'bg-secondary' : 'bg-warning text-dark'}">${a.status}</span>`;
+                actionHtml = `
+                    ${a.is_tutorial && a.tutorial_link
+                        ? `<a href="${a.tutorial_link}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-youtube-play"></i></a>`
+                        : `<a href="/administration/submissions/${a.id}/" class="btn btn-sm btn-info">Submissions</a>`}
+                    <button class="btn btn-sm btn-outline-dark" onclick="openEditAssignment(${a.id})">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${a.title.replace(/'/g, "\\'")}')">Unlink</button>
+                `;
+            } else {
+                badgeHtml = `<span class="badge ${type === 'Coding' ? 'bg-info' : 'bg-warning text-dark'}">${type} Question</span>`;
+                dateHtml = '—';
+                statusBadge = `<span class="badge ${a.is_approved ? 'bg-success' : 'bg-secondary'}">${a.is_approved ? 'Approved' : 'Draft'}</span>`;
+                if (type === 'MCQ') {
+                    actionHtml = `
+                        <button class="btn btn-sm btn-outline-dark" onclick="openEditMcq(${a.id})">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteMcq(${a.id}, '${(a.title || a.question_text || '').replace(/'/g, "\\'")}')">Delete</button>
+                    `;
+                } else {
+                    actionHtml = `
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${(a.title || a.question_text || '').replace(/'/g, "\\'")}')">Unlink</button>
+                    `;
+                }
+            }
+
+            return `
+            <tr id="assign-row-${item.item_id}">
+            <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${i + 1}</h6></td>
+            <td class="border-bottom-0">
+                <span data-bs-toggle="tooltip" title="${a.title || a.question_text || ''}">
+                ${(a.title || a.question_text || '').length > 25 ? (a.title || a.question_text || '').substring(0, 25) + '…' : (a.title || a.question_text || '')}
+                </span>
+            </td>
+            <td class="border-bottom-0">${badgeHtml}</td>
+            <td class="border-bottom-0">${dateHtml}</td>
+            <td class="border-bottom-0">${statusBadge}</td>
+            <td class="border-bottom-0">
+                <div class="d-flex gap-1">${actionHtml}</div>
+            </td>
+            </tr>
+            `;
+        }).join('');
         // init tooltips
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
     }
 
     // ==================== MODALS ====================
     function openAddModal() {
-        document.getElementById('assignmentModalLabel').textContent = 'Add Assignment';
+        document.getElementById('assignmentModalLabel').textContent = 'Add Assignment / Tutorial';
         document.getElementById('assignBtnText').textContent = 'Save';
         document.getElementById('assignmentId').value = '';
         document.getElementById('assignTitle').value = '';
@@ -304,9 +499,10 @@
     }
 
     function openEditAssignment(id) {
-        const a = assignmentsCache.find(a => a.id === id);
+        const assignmentItem = sheetItemsCache.find(item => item.type === 'Assignment' && item.obj.id === id);
+        const a = assignmentItem ? assignmentItem.obj : null;
         if (!a) return;
-        document.getElementById('assignmentModalLabel').textContent = 'Edit Assignment';
+        document.getElementById('assignmentModalLabel').textContent = a.is_tutorial ? 'Edit Tutorial' : 'Edit Assignment';
         document.getElementById('assignBtnText').textContent = 'Update';
         document.getElementById('assignmentId').value = a.id;
         document.getElementById('assignTitle').value = a.title;
@@ -368,7 +564,7 @@
             const data = await res.json();
             if (data.success || res.ok) {
                 bootstrap.Modal.getInstance(document.getElementById('assignmentModal')).hide();
-                await loadAssignments();
+                await loadSheetItems();
             } else {
                 const msgs = data.errors ? Object.values(data.errors).flat().join(' ') : (data.error || 'Save failed.');
                 errEl.textContent = msgs; errEl.classList.remove('d-none');
@@ -381,34 +577,254 @@
         }
     }
 
-    // ==================== DELETE ASSIGNMENT ====================
-    function openDeleteAssign(id, name) {
+    // ==================== REMOVE/UNLINK ITEM ====================
+    function resetDeleteModalText() {
+        document.getElementById('deleteAssignModalTitle').textContent = '🗑️ Unlink Item';
+        document.getElementById('deleteAssignMessagePrefix').textContent = 'Are you sure you want to unlink';
+        document.getElementById('deleteAssignMessageSuffix').textContent = 'from this sheet?';
+        document.getElementById('confirmDeleteAssignBtn').textContent = 'Yes, Unlink';
+    }
+
+    function openDeleteAssign(id, type, name) {
         pendingDeleteId = id;
+        pendingDeleteType = type;
+        pendingDeleteMode = 'unlink';
+        resetDeleteModalText();
         document.getElementById('deleteAssignNameLabel').textContent = name;
         new bootstrap.Modal(document.getElementById('deleteAssignModal')).show();
     }
 
+    function openDeleteMcq(id, name) {
+        pendingDeleteId = id;
+        pendingDeleteType = 'MCQ';
+        pendingDeleteMode = 'delete';
+        document.getElementById('deleteAssignModalTitle').textContent = '🗑️ Delete MCQ Question';
+        document.getElementById('deleteAssignMessagePrefix').textContent = 'Are you sure you want to permanently delete';
+        document.getElementById('deleteAssignNameLabel').textContent = name;
+        document.getElementById('deleteAssignMessageSuffix').textContent = '? This cannot be undone.';
+        document.getElementById('confirmDeleteAssignBtn').textContent = 'Yes, Delete';
+        new bootstrap.Modal(document.getElementById('deleteAssignModal')).show();
+    }
+
     async function confirmDeleteAssignment() {
-        if (!pendingDeleteId) return;
+        if (!pendingDeleteId || !pendingDeleteType) return;
         const btn = document.getElementById('confirmDeleteAssignBtn');
-        btn.disabled = true; btn.textContent = 'Deleting…';
+        btn.disabled = true;
+        btn.textContent = pendingDeleteMode === 'delete' ? 'Deleting…' : 'Removing…';
         try {
-            const res = await fetch(`/administration/api/v1/assignments/${pendingDeleteId}/`, {
-                method: 'DELETE', headers: { 'X-CSRFToken': CSRF }
-            });
+            let res;
+            if (pendingDeleteMode === 'delete' && pendingDeleteType === 'MCQ') {
+                res = await fetch(`/administration/api/v1/mcq-questions/${pendingDeleteId}/`, {
+                    method: 'DELETE', headers: { 'X-CSRFToken': CSRF }
+                });
+            } else {
+                res = await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/unlink-item/`, {
+                    method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item_id: pendingDeleteId, type: pendingDeleteType })
+                });
+            }
+
             if (res.ok) {
                 bootstrap.Modal.getInstance(document.getElementById('deleteAssignModal')).hide();
-                document.getElementById(`assign-row-${pendingDeleteId}`)?.remove();
-                assignmentsCache = assignmentsCache.filter(a => a.id !== pendingDeleteId);
+                await loadSheetItems();
                 pendingDeleteId = null;
+                pendingDeleteType = null;
+                pendingDeleteMode = 'unlink';
             } else {
-                alert('Delete failed.');
+                alert(pendingDeleteMode === 'delete' ? 'Delete failed.' : 'Unlink failed.');
             }
-        } catch (e) { alert('Delete failed.'); }
-        finally { btn.disabled = false; btn.textContent = 'Yes, Delete'; }
+        } catch (e) { alert(pendingDeleteMode === 'delete' ? 'Delete failed.' : 'Unlink failed.'); }
+        finally {
+            btn.disabled = false;
+            resetDeleteModalText();
+        }
+    }
+
+    // ==================== SAVE MCQ ====================
+    function openAddMcqModal() {
+        document.getElementById('mcqModalLabel').textContent = 'Create MCQ Question';
+        document.getElementById('mcqBtnText').textContent = 'Save & Link';
+        document.getElementById('mcqId').value = '';
+        document.getElementById('mcqText').value = '';
+        document.getElementById('mcqA').value = '';
+        document.getElementById('mcqB').value = '';
+        document.getElementById('mcqC').value = '';
+        document.getElementById('mcqD').value = '';
+        document.getElementById('mcqCorrect').value = 'A';
+        document.getElementById('mcqDiff').value = 'Easy';
+        document.getElementById('mcqFormError').classList.add('d-none');
+    }
+
+    async function openEditMcq(id) {
+        const errEl = document.getElementById('mcqFormError');
+        openAddMcqModal();
+        document.getElementById('mcqModalLabel').textContent = 'Edit MCQ Question';
+        document.getElementById('mcqBtnText').textContent = 'Update Question';
+        document.getElementById('mcqId').value = id;
+
+        try {
+            const res = await fetch(`/administration/api/v1/mcq-questions/${id}/`, {
+                headers: { 'X-CSRFToken': CSRF }
+            });
+
+            if (!res.ok) {
+                throw new Error('Failed to load MCQ question details.');
+            }
+
+            const data = await res.json();
+            document.getElementById('mcqText').value = data.question_text || '';
+            document.getElementById('mcqA').value = data.option_a || '';
+            document.getElementById('mcqB').value = data.option_b || '';
+            document.getElementById('mcqC').value = data.option_c || '';
+            document.getElementById('mcqD').value = data.option_d || '';
+            document.getElementById('mcqCorrect').value = data.correct_option || 'A';
+            document.getElementById('mcqDiff').value = data.difficulty_level || 'Easy';
+
+            new bootstrap.Modal(document.getElementById('mcqModal')).show();
+        } catch (e) {
+            errEl.textContent = 'Failed to load MCQ details.';
+            errEl.classList.remove('d-none');
+            alert('Failed to load MCQ details.');
+        }
+    }
+
+    async function saveMcq() {
+        const errEl = document.getElementById('mcqFormError');
+        errEl.classList.add('d-none');
+        const mcqId = document.getElementById('mcqId').value;
+        const isEdit = !!mcqId;
+
+        const qt = document.getElementById('mcqText').value.trim();
+        const oa = document.getElementById('mcqA').value.trim();
+        const ob = document.getElementById('mcqB').value.trim();
+        const oc = document.getElementById('mcqC').value.trim();
+        const od = document.getElementById('mcqD').value.trim();
+
+        if (!qt || !oa || !ob || !oc || !od) { errEl.textContent = 'All option fields are required.'; errEl.classList.remove('d-none'); return; }
+
+        const payload = {
+            question_text: qt, option_a: oa, option_b: ob, option_c: oc, option_d: od,
+            correct_option: document.getElementById('mcqCorrect').value,
+            difficulty_level: document.getElementById('mcqDiff').value,
+            is_approved: true
+        };
+
+        const btn = document.getElementById('saveMcqBtn');
+        btn.disabled = true; document.getElementById('mcqBtnSpinner').classList.remove('d-none');
+
+        try {
+            const url = isEdit ? `/administration/api/v1/mcq-questions/${mcqId}/` : `/administration/api/v1/mcq-questions/`;
+            const method = isEdit ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method, headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (_) {
+                data = {};
+            }
+
+            if (res.ok) {
+                if (!isEdit) {
+                    await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/link-item/`, {
+                        method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'MCQ', item_id: data.data?.id || data.id })
+                    });
+                }
+                bootstrap.Modal.getInstance(document.getElementById('mcqModal')).hide();
+                await loadSheetItems();
+            } else {
+                errEl.textContent = data.error || 'Save failed.';
+                errEl.classList.remove('d-none');
+            }
+        } catch (e) { errEl.textContent = 'Network error.'; errEl.classList.remove('d-none'); }
+        finally { btn.disabled = false; document.getElementById('mcqBtnSpinner').classList.add('d-none'); }
+    }
+
+    // ==================== SAVE CODING ====================
+    function openAddCodingModal() {
+        document.getElementById('codeTitle').value = '';
+        document.getElementById('codeDesc').value = '';
+        document.getElementById('codeDiff').value = 'Easy';
+        document.getElementById('codeFormError').classList.add('d-none');
+    }
+
+    async function saveCoding() {
+        const errEl = document.getElementById('codeFormError');
+        errEl.classList.add('d-none');
+
+        const title = document.getElementById('codeTitle').value.trim();
+        if (!title) { errEl.textContent = 'Title is required.'; errEl.classList.remove('d-none'); return; }
+
+        const payload = {
+            title: title,
+            description: document.getElementById('codeDesc').value,
+            difficulty_level: document.getElementById('codeDiff').value,
+            is_approved: true
+        };
+
+        const btn = document.getElementById('saveCodingBtn');
+        btn.disabled = true; document.getElementById('codeBtnSpinner').classList.remove('d-none');
+
+        try {
+            // Create Coding
+            const res = await fetch(`/administration/api/v1/coding-questions/`, {
+                method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                // Link it
+                await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/link-item/`, {
+                    method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'Coding', item_id: data.data?.id || data.id })
+                });
+                bootstrap.Modal.getInstance(document.getElementById('codingModal')).hide();
+                await loadSheetItems();
+            } else {
+                errEl.textContent = 'Save failed.'; errEl.classList.remove('d-none');
+            }
+        } catch (e) { errEl.textContent = 'Network error.'; errEl.classList.remove('d-none'); }
+        finally { btn.disabled = false; document.getElementById('codeBtnSpinner').classList.add('d-none'); }
+    }
+
+    // ==================== LINK EXISTING ====================
+    function openLinkModal() {
+        document.getElementById('linkId').value = '';
+        document.getElementById('linkFormError').classList.add('d-none');
+    }
+
+    async function saveLink() {
+        const errEl = document.getElementById('linkFormError');
+        errEl.classList.add('d-none');
+
+        const linkId = document.getElementById('linkId').value.trim();
+        if (!linkId) { errEl.textContent = 'ID is required.'; errEl.classList.remove('d-none'); return; }
+
+        const btn = document.getElementById('saveLinkBtn');
+        btn.disabled = true; document.getElementById('linkBtnSpinner').classList.remove('d-none');
+
+        try {
+            const res = await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/link-item/`, {
+                method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: document.getElementById('linkType').value, item_id: linkId })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('linkItemModal')).hide();
+                await loadSheetItems();
+            } else {
+                errEl.textContent = data.error || 'Link failed. Check ID.'; errEl.classList.remove('d-none');
+            }
+        } catch (e) { errEl.textContent = 'Network error.'; errEl.classList.remove('d-none'); }
+        finally { btn.disabled = false; document.getElementById('linkBtnSpinner').classList.add('d-none'); }
     }
 
     toggleTutorialRow();
-    loadAssignments();
+    loadSheetItems();
 </script>
 {% endblock %}
