@@ -141,8 +141,6 @@ def register(request):
                     is_email_verified=False,
                 )
 
-                print(f"New user created: {new_user.username} with ID: {new_user.id}")
-
                 # Send verification email
                 send_verification_mail(new_user, request)
 
