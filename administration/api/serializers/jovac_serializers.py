@@ -115,6 +115,21 @@ class AssignmentAdminSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['created_at', 'updated_at']
 
+    def validate(self, attrs):
+        instance = getattr(self, 'instance', None)
+        is_tutorial = attrs.get('is_tutorial', instance.is_tutorial if instance else False)
+        assignment_type = attrs.get('assignment_type', instance.assignment_type if instance else '')
+
+        if is_tutorial:
+            # Tutorials are view-only items; keep a safe internal type to avoid submission-format coupling.
+            attrs['assignment_type'] = 'Text'
+            return attrs
+
+        if not assignment_type:
+            raise serializers.ValidationError({'assignment_type': 'Assignment type is required for non-tutorial items.'})
+
+        return attrs
+
 # ====================================================
 # Mixed Item
 # ====================================================

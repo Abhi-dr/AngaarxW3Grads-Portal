@@ -28,13 +28,8 @@
         background: #f8fafc;
     }
 
-    .tutorial-preview-block[contenteditable="true"] {
-        cursor: text;
-    }
-
-    .tutorial-preview-block[contenteditable="true"]:focus {
-        outline: 2px solid rgba(59, 130, 246, 0.55);
-        outline-offset: 1px;
+    .tutorial-preview-block {
+        cursor: default;
     }
 
     .tutorial-preview-block pre {
@@ -184,17 +179,21 @@
                         <i class="ti ti-plus me-1"></i>Add Item
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assignmentModal"
-                                onclick="openAddModal()">Assignment / Tutorial</a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assignmentModal"
+                        onclick="openAddAssignmentModal()">Assignment</a></li>
+                    <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#assignmentModal"
+                        onclick="openAddTutorialModal()">Tutorial</a></li>
                         <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#mcqModal"
                                 onclick="openAddMcqModal()">MCQ Question</a></li>
+                        <!--
                         <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#codingModal"
-                                onclick="openAddCodingModal()">Coding Question</a></li>
+                            onclick="openAddCodingModal()">Coding Question</a></li>
+                        -->
                         <li>
                             <hr class="dropdown-divider">
                         </li>
                         <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#linkItemModal"
-                                onclick="openLinkModal()">Link Existing MCQ/Coding</a></li>
+                                onclick="openLinkModal()">Link Existing MCQ</a></li>
                     </ul>
                 </div>
                 <a href="{% url 'administrator_edit_jovac_sheet' course.slug sheet.slug %}" class="btn btn-outline-warning">
@@ -272,13 +271,13 @@
             <div class="modal-body">
                 <input type="hidden" id="assignmentId" value="">
                 <div class="row g-3">
-                    <div class="col-md-8">
+                    <div class="col-md-8" id="assignTitleCol">
                         <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="assignTitle"
                             placeholder="e.g. Binary Search Problem">
                     </div>
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold">Type</label>
+                    <div class="col-md-4" id="assignTypeCol">
+                        <label class="form-label fw-semibold">Type <span class="text-danger">*</span></label>
                         <select class="form-select" id="assignType">
                             <option value="Coding">Coding</option>
                             <option value="Text">Text</option>
@@ -293,10 +292,10 @@
                     </div>
                     <div class="col-12 d-none" id="tutorialPreviewRow">
                         <label class="form-label fw-semibold mb-1">Tutorial Preview (Student Side)</label>
-                        <div id="assignTutorialPreview" class="tutorial-preview-block" contenteditable="true">
+                        <div id="assignTutorialPreview" class="tutorial-preview-block">
                             <p class="text-muted mb-0">No tutorial content added yet.</p>
                         </div>
-                        <small class="text-muted d-block mt-2">This preview is editable directly from admin side.</small>
+                        <small class="text-muted d-block mt-2">Preview is read-only. Edit the HTML content field above.</small>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Due Date</label>
@@ -314,7 +313,7 @@
                             <option value="Archived">Archived</option>
                         </select>
                     </div>
-                    <div class="col-12">
+                    <div class="col-12 d-none" id="assignTutorialToggleRow">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="assignIsTutorial">
                             <label class="form-check-label">Is Tutorial (Video only, no submission)</label>
@@ -526,6 +525,7 @@
     let sheetItemsCache = [];
     let linkQuestionSelect = null;
     let linkQuestionAbortController = null;
+    let assignmentModalIntent = 'assignment';
 
     // ==================== LOAD SHEET ITEMS ====================
     async function loadSheetItems() {
@@ -574,13 +574,21 @@
                 badgeHtml = `<span class="badge ${a.is_tutorial ? 'bg-secondary' : 'bg-primary'}">${a.is_tutorial ? 'Tutorial' : a.assignment_type}</span>`;
                 dateHtml = formatDate(a.due_date);
                 statusBadge = `<span class="badge ${a.status === 'Published' ? 'bg-success' : a.status === 'Archived' ? 'bg-secondary' : 'bg-warning text-dark'}">${a.status}</span>`;
-                actionHtml = `
-                    ${a.is_tutorial && a.tutorial_link
-                        ? `<a href="${a.tutorial_link}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-youtube-play"></i></a>`
-                        : `<a href="/administration/submissions/${a.id}/" class="btn btn-sm btn-info">Submissions</a>`}
-                    <button class="btn btn-sm btn-outline-dark" onclick="openEditAssignment(${a.id})">Edit</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${a.title.replace(/'/g, "\\'")}')">Unlink</button>
-                `;
+                if (a.is_tutorial) {
+                    actionHtml = `
+                        ${a.tutorial_link
+                            ? `<a href="${a.tutorial_link}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-youtube-play"></i></a>`
+                            : `<span class="btn btn-sm btn-outline-secondary disabled">No Video</span>`}
+                        <button class="btn btn-sm btn-outline-dark" onclick="openEditAssignment(${a.id})">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${a.title.replace(/'/g, "\\'")}')">Unlink</button>
+                    `;
+                } else {
+                    actionHtml = `
+                        <a href="/administration/submissions/${a.id}/" class="btn btn-sm btn-info">Submissions</a>
+                        <button class="btn btn-sm btn-outline-dark" onclick="openEditAssignment(${a.id})">Edit</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${a.title.replace(/'/g, "\\'")}')">Unlink</button>
+                    `;
+                }
             } else {
                 badgeHtml = `<span class="badge ${type === 'Coding' ? 'bg-info' : 'bg-warning text-dark'}">${type} Question</span>`;
                 dateHtml = '—';
@@ -641,19 +649,23 @@
     }
 
     function getTutorialEditorHtml() {
-        const preview = document.getElementById('assignTutorialPreview');
-        if (!preview) return '';
-
-        if (preview.querySelector('[data-empty-placeholder="true"]')) {
-            return '';
-        }
-
-        return (preview.innerHTML || '').trim();
+        return document.getElementById('assignDesc').value || '';
     }
 
     // ==================== MODALS ====================
-    function openAddModal() {
-        document.getElementById('assignmentModalLabel').textContent = 'Add Assignment / Tutorial';
+    function openAddAssignmentModal() {
+        openAddModal('assignment');
+    }
+
+    function openAddTutorialModal() {
+        openAddModal('tutorial');
+    }
+
+    function openAddModal(mode = 'assignment') {
+        assignmentModalIntent = mode;
+        const isTutorial = mode === 'tutorial';
+
+        document.getElementById('assignmentModalLabel').textContent = isTutorial ? 'Add Tutorial' : 'Add Assignment';
         document.getElementById('assignBtnText').textContent = 'Save';
         document.getElementById('assignmentId').value = '';
         document.getElementById('assignTitle').value = '';
@@ -662,7 +674,7 @@
         document.getElementById('assignStatus').value = 'Draft';
         document.getElementById('assignMaxScore').value = '100';
         document.getElementById('assignDueDate').value = '';
-        document.getElementById('assignIsTutorial').checked = false;
+        document.getElementById('assignIsTutorial').checked = isTutorial;
         document.getElementById('assignTutorialLink').value = '';
         document.getElementById('assignInstructions').value = '';
         document.getElementById('assignFormError').classList.add('d-none');
@@ -673,13 +685,14 @@
         const assignmentItem = sheetItemsCache.find(item => item.type === 'Assignment' && item.obj.id === id);
         const a = assignmentItem ? assignmentItem.obj : null;
         if (!a) return;
+        assignmentModalIntent = a.is_tutorial ? 'tutorial' : 'assignment';
         document.getElementById('assignmentModalLabel').textContent = a.is_tutorial ? 'Edit Tutorial' : 'Edit Assignment';
         document.getElementById('assignBtnText').textContent = 'Update';
         document.getElementById('assignmentId').value = a.id;
         document.getElementById('assignTitle').value = a.title;
         // Tutorials render full HTML from `content` on student side, so edit that full content here.
         document.getElementById('assignDesc').value = a.is_tutorial ? (a.content || a.description || '') : (a.description || '');
-        document.getElementById('assignType').value = a.assignment_type;
+        document.getElementById('assignType').value = a.assignment_type || 'Text';
         document.getElementById('assignStatus').value = a.status;
         document.getElementById('assignMaxScore').value = a.max_score || 100;
         const dd = a.due_date ? new Date(a.due_date).toISOString().slice(0, 16) : '';
@@ -693,26 +706,48 @@
     }
 
     document.getElementById('assignIsTutorial').addEventListener('change', toggleTutorialRow);
-    document.getElementById('assignTutorialPreview').addEventListener('input', () => {
+    document.getElementById('assignDesc').addEventListener('input', () => {
         if (!document.getElementById('assignIsTutorial').checked) return;
-        document.getElementById('assignDesc').value = getTutorialEditorHtml();
+        renderTutorialPreview();
     });
 
     function toggleTutorialRow() {
         const isTutorial = document.getElementById('assignIsTutorial').checked;
+        const typeCol = document.getElementById('assignTypeCol');
+        const titleCol = document.getElementById('assignTitleCol');
+        const typeInput = document.getElementById('assignType');
         const descRow = document.getElementById('assignDescRow');
+        const descLabel = document.getElementById('assignDescLabel');
         const descInput = document.getElementById('assignDesc');
         const tutorialPreviewRow = document.getElementById('tutorialPreviewRow');
+
+        if (isTutorial) {
+            typeCol.classList.add('d-none');
+            titleCol.classList.remove('col-md-8');
+            titleCol.classList.add('col-md-12');
+            typeInput.disabled = true;
+            typeInput.value = 'Text';
+        } else {
+            typeCol.classList.remove('d-none');
+            titleCol.classList.remove('col-md-12');
+            titleCol.classList.add('col-md-8');
+            typeInput.disabled = false;
+        }
 
         document.getElementById('tutorialLinkRow').style.display = isTutorial ? '' : 'none';
 
         if (isTutorial) {
-            descRow.classList.add('d-none');
+            descRow.classList.remove('d-none');
+            descLabel.textContent = 'Tutorial HTML Content';
+            descInput.rows = 10;
+            descInput.placeholder = 'Enter tutorial HTML content (h1, p, ul, pre, code, etc.)';
             tutorialPreviewRow.classList.remove('d-none');
             renderTutorialPreview();
         } else {
             descRow.classList.remove('d-none');
-            descInput.value = getTutorialEditorHtml();
+            descLabel.textContent = 'Description';
+            descInput.rows = 3;
+            descInput.placeholder = 'Enter assignment description';
             tutorialPreviewRow.classList.add('d-none');
         }
     }
@@ -729,13 +764,14 @@
 
         const isTutorial = document.getElementById('assignIsTutorial').checked;
         const descriptionValue = isTutorial ? getTutorialEditorHtml() : document.getElementById('assignDesc').value;
+        const assignmentTypeValue = isTutorial ? 'Text' : document.getElementById('assignType').value;
         document.getElementById('assignDesc').value = descriptionValue;
 
         const payload = {
             title,
             // Keep description in sync so list/search still works across old/new flows.
             description: descriptionValue,
-            assignment_type: document.getElementById('assignType').value,
+            assignment_type: assignmentTypeValue,
             status: document.getElementById('assignStatus').value,
             max_score: document.getElementById('assignMaxScore').value,
             due_date: document.getElementById('assignDueDate').value || null,
