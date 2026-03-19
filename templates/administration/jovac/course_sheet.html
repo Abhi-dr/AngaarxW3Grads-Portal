@@ -7,10 +7,68 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.min.css">
 <style>
     .fa-youtube-play {
         font-size: 1.6rem;
         color: red;
+    }
+
+    .tutorial-preview-block {
+        min-height: 220px;
+        max-height: 380px;
+        overflow: auto;
+        border: 1px solid var(--bs-border-color, #2f3847);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background: #1b2230;
+    }
+
+    [data-bs-theme="light"] .tutorial-preview-block {
+        background: #f8fafc;
+    }
+
+    .tutorial-preview-block[contenteditable="true"] {
+        cursor: text;
+    }
+
+    .tutorial-preview-block[contenteditable="true"]:focus {
+        outline: 2px solid rgba(59, 130, 246, 0.55);
+        outline-offset: 1px;
+    }
+
+    .tutorial-preview-block pre {
+        background: #131722;
+        color: #dbe7ff;
+        padding: 0.85rem;
+        border-radius: 0.45rem;
+        overflow: auto;
+    }
+
+    [data-bs-theme="light"] .tutorial-preview-block pre {
+        background: #0f172a;
+        color: #e2e8f0;
+    }
+
+    .tutorial-preview-block code {
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 0.9rem;
+    }
+
+    .tutorial-preview-block img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .tutorial-preview-block table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tutorial-preview-block table td,
+    .tutorial-preview-block table th {
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        padding: 0.4rem 0.55rem;
     }
 
     .skeleton-row td {
@@ -35,6 +93,73 @@
         background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
         background-size: 200% 100%;
         animation: shimmer 1.2s infinite;
+    }
+
+    .question-select-wrapper .ts-wrapper.single .ts-control {
+        min-height: calc(1.5em + 0.75rem + 2px);
+        border-radius: 0.65rem;
+        padding: 0.5rem 0.7rem;
+        border-color: var(--bs-border-color);
+        box-shadow: none;
+    }
+
+    .question-select-wrapper .ts-wrapper.focus .ts-control {
+        border-color: rgba(13, 110, 253, 0.55);
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    }
+
+    .question-select-wrapper .ts-dropdown {
+        border-radius: 0.75rem;
+        border: 1px solid rgba(15, 23, 42, 0.1);
+        box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
+        overflow: hidden;
+        z-index: 2000;
+    }
+
+    .question-option {
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+    }
+
+    .question-option__title {
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .question-option__meta {
+        color: #6b7280;
+        font-size: 0.78rem;
+    }
+
+    [data-bs-theme="dark"] .question-select-wrapper .ts-wrapper .ts-control,
+    [data-bs-theme="dark"] .question-select-wrapper .ts-wrapper .ts-control input,
+    [data-bs-theme="dark"] .question-select-wrapper .ts-wrapper .ts-control .item {
+        color: #f1f5f9 !important;
+        background-color: #2b3035 !important;
+        border-color: #495057 !important;
+    }
+
+    [data-bs-theme="dark"] .question-select-wrapper .ts-wrapper .ts-dropdown {
+        background-color: #2b3035 !important;
+        border-color: #495057 !important;
+    }
+
+    [data-bs-theme="dark"] .question-select-wrapper .ts-wrapper .ts-dropdown .option {
+        color: #f1f5f9 !important;
+    }
+
+    [data-bs-theme="dark"] .question-select-wrapper .ts-wrapper .ts-dropdown .active {
+        background: rgba(93, 135, 255, 0.2) !important;
+        color: #ffffff !important;
+    }
+
+    [data-bs-theme="dark"] .question-option__title {
+        color: #f1f5f9;
+    }
+
+    [data-bs-theme="dark"] .question-option__meta {
+        color: #94a3b8;
     }
 </style>
 {% endblock %}
@@ -162,9 +287,16 @@
                             <option value="Link">Link</option>
                         </select>
                     </div>
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Description</label>
-                        <textarea class="form-control" id="assignDesc" rows="2"></textarea>
+                    <div class="col-12" id="assignDescRow">
+                        <label class="form-label fw-semibold mb-1" id="assignDescLabel">Description</label>
+                        <textarea class="form-control" id="assignDesc" rows="3" placeholder="Enter assignment description"></textarea>
+                    </div>
+                    <div class="col-12 d-none" id="tutorialPreviewRow">
+                        <label class="form-label fw-semibold mb-1">Tutorial Preview (Student Side)</label>
+                        <div id="assignTutorialPreview" class="tutorial-preview-block" contenteditable="true">
+                            <p class="text-muted mb-0">No tutorial content added yet.</p>
+                        </div>
+                        <small class="text-muted d-block mt-2">This preview is editable directly from admin side.</small>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Due Date</label>
@@ -358,9 +490,12 @@
                         </select>
                     </div>
                     <div class="col-12">
-                        <label class="form-label fw-semibold">Question ID <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="linkId" placeholder="e.g. 15">
-                        <small class="text-muted">Enter the ID of the existing question you want to link.</small>
+                        <label class="form-label fw-semibold">Search Question <span class="text-danger">*</span></label>
+                        <div class="question-select-wrapper">
+                            <select class="form-select" id="linkQuestionSelect" placeholder="Search and select question"></select>
+                        </div>
+                        <input type="hidden" id="linkId">
+                        <small class="text-muted" id="linkQuestionHint">Search by title/question text or ID, then select one question.</small>
                     </div>
                 </div>
                 <div id="linkFormError" class="alert alert-danger mt-3 d-none"></div>
@@ -379,6 +514,7 @@
 {% endblock %}
 
 {% block myjs %}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
 <script>
     const CSRF = '{{ csrf_token }}';
     const COURSE_SLUG = '{{ course.slug }}';
@@ -388,6 +524,8 @@
     let pendingDeleteType = null;
     let pendingDeleteMode = 'unlink';
     let sheetItemsCache = [];
+    let linkQuestionSelect = null;
+    let linkQuestionAbortController = null;
 
     // ==================== LOAD SHEET ITEMS ====================
     async function loadSheetItems() {
@@ -480,6 +618,39 @@
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
     }
 
+    function getSanitizedTutorialHtml(rawHtml) {
+        if (!rawHtml) return '';
+        return rawHtml
+            .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+            .replace(/\son\w+="[^"]*"/gi, '')
+            .replace(/\son\w+='[^']*'/gi, '');
+    }
+
+    function renderTutorialPreview() {
+        const preview = document.getElementById('assignTutorialPreview');
+        if (!preview) return;
+        const rawHtml = document.getElementById('assignDesc').value || '';
+        const sanitizedHtml = getSanitizedTutorialHtml(rawHtml).trim();
+
+        if (!sanitizedHtml) {
+            preview.innerHTML = '<p class="text-muted mb-0" data-empty-placeholder="true">Edit tutorial content here...</p>';
+            return;
+        }
+
+        preview.innerHTML = sanitizedHtml;
+    }
+
+    function getTutorialEditorHtml() {
+        const preview = document.getElementById('assignTutorialPreview');
+        if (!preview) return '';
+
+        if (preview.querySelector('[data-empty-placeholder="true"]')) {
+            return '';
+        }
+
+        return (preview.innerHTML || '').trim();
+    }
+
     // ==================== MODALS ====================
     function openAddModal() {
         document.getElementById('assignmentModalLabel').textContent = 'Add Assignment / Tutorial';
@@ -506,7 +677,8 @@
         document.getElementById('assignBtnText').textContent = 'Update';
         document.getElementById('assignmentId').value = a.id;
         document.getElementById('assignTitle').value = a.title;
-        document.getElementById('assignDesc').value = a.description || '';
+        // Tutorials render full HTML from `content` on student side, so edit that full content here.
+        document.getElementById('assignDesc').value = a.is_tutorial ? (a.content || a.description || '') : (a.description || '');
         document.getElementById('assignType').value = a.assignment_type;
         document.getElementById('assignStatus').value = a.status;
         document.getElementById('assignMaxScore').value = a.max_score || 100;
@@ -521,9 +693,28 @@
     }
 
     document.getElementById('assignIsTutorial').addEventListener('change', toggleTutorialRow);
+    document.getElementById('assignTutorialPreview').addEventListener('input', () => {
+        if (!document.getElementById('assignIsTutorial').checked) return;
+        document.getElementById('assignDesc').value = getTutorialEditorHtml();
+    });
+
     function toggleTutorialRow() {
-        const show = document.getElementById('assignIsTutorial').checked;
-        document.getElementById('tutorialLinkRow').style.display = show ? '' : 'none';
+        const isTutorial = document.getElementById('assignIsTutorial').checked;
+        const descRow = document.getElementById('assignDescRow');
+        const descInput = document.getElementById('assignDesc');
+        const tutorialPreviewRow = document.getElementById('tutorialPreviewRow');
+
+        document.getElementById('tutorialLinkRow').style.display = isTutorial ? '' : 'none';
+
+        if (isTutorial) {
+            descRow.classList.add('d-none');
+            tutorialPreviewRow.classList.remove('d-none');
+            renderTutorialPreview();
+        } else {
+            descRow.classList.remove('d-none');
+            descInput.value = getTutorialEditorHtml();
+            tutorialPreviewRow.classList.add('d-none');
+        }
     }
 
     // ==================== SAVE ASSIGNMENT ====================
@@ -536,19 +727,27 @@
         const title = document.getElementById('assignTitle').value.trim();
         if (!title) { errEl.textContent = 'Title is required.'; errEl.classList.remove('d-none'); return; }
 
+        const isTutorial = document.getElementById('assignIsTutorial').checked;
+        const descriptionValue = isTutorial ? getTutorialEditorHtml() : document.getElementById('assignDesc').value;
+        document.getElementById('assignDesc').value = descriptionValue;
+
         const payload = {
             title,
-            description: document.getElementById('assignDesc').value,
+            // Keep description in sync so list/search still works across old/new flows.
+            description: descriptionValue,
             assignment_type: document.getElementById('assignType').value,
             status: document.getElementById('assignStatus').value,
             max_score: document.getElementById('assignMaxScore').value,
             due_date: document.getElementById('assignDueDate').value || null,
-            is_tutorial: document.getElementById('assignIsTutorial').checked,
+            is_tutorial: isTutorial,
             tutorial_link: document.getElementById('assignTutorialLink').value || null,
             instructions: document.getElementById('assignInstructions').value,
             course_slug: COURSE_SLUG,
             sheet_slug: SHEET_SLUG,
         };
+
+        // Student tutorial page reads `content`, not `description`.
+        payload.content = isTutorial ? descriptionValue : '';
 
         const btn = document.getElementById('saveAssignBtn');
         btn.disabled = true;
@@ -793,9 +992,194 @@
     }
 
     // ==================== LINK EXISTING ====================
+    function getLinkQuestionEndpoint(linkType) {
+        return linkType === 'Coding'
+            ? '/administration/api/v1/coding-questions/'
+            : '/administration/api/v1/mcq-questions/';
+    }
+
+    function getLinkQuestionPlaceholder(linkType) {
+        return linkType === 'Coding'
+            ? 'Search coding question by title or ID'
+            : 'Search MCQ question by text or ID';
+    }
+
+    function updateLinkQuestionHint() {
+        const hintEl = document.getElementById('linkQuestionHint');
+        const typeEl = document.getElementById('linkType');
+        if (!hintEl || !typeEl) return;
+
+        hintEl.textContent = typeEl.value === 'Coding'
+            ? 'Search coding questions by title or ID, then choose one to link.'
+            : 'Search MCQ questions by question text or ID, then choose one to link.';
+    }
+
+    function normalizeLinkQuestionOption(item, linkType) {
+        const baseText = linkType === 'Coding'
+            ? (item.title || item.description || '')
+            : (item.question_text || '');
+        const normalizedText = String(baseText || '').replace(/\s+/g, ' ').trim();
+        const shortText = normalizedText.length > 90 ? `${normalizedText.slice(0, 90)}...` : normalizedText;
+        const safeTitle = shortText || (item.slug ? `Slug: ${item.slug}` : `Question #${item.id}`);
+
+        return {
+            id: String(item.id),
+            label: `#${item.id} - ${safeTitle}`,
+            text: normalizedText,
+            slug: item.slug || '',
+        };
+    }
+
+    async function fetchLinkQuestionOptions(query = '') {
+        const linkType = document.getElementById('linkType').value;
+        const endpoint = getLinkQuestionEndpoint(linkType);
+        const params = new URLSearchParams();
+        const searchText = String(query || '').trim();
+        if (searchText) {
+            params.set('search', searchText);
+        }
+        const url = params.toString() ? `${endpoint}?${params.toString()}` : endpoint;
+
+        if (linkQuestionAbortController) {
+            linkQuestionAbortController.abort();
+        }
+        linkQuestionAbortController = new AbortController();
+
+        const res = await fetch(url, {
+            headers: { 'X-CSRFToken': CSRF },
+            signal: linkQuestionAbortController.signal,
+        });
+        if (!res.ok) {
+            throw new Error('Failed to fetch questions.');
+        }
+
+        const payload = await res.json();
+        const rows = Array.isArray(payload) ? payload : (Array.isArray(payload.results) ? payload.results : []);
+        return rows.map(item => normalizeLinkQuestionOption(item, linkType));
+    }
+
+    async function loadNativeLinkQuestionSelect() {
+        const selectEl = document.getElementById('linkQuestionSelect');
+        if (!selectEl) return;
+
+        try {
+            const options = await fetchLinkQuestionOptions('');
+            selectEl.innerHTML = '<option value="">Select a question</option>';
+            options.forEach((optionItem) => {
+                const optionEl = document.createElement('option');
+                optionEl.value = optionItem.id;
+                optionEl.textContent = optionItem.label;
+                selectEl.appendChild(optionEl);
+            });
+        } catch (_) {
+            selectEl.innerHTML = '<option value="">Failed to load questions</option>';
+        }
+    }
+
+    function resetLinkQuestionSelect() {
+        document.getElementById('linkId').value = '';
+        const typeEl = document.getElementById('linkType');
+
+        if (!linkQuestionSelect) {
+            const nativeSelect = document.getElementById('linkQuestionSelect');
+            if (nativeSelect) {
+                nativeSelect.value = '';
+            }
+            return;
+        }
+
+        linkQuestionSelect.clear(true);
+        linkQuestionSelect.clearOptions();
+        linkQuestionSelect.settings.placeholder = getLinkQuestionPlaceholder(typeEl.value);
+        linkQuestionSelect.inputState();
+        linkQuestionSelect.setTextboxValue('');
+        linkQuestionSelect.load('');
+    }
+
+    function initializeLinkQuestionSearch() {
+        const typeEl = document.getElementById('linkType');
+        const selectEl = document.getElementById('linkQuestionSelect');
+        if (!typeEl || !selectEl) return;
+
+        if (!typeEl.dataset.bound) {
+            typeEl.addEventListener('change', async () => {
+                updateLinkQuestionHint();
+                resetLinkQuestionSelect();
+                if (!linkQuestionSelect) {
+                    await loadNativeLinkQuestionSelect();
+                }
+            });
+            typeEl.dataset.bound = '1';
+        }
+
+        if (!selectEl.dataset.bound) {
+            selectEl.addEventListener('change', () => {
+                document.getElementById('linkId').value = selectEl.value || '';
+            });
+            selectEl.dataset.bound = '1';
+        }
+
+        if (typeof TomSelect === 'undefined' || linkQuestionSelect) {
+            updateLinkQuestionHint();
+            if (typeof TomSelect === 'undefined') {
+                loadNativeLinkQuestionSelect();
+            }
+            return;
+        }
+
+        linkQuestionSelect = new TomSelect('#linkQuestionSelect', {
+            valueField: 'id',
+            labelField: 'label',
+            searchField: ['label', 'text', 'slug'],
+            options: [],
+            create: false,
+            maxOptions: 10,
+            hideSelected: true,
+            allowEmptyOption: true,
+            openOnFocus: true,
+            preload: true,
+            loadThrottle: 250,
+            placeholder: getLinkQuestionPlaceholder(typeEl.value),
+            render: {
+                option: function (data, escape) {
+                    return `
+                        <div class="question-option">
+                            <span class="question-option__title">${escape(data.label)}</span>
+                            <span class="question-option__meta">${escape(data.slug ? `Slug: ${data.slug}` : `ID: ${data.id}`)}</span>
+                        </div>
+                    `;
+                },
+                item: function (data, escape) {
+                    return `<div>${escape(data.label)}</div>`;
+                },
+                no_results: function (_, escape) {
+                    return `<div class="py-3 px-3 text-muted">${escape('No question found')}</div>`;
+                }
+            },
+            load: async function (query, callback) {
+                try {
+                    const options = await fetchLinkQuestionOptions(query);
+                    callback(options);
+                } catch (error) {
+                    if (error.name !== 'AbortError') {
+                        console.error(error);
+                    }
+                    callback();
+                }
+            },
+            onChange: function (value) {
+                document.getElementById('linkId').value = value || '';
+            }
+        });
+
+        updateLinkQuestionHint();
+    }
+
     function openLinkModal() {
         document.getElementById('linkId').value = '';
         document.getElementById('linkFormError').classList.add('d-none');
+        initializeLinkQuestionSearch();
+        resetLinkQuestionSelect();
     }
 
     async function saveLink() {
@@ -803,7 +1187,7 @@
         errEl.classList.add('d-none');
 
         const linkId = document.getElementById('linkId').value.trim();
-        if (!linkId) { errEl.textContent = 'ID is required.'; errEl.classList.remove('d-none'); return; }
+        if (!linkId) { errEl.textContent = 'Please search and select a question first.'; errEl.classList.remove('d-none'); return; }
 
         const btn = document.getElementById('saveLinkBtn');
         btn.disabled = true; document.getElementById('linkBtnSpinner').classList.remove('d-none');
@@ -824,6 +1208,7 @@
         finally { btn.disabled = false; document.getElementById('linkBtnSpinner').classList.add('d-none'); }
     }
 
+    initializeLinkQuestionSearch();
     toggleTutorialRow();
     loadSheetItems();
 </script>

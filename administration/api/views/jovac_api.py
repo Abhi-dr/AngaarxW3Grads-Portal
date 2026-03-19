@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.filters import SearchFilter
 from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
 
@@ -316,6 +317,8 @@ class MCQQuestionAdminViewSet(viewsets.ModelViewSet):
     serializer_class = MCQQuestionAdminSerializer
     permission_classes = [IsAdministratorOrInstructor]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+    filter_backends = [SearchFilter]
+    search_fields = ['question_text', 'slug', '=id']
 
     def create(self, request, *args, **kwargs):
         """
@@ -372,6 +375,8 @@ class QuestionAdminViewSet(viewsets.ModelViewSet):
     serializer_class = QuestionAdminSerializer
     permission_classes = [IsAdministratorOrInstructor]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'description', 'slug', '=id']
 
 # ============================================================
 # TestCase CRUD ViewSet
