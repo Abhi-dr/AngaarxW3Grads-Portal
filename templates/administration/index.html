@@ -113,6 +113,19 @@ Administration | Home
         width: 0;
         height: 0;
     }
+
+    #submissionsDaysFilter,
+    #registrationsDaysFilter {
+        color: #ffffff !important;
+        background-color: #1f2937;
+        border-color: #475569;
+    }
+
+    #submissionsDaysFilter option,
+    #registrationsDaysFilter option {
+        color: #ffffff;
+        background-color: #1f2937;
+    }
 </style>
 
 {% endblock %}
@@ -149,7 +162,18 @@ Administration | Home
                 <div class="col-lg-12">
                     <div class="card overflow-hidden">
                         <div class="card-body p-4">
-                            <h5 class="card-title mb-3 fw-semibold">Submissions — Last 5 Days 📩</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+                                <h5 class="card-title mb-0 fw-semibold">Submissions 📩</h5>
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="mb-0 fs-2 text-white" for="submissionsDaysFilter">Days</label>
+                                    <select id="submissionsDaysFilter" class="form-select form-select-sm" style="width: 90px;">
+                                        <option value="5" selected>5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="30">30</option>
+                                    </select>
+                                </div>
+                            </div>
                             <canvas id="submissionsChart" height="130"></canvas>
                             <div class="mt-3 d-flex align-items-center">
                                 <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
@@ -171,7 +195,18 @@ Administration | Home
                 <div class="col-lg-12">
                     <div class="card overflow-hidden">
                         <div class="card-body p-4">
-                            <h5 class="card-title mb-3 fw-semibold">Registrations — Last 5 Days 👥</h5>
+                            <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+                                <h5 class="card-title mb-0 fw-semibold">Registrations 👥</h5>
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="mb-0 fs-2 text-white" for="registrationsDaysFilter">Days</label>
+                                    <select id="registrationsDaysFilter" class="form-select form-select-sm" style="width: 90px;">
+                                        <option value="5" selected>5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="30">30</option>
+                                    </select>
+                                </div>
+                            </div>
                             <canvas id="registrationsChart" height="130"></canvas>
                             <div class="mt-2 d-flex align-items-center">
                                 <span class="round-8 bg-light-success rounded-circle me-2 d-inline-block"></span>
@@ -662,34 +697,64 @@ Administration | Home
         chart.update();
     }
 
-    // Fetch submissions data from API
-    fetch("{% url 'api_dashboard_submissions' %}")
-        .then(r => r.json())
-        .then(d => {
-            updateChart(submissionsChart, d.labels, d.data);
-            document.getElementById('totalSubmissions').textContent = d.total;
-            document.getElementById('submissionsToday').textContent = d.today_count;
-        })
-        .catch(() => {
-            document.getElementById('totalSubmissions').textContent = 'Error';
-            document.getElementById('submissionsToday').textContent = 'Error';
-        });
+    function getValidDays(value) {
+        const allowed = [5, 10, 15, 30];
+        const parsed = Number(value);
+        return allowed.includes(parsed) ? parsed : 5;
+    }
 
-    // Fetch registrations data from API
+    function loadSubmissionsChart(days = 5) {
+        const validDays = getValidDays(days);
+        fetch(`{% url 'api_dashboard_submissions' %}?days=${validDays}`)
+            .then(r => r.json())
+            .then(d => {
+                updateChart(submissionsChart, d.labels, d.data);
+                document.getElementById('totalSubmissions').textContent = d.total;
+                document.getElementById('submissionsToday').textContent = d.today_count;
+            })
+            .catch(() => {
+                document.getElementById('totalSubmissions').textContent = 'Error';
+                document.getElementById('submissionsToday').textContent = 'Error';
+            });
+    }
+
     const totalRegistrationsEl = document.getElementById('totalRegistrations');
     const activeStudentsTodayEl = document.getElementById('activeStudentsToday');
 
-    fetch("{% url 'api_dashboard_registrations' %}")
-        .then(r => r.json())
-        .then(d => {
-            updateChart(registrationsChart, d.labels, d.data);
-            if (totalRegistrationsEl) totalRegistrationsEl.textContent = d.total;
-            if (activeStudentsTodayEl) activeStudentsTodayEl.textContent = d.active_today;
-        })
-        .catch(() => {
-            if (totalRegistrationsEl) totalRegistrationsEl.textContent = 'Error';
-            if (activeStudentsTodayEl) activeStudentsTodayEl.textContent = 'Error';
+    function loadRegistrationsChart(days = 5) {
+        const validDays = getValidDays(days);
+        fetch(`{% url 'api_dashboard_registrations' %}?days=${validDays}`)
+            .then(r => r.json())
+            .then(d => {
+                updateChart(registrationsChart, d.labels, d.data);
+                if (totalRegistrationsEl) totalRegistrationsEl.textContent = d.total;
+                if (activeStudentsTodayEl) activeStudentsTodayEl.textContent = d.active_today;
+            })
+            .catch(() => {
+                if (totalRegistrationsEl) totalRegistrationsEl.textContent = 'Error';
+                if (activeStudentsTodayEl) activeStudentsTodayEl.textContent = 'Error';
+            });
+    }
+
+    const submissionsDaysFilter = document.getElementById('submissionsDaysFilter');
+    const registrationsDaysFilter = document.getElementById('registrationsDaysFilter');
+
+    if (submissionsDaysFilter) {
+        submissionsDaysFilter.value = '5';
+        submissionsDaysFilter.addEventListener('change', (e) => {
+            loadSubmissionsChart(e.target.value);
         });
+    }
+
+    if (registrationsDaysFilter) {
+        registrationsDaysFilter.value = '5';
+        registrationsDaysFilter.addEventListener('change', (e) => {
+            loadRegistrationsChart(e.target.value);
+        });
+    }
+
+    loadSubmissionsChart(5);
+    loadRegistrationsChart(5);
 
     // Fetch today's user stats
     fetch("{% url 'get_user_stats' %}")
@@ -701,13 +766,6 @@ Administration | Home
                 </h5>
                 <h5 class="fw-semibold mb-2">
                     Active Students Today: <span class="badge bg-dark float-end fs-4 text-success">${data.users_logged_in_today}</span>
-                </h5>
-                <hr>
-                <h5 class="fw-semibold mb-2">
-                    FLAMES Today\uD83D\uDD25: <span class="badge bg-dark float-end fs-4 text-success">${data.flames_registered_today}</span>
-                </h5>
-                <h5 class="fw-semibold mb-2">
-                    FLAMES Total\uD83D\uDD25: <span class="badge bg-dark float-end fs-4 text-success">${data.total_flames_registrations}</span>
                 </h5>
             `;
         })

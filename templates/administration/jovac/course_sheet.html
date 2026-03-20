@@ -196,9 +196,9 @@
                                 onclick="openLinkModal()">Link Existing MCQ</a></li>
                     </ul>
                 </div>
-                <a href="{% url 'administrator_edit_jovac_sheet' course.slug sheet.slug %}" class="btn btn-outline-warning">
+                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editSheetModal" onclick="openEditSheetModal()">
                     <i class="ti ti-pencil me-1"></i>Edit Sheet
-                </a>
+                </button>
                 <a href="{% url 'reorder_course_sheet_assignments' sheet.slug %}" class="btn btn-outline-secondary">
                     <i class="ti ti-arrows-sort me-1"></i>Reorder
                 </a>
@@ -258,6 +258,57 @@
         </div>
     </div>
 
+</div>
+
+<!-- ============ EDIT SHEET MODAL ============ -->
+<div class="modal fade" id="editSheetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Sheet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label for="sheetNameInput" class="form-label fw-semibold">Sheet Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="sheetNameInput" required>
+                    </div>
+                    <div class="col-12">
+                        <label for="sheetDescriptionInput" class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="sheetDescriptionInput" rows="4"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label for="sheetThumbnailInput" class="form-label fw-semibold">Thumbnail</label>
+                        <input type="file" class="form-control" id="sheetThumbnailInput" accept="image/*">
+                        <small class="text-muted d-block mt-1 {% if not sheet.thumbnail %}d-none{% endif %}" id="currentSheetThumbnailWrap">
+                            Current: <a href="{% if sheet.thumbnail %}{{ sheet.thumbnail.url }}{% endif %}" target="_blank" id="currentSheetThumbnailLink">View Thumbnail</a>
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="sheetEnabledInput">
+                            <label class="form-check-label" for="sheetEnabledInput">Enabled</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="sheetApprovedInput">
+                            <label class="form-check-label" for="sheetApprovedInput">Approved</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="sheetFormError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveSheetBtn" onclick="saveSheetDetails()">
+                    <span id="sheetBtnText">Update Sheet</span>
+                    <span id="sheetBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- ============ ADD / EDIT ASSIGNMENT MODAL ============ -->
@@ -518,6 +569,7 @@
     const CSRF = '{{ csrf_token }}';
     const COURSE_SLUG = '{{ course.slug }}';
     const SHEET_SLUG = '{{ sheet.slug }}';
+    const EDIT_SHEET_URL = "{% url 'administrator_edit_jovac_sheet' course.slug sheet.slug %}";
     const API_SHEET = `/administration/api/v1/course-sheets/${SHEET_SLUG}/items/`;
     let pendingDeleteId = null;
     let pendingDeleteType = null;
@@ -526,6 +578,111 @@
     let linkQuestionSelect = null;
     let linkQuestionAbortController = null;
     let assignmentModalIntent = 'assignment';
+    let currentSheetState = {
+        name: `{{ sheet.name|escapejs }}`,
+        description: `{{ sheet.description|default_if_none:''|escapejs }}`,
+        is_enabled: {% if sheet.is_enabled %}true{% else %}false{% endif %},
+        is_approved: {% if sheet.is_approved %}true{% else %}false{% endif %},
+        thumbnail_url: `{% if sheet.thumbnail %}{{ sheet.thumbnail.url|escapejs }}{% endif %}`
+    };
+
+    function refreshHeaderSheetName() {
+        const sheetNameEl = document.querySelector('.card .card-body p.text-muted strong');
+        if (sheetNameEl) {
+            sheetNameEl.textContent = currentSheetState.name || '';
+        }
+    }
+
+    function syncSheetModalThumbnailLink() {
+        const wrap = document.getElementById('currentSheetThumbnailWrap');
+        const link = document.getElementById('currentSheetThumbnailLink');
+        if (!wrap || !link) return;
+
+        if (currentSheetState.thumbnail_url) {
+            wrap.classList.remove('d-none');
+            link.href = currentSheetState.thumbnail_url;
+        } else {
+            wrap.classList.add('d-none');
+        }
+    }
+
+    function openEditSheetModal() {
+        document.getElementById('sheetNameInput').value = currentSheetState.name || '';
+        document.getElementById('sheetDescriptionInput').value = currentSheetState.description || '';
+        document.getElementById('sheetEnabledInput').checked = !!currentSheetState.is_enabled;
+        document.getElementById('sheetApprovedInput').checked = !!currentSheetState.is_approved;
+        document.getElementById('sheetThumbnailInput').value = '';
+        document.getElementById('sheetFormError').classList.add('d-none');
+        syncSheetModalThumbnailLink();
+    }
+
+    async function saveSheetDetails() {
+        const errEl = document.getElementById('sheetFormError');
+        errEl.classList.add('d-none');
+
+        const name = document.getElementById('sheetNameInput').value.trim();
+        if (!name) {
+            errEl.textContent = 'Sheet name is required.';
+            errEl.classList.remove('d-none');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('description', document.getElementById('sheetDescriptionInput').value || '');
+        if (document.getElementById('sheetEnabledInput').checked) {
+            formData.append('is_enabled', 'on');
+        }
+        if (document.getElementById('sheetApprovedInput').checked) {
+            formData.append('is_approved', 'on');
+        }
+
+        const thumbnailInput = document.getElementById('sheetThumbnailInput');
+        if (thumbnailInput.files && thumbnailInput.files[0]) {
+            formData.append('thumbnail', thumbnailInput.files[0]);
+        }
+
+        const btn = document.getElementById('saveSheetBtn');
+        btn.disabled = true;
+        document.getElementById('sheetBtnSpinner').classList.remove('d-none');
+
+        try {
+            const res = await fetch(EDIT_SHEET_URL, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': CSRF,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData,
+            });
+
+            let data = {};
+            try {
+                data = await res.json();
+            } catch (_) {
+                data = {};
+            }
+
+            if (res.ok && data.success) {
+                currentSheetState = {
+                    ...currentSheetState,
+                    ...data.sheet,
+                };
+                refreshHeaderSheetName();
+                syncSheetModalThumbnailLink();
+                bootstrap.Modal.getInstance(document.getElementById('editSheetModal')).hide();
+            } else {
+                errEl.textContent = data.error || 'Failed to update sheet.';
+                errEl.classList.remove('d-none');
+            }
+        } catch (e) {
+            errEl.textContent = 'Network error while updating sheet.';
+            errEl.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            document.getElementById('sheetBtnSpinner').classList.add('d-none');
+        }
+    }
 
     // ==================== LOAD SHEET ITEMS ====================
     async function loadSheetItems() {
@@ -1246,6 +1403,7 @@
 
     initializeLinkQuestionSearch();
     toggleTutorialRow();
+    syncSheetModalThumbnailLink();
     loadSheetItems();
 </script>
 {% endblock %}
