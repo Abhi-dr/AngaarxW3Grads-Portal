@@ -299,6 +299,33 @@ class CertificateAdminViewSet(viewsets.ModelViewSet):
             'message': f'{created_count} issued, {skipped_count} duplicates skipped, {len(not_found)} emails not found.'
         })
 
+    @action(detail=False, methods=['post'], url_path='approve-all')
+    def approve_all(self, request):
+        """
+        POST /api/v1/certificates/approve-all/
+        { event_id: int }
+        Marks all pending certificates for the given event as approved.
+        """
+        event_id = request.data.get('event_id')
+        if not event_id:
+            return Response({'success': False, 'error': 'event_id is required.'}, status=400)
+
+        try:
+            event = Event.objects.get(pk=event_id)
+        except Event.DoesNotExist:
+            return Response({'success': False, 'error': 'Event not found.'}, status=404)
+
+        pending_qs = Certificate.objects.filter(event=event, approved=False)
+        approved_now = pending_qs.update(approved=True)
+        total_count = Certificate.objects.filter(event=event).count()
+
+        return Response({
+            'success': True,
+            'approved_now': approved_now,
+            'total': total_count,
+            'message': f'{approved_now} certificate(s) approved.'
+        })
+
     @action(detail=True, methods=['patch'], url_path='toggle-approved')
     def toggle_approved(self, request, pk=None):
         """PATCH /api/v1/certificates/<pk>/toggle-approved/ — flip approved flag."""
