@@ -56,12 +56,20 @@ def index(request):
 @staff_member_required(login_url='login')
 @admin_required
 def api_dashboard_submissions(request):
-    """Returns last 5 days submission counts as JSON."""
+    """Returns submission counts as JSON for selected days (5/10/15/30, default 5)."""
+    allowed_days = {5, 10, 15, 30}
+    try:
+        days = int(request.GET.get('days', 5))
+    except (TypeError, ValueError):
+        days = 5
+    if days not in allowed_days:
+        days = 5
+
     today = timezone.now().date()
-    last_5_days = [today - timedelta(days=i) for i in range(4, -1, -1)]
-    labels = [d.strftime('%d %b') for d in last_5_days]
+    day_window = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    labels = [d.strftime('%d %b') for d in day_window]
     data = []
-    for d in last_5_days:
+    for d in day_window:
         start = timezone.make_aware(datetime.datetime.combine(d, datetime.time.min))
         end   = timezone.make_aware(datetime.datetime.combine(d, datetime.time.max))
         data.append(Submission.objects.filter(submitted_at__gte=start, submitted_at__lte=end).count())
@@ -76,12 +84,20 @@ def api_dashboard_submissions(request):
 @staff_member_required(login_url='login')
 @admin_required
 def api_dashboard_registrations(request):
-    """Returns last 5 days new student registrations as JSON."""
+    """Returns student registration counts as JSON for selected days (5/10/15/30, default 5)."""
+    allowed_days = {5, 10, 15, 30}
+    try:
+        days = int(request.GET.get('days', 5))
+    except (TypeError, ValueError):
+        days = 5
+    if days not in allowed_days:
+        days = 5
+
     today = timezone.now().date()
-    last_5_days = [today - timedelta(days=i) for i in range(4, -1, -1)]
-    labels = [d.strftime('%d %b') for d in last_5_days]
+    day_window = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    labels = [d.strftime('%d %b') for d in day_window]
     data = []
-    for d in last_5_days:
+    for d in day_window:
         start = timezone.make_aware(datetime.datetime.combine(d, datetime.time.min))
         end   = timezone.make_aware(datetime.datetime.combine(d, datetime.time.max))
         data.append(CustomUser.objects.filter(date_joined__gte=start, date_joined__lte=end, role='student').count())

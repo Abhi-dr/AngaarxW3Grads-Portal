@@ -122,13 +122,20 @@ def jovac_sheet(request, course_slug, sheet_slug):
 def edit_sheet(request, course_slug, sheet_slug):
     course = get_object_or_404(Course, slug=course_slug)
     sheet = get_object_or_404(CourseSheet, slug=sheet_slug, course=course)
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
     if request.method == 'POST':
-        name = request.POST.get('name')
+        name = (request.POST.get('name') or '').strip()
         description = request.POST.get('description')
         is_enabled = bool(request.POST.get('is_enabled'))
         is_approved = bool(request.POST.get('is_approved'))
         thumbnail = request.FILES.get('thumbnail')
+
+        if not name:
+            if is_ajax:
+                return JsonResponse({'success': False, 'error': 'Sheet name is required.'}, status=400)
+            messages.error(request, "Sheet name is required.")
+            return redirect('administrator_edit_jovac_sheet', course_slug=course.slug, sheet_slug=sheet.slug)
 
         sheet.name = name
         sheet.description = description
@@ -139,6 +146,18 @@ def edit_sheet(request, course_slug, sheet_slug):
             sheet.thumbnail = thumbnail
 
         sheet.save()
+
+        if is_ajax:
+            return JsonResponse({
+                'success': True,
+                'sheet': {
+                    'name': sheet.name,
+                    'description': sheet.description or '',
+                    'is_enabled': sheet.is_enabled,
+                    'is_approved': sheet.is_approved,
+                    'thumbnail_url': sheet.thumbnail.url if sheet.thumbnail else '',
+                }
+            })
 
         messages.success(request, "Sheet updated successfully.")
         return redirect('administrator_jovac', slug=course.slug)

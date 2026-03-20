@@ -3,10 +3,10 @@
 
 {% block title %}JOVAC | {{ course.name }}{% endblock %}
 
-
 {% block jovac_active %}
 active
 {% endblock %}
+
 {% block extra_css %}
 <style>
     .skeleton-img {
@@ -32,11 +32,11 @@ active
 
     @keyframes shimmer {
         0% {
-            background-position: 200% 0
+            background-position: 200% 0;
         }
 
         100% {
-            background-position: -200% 0
+            background-position: -200% 0;
         }
     }
 
@@ -56,29 +56,35 @@ active
 
 {% block body %}
 <div class="container-fluid">
-
-    <!-- Header -->
     <div class="card mb-4">
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <h3 class="heading mb-0">
-                    <span class="fw-semibold">{{ course.name }} 🔥</span>
-                    <span class="fs-5 text-muted"> | By: {{ course.get_instructor_names }}</span>
+                    <span class="fw-semibold" id="courseNameHeading">{{ course.name }} 🔥</span>
+                    <span class="fs-5 text-muted" id="courseInstructorsHeading"> | By: {{ course.get_instructor_names }}</span>
                 </h3>
             </div>
             <div class="d-flex gap-2 flex-wrap">
                 <a href="{% url 'administrator_add_jovac_sheet' course.slug %}" class="btn btn-success">
                     <i class="ti ti-plus me-1"></i>Add Sheet
                 </a>
+                <button type="button" class="btn btn-outline-success" id="enableAllSheetsBtn" onclick="bulkUpdateSheets('enable_all')">
+                    <i class="ti ti-check me-1"></i>Enable All
+                </button>
+                <button type="button" class="btn btn-outline-info" id="approveAllSheetsBtn" onclick="bulkUpdateSheets('approve_all')">
+                    <i class="ti ti-rosette-check me-1"></i>Approve All
+                </button>
                 <a href="{% url 'administrator_jovac_reorder_sheets' course.slug %}" class="btn btn-outline-primary">
                     <i class="ti ti-arrows-sort me-1"></i>Reorder Sheets
                 </a>
-                <a href="{% url 'administrator_edit_jovac' course.slug %}" class="btn btn-outline-warning">
+                <button type="button" class="btn btn-outline-warning" onclick="openEditCourseModal()">
                     <i class="ti ti-pencil me-1"></i>Edit Course
-                </a>
+                </button>
             </div>
         </div>
     </div>
+
+    <div id="sheetBulkActionAlert"></div>
 
     {% for message in messages %}
     <div class="alert {{ message.tags }} alert-dismissible fade show">
@@ -86,7 +92,6 @@ active
     </div>
     {% endfor %}
 
-    <!-- Sheets Grid -->
     <div class="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4" id="sheetsGrid">
         {% for i in "1234" %}
         <div class="col skeleton-item">
@@ -101,10 +106,108 @@ active
         </div>
         {% endfor %}
     </div>
-
 </div>
 
-<!-- DELETE CONFIRM MODAL -->
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="courseEditName" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="courseEditDescription" rows="4"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Instructors</label>
+                        <select class="form-select" id="courseEditInstructors" multiple></select>
+                        <small class="text-muted">Hold Ctrl/Command to select multiple instructors.</small>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Thumbnail</label>
+                        <input type="file" class="form-control" id="courseEditThumbnail" accept="image/*">
+                        <small class="text-muted d-block mt-1 d-none" id="courseCurrentThumbWrap">
+                            Current: <a href="#" target="_blank" id="courseCurrentThumbLink">View Thumbnail</a>
+                        </small>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="courseEditIsActive">
+                            <label class="form-check-label" for="courseEditIsActive">Course Active</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="courseEditError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCourseEditBtn" onclick="saveCourseEdit()">
+                    <span id="saveCourseEditText">Update Course</span>
+                    <span id="saveCourseEditSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editSheetModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Sheet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editSheetSlug">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Sheet Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="sheetEditName" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="sheetEditDescription" rows="4"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Thumbnail</label>
+                        <input type="file" class="form-control" id="sheetEditThumbnail" accept="image/*">
+                        <small class="text-muted d-block mt-1 d-none" id="sheetCurrentThumbWrap">
+                            Current: <a href="#" target="_blank" id="sheetCurrentThumbLink">View Thumbnail</a>
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="sheetEditEnabled">
+                            <label class="form-check-label" for="sheetEditEnabled">Enabled</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" id="sheetEditApproved">
+                            <label class="form-check-label" for="sheetEditApproved">Approved</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="sheetEditError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveSheetEditBtn" onclick="saveSheetEdit()">
+                    <span id="saveSheetEditText">Update Sheet</span>
+                    <span id="saveSheetEditSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="deleteSheetModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -118,8 +221,7 @@ active
             </div>
             <div class="modal-footer border-0">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger" id="confirmDeleteSheetBtn"
-                    onclick="confirmDeleteSheet()">Yes, Delete</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteSheetBtn" onclick="confirmDeleteSheet()">Yes, Delete</button>
             </div>
         </div>
     </div>
@@ -130,59 +232,316 @@ active
 <script>
     const CSRF = '{{ csrf_token }}';
     const COURSE_SLUG = '{{ course.slug }}';
-    let pendingDeleteSlug = null;
+    const COURSE_API_URL = `/administration/api/v1/courses/${COURSE_SLUG}/`;
 
-    // ==================== LOAD SHEETS ====================
+    let pendingDeleteSlug = null;
+    let sheetsCache = [];
+    let instructorsCache = [];
+    let assignedInstructors = [];
+
+    let courseState = {
+        name: `{{ course.name|escapejs }}`,
+        description: `{{ course.description|default_if_none:''|escapejs }}`,
+        is_active: {% if course.is_active %}true{% else %}false{% endif %},
+        thumbnail: `{% if course.thumbnail %}{{ course.thumbnail.url|escapejs }}{% endif %}`,
+    };
+
+    function showBulkAlert(message, type = 'success') {
+        const alertWrap = document.getElementById('sheetBulkActionAlert');
+        if (!alertWrap) return;
+        alertWrap.innerHTML = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+
+    function syncCourseThumbLink() {
+        const wrap = document.getElementById('courseCurrentThumbWrap');
+        const link = document.getElementById('courseCurrentThumbLink');
+        if (!wrap || !link) return;
+
+        if (courseState.thumbnail) {
+            wrap.classList.remove('d-none');
+            link.href = courseState.thumbnail;
+        } else {
+            wrap.classList.add('d-none');
+            link.href = '#';
+        }
+    }
+
+    async function bulkUpdateSheets(actionType) {
+        const enableBtn = document.getElementById('enableAllSheetsBtn');
+        const approveBtn = document.getElementById('approveAllSheetsBtn');
+        const isEnableAction = actionType === 'enable_all';
+        const targetBtn = isEnableAction ? enableBtn : approveBtn;
+        const defaultLabel = isEnableAction
+            ? '<i class="ti ti-check me-1"></i>Enable All'
+            : '<i class="ti ti-rosette-check me-1"></i>Approve All';
+
+        enableBtn.disabled = true;
+        approveBtn.disabled = true;
+        targetBtn.innerHTML = isEnableAction ? 'Enabling...' : 'Approving...';
+
+        try {
+            const res = await fetch(`/administration/api/v1/courses/${COURSE_SLUG}/bulk-update-sheets/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': CSRF,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: actionType }),
+            });
+
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showBulkAlert(data.message || 'Sheets updated successfully.', 'success');
+                await loadSheets();
+            } else {
+                showBulkAlert(data.error || 'Bulk update failed.', 'danger');
+            }
+        } catch (e) {
+            showBulkAlert('Network error while updating sheets.', 'danger');
+        } finally {
+            enableBtn.disabled = false;
+            approveBtn.disabled = false;
+            targetBtn.innerHTML = defaultLabel;
+        }
+    }
+
     async function loadSheets() {
         try {
             const res = await fetch(`/administration/api/v1/courses/${COURSE_SLUG}/sheets/`, {
                 headers: { 'X-CSRFToken': CSRF }
             });
             const data = await res.json();
-            renderSheets(data.sheets || []);
+            sheetsCache = data.sheets || [];
+            renderSheets(sheetsCache);
         } catch (e) {
             document.getElementById('sheetsGrid').innerHTML =
-                `<div class="col-12"><div class="alert alert-danger">Failed to load sheets. Please refresh.</div></div>`;
+                '<div class="col-12"><div class="alert alert-danger">Failed to load sheets. Please refresh.</div></div>';
         }
     }
 
     function renderSheets(sheets) {
         const grid = document.getElementById('sheetsGrid');
         if (!sheets.length) {
-            grid.innerHTML = `<div class="col-12"><div class="alert alert-info">No sheets yet. Click "Add Sheet" to create one.</div></div>`;
+            grid.innerHTML = '<div class="col-12"><div class="alert alert-info">No sheets yet. Click "Add Sheet" to create one.</div></div>';
             return;
         }
-        grid.innerHTML = sheets.map(s => `
-    <div class="col" id="sheet-card-${s.slug}">
-      <div class="card sheet-card h-100 shadow-sm">
-        <a href="/administration/jovac/${COURSE_SLUG}/${s.slug}">
-          <img src="${s.thumbnail || 'https://placehold.co/400x160?text=Sheet'}"
-               class="card-img-top" alt="${s.name}"
-               onerror="this.src='https://placehold.co/400x160?text=Sheet'">
-        </a>
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title mb-1">${s.name} 🔥</h5>
-          <div class="mb-2">
-            <span class="badge ${s.is_enabled ? 'bg-success' : 'bg-danger'}">
-              ${s.is_enabled ? 'Enabled' : 'Disabled'}
-            </span>
-            <span class="badge bg-secondary ms-1">${s.assignments_count || 0} assignments</span>
-          </div>
-          <div class="d-flex gap-2 mt-auto">
-            <a href="/administration/jovac/${COURSE_SLUG}/${s.slug}" class="btn btn-sm btn-outline-secondary flex-fill">View</a>
-            <a href="/administration/course/${COURSE_SLUG}/sheet/${s.slug}/edit/" class="btn btn-sm btn-outline-warning flex-fill">Edit</a>
-          </div>
-          <button class="btn btn-sm btn-danger mt-2 w-100"
-                  onclick="openDeleteSheet('${s.slug}', '${s.name.replace(/'/g, "\\'").replace(/"/g, '\\"')}')">
-            🗑️ Delete
-          </button>
-        </div>
-      </div>
-    </div>
-  `).join('');
+
+        grid.innerHTML = sheets.map((s) => `
+            <div class="col" id="sheet-card-${s.slug}">
+                <div class="card sheet-card h-100 shadow-sm">
+                    <a href="/administration/jovac/${COURSE_SLUG}/${s.slug}">
+                        <img src="${s.thumbnail || 'https://placehold.co/400x160?text=Sheet'}"
+                             class="card-img-top" alt="${s.name}"
+                             onerror="this.src='https://placehold.co/400x160?text=Sheet'">
+                    </a>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title mb-1">${s.name} 🔥</h5>
+                        <div class="mb-2">
+                            <span class="badge ${s.is_enabled ? 'bg-success' : 'bg-danger'}">${s.is_enabled ? 'Enabled' : 'Disabled'}</span>
+                            <span class="badge bg-secondary ms-1">${s.assignments_count || 0} assignments</span>
+                        </div>
+                        <div class="d-flex gap-2 mt-auto">
+                            <a href="/administration/jovac/${COURSE_SLUG}/${s.slug}" class="btn btn-sm btn-outline-secondary flex-fill">View</a>
+                            <button type="button" class="btn btn-sm btn-outline-warning flex-fill" onclick="openEditSheetModal('${s.slug}')">Edit</button>
+                        </div>
+                        <button class="btn btn-sm btn-danger mt-2 w-100" onclick="openDeleteSheet('${s.slug}', ${JSON.stringify(s.name)})">🗑️ Delete</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
     }
 
-    // ==================== DELETE SHEET ====================
+    async function loadCourseInstructors() {
+        const res = await fetch(`/administration/api/v1/courses/${COURSE_SLUG}/instructors/`, {
+            headers: { 'X-CSRFToken': CSRF }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            instructorsCache = data.instructors || [];
+            assignedInstructors = data.assigned || [];
+        }
+    }
+
+    async function openEditCourseModal() {
+        const errorEl = document.getElementById('courseEditError');
+        errorEl.classList.add('d-none');
+
+        document.getElementById('courseEditName').value = courseState.name || '';
+        document.getElementById('courseEditDescription').value = courseState.description || '';
+        document.getElementById('courseEditIsActive').checked = !!courseState.is_active;
+        document.getElementById('courseEditThumbnail').value = '';
+
+        try {
+            await loadCourseInstructors();
+            const select = document.getElementById('courseEditInstructors');
+            select.innerHTML = instructorsCache.map((i) => {
+                const isSelected = assignedInstructors.includes(i.id) ? 'selected' : '';
+                const fullName = `${(i.first_name || '').trim()} ${(i.last_name || '').trim()}`.trim() || i.email;
+                return `<option value="${i.id}" ${isSelected}>${fullName}</option>`;
+            }).join('');
+            syncCourseThumbLink();
+        } catch (e) {
+            errorEl.textContent = 'Failed to load instructors.';
+            errorEl.classList.remove('d-none');
+        }
+
+        new bootstrap.Modal(document.getElementById('editCourseModal')).show();
+    }
+
+    async function saveCourseEdit() {
+        const errEl = document.getElementById('courseEditError');
+        errEl.classList.add('d-none');
+
+        const name = document.getElementById('courseEditName').value.trim();
+        if (!name) {
+            errEl.textContent = 'Course name is required.';
+            errEl.classList.remove('d-none');
+            return;
+        }
+
+        const saveBtn = document.getElementById('saveCourseEditBtn');
+        saveBtn.disabled = true;
+        document.getElementById('saveCourseEditSpinner').classList.remove('d-none');
+
+        try {
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', document.getElementById('courseEditDescription').value || '');
+            formData.append('is_active', document.getElementById('courseEditIsActive').checked ? 'true' : 'false');
+            formData.append('instructors_present', '1');
+
+            const selected = Array.from(document.getElementById('courseEditInstructors').selectedOptions).map((opt) => opt.value);
+            selected.forEach((id) => formData.append('instructors', id));
+
+            const thumbnailInput = document.getElementById('courseEditThumbnail');
+            if (thumbnailInput.files && thumbnailInput.files[0]) {
+                formData.append('thumbnail', thumbnailInput.files[0]);
+            }
+
+            const res = await fetch(COURSE_API_URL, {
+                method: 'PATCH',
+                headers: { 'X-CSRFToken': CSRF },
+                body: formData,
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                const payload = data.data || {};
+                courseState.name = payload.name || name;
+                courseState.description = payload.description || '';
+                courseState.is_active = !!payload.is_active;
+                courseState.thumbnail = payload.thumbnail || courseState.thumbnail;
+
+                const selectedInstructorNames = Array.from(document.getElementById('courseEditInstructors').selectedOptions)
+                    .map((opt) => opt.textContent.trim())
+                    .filter(Boolean);
+
+                document.getElementById('courseNameHeading').textContent = `${courseState.name} 🔥`;
+                document.getElementById('courseInstructorsHeading').textContent = ` | By: ${selectedInstructorNames.length ? selectedInstructorNames.join(', ') : 'N/A'}`;
+                assignedInstructors = selected.map((val) => Number(val));
+
+                bootstrap.Modal.getInstance(document.getElementById('editCourseModal')).hide();
+                showBulkAlert('Course updated successfully.', 'success');
+            } else {
+                errEl.textContent = data.error || 'Failed to update course.';
+                errEl.classList.remove('d-none');
+            }
+        } catch (e) {
+            errEl.textContent = 'Network error while updating course.';
+            errEl.classList.remove('d-none');
+        } finally {
+            saveBtn.disabled = false;
+            document.getElementById('saveCourseEditSpinner').classList.add('d-none');
+        }
+    }
+
+    function openEditSheetModal(sheetSlug) {
+        const errEl = document.getElementById('sheetEditError');
+        errEl.classList.add('d-none');
+
+        const sheet = sheetsCache.find((s) => s.slug === sheetSlug);
+        if (!sheet) {
+            showBulkAlert('Sheet details not found. Please refresh.', 'danger');
+            return;
+        }
+
+        document.getElementById('editSheetSlug').value = sheet.slug;
+        document.getElementById('sheetEditName').value = sheet.name || '';
+        document.getElementById('sheetEditDescription').value = sheet.description || '';
+        document.getElementById('sheetEditEnabled').checked = !!sheet.is_enabled;
+        document.getElementById('sheetEditApproved').checked = !!sheet.is_approved;
+        document.getElementById('sheetEditThumbnail').value = '';
+
+        const wrap = document.getElementById('sheetCurrentThumbWrap');
+        const link = document.getElementById('sheetCurrentThumbLink');
+        if (sheet.thumbnail) {
+            wrap.classList.remove('d-none');
+            link.href = sheet.thumbnail;
+        } else {
+            wrap.classList.add('d-none');
+            link.href = '#';
+        }
+
+        new bootstrap.Modal(document.getElementById('editSheetModal')).show();
+    }
+
+    async function saveSheetEdit() {
+        const errEl = document.getElementById('sheetEditError');
+        errEl.classList.add('d-none');
+
+        const slug = document.getElementById('editSheetSlug').value;
+        const name = document.getElementById('sheetEditName').value.trim();
+        if (!name) {
+            errEl.textContent = 'Sheet name is required.';
+            errEl.classList.remove('d-none');
+            return;
+        }
+
+        const saveBtn = document.getElementById('saveSheetEditBtn');
+        saveBtn.disabled = true;
+        document.getElementById('saveSheetEditSpinner').classList.remove('d-none');
+
+        try {
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', document.getElementById('sheetEditDescription').value || '');
+            formData.append('is_enabled', document.getElementById('sheetEditEnabled').checked ? 'true' : 'false');
+            formData.append('is_approved', document.getElementById('sheetEditApproved').checked ? 'true' : 'false');
+
+            const thumbInput = document.getElementById('sheetEditThumbnail');
+            if (thumbInput.files && thumbInput.files[0]) {
+                formData.append('thumbnail', thumbInput.files[0]);
+            }
+
+            const res = await fetch(`/administration/api/v1/course-sheets/${slug}/`, {
+                method: 'PATCH',
+                headers: { 'X-CSRFToken': CSRF },
+                body: formData,
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                bootstrap.Modal.getInstance(document.getElementById('editSheetModal')).hide();
+                showBulkAlert('Sheet updated successfully.', 'success');
+                await loadSheets();
+            } else {
+                errEl.textContent = data.error || 'Failed to update sheet.';
+                errEl.classList.remove('d-none');
+            }
+        } catch (e) {
+            errEl.textContent = 'Network error while updating sheet.';
+            errEl.classList.remove('d-none');
+        } finally {
+            saveBtn.disabled = false;
+            document.getElementById('saveSheetEditSpinner').classList.add('d-none');
+        }
+    }
+
     function openDeleteSheet(slug, name) {
         pendingDeleteSlug = slug;
         document.getElementById('deleteSheetNameLabel').textContent = name;
@@ -191,21 +550,30 @@ active
 
     async function confirmDeleteSheet() {
         if (!pendingDeleteSlug) return;
+
         const btn = document.getElementById('confirmDeleteSheetBtn');
-        btn.disabled = true; btn.textContent = 'Deleting…';
+        btn.disabled = true;
+        btn.textContent = 'Deleting...';
+
         try {
             const res = await fetch(`/administration/api/v1/course-sheets/${pendingDeleteSlug}/`, {
-                method: 'DELETE', headers: { 'X-CSRFToken': CSRF }
+                method: 'DELETE',
+                headers: { 'X-CSRFToken': CSRF }
             });
+
             if (res.ok) {
                 bootstrap.Modal.getInstance(document.getElementById('deleteSheetModal')).hide();
-                document.getElementById(`sheet-card-${pendingDeleteSlug}`)?.remove();
+                await loadSheets();
                 pendingDeleteSlug = null;
             } else {
                 alert('Delete failed. The sheet may have dependencies.');
             }
-        } catch (e) { alert('Delete failed.'); }
-        finally { btn.disabled = false; btn.textContent = 'Yes, Delete'; }
+        } catch (e) {
+            alert('Delete failed.');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Yes, Delete';
+        }
     }
 
     loadSheets();
