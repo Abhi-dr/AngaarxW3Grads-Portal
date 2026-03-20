@@ -105,33 +105,30 @@
     <style>
         #scrollToTopBtn {
             display: none;
-            /* Hidden by default */
             position: fixed;
-            /* Fixed position */
-            bottom: 20px;
-            /* Place it at the bottom */
-            right: 30px;
-            /* Place it at the right */
-            z-index: 99;
-            /* Ensure it is visible over other elements */
-            border: none;
-            /* No borders */
+            right: 24px;
+            bottom: 24px;
+            z-index: 1080;
+            width: 46px;
+            height: 46px;
+            border: 1px solid rgba(255, 255, 255, 0.16);
             outline: none;
-            background-color: #343333a2;
-            /* Black background */
-            color: white;
-            /* White text */
+            border-radius: 999px;
+            background: rgba(33, 37, 41, 0.85);
+            color: #fff;
             cursor: pointer;
-            /* Pointer/hand icon */
-            padding: 15px;
-            border-radius: 10px;
-            /* Rounded corners */
-            font-size: 18px;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(6px);
+            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
         }
 
         #scrollToTopBtn:hover {
-            background-color: #555;
-            /* Darker background on hover */
+            background: rgba(52, 58, 64, 0.95);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 26px rgba(0, 0, 0, 0.3);
         }
 
         .body-wrapper>.container-fluid {
@@ -892,7 +889,10 @@
             {% block body %}
             {% endblock %}
 
-            <button onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top">â†‘</button>
+            <button type="button" onclick="scrollToTop()" id="scrollToTopBtn" title="Go to top"
+                aria-label="Go to top">
+                <i class="ti ti-arrow-up fs-5" aria-hidden="true"></i>
+            </button>
 
         </div>
     </div>
@@ -942,7 +942,7 @@
             const scrollToTopBtn = document.getElementById("scrollToTopBtn");
 
             if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                scrollToTopBtn.style.display = "block";
+                scrollToTopBtn.style.display = "flex";
             } else {
                 scrollToTopBtn.style.display = "none";
             }
@@ -950,8 +950,7 @@
 
         // Scroll to the top of the document when the user clicks on the button
         function scrollToTop() {
-            document.body.scrollTop = 0; // For Safari
-            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE, and Opera
+            window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
     </script>
