@@ -81,8 +81,9 @@ class CourseAdminViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             course = serializer.save()
             # handle instructors update
-            if 'instructors' in request.data:
+            if 'instructors' in request.data or str(request.data.get('instructors_present', '')).lower() in ['1', 'true', 'yes']:
                 instructor_ids = request.data.getlist('instructors', [])
+                instructor_ids = [i for i in instructor_ids if str(i).strip()]
                 course.instructors.set(instructor_ids)
             return Response({'success': True, 'data': self.get_serializer(course).data})
         return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -112,6 +113,34 @@ class CourseAdminViewSet(viewsets.ModelViewSet):
         course.sheet_order = {str(sheet_id): idx for idx, sheet_id in enumerate(order)}
         course.save(update_fields=['sheet_order'])
         return Response({'success': True, 'message': 'Sheet order saved successfully.'})
+
+    @action(detail=True, methods=['post'], url_path='bulk-update-sheets')
+    def bulk_update_sheets(self, request, slug=None):
+        """POST /api/v1/courses/<slug>/bulk-update-sheets/
+        Body: {"action": "enable_all" | "approve_all"}
+        """
+        course = self.get_object()
+        action_type = request.data.get('action')
+
+        if action_type not in ['enable_all', 'approve_all']:
+            return Response({'success': False, 'error': 'Invalid action. Use enable_all or approve_all.'}, status=400)
+
+        sheets_qs = CourseSheet.objects.filter(course=course).distinct()
+
+        if action_type == 'enable_all':
+            updated_count = sheets_qs.exclude(is_enabled=True).update(is_enabled=True)
+            return Response({
+                'success': True,
+                'updated_count': updated_count,
+                'message': f'Enabled {updated_count} sheet(s) successfully.'
+            })
+
+        updated_count = sheets_qs.exclude(is_approved=True).update(is_approved=True)
+        return Response({
+            'success': True,
+            'updated_count': updated_count,
+            'message': f'Approved {updated_count} sheet(s) successfully.'
+        })
 
     @action(detail=True, methods=['get'], url_path='instructors')
     def instructors(self, request, slug=None):
