@@ -176,6 +176,13 @@
     </div>
 
     <div id="panel-list">
+        <div class="d-flex justify-content-end mb-3">
+            <button id="approveAllBtn" class="btn btn-success text-white shadow-sm rounded-pill px-4"
+                onclick="approveAllCertificates()">
+                <span id="approveAllBtnText"><i class="ti ti-checks me-1"></i>Approve All Pending</span>
+                <span id="approveAllBtnSpinner" class="spinner-border spinner-border-sm ms-2 d-none"></span>
+            </button>
+        </div>
         <div class="table-responsive">
             <table class="table-modern">
                 <thead>
@@ -412,6 +419,20 @@
         document.getElementById('tab-' + name).classList.add('active');
     }
 
+    function showGlobalAlert(message, type = 'success') {
+        const box = document.getElementById('alertBox');
+        if (!box) return;
+
+        box.className = `alert alert-${type} mb-4 shadow-sm border-0 rounded-4`;
+        box.textContent = message;
+        box.classList.remove('d-none');
+
+        if (window.globalAlertTimer) clearTimeout(window.globalAlertTimer);
+        window.globalAlertTimer = setTimeout(() => {
+            box.classList.add('d-none');
+        }, 5000);
+    }
+
     let prevPageUrl = null;
     let nextPageUrl = null;
 
@@ -430,6 +451,8 @@
         document.getElementById('certPagination').style.setProperty("display", (prevPageUrl || nextPageUrl) ? 'flex' : 'none', "important");
         document.getElementById('certPaginationCount').textContent = data.count || rows.length;
         document.getElementById('certCountBadge').textContent = data.count || rows.length;
+        const approveAllBtn = document.getElementById('approveAllBtn');
+        if (approveAllBtn) approveAllBtn.disabled = (data.count || rows.length) === 0;
 
         const tbody = document.getElementById('certTableBody');
         if (rows.length === 0) {
@@ -473,6 +496,41 @@
             method: 'PATCH', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }, body: '{}',
         });
         if (res.ok) loadCertificates();
+    }
+
+    async function approveAllCertificates() {
+        const shouldProceed = window.confirm('Approve all pending certificates for this event?');
+        if (!shouldProceed) return;
+
+        const btn = document.getElementById('approveAllBtn');
+        const btnText = document.getElementById('approveAllBtnText');
+        const spinner = document.getElementById('approveAllBtnSpinner');
+
+        btn.disabled = true;
+        btnText.innerHTML = '<i class="ti ti-loader me-1"></i>Approving...';
+        spinner.classList.remove('d-none');
+
+        try {
+            const res = await fetch(`${BASE}/certificates/approve-all/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ event_id: EVENT_ID }),
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                showGlobalAlert(`${data.approved_now} certificate(s) approved for this event.`, 'success');
+                loadCertificates();
+            } else {
+                showGlobalAlert(data.error || 'Failed to approve all certificates.', 'danger');
+            }
+        } catch (e) {
+            showGlobalAlert('Network error while approving certificates.', 'danger');
+        } finally {
+            btnText.innerHTML = '<i class="ti ti-checks me-1"></i>Approve All Pending';
+            spinner.classList.add('d-none');
+            btn.disabled = false;
+        }
     }
 
     // ─── Delete Certificate ────────────────────────────────────────
