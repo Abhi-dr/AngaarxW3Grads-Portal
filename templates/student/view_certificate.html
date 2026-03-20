@@ -36,6 +36,18 @@ active
     #certificateContent.loaded {
         display: block;
     }
+
+    /* --- ADD THIS: Dark Mode Signature Fix --- */
+    
+    /* Option A: If your portal uses a data attribute or class for the dark mode toggle (adjust the selector to match your setup) */
+    [data-theme="dark"] #certificateContent .signature-img,
+    body.dark-mode #certificateContent .signature-img {
+        filter: invert(1);
+        mix-blend-mode: screen;
+        opacity: 0.9;
+    }
+
+    
 </style>
 {% endblock %}
 
