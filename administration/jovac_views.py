@@ -462,13 +462,13 @@ def view_submissions(request, id):
 @admin_required
 def reorder_assignments(request, slug):
     course_sheet = get_object_or_404(CourseSheet, slug=slug)
-    assignments = course_sheet.get_ordered_assignments()
+    items = course_sheet.get_ordered_items()
     administrator = request.user  # CustomUser with role='admin' — no separate table
 
     return render(request, 'administration/jovac/reorder.html', {
         "administrator": administrator,
         "course_sheet": course_sheet,
-        "assignments": assignments
+        "items": items
     })
 
 
@@ -480,7 +480,19 @@ def update_assignment_order(request, id):
     order = request.POST.getlist("order[]")  # JS will send order[]=1&order[]=2
 
     try:
-        new_order = {str(assignment_id): index for index, assignment_id in enumerate(order)}
+        normalized_order = []
+        for item_id in order:
+            item_id = (item_id or "").strip()
+            if not item_id:
+                continue
+
+            # Backward-compatible: treat plain numeric IDs as assignment IDs.
+            if "_" not in item_id and item_id.isdigit():
+                item_id = f"assignment_{item_id}"
+
+            normalized_order.append(item_id)
+
+        new_order = {item_id: index for index, item_id in enumerate(normalized_order)}
         course_sheet.custom_order = new_order
         course_sheet.save()
         return JsonResponse({"status": "success"})
