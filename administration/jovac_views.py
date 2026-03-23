@@ -495,6 +495,17 @@ def update_assignment_order(request, id):
         new_order = {item_id: index for index, item_id in enumerate(normalized_order)}
         course_sheet.custom_order = new_order
         course_sheet.save()
-        return JsonResponse({"status": "success"})
+
+        course = course_sheet.course.first()
+        if course:
+            redirect_url = reverse(
+                'administrator_jovac_sheet',
+                kwargs={'course_slug': course.slug, 'sheet_slug': course_sheet.slug}
+            )
+        else:
+            redirect_url = reverse('administrator_jovacs')
+
+        messages.success(request, "Order updated!")
+        return JsonResponse({"status": "success", "redirect_url": redirect_url})
     except Exception as e:
         return JsonResponse({"status": "error", "message": str(e)})

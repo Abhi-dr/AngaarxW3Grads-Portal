@@ -117,31 +117,31 @@ def mcq_question_view(request, sheet_slug, slug):
     next_question_url = None
 
     if is_jovac_mcq and course_sheet:
-        # For JOVAC MCQ page navigation, move only across MCQs in this sheet.
-        ordered_mcq_slugs = list(
-            MCQQuestion.objects.filter(course_sheets=course_sheet, is_approved=True)
-            .order_by('id')
-            .values_list('slug', flat=True)
-        )
+        def get_item_url(item):
+            if not item:
+                return None
 
-        if mcq_question.slug in ordered_mcq_slugs:
-            current_index = ordered_mcq_slugs.index(mcq_question.slug)
-            if current_index > 0:
-                previous_question_url = reverse(
+            if item['type'] == 'MCQ':
+                return reverse(
                     'mcq_question',
                     kwargs={
                         'sheet_slug': course_sheet.slug,
-                        'slug': ordered_mcq_slugs[current_index - 1]
+                        'slug': item['obj'].slug,
                     }
                 )
-            if current_index < len(ordered_mcq_slugs) - 1:
-                next_question_url = reverse(
-                    'mcq_question',
-                    kwargs={
-                        'sheet_slug': course_sheet.slug,
-                        'slug': ordered_mcq_slugs[current_index + 1]
-                    }
-                )
+
+            if item['type'] == 'Coding':
+                return reverse('problem', kwargs={'slug': item['obj'].slug})
+
+            assignment = item['obj']
+            if assignment.is_tutorial:
+                return f"{reverse('view_jovac_tutorial', kwargs={'id': assignment.id})}?sheet={course_sheet.slug}"
+            return f"{reverse('submit_assignment', kwargs={'assignment_id': assignment.id})}?sheet={course_sheet.slug}"
+
+        previous_item = course_sheet.get_previous_item(f'mcq_{mcq_question.id}')
+        next_item = course_sheet.get_next_item(f'mcq_{mcq_question.id}')
+        previous_question_url = get_item_url(previous_item)
+        next_question_url = get_item_url(next_item)
     else:
         ordered_mcq_slugs = list(
             MCQQuestion.objects.filter(sheet=mcq_question.sheet, is_approved=True)

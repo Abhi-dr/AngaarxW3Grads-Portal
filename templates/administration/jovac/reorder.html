@@ -80,7 +80,13 @@ Reorder Sheet Items - {{ course_sheet.name }}
             })
             .then(res => res.json())
             .then(data => {
-                if (data.status === 'success') alert('Order updated!');
+                if (data.status === 'success') {
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                        return;
+                    }
+                    alert('Order updated!');
+                }
                 else alert('Error: ' + data.message);
             })
             .catch(err => console.error("Fetch error:", err));
