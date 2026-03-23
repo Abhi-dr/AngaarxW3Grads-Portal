@@ -83,6 +83,7 @@ class AdminReorderSheetItemsTests(TestCase):
 				f'coding_{self.coding_question.id}': 2,
 			}
 		)
+		self.assertIn('redirect_url', response.json())
 
 	def test_update_order_accepts_legacy_numeric_assignment_ids(self):
 		url = reverse('update_course_sheet_order', kwargs={'id': self.sheet.id})
