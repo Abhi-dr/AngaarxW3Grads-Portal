@@ -7,16 +7,127 @@ Reorder Sheet Items - {{ course_sheet.name }}
 
 {% block extra_css %}
 <style>
-    .dragging {
-        background-color: #313131;
+    .reorder-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border: 1px solid rgba(0,0,0,.125);
+        border-radius: 6px;
+        margin-bottom: 6px;
+        background-color: var(--bs-body-bg, #fff);
+        transition: background-color 0.15s ease;
+    }
+
+    .reorder-row:hover {
+        background-color: var(--bs-tertiary-bg, #f8f9fa);
+    }
+
+    .reorder-row.is-dragging {
+        opacity: 0.4;
         border: 2px dashed #007bff;
+        background-color: #313131;
+    }
+
+    .reorder-row.drag-over-above {
+        border-top: 3px solid #007bff;
+    }
+
+    .reorder-row.drag-over-below {
+        border-bottom: 3px solid #007bff;
+    }
+
+    .row-index {
+        font-size: 0.85rem;
+        min-width: 28px;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    .row-label {
+        flex: 1;
+        font-size: 0.9rem;
+    }
+
+    .drag-handle {
+        cursor: grab;
+        padding: 0 6px;
+        font-size: 1.1rem;
+        color: #6c757d;
+        transition: color 0.15s;
+        touch-action: none;
+    }
+
+    .drag-handle:hover {
+        color: #007bff;
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .move-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .move-buttons button {
+        width: 28px;
+        height: 24px;
+        padding: 0;
+        font-size: 0.7rem;
+        line-height: 1;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        color: #495057;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+    }
+
+    .move-buttons button:hover:not(:disabled) {
+        background: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
+
+    .move-buttons button:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+    }
+
+    .jump-input {
+        width: 52px;
+        height: 30px;
+        text-align: center;
+        font-size: 0.8rem;
+        border-radius: 4px;
+        border: 1px solid #dee2e6;
+        background: #fff;
+        color: #495057;
+        padding: 0 4px;
+    }
+
+    .jump-input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+    }
+
+    .flash {
+        animation: flashRow 0.4s ease;
+    }
+
+    @keyframes flashRow {
+        0%   { background-color: #cfe2ff; }
+        100% { background-color: var(--bs-tertiary-bg, #f8f9fa); }
     }
 </style>
 {% endblock %}
 
 {% block body %}
 <div class="container-fluid">
-    
 
     <div class="card">
         <div class="card-body d-inline-flex">
@@ -26,12 +137,23 @@ Reorder Sheet Items - {{ course_sheet.name }}
 
     <div class="card w-100">
         <div class="card-body p-4">
-            <ul id="assignment-list" class="list-group">
+
+            <p class="text-muted small mb-3">
+                <strong>Drag</strong> the ☰ handle to reorder &nbsp;·&nbsp;
+                Use <strong>▲ ▼</strong> to move one step &nbsp;·&nbsp;
+                Type a number and press <kbd>Enter</kbd> to jump directly.
+            </p>
+
+            <div id="reorder-list">
                 {% for item in items %}
-                <li class="list-group-item d-flex justify-content-between align-items-center"
-                    data-id="{{ item.item_id }}">
-                    <span class="float-start">{{ forloop.counter }}</span>
-                    <span>
+                <div class="reorder-row" data-id="{{ item.item_id }}" draggable="false">
+
+                    <!-- Drag handle (only this triggers drag) -->
+                    <span class="drag-handle" title="Drag to reorder">&#9776;</span>
+
+                    <span class="row-index">{{ forloop.counter }}</span>
+
+                    <span class="row-label">
                         {% if item.type == 'Assignment' %}
                             {{ item.obj.title }}
                             {% if item.obj.is_tutorial %}
@@ -41,34 +163,239 @@ Reorder Sheet Items - {{ course_sheet.name }}
                             {% endif %}
                         {% elif item.type == 'MCQ' %}
                             {{ item.obj.question_text|truncatechars:90 }}
-                            <span class="badge bg-primary ms-2">MCQ</span>
+                            <span class="badge bg-success ms-2">MCQ</span>
                         {% else %}
                             {{ item.obj.title }}
                             <span class="badge bg-warning text-dark ms-2">Coding</span>
                         {% endif %}
                     </span>
-                    <span class="drag-handle" style="cursor: grab;">&#9776;</span>
-                </li>
-                {% endfor %}
-            </ul>
 
-            <button class="btn btn-primary mt-3" onclick="saveOrder()">Save Order</button>
+                    <input
+                        type="number"
+                        class="jump-input text-black"
+                        title="Type a position and press Enter"
+                        placeholder="?"
+                        min="1"
+                    />
+
+                    <div class="move-buttons">
+                        <button class="btn-up"   title="Move up">▲</button>
+                        <button class="btn-down" title="Move down">▼</button>
+                    </div>
+
+                </div>
+                {% endfor %}
+            </div>
+
+            <button class="btn btn-primary mt-4" onclick="saveOrder()">Save Order</button>
+
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-
     <script>
-        const sortable = new Sortable(document.getElementById('assignment-list'), {
-            animation: 150,
-            handle: '.drag-handle',
-            onStart: evt => evt.item.classList.add('dragging'),
-            onEnd: evt => evt.item.classList.remove('dragging')
+    (() => {
+        const list       = document.getElementById('reorder-list');
+        let draggedRow   = null;   // the row being dragged
+        let scrollRafId  = null;   // requestAnimationFrame id for auto-scroll
+        let mouseY       = 0;      // current mouse Y within the viewport
+
+        /* ─── Helpers ────────────────────────────────────────────── */
+
+        function getRows() {
+            return Array.from(list.querySelectorAll('.reorder-row'));
+        }
+
+        function clearDropIndicators() {
+            list.querySelectorAll('.drag-over-above, .drag-over-below')
+                .forEach(el => el.classList.remove('drag-over-above', 'drag-over-below'));
+        }
+
+        function updateUI(flashEl = null) {
+            const rows  = getRows();
+            const total = rows.length;
+
+            rows.forEach((row, i) => {
+                row.querySelector('.row-index').textContent = i + 1;
+                row.querySelector('.btn-up').disabled       = (i === 0);
+                row.querySelector('.btn-down').disabled     = (i === total - 1);
+                const inp = row.querySelector('.jump-input');
+                inp.max         = total;
+                inp.value       = '';
+                inp.placeholder = i + 1;
+            });
+
+            if (flashEl) {
+                flashEl.classList.remove('flash');
+                void flashEl.offsetWidth;          // reflow to restart animation
+                flashEl.classList.add('flash');
+                flashEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        const SCROLL_ZONE = 80;   // px from top/bottom edge to start scrolling
+        const SCROLL_MAX  = 50;   // max px to scroll per frame
+
+        function autoScrollStep() {
+            const vh = window.innerHeight;
+
+            if (mouseY < SCROLL_ZONE) {
+                // Near top — scroll up
+                const strength = 1 - mouseY / SCROLL_ZONE;          // 0 → 1
+                window.scrollBy(0, -(SCROLL_MAX * strength));
+            } else if (mouseY > vh - SCROLL_ZONE) {
+                // Near bottom — scroll down
+                const strength = 1 - (vh - mouseY) / SCROLL_ZONE;   // 0 → 1
+                window.scrollBy(0,  SCROLL_MAX * strength);
+            }
+
+            scrollRafId = requestAnimationFrame(autoScrollStep);
+        }
+
+        function startScrollLoop() {
+            if (scrollRafId) return;
+            scrollRafId = requestAnimationFrame(autoScrollStep);
+        }
+
+        function stopScrollLoop() {
+            if (scrollRafId) {
+                cancelAnimationFrame(scrollRafId);
+                scrollRafId = null;
+            }
+        }
+
+        /* ─── Activate drag only from the handle ────────────────── */
+
+        list.addEventListener('mousedown', e => {
+            if (e.target.closest('.drag-handle')) {
+                // Make the parent row draggable, then release after dragstart
+                const row = e.target.closest('.reorder-row');
+                row.setAttribute('draggable', 'true');
+            }
         });
 
-        function saveOrder() {
-            const order = Array.from(document.querySelectorAll('#assignment-list li'))
-                .map(item => item.getAttribute('data-id'));
+
+        list.addEventListener('dragstart', e => {
+            draggedRow = e.target.closest('.reorder-row');
+            if (!draggedRow) return;
+
+            // Use a transparent 1×1 image as the drag ghost — we show state
+            // via CSS on the original element instead (looks much cleaner).
+            const ghost = new Image();
+            ghost.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+            e.dataTransfer.setDragImage(ghost, 0, 0);
+            e.dataTransfer.effectAllowed = 'move';
+
+            requestAnimationFrame(() => draggedRow.classList.add('is-dragging'));
+            startScrollLoop();
+        });
+
+        // Track mouse position globally so the rAF loop can use it
+        document.addEventListener('dragover', e => {
+            e.preventDefault();
+            mouseY = e.clientY;
+        });
+
+        list.addEventListener('dragover', e => {
+            e.preventDefault();
+            if (!draggedRow) return;
+
+            const target = e.target.closest('.reorder-row');
+            if (!target || target === draggedRow) return;
+
+            clearDropIndicators();
+
+            // Decide whether to drop above or below based on cursor position
+            const rect    = target.getBoundingClientRect();
+            const midY    = rect.top + rect.height / 2;
+            const isAbove = e.clientY < midY;
+
+            target.classList.add(isAbove ? 'drag-over-above' : 'drag-over-below');
+        });
+
+        list.addEventListener('drop', e => {
+            e.preventDefault();
+            if (!draggedRow) return;
+
+            const target = e.target.closest('.reorder-row');
+            if (!target || target === draggedRow) {
+                cleanup();
+                return;
+            }
+
+            const rect    = target.getBoundingClientRect();
+            const isAbove = e.clientY < (rect.top + rect.height / 2);
+
+            if (isAbove) {
+                list.insertBefore(draggedRow, target);
+            } else {
+                list.insertBefore(draggedRow, target.nextSibling);
+            }
+
+            cleanup();
+            updateUI(draggedRow);
+        });
+
+        list.addEventListener('dragend', () => cleanup());
+
+        function cleanup() {
+            stopScrollLoop();
+            clearDropIndicators();
+            if (draggedRow) {
+                draggedRow.classList.remove('is-dragging');
+                draggedRow.setAttribute('draggable', 'false');
+                draggedRow = null;
+            }
+        }
+
+        /* ─── Up / Down buttons ─────────────────────────────────── */
+
+        list.addEventListener('click', e => {
+            if (e.target.classList.contains('btn-up')) {
+                const row  = e.target.closest('.reorder-row');
+                const prev = row.previousElementSibling;
+                if (prev) { list.insertBefore(row, prev); updateUI(row); }
+                return;
+            }
+            if (e.target.classList.contains('btn-down')) {
+                const row  = e.target.closest('.reorder-row');
+                const next = row.nextElementSibling;
+                if (next) { list.insertBefore(next, row); updateUI(row); }
+            }
+        });
+
+        /* ─── Jump-to-position ──────────────────────────────────── */
+
+        list.addEventListener('keydown', e => {
+            if (e.key !== 'Enter') return;
+            const input = e.target;
+            if (!input.classList.contains('jump-input')) return;
+
+            const row    = input.closest('.reorder-row');
+            const rows   = getRows();
+            const total  = rows.length;
+            let   target = parseInt(input.value, 10);
+
+            if (isNaN(target)) return;
+            target = Math.max(1, Math.min(total, target)) - 1; // clamp, 0-indexed
+
+            const currentIndex = rows.indexOf(row);
+            if (target === currentIndex) { input.value = ''; return; }
+
+            const ref = rows[target];
+            if (target < currentIndex) {
+                list.insertBefore(row, ref);
+            } else {
+                list.insertBefore(row, ref.nextSibling);
+            }
+
+            updateUI(row);
+            input.blur();
+        });
+
+        /* ─── Save ──────────────────────────────────────────────── */
+
+        window.saveOrder = function () {
+            const order = getRows().map(r => r.getAttribute('data-id'));
 
             fetch("{% url 'update_course_sheet_order' course_sheet.id %}", {
                 method: 'POST',
@@ -76,21 +403,24 @@ Reorder Sheet Items - {{ course_sheet.name }}
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
-                body: new URLSearchParams(order.map((id, index) => ['order[]', id]))
+                body: new URLSearchParams(order.map(id => ['order[]', id]))
             })
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
-                    if (data.redirect_url) {
-                        window.location.href = data.redirect_url;
-                        return;
-                    }
-                    alert('Order updated!');
+                    if (data.redirect_url) { window.location.href = data.redirect_url; return; }
+                    alert('Order saved!');
+                } else {
+                    alert('Error: ' + data.message);
                 }
-                else alert('Error: ' + data.message);
             })
-            .catch(err => console.error("Fetch error:", err));
-        }
+            .catch(err => console.error('Fetch error:', err));
+        };
+
+        /* ─── Init ──────────────────────────────────────────────── */
+        updateUI();
+    })();
     </script>
+
 </div>
 {% endblock %}
