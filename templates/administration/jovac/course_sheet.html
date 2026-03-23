@@ -711,6 +711,27 @@
             + ' @' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
     }
 
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function openDeleteAssignFromCache(id, type) {
+        const item = sheetItemsCache.find(entry => entry.type === type && entry.obj.id === id);
+        const name = item ? (item.obj.title || item.obj.question_text || `Item #${id}`) : `Item #${id}`;
+        openDeleteAssign(id, type, name);
+    }
+
+    function openDeleteMcqFromCache(id) {
+        const item = sheetItemsCache.find(entry => entry.type === 'MCQ' && entry.obj.id === id);
+        const name = item ? (item.obj.title || item.obj.question_text || `MCQ #${id}`) : `MCQ #${id}`;
+        openDeleteMcq(id, name);
+    }
+
     function renderAssignments(items) {
         const tbody = document.getElementById('assignmentTableBody');
         if (!items.length) {
@@ -721,6 +742,10 @@
             const a = item.obj;
             const type = item.type;
             const isAssignment = type === 'Assignment';
+            const rawTitle = a.title || a.question_text || '';
+            const escapedTitle = escapeHtml(rawTitle);
+            const shortTitle = rawTitle.length > 25 ? `${rawTitle.substring(0, 25)}…` : rawTitle;
+            const escapedShortTitle = escapeHtml(shortTitle);
 
             let badgeHtml = '';
             let dateHtml = '—';
@@ -737,13 +762,13 @@
                             ? `<a href="${a.tutorial_link}" target="_blank" class="btn btn-sm btn-outline-danger"><i class="fa fa-youtube-play"></i></a>`
                             : `<span class="btn btn-sm btn-outline-secondary disabled">No Video</span>`}
                         <button class="btn btn-sm btn-outline-dark" onclick="openEditAssignment(${a.id})">Edit</button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${a.title.replace(/'/g, "\\'")}')">Unlink</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssignFromCache(${a.id}, '${item.type}')">Unlink</button>
                     `;
                 } else {
                     actionHtml = `
                         <a href="/administration/submissions/${a.id}/" class="btn btn-sm btn-info">Submissions</a>
                         <button class="btn btn-sm btn-outline-dark" onclick="openEditAssignment(${a.id})">Edit</button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${a.title.replace(/'/g, "\\'")}')">Unlink</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssignFromCache(${a.id}, '${item.type}')">Unlink</button>
                     `;
                 }
             } else {
@@ -753,11 +778,11 @@
                 if (type === 'MCQ') {
                     actionHtml = `
                         <button class="btn btn-sm btn-outline-dark" onclick="openEditMcq(${a.id})">Edit</button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteMcq(${a.id}, '${(a.title || a.question_text || '').replace(/'/g, "\\'")}')">Delete</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteMcqFromCache(${a.id})">Delete</button>
                     `;
                 } else {
                     actionHtml = `
-                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssign(${a.id}, '${item.type}', '${(a.title || a.question_text || '').replace(/'/g, "\\'")}')">Unlink</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssignFromCache(${a.id}, '${item.type}')">Unlink</button>
                     `;
                 }
             }
@@ -766,8 +791,8 @@
             <tr id="assign-row-${item.item_id}">
             <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${i + 1}</h6></td>
             <td class="border-bottom-0">
-                <span data-bs-toggle="tooltip" title="${a.title || a.question_text || ''}">
-                ${(a.title || a.question_text || '').length > 25 ? (a.title || a.question_text || '').substring(0, 25) + '…' : (a.title || a.question_text || '')}
+                <span data-bs-toggle="tooltip" title="${escapedTitle}">
+                ${escapedShortTitle}
                 </span>
             </td>
             <td class="border-bottom-0">${badgeHtml}</td>
