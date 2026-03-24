@@ -50,47 +50,67 @@ Instructor | JOVAC
 
     <!-- ======== JOVAC Course Container ======== -->
 
-    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container">
-
-        {% for course in courses %}
-        <div class="col-md-3">
-
-            <div class="card">
-
-                                <!-- Thumbnail with lazy loading -->
-                <a href="{% url 'instructor_jovac' course.slug %}">
-                    {% if course.thumbnail %}
-                    <img src="{{ course.thumbnail.url }}" class="card-img-top lazy-load" alt="{{ course.name }}">
-                    {% else %}
-                    <div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
-                        No thumbnail
-                    </div>
-                    {% endif %}
-                </a>
-
-
-                <div class="card-body">
-                    <h5 class="card-title">{{ course.name }}🔥</h5>
-
-                    <p class="card-text mb-2"><b>By: </b>{{ course.get_instructor_names }}</p>
-
-                    <p class="card-text mb-1">Total Assignments: {{ course.get_total_assignments }}</p>
-
-                    {% if course.is_active %}
-                    <span class="badge bg-success">Active</span>
-                    {% else %}
-                    <span class="badge bg-warning text-dark">Pending Approval</span>
-                    {% endif %}
-
-                    <a href="{% url 'instructor_jovac' course.slug %}"
-                        class="btn btn-outline-secondary w-100 mt-2">View
-                        More</a>
-                </div>
-            </div>
-
-        </div>
-        {% endfor %}
-    </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container"></div>
 </div>
+
+<script>
+    (function () {
+        const container = document.getElementById('sheets-container');
+        const detailTemplate = "{% url 'instructor_jovac' 'course-slug-placeholder' %}";
+
+        function renderCourseCard(course) {
+            const detailUrl = detailTemplate.replace('course-slug-placeholder', course.slug);
+            const thumbnailHtml = course.thumbnail
+                ? `<img src="${course.thumbnail}" class="card-img-top lazy-load" alt="${course.name}">`
+                : `<div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">No thumbnail</div>`;
+
+            const statusBadge = course.is_active
+                ? '<span class="badge bg-success">Active</span>'
+                : '<span class="badge bg-warning text-dark">Pending Approval</span>';
+
+            return `
+                <div class="col-md-3">
+                    <div class="card">
+                        <a href="${detailUrl}">
+                            ${thumbnailHtml}
+                        </a>
+                        <div class="card-body">
+                            <h5 class="card-title">${course.name}🔥</h5>
+                            <p class="card-text mb-2"><b>By: </b>${course.instructor_names || '-'}</p>
+                            ${statusBadge}
+                            <a href="${detailUrl}" class="btn btn-outline-secondary w-100 mt-2">View More</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadCourses() {
+            container.innerHTML = '<div class="col-12 text-center text-muted py-4">Loading courses...</div>';
+            try {
+                const response = await fetch('/instructor/api/v1/courses/', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch courses');
+                }
+
+                const payload = await response.json();
+                const courses = Array.isArray(payload) ? payload : (payload.results || []);
+
+                if (!courses.length) {
+                    container.innerHTML = '<div class="col-12 text-center text-muted py-4">No courses found.</div>';
+                    return;
+                }
+
+                container.innerHTML = courses.map(renderCourseCard).join('');
+            } catch (error) {
+                container.innerHTML = '<div class="col-12 text-center text-danger py-4">Unable to load courses right now.</div>';
+            }
+        }
+
+        loadCourses();
+    })();
+</script>
 
 {% endblock %}

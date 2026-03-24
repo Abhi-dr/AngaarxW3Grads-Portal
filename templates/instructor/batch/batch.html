@@ -118,43 +118,7 @@ active
 
                 <div class="card-body p-2">
                     <div class=" container mb-2">
-                        <div class="d-flex flex-row overflow-auto" style="gap: 1rem;">
-                            {% for sheet in sheets %}
-
-                            <div class="col-md-3">
-                                <div class="card">
-                                    <a href="{% url 'instructor_batch_sheet' batch.slug sheet.slug %}">
-                                        {% if sheet.thumbnail %}
-                                        <img src="{{ sheet.thumbnail.url }}" class="card-img-top"
-                                            alt="Sheet Thumbnail" />
-                                        {% else %}
-                                        <div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 160px;">
-                                            No thumbnail
-                                        </div>
-                                        {% endif %}
-                                        <div class="card-body">
-                                            <h5 class="card-title">
-                                                {{ sheet.name }}🔥
-                                            </h5>
-                                            <p class="card-text mb-1">
-                                                Total Questions: {{ sheet.get_total_questions }}
-                                            </p>
-
-                                            {% if sheet.is_enabled %}
-                                            <span class="text-success">Enabled</span>
-                                            {% else %}
-                                            <span class="text-danger">Disabled</span>
-                                            {% endif %}
-                                            <a href="{% url 'instructor_batch_sheet' batch.slug sheet.slug %}"
-                                                class="btn btn-outline-secondary w-100">View More</a>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-
-                            {% endfor %}
-
-                        </div>
+                        <div class="d-flex flex-row overflow-auto" style="gap: 1rem;" id="batchSheetsContainer"></div>
                     </div>
                 </div>
             </div>
@@ -205,5 +169,47 @@ active
             </div>
         </div>
     </div>
+
+    <script>
+        (function () {
+            const container = document.getElementById('batchSheetsContainer');
+            const batchSlug = '{{ batch.slug }}';
+
+            function renderCard(sheet) {
+                const thumbnail = sheet.thumbnail
+                    ? `<img src="${sheet.thumbnail}" class="card-img-top" alt="Sheet Thumbnail" />`
+                    : `<div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 160px;">No thumbnail</div>`;
+                const status = sheet.is_enabled
+                    ? '<span class="text-success">Enabled</span>'
+                    : '<span class="text-danger">Disabled</span>';
+
+                return `
+                    <div class="col-md-3">
+                        <div class="card">
+                            <a href="/instructor/course/${batchSlug}/sheet/${sheet.slug}/">
+                                ${thumbnail}
+                                <div class="card-body">
+                                    <h5 class="card-title">${sheet.name}🔥</h5>
+                                    <p class="card-text mb-1">Total Questions: ${sheet.total_questions}</p>
+                                    ${status}
+                                    <span class="btn btn-outline-secondary w-100">View More</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+
+            fetch(`/instructor/api/v1/sheets/by-batch/${batchSlug}/`)
+                .then((r) => r.json())
+                .then((res) => {
+                    const sheets = (res && res.data) || [];
+                    container.innerHTML = sheets.map(renderCard).join('');
+                })
+                .catch(() => {
+                    container.innerHTML = '<p class="text-muted m-3">Unable to load sheets right now.</p>';
+                });
+        })();
+    </script>
 
     {% endblock %}

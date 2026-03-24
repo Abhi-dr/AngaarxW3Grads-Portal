@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from instructor.api.views.batch_api import BatchInstructorViewSet
+from instructor.api.views.batch_api import BatchInstructorViewSet, SheetInstructorViewSet
 from administration.api.views.jovac_api import (
     CourseAdminViewSet,
     CourseSheetAdminViewSet,
@@ -13,6 +13,7 @@ from administration.api.views.jovac_api import (
 
 router = DefaultRouter()
 router.register(r'batches', BatchInstructorViewSet, basename='instructor-batch')
+router.register(r'sheets', SheetInstructorViewSet, basename='instructor-sheet')
 router.register(r'courses', CourseAdminViewSet, basename='instructor-course')
 router.register(r'course-sheets', CourseSheetAdminViewSet, basename='instructor-course-sheet')
 router.register(r'assignments', AssignmentAdminViewSet, basename='instructor-assignment')

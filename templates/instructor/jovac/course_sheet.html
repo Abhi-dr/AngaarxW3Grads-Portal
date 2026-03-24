@@ -98,7 +98,7 @@ active
     <div class="card w-100">
         <div class="card-body p-4">
             <!-- <h5 class="card-title fw-semibold mb-4">Search Applicants 🔍</h5> -->
-            <form method="post">
+            <form method="post" id="itemSearchForm">
 
                 {% csrf_token %}
 
@@ -120,7 +120,7 @@ active
 
                     <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
                     <!-- make a button to clear the search -->
-                    <a href="#" class="btn btn-outline-danger">Clear</a>
+                    <button type="button" id="clearSearchBtn" class="btn btn-outline-danger">Clear</button>
                 </div>
             </form>
         </div>
@@ -172,84 +172,7 @@ active
                         </tr>
                     </thead>
 
-                    <tbody id="assignmentTableBody">
-
-                        {% for item in items %}
-
-                        <tr>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ item.pk }}</h6>
-                            </td>
-                            <td class="border-bottom-0">
-                                {% if item.type == 'MCQ' %}
-                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ item.obj.question_text }}">{{ item.obj.question_text|truncatechars:40 }}</h6>
-                                {% else %}
-                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ item.obj.title }}">{{ item.obj.title|truncatechars:40 }}</h6>
-                                {% endif %}
-
-                            </td>
-                            <td class="border-bottom-0">
-                                {% if item.type == 'Assignment' %}
-                                    {% if item.obj.is_tutorial %}
-                                    <span class="badge bg-secondary">Tutorial</span>
-                                    {% else %}
-                                    <span class="badge bg-primary">{{ item.obj.assignment_type }}</span>
-                                    {% endif %}
-                                {% elif item.type == 'MCQ' %}
-                                    <span class="badge bg-warning text-dark">MCQ Question</span>
-                                {% else %}
-                                    <span class="badge bg-info">Coding Question</span>
-                                {% endif %}
-                            </td>
-
-                            <td class="border-bottom-0">
-                                {% if item.type == 'Assignment' and not item.obj.is_tutorial %}
-                                    <p class="fw-semibold mb-0">
-                                        <span> {{ item.obj.due_date|date }} </span><br>
-                                        <span style="font-weight: bold; color: black;">@{{ item.obj.due_date|time }}</span>
-                                    </p>
-                                {% else %}
-                                    <p class="fw-semibold mb-0">-</p>
-                                {% endif %}
-                            </td>
-
-                            <td class="border-bottom-0">
-                                {% if item.type == 'Assignment' %}
-                                    <span class="badge bg-success">Ready</span>
-                                {% else %}
-                                    {% if item.obj.is_approved %}
-                                    <span class="badge bg-success">Approved</span>
-                                    {% else %}
-                                    <span class="badge bg-warning text-dark">Pending Approval</span>
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    {% if item.type == 'Assignment' %}
-                                    <a class="btn btn-outline-dark edit-btn"
-                                        href="{% url 'instructor_jovac_edit_assignment' item.obj.id %}">Edit</a>
-                                    <a class="btn btn-outline-danger delete-btn"
-                                        href="{% url 'instructor_delete_assignment' item.obj.id %}">Delete</a>
-                                    {% else %}
-                                    <span class="text-muted small">Managed from admin approval queue</span>
-                                    {% endif %}
-                                </div>
-                            </td>
-
-
-                        </tr>
-
-                        {% empty %}
-                        <tr>
-                            <td colspan="6" class="text-center text-muted py-4">No items found.</td>
-                        </tr>
-                        {% endfor %}
-
-                    </tbody>
+                    <tbody id="assignmentTableBody"></tbody>
                 </table>
             </div>
 
@@ -500,6 +423,148 @@ active
 
 <script>
     (function () {
+        const tableBody = document.getElementById('assignmentTableBody');
+        const searchForm = document.getElementById('itemSearchForm');
+        const searchInput = searchForm ? searchForm.querySelector('input[name="query"]') : null;
+        const clearSearchBtn = document.getElementById('clearSearchBtn');
+        const sheetSlug = '{{ sheet.slug }}';
+        const editAssignmentUrlTemplate = "{% url 'instructor_jovac_edit_assignment' 0 %}";
+        const deleteAssignmentUrlTemplate = "{% url 'instructor_delete_assignment' 0 %}";
+        let allItems = [];
+
+        function truncate(text, maxLength) {
+            if (!text) {
+                return '-';
+            }
+            return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+        }
+
+        function formatDeadline(item) {
+            if (item.type !== 'Assignment' || item.obj.is_tutorial || !item.obj.due_date) {
+                return '-';
+            }
+
+            const dueDate = new Date(item.obj.due_date);
+            if (Number.isNaN(dueDate.getTime())) {
+                return '-';
+            }
+
+            const date = dueDate.toLocaleDateString();
+            const time = dueDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return `${date}<br><span style="font-weight: bold; color: black;">@${time}</span>`;
+        }
+
+        function renderTypeBadge(item) {
+            if (item.type === 'Assignment') {
+                if (item.obj.is_tutorial) {
+                    return '<span class="badge bg-secondary">Tutorial</span>';
+                }
+                return `<span class="badge bg-primary">${item.obj.assignment_type || 'Assignment'}</span>`;
+            }
+            if (item.type === 'MCQ') {
+                return '<span class="badge bg-warning text-dark">MCQ Question</span>';
+            }
+            return '<span class="badge bg-info">Coding Question</span>';
+        }
+
+        function renderStatusBadge(item) {
+            if (item.type === 'Assignment') {
+                return '<span class="badge bg-success">Ready</span>';
+            }
+            return item.obj.is_approved
+                ? '<span class="badge bg-success">Approved</span>'
+                : '<span class="badge bg-warning text-dark">Pending Approval</span>';
+        }
+
+        function renderActionColumn(item) {
+            if (item.type !== 'Assignment') {
+                return '<span class="text-muted small">Managed from admin approval queue</span>';
+            }
+
+            const editUrl = editAssignmentUrlTemplate.replace('/0/', `/${item.obj.id}/`);
+            const deleteUrl = deleteAssignmentUrlTemplate.replace('/0/', `/${item.obj.id}/`);
+            return `
+                <a class="btn btn-outline-dark edit-btn" href="${editUrl}">Edit</a>
+                <a class="btn btn-outline-danger delete-btn" href="${deleteUrl}">Delete</a>
+            `;
+        }
+
+        function renderTable(items) {
+            if (!items.length) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No items found.</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = items.map((item) => {
+                const title = item.type === 'MCQ'
+                    ? (item.obj.question_text || item.obj.title || '-')
+                    : (item.obj.title || '-');
+
+                return `
+                    <tr>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${item.pk}</h6></td>
+                        <td class="border-bottom-0"><h6 class="fw-semibold mb-1" title="${title.replace(/"/g, '&quot;')}">${truncate(title, 40)}</h6></td>
+                        <td class="border-bottom-0">${renderTypeBadge(item)}</td>
+                        <td class="border-bottom-0"><p class="fw-semibold mb-0">${formatDeadline(item)}</p></td>
+                        <td class="border-bottom-0">${renderStatusBadge(item)}</td>
+                        <td class="border-bottom-0"><div class="d-flex align-items-center gap-2">${renderActionColumn(item)}</div></td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function applySearch(queryText) {
+            const query = (queryText || '').trim().toLowerCase();
+            if (!query) {
+                renderTable(allItems);
+                return;
+            }
+
+            const filtered = allItems.filter((item) => {
+                const type = (item.type || '').toLowerCase();
+                const title = (item.obj.title || item.obj.question_text || '').toLowerCase();
+                const description = (item.obj.description || '').toLowerCase();
+                return String(item.pk).includes(query)
+                    || type.includes(query)
+                    || title.includes(query)
+                    || description.includes(query);
+            });
+            renderTable(filtered);
+        }
+
+        async function loadItems() {
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Loading items...</td></tr>';
+            try {
+                const response = await fetch(`/instructor/api/v1/course-sheets/${sheetSlug}/items/`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch items');
+                }
+
+                const payload = await response.json();
+                allItems = payload.items || [];
+                applySearch(searchInput ? searchInput.value : '');
+            } catch (error) {
+                tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Unable to load items right now.</td></tr>';
+            }
+        }
+
+        if (searchForm && searchInput) {
+            searchForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+                applySearch(searchInput.value);
+            });
+        }
+
+        if (clearSearchBtn && searchInput) {
+            clearSearchBtn.addEventListener('click', function () {
+                searchInput.value = '';
+                applySearch('');
+            });
+        }
+
         const latePenaltyInput = document.getElementById('latePenaltyPerDay');
         if (latePenaltyInput) {
             latePenaltyInput.addEventListener('input', function () {
@@ -508,6 +573,8 @@ active
                 }
             });
         }
+
+        loadItems();
     })();
 </script>
 
