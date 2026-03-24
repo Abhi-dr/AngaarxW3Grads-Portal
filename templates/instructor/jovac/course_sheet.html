@@ -34,6 +34,19 @@ active
             font-weight: 500;
         }
     }
+
+    .jovac-modal-content .modal-body {
+        max-height: 65vh;
+        overflow-y: auto;
+    }
+
+    .jovac-modal-content .modal-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        background: var(--bs-body-bg);
+        border-top: 1px solid var(--bs-border-color);
+    }
 </style>
 
 {% endblock %}
@@ -53,22 +66,21 @@ active
                         🔥</span>
             </h3>
         </div>
-        <div class="row mt-n3">
-            <div class="col-md-5 mx-auto">
-                <a href="{% url 'instructor_add_assignment' course.slug sheet.slug %}"
-                    class="btn btn-outline-primary button mt-n2 mb-3 w-100 ">Add Assignment</a>
-
-            </div>
-            <div class="col-md-5 mx-auto">
-                <a href="{% url 'instructor_edit_jovac_sheet' course.slug sheet.slug %}"
-                    class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Edit Sheet</a>
-            </div>
-
-            <div class="col-md-5 mx-auto">
-                <a href="{% url 'instructor_reorder_course_sheet_assignments' sheet.slug %}"
-                    class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Reorder</a>
+        <div class="d-flex flex-wrap gap-2 mt-n3 px-3 pb-3">
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    + Add Item
+                </button>
+                <ul class="dropdown-menu dropdown-menu-dark">
+                    <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">Assignment</button></li>
+                    <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addTutorialModal">Tutorial</button></li>
+                    <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addMcqModal">MCQ Question</button></li>
+                    <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addCodingModal">Coding Question</button></li>
+                </ul>
             </div>
 
+            <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editSheetModal">Edit Sheet</button>
+            <a href="{% url 'instructor_reorder_course_sheet_assignments' sheet.slug %}" class="btn btn-outline-info">Reorder</a>
         </div>
 
     </div>
@@ -118,7 +130,7 @@ active
 
     <div class="card w-100">
         <div class="card-body p-4">
-            <h5 class="card-title fw-semibold mb-4">Angaari Assignments 🔥
+            <h5 class="card-title fw-semibold mb-4">Angaari Sheet Items 🔥
                 {% if query %}
                 <span class="fs-6"> | Search Results for "{{ query }}"</span>
                 {% endif %}
@@ -140,12 +152,6 @@ active
                             </th>
                             <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">
-                                    Description📝
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
                                     Type❔
                                 </h6>
                             </th>
@@ -158,118 +164,89 @@ active
 
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#1
+                                    Status
                                 </h6>
                             </th>
-                            <th class="border-bottom-0 justify-content-center">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#2
-                                </h6>
-                            </th>
+                            <th class="border-bottom-0 justify-content-center"><h6 class="fw-semibold mb-0">Action</h6></th>
 
                         </tr>
                     </thead>
 
                     <tbody id="assignmentTableBody">
 
-                        {% for assignment in assignments %}
+                        {% for item in items %}
 
                         <tr>
                             <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ assignment.id }}</h6>
+                                <h6 class="fw-semibold mb-0">{{ item.pk }}</h6>
                             </td>
                             <td class="border-bottom-0">
+                                {% if item.type == 'MCQ' %}
                                 <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ assignment.title }}">{{ assignment.title|truncatechars:10 }}</h6>
+                                    title="{{ item.obj.question_text }}">{{ item.obj.question_text|truncatechars:40 }}</h6>
+                                {% else %}
+                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
+                                    title="{{ item.obj.title }}">{{ item.obj.title|truncatechars:40 }}</h6>
+                                {% endif %}
 
                             </td>
-
-                            {% if assignment.is_tutorial %}
-
                             <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal">
-                                    -
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-secondary">
-                                        Tutorial
-                                    </span>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    -
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    {% if assignment.tutorial_link %}
-                                    <a href="{{ assignment.tutorial_link }}" target="_blank">
-                                        <i class="fa fa-youtube-play"></i></a>
+                                {% if item.type == 'Assignment' %}
+                                    {% if item.obj.is_tutorial %}
+                                    <span class="badge bg-secondary">Tutorial</span>
                                     {% else %}
-                                    <span class="text-muted fw-normal">No Tutorial Link</span>
+                                    <span class="badge bg-primary">{{ item.obj.assignment_type }}</span>
                                     {% endif %}
-                                </p>
-                            </td>
-
-                            {% else %}
-
-                            <td class="border-bottom-0">
-                                <p class="mb-0 fw-normal" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ assignment.description }}">
-                                    {{ assignment.description|truncatechars:30 }}
-                                </p>
+                                {% elif item.type == 'MCQ' %}
+                                    <span class="badge bg-warning text-dark">MCQ Question</span>
+                                {% else %}
+                                    <span class="badge bg-info">Coding Question</span>
+                                {% endif %}
                             </td>
 
                             <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <p class="mb-0 fw-normal">{{ assignment.assignment_type }} Type</p>
-                                </div>
+                                {% if item.type == 'Assignment' and not item.obj.is_tutorial %}
+                                    <p class="fw-semibold mb-0">
+                                        <span> {{ item.obj.due_date|date }} </span><br>
+                                        <span style="font-weight: bold; color: black;">@{{ item.obj.due_date|time }}</span>
+                                    </p>
+                                {% else %}
+                                    <p class="fw-semibold mb-0">-</p>
+                                {% endif %}
                             </td>
 
                             <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    <span> {{ assignment.due_date|date }} </span>
-                                    <br>
-                                    <span style="font-weight: bold; color: black;">
-                                        @{{ assignment.due_date|time }} </span>
-                                    </span>
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'instructor_view_assignment_submissions' assignment.id %}"
-                                        class="btn btn-info float-end">View Submission✅
-                                    </a>
-
-                                </div>
-                            </td>
-
-                            {% endif %}
-
-
-
-
+                                {% if item.type == 'Assignment' %}
+                                    <span class="badge bg-success">Ready</span>
+                                {% else %}
+                                    {% if item.obj.is_approved %}
+                                    <span class="badge bg-success">Approved</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Pending Approval</span>
+                                    {% endif %}
+                                {% endif %}
                             </td>
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
+                                    {% if item.type == 'Assignment' %}
                                     <a class="btn btn-outline-dark edit-btn"
-                                        href="{% url 'instructor_jovac_edit_assignment' assignment.id %}">Edit</a>
+                                        href="{% url 'instructor_jovac_edit_assignment' item.obj.id %}">Edit</a>
                                     <a class="btn btn-outline-danger delete-btn"
-                                        href="{% url 'instructor_delete_assignment' assignment.id %}">Delete</a>
+                                        href="{% url 'instructor_delete_assignment' item.obj.id %}">Delete</a>
+                                    {% else %}
+                                    <span class="text-muted small">Managed from admin approval queue</span>
+                                    {% endif %}
                                 </div>
                             </td>
 
 
                         </tr>
 
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No items found.</td>
+                        </tr>
                         {% endfor %}
 
                     </tbody>
@@ -281,6 +258,258 @@ active
 
 
 </div>
+
+<div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content jovac-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addAssignmentModalLabel">Add Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_add_assignment' course.slug sheet.slug %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="is_tutorial" value="">
+                    <div class="mb-3">
+                        <label class="form-label">Title *</label>
+                        <input type="text" class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description *</label>
+                        <textarea class="form-control" name="description" rows="4" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Assignment Type *</label>
+                        <select class="form-select" name="assignment_type" required>
+                            <option value="" disabled selected>Select type</option>
+                            {% for value, label in assignment_types %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Due Date</label>
+                            <input type="datetime-local" class="form-control" name="due_date">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Max Score *</label>
+                            <input type="number" class="form-control" name="max_score" min="1" value="100" required>
+                        </div>
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label class="form-label">Status *</label>
+                        <select class="form-select" name="status" required>
+                            <option value="" disabled selected>Select status</option>
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}">{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Instructions</label>
+                        <textarea class="form-control" name="instructions" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Downloadable Content</label>
+                        <input type="file" class="form-control" name="downloadable_content">
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="allowLateSubmission" name="allow_late_submission">
+                        <label class="form-check-label" for="allowLateSubmission">Allow Late Submission</label>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Late Penalty per Day (%)</label>
+                        <input type="number" class="form-control" id="latePenaltyPerDay" name="late_penalty_per_day" step="0.01" min="0" max="100" placeholder="e.g. 10">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addTutorialModal" tabindex="-1" aria-labelledby="addTutorialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content jovac-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTutorialModalLabel">Add Tutorial</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_add_assignment' course.slug sheet.slug %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <input type="hidden" name="is_tutorial" value="on">
+                    <div class="mb-3">
+                        <label class="form-label">Title *</label>
+                        <input type="text" class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tutorial Content *</label>
+                        <textarea class="form-control" name="content" rows="6" required></textarea>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Tutorial Video Link</label>
+                        <input type="text" class="form-control" name="tutorial_link" placeholder="https://...">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Tutorial</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addMcqModal" tabindex="-1" aria-labelledby="addMcqModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content jovac-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMcqModalLabel">Add MCQ Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_add_jovac_mcq_question' course.slug sheet.slug %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Question Text *</label>
+                        <textarea class="form-control" name="question_text" rows="3" required></textarea>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label">Option A</label><input class="form-control" name="option_a" required></div>
+                        <div class="col-md-6"><label class="form-label">Option B</label><input class="form-control" name="option_b" required></div>
+                        <div class="col-md-6"><label class="form-label">Option C</label><input class="form-control" name="option_c" required></div>
+                        <div class="col-md-6"><label class="form-label">Option D</label><input class="form-control" name="option_d" required></div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Correct Option *</label>
+                            <select class="form-select" name="correct_option" required>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Difficulty</label>
+                            <select class="form-select" name="difficulty_level">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Explanation</label>
+                        <textarea class="form-control" name="explanation" rows="3"></textarea>
+                    </div>
+                    <div class="mt-3 mb-0">
+                        <label class="form-label">Tags (comma separated)</label>
+                        <input class="form-control" name="tags" placeholder="html, forms, upload">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Add MCQ Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addCodingModal" tabindex="-1" aria-labelledby="addCodingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content jovac-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCodingModalLabel">Add Coding Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_add_jovac_coding_question' course.slug sheet.slug %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Title *</label>
+                        <input class="form-control" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description *</label>
+                        <textarea class="form-control" name="description" rows="6" required></textarea>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Difficulty</label>
+                        <select class="form-select" name="difficulty_level">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">Add Coding Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editSheetModal" tabindex="-1" aria-labelledby="editSheetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content jovac-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editSheetModalLabel">Edit Sheet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{% url 'instructor_edit_jovac_sheet' course.slug sheet.slug %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Sheet Name *</label>
+                        <input type="text" class="form-control" name="name" value="{{ sheet.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="4">{{ sheet.description }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Thumbnail</label>
+                        <input type="file" class="form-control" name="thumbnail">
+                    </div>
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="editSheetEnabled" name="is_enabled" {% if sheet.is_enabled %}checked{% endif %}>
+                        <label class="form-check-label" for="editSheetEnabled">Enabled</label>
+                    </div>
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="editSheetApproved" name="is_approved" {% if sheet.is_approved %}checked{% endif %}>
+                        <label class="form-check-label" for="editSheetApproved">Approved</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Update Sheet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const latePenaltyInput = document.getElementById('latePenaltyPerDay');
+        if (latePenaltyInput) {
+            latePenaltyInput.addEventListener('input', function () {
+                if (Number(this.value) > 100) {
+                    this.value = 100;
+                }
+            });
+        }
+    })();
+</script>
 
 
 

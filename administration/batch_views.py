@@ -31,8 +31,7 @@ def batches(request):
     
     parameters = {
         "administrator": administrator,
-        "batches": batches
-        
+        "batches": batches,
     }
     
     return render(request, 'administration/batch/batches.html', parameters)
@@ -322,6 +321,22 @@ def batch(request, slug):
 
     # Fetch sheets in custom order
     sheets = batch.get_ordered_sheets()
+    sheet_items = []
+    for sheet in sheets:
+        if sheet.sheet_type == "MCQ":
+            approved_qs = sheet.mcq_questions.filter(is_approved=True)
+            preview_questions = list(approved_qs.values_list('question_text', flat=True)[:5])
+            total_questions = approved_qs.count()
+        else:
+            approved_qs = sheet.questions.filter(is_approved=True)
+            preview_questions = list(approved_qs.values_list('title', flat=True)[:5])
+            total_questions = approved_qs.count()
+
+        sheet_items.append({
+            "sheet": sheet,
+            "total_questions": total_questions,
+            "preview_questions": preview_questions,
+        })
 
     try:
         pod = POD.objects.get(batch=batch, date=datetime.date.today())
@@ -332,6 +347,7 @@ def batch(request, slug):
         "administrator": administrator,
         "batch": batch,
         "sheets": sheets,
+        "sheet_items": sheet_items,
         "pod": pod
     }
 

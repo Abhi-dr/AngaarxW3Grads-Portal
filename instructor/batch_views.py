@@ -7,8 +7,11 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.utils.timezone import now
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
+from datetime import timedelta
 
 from accounts.models import CustomUser
+from student.models import Notification
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 from django.db.models import Subquery, OuterRef
 from angaar_hai.custom_decorators import admin_required
@@ -21,14 +24,53 @@ import datetime
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 def batches(request):
-    
-    batches = Batch.objects.all()
-    
+    batches = Batch.objects.order_by("-id")
+
     parameters = {
-        "batches": batches        
+        "batches": batches,
     }
-    
+
     return render(request, 'instructor/batch/batches.html', parameters)
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def add_batch_request(request):
+    if request.method == "POST":
+        name = (request.POST.get('name') or '').strip()
+        description = (request.POST.get('description') or '').strip()
+        thumbnail = request.FILES.get('thumbnail')
+
+        if not name:
+            messages.error(request, "Course name is required.")
+            return render(request, 'instructor/batch/add_batch_request.html')
+
+        if Batch.objects.filter(name__iexact=name).exists():
+            messages.error(request, "A course with this name already exists.")
+            return render(request, 'instructor/batch/add_batch_request.html')
+
+        batch = Batch.objects.create(
+            name=name,
+            description=description,
+            thumbnail=thumbnail,
+            is_active=False,
+        )
+
+        reviewer_url = reverse('administrator_batches')
+        requester = request.user.get_full_name() or request.user.email
+        Notification.objects.create(
+            title='Approval Request: Course',
+            description=f"{requester} created Course '{batch.name}' and requested admin approval. Review: {reviewer_url}",
+            is_alert=True,
+            is_fixed=False,
+            type='warning',
+            expiration_date=now() + timedelta(days=30),
+        )
+
+        messages.success(request, "Course request sent to admin for approval.")
+        return redirect('instructor_batches')
+
+    return redirect('instructor_batches')
 
 
 # =============================== BATCH DETAILS ==============================
@@ -55,6 +97,25 @@ def batch(request, slug):
     }
     
     return render(request, 'instructor/batch/batch.html', parameters)
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def batch_sheet(request, batch_slug, sheet_slug):
+    batch = get_object_or_404(Batch, slug=batch_slug)
+    sheet = get_object_or_404(Sheet, slug=sheet_slug, batches=batch)
+    questions = sheet.get_ordered_questions()
+
+    parameters = {
+        "batch": batch,
+        "sheet": sheet,
+        "questions": questions,
+        "from_course": True,
+        "course_slug": batch.slug,
+        "return_url": request.path,
+    }
+
+    return render(request, 'instructor/sheet/sheet.html', parameters)
 
 
 # =============================== SET POD FOR BATCH ==============================

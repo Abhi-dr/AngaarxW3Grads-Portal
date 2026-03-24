@@ -34,11 +34,11 @@ Instructor | JOVAC
         </div>
 
         <div class="row mt-n3">
-            <!-- <div class="col-md-5 mx-auto">
-                <a href="{% url 'administrator_add_jovac' %}"
+            <div class="col-md-5 mx-auto">
+                <a href="{% url 'instructor_add_jovac' %}"
                     class="btn btn-outline-primary button mt-n2 mb-3 w-100 ">Add Course
                 </a>
-            </div> -->
+            </div>
             <!-- <div class="col-md-5 mx-auto">
                 <a href="{% url 'administrator_pending_sheet' %}"
                     class="btn btn-outline-warning button mt-n2 mb-3 w-100 ">Pendng Sheets
@@ -59,31 +59,27 @@ Instructor | JOVAC
 
                                 <!-- Thumbnail with lazy loading -->
                 <a href="{% url 'instructor_jovac' course.slug %}">
-                    <img src="{{ course.thumbnail.url }}" class="card-img-top lazy-load" alt="${sheet.name}">
+                    {% if course.thumbnail %}
+                    <img src="{{ course.thumbnail.url }}" class="card-img-top lazy-load" alt="{{ course.name }}">
+                    {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+                        No thumbnail
+                    </div>
+                    {% endif %}
                 </a>
 
 
                 <div class="card-body">
                     <h5 class="card-title">{{ course.name }}🔥</h5>
 
-                    <p class="card-text mb-2">
-                        <b>By: </b>
-                        <span class="text-success">
-                            abhi add krunga
-                        </span>
-                    </p>
+                    <p class="card-text mb-2"><b>By: </b>{{ course.get_instructor_names }}</p>
 
                     <p class="card-text mb-1">Total Assignments: {{ course.get_total_assignments }}</p>
 
                     {% if course.is_active %}
-                    <span class="badge bg-success">
-                        Active
-                    </span>
-
+                    <span class="badge bg-success">Active</span>
                     {% else %}
-                    <span class="badge bg-danger">
-                        Inactive
-                    </span>
+                    <span class="badge bg-warning text-dark">Pending Approval</span>
                     {% endif %}
 
                     <a href="{% url 'instructor_jovac' course.slug %}"

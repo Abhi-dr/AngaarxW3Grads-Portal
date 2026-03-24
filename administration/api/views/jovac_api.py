@@ -6,8 +6,11 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.filters import SearchFilter
 from django.shortcuts import get_object_or_404
 from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
+from django.utils import timezone
+from datetime import timedelta
 
-from student.models import Course, CourseSheet, Assignment
+from student.models import Course, CourseSheet, Assignment, Notification
 from practice.models import Question, TestCase, DriverCode
 from accounts.models import CustomUser
 
@@ -16,6 +19,23 @@ from administration.api.serializers.jovac_serializers import (
     CourseAdminSerializer, CourseSheetAdminSerializer,
     AssignmentAdminSerializer, TestCaseAdminSerializer, DriverCodeAdminSerializer
 )
+
+
+def _is_instructor_request(request):
+    return getattr(request.user, 'role', '') == 'instructor'
+
+
+def _notify_admin_about_request(user, item_type, item_name):
+    requester = user.get_full_name() or user.email
+    courses_url = reverse('administrator_batches')
+    Notification.objects.create(
+        title=f"Approval Request: {item_type}",
+        description=f"{requester} created {item_type} '{item_name}' and requested admin approval. Review: {courses_url}",
+        is_alert=True,
+        is_fixed=False,
+        type='warning',
+        expiration_date=timezone.now() + timedelta(days=30),
+    )
 
 
 # ============================================================
@@ -66,11 +86,19 @@ class CourseAdminViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            course = serializer.save()
+            if _is_instructor_request(request):
+                course = serializer.save(is_active=False)
+            else:
+                course = serializer.save()
             # handle instructors
             instructor_ids = request.data.getlist('instructors', [])
             if instructor_ids:
                 course.instructors.set(instructor_ids)
+
+            if _is_instructor_request(request):
+                if request.user.id not in set(course.instructors.values_list('id', flat=True)):
+                    course.instructors.add(request.user)
+                _notify_admin_about_request(request.user, 'Course', course.name)
             return Response({'success': True, 'data': self.get_serializer(course).data}, status=status.HTTP_201_CREATED)
         return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -119,6 +147,9 @@ class CourseAdminViewSet(viewsets.ModelViewSet):
         """POST /api/v1/courses/<slug>/bulk-update-sheets/
         Body: {"action": "enable_all" | "approve_all"}
         """
+        if _is_instructor_request(request):
+            return Response({'success': False, 'error': 'Only admin can bulk approve/enable sheets.'}, status=403)
+
         course = self.get_object()
         action_type = request.data.get('action')
 
@@ -173,12 +204,18 @@ class CourseSheetAdminViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            sheet = serializer.save(created_by=request.user)
+            save_kwargs = {'created_by': request.user}
+            if _is_instructor_request(request):
+                save_kwargs.update({'is_enabled': False, 'is_approved': False})
+            sheet = serializer.save(**save_kwargs)
             # Attach to course
             course_slug = request.data.get('course_slug')
             if course_slug:
                 course = get_object_or_404(Course, slug=course_slug)
                 sheet.course.add(course)
+
+            if _is_instructor_request(request):
+                _notify_admin_about_request(request.user, 'Course Sheet', sheet.name)
             return Response({'success': True, 'data': self.get_serializer(sheet).data}, status=status.HTTP_201_CREATED)
         return Response({'success': False, 'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -377,11 +414,15 @@ class MCQQuestionAdminViewSet(viewsets.ModelViewSet):
         # Add the sheet to the request data for serialization
         data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
         data['sheet'] = jovac_sheet.id
+        data['is_approved'] = False if _is_instructor_request(request) else True
         
         # Create serializer with updated data
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
+        if _is_instructor_request(request):
+            _notify_admin_about_request(request.user, 'MCQ Question', serializer.instance.question_text[:80])
         
         return Response({
             'success': True,
@@ -406,6 +447,20 @@ class QuestionAdminViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     filter_backends = [SearchFilter]
     search_fields = ['title', 'description', 'slug', '=id']
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy() if hasattr(request.data, 'copy') else dict(request.data)
+        if _is_instructor_request(request):
+            data['is_approved'] = False
+
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+
+        if _is_instructor_request(request):
+            _notify_admin_about_request(request.user, 'Coding Question', serializer.instance.title)
+
+        return Response({'success': True, 'data': serializer.data}, status=status.HTTP_201_CREATED)
 
 # ============================================================
 # TestCase CRUD ViewSet

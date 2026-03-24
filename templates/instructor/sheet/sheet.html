@@ -1,15 +1,29 @@
 {% extends "instructor/base.html" %}
 {% load static %}
 
-{% block sheet_active %}
-active
-{% endblock %}
+{% block batch_active %}{% if from_course %}active{% endif %}{% endblock %}
+{% block sheet_active %}{% if not from_course %}active{% endif %}{% endblock %}
 
 {% block title %}
 {{ sheet.name }}
 {% endblock %}
 
 {% block body %}
+
+<style>
+    .sheet-modal-content .modal-body {
+        max-height: 65vh;
+        overflow-y: auto;
+    }
+
+    .sheet-modal-content .modal-footer {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        background: var(--bs-body-bg);
+        border-top: 1px solid var(--bs-border-color);
+    }
+</style>
 
 <div class="container-fluid">
 
@@ -33,7 +47,18 @@ active
                     data-bs-target="#setTimerModal">⏰</button>
 
 
-                <a href="{% url 'instructor_add_new_question' sheet.slug %}" class="btn btn-outline-primary">Add New Question</a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        Add Item
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark">
+                        <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addNewQuestionModal">Coding Question</button></li>
+                        <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addMcqQuestionModal">MCQ Question</button></li>
+                        <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#assignmentInfoModal">Assignment</button></li>
+                        <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#tutorialInfoModal">Tutorial</button></li>
+                    </ul>
+                </div>
                 
                 <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#aiGenerateModal">
                     <i class="ti ti-sparkles"></i> AI Generate Question
@@ -271,6 +296,175 @@ active
 
 
     <!-- ============================== ADD QUESTION ================================ -->
+
+    <div class="modal fade" id="addNewQuestionModal" tabindex="-1" aria-labelledby="addNewQuestionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content sheet-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addNewQuestionModalLabel">Add New Question to {{ sheet.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'instructor_add_new_question' sheet.slug %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ return_url|default:'' }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="newQuestionTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="newQuestionTitle" name="title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newQuestionScenario" class="form-label">Scenario (Optional)</label>
+                            <textarea class="form-control" id="newQuestionScenario" name="scenario" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newQuestionDescription" class="form-label">Problem Description</label>
+                            <textarea class="form-control" id="newQuestionDescription" name="description" rows="4" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newQuestionInputFormat" class="form-label">Input Format</label>
+                            <textarea class="form-control" id="newQuestionInputFormat" name="input_format" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newQuestionOutputFormat" class="form-label">Output Format</label>
+                            <textarea class="form-control" id="newQuestionOutputFormat" name="output_format" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newQuestionConstraints" class="form-label">Constraints</label>
+                            <textarea class="form-control" id="newQuestionConstraints" name="constraints" rows="3" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="newQuestionHint" class="form-label">Hint (Optional)</label>
+                            <textarea class="form-control" id="newQuestionHint" name="hint" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-0">
+                            <label for="newQuestionDifficulty" class="form-label">Difficulty Level</label>
+                            <select class="form-select" id="newQuestionDifficulty" name="difficulty_level" required>
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Add Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addMcqQuestionModal" tabindex="-1" aria-labelledby="addMcqQuestionModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content sheet-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMcqQuestionModalLabel">Add MCQ Question to {{ sheet.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'instructor_add_new_mcq_question' sheet.slug %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ return_url|default:'' }}">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="mcqQuestionText" class="form-label">Question Text</label>
+                            <textarea class="form-control" id="mcqQuestionText" name="question_text" rows="3" required></textarea>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="mcqOptionA" class="form-label">Option A</label>
+                                <input type="text" class="form-control" id="mcqOptionA" name="option_a" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="mcqOptionB" class="form-label">Option B</label>
+                                <input type="text" class="form-control" id="mcqOptionB" name="option_b" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="mcqOptionC" class="form-label">Option C</label>
+                                <input type="text" class="form-control" id="mcqOptionC" name="option_c" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="mcqOptionD" class="form-label">Option D</label>
+                                <input type="text" class="form-control" id="mcqOptionD" name="option_d" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-6">
+                                <label for="mcqCorrectOption" class="form-label">Correct Option</label>
+                                <select class="form-select" id="mcqCorrectOption" name="correct_option" required>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="mcqDifficulty" class="form-label">Difficulty Level</label>
+                                <select class="form-select" id="mcqDifficulty" name="difficulty_level" required>
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-0 mt-3">
+                            <label for="mcqExplanation" class="form-label">Explanation (Optional)</label>
+                            <textarea class="form-control" id="mcqExplanation" name="explanation" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Add MCQ Question</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="assignmentInfoModal" tabindex="-1" aria-labelledby="assignmentInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignmentInfoModalLabel">Assignment Items</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Assignment items are available in JOVAC Course Sheets. This standard sheet supports Coding and MCQ items.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="tutorialInfoModal" tabindex="-1" aria-labelledby="tutorialInfoModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tutorialInfoModalLabel">Tutorial Items</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Tutorial items are available in JOVAC Course Sheets. This standard sheet supports Coding and MCQ items.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
     <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel"

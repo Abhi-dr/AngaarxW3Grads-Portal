@@ -126,7 +126,15 @@ class Course(models.Model): # Called as JOVAC in HTML
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name) or 'course'
+            slug = base_slug
+            counter = 1
+
+            while Course.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):

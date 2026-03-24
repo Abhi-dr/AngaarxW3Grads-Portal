@@ -113,6 +113,19 @@ Instructor -> Home
         width: 0;
         height: 0;
     }
+
+    #submissionsDaysFilter,
+    #registrationsDaysFilter {
+        color: #ffffff !important;
+        background-color: #1f2937;
+        border-color: #475569;
+    }
+
+    #submissionsDaysFilter option,
+    #registrationsDaysFilter option {
+        color: #ffffff;
+        background-color: #1f2937;
+    }
 </style>
 
 
@@ -150,36 +163,28 @@ Instructor -> Home
                 <div class="col-lg-12">
                     <div class="card overflow-hidden">
                         <div class="card-body p-4">
-                            <h5 class="card-title mb-9 fw-semibold">Total Sessions🏛️</h5>
-                            <div class="row align-items-center">
-                                <div class="col-8">
-                                    <h4 class="fw-semibold mb-3">
-                                        {{ total_sessions }}
-                                    </h4>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <span class="">
-                                            <i class=""></i>
-                                        </span>
-                                        <p class=" me-1 fs-3 mb-0"></p>
-                                        <p class="fs-3 mb-0"></p>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-4">
-                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                                            <span class="fs-2">Completed</span>
-                                        </div>
-                                    </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+                                <h5 class="card-title mb-0 fw-semibold">Submissions 📩</h5>
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="mb-0 fs-2 text-white" for="submissionsDaysFilter">Days</label>
+                                    <select id="submissionsDaysFilter" class="form-select form-select-sm" style="width: 90px;">
+                                        <option value="5" selected>5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="30">30</option>
+                                    </select>
                                 </div>
-                                <div class="col-4">
-                                    <div class="d-flex justify-content-center">
-                                        <div class="progress-bar-container">
-
-                                            <div class="progress-bar html">
-                                                <progress id="html" min="0" max="100" value="70"></progress>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            </div>
+                            <canvas id="submissionsChart" height="130"></canvas>
+                            <div class="mt-3 d-flex align-items-center">
+                                <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
+                                <span class="fs-2 me-3">Total Submissions (all time):</span>
+                                <span class="fw-bold fs-3" id="totalSubmissions">—</span>
+                            </div>
+                            <div class="mt-2 d-flex align-items-center">
+                                <span class="round-8 bg-light-primary rounded-circle me-2 d-inline-block"></span>
+                                <span class="fs-2 me-3">Questions Solved Today:</span>
+                                <span class="fw-bold fs-3 text-primary" id="submissionsToday">—</span>
                             </div>
                         </div>
                     </div>
@@ -192,33 +197,23 @@ Instructor -> Home
                 <div class="col-lg-12">
                     <div class="card overflow-hidden">
                         <div class="card-body p-4">
-                            <h5 class="card-title mb-9 fw-semibold">Total Registrations 👥</h5>
-                            <div class="row align-items-center">
-                                <div class="col-8">
-                                    <h4 class="fw-semibold mb-3">
-                                        {{ total_enrolled_students }}
-                                    </h4>
-                                    <div class="d-flex align-items-center mb-3">
-                                        <p class=" me-1 fs-3 mb-0">Matters? Yes😁</p>
-                                        <!-- <p class="fs-3 mb-0">Keep it up</p> -->
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <div class="me-4">
-                                            <span class="round-8 bg-primary rounded-circle me-2 d-inline-block"></span>
-                                            <span class="fs-2">Active Students</span>
-                                        </div>
-                                    </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
+                                <h5 class="card-title mb-0 fw-semibold">Registrations 👥</h5>
+                                <div class="d-flex align-items-center gap-2">
+                                    <label class="mb-0 fs-2 text-white" for="registrationsDaysFilter">Days</label>
+                                    <select id="registrationsDaysFilter" class="form-select form-select-sm" style="width: 90px;">
+                                        <option value="5" selected>5</option>
+                                        <option value="10">10</option>
+                                        <option value="15">15</option>
+                                        <option value="30">30</option>
+                                    </select>
                                 </div>
-                                <div class="col-4">
-                                    <div class="d-flex justify-content-center">
-                                        <div class="progress-bar-container">
-
-                                            <div class="progress-bar css">
-                                                <progress id="css" min="0" max="100" value="30"></progress>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            </div>
+                            <canvas id="registrationsChart" height="130"></canvas>
+                            <div class="mt-2 d-flex align-items-center">
+                                <span class="round-8 bg-light-success rounded-circle me-2 d-inline-block"></span>
+                                <span class="fs-2 me-3">Active Students Today:</span>
+                                <span class="fw-bold fs-3 text-success" id="activeStudentsToday">—</span>
                             </div>
                         </div>
                     </div>
@@ -341,7 +336,13 @@ Instructor -> Home
                                 </div>
                             </div> -->
 
-                        <img src="{{ course.thumbnail.url }}" height="182vh" style="border-radius: 5px;" alt="">
+                        {% if course.thumbnail %}
+                        <img src="{{ course.thumbnail.url }}" height="182vh" style="border-radius: 5px;" alt="{{ course.name }}">
+                        {% else %}
+                        <div class="d-flex align-items-center justify-content-center text-muted" style="height: 182px; border-radius: 5px; border: 1px dashed #6c757d;">
+                            No thumbnail
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -706,4 +707,112 @@ Instructor -> Home
     </div>
 </div>
 
+{% endblock %}
+
+{% block myjs %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const chartDefaults = {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: { mode: 'index', intersect: false }
+        },
+        scales: {
+            x: {
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                ticks: { color: '#a0aec0', font: { size: 11 } }
+            },
+            y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(255,255,255,0.06)' },
+                ticks: { color: '#a0aec0', font: { size: 11 }, precision: 0 }
+            }
+        }
+    };
+
+    function buildChart(canvasId, color, bgColor, label) {
+        return new Chart(document.getElementById(canvasId), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: label,
+                    data: [],
+                    borderColor: color,
+                    backgroundColor: bgColor,
+                    borderWidth: 2,
+                    pointBackgroundColor: color,
+                    pointRadius: 4,
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: chartDefaults
+        });
+    }
+
+    const submissionsChart = buildChart('submissionsChart', '#5d87ff', 'rgba(93,135,255,0.15)', 'Submissions');
+    const registrationsChart = buildChart('registrationsChart', '#13deb9', 'rgba(19,222,185,0.15)', 'New Registrations');
+
+    function updateChart(chart, labels, data) {
+        chart.data.labels = labels;
+        chart.data.datasets[0].data = data;
+        chart.update();
+    }
+
+    function getValidDays(value) {
+        const allowed = [5, 10, 15, 30];
+        const parsed = Number(value);
+        return allowed.includes(parsed) ? parsed : 5;
+    }
+
+    function loadSubmissionsChart(days = 5) {
+        const validDays = getValidDays(days);
+        fetch(`{% url 'instructor_api_dashboard_submissions' %}?days=${validDays}`)
+            .then(r => r.json())
+            .then(d => {
+                updateChart(submissionsChart, d.labels, d.data);
+                document.getElementById('totalSubmissions').textContent = d.total;
+                document.getElementById('submissionsToday').textContent = d.today_count;
+            })
+            .catch(() => {
+                document.getElementById('totalSubmissions').textContent = 'Error';
+                document.getElementById('submissionsToday').textContent = 'Error';
+            });
+    }
+
+    function loadRegistrationsChart(days = 5) {
+        const validDays = getValidDays(days);
+        fetch(`{% url 'instructor_api_dashboard_registrations' %}?days=${validDays}`)
+            .then(r => r.json())
+            .then(d => {
+                updateChart(registrationsChart, d.labels, d.data);
+                document.getElementById('activeStudentsToday').textContent = d.active_today;
+            })
+            .catch(() => {
+                document.getElementById('activeStudentsToday').textContent = 'Error';
+            });
+    }
+
+    const submissionsDaysFilter = document.getElementById('submissionsDaysFilter');
+    const registrationsDaysFilter = document.getElementById('registrationsDaysFilter');
+
+    if (submissionsDaysFilter) {
+        submissionsDaysFilter.value = '5';
+        submissionsDaysFilter.addEventListener('change', (e) => {
+            loadSubmissionsChart(e.target.value);
+        });
+    }
+
+    if (registrationsDaysFilter) {
+        registrationsDaysFilter.value = '5';
+        registrationsDaysFilter.addEventListener('change', (e) => {
+            loadRegistrationsChart(e.target.value);
+        });
+    }
+
+    loadSubmissionsChart(5);
+    loadRegistrationsChart(5);
+</script>
 {% endblock %}

@@ -134,6 +134,10 @@ class JOVACSheetAssignmentsView(APIView):
         serialized_items = []
         for item in items:
             obj = item['obj']
+            if item['type'] in ['MCQ', 'Coding'] and not getattr(obj, 'is_approved', False):
+                # Keep pending instructor-created questions hidden until admin approval.
+                continue
+
             if item['type'] == 'Assignment':
                 # Add is_submitted flag
                 obj.is_submitted = obj.id in submitted_assignment_ids
