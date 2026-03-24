@@ -168,103 +168,7 @@
                         </tr>
                     </thead>
 
-                    <tbody>
-
-                        {% for question in questions %}
-
-                        <tr>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">{{ forloop.counter }}
-                                </h6>
-                            </td>
-                            <td class="border-bottom-0">
-                                <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top"
-                                    title="{{ question.title }}">{{ question.title|truncatechars:25 }}</h6>
-
-                                {% for sheet in question.sheets.all %}
-                                <span style="font-weight: bold;"> {{ sheet.name }} |
-                                </span>
-                                {% endfor %}
-
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width: 100%;"
-                                        data-bs-toggle="modal" data-bs-target="#questionModal"
-                                        data-title="{{ question.title }}" data-description="{{ question.description }}"
-                                        title="{{ question.title }}"> View</button>
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <p class="fw-semibold mb-0">
-                                    <span class="badge bg-{{ question.get_difficulty_level_color }} text-color">
-                                        {{ question.difficulty_level }}
-                                    </span>
-                                </p>
-                            </td>
-
-                            <td class="border-bottom-0">
-
-                                <div class="dropdown ms-auto">
-                                    <button type="button"
-                                        class="btn btn-outline-success text-blue dropdown-toggle dropdown-toggle-split"
-                                        data-bs-toggle="dropdown" aria-expanded="false">TC/DC
-                                        <span class="visually-hidden">Toggle Dropdown</span>
-                                    </button>
-
-
-                                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownMenuButton2">
-                                        <li>
-                                            <a href="{% url 'instructor_test_cases' question.slug %}"
-                                                class="btn btn-success mt-1 text-blue w-100">Test Cases
-                                                ({{question.test_cases.count }})</a>
-                                        </li>
-
-                                        <li>
-                                            <a href="{% url 'instructor_driver_code' question.slug %}"
-                                                class="btn btn-warning mt-1 text-blue w-100">
-                                                Driver Codes
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'instructor_view_submissions' question.slug %}"
-                                        class="btn btn-outline-info text-blue float-end">Submissions
-                                        ({{question.how_many_users_solved }}) </a>
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'instructor_test_code' question.slug %}"
-                                        class="btn btn-info text-blue float-end">TEST CODE</a>
-
-                                </div>
-                            </td>
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-
-                                    <!-- <a href="{% url 'instructor_remove_from_sheet' sheet.id question.id %}" -->
-                                    <a href="{% url 'instructor_delete_question' question.id %}"
-                                        class="float-end"
-                                        onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">❌</a>
-
-                                    <a href="{% url 'instructor_edit_question' question.id %}" class="float-end">✏️</a>
-                                </div>
-                            </td>
-
-                        </tr>
-
-                        {% endfor %}
-
-                    </tbody>
+                    <tbody id="questionsTableBody"></tbody>
                 </table>
             </div>
 
@@ -661,6 +565,66 @@
 </div>
 
 <script>
+    (function () {
+        const tbody = document.getElementById('questionsTableBody');
+        const sheetSlug = '{{ sheet.slug }}';
+
+        function esc(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function codingRow(q, idx) {
+            return `
+                <tr>
+                    <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${idx + 1}</h6></td>
+                    <td class="border-bottom-0"><h6 class="fw-semibold mb-1" title="${esc(q.title)}">${esc(q.title)}</h6></td>
+                    <td class="border-bottom-0"><p class="fw-semibold mb-0"><button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width:100%;" data-bs-toggle="modal" data-bs-target="#questionModal" data-title="${esc(q.title)}" data-description="${esc(q.description)}">View</button></p></td>
+                    <td class="border-bottom-0"><p class="fw-semibold mb-0"><span class="badge bg-${esc(q.difficulty_level_color)} text-color">${esc(q.difficulty_level)}</span></p></td>
+                    <td class="border-bottom-0"><a href="/instructor/test_cases/${esc(q.slug)}/" class="btn btn-success btn-sm">Test Cases</a></td>
+                    <td class="border-bottom-0"><a href="/instructor/view_submissions/${esc(q.slug)}/" class="btn btn-outline-info btn-sm">Submissions</a></td>
+                    <td class="border-bottom-0"><a href="/instructor/test_code/${esc(q.slug)}/" class="btn btn-info btn-sm">TEST CODE</a></td>
+                    <td class="border-bottom-0"><div class="d-flex gap-2"><a href="/instructor/delete_question/${q.id}" onclick="return confirm('Delete this question?')">❌</a><a href="/instructor/edit_question/${q.id}">✏️</a></div></td>
+                </tr>
+            `;
+        }
+
+        function mcqRow(q, idx) {
+            return `
+                <tr>
+                    <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${idx + 1}</h6></td>
+                    <td class="border-bottom-0"><h6 class="fw-semibold mb-1" title="${esc(q.question_text)}">${esc(q.question_text)}</h6></td>
+                    <td class="border-bottom-0"><p class="text-muted mb-0">MCQ item</p></td>
+                    <td class="border-bottom-0"><p class="fw-semibold mb-0"><span class="badge bg-${esc(q.difficulty_level_color)} text-color">${esc(q.difficulty_level)}</span></p></td>
+                    <td class="border-bottom-0"><span class="text-muted">-</span></td>
+                    <td class="border-bottom-0"><span class="text-muted">-</span></td>
+                    <td class="border-bottom-0"><span class="text-muted">-</span></td>
+                    <td class="border-bottom-0"><span class="text-muted">Managed via MCQ flow</span></td>
+                </tr>
+            `;
+        }
+
+        fetch(`/instructor/api/v1/sheets/${sheetSlug}/`)
+            .then((r) => r.json())
+            .then((res) => {
+                const data = (res && res.data) || {};
+                const coding = data.coding_questions || [];
+                const mcq = data.mcq_questions || [];
+                const rows = [];
+                coding.forEach((q, i) => rows.push(codingRow(q, rows.length)));
+                mcq.forEach((q, i) => rows.push(mcqRow(q, rows.length)));
+                tbody.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="8" class="text-center text-muted py-4">No questions found.</td></tr>';
+            })
+            .catch(() => {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Failed to load questions from API.</td></tr>';
+            });
+    })();
+
     document.getElementById('saveTimerBtn').addEventListener('click', function () {
 
         var startTime = document.getElementById('start_time').value;

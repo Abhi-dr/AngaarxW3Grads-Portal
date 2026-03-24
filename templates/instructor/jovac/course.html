@@ -42,52 +42,68 @@ active
 
     <!-- ================================= SESSIONS TABLE ================================== -->
 
-    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container">
-
-        {% for sheet in course_sheets %}
-        <div class="col-md-3">
-
-            <div class="card">
-
-                <!-- Thumbnail with lazy loading -->
-                <a href="{% url 'instructor_jovac_sheet' course.slug sheet.slug %}">
-                    {% if sheet.thumbnail %}
-                    <img src="{{ sheet.thumbnail.url }}" class="card-img-top lazy-load" alt="{{ sheet.name }}">
-                    {% else %}
-                    <div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
-                        No thumbnail
-                    </div>
-                    {% endif %}
-                </a>
-
-                <div class="card-body">
-                    <h5 class="card-title">{{ sheet.name }}🔥</h5>
-
-                    <!-- <p class="ca   rd-text mb-1">Total Assignments: {{ course.get_total_assignments }}</p> -->
-
-                    {% if sheet.is_enabled %}
-                    <span class="badge bg-success">
-                        Enabled
-                    </span>
-
-                    {% else %}
-                    <span class="badge bg-warning text-dark">
-                        Pending Approval
-                    </span>
-                    {% endif %}
-
-                    <a href="{% url 'instructor_jovac_sheet' course.slug sheet.slug %}"
-                        class="btn btn-outline-secondary w-100 mt-2">View
-                        More</a>
-                </div>
-            </div>
-
-        </div>
-        {% endfor %}
-    </div>
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container"></div>
 
 
 </div>
+
+<script>
+    (function () {
+        const container = document.getElementById('sheets-container');
+        const courseSlug = '{{ course.slug }}';
+        const detailTemplate = "{% url 'instructor_jovac_sheet' course.slug 'sheet-slug-placeholder' %}";
+
+        function renderSheetCard(sheet) {
+            const detailUrl = detailTemplate.replace('sheet-slug-placeholder', sheet.slug);
+            const thumbnailHtml = sheet.thumbnail
+                ? `<img src="${sheet.thumbnail}" class="card-img-top lazy-load" alt="${sheet.name}">`
+                : `<div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">No thumbnail</div>`;
+
+            const statusBadge = sheet.is_enabled
+                ? '<span class="badge bg-success">Enabled</span>'
+                : '<span class="badge bg-warning text-dark">Pending Approval</span>';
+
+            return `
+                <div class="col-md-3">
+                    <div class="card">
+                        <a href="${detailUrl}">${thumbnailHtml}</a>
+                        <div class="card-body">
+                            <h5 class="card-title">${sheet.name}🔥</h5>
+                            ${statusBadge}
+                            <a href="${detailUrl}" class="btn btn-outline-secondary w-100 mt-2">View More</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadSheets() {
+            container.innerHTML = '<div class="col-12 text-center text-muted py-4">Loading sheets...</div>';
+            try {
+                const response = await fetch(`/instructor/api/v1/courses/${courseSlug}/sheets/`, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to fetch sheets');
+                }
+
+                const payload = await response.json();
+                const sheets = payload.sheets || [];
+
+                if (!sheets.length) {
+                    container.innerHTML = '<div class="col-12 text-center text-muted py-4">No sheets found.</div>';
+                    return;
+                }
+
+                container.innerHTML = sheets.map(renderSheetCard).join('');
+            } catch (error) {
+                container.innerHTML = '<div class="col-12 text-center text-danger py-4">Unable to load sheets right now.</div>';
+            }
+        }
+
+        loadSheets();
+    })();
+</script>
 
 
 

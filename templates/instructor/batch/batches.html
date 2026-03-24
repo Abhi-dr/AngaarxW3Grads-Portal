@@ -23,45 +23,7 @@
     </div>
     {% endfor %}
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-        {% for batch in batches %}
-        <div class="col">
-            <div class="card h-100 shadow-sm">
-                {% if batch.thumbnail %}
-                <img src="{{ batch.thumbnail.url }}" class="card-img-top" alt="{{ batch.name }}" style="height: 180px; object-fit: cover;">
-                {% else %}
-                <div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
-                    No Image
-                </div>
-                {% endif %}
-
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title mb-2">{{ batch.name }}</h5>
-                    <p class="card-text text-muted small mb-3">{{ batch.description|default:"No description available"|truncatechars:90 }}</p>
-
-                    {% if batch.is_active %}
-                    <span class="badge bg-success mb-3 align-self-start">Active</span>
-                    {% else %}
-                    <span class="badge bg-secondary mb-3 align-self-start">Inactive</span>
-                    {% endif %}
-
-                    <div class="mt-auto d-flex gap-2 flex-wrap">
-                        <a href="{% url 'instructor_batch' batch.slug %}" class="btn btn-outline-primary btn-sm">View</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center py-5">
-                    <h5 class="mb-2">No batches yet</h5>
-                    <p class="text-muted mb-0">No course batches are available right now.</p>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="coursesGrid"></div>
 </div>
 
 <div class="modal fade" id="addCourseRequestModal" tabindex="-1" aria-labelledby="addCourseRequestModalLabel" aria-hidden="true">
@@ -99,4 +61,63 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        const grid = document.getElementById('coursesGrid');
+
+        function cardTemplate(batch) {
+            const thumbnail = batch.thumbnail
+                ? `<img src="${batch.thumbnail}" class="card-img-top" alt="${batch.name}" style="height: 180px; object-fit: cover;">`
+                : `<div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">No Image</div>`;
+
+            const status = batch.is_active
+                ? '<span class="badge bg-success mb-3 align-self-start">Active</span>'
+                : '<span class="badge bg-secondary mb-3 align-self-start">Inactive</span>';
+
+            return `
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        ${thumbnail}
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title mb-2">${batch.name}</h5>
+                            <p class="card-text text-muted small mb-3">${batch.description || 'No description available'}</p>
+                            ${status}
+                            <div class="mt-auto d-flex gap-2 flex-wrap">
+                                <a href="/instructor/course/${batch.slug}/" class="btn btn-outline-primary btn-sm">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEmpty() {
+            grid.innerHTML = `
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <h5 class="mb-2">No batches yet</h5>
+                            <p class="text-muted mb-0">No course batches are available right now.</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        fetch('/instructor/api/v1/batches/')
+            .then((r) => r.json())
+            .then((res) => {
+                const batches = (res && res.data) || [];
+                if (!batches.length) {
+                    renderEmpty();
+                    return;
+                }
+                grid.innerHTML = batches.map(cardTemplate).join('');
+            })
+            .catch(() => {
+                renderEmpty();
+            });
+    })();
+</script>
 {% endblock %}

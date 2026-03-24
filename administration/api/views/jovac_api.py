@@ -83,6 +83,12 @@ class CourseAdminViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     lookup_field = 'slug'
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if _is_instructor_request(self.request):
+            return queryset.filter(instructors=self.request.user).distinct()
+        return queryset
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -200,6 +206,12 @@ class CourseSheetAdminViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdministratorOrInstructor]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
     lookup_field = 'slug'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if _is_instructor_request(self.request):
+            return queryset.filter(course__instructors=self.request.user).distinct()
+        return queryset
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
