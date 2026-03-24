@@ -27,7 +27,10 @@ class StudentDashboardView(APIView):
         student = request.user
         
         # 1. Notifications
-        notifications = Notification.objects.filter(expiration_date__gt=timezone.now(), is_alert=True)
+        notifications = Notification.objects.filter(
+            expiration_date__gt=timezone.now(),
+            is_alert=True,
+        ).exclude(title__startswith='Approval Request:')
         notif_serializer = NotificationSerializer(notifications, many=True)
         
         # 2. Get enrolled batches and sheets
