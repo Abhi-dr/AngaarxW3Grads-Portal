@@ -48,6 +48,9 @@ active
         </div>
 
         <div class="">
+            <button type="button" class="btn btn-outline-success button mt-n3 m-3 w-25" data-bs-toggle="modal"
+                data-bs-target="#addSheetModal">Add Sheet</button>
+
             <a href="{% url 'instructor_pod_for_batch' batch.slug %}"
                 class="btn btn-outline-primary button mt-n3 m-3 w-25">Set POD</a>
 
@@ -120,9 +123,15 @@ active
 
                             <div class="col-md-3">
                                 <div class="card">
-                                    <a href="{% url 'instructor_sheet' sheet.slug %}">
+                                    <a href="{% url 'instructor_batch_sheet' batch.slug sheet.slug %}">
+                                        {% if sheet.thumbnail %}
                                         <img src="{{ sheet.thumbnail.url }}" class="card-img-top"
                                             alt="Sheet Thumbnail" />
+                                        {% else %}
+                                        <div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 160px;">
+                                            No thumbnail
+                                        </div>
+                                        {% endif %}
                                         <div class="card-body">
                                             <h5 class="card-title">
                                                 {{ sheet.name }}🔥
@@ -136,7 +145,7 @@ active
                                             {% else %}
                                             <span class="text-danger">Disabled</span>
                                             {% endif %}
-                                            <a href="{% url 'instructor_sheet' sheet.slug %}"
+                                            <a href="{% url 'instructor_batch_sheet' batch.slug sheet.slug %}"
                                                 class="btn btn-outline-secondary w-100">View More</a>
                                         </div>
                                     </a>
@@ -158,6 +167,42 @@ active
             <p class="mb-0 fs-4">❤️ From <a href="http://theangaarbatch.in/" target="_blank"
                     class="pe-1 text-danger-emphasis text-decoration-none">The Angaar Batch🔥</a>
             </p>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addSheetModal" tabindex="-1" aria-labelledby="addSheetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSheetModalLabel">Add Sheet to {{ batch.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form method="POST" action="{% url 'instructor_add_sheet' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" name="batches" value="{{ batch.id }}">
+
+                        <div class="mb-3">
+                            <label for="sheetName" class="form-label">Sheet Name</label>
+                            <input type="text" class="form-control" id="sheetName" name="name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="sheetThumbnail" class="form-label">Thumbnail</label>
+                            <input type="file" class="form-control" id="sheetThumbnail" name="thumbnail" accept="image/*">
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="sheetSequential" name="is_sequential">
+                            <label class="form-check-label" for="sheetSequential">Sequential Sheet</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Create Sheet</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

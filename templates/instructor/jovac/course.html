@@ -51,7 +51,13 @@ active
 
                 <!-- Thumbnail with lazy loading -->
                 <a href="{% url 'instructor_jovac_sheet' course.slug sheet.slug %}">
-                    <img src="{{ sheet.thumbnail.url }}" class="card-img-top lazy-load" alt="${sheet.name}">
+                    {% if sheet.thumbnail %}
+                    <img src="{{ sheet.thumbnail.url }}" class="card-img-top lazy-load" alt="{{ sheet.name }}">
+                    {% else %}
+                    <div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">
+                        No thumbnail
+                    </div>
+                    {% endif %}
                 </a>
 
                 <div class="card-body">
@@ -65,8 +71,8 @@ active
                     </span>
 
                     {% else %}
-                    <span class="badge bg-danger">
-                        Disabled
+                    <span class="badge bg-warning text-dark">
+                        Pending Approval
                     </span>
                     {% endif %}
 

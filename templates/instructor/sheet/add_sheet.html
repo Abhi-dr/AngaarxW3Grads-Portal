@@ -36,7 +36,7 @@ active
                             <label for="assignment_type" class="form-label">Batches</label>
                             <select class="form-select form-control" name="batches" id="assignment_type" multiple>
                                 {% for batch in batches %}
-                                <option value="{{ batch.id }}">{{ batch.name }}</option>
+                                <option value="{{ batch.id }}" {% if selected_batch_id and selected_batch_id == batch.id|stringformat:"s" %}selected{% endif %}>{{ batch.name }}</option>
                                 {% endfor %}
                             </select>
                         </div>

@@ -26,15 +26,33 @@ import math
 from django.utils.timezone import now
 from datetime import timedelta
 
-from practice.models import Streak
+from practice.models import Streak, MCQQuestion
+
+
+def _notify_admin_approval_request(created_by, item_type, item_name, details_url=''):
+    """Create a dashboard notification for admin approval requests from instructor side."""
+    title = f"Approval Request: {item_type}"
+    requester = created_by.get_full_name() or created_by.email
+    description = f"{requester} created {item_type} '{item_name}' and requested admin approval."
+    if details_url:
+        description = f"{description} Review: {details_url}"
+
+    Notification.objects.create(
+        title=title,
+        description=description,
+        is_alert=True,
+        is_fixed=False,
+        type='warning',
+        expiration_date=timezone.now() + timedelta(days=30),
+    )
 
 # ======================================== MY JOVAC COURSE ======================================
 
 def jovacs(request):
     instructor = get_object_or_404(CustomUser, id=request.user.id)
 
-    # Get only courses where the logged-in instructor is assigned
-    courses = Course.objects.filter(instructors=instructor, is_active=True)
+    # Show both active and pending courses created/assigned for this instructor.
+    courses = Course.objects.filter(instructors=instructor)
 
     parameters = {
         "courses": courses,
@@ -71,28 +89,71 @@ def jovac_sheet(request, course_slug, sheet_slug):
 
     course_sheet = CourseSheet.objects.get(course = course, slug=sheet_slug)
 
-    assignments = course_sheet.get_ordered_assignments()
-
-    print(assignments)
+    items = course_sheet.get_ordered_items()
 
     query = request.POST.get("query")
     if query:
-        assignments = Assignment.objects.filter(
-            Q(id__icontains=query) |
-            Q(title__icontains=query) |
-            Q(description__icontains=query)|
-            Q(assignment_type__icontains=query)
-            )
+        needle = query.lower().strip()
+        items = [
+            item for item in items
+            if needle in str(item.get('pk', '')).lower()
+            or needle in (getattr(item['obj'], 'title', '') or '').lower()
+            or needle in (getattr(item['obj'], 'question_text', '') or '').lower()
+            or needle in (getattr(item['obj'], 'description', '') or '').lower()
+            or needle in item.get('type', '').lower()
+        ]
 
 
     parameters = {
         "course": course,
         "sheet": course_sheet,
         "instructors": instructors,
-        "assignments": assignments,
+        "items": items,
+        "query": query,
     }
 
     return render(request, "instructor/jovac/course_sheet.html", parameters)
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def add_course(request):
+    instructors = CustomUser.objects.filter(role='instructor')
+
+    if request.method == 'POST':
+        name = (request.POST.get('name') or '').strip()
+        description = (request.POST.get('description') or '').strip()
+        thumbnail = request.FILES.get('thumbnail')
+        selected_instructors = request.POST.getlist('instructors')
+
+        if not name or not description:
+            messages.error(request, 'Course name and description are required.')
+            return render(request, 'instructor/jovac/add_course.html', {'instructors': instructors})
+
+        course = Course.objects.create(
+            name=name,
+            description=description,
+            thumbnail=thumbnail,
+            is_active=False,
+        )
+
+        if selected_instructors:
+            course.instructors.set(selected_instructors)
+
+        if request.user.id not in set(course.instructors.values_list('id', flat=True)):
+            course.instructors.add(request.user)
+
+        _notify_admin_approval_request(
+            created_by=request.user,
+            item_type='Course',
+            item_name=course.name,
+            details_url=reverse('administrator_batches'),
+        )
+
+        messages.success(request, 'Course created and sent for admin approval.')
+        return redirect('instructor_jovacs')
+
+    return render(request, 'instructor/jovac/add_course.html', {'instructors': instructors})
 
 
 # ======================================= ADD COURSE SHEET ==================================
@@ -114,10 +175,19 @@ def add_sheet(request, course_slug):
             description=description,
             thumbnail=thumbnail,
             created_by=created_by,
+            is_enabled=False,
+            is_approved=False,
         )
         sheet.course.add(course)
 
-        messages.success(request, "Sheet created successfully.")
+        _notify_admin_approval_request(
+            created_by=request.user,
+            item_type='Course Sheet',
+            item_name=sheet.name,
+            details_url=reverse('administrator_batches'),
+        )
+
+        messages.success(request, "Sheet created and sent for admin approval.")
         return redirect('instructor_jovac', slug=course.slug)
 
     return render(request, 'instructor/jovac/add_sheet.html', {'course': course})
@@ -342,6 +412,89 @@ def view_submissions(request, id):
     }
     
     return render(request, "instructor/jovac/submissions.html", parameters)
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def add_mcq_question(request, course_slug, sheet_slug):
+    course = get_object_or_404(Course, slug=course_slug)
+    course_sheet = get_object_or_404(CourseSheet, slug=sheet_slug, course=course)
+
+    if request.method == 'POST':
+        question_text = (request.POST.get('question_text') or '').strip()
+        option_a = (request.POST.get('option_a') or '').strip()
+        option_b = (request.POST.get('option_b') or '').strip()
+        option_c = (request.POST.get('option_c') or '').strip()
+        option_d = (request.POST.get('option_d') or '').strip()
+        correct_option = (request.POST.get('correct_option') or '').strip().upper()
+        difficulty_level = (request.POST.get('difficulty_level') or 'Easy').strip()
+
+        if not all([question_text, option_a, option_b, option_c, option_d, correct_option]):
+            messages.error(request, 'All MCQ fields are required.')
+            return render(request, 'instructor/jovac/add_mcq_question.html', {'course': course, 'sheet': course_sheet})
+
+        mcq = MCQQuestion.objects.create(
+            question_text=question_text,
+            option_a=option_a,
+            option_b=option_b,
+            option_c=option_c,
+            option_d=option_d,
+            correct_option=correct_option,
+            explanation=(request.POST.get('explanation') or '').strip(),
+            tags=(request.POST.get('tags') or '').strip(),
+            difficulty_level=difficulty_level,
+            is_approved=False,
+        )
+        course_sheet.mcq_questions.add(mcq)
+
+        _notify_admin_approval_request(
+            created_by=request.user,
+            item_type='MCQ Question',
+            item_name=mcq.question_text[:80],
+            details_url=reverse('administrator_batches'),
+        )
+
+        messages.success(request, 'MCQ question created and sent for admin approval.')
+        return redirect('instructor_jovac_sheet', course_slug=course.slug, sheet_slug=course_sheet.slug)
+
+    return render(request, 'instructor/jovac/add_mcq_question.html', {'course': course, 'sheet': course_sheet})
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def add_coding_question(request, course_slug, sheet_slug):
+    course = get_object_or_404(Course, slug=course_slug)
+    course_sheet = get_object_or_404(CourseSheet, slug=sheet_slug, course=course)
+
+    if request.method == 'POST':
+        title = (request.POST.get('title') or '').strip()
+        description = (request.POST.get('description') or '').strip()
+        difficulty_level = (request.POST.get('difficulty_level') or 'Easy').strip()
+
+        if not title or not description:
+            messages.error(request, 'Coding question title and description are required.')
+            return render(request, 'instructor/jovac/add_coding_question.html', {'course': course, 'sheet': course_sheet})
+
+        coding_question = Question.objects.create(
+            title=title,
+            description=description,
+            difficulty_level=difficulty_level,
+            is_approved=False,
+            added_by=request.user,
+        )
+        course_sheet.coding_questions.add(coding_question)
+
+        _notify_admin_approval_request(
+            created_by=request.user,
+            item_type='Coding Question',
+            item_name=coding_question.title,
+            details_url=reverse('administrator_batches'),
+        )
+
+        messages.success(request, 'Coding question created and sent for admin approval.')
+        return redirect('instructor_jovac_sheet', course_slug=course.slug, sheet_slug=course_sheet.slug)
+
+    return render(request, 'instructor/jovac/add_coding_question.html', {'course': course, 'sheet': course_sheet})
 
 # ======================================== REORDER ASSIGNMENTS ===================================
 

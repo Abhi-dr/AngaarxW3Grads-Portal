@@ -5,6 +5,10 @@ urlpatterns = [
     path('api/v1/', include('instructor.api.urls')),
     path("", views.index, name="instructor"),
 
+    # Dashboard chart APIs
+    path("api/dashboard/submissions/", views.api_dashboard_submissions, name="instructor_api_dashboard_submissions"),
+    path("api/dashboard/registrations/", views.api_dashboard_registrations, name="instructor_api_dashboard_registrations"),
+
 
     # ========================= PROFILE WORK =========================
 
@@ -49,6 +53,7 @@ urlpatterns = [
     
     path("make_duplicate/<int:sheet_id>/<int:question_id>/", sheet_views.make_duplicate, name="instructor_make_duplicate"),
     path("add_new_question/<slug:slug>/", sheet_views.add_new_question, name="instructor_add_new_question"),
+    path("add_new_mcq_question/<slug:slug>/", sheet_views.add_new_mcq_question, name="instructor_add_new_mcq_question"),
     
     path("add_question_json/<slug:slug>/", sheet_views.add_question_json, name="instructor_add_question_json"),
     path("generate_question_json/", sheet_views.generate_question_json, name="instructor_generate_question_json"),
@@ -79,6 +84,8 @@ urlpatterns = [
 
 urlpatterns += [
     path("courses/", batch_views.batches, name="instructor_batches"),
+    path("courses/add/", batch_views.add_batch_request, name="instructor_add_batch_request"),
+    path("course/<slug:batch_slug>/sheet/<slug:sheet_slug>/", batch_views.batch_sheet, name="instructor_batch_sheet"),
     path("course/<slug:slug>/", batch_views.batch, name="instructor_batch"),
     
     path("<slug:slug>/set_pod", batch_views.set_pod_for_batch, name="instructor_pod_for_batch"),
@@ -94,6 +101,7 @@ urlpatterns += [
 
 urlpatterns += [
     path("jovacs/", jovac_views.jovacs, name="instructor_jovacs"),
+    path("jovac/add_course/", jovac_views.add_course, name="instructor_add_jovac"),
     path("jovac/<slug:slug>", jovac_views.jovac, name="instructor_jovac"),
 
     path("jovac/<slug:course_slug>/<slug:sheet_slug>", jovac_views.jovac_sheet, name="instructor_jovac_sheet"),
@@ -101,6 +109,8 @@ urlpatterns += [
     path('course/<slug:course_slug>/sheet/<slug:sheet_slug>/edit/', jovac_views.edit_sheet, name='instructor_edit_jovac_sheet'),
 
     path("jovac/<slug:course_slug>/<slug:sheet_slug>/add_assignment/", jovac_views.add_assignment, name="instructor_add_assignment"),
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>/add-mcq/", jovac_views.add_mcq_question, name="instructor_add_jovac_mcq_question"),
+    path("jovac/<slug:course_slug>/<slug:sheet_slug>/add-coding/", jovac_views.add_coding_question, name="instructor_add_jovac_coding_question"),
 
     path("edit_assignment/<int:id>", jovac_views.edit_assignment, name="instructor_jovac_edit_assignment"),
     path("delete_assignment/<int:id>/", jovac_views.delete_assignment, name="instructor_delete_assignment"),

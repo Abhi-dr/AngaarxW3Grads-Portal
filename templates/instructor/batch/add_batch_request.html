@@ -1,0 +1,51 @@
+{% extends 'instructor/base.html' %}
+
+{% block batch_active %}active{% endblock %}
+
+{% block title %}Instructor | Add Course{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="heading mb-0"><span class="fw-semibold">Add Course Request</span></h3>
+                <p class="text-muted mb-0">This course will be sent to admin for approval.</p>
+            </div>
+            <a href="{% url 'instructor_batches' %}" class="btn btn-outline-secondary">Back</a>
+        </div>
+    </div>
+
+    {% for message in messages %}
+    <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    <div class="card">
+        <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="name" class="form-label">Course Name</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="thumbnail" class="form-label">Thumbnail</label>
+                    <input type="file" class="form-control" id="thumbnail" name="thumbnail" accept="image/*">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Send For Approval</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

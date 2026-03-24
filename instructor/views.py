@@ -10,8 +10,10 @@ from practice.models import Sheet, Submission, Question
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import datetime
+from datetime import timedelta
 import pandas as pd
 import io
+from django.utils import timezone
 
 
 # ======================================== Instructor ======================================
@@ -33,6 +35,68 @@ def index(request):
     }
     
     return render(request, "instructor/index.html", parameters)
+
+
+# ======================================== DASHBOARD CHART APIs ======================================
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def api_dashboard_submissions(request):
+    """Returns submission counts as JSON for selected days (5/10/15/30, default 5)."""
+    allowed_days = {5, 10, 15, 30}
+    try:
+        days = int(request.GET.get('days', 5))
+    except (TypeError, ValueError):
+        days = 5
+    if days not in allowed_days:
+        days = 5
+
+    today = timezone.now().date()
+    day_window = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    labels = [d.strftime('%d %b') for d in day_window]
+
+    data = []
+    for d in day_window:
+        start = timezone.make_aware(datetime.datetime.combine(d, datetime.time.min))
+        end = timezone.make_aware(datetime.datetime.combine(d, datetime.time.max))
+        data.append(Submission.objects.filter(submitted_at__gte=start, submitted_at__lte=end).count())
+
+    total = Submission.objects.count()
+    today_start = timezone.make_aware(datetime.datetime.combine(today, datetime.time.min))
+    today_end = timezone.make_aware(datetime.datetime.combine(today, datetime.time.max))
+    today_count = Submission.objects.filter(submitted_at__gte=today_start, submitted_at__lte=today_end).count()
+
+    return JsonResponse({'labels': labels, 'data': data, 'total': total, 'today_count': today_count})
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def api_dashboard_registrations(request):
+    """Returns student registration counts as JSON for selected days (5/10/15/30, default 5)."""
+    allowed_days = {5, 10, 15, 30}
+    try:
+        days = int(request.GET.get('days', 5))
+    except (TypeError, ValueError):
+        days = 5
+    if days not in allowed_days:
+        days = 5
+
+    today = timezone.now().date()
+    day_window = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    labels = [d.strftime('%d %b') for d in day_window]
+
+    data = []
+    for d in day_window:
+        start = timezone.make_aware(datetime.datetime.combine(d, datetime.time.min))
+        end = timezone.make_aware(datetime.datetime.combine(d, datetime.time.max))
+        data.append(CustomUser.objects.filter(date_joined__gte=start, date_joined__lte=end, role='student').count())
+
+    total = CustomUser.objects.filter(role='student', is_active=True).count()
+    today_start = timezone.make_aware(datetime.datetime.combine(today, datetime.time.min))
+    today_end = timezone.make_aware(datetime.datetime.combine(today, datetime.time.max))
+    active_today = CustomUser.objects.filter(last_login__gte=today_start, last_login__lte=today_end, role='student').count()
+
+    return JsonResponse({'labels': labels, 'data': data, 'total': total, 'active_today': active_today})
     
 
 # ========================================= MY PROFILE =========================================

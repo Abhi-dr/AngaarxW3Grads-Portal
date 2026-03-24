@@ -20,7 +20,7 @@ from accounts.models import CustomUser
 from practice.models import POD, Submission, Question, Sheet, Batch,EnrollmentRequest
 
 from django.views.decorators.cache import cache_control
-from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode
+from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCode, MCQQuestion
 
 import google.generativeai as genai
 from django.conf import settings
@@ -49,6 +49,7 @@ def add_sheet(request):
     
     instructor = CustomUser.objects.get(id=request.user.id)
     batches = Batch.objects.all()
+    selected_batch_id = request.GET.get('batch')
     
     if request.method == "POST":
         
@@ -75,7 +76,8 @@ def add_sheet(request):
     
     parameters = {
         "instructor": instructor,
-        "batches": batches
+        "batches": batches,
+        "selected_batch_id": selected_batch_id,
     }
     
     return render(request, 'instructor/sheet/add_sheet.html', parameters)
@@ -219,6 +221,9 @@ def add_new_question(request, slug):
         sheet.questions.add(question)
         
         messages.success(request, "Question added successfully!")
+        next_url = request.POST.get('next')
+        if next_url:
+            return redirect(next_url)
         return redirect('instructor_sheet', slug=sheet.slug)
     
     parameters = {
@@ -227,6 +232,50 @@ def add_new_question(request, slug):
     }
     
     return render(request, 'instructor/sheet/add_new_question.html', parameters)
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def add_new_mcq_question(request, slug):
+    sheet = get_object_or_404(Sheet, slug=slug)
+
+    if request.method == "POST":
+        question_text = (request.POST.get('question_text') or '').strip()
+        option_a = (request.POST.get('option_a') or '').strip()
+        option_b = (request.POST.get('option_b') or '').strip()
+        option_c = (request.POST.get('option_c') or '').strip()
+        option_d = (request.POST.get('option_d') or '').strip()
+        correct_option = (request.POST.get('correct_option') or '').strip()
+        explanation = (request.POST.get('explanation') or '').strip()
+        difficulty_level = (request.POST.get('difficulty_level') or 'Easy').strip()
+
+        if not all([question_text, option_a, option_b, option_c, option_d, correct_option]):
+            messages.error(request, "Please fill all required MCQ fields.")
+            next_url = request.POST.get('next')
+            if next_url:
+                return redirect(next_url)
+            return redirect('instructor_sheet', slug=sheet.slug)
+
+        MCQQuestion.objects.create(
+            sheet=sheet,
+            question_text=question_text,
+            option_a=option_a,
+            option_b=option_b,
+            option_c=option_c,
+            option_d=option_d,
+            correct_option=correct_option,
+            explanation=explanation,
+            difficulty_level=difficulty_level,
+            is_approved=True,
+        )
+
+        messages.success(request, "MCQ question added successfully!")
+        next_url = request.POST.get('next')
+        if next_url:
+            return redirect(next_url)
+        return redirect('instructor_sheet', slug=sheet.slug)
+
+    return redirect('instructor_sheet', slug=sheet.slug)
         
         
     

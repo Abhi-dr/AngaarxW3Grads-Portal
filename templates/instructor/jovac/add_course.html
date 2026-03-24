@@ -1,0 +1,54 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block title %}JOVAC | Add Course{% endblock %}
+{% block jovac_active %}active{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title fw-semibold mb-0">Create JOVAC Course</h5>
+            <p class="text-muted mb-0">New courses from instructor panel are sent for admin approval before going live.</p>
+        </div>
+
+        <div class="container px-4 pb-4">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <hr class="mt-0">
+                <div class="card">
+                    <div class="card-header">Course Details</div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="name" placeholder="Course name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="description" rows="5" placeholder="Course description" required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Instructors</label>
+                            <select class="form-select" name="instructors" multiple>
+                                {% for instructor in instructors %}
+                                <option value="{{ instructor.id }}">{{ instructor.first_name }} {{ instructor.last_name }} ({{ instructor.email }})</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">You will be auto-added even if not selected.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Thumbnail Image</label>
+                            <input type="file" class="form-control" name="thumbnail" accept="image/*">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Create Course & Send Approval Request</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
