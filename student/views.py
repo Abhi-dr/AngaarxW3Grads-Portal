@@ -36,7 +36,10 @@ from django.db.models import Max, Sum
 @login_required(login_url="login")
 def dashboard(request):
     
-    notifications = Notification.objects.filter(expiration_date__gt=timezone.now(), is_alert=True)
+    notifications = Notification.objects.filter(
+        expiration_date__gt=timezone.now(),
+        is_alert=True,
+    ).exclude(title__startswith='Approval Request:')
     student = request.user
     
     # Get enrolled batches for the student
@@ -167,7 +170,9 @@ def dashboard(request):
 @login_required(login_url="login")
 def notifications(request):
     
-    notifications = Notification.objects.order_by("-expiration_date")
+    notifications = Notification.objects.exclude(
+        title__startswith='Approval Request:'
+    ).order_by("-expiration_date")
     
     parameters = {
         "notifications": notifications

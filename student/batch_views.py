@@ -146,7 +146,10 @@ def enroll_batch(request, id):
 def batch(request, slug):
     batch = get_object_or_404(Batch, slug=slug)
     student = request.user
-    notifications = Notification.objects.filter(expiration_date__gt=timezone.now(), is_alert=True)
+    notifications = Notification.objects.filter(
+        expiration_date__gt=timezone.now(),
+        is_alert=True,
+    ).exclude(title__startswith='Approval Request:')
 
     
     if not EnrollmentRequest.objects.filter(student=student, batch=batch, status='Accepted').exists():
