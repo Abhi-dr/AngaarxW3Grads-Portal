@@ -114,6 +114,7 @@ urlpatterns += [
     path("reject_enrollment/<int:id>", batch_views.reject_enrollment, name="administrator_reject_enrollment"),
     
     path("batch/<slug:slug>/", batch_views.batch, name="administrator_batch"),
+    path("batch/<slug:batch_slug>/sheet/<slug:sheet_slug>/", batch_views.batch_sheet, name="administrator_batch_sheet"),
     path("batch/<slug:slug>/students-json/", batch_views.batch_students_json, name="administrator_batch_students_json"),
     
     path("administrator_set_pod_for_batch/<slug:slug>/", batch_views.administrator_set_pod_for_batch, name="administrator_pod_for_batch"),

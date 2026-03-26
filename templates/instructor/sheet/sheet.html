@@ -31,38 +31,29 @@
         <div class="card-body d-inline-flex">
             <h3 class="heading">
                 <span class="fw-semibold">{{ sheet.name }}</span>
+                {% if sheet.sheet_type %}
+                <span class="fs-3 mx-2 badge text-bg-success">{{ sheet.sheet_type }}</span>
+                {% endif %}
                 <span class="fs-4"> | <span class="mx-1 badge text-bg-dark" id="admin-timer">No Time
                         Set</span></span>
             </h3>
 
             <div class="dropdown ms-auto">
-                <button class="btn btn-outline-primary " data-bs-toggle="modal" data-bs-target="#addQuestionModal"
-                    onclick="setSheetId('{{ sheet.id }}')">
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
                     <i class="ti ti-plus"></i>
                 </button>
+
+                {% if sheet.sheet_type == "MCQ" %}
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addMcqQuestionModal">Add New MCQ Question</button>
+                {% else %}
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addNewQuestionModal">Add New Question</button>
+                <button class="btn btn-outline-success" type="button" data-bs-toggle="modal" data-bs-target="#importJsonModal">Import JSON</button>
+                {% endif %}
 
                 <a href="{% url 'instructor_reorder' sheet.slug %}" class="btn btn-outline-primary">⬆️</a>
 
                 <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
                     data-bs-target="#setTimerModal">⏰</button>
-
-
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-primary dropdown-toggle" data-bs-toggle="dropdown"
-                        aria-expanded="false">
-                        Add Item
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-dark">
-                        <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addNewQuestionModal">Coding Question</button></li>
-                        <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addMcqQuestionModal">MCQ Question</button></li>
-                        <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#assignmentInfoModal">Assignment</button></li>
-                        <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#tutorialInfoModal">Tutorial</button></li>
-                    </ul>
-                </div>
-                
-                <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#aiGenerateModal">
-                    <i class="ti ti-sparkles"></i> AI Generate Question
-                </button>
 
                 <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split"
                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -326,6 +317,10 @@
                             <label for="mcqExplanation" class="form-label">Explanation (Optional)</label>
                             <textarea class="form-control" id="mcqExplanation" name="explanation" rows="3"></textarea>
                         </div>
+                        <div class="mb-0 mt-3">
+                            <label for="mcqTags" class="form-label">Tags (comma separated)</label>
+                            <input type="text" class="form-control" id="mcqTags" name="tags" placeholder="html, forms, upload">
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -470,6 +465,65 @@
         </div>
     </div>
 
+    {% if sheet.sheet_type != "MCQ" %}
+    <div class="modal fade" id="importJsonModal" tabindex="-1" aria-labelledby="importJsonModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importJsonModalLabel">Import Question from JSON</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="jsonData" class="form-label">JSON Data</label>
+                        <textarea class="form-control" id="jsonData" rows="15" placeholder="Paste your JSON data here..."></textarea>
+                    </div>
+                    <div id="jsonValidationFeedback" class="invalid-feedback d-none">Please provide valid JSON data.</div>
+                    <div id="jsonImportStatus" class="alert d-none" role="alert"></div>
+                                        <div class="mb-3">
+                                                <p><strong>Required JSON Structure:</strong></p>
+                                                <pre>{
+    "title": "Question Title",
+    "description": "Question Description",
+    "scenario": "Optional Scenario",
+    "input_format": "Input Format",
+    "output_format": "Output Format",
+    "constraints": "Constraints",
+    "hint": "Optional Hint",
+    "difficulty_level": "Easy|Medium|Hard",
+    "test_cases": [
+        {
+            "input": "test input",
+            "output": "expected output",
+            "is_sample": true
+        }
+    ],
+    "driver_codes": [
+        {
+            "language_id": 71,
+            "visible_driver_code": "def solution(...):",
+            "complete_driver_code": "# Full code"
+        }
+    ],
+    "recommended_questions": [
+        {
+            "title": "Related Question",
+            "platform": "LeetCode",
+            "link": "https://example.com"
+        }
+    ]
+}</pre>
+                                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="importJsonBtn">Import</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- =============================== AI GENERATE QUESTION MODAL ================================= -->
 
     <div class="modal fade" id="aiGenerateModal" tabindex="-1" aria-labelledby="aiGenerateModalLabel" aria-hidden="true">
@@ -568,6 +622,11 @@
     (function () {
         const tbody = document.getElementById('questionsTableBody');
         const sheetSlug = '{{ sheet.slug }}';
+        const returnPath = encodeURIComponent(window.location.pathname + window.location.search);
+        const editCodingUrlTemplate = "{% url 'instructor_edit_question' 0 %}";
+        const deleteCodingUrlTemplate = "{% url 'instructor_delete_question' 0 %}";
+        const editMcqUrlTemplate = "{% url 'instructor_edit_mcq_question' 0 %}";
+        const deleteMcqUrlTemplate = "{% url 'instructor_delete_mcq_question' 0 %}";
 
         function esc(text) {
             if (text === null || text === undefined) return '';
@@ -580,6 +639,8 @@
         }
 
         function codingRow(q, idx) {
+            const editUrl = `${editCodingUrlTemplate.replace('/0', `/${q.id}`)}?next=${returnPath}`;
+            const deleteUrl = `${deleteCodingUrlTemplate.replace('/0', `/${q.id}`)}?next=${returnPath}`;
             return `
                 <tr>
                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${idx + 1}</h6></td>
@@ -589,12 +650,19 @@
                     <td class="border-bottom-0"><a href="/instructor/test_cases/${esc(q.slug)}/" class="btn btn-success btn-sm">Test Cases</a></td>
                     <td class="border-bottom-0"><a href="/instructor/view_submissions/${esc(q.slug)}/" class="btn btn-outline-info btn-sm">Submissions</a></td>
                     <td class="border-bottom-0"><a href="/instructor/test_code/${esc(q.slug)}/" class="btn btn-info btn-sm">TEST CODE</a></td>
-                    <td class="border-bottom-0"><div class="d-flex gap-2"><a href="/instructor/delete_question/${q.id}" onclick="return confirm('Delete this question?')">❌</a><a href="/instructor/edit_question/${q.id}">✏️</a></div></td>
+                    <td class="border-bottom-0">
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-outline-dark btn-sm" href="${editUrl}">Edit</a>
+                            <a class="btn btn-outline-danger btn-sm" href="${deleteUrl}" onclick="return confirm('Delete this coding question?')">Delete</a>
+                        </div>
+                    </td>
                 </tr>
             `;
         }
 
         function mcqRow(q, idx) {
+            const editUrl = `${editMcqUrlTemplate.replace('/0', `/${q.id}`)}?next=${returnPath}`;
+            const deleteUrl = `${deleteMcqUrlTemplate.replace('/0/', `/${q.id}/`)}?next=${returnPath}`;
             return `
                 <tr>
                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${idx + 1}</h6></td>
@@ -604,7 +672,12 @@
                     <td class="border-bottom-0"><span class="text-muted">-</span></td>
                     <td class="border-bottom-0"><span class="text-muted">-</span></td>
                     <td class="border-bottom-0"><span class="text-muted">-</span></td>
-                    <td class="border-bottom-0"><span class="text-muted">Managed via MCQ flow</span></td>
+                    <td class="border-bottom-0">
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-outline-dark btn-sm" href="${editUrl}">Edit</a>
+                            <a class="btn btn-outline-danger btn-sm" href="${deleteUrl}" onclick="return confirm('Delete this MCQ question?')">Delete</a>
+                        </div>
+                    </td>
                 </tr>
             `;
         }
@@ -838,6 +911,65 @@
 
     fetchTimer();
 </script>
+
+{% if sheet.sheet_type != "MCQ" %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const jsonImportBtn = document.getElementById('importJsonBtn');
+        const jsonData = document.getElementById('jsonData');
+        const jsonValidationFeedback = document.getElementById('jsonValidationFeedback');
+        const jsonImportStatus = document.getElementById('jsonImportStatus');
+
+        if (!jsonImportBtn || !jsonData) {
+            return;
+        }
+
+        jsonImportBtn.addEventListener('click', function () {
+            jsonValidationFeedback.classList.add('d-none');
+            jsonImportStatus.classList.add('d-none');
+
+            try {
+                JSON.parse(jsonData.value);
+            } catch (e) {
+                jsonValidationFeedback.textContent = 'Invalid JSON format: ' + e.message;
+                jsonValidationFeedback.classList.remove('d-none');
+                return;
+            }
+
+            fetch('{% url "instructor_add_question_json" sheet.slug %}', {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    'json_data': jsonData.value
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    jsonImportStatus.classList.remove('d-none', 'alert-success', 'alert-danger');
+
+                    if (data.status === 'success') {
+                        jsonImportStatus.classList.add('alert-success');
+                        jsonImportStatus.textContent = data.message;
+                        setTimeout(function () {
+                            window.location.href = data.redirect_url || window.location.href;
+                        }, 1200);
+                    } else {
+                        jsonImportStatus.classList.add('alert-danger');
+                        jsonImportStatus.textContent = data.message || 'Import failed.';
+                    }
+                })
+                .catch(error => {
+                    jsonImportStatus.classList.remove('d-none');
+                    jsonImportStatus.classList.add('alert-danger');
+                    jsonImportStatus.textContent = 'Error: ' + error.message;
+                });
+        });
+    });
+</script>
+{% endif %}
 
 <!-- AI Question Generation JavaScript -->
 <script>

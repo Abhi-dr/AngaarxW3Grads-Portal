@@ -21,6 +21,7 @@ from django.utils import timezone
 import datetime
 from django.http import JsonResponse
 import math
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
 from django.utils.timezone import now
@@ -80,6 +81,19 @@ def jovac(request, slug):
     return render(request, "instructor/jovac/course.html", parameters)
 
 
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+def reorder_jovac_sheets(request, slug):
+    course = get_object_or_404(Course, slug=slug)
+    sheets = course.get_ordered_sheets()
+
+    parameters = {
+        "course": course,
+        "sheets": sheets,
+    }
+    return render(request, "instructor/jovac/reorder_sheets.html", parameters)
+
+
 # ======================================== JOVAC SHEETS ======================================
 
 def jovac_sheet(request, course_slug, sheet_slug):
@@ -110,6 +124,8 @@ def jovac_sheet(request, course_slug, sheet_slug):
         "instructors": instructors,
         "items": items,
         "query": query,
+        "assignment_types": Assignment.ASSIGNMENT_TYPES,
+        "status_choices": Assignment.STATUS_CHOICES,
     }
 
     return render(request, "instructor/jovac/course_sheet.html", parameters)
@@ -204,13 +220,11 @@ def edit_sheet(request, course_slug, sheet_slug):
         name = request.POST.get('name')
         description = request.POST.get('description')
         is_enabled = bool(request.POST.get('is_enabled'))
-        is_approved = bool(request.POST.get('is_approved'))
         thumbnail = request.FILES.get('thumbnail')
 
         sheet.name = name
         sheet.description = description
         sheet.is_enabled = is_enabled
-        sheet.is_approved = is_approved
 
         if thumbnail:
             sheet.thumbnail = thumbnail
@@ -257,8 +271,20 @@ def add_assignment(request, course_slug, sheet_slug):
             # For tutorials: use only content field
             content = request.POST.get('content')
             tutorial_link = request.POST.get('tutorial_link', '').strip()
+            due_date = request.POST.get('due_date') or None
+            max_score = request.POST.get('max_score') or 0
+            status = request.POST.get('status') or Assignment.STATUS_CHOICES[0][0]
+            instructions = request.POST.get('instructions', '').strip()
             assignment_data['content'] = content
             assignment_data['tutorial_link'] = tutorial_link
+            assignment_data['description'] = (content or '')[:100] or 'Tutorial content'
+            assignment_data['assignment_type'] = Assignment.ASSIGNMENT_TYPES[0][0]
+            assignment_data['due_date'] = due_date
+            assignment_data['max_score'] = max_score
+            assignment_data['status'] = status
+            assignment_data['instructions'] = instructions
+            assignment_data['allow_late_submission'] = False
+            assignment_data['late_penalty_per_day'] = 0
         else:
             # For regular assignments
             description = request.POST.get('description')
@@ -290,7 +316,7 @@ def add_assignment(request, course_slug, sheet_slug):
         assignment.course_sheets.add(course_sheet)
 
         messages.success(request, "Assignment added successfully.")
-        return redirect('instructor_jovac', slug=course.slug)
+        return redirect('instructor_jovac_sheet', course_slug=course.slug, sheet_slug=course_sheet.slug)
 
     context = {
         'course': course,
@@ -378,13 +404,21 @@ def edit_assignment(request, id):
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
 def delete_assignment(request, id):
-        
     assignment = Assignment.objects.get(id=id)
+    course_slug = assignment.course.slug if assignment.course else None
+    next_url = request.GET.get('next')
+
     assignment.delete()
-    
+
     messages.success(request, "Assignment deleted successfully!")
-    
-    return redirect("instructor_jovac", slug=assignment.course.slug)
+
+    if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return redirect(next_url)
+
+    if course_slug:
+        return redirect("instructor_jovac", slug=course_slug)
+
+    return redirect("instructor_jovacs")
 
 
 # ======================================== VIEW SUBMISSIONS ===================================
@@ -468,8 +502,16 @@ def add_coding_question(request, course_slug, sheet_slug):
 
     if request.method == 'POST':
         title = (request.POST.get('title') or '').strip()
+        scenario = (request.POST.get('scenario') or '').strip()
         description = (request.POST.get('description') or '').strip()
+        input_format = (request.POST.get('input_format') or '').strip()
+        output_format = (request.POST.get('output_format') or '').strip()
+        constraints = (request.POST.get('constraints') or '').strip()
+        hint = (request.POST.get('hint') or '').strip()
         difficulty_level = (request.POST.get('difficulty_level') or 'Easy').strip()
+        cpu_time_limit = request.POST.get('cpu_time_limit') or 1
+        memory_limit = request.POST.get('memory_limit') or 256
+        position = request.POST.get('position')
 
         if not title or not description:
             messages.error(request, 'Coding question title and description are required.')
@@ -477,11 +519,26 @@ def add_coding_question(request, course_slug, sheet_slug):
 
         coding_question = Question.objects.create(
             title=title,
+            scenario=scenario,
             description=description,
+            input_format=input_format,
+            output_format=output_format,
+            constraints=constraints,
+            hint=hint,
             difficulty_level=difficulty_level,
+            cpu_time_limit=cpu_time_limit,
+            memory_limit=memory_limit,
             is_approved=False,
             added_by=request.user,
         )
+
+        if position not in (None, '', '0'):
+            try:
+                coding_question.position = int(position)
+                coding_question.save(update_fields=['position'])
+            except (TypeError, ValueError):
+                pass
+
         course_sheet.coding_questions.add(coding_question)
 
         _notify_admin_approval_request(

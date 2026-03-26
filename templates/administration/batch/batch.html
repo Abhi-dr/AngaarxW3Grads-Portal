@@ -31,6 +31,12 @@ active
             <div class="fs-5">Total Enrollments: <span class="badge bg-dark">{{ batch.get_total_enrollments }}</span></div>
         </div>
         <div class="px-3 pb-3 d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-success" id="enableAllBatchSheetsBtn">
+                <i class="ti ti-check me-1"></i>Enable All
+            </button>
+            <button type="button" class="btn btn-outline-info" id="approveAllBatchSheetsBtn">
+                <i class="ti ti-rosette-check me-1"></i>Approve All
+            </button>
             <a href="{% url 'administrator_pod_for_batch' batch.slug %}" class="btn btn-outline-primary">Set POD</a>
             <a href="{% url 'administrator_batch_enrollment_requests' batch.slug %}" class="btn btn-outline-warning">Enrollment Requests</a>
             <a href="{% url 'administrator_batch_leaderboard' batch.slug %}" class="btn btn-outline-secondary">Leaderboard</a>
@@ -39,6 +45,8 @@ active
             </a>
         </div>
     </div>
+
+    <div id="batchBulkActionAlert"></div>
 
     <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
         {% for item in sheet_items %}
@@ -62,17 +70,8 @@ active
                         {% endif %}
                     </div>
 
-                    <h6 class="small text-muted mt-2 mb-2">Questions Preview</h6>
-                    <ul class="small ps-3 mb-3">
-                        {% for q in item.preview_questions %}
-                        <li>{{ q|striptags|truncatechars:80 }}</li>
-                        {% empty %}
-                        <li class="text-muted">No approved questions yet.</li>
-                        {% endfor %}
-                    </ul>
-
                     <div class="mt-auto">
-                        <a href="{% url 'administrator_sheet' item.sheet.slug %}" class="btn btn-outline-secondary w-100">View Sheet & Questions</a>
+                        <a href="{% url 'administrator_batch_sheet' batch.slug item.sheet.slug %}" class="btn btn-outline-secondary w-100">View Sheet & Questions</a>
                     </div>
                 </div>
             </div>
@@ -89,4 +88,77 @@ active
         {% endfor %}
     </div>
 </div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+    (function () {
+        const batchSlug = '{{ batch.slug }}';
+        const csrfToken = '{{ csrf_token }}';
+
+        function showBulkAlert(message, type) {
+            const wrap = document.getElementById('batchBulkActionAlert');
+            if (!wrap) return;
+            wrap.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+
+        async function bulkUpdateSheets(actionType) {
+            const isEnable = actionType === 'enable_all';
+            const btn = document.getElementById(isEnable ? 'enableAllBatchSheetsBtn' : 'approveAllBatchSheetsBtn');
+            if (!btn) return;
+
+            const confirmText = isEnable
+                ? 'Enable all sheets in this course?'
+                : 'Approve all sheets in this course?';
+
+            if (!confirm(confirmText)) {
+                return;
+            }
+
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = isEnable ? 'Enabling...' : 'Approving...';
+
+            try {
+                const res = await fetch(`/administration/api/v1/batches/${batchSlug}/bulk-update-sheets/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: actionType }),
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Unable to update sheets.');
+                }
+                showBulkAlert(data.message || 'Updated successfully.', 'success');
+                setTimeout(() => window.location.reload(), 600);
+            } catch (error) {
+                showBulkAlert(error.message || 'Network error while updating sheets.', 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        }
+
+        const enableBtn = document.getElementById('enableAllBatchSheetsBtn');
+        const approveBtn = document.getElementById('approveAllBatchSheetsBtn');
+        if (enableBtn) {
+            enableBtn.addEventListener('click', function () {
+                bulkUpdateSheets('enable_all');
+            });
+        }
+        if (approveBtn) {
+            approveBtn.addEventListener('click', function () {
+                bulkUpdateSheets('approve_all');
+            });
+        }
+    })();
+</script>
 {% endblock %}

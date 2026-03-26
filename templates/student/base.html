@@ -1480,6 +1480,131 @@
         });
     </script>
 
+    <script>
+        (function () {
+            const typingTimers = new WeakMap();
+
+            function looksLikeSearchInput(input) {
+                const attrs = [
+                    input.type || '',
+                    input.name || '',
+                    input.id || '',
+                    input.className || '',
+                    input.placeholder || '',
+                    input.getAttribute('aria-label') || ''
+                ].join(' ').toLowerCase();
+
+                return attrs.includes('search') || attrs.includes('query') || attrs.includes('filter');
+            }
+
+            function findSearchButton(scopeEl) {
+                const buttons = scopeEl.querySelectorAll('button, input[type="button"], input[type="submit"], a.btn');
+                for (const btn of buttons) {
+                    const text = (btn.textContent || btn.value || '').trim().toLowerCase();
+                    const idClass = ((btn.id || '') + ' ' + (btn.className || '')).toLowerCase();
+
+                    if (text === 'search' || idClass.includes('search')) {
+                        return btn;
+                    }
+                }
+                return null;
+            }
+
+            function isSupportedInput(target) {
+                const inputType = (target.type || '').toLowerCase();
+                return ['text', 'search', 'email', 'number', 'tel', 'url'].includes(inputType);
+            }
+
+            function getSearchScope(target) {
+                const form = target.closest('form');
+                const container = target.closest('.input-group, .card, .modal, .container, .container-fluid') || document;
+                const searchButton = findSearchButton(container);
+                return { form, searchButton };
+            }
+
+            function triggerLiveSearch(target) {
+                const { form, searchButton } = getSearchScope(target);
+
+                // Prefer the exact same path users trigger manually (button click).
+                if (searchButton) {
+                    searchButton.click();
+                    return;
+                }
+
+                if (form) {
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                    return;
+                }
+
+                // Fallback for pages using only input/change listeners.
+                target.dispatchEvent(new Event('input', { bubbles: true }));
+                target.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+
+            document.addEventListener('input', function (event) {
+                if (!event.isTrusted) {
+                    return;
+                }
+
+                const target = event.target;
+                if (!target || target.tagName !== 'INPUT' || !isSupportedInput(target) || !looksLikeSearchInput(target)) {
+                    return;
+                }
+
+                if (event.isComposing) {
+                    return;
+                }
+
+                const existingTimer = typingTimers.get(target);
+                if (existingTimer) {
+                    clearTimeout(existingTimer);
+                }
+
+                const timer = setTimeout(function () {
+                    triggerLiveSearch(target);
+                }, 250);
+
+                typingTimers.set(target, timer);
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key !== 'Enter' || event.shiftKey || event.ctrlKey || event.altKey || event.metaKey) {
+                    return;
+                }
+
+                const target = event.target;
+                if (!target || target.tagName !== 'INPUT' || !isSupportedInput(target) || !looksLikeSearchInput(target)) {
+                    return;
+                }
+
+                const { form, searchButton } = getSearchScope(target);
+
+                if (form) {
+                    event.preventDefault();
+                    if (typeof form.requestSubmit === 'function') {
+                        form.requestSubmit();
+                    } else {
+                        form.submit();
+                    }
+                    return;
+                }
+
+                if (searchButton) {
+                    event.preventDefault();
+                    searchButton.click();
+                    return;
+                }
+
+                target.dispatchEvent(new Event('input', { bubbles: true }));
+                target.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        })();
+    </script>
+
 
 
     <!-- Theme initialization is now handled by the script in the head -->

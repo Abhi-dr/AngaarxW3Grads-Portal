@@ -15,8 +15,8 @@ active
 
 <style>
     .fa-youtube-play {
-        font-size: 220%;
-        color: red
+        font-size: 1.6rem;
+        color: red;
     }
 
     .text-color {
@@ -25,7 +25,7 @@ active
 
     [data-bs-theme="dark"] {
         .fa-youtube-play {
-            font-size: 220%;
+            font-size: 1.6rem;
             color: red;
         }
 
@@ -46,6 +46,72 @@ active
         z-index: 2;
         background: var(--bs-body-bg);
         border-top: 1px solid var(--bs-border-color);
+    }
+
+    .tutorial-preview-block {
+        min-height: 220px;
+        max-height: 380px;
+        overflow: auto;
+        border: 1px solid var(--bs-border-color);
+        border-radius: 0.5rem;
+        padding: 1rem;
+        background: #1b2230;
+        cursor: default;
+    }
+
+    [data-bs-theme="light"] .tutorial-preview-block {
+        background: #f8fafc;
+    }
+
+    .tutorial-preview-block pre {
+        background: #131722;
+        color: #dbe7ff;
+        padding: 0.85rem;
+        border-radius: 0.45rem;
+        overflow: auto;
+    }
+
+    [data-bs-theme="light"] .tutorial-preview-block pre {
+        background: #0f172a;
+        color: #e2e8f0;
+    }
+
+    .tutorial-preview-block code {
+        font-family: "Consolas", "Courier New", monospace;
+        font-size: 0.9rem;
+    }
+
+    .tutorial-preview-block img {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .tutorial-preview-block table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tutorial-preview-block table td,
+    .tutorial-preview-block table th {
+        border: 1px solid rgba(148, 163, 184, 0.25);
+        padding: 0.4rem 0.55rem;
+    }
+
+    .tutorial-video-btn {
+        background: #ffffff;
+        border: 1px solid #dc3545;
+        color: #111827;
+    }
+
+    .tutorial-video-btn:hover,
+    .tutorial-video-btn:focus {
+        background: #ffffff;
+        border: 1px solid #dc3545;
+        color: #111827;
+    }
+
+    .tutorial-video-btn .fa-youtube-play {
+        color: #111827;
     }
 </style>
 
@@ -75,7 +141,8 @@ active
                     <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">Assignment</button></li>
                     <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addTutorialModal">Tutorial</button></li>
                     <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addMcqModal">MCQ Question</button></li>
-                    <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addCodingModal">Coding Question</button></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#linkMcqModal" onclick="window.openLinkMcqModal()">Link Existing MCQ Question</button></li>
                 </ul>
             </div>
 
@@ -182,6 +249,35 @@ active
 
 </div>
 
+<div class="modal fade" id="linkMcqModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Link Existing MCQ Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Search MCQ Question</label>
+                    <input type="text" class="form-control" id="linkMcqSearch" placeholder="Search by question text or ID">
+                </div>
+                <div class="mb-0">
+                    <label class="form-label">Select Question *</label>
+                    <select class="form-select" id="linkMcqSelect">
+                        <option value="">Select a question</option>
+                    </select>
+                    <small class="text-muted d-block mt-1">Questions from other sheets can be linked here.</small>
+                </div>
+                <div id="linkMcqError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveLinkMcqBtn" onclick="window.saveLinkMcq()">Link Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="addAssignmentModal" tabindex="-1" aria-labelledby="addAssignmentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content jovac-modal-content">
@@ -271,12 +367,41 @@ active
                         <input type="text" class="form-control" name="title" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Tutorial Content *</label>
-                        <textarea class="form-control" name="content" rows="6" required></textarea>
+                        <label class="form-label">Tutorial HTML Content *</label>
+                        <textarea class="form-control" id="addTutorialContent" name="content" rows="6" placeholder="Enter tutorial HTML content (h1, p, ul, pre, code, etc.)" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tutorial Preview (Student Side)</label>
+                        <div id="addTutorialPreview" class="tutorial-preview-block">
+                            <p class="text-muted mb-0" data-empty-placeholder="true">Edit tutorial content here...</p>
+                        </div>
+                        <small class="text-muted d-block mt-2">Preview is read-only. Edit the HTML content field above.</small>
                     </div>
                     <div class="mb-0">
                         <label class="form-label">Tutorial Video Link</label>
                         <input type="text" class="form-control" name="tutorial_link" placeholder="https://...">
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Due Date</label>
+                            <input type="datetime-local" class="form-control" name="due_date">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Max Score</label>
+                            <input type="number" class="form-control" name="max_score" min="0" value="100">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" name="status">
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if forloop.first %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-0 mt-3">
+                        <label class="form-label">Instructions</label>
+                        <textarea class="form-control" name="instructions" rows="2" placeholder="Detailed instructions for students…"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -360,8 +485,42 @@ active
                         <input class="form-control" name="title" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Scenario</label>
+                        <textarea class="form-control" name="scenario" rows="3" placeholder="Optional scenario"></textarea>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Description *</label>
                         <textarea class="form-control" name="description" rows="6" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Input Format</label>
+                        <textarea class="form-control" name="input_format" rows="3" placeholder="Input format"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Output Format</label>
+                        <textarea class="form-control" name="output_format" rows="3" placeholder="Output format"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Constraints</label>
+                        <textarea class="form-control" name="constraints" rows="3" placeholder="Constraints"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hint</label>
+                        <textarea class="form-control" name="hint" rows="2" placeholder="Optional hint"></textarea>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Position</label>
+                            <input type="number" class="form-control" name="position" min="0" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">CPU Time Limit (sec)</label>
+                            <input type="number" class="form-control" name="cpu_time_limit" step="0.01" min="0" value="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Memory Limit (KB)</label>
+                            <input type="number" class="form-control" name="memory_limit" min="1" value="256">
+                        </div>
                     </div>
                     <div class="mb-0">
                         <label class="form-label">Difficulty</label>
@@ -407,14 +566,201 @@ active
                         <input class="form-check-input" type="checkbox" id="editSheetEnabled" name="is_enabled" {% if sheet.is_enabled %}checked{% endif %}>
                         <label class="form-check-label" for="editSheetEnabled">Enabled</label>
                     </div>
-                    <div class="form-check mb-0">
-                        <input class="form-check-input" type="checkbox" id="editSheetApproved" name="is_approved" {% if sheet.is_approved %}checked{% endif %}>
-                        <label class="form-check-label" for="editSheetApproved">Approved</label>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-warning">Update Sheet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editTutorialModal" tabindex="-1" aria-labelledby="editTutorialModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content jovac-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTutorialModalLabel">Edit Tutorial</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editTutorialForm">
+                {% csrf_token %}
+                <input type="hidden" id="editTutorialId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Title *</label>
+                        <input type="text" class="form-control" id="editTutorialTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tutorial HTML Content *</label>
+                        <textarea class="form-control" id="editTutorialContent" rows="6" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Tutorial Preview (Student Side)</label>
+                        <div id="editTutorialPreview" class="tutorial-preview-block">
+                            <p class="text-muted mb-0" data-empty-placeholder="true">Edit tutorial content here...</p>
+                        </div>
+                        <small class="text-muted d-block mt-2">Preview is read-only. Edit the HTML content field above.</small>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label">Tutorial Video Link</label>
+                        <input type="text" class="form-control" id="editTutorialLink" placeholder="https://...">
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Due Date</label>
+                            <input type="datetime-local" class="form-control" id="editTutorialDueDate">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Max Score</label>
+                            <input type="number" class="form-control" id="editTutorialMaxScore" min="0" value="100">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="editTutorialStatus">
+                                {% for value, label in status_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-0 mt-3">
+                        <label class="form-label">Instructions</label>
+                        <textarea class="form-control" id="editTutorialInstructions" rows="2" placeholder="Detailed instructions for students…"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Tutorial</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editMcqModal" tabindex="-1" aria-labelledby="editMcqModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content jovac-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMcqModalLabel">Edit MCQ Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editMcqForm">
+                {% csrf_token %}
+                <input type="hidden" id="editMcqId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Question Text *</label>
+                        <textarea class="form-control" id="editMcqQuestionText" rows="3" required></textarea>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-6"><label class="form-label">Option A</label><input class="form-control" id="editMcqOptionA" required></div>
+                        <div class="col-md-6"><label class="form-label">Option B</label><input class="form-control" id="editMcqOptionB" required></div>
+                        <div class="col-md-6"><label class="form-label">Option C</label><input class="form-control" id="editMcqOptionC" required></div>
+                        <div class="col-md-6"><label class="form-label">Option D</label><input class="form-control" id="editMcqOptionD" required></div>
+                    </div>
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6">
+                            <label class="form-label">Correct Option *</label>
+                            <select class="form-select" id="editMcqCorrectOption" required>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Difficulty</label>
+                            <select class="form-select" id="editMcqDifficultyLevel">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Explanation</label>
+                        <textarea class="form-control" id="editMcqExplanation" rows="3"></textarea>
+                    </div>
+                    <div class="mt-3 mb-0">
+                        <label class="form-label">Tags (comma separated)</label>
+                        <input class="form-control" id="editMcqTags" placeholder="html, forms, upload">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Update MCQ Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editCodingModal" tabindex="-1" aria-labelledby="editCodingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content jovac-modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCodingModalLabel">Edit Coding Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editCodingForm">
+                {% csrf_token %}
+                <input type="hidden" id="editCodingId">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Title *</label>
+                        <input class="form-control" id="editCodingTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Scenario</label>
+                        <textarea class="form-control" id="editCodingScenario" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description *</label>
+                        <textarea class="form-control" id="editCodingDescription" rows="6" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Input Format</label>
+                        <textarea class="form-control" id="editCodingInputFormat" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Output Format</label>
+                        <textarea class="form-control" id="editCodingOutputFormat" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Constraints</label>
+                        <textarea class="form-control" id="editCodingConstraints" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hint</label>
+                        <textarea class="form-control" id="editCodingHint" rows="2"></textarea>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Position</label>
+                            <input type="number" class="form-control" id="editCodingPosition" min="0" value="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">CPU Time Limit (sec)</label>
+                            <input type="number" class="form-control" id="editCodingCpuTime" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Memory Limit (KB)</label>
+                            <input type="number" class="form-control" id="editCodingMemoryLimit" min="1">
+                        </div>
+                    </div>
+                    <div class="mb-0 mt-3">
+                        <label class="form-label">Difficulty</label>
+                        <select class="form-select" id="editCodingDifficulty">
+                            <option value="Easy">Easy</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-info">Update Coding Question</button>
                 </div>
             </form>
         </div>
@@ -428,9 +774,17 @@ active
         const searchInput = searchForm ? searchForm.querySelector('input[name="query"]') : null;
         const clearSearchBtn = document.getElementById('clearSearchBtn');
         const sheetSlug = '{{ sheet.slug }}';
+        const csrfToken = '{{ csrf_token }}';
+        const returnPath = encodeURIComponent(window.location.pathname + window.location.search);
         const editAssignmentUrlTemplate = "{% url 'instructor_jovac_edit_assignment' 0 %}";
+        const assignmentApiUrlTemplate = "/instructor/api/v1/assignments/0/";
         const deleteAssignmentUrlTemplate = "{% url 'instructor_delete_assignment' 0 %}";
+        const mcqApiUrlTemplate = "/instructor/api/v1/mcq-questions/0/";
+        const deleteMcqUrlTemplate = "{% url 'instructor_delete_mcq_question' 0 %}";
+        const codingApiUrlTemplate = "/instructor/api/v1/coding-questions/0/";
+        const deleteCodingUrlTemplate = "{% url 'instructor_delete_question' 0 %}";
         let allItems = [];
+        let mcqSearchDebounce = null;
 
         function truncate(text, maxLength) {
             if (!text) {
@@ -477,17 +831,170 @@ active
         }
 
         function renderActionColumn(item) {
-            if (item.type !== 'Assignment') {
-                return '<span class="text-muted small">Managed from admin approval queue</span>';
+            if (item.type === 'Assignment') {
+                const deleteUrl = `${deleteAssignmentUrlTemplate.replace('/0/', `/${item.obj.id}/`)}?next=${returnPath}`;
+
+                if (item.obj.is_tutorial) {
+                    const tutorialVideoButton = item.obj.tutorial_link
+                        ? `<a href="${item.obj.tutorial_link}" target="_blank" class="btn btn-sm tutorial-video-btn"><i class="fa fa-youtube-play"></i></a>`
+                        : '<span class="btn btn-sm btn-outline-secondary disabled">No Video</span>';
+
+                    return `
+                        ${tutorialVideoButton}
+                        <button type="button" class="btn btn-outline-dark edit-btn" onclick="window.openEditTutorialModal(${item.obj.id})">Edit</button>
+                        <a class="btn btn-outline-danger delete-btn" href="${deleteUrl}">Unlink</a>
+                    `;
+                }
+
+                const editUrl = editAssignmentUrlTemplate.replace('/0/', `/${item.obj.id}/`);
+
+                return `
+                    <a class="btn btn-outline-dark edit-btn" href="${editUrl}">Edit</a>
+                    <a class="btn btn-outline-danger delete-btn" href="${deleteUrl}">Unlink</a>
+                `;
             }
 
-            const editUrl = editAssignmentUrlTemplate.replace('/0/', `/${item.obj.id}/`);
-            const deleteUrl = deleteAssignmentUrlTemplate.replace('/0/', `/${item.obj.id}/`);
+            if (item.type === 'MCQ') {
+                const deleteUrl = `${deleteMcqUrlTemplate.replace('/0/', `/${item.obj.id}/`)}?next=${returnPath}`;
+                return `
+                    <button type="button" class="btn btn-outline-dark btn-sm" onclick="window.openEditMcqModal(${item.obj.id})">Edit</button>
+                    <a class="btn btn-outline-danger btn-sm" href="${deleteUrl}" onclick="return confirm('Delete this MCQ question?')">Unlink</a>
+                `;
+            }
+
+            const deleteUrl = `${deleteCodingUrlTemplate.replace('/0', `/${item.obj.id}`)}?next=${returnPath}`;
             return `
-                <a class="btn btn-outline-dark edit-btn" href="${editUrl}">Edit</a>
-                <a class="btn btn-outline-danger delete-btn" href="${deleteUrl}">Delete</a>
+                <button type="button" class="btn btn-outline-dark btn-sm" onclick="window.openEditCodingModal(${item.obj.id})">Edit</button>
+                <a class="btn btn-outline-danger btn-sm" href="${deleteUrl}" onclick="return confirm('Delete this coding question?')">Unlink</a>
             `;
         }
+
+        async function apiRequest(url, method = 'GET', payload = null) {
+            const response = await fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+                body: payload ? JSON.stringify(payload) : undefined,
+            });
+
+            if (!response.ok) {
+                let errorMessage = `Request failed (${response.status})`;
+                try {
+                    const data = await response.json();
+                    errorMessage = data.error || JSON.stringify(data.errors || data) || errorMessage;
+                } catch (error) {
+                    // Keep fallback error.
+                }
+                throw new Error(errorMessage);
+            }
+
+            if (response.status === 204) {
+                return null;
+            }
+
+            try {
+                return await response.json();
+            } catch (error) {
+                return null;
+            }
+        }
+
+        function toDatetimeLocalValue(value) {
+            if (!value) {
+                return '';
+            }
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return '';
+            }
+            const offsetMs = date.getTimezoneOffset() * 60000;
+            return new Date(date.getTime() - offsetMs).toISOString().slice(0, 16);
+        }
+
+        const editTutorialModalElement = document.getElementById('editTutorialModal');
+        const editMcqModalElement = document.getElementById('editMcqModal');
+        const editCodingModalElement = document.getElementById('editCodingModal');
+
+        function getModalInstance(modalElement) {
+            if (!modalElement || !window.bootstrap || !window.bootstrap.Modal) {
+                return null;
+            }
+            return window.bootstrap.Modal.getOrCreateInstance(modalElement);
+        }
+
+        async function openEditTutorialModal(id) {
+            try {
+                const assignment = await apiRequest(assignmentApiUrlTemplate.replace('/0/', `/${id}/`), 'GET');
+                document.getElementById('editTutorialId').value = assignment.id;
+                document.getElementById('editTutorialTitle').value = assignment.title || '';
+                document.getElementById('editTutorialContent').value = assignment.content || '';
+                document.getElementById('editTutorialLink').value = assignment.tutorial_link || '';
+                document.getElementById('editTutorialDueDate').value = toDatetimeLocalValue(assignment.due_date);
+                document.getElementById('editTutorialMaxScore').value = assignment.max_score ?? 100;
+                document.getElementById('editTutorialStatus').value = assignment.status || '';
+                document.getElementById('editTutorialInstructions').value = assignment.instructions || '';
+                renderTutorialPreview(document.getElementById('editTutorialContent').value, document.getElementById('editTutorialPreview'));
+                const modal = getModalInstance(editTutorialModalElement);
+                if (modal) {
+                    modal.show();
+                }
+            } catch (error) {
+                alert(`Unable to load tutorial details. ${error.message}`);
+            }
+        }
+
+        async function openEditMcqModal(id) {
+            try {
+                const mcq = await apiRequest(mcqApiUrlTemplate.replace('/0/', `/${id}/`), 'GET');
+                document.getElementById('editMcqId').value = mcq.id;
+                document.getElementById('editMcqQuestionText').value = mcq.question_text || '';
+                document.getElementById('editMcqOptionA').value = mcq.option_a || '';
+                document.getElementById('editMcqOptionB').value = mcq.option_b || '';
+                document.getElementById('editMcqOptionC').value = mcq.option_c || '';
+                document.getElementById('editMcqOptionD').value = mcq.option_d || '';
+                document.getElementById('editMcqCorrectOption').value = mcq.correct_option || 'A';
+                document.getElementById('editMcqDifficultyLevel').value = mcq.difficulty_level || 'Easy';
+                document.getElementById('editMcqExplanation').value = mcq.explanation || '';
+                document.getElementById('editMcqTags').value = mcq.tags || '';
+                const modal = getModalInstance(editMcqModalElement);
+                if (modal) {
+                    modal.show();
+                }
+            } catch (error) {
+                alert(`Unable to load MCQ details. ${error.message}`);
+            }
+        }
+
+        async function openEditCodingModal(id) {
+            try {
+                const coding = await apiRequest(codingApiUrlTemplate.replace('/0/', `/${id}/`), 'GET');
+                document.getElementById('editCodingId').value = coding.id;
+                document.getElementById('editCodingTitle').value = coding.title || '';
+                document.getElementById('editCodingScenario').value = coding.scenario || '';
+                document.getElementById('editCodingDescription').value = coding.description || '';
+                document.getElementById('editCodingInputFormat').value = coding.input_format || '';
+                document.getElementById('editCodingOutputFormat').value = coding.output_format || '';
+                document.getElementById('editCodingConstraints').value = coding.constraints || '';
+                document.getElementById('editCodingHint').value = coding.hint || '';
+                document.getElementById('editCodingPosition').value = coding.position ?? 0;
+                document.getElementById('editCodingCpuTime').value = coding.cpu_time_limit ?? 1;
+                document.getElementById('editCodingMemoryLimit').value = coding.memory_limit ?? 256;
+                document.getElementById('editCodingDifficulty').value = coding.difficulty_level || 'Easy';
+                const modal = getModalInstance(editCodingModalElement);
+                if (modal) {
+                    modal.show();
+                }
+            } catch (error) {
+                alert(`Unable to load coding question details. ${error.message}`);
+            }
+        }
+
+        window.openEditTutorialModal = openEditTutorialModal;
+        window.openEditMcqModal = openEditMcqModal;
+        window.openEditCodingModal = openEditCodingModal;
 
         function renderTable(items) {
             if (!items.length) {
@@ -544,12 +1051,133 @@ active
                 }
 
                 const payload = await response.json();
-                allItems = payload.items || [];
+                allItems = (payload.items || payload.data || []).filter((item) => item.type !== 'Coding');
                 applySearch(searchInput ? searchInput.value : '');
             } catch (error) {
                 tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Unable to load items right now.</td></tr>';
             }
         }
+
+        function renderMcqSelectOptions(rows) {
+            const select = document.getElementById('linkMcqSelect');
+            if (!select) return;
+
+            const options = ['<option value="">Select a question</option>'];
+            (rows || []).forEach((q) => {
+                const text = (q.question_text || '').replace(/\s+/g, ' ').trim();
+                const shortText = text.length > 90 ? `${text.slice(0, 90)}...` : text;
+                options.push(`<option value="${q.id}">#${q.id} - ${shortText || 'MCQ Question'}</option>`);
+            });
+            select.innerHTML = options.join('');
+        }
+
+        async function fetchMcqOptions(queryText) {
+            const params = new URLSearchParams();
+            const query = (queryText || '').trim();
+            if (query) {
+                params.set('search', query);
+            }
+
+            const url = params.toString()
+                ? `/instructor/api/v1/mcq-questions/?${params.toString()}`
+                : '/instructor/api/v1/mcq-questions/';
+
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            if (!response.ok) {
+                throw new Error('Unable to load MCQ questions');
+            }
+
+            const payload = await response.json();
+            return Array.isArray(payload) ? payload : (payload.results || []);
+        }
+
+        async function openLinkMcqModal() {
+            const errorBox = document.getElementById('linkMcqError');
+            const search = document.getElementById('linkMcqSearch');
+            if (errorBox) {
+                errorBox.classList.add('d-none');
+                errorBox.textContent = '';
+            }
+            if (search) {
+                search.value = '';
+            }
+
+            try {
+                const rows = await fetchMcqOptions('');
+                renderMcqSelectOptions(rows);
+            } catch (error) {
+                renderMcqSelectOptions([]);
+                if (errorBox) {
+                    errorBox.textContent = error.message;
+                    errorBox.classList.remove('d-none');
+                }
+            }
+        }
+
+        async function saveLinkMcq() {
+            const select = document.getElementById('linkMcqSelect');
+            const errorBox = document.getElementById('linkMcqError');
+            const saveBtn = document.getElementById('saveLinkMcqBtn');
+
+            if (errorBox) {
+                errorBox.classList.add('d-none');
+                errorBox.textContent = '';
+            }
+
+            const mcqId = select ? select.value : '';
+            if (!mcqId) {
+                if (errorBox) {
+                    errorBox.textContent = 'Please select an MCQ question.';
+                    errorBox.classList.remove('d-none');
+                }
+                return;
+            }
+
+            if (saveBtn) {
+                saveBtn.disabled = true;
+            }
+
+            try {
+                const response = await fetch(`/instructor/api/v1/course-sheets/${sheetSlug}/link-item/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({
+                        type: 'MCQ',
+                        item_id: mcqId,
+                    }),
+                });
+
+                const payload = await response.json();
+                if (!response.ok || !payload.success) {
+                    throw new Error(payload.error || 'Unable to link MCQ question.');
+                }
+
+                const modalElement = document.getElementById('linkMcqModal');
+                const modal = getModalInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                }
+                await loadItems();
+            } catch (error) {
+                if (errorBox) {
+                    errorBox.textContent = error.message;
+                    errorBox.classList.remove('d-none');
+                }
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                }
+            }
+        }
+
+        window.openLinkMcqModal = openLinkMcqModal;
+        window.saveLinkMcq = saveLinkMcq;
 
         if (searchForm && searchInput) {
             searchForm.addEventListener('submit', function (event) {
@@ -565,6 +1193,21 @@ active
             });
         }
 
+        const linkMcqSearchInput = document.getElementById('linkMcqSearch');
+        if (linkMcqSearchInput) {
+            linkMcqSearchInput.addEventListener('input', function () {
+                clearTimeout(mcqSearchDebounce);
+                mcqSearchDebounce = setTimeout(async () => {
+                    try {
+                        const rows = await fetchMcqOptions(linkMcqSearchInput.value);
+                        renderMcqSelectOptions(rows);
+                    } catch (_) {
+                        renderMcqSelectOptions([]);
+                    }
+                }, 250);
+            });
+        }
+
         const latePenaltyInput = document.getElementById('latePenaltyPerDay');
         if (latePenaltyInput) {
             latePenaltyInput.addEventListener('input', function () {
@@ -572,6 +1215,154 @@ active
                     this.value = 100;
                 }
             });
+        }
+
+        function getSanitizedTutorialHtml(rawHtml) {
+            if (!rawHtml) {
+                return '';
+            }
+
+            return rawHtml
+                .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+                .replace(/\son\w+="[^"]*"/gi, '')
+                .replace(/\son\w+='[^']*'/gi, '');
+        }
+
+        function renderTutorialPreview(rawHtml, previewElement) {
+            if (!previewElement) {
+                return;
+            }
+
+            const sanitizedHtml = getSanitizedTutorialHtml(rawHtml || '').trim();
+            if (!sanitizedHtml) {
+                previewElement.innerHTML = '<p class="text-muted mb-0" data-empty-placeholder="true">Edit tutorial content here...</p>';
+                return;
+            }
+
+            previewElement.innerHTML = sanitizedHtml;
+        }
+
+        function renderAddTutorialPreview() {
+            const contentInput = document.getElementById('addTutorialContent');
+            const preview = document.getElementById('addTutorialPreview');
+            if (!contentInput || !preview) {
+                return;
+            }
+            renderTutorialPreview(contentInput.value, preview);
+        }
+
+        const editTutorialContent = document.getElementById('editTutorialContent');
+        const editTutorialPreview = document.getElementById('editTutorialPreview');
+        if (editTutorialContent && editTutorialPreview) {
+            editTutorialContent.addEventListener('input', function () {
+                renderTutorialPreview(editTutorialContent.value, editTutorialPreview);
+            });
+        }
+
+        const editTutorialForm = document.getElementById('editTutorialForm');
+        if (editTutorialForm) {
+            editTutorialForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const tutorialId = document.getElementById('editTutorialId').value;
+                if (!tutorialId) {
+                    return;
+                }
+
+                try {
+                    await apiRequest(assignmentApiUrlTemplate.replace('/0/', `/${tutorialId}/`), 'PATCH', {
+                        title: document.getElementById('editTutorialTitle').value,
+                        is_tutorial: true,
+                        content: document.getElementById('editTutorialContent').value,
+                        tutorial_link: document.getElementById('editTutorialLink').value,
+                        due_date: document.getElementById('editTutorialDueDate').value || null,
+                        max_score: Number(document.getElementById('editTutorialMaxScore').value || 0),
+                        status: document.getElementById('editTutorialStatus').value,
+                        instructions: document.getElementById('editTutorialInstructions').value,
+                    });
+                    const modal = getModalInstance(editTutorialModalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                    await loadItems();
+                } catch (error) {
+                    alert(`Unable to update tutorial. ${error.message}`);
+                }
+            });
+        }
+
+        const editMcqForm = document.getElementById('editMcqForm');
+        if (editMcqForm) {
+            editMcqForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const mcqId = document.getElementById('editMcqId').value;
+                if (!mcqId) {
+                    return;
+                }
+
+                try {
+                    await apiRequest(mcqApiUrlTemplate.replace('/0/', `/${mcqId}/`), 'PATCH', {
+                        question_text: document.getElementById('editMcqQuestionText').value,
+                        option_a: document.getElementById('editMcqOptionA').value,
+                        option_b: document.getElementById('editMcqOptionB').value,
+                        option_c: document.getElementById('editMcqOptionC').value,
+                        option_d: document.getElementById('editMcqOptionD').value,
+                        correct_option: document.getElementById('editMcqCorrectOption').value,
+                        difficulty_level: document.getElementById('editMcqDifficultyLevel').value,
+                        explanation: document.getElementById('editMcqExplanation').value,
+                        tags: document.getElementById('editMcqTags').value,
+                    });
+                    const modal = getModalInstance(editMcqModalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                    await loadItems();
+                } catch (error) {
+                    alert(`Unable to update MCQ question. ${error.message}`);
+                }
+            });
+        }
+
+        const editCodingForm = document.getElementById('editCodingForm');
+        if (editCodingForm) {
+            editCodingForm.addEventListener('submit', async function (event) {
+                event.preventDefault();
+                const codingId = document.getElementById('editCodingId').value;
+                if (!codingId) {
+                    return;
+                }
+
+                try {
+                    await apiRequest(codingApiUrlTemplate.replace('/0/', `/${codingId}/`), 'PATCH', {
+                        title: document.getElementById('editCodingTitle').value,
+                        scenario: document.getElementById('editCodingScenario').value,
+                        description: document.getElementById('editCodingDescription').value,
+                        input_format: document.getElementById('editCodingInputFormat').value,
+                        output_format: document.getElementById('editCodingOutputFormat').value,
+                        constraints: document.getElementById('editCodingConstraints').value,
+                        hint: document.getElementById('editCodingHint').value,
+                        difficulty_level: document.getElementById('editCodingDifficulty').value,
+                        cpu_time_limit: document.getElementById('editCodingCpuTime').value || 1,
+                        memory_limit: document.getElementById('editCodingMemoryLimit').value || 256,
+                    });
+                    const modal = getModalInstance(editCodingModalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                    await loadItems();
+                } catch (error) {
+                    alert(`Unable to update coding question. ${error.message}`);
+                }
+            });
+        }
+
+        const addTutorialContent = document.getElementById('addTutorialContent');
+        if (addTutorialContent) {
+            addTutorialContent.addEventListener('input', renderAddTutorialPreview);
+        }
+
+        const addTutorialModal = document.getElementById('addTutorialModal');
+        if (addTutorialModal) {
+            addTutorialModal.addEventListener('shown.bs.modal', renderAddTutorialPreview);
         }
 
         loadItems();

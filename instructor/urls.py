@@ -71,6 +71,8 @@ urlpatterns = [
     
     path("delete_question/<int:id>", sheet_views.delete_question, name="instructor_delete_question"),
     path("edit_question/<int:id>", sheet_views.edit_question, name="instructor_edit_question"),
+    path("edit_mcq_question/<int:id>", sheet_views.edit_mcq_question, name="instructor_edit_mcq_question"),
+    path("delete_mcq_question/<int:id>/", sheet_views.delete_mcq_question, name="instructor_delete_mcq_question"),
     
     path("test_code/<slug:slug>/", sheet_views.test_code, name="instructor_test_code"),
 
@@ -86,12 +88,19 @@ urlpatterns += [
     path("courses/", batch_views.batches, name="instructor_batches"),
     path("courses/add/", batch_views.add_batch_request, name="instructor_add_batch_request"),
     path("course/<slug:batch_slug>/sheet/<slug:sheet_slug>/", batch_views.batch_sheet, name="instructor_batch_sheet"),
+    path("course/<slug:slug>/reorder-sheets/", batch_views.reorder_batch_sheets, name="instructor_batch_reorder_sheets"),
     path("course/<slug:slug>/", batch_views.batch, name="instructor_batch"),
+    path("course/<slug:slug>/bulk-update-sheets/", batch_views.bulk_update_batch_sheets, name="instructor_batch_bulk_update_sheets"),
+    path("course/<slug:slug>/update/", batch_views.update_batch, name="instructor_update_batch"),
+    path("course/<slug:slug>/toggle-active/", batch_views.toggle_batch_active, name="instructor_toggle_batch_active"),
     
     path("<slug:slug>/set_pod", batch_views.set_pod_for_batch, name="instructor_pod_for_batch"),
     path("view_submissions/<slug:slug>/", batch_views.view_submissions, name="instructor_view_submissions"),
     
     path("<slug:slug>/enrollment_requests/", batch_views.batch_enrollment_requests, name="instructor_batch_enrollment_requests"),
+    path("course/<slug:slug>/leaderboard/", batch_views.batch_leaderboard, name="instructor_batch_leaderboard"),
+    path("course/<slug:slug>/fetch-leaderboard/", batch_views.fetch_batch_leaderboard, name="instructor_fetch_batch_leaderboard"),
+    path("course/<slug:slug>/download-leaderboard/", batch_views.download_batch_leaderboard_excel, name="instructor_download_batch_leaderboard"),
 
 
 ]
@@ -103,6 +112,7 @@ urlpatterns += [
     path("jovacs/", jovac_views.jovacs, name="instructor_jovacs"),
     path("jovac/add_course/", jovac_views.add_course, name="instructor_add_jovac"),
     path("jovac/<slug:slug>", jovac_views.jovac, name="instructor_jovac"),
+    path('jovac/<slug:slug>/reorder-sheets/', jovac_views.reorder_jovac_sheets, name='instructor_jovac_reorder_sheets'),
 
     path("jovac/<slug:course_slug>/<slug:sheet_slug>", jovac_views.jovac_sheet, name="instructor_jovac_sheet"),
     path('jovac/<slug:course_slug>/add-sheet/', jovac_views.add_sheet, name='instructor_add_jovac_sheet'),

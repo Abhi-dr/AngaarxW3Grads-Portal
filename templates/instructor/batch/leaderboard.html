@@ -1,0 +1,155 @@
+{% extends "instructor/base.html" %}
+{% load static %}
+
+{% block title %}
+Leaderboard | {{ batch.name }}
+{% endblock %}
+
+{% block batch_active %}
+active
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .download-btn {
+        background: linear-gradient(to right, #ff4500, #ffa500);
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .download-btn:hover {
+        background: linear-gradient(to right, #ff6347, #ff4500);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="heading mb-0">
+                    <span class="fw-semibold">{{ batch.name }}'s Leaderboard🔥</span>
+                </h3>
+                <a href="{% url 'instructor_download_batch_leaderboard' slug=batch.slug %}" class="download-btn">
+                    <i class="fas fa-download"></i> Download Leaderboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card w-100 mt-3">
+        <div class="card-body p-4">
+            <h5 class="card-title fw-semibold mb-4">Leaderboard 🔥</h5>
+            <div class="table-responsive">
+                <table class="table text-nowrap mb-0 align-middle">
+                    <thead class="fs-4">
+                        <tr>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Rank</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Student</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Total Score</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Earliest Submission</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Solved Problems</h6></th>
+                            <th class="border-bottom-0"><h6 class="fw-semibold mb-0">Sheet Breakdown</h6></th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard"></tbody>
+                </table>
+            </div>
+            <div id="pagination-container" class="mt-4"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const leaderboardContainer = document.getElementById('leaderboard');
+        const apiUrl = "{% url 'instructor_fetch_batch_leaderboard' batch.slug %}";
+
+        async function fetchLeaderboard(page = 1) {
+            leaderboardContainer.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
+                </tr>`;
+
+            const response = await fetch(`${apiUrl}?page=${page}&page_size=10`);
+            const data = await response.json();
+            renderLeaderboard(data.leaderboard || []);
+            renderPagination(data.pagination || {});
+        }
+
+        function renderLeaderboard(rows) {
+            leaderboardContainer.innerHTML = '';
+            if (!rows.length) {
+                leaderboardContainer.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No leaderboard data available</td>
+                    </tr>`;
+                return;
+            }
+
+            rows.forEach((entry) => {
+                let sheetDetails = '';
+                Object.entries(entry.sheet_breakdown || {}).forEach(([sheet, count]) => {
+                    sheetDetails += `<p class="mb-0"><strong>${sheet}:</strong> ${count}</p>`;
+                });
+
+                const row = `
+                    <tr>
+                        <td class="border-bottom-0"><p class="fw-semibold mb-0">${entry.rank}</p></td>
+                        <td class="border-bottom-0"><p class="fw-semibold mb-0">${entry.student.name}</p></td>
+                        <td class="border-bottom-0"><p class="fw-semibold mb-0">${entry.total_score}</p></td>
+                        <td class="border-bottom-0"><p class="fw-semibold mb-0">${new Date(entry.earliest_submission).toLocaleString()}</p></td>
+                        <td class="border-bottom-0"><p class="fw-semibold mb-0">${entry.solved_problems}</p></td>
+                        <td class="border-bottom-0"><div class="text-muted small">${sheetDetails || '<p class="mb-0">No sheets solved</p>'}</div></td>
+                    </tr>`;
+                leaderboardContainer.innerHTML += row;
+            });
+        }
+
+        function renderPagination(pagination) {
+            const paginationContainer = document.getElementById('pagination-container');
+            if (!paginationContainer) return;
+            if (!pagination.total_pages || pagination.total_pages <= 1) {
+                paginationContainer.innerHTML = '';
+                return;
+            }
+
+            let html = '<nav aria-label="Leaderboard pagination"><ul class="pagination justify-content-center mb-0">';
+            html += `
+                <li class="page-item ${!pagination.has_previous ? 'disabled' : ''}">
+                    <button class="page-link" onclick="changePage(${pagination.current_page - 1})" ${!pagination.has_previous ? 'disabled' : ''}>Previous</button>
+                </li>`;
+
+            for (let i = 1; i <= pagination.total_pages; i++) {
+                html += `
+                    <li class="page-item ${i === pagination.current_page ? 'active' : ''}">
+                        <button class="page-link" onclick="changePage(${i})">${i}</button>
+                    </li>`;
+            }
+
+            html += `
+                <li class="page-item ${!pagination.has_next ? 'disabled' : ''}">
+                    <button class="page-link" onclick="changePage(${pagination.current_page + 1})" ${!pagination.has_next ? 'disabled' : ''}>Next</button>
+                </li>`;
+            html += '</ul></nav>';
+            paginationContainer.innerHTML = html;
+        }
+
+        window.changePage = function (page) {
+            fetchLeaderboard(page);
+        };
+
+        fetchLeaderboard();
+    });
+</script>
+{% endblock %}
