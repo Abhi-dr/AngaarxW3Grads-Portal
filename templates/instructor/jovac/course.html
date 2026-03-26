@@ -9,29 +9,40 @@ JOVAC | {{ course.name }}
 active
 {% endblock %}
 
+{% block extra_css %}
+<style>
+    .sheet-card .card-img-top {
+        height: 160px;
+        object-fit: cover;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 
 <div class="container-fluid">
-    <div class="card">
+    <div class="card mb-4">
         <div class="card-body">
-            <h3 class="heading">
-                <span class="fw-semibold">{{ course.name }}🔥</span>
-                <span class="fs-4"> | 🔥By:
-                    {{ course.get_instructor_names }}
-                    🔥</span>
+            <h3 class="heading mb-0">
+                <span class="fw-semibold">{{ course.name }} 🔥</span>
+                <span class="fs-5 text-muted"> | By: {{ course.get_instructor_names }}</span>
             </h3>
-        </div>
-        <div class="row mt-n3">
 
-            <div class="col-md-3 mx-auto">
-                <a href="{% url 'instructor_add_jovac_sheet' course.slug %}"
-                    class="btn btn-outline-success button mt-n2 mb-3 w-100 ">Add Sheet</a>
+            <div class="d-flex gap-2 flex-wrap mt-3">
+                <a href="{% url 'instructor_add_jovac_sheet' course.slug %}" class="btn btn-success">
+                    <i class="ti ti-plus me-1"></i>Add Sheet
+                </a>
+                <a href="{% url 'instructor_jovac_reorder_sheets' course.slug %}" class="btn btn-outline-primary">
+                    <i class="ti ti-arrows-sort me-1"></i>Reorder Sheets
+                </a>
+                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#editCourseModal">
+                    <i class="ti ti-pencil me-1"></i>Edit Course
+                </button>
             </div>
-
-            <div class="col-md-3 mx-auto"> </div>
         </div>
-
     </div>
+
+    <div id="sheetBulkActionAlert"></div>
 
     {% for message in messages %}
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
@@ -42,15 +53,55 @@ active
 
     <!-- ================================= SESSIONS TABLE ================================== -->
 
-    <div class="row row-cols-1 row-cols-md-3 g-4 mt-4" id="sheets-container"></div>
+    <div class="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4 mt-4" id="sheets-container"></div>
 
 
 </div>
+
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="courseEditName" value="{{ course.name }}" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="courseEditDescription" rows="4">{{ course.description|default_if_none:'' }}</textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Thumbnail</label>
+                        <input type="file" class="form-control" id="courseEditThumbnail" accept="image/*">
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="courseEditIsActive" {% if course.is_active %}checked{% endif %}>
+                            <label class="form-check-label" for="courseEditIsActive">Course Active</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="courseEditError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCourseEditBtn">Update Course</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
     (function () {
         const container = document.getElementById('sheets-container');
         const courseSlug = '{{ course.slug }}';
+        const csrfToken = '{{ csrf_token }}';
         const detailTemplate = "{% url 'instructor_jovac_sheet' course.slug 'sheet-slug-placeholder' %}";
 
         function renderSheetCard(sheet) {
@@ -64,17 +115,100 @@ active
                 : '<span class="badge bg-warning text-dark">Pending Approval</span>';
 
             return `
-                <div class="col-md-3">
-                    <div class="card">
+                <div class="col">
+                    <div class="card sheet-card h-100">
                         <a href="${detailUrl}">${thumbnailHtml}</a>
-                        <div class="card-body">
-                            <h5 class="card-title">${sheet.name}🔥</h5>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title mb-1">${sheet.name}🔥</h5>
                             ${statusBadge}
-                            <a href="${detailUrl}" class="btn btn-outline-secondary w-100 mt-2">View More</a>
+                            <a href="${detailUrl}" class="btn btn-outline-secondary w-100 mt-3">View More</a>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        function showBulkAlert(message, type) {
+            const wrap = document.getElementById('sheetBulkActionAlert');
+            if (!wrap) return;
+            wrap.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+        }
+
+        async function bulkUpdateSheets(actionType) {
+            const isEnable = actionType === 'enable_all';
+            const btn = document.getElementById(isEnable ? 'enableAllSheetsBtn' : 'approveAllSheetsBtn');
+            const confirmText = isEnable
+                ? 'Enable all sheets in this course?'
+                : 'Approve all sheets in this course?';
+            if (!confirm(confirmText)) {
+                return;
+            }
+
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = isEnable ? 'Enabling...' : 'Approving...';
+
+            try {
+                const res = await fetch(`/instructor/api/v1/courses/${courseSlug}/bulk-update-sheets/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: actionType }),
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    showBulkAlert(data.message || 'Updated successfully.', 'success');
+                    await loadSheets();
+                } else {
+                    showBulkAlert(data.error || 'Failed to update sheets.', 'danger');
+                }
+            } catch (error) {
+                showBulkAlert('Network error while updating sheets.', 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHtml;
+            }
+        }
+
+        async function saveCourseEdit() {
+            const saveBtn = document.getElementById('saveCourseEditBtn');
+            const err = document.getElementById('courseEditError');
+            err.classList.add('d-none');
+
+            const fd = new FormData();
+            fd.append('name', document.getElementById('courseEditName').value.trim());
+            fd.append('description', document.getElementById('courseEditDescription').value.trim());
+            fd.append('is_active', document.getElementById('courseEditIsActive').checked ? 'true' : 'false');
+            const thumb = document.getElementById('courseEditThumbnail').files[0];
+            if (thumb) {
+                fd.append('thumbnail', thumb);
+            }
+
+            saveBtn.disabled = true;
+            try {
+                const res = await fetch(`/instructor/api/v1/courses/${courseSlug}/`, {
+                    method: 'PATCH',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: fd,
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    throw new Error(data.error || 'Unable to update course.');
+                }
+                window.location.reload();
+            } catch (error) {
+                err.textContent = error.message;
+                err.classList.remove('d-none');
+            } finally {
+                saveBtn.disabled = false;
+            }
         }
 
         async function loadSheets() {
@@ -88,7 +222,7 @@ active
                 }
 
                 const payload = await response.json();
-                const sheets = payload.sheets || [];
+                const sheets = payload.sheets || payload.data || [];
 
                 if (!sheets.length) {
                     container.innerHTML = '<div class="col-12 text-center text-muted py-4">No sheets found.</div>';
@@ -100,6 +234,13 @@ active
                 container.innerHTML = '<div class="col-12 text-center text-danger py-4">Unable to load sheets right now.</div>';
             }
         }
+
+        const enableBtn = document.getElementById('enableAllSheetsBtn');
+        const approveBtn = document.getElementById('approveAllSheetsBtn');
+        const saveCourseBtn = document.getElementById('saveCourseEditBtn');
+        if (enableBtn) enableBtn.addEventListener('click', function () { bulkUpdateSheets('enable_all'); });
+        if (approveBtn) approveBtn.addEventListener('click', function () { bulkUpdateSheets('approve_all'); });
+        if (saveCourseBtn) saveCourseBtn.addEventListener('click', saveCourseEdit);
 
         loadSheets();
     })();

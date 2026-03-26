@@ -53,6 +53,25 @@ class BatchAdminViewSet(viewsets.ModelViewSet):
         batch.save(update_fields=['sheet_order'])
         return Response({'success': True, 'message': 'Sheet order saved successfully.'})
 
+    @action(detail=True, methods=['post'], url_path='bulk-update-sheets', permission_classes=[IsAdministrator])
+    def bulk_update_sheets(self, request, slug=None):
+        """POST .../batches/<slug>/bulk-update-sheets/
+        Body: {"action": "enable_all" | "approve_all"}
+        """
+        batch = self.get_object()
+        action_type = request.data.get('action')
+
+        if action_type not in ['enable_all', 'approve_all']:
+            return Response({'success': False, 'error': 'Invalid action. Use enable_all or approve_all.'}, status=400)
+
+        sheets_qs = batch.sheets.all()
+        if action_type == 'enable_all':
+            count = sheets_qs.update(is_enabled=True)
+            return Response({'success': True, 'message': f'Enabled {count} sheet(s).'}, status=200)
+
+        count = sheets_qs.update(is_approved=True)
+        return Response({'success': True, 'message': f'Approved {count} sheet(s).'}, status=200)
+
     def update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
         instance = self.get_object()

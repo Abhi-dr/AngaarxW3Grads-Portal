@@ -4,13 +4,31 @@
 
 {% block title %}Instructor | Courses{% endblock %}
 
+{% block extra_css %}
+<style>
+    .course-card .card-img-top {
+        height: 230px;
+        object-fit: cover;
+    }
+
+    .text-truncate-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="container-fluid">
+    <div id="alertContainer"></div>
+
     <div class="card mb-4">
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
                 <h3 class="heading mb-0"><span class="fw-semibold">All Courses</span></h3>
-                <p class="text-muted mb-0">Batches dashboard for instructor panel.</p>
+                <p class="text-body-secondary mb-0 small">Course Management Dashboard</p>
             </div>
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseRequestModal">Add Course</button>
         </div>
@@ -23,7 +41,7 @@
     </div>
     {% endfor %}
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4" id="coursesGrid"></div>
+    <div class="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4" id="coursesGrid"></div>
 </div>
 
 <div class="modal fade" id="addCourseRequestModal" tabindex="-1" aria-labelledby="addCourseRequestModalLabel" aria-hidden="true">
@@ -62,35 +80,211 @@
     </div>
 </div>
 
+<div class="modal fade" id="editCourseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Course</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editCourseSlug">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Course Name *</label>
+                        <input type="text" class="form-control" id="editCourseName" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="editCourseDescription" rows="4"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Thumbnail</label>
+                        <input type="file" class="form-control" id="editCourseThumbnail" accept="image/*">
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="editCourseIsActive">
+                            <label class="form-check-label" for="editCourseIsActive">Active</label>
+                        </div>
+                    </div>
+                </div>
+                <div id="editCourseError" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveCourseEditBtn" onclick="saveCourseEdit()">Update Course</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     (function () {
         const grid = document.getElementById('coursesGrid');
+        const csrfToken = '{{ csrf_token }}';
+        let batchesCache = [];
+
+        function showAlert(message, type = 'success') {
+            const container = document.getElementById('alertContainer');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+
+        function escapeHtml(value) {
+            return String(value || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         function cardTemplate(batch) {
             const thumbnail = batch.thumbnail
-                ? `<img src="${batch.thumbnail}" class="card-img-top" alt="${batch.name}" style="height: 180px; object-fit: cover;">`
-                : `<div class="card-img-top d-flex align-items-center justify-content-center text-muted" style="height: 180px;">No Image</div>`;
+                ? `<img src="${batch.thumbnail}" class="card-img-top" alt="${escapeHtml(batch.name)}">`
+                : `<div class="card-img-top d-flex align-items-center justify-content-center text-muted">No Thumbnail</div>`;
 
-            const status = batch.is_active
-                ? '<span class="badge bg-success mb-3 align-self-start">Active</span>'
-                : '<span class="badge bg-secondary mb-3 align-self-start">Inactive</span>';
+            const status = batch.is_active ? 'Active' : 'Inactive';
+            const statusClass = batch.is_active ? 'text-bg-success' : 'text-bg-danger';
+            const toggleLabel = batch.is_active ? 'Deactivate' : 'Activate';
+            const toggleClass = batch.is_active ? 'btn-outline-danger' : 'btn-outline-success';
 
             return `
                 <div class="col">
-                    <div class="card h-100 shadow-sm">
-                        ${thumbnail}
+                    <div class="card course-card h-100 shadow-sm" id="batch-card-${batch.slug}">
+                        <div class="position-relative">
+                            <a href="/instructor/course/${batch.slug}/">
+                                ${thumbnail}
+                            </a>
+                            <span class="position-absolute top-0 end-0 m-2 badge ${statusClass}" id="badge-${batch.slug}">${status}</span>
+                        </div>
                         <div class="card-body d-flex flex-column">
-                            <h5 class="card-title mb-2">${batch.name}</h5>
-                            <p class="card-text text-muted small mb-3">${batch.description || 'No description available'}</p>
-                            ${status}
-                            <div class="mt-auto d-flex gap-2 flex-wrap">
-                                <a href="/instructor/course/${batch.slug}/" class="btn btn-outline-primary btn-sm">View</a>
+                            <h5 class="card-title fw-bold mb-3 text-truncate-2" title="${escapeHtml(batch.name)}">${escapeHtml(batch.name)}</h5>
+                            <div class="d-flex gap-2 mt-auto flex-wrap">
+                                <a href="/instructor/course/${batch.slug}/" class="btn btn-sm btn-outline-secondary flex-fill fw-medium">View</a>
+                                <button class="btn btn-sm btn-outline-secondary flex-fill fw-medium" onclick="window.openEditCourseModal('${batch.slug}')">Edit</button>
+                                <button class="btn btn-sm ${toggleClass} flex-fill fw-medium" id="toggle-${batch.slug}" onclick="window.toggleActiveCourse('${batch.slug}', this)">${toggleLabel}</button>
                             </div>
                         </div>
                     </div>
                 </div>
             `;
         }
+
+        function openEditCourseModal(slug) {
+            const batch = batchesCache.find((item) => item.slug === slug);
+            if (!batch) return;
+
+            document.getElementById('editCourseSlug').value = batch.slug;
+            document.getElementById('editCourseName').value = batch.name || '';
+            document.getElementById('editCourseDescription').value = batch.description || '';
+            document.getElementById('editCourseThumbnail').value = '';
+            document.getElementById('editCourseIsActive').checked = !!batch.is_active;
+            document.getElementById('editCourseError').classList.add('d-none');
+
+            const modal = new bootstrap.Modal(document.getElementById('editCourseModal'));
+            modal.show();
+        }
+
+        async function saveCourseEdit() {
+            const slug = document.getElementById('editCourseSlug').value;
+            const errorEl = document.getElementById('editCourseError');
+            const saveBtn = document.getElementById('saveCourseEditBtn');
+            errorEl.classList.add('d-none');
+
+            const name = document.getElementById('editCourseName').value.trim();
+            if (!name) {
+                errorEl.textContent = 'Course name is required.';
+                errorEl.classList.remove('d-none');
+                return;
+            }
+
+            const fd = new FormData();
+            fd.append('name', name);
+            fd.append('description', document.getElementById('editCourseDescription').value.trim());
+            fd.append('is_active', document.getElementById('editCourseIsActive').checked ? 'true' : 'false');
+
+            const thumbnail = document.getElementById('editCourseThumbnail').files[0];
+            if (thumbnail) {
+                fd.append('thumbnail', thumbnail);
+            }
+
+            saveBtn.disabled = true;
+            try {
+                const response = await fetch(`/instructor/course/${slug}/update/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                    body: fd,
+                });
+
+                const payload = await response.json();
+                if (!response.ok || !payload.success) {
+                    throw new Error(payload.error || 'Unable to update course.');
+                }
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editCourseModal'));
+                if (modal) {
+                    modal.hide();
+                }
+
+                showAlert(payload.message || 'Course updated successfully.');
+                await loadCourses();
+            } catch (error) {
+                errorEl.textContent = error.message;
+                errorEl.classList.remove('d-none');
+            } finally {
+                saveBtn.disabled = false;
+            }
+        }
+
+        async function toggleActiveCourse(slug, button) {
+            const originalText = button.textContent;
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+            try {
+                const response = await fetch(`/instructor/course/${slug}/toggle-active/`, {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken },
+                });
+
+                const payload = await response.json();
+                if (!response.ok || !payload.success) {
+                    throw new Error(payload.error || 'Unable to update status.');
+                }
+
+                const badge = document.getElementById(`badge-${slug}`);
+                if (badge) {
+                    badge.textContent = payload.is_active ? 'Active' : 'Inactive';
+                    badge.className = `position-absolute top-0 end-0 m-2 badge ${payload.is_active ? 'text-bg-success' : 'text-bg-danger'}`;
+                }
+
+                button.textContent = payload.is_active ? 'Deactivate' : 'Activate';
+                button.className = `btn btn-sm ${payload.is_active ? 'btn-outline-danger' : 'btn-outline-success'} flex-fill fw-medium`;
+
+                const idx = batchesCache.findIndex((item) => item.slug === slug);
+                if (idx >= 0) {
+                    batchesCache[idx].is_active = payload.is_active;
+                }
+
+                showAlert(payload.message || 'Status updated successfully.');
+            } catch (error) {
+                button.textContent = originalText;
+                showAlert(error.message || 'Unable to update status.', 'danger');
+            } finally {
+                button.disabled = false;
+            }
+        }
+
+        window.openEditCourseModal = openEditCourseModal;
+        window.saveCourseEdit = saveCourseEdit;
+        window.toggleActiveCourse = toggleActiveCourse;
 
         function renderEmpty() {
             grid.innerHTML = `
@@ -105,19 +299,25 @@
             `;
         }
 
-        fetch('/instructor/api/v1/batches/')
-            .then((r) => r.json())
-            .then((res) => {
-                const batches = (res && res.data) || [];
+        async function loadCourses() {
+            try {
+                const response = await fetch('/instructor/api/v1/batches/');
+                const payload = await response.json();
+                const batches = (payload && payload.data) || [];
+                batchesCache = batches;
+
                 if (!batches.length) {
                     renderEmpty();
                     return;
                 }
+
                 grid.innerHTML = batches.map(cardTemplate).join('');
-            })
-            .catch(() => {
+            } catch (_) {
                 renderEmpty();
-            });
+            }
+        }
+
+        loadCourses();
     })();
 </script>
 {% endblock %}

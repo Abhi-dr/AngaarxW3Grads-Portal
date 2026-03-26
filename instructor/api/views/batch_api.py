@@ -29,6 +29,18 @@ class BatchInstructorViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = BatchDetailInstructorSerializer(instance, context={'request': request})
         return Response({'success': True, 'data': serializer.data})
 
+    @action(detail=True, methods=['patch'], url_path='reorder-sheets')
+    def reorder_sheets(self, request, slug=None):
+        """PATCH .../batches/<slug>/reorder-sheets/ — save custom sheet order for instructor."""
+        batch = self.get_object()
+        order = request.data.get('order', [])
+        if not isinstance(order, list):
+            return Response({'success': False, 'error': 'order must be a list of sheet IDs.'}, status=400)
+
+        batch.sheet_order = {str(sheet_id): idx for idx, sheet_id in enumerate(order)}
+        batch.save(update_fields=['sheet_order'])
+        return Response({'success': True, 'message': 'Sheet order saved successfully.'})
+
 
 class SheetInstructorViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Sheet.objects.all().order_by('-id')

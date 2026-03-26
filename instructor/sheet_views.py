@@ -25,6 +25,31 @@ from practice.models import POD, Question, Sheet, Submission, TestCase, DriverCo
 import google.generativeai as genai
 from django.conf import settings
 
+
+def _resolve_instructor_item_redirect(item, next_url=None, fallback_view='instructor_sheets'):
+    if next_url:
+        return next_url
+
+    if hasattr(item, 'course_sheets'):
+        course_sheet = item.course_sheets.first()
+        if course_sheet:
+            course = course_sheet.course.first()
+            if course:
+                return reverse('instructor_jovac_sheet', kwargs={
+                    'course_slug': course.slug,
+                    'sheet_slug': course_sheet.slug,
+                })
+
+    if hasattr(item, 'sheets'):
+        sheet = item.sheets.first()
+        if sheet:
+            return reverse('instructor_sheet', kwargs={'slug': sheet.slug})
+
+    if hasattr(item, 'sheet') and item.sheet:
+        return reverse('instructor_sheet', kwargs={'slug': item.sheet.slug})
+
+    return reverse(fallback_view)
+
 # ========================= SHEET WORK ==========================
 
 @login_required(login_url='login')
@@ -247,6 +272,7 @@ def add_new_mcq_question(request, slug):
         option_d = (request.POST.get('option_d') or '').strip()
         correct_option = (request.POST.get('correct_option') or '').strip()
         explanation = (request.POST.get('explanation') or '').strip()
+        tags = (request.POST.get('tags') or '').strip()
         difficulty_level = (request.POST.get('difficulty_level') or 'Easy').strip()
 
         if not all([question_text, option_a, option_b, option_c, option_d, correct_option]):
@@ -265,6 +291,7 @@ def add_new_mcq_question(request, slug):
             option_d=option_d,
             correct_option=correct_option,
             explanation=explanation,
+            tags=tags,
             difficulty_level=difficulty_level,
             is_approved=True,
         )
@@ -739,15 +766,14 @@ def driver_code(request, slug):
 @staff_member_required(login_url='login')
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def delete_question(request, id):
-    
     question = Question.objects.get(id=id)
-    slug = question.sheets.first().slug
-    
+    next_url = request.GET.get('next') or request.POST.get('next')
+    redirect_url = _resolve_instructor_item_redirect(question, next_url=next_url)
+
     question.delete()
-    
-    
+
     messages.success(request, 'Problem deleted successfully')
-    return redirect('instructor_sheet', slug=slug)
+    return redirect(redirect_url)
 
 
 # ======================================== EDIT PROBLEM ======================================
@@ -756,10 +782,10 @@ def delete_question(request, id):
 @staff_member_required(login_url='login')
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def edit_question(request, id):
-    
     question = Question.objects.get(id=id)
     sheets = Sheet.objects.all().order_by('-id')
-    
+    next_url = request.GET.get('next') or request.POST.get('next')
+
     if request.method == 'POST':
         
         sheet = request.POST.getlist('sheet')
@@ -801,15 +827,59 @@ def edit_question(request, id):
                 question.sheets.add(sheet_obj)
         
         messages.success(request, 'Problem updated successfully')
+        if next_url:
+            return redirect(next_url)
         return redirect('instructor_edit_question', id=question.id)
     
     question.description = convert_code_to_backticks(question.description)
     
     parameters = {
         'question': question,
-        'sheets': sheets
+        'sheets': sheets,
+        'next_url': next_url,
     }
     return render(request, 'instructor/sheet/edit_question.html', parameters)
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def edit_mcq_question(request, id):
+    question = get_object_or_404(MCQQuestion, id=id)
+    next_url = request.GET.get('next') or request.POST.get('next')
+
+    if request.method == 'POST':
+        question.question_text = request.POST.get('question_text', '').strip()
+        question.option_a = request.POST.get('option_a', '').strip()
+        question.option_b = request.POST.get('option_b', '').strip()
+        question.option_c = request.POST.get('option_c', '').strip()
+        question.option_d = request.POST.get('option_d', '').strip()
+        question.correct_option = request.POST.get('correct_option', 'A').strip().upper()
+        question.difficulty_level = request.POST.get('difficulty_level', 'Easy').strip()
+        question.explanation = request.POST.get('explanation', '').strip()
+        question.tags = request.POST.get('tags', '').strip()
+        question.save()
+
+        messages.success(request, 'MCQ question updated successfully')
+        return redirect(_resolve_instructor_item_redirect(question, next_url=next_url))
+
+    return render(request, 'instructor/sheet/edit_mcq_question.html', {
+        'question': question,
+        'next_url': next_url,
+    })
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@cache_control(no_cache=True, must_revalidate=True, no_store=True)
+def delete_mcq_question(request, id):
+    question = get_object_or_404(MCQQuestion, id=id)
+    next_url = request.GET.get('next') or request.POST.get('next')
+    redirect_url = _resolve_instructor_item_redirect(question, next_url=next_url)
+
+    question.delete()
+    messages.success(request, 'MCQ question deleted successfully')
+    return redirect(redirect_url)
 
 # ========================================== Convert to code ==========================================
 

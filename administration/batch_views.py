@@ -353,6 +353,28 @@ def batch(request, slug):
 
     return render(request, 'administration/batch/batch.html', parameters)
 
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
+@admin_required
+def batch_sheet(request, batch_slug, sheet_slug):
+    batch = get_object_or_404(Batch, slug=batch_slug)
+    sheet = get_object_or_404(Sheet, slug=sheet_slug, batches=batch)
+    questions = sheet.get_ordered_questions()
+
+    administrator = CustomUser.objects.get(id=request.user.id)
+    parameters = {
+        "administrator": administrator,
+        "batch": batch,
+        "sheet": sheet,
+        "questions": questions,
+        "from_course": True,
+        "course_slug": batch.slug,
+        "return_url": request.path,
+    }
+
+    return render(request, 'administration/sheet/sheet.html', parameters)
+
 # =============================== REORDER BATCH SHEETS ==============================
 
 @login_required(login_url='login')

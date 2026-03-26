@@ -212,6 +212,21 @@
     </div>
     {% endfor %}
 
+    <div class="card w-100 mb-4">
+        <div class="card-body p-4">
+            <form method="post" id="itemSearchForm">
+                {% csrf_token %}
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Search by ID, Title, Description or Type"
+                        aria-label="Search by ID, Title, Description or Type" aria-describedby="button-addon2"
+                        name="query">
+                    <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+                    <button type="button" id="clearSearchBtn" class="btn btn-outline-danger">Clear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Assignments Table -->
     <div class="card w-100">
         <div class="card-body p-4">
@@ -464,6 +479,14 @@
                             <option value="Hard">Hard</option>
                         </select>
                     </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Explanation</label>
+                        <textarea class="form-control" id="mcqExplanation" rows="3" placeholder="Optional explanation"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Tags (comma separated)</label>
+                        <input type="text" class="form-control" id="mcqTags" placeholder="html, forms, upload">
+                    </div>
                 </div>
                 <div id="mcqFormError" class="alert alert-danger mt-3 d-none"></div>
             </div>
@@ -487,6 +510,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="codeId" value="">
                 <div class="row g-3">
                     <div class="col-md-8">
                         <label class="form-label fw-semibold">Title <span class="text-danger">*</span></label>
@@ -575,6 +599,9 @@
     let pendingDeleteType = null;
     let pendingDeleteMode = 'unlink';
     let sheetItemsCache = [];
+    const searchForm = document.getElementById('itemSearchForm');
+    const searchInput = searchForm ? searchForm.querySelector('input[name="query"]') : null;
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
     let linkQuestionSelect = null;
     let linkQuestionAbortController = null;
     let assignmentModalIntent = 'assignment';
@@ -697,11 +724,33 @@
             }
 
             sheetItemsCache = data.items || [];
-            renderAssignments(sheetItemsCache);
+            applySheetSearch(searchInput ? searchInput.value : '');
         } catch (e) {
             document.getElementById('assignmentTableBody').innerHTML =
                 `<tr><td colspan="6" class="text-danger">Failed to load sheet items.</td></tr>`;
         }
+    }
+
+    function applySheetSearch(queryText) {
+        const query = String(queryText || '').trim().toLowerCase();
+        if (!query) {
+            renderAssignments(sheetItemsCache);
+            return;
+        }
+
+        const filteredItems = sheetItemsCache.filter((item) => {
+            const type = String(item.type || '').toLowerCase();
+            const title = String(item.obj?.title || item.obj?.question_text || '').toLowerCase();
+            const description = String(item.obj?.description || '').toLowerCase();
+            const itemId = String(item.item_id || item.pk || item.obj?.id || '');
+
+            return itemId.includes(query)
+                || type.includes(query)
+                || title.includes(query)
+                || description.includes(query);
+        });
+
+        renderAssignments(filteredItems);
     }
 
     function formatDate(dt) {
@@ -782,6 +831,7 @@
                     `;
                 } else {
                     actionHtml = `
+                        <button class="btn btn-sm btn-outline-dark" onclick="openEditCoding(${a.id})">Edit</button>
                         <button class="btn btn-sm btn-outline-danger" onclick="openDeleteAssignFromCache(${a.id}, '${item.type}')">Unlink</button>
                     `;
                 }
@@ -1069,6 +1119,8 @@
         document.getElementById('mcqD').value = '';
         document.getElementById('mcqCorrect').value = 'A';
         document.getElementById('mcqDiff').value = 'Easy';
+        document.getElementById('mcqExplanation').value = '';
+        document.getElementById('mcqTags').value = '';
         document.getElementById('mcqFormError').classList.add('d-none');
     }
 
@@ -1096,6 +1148,8 @@
             document.getElementById('mcqD').value = data.option_d || '';
             document.getElementById('mcqCorrect').value = data.correct_option || 'A';
             document.getElementById('mcqDiff').value = data.difficulty_level || 'Easy';
+            document.getElementById('mcqExplanation').value = data.explanation || '';
+            document.getElementById('mcqTags').value = data.tags || '';
 
             new bootstrap.Modal(document.getElementById('mcqModal')).show();
         } catch (e) {
@@ -1123,6 +1177,8 @@
             question_text: qt, option_a: oa, option_b: ob, option_c: oc, option_d: od,
             correct_option: document.getElementById('mcqCorrect').value,
             difficulty_level: document.getElementById('mcqDiff').value,
+            explanation: document.getElementById('mcqExplanation').value,
+            tags: document.getElementById('mcqTags').value,
             is_approved: true
         };
 
@@ -1164,15 +1220,50 @@
 
     // ==================== SAVE CODING ====================
     function openAddCodingModal() {
+        document.querySelector('#codingModal .modal-title').textContent = 'Create Coding Question';
+        document.getElementById('codeBtnText').textContent = 'Save & Link';
+        document.getElementById('codeId').value = '';
         document.getElementById('codeTitle').value = '';
         document.getElementById('codeDesc').value = '';
         document.getElementById('codeDiff').value = 'Easy';
         document.getElementById('codeFormError').classList.add('d-none');
     }
 
+    async function openEditCoding(id) {
+        openAddCodingModal();
+        document.querySelector('#codingModal .modal-title').textContent = 'Edit Coding Question';
+        document.getElementById('codeBtnText').textContent = 'Update Question';
+        document.getElementById('codeId').value = id;
+
+        const cached = sheetItemsCache.find(item => item.type === 'Coding' && item.obj.id === id);
+        if (cached && cached.obj) {
+            document.getElementById('codeTitle').value = cached.obj.title || '';
+            document.getElementById('codeDesc').value = cached.obj.description || '';
+            document.getElementById('codeDiff').value = cached.obj.difficulty_level || 'Easy';
+        }
+
+        try {
+            const res = await fetch(`/administration/api/v1/coding-questions/${id}/`, {
+                headers: { 'X-CSRFToken': CSRF }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('codeTitle').value = data.title || document.getElementById('codeTitle').value;
+                document.getElementById('codeDesc').value = data.description || document.getElementById('codeDesc').value;
+                document.getElementById('codeDiff').value = data.difficulty_level || document.getElementById('codeDiff').value || 'Easy';
+            }
+        } catch (_) {
+            // Keep cached values if fetch fails.
+        }
+
+        new bootstrap.Modal(document.getElementById('codingModal')).show();
+    }
+
     async function saveCoding() {
         const errEl = document.getElementById('codeFormError');
         errEl.classList.add('d-none');
+        const codingId = document.getElementById('codeId').value;
+        const isEdit = !!codingId;
 
         const title = document.getElementById('codeTitle').value.trim();
         if (!title) { errEl.textContent = 'Title is required.'; errEl.classList.remove('d-none'); return; }
@@ -1188,18 +1279,21 @@
         btn.disabled = true; document.getElementById('codeBtnSpinner').classList.remove('d-none');
 
         try {
-            // Create Coding
-            const res = await fetch(`/administration/api/v1/coding-questions/`, {
-                method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+            const url = isEdit ? `/administration/api/v1/coding-questions/${codingId}/` : `/administration/api/v1/coding-questions/`;
+            const method = isEdit ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method, headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
             const data = await res.json();
             if (res.ok) {
-                // Link it
-                await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/link-item/`, {
-                    method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ type: 'Coding', item_id: data.data?.id || data.id })
-                });
+                if (!isEdit) {
+                    await fetch(`/administration/api/v1/course-sheets/${SHEET_SLUG}/link-item/`, {
+                        method: 'POST', headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ type: 'Coding', item_id: data.data?.id || data.id })
+                    });
+                }
                 bootstrap.Modal.getInstance(document.getElementById('codingModal')).hide();
                 await loadSheetItems();
             } else {
@@ -1424,6 +1518,20 @@
             }
         } catch (e) { errEl.textContent = 'Network error.'; errEl.classList.remove('d-none'); }
         finally { btn.disabled = false; document.getElementById('linkBtnSpinner').classList.add('d-none'); }
+    }
+
+    if (searchForm && searchInput) {
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            applySheetSearch(searchInput.value);
+        });
+    }
+
+    if (clearSearchBtn && searchInput) {
+        clearSearchBtn.addEventListener('click', function () {
+            searchInput.value = '';
+            applySheetSearch('');
+        });
     }
 
     initializeLinkQuestionSearch();
