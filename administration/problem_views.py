@@ -374,6 +374,7 @@ def reject_question(request, id):
 def test_cases(request, slug):
     
     administrator = CustomUser.objects.get(id=request.user.id)
+    from_course = request.GET.get('from_course') in ['1', 'true', 'True']
     
     question = Question.objects.get(slug=slug)
     
@@ -382,7 +383,8 @@ def test_cases(request, slug):
     parameters = {
         'administrator': administrator,
         'question': question,
-        'test_cases': test_cases
+        'test_cases': test_cases,
+        'from_course': from_course,
     }
     return render(request, 'administration/practice/test_cases.html', parameters)
 
@@ -544,6 +546,7 @@ def delete_test_case(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def driver_code(request, slug):
     question = Question.objects.get(slug=slug)
+    from_course = request.GET.get('from_course') in ['1', 'true', 'True']
     
     driver_codes = {
     code.language_id: {
@@ -600,6 +603,7 @@ def driver_code(request, slug):
         
         'question': question,
         'driver_codes': mark_safe(json.dumps(driver_codes)),
+        'from_course': from_course,
     }
 
     return render(request, 'administration/practice/driver_code.html', parameters)

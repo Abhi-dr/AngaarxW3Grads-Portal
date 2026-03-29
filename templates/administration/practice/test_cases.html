@@ -3,7 +3,8 @@
 
 {% block title %}{{ question.title }} | Test Cases{% endblock %}
 
-{% block problem_active %}active{% endblock %}
+{% block problem_active %}{% if not from_course %}active{% endif %}{% endblock %}
+{% block my_batches_active %}{% if from_course %}active{% endif %}{% endblock %}
 
 {% block extra_css %}
 <style>

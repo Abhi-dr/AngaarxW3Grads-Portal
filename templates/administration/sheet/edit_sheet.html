@@ -77,8 +77,14 @@ active
                                 </div>
 
                                 <div class="mb-3 col-md-3">
-                                    <img src="{{ sheet.thumbnail.url }}" alt="thumbnail" class="img-thumbnail"
+                                    {% if thumbnail_url %}
+                                    <img src="{{ thumbnail_url }}" alt="thumbnail" class="img-thumbnail"
                                         style="height: 100px;">
+                                    {% else %}
+                                    <div class="img-thumbnail d-flex align-items-center justify-content-center text-muted" style="height: 100px;">
+                                        No thumbnail
+                                    </div>
+                                    {% endif %}
                                 </div>
                             </div>
 

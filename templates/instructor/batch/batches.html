@@ -41,7 +41,9 @@
     </div>
     {% endfor %}
 
-    <div class="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4" id="coursesGrid"></div>
+    <div class="row row-cols-1 row-cols-md-3 row-cols-xl-4 g-4" id="coursesGrid">
+        <div class="col-12 text-center text-muted py-4">Loading courses...</div>
+    </div>
 </div>
 
 <div class="modal fade" id="addCourseRequestModal" tabindex="-1" aria-labelledby="addCourseRequestModalLabel" aria-hidden="true">
@@ -299,7 +301,12 @@
             `;
         }
 
+        function renderLoading() {
+            grid.innerHTML = '<div class="col-12 text-center text-muted py-4">Loading courses...</div>';
+        }
+
         async function loadCourses() {
+            renderLoading();
             try {
                 const response = await fetch('/instructor/api/v1/batches/');
                 const payload = await response.json();

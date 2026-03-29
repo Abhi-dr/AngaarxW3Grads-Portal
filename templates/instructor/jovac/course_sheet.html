@@ -774,6 +774,7 @@ active
         const searchInput = searchForm ? searchForm.querySelector('input[name="query"]') : null;
         const clearSearchBtn = document.getElementById('clearSearchBtn');
         const sheetSlug = '{{ sheet.slug }}';
+        const currentSheetName = '{{ sheet.name|escapejs }}';
         const csrfToken = '{{ csrf_token }}';
         const returnPath = encodeURIComponent(window.location.pathname + window.location.search);
         const editAssignmentUrlTemplate = "{% url 'instructor_jovac_edit_assignment' 0 %}";
@@ -1010,7 +1011,10 @@ active
                 return `
                     <tr>
                         <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${item.pk}</h6></td>
-                        <td class="border-bottom-0"><h6 class="fw-semibold mb-1" title="${title.replace(/"/g, '&quot;')}">${truncate(title, 40)}</h6></td>
+                        <td class="border-bottom-0">
+                            <h6 class="fw-semibold mb-1" title="${title.replace(/"/g, '&quot;')}">${truncate(title, 25)}</h6>
+                            <span style="font-weight: bold;">${currentSheetName} |</span>
+                        </td>
                         <td class="border-bottom-0">${renderTypeBadge(item)}</td>
                         <td class="border-bottom-0"><p class="fw-semibold mb-0">${formatDeadline(item)}</p></td>
                         <td class="border-bottom-0">${renderStatusBadge(item)}</td>

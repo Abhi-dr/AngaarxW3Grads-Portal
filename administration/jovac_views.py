@@ -124,6 +124,14 @@ def edit_sheet(request, course_slug, sheet_slug):
     sheet = get_object_or_404(CourseSheet, slug=sheet_slug, course=course)
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
+    def _safe_thumb_url(file_field):
+        try:
+            if file_field and getattr(file_field, 'name', None):
+                return file_field.url
+        except Exception:
+            return ''
+        return ''
+
     if request.method == 'POST':
         name = (request.POST.get('name') or '').strip()
         description = request.POST.get('description')
@@ -155,7 +163,7 @@ def edit_sheet(request, course_slug, sheet_slug):
                     'description': sheet.description or '',
                     'is_enabled': sheet.is_enabled,
                     'is_approved': sheet.is_approved,
-                    'thumbnail_url': sheet.thumbnail.url if sheet.thumbnail else '',
+                    'thumbnail_url': _safe_thumb_url(sheet.thumbnail),
                 }
             })
 
@@ -165,6 +173,7 @@ def edit_sheet(request, course_slug, sheet_slug):
     context = {
         'course': course,
         'sheet': sheet,
+        'thumbnail_url': _safe_thumb_url(sheet.thumbnail),
     }
     return render(request, 'administration/jovac/edit_sheet.html', context)
 

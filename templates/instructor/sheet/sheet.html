@@ -23,6 +23,7 @@
         background: var(--bs-body-bg);
         border-top: 1px solid var(--bs-border-color);
     }
+
 </style>
 
 <div class="container-fluid">
@@ -137,23 +138,23 @@
 
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#1
+                                    TC/DC
                                 </h6>
                             </th>
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#2
+                                    Submissions
                                 </h6>
                             </th>
 
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#3
+                                    Test Code
                                 </h6>
                             </th>
                             <th class="border-bottom-0 justify-content-center">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#4
+                                    Actions
                                 </h6>
                             </th>
                         </tr>
@@ -627,6 +628,8 @@
         const deleteCodingUrlTemplate = "{% url 'instructor_delete_question' 0 %}";
         const editMcqUrlTemplate = "{% url 'instructor_edit_mcq_question' 0 %}";
         const deleteMcqUrlTemplate = "{% url 'instructor_delete_mcq_question' 0 %}";
+        const tcDcQuery = "{% if from_course %}?from_course=1{% endif %}";
+        const currentSheetName = "{{ sheet.name|escapejs }}";
 
         function esc(text) {
             if (text === null || text === undefined) return '';
@@ -638,22 +641,45 @@
                 .replace(/'/g, '&#039;');
         }
 
+        function truncate(text, maxLength) {
+            if (text === null || text === undefined) return '';
+            const str = String(text);
+            return str.length > maxLength ? `${str.slice(0, maxLength)}...` : str;
+        }
+
         function codingRow(q, idx) {
             const editUrl = `${editCodingUrlTemplate.replace('/0', `/${q.id}`)}?next=${returnPath}`;
             const deleteUrl = `${deleteCodingUrlTemplate.replace('/0', `/${q.id}`)}?next=${returnPath}`;
+            const testCaseCount = q.test_cases_count ?? q.test_cases?.length ?? q.test_cases_count_display ?? '';
+            const solvedCount = q.how_many_users_solved ?? q.submissions_count ?? 0;
             return `
                 <tr>
                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${idx + 1}</h6></td>
-                    <td class="border-bottom-0"><h6 class="fw-semibold mb-1" title="${esc(q.title)}">${esc(q.title)}</h6></td>
+                    <td class="border-bottom-0">
+                        <h6 class="fw-semibold mb-1" title="${esc(q.title)}">${esc(truncate(q.title, 25))}</h6>
+                        <span style="font-weight: bold;">${esc(currentSheetName)} |</span>
+                    </td>
                     <td class="border-bottom-0"><p class="fw-semibold mb-0"><button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap" style="width:100%;" data-bs-toggle="modal" data-bs-target="#questionModal" data-title="${esc(q.title)}" data-description="${esc(q.description)}">View</button></p></td>
                     <td class="border-bottom-0"><p class="fw-semibold mb-0"><span class="badge bg-${esc(q.difficulty_level_color)} text-color">${esc(q.difficulty_level)}</span></p></td>
-                    <td class="border-bottom-0"><a href="/instructor/test_cases/${esc(q.slug)}/" class="btn btn-success btn-sm">Test Cases</a></td>
-                    <td class="border-bottom-0"><a href="/instructor/view_submissions/${esc(q.slug)}/" class="btn btn-outline-info btn-sm">Submissions</a></td>
-                    <td class="border-bottom-0"><a href="/instructor/test_code/${esc(q.slug)}/" class="btn btn-info btn-sm">TEST CODE</a></td>
                     <td class="border-bottom-0">
-                        <div class="d-flex gap-2">
-                            <a class="btn btn-outline-dark btn-sm" href="${editUrl}">Edit</a>
-                            <a class="btn btn-outline-danger btn-sm" href="${deleteUrl}" onclick="return confirm('Delete this coding question?')">Delete</a>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-success btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">TC/DC</button>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li>
+                                    <a href="/instructor/test_cases/${esc(q.slug)}/${tcDcQuery}" class="btn btn-success mt-1 text-blue w-100">Test Cases${testCaseCount !== '' ? ` (${testCaseCount})` : ''}</a>
+                                </li>
+                                <li>
+                                    <a href="/instructor/driver_code/${esc(q.slug)}/${tcDcQuery}" class="btn btn-warning mt-1 text-blue w-100">Driver Codes</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </td>
+                    <td class="border-bottom-0"><a href="/instructor/view_submissions/${esc(q.slug)}/" class="btn btn-outline-info text-blue float-end"><i class="ti ti-file-text"></i> ${solvedCount}</a></td>
+                    <td class="border-bottom-0"><a href="/instructor/test_code/${esc(q.slug)}/" class="btn btn-info text-blue float-end"><i class="ti ti-code"></i></a></td>
+                    <td class="border-bottom-0">
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="${deleteUrl}" class="float-end" onclick="return confirm('Delete this coding question?')">❌</a>
+                            <a href="${editUrl}" class="float-end">✏️</a>
                         </div>
                     </td>
                 </tr>
@@ -666,16 +692,16 @@
             return `
                 <tr>
                     <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${idx + 1}</h6></td>
-                    <td class="border-bottom-0"><h6 class="fw-semibold mb-1" title="${esc(q.question_text)}">${esc(q.question_text)}</h6></td>
+                    <td class="border-bottom-0"><h6 class="fw-semibold mb-1" title="${esc(q.question_text)}">${esc(truncate(q.question_text, 30))}</h6></td>
                     <td class="border-bottom-0"><p class="text-muted mb-0">MCQ item</p></td>
                     <td class="border-bottom-0"><p class="fw-semibold mb-0"><span class="badge bg-${esc(q.difficulty_level_color)} text-color">${esc(q.difficulty_level)}</span></p></td>
                     <td class="border-bottom-0"><span class="text-muted">-</span></td>
                     <td class="border-bottom-0"><span class="text-muted">-</span></td>
                     <td class="border-bottom-0"><span class="text-muted">-</span></td>
                     <td class="border-bottom-0">
-                        <div class="d-flex gap-2">
-                            <a class="btn btn-outline-dark btn-sm" href="${editUrl}">Edit</a>
-                            <a class="btn btn-outline-danger btn-sm" href="${deleteUrl}" onclick="return confirm('Delete this MCQ question?')">Delete</a>
+                        <div class="d-flex align-items-center gap-2">
+                            <a href="${deleteUrl}" class="float-end" onclick="return confirm('Delete this MCQ question?')">❌</a>
+                            <a href="${editUrl}" class="float-end">✏️</a>
                         </div>
                     </td>
                 </tr>
