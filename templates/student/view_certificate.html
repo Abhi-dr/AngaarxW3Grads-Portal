@@ -8,6 +8,7 @@ active
 {% block title %}The Angaar Batch | Certificate {% endblock %}
 
 {% block extra_css %}
+
 <style>
     .certificate-loading {
         text-align: center;
@@ -18,120 +19,157 @@ active
         justify-content: center;
         align-items: center;
     }
-    
+
     .certificate-loading .spinner-border {
         width: 3rem;
         height: 3rem;
     }
-    
+
     .certificate-error {
         text-align: center;
         padding: 50px;
     }
-    
+
     #certificateContent {
         display: none;
     }
-    
+
     #certificateContent.loaded {
         display: block;
     }
+
+    /* Dark Mode Signature Fix */
+    [data-theme="dark"] #certificateContent .signature-img,
+    body.dark-mode #certificateContent .signature-img {
+        filter: invert(1);
+        mix-blend-mode: screen;
+        opacity: 0.9;
+    }
 </style>
+
 {% endblock %}
 
 {% block body %}
+
 <div class="container-fluid">
 
     {% for message in messages %}
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
         <strong>{{ message.tag }}</strong> {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
     {% endfor %}
 
     <!-- Loading State -->
     <div id="loadingState" class="certificate-loading">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
+        <div class="spinner-border text-primary" role="status"></div>
         <p class="mt-3">Loading certificate...</p>
     </div>
 
     <!-- Error State -->
     <div id="errorState" class="certificate-error" style="display: none;">
-        <div class="alert alert-danger" role="alert">
-            <i class="fas fa-exclamation-triangle"></i>
+        <div class="alert alert-danger">
             <h4>Failed to Load Certificate</h4>
             <p id="errorMessage">An error occurred while loading the certificate.</p>
             <button class="btn btn-primary mt-3" onclick="loadCertificate()">Try Again</button>
-            <a href="{% url 'my_certificates' %}" class="btn btn-secondary mt-3">Back to Certificates</a>
+            <a href="{% url 'my_certificates' %}" class="btn btn-secondary mt-3">Back</a>
         </div>
     </div>
 
     <!-- Certificate Content -->
-    <div id="certificateContent">
-        <!-- Certificate HTML will be injected here -->
-    </div>
+    <div id="certificateContent"></div>
+    ```
 
 </div>
 
 <script>
-    // Get certificate ID from URL
     const certificateId = {{ id }};
 
-    // Load certificate data from API
-    async function loadCertificate() {
-        const loadingState = document.getElementById('loadingState');
-        const errorState = document.getElementById('errorState');
-        const certificateContent = document.getElementById('certificateContent');
-        const errorMessage = document.getElementById('errorMessage');
+    // 🔹 Download Function (GLOBAL)
+    function downloadCertificate() {
+        const certificateElement = document.getElementById('certificateContent');
 
-        // Show loading, hide others
-        loadingState.style.display = 'flex';
-        errorState.style.display = 'none';
-        certificateContent.classList.remove('loaded');
-
-        try {
-            const response = await fetch(`/dashboard/api/certificate/${certificateId}/`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                credentials: 'same-origin'
-            });
-
-            if (!response.ok) {
-                if (response.status === 404) {
-                    throw new Error('Certificate not found. It may have been deleted or you do not have permission to view it.');
-                } else if (response.status === 403) {
-                    throw new Error('You do not have permission to view this certificate.');
-                } else {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-            }
-
-            const data = await response.json();
-
-            // Hide loading
-            loadingState.style.display = 'none';
-
-            // Inject the rendered HTML
-            certificateContent.innerHTML = data.rendered_html;
-            certificateContent.classList.add('loaded');
-
-        } catch (error) {
-            console.error('Error loading certificate:', error);
-            
-            // Hide loading, show error
-            loadingState.style.display = 'none';
-            errorState.style.display = 'block';
-            errorMessage.textContent = error.message;
+        if (!certificateElement || !certificateElement.innerHTML.trim()) {
+            alert("Certificate not loaded yet!");
+            return;
         }
-    }
 
-    // Load certificate when page loads
-    document.addEventListener('DOMContentLoaded', loadCertificate);
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Certificate</title>
+                    <style>
+                        body { margin: 0; padding: 0; }
+                    </style>
+
+            </head >
+            <body>
+                ${certificateElement.innerHTML}
+            </body>
+        </html >
+            `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+}
+
+// 🔹 Load Certificate
+async function loadCertificate() {
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    const certificateContent = document.getElementById('certificateContent');
+    const errorMessage = document.getElementById('errorMessage');
+
+    loadingState.style.display = 'flex';
+    errorState.style.display = 'none';
+    certificateContent.classList.remove('loaded');
+
+    try {
+        const response = await fetch(`/dashboard/api/certificate/${ certificateId }/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'
+        });
+
+        if (!response.ok) {
+            if (response.status === 404) {
+                throw new Error('Certificate not found.');
+            } else if (response.status === 403) {
+                throw new Error('Permission denied.');
+            } else {
+                throw new Error(`Error: ${ response.status }`);
+            }
+        }
+
+        const data = await response.json();
+
+        loadingState.style.display = 'none';
+
+        certificateContent.innerHTML = data.rendered_html;
+        certificateContent.classList.add('loaded');
+
+        // 🔹 Attach Download Button Event (clean way)
+        const btn = document.getElementById('downloadBtn');
+        if (btn) {
+            btn.addEventListener('click', downloadCertificate);
+        }
+
+    } catch (error) {
+        console.error(error);
+        loadingState.style.display = 'none';
+        errorState.style.display = 'block';
+        errorMessage.textContent = error.message;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadCertificate);
+
+
 </script>
 
 {% endblock %}
