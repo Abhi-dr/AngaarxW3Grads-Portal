@@ -14,146 +14,56 @@ active
 {% block extra_css %}
 
 <style>
-    @property --progress-value {
-        syntax: "<integer>";
-        inherits: false;
-        initial-value: 0;
-    }
-
-    @-webkit-keyframes css-progress {
-        to {
-            --progress-value: 50;
-        }
-    }
-
-    @keyframes css-progress {
-        to {
-            --progress-value: {{progress}};
-        }
-    }
-
-    @-webkit-keyframes js-progress {
-        to {
-            --progress-value: 43;
-        }
-    }
-
-    @keyframes js-progress {
-        to {
-            --progress-value: 100;
-        }
-    }
-
-    .progress-bar {
+    /* Circular Progress Bar updated to avoid Bootstrap conflict */
+    .circular-progress-bar {
         width: 100px;
         height: 100px;
         border-radius: 50%;
-        /* to center the percentage value */
         display: flex;
         justify-content: center;
         align-items: center;
+        /* Start empty — JS animates this */
+        background: radial-gradient(closest-side, white 79%, transparent 80% 100%),
+            conic-gradient(#5d87ff 0%, #ecf2ff 0);
     }
 
-    .progress-bar::before {
-        counter-reset: percentage var(--progress-value);
-        content: counter(percentage) "%";
+    [data-bs-theme="dark"] .circular-progress-bar {
+        background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%),
+            conic-gradient(#5d87ff 0%, #ffffff 0);
     }
 
-    .html {
-        background: radial-gradient(closest-side, white 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
-        -webkit-animation: html-progress 2s 1 forwards;
-        animation: html-progress 2s 1 forwards;
+    #progress-text {
+        font-size: 14px;
+        font-weight: 700;
+        color: #5d87ff;
+        pointer-events: none;
+        user-select: none;
     }
 
-    .html::before {
-        -webkit-animation: html-progress 2s 1 forwards;
-        animation: html-progress 2s 1 forwards;
-    }
-
-    .css {
-        background: radial-gradient(closest-side, white 79%, transparent 80% 100%, white 0), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
-        -webkit-animation: css-progress 2s 1 forwards;
-        animation: css-progress 2s 1 forwards;
-    }
-
-    .css::before {
-        -webkit-animation: css-progress 2s 1 forwards;
-        animation: css-progress 2s 1 forwards;
-    }
-
-    .js {
-        background: radial-gradient(closest-side, white 79%, transparent 80% 100%, white 0), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ecf2ff 0);
-        -webkit-animation: js-progress 2s 1 forwards;
-        animation: js-progress 2s 1 forwards;
-    }
-
-    .js::before {
-        -webkit-animation: js-progress 2s 1 forwards;
-        animation: js-progress 2s 1 forwards;
-    }
-
-    [data-bs-theme="dark"] {
-
-        .html {
-            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
-            -webkit-animation: html-progress 2s 1 forwards;
-            animation: html-progress 2s 1 forwards;
-
-            color: white;
-        }
-
-        .css {
-            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
-            -webkit-animation: html-progress 2s 1 forwards;
-            animation: css-progress 2s 1 forwards;
-
-            color: white;
-        }
-
-        .css-dark {
-            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
-            -webkit-animation: html-progress 2s 1 forwards;
-            animation: css-progress 2s 1 forwards;
-
-            color: white;
-        }
-
-        .css-dark {
-            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%),
-                conic-gradient(#ff6f4b calc(var(--progress-value) * 1%), #ffffff 0);
-            color: white;
-        }
-
-        .css-dark::before {
-            color: white;
-            /* Ensures the percentage text is visible */
-        }
-
-
-        .js {
-            background: radial-gradient(closest-side, #212529 79%, transparent 80% 100%), conic-gradient(#5d87ff calc(var(--progress-value) * 1%), #ffffff 0);
-            -webkit-animation: html-progress 2s 1 forwards;
-            animation: js-progress 2s 1 forwards;
-
-            color: white;
-        }
+    [data-bs-theme="dark"] #progress-text {
+        color: #ffffff;
     }
 
     h2 {
         text-align: center;
     }
 
-    progress {
-        visibility: hidden;
-        width: 0;
-        height: 0;
+    /* Sheet Card Hover Effects */
+    .sheet-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .sheet-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+    [data-bs-theme="dark"] .sheet-card:hover {
+        box-shadow: 0 10px 20px rgba(0,0,0,0.4) !important;
     }
 
     /* ================================================ */
-    /* IMAGE LAZY LOADING & OPTIMIZATION STYLES */
+    /* IMAGE LAZY LOADING & OPTIMIZATION STYLES         */
     /* ================================================ */
 
-    /* Skeleton Loader for Images */
     .image-skeleton {
         position: relative;
         overflow: hidden;
@@ -163,7 +73,6 @@ active
                 rgba(255, 255, 255, 0.05) 75%);
         background-size: 200% 100%;
         animation: shimmer 1.5s infinite;
-        min-height: 200px;
     }
 
     @keyframes shimmer {
@@ -176,7 +85,6 @@ active
         }
     }
 
-    /* Image Container for Lazy Loading */
     .lazy-image-container {
         position: relative;
         width: 100%;
@@ -184,27 +92,22 @@ active
         background-color: rgba(255, 255, 255, 0.05);
     }
 
-    /* Lazy Load Images - Hidden Initially */
     .lazy-image {
         opacity: 0;
         transition: opacity 0.4s ease-in-out;
         width: 100%;
-        height: auto;
         display: block;
     }
 
-    /* Loaded State */
     .lazy-image.loaded {
         opacity: 1;
     }
 
-    /* Error State for Broken Images */
     .lazy-image.error {
         opacity: 0.5;
         filter: grayscale(100%);
     }
 
-    /* Fade In Animation */
     @keyframes fadeIn {
         from {
             opacity: 0;
@@ -221,7 +124,6 @@ active
         animation: fadeIn 0.3s ease-in-out;
     }
 
-    /* Optimize Image Rendering */
     .card-img-top {
         image-rendering: -webkit-optimize-contrast;
         image-rendering: crisp-edges;
@@ -230,7 +132,6 @@ active
         will-change: transform;
     }
 
-    /* Card Hover Performance Optimization */
     .card {
         transform: translateZ(0);
         backface-visibility: hidden;
@@ -255,39 +156,30 @@ active
 <div class="container-fluid">
 
     {% for message in messages %}
-
     <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
         <strong>{{ message.tag }}</strong> {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-
     {% endfor %}
 
     {% for notification in notifications %}
-
     <div class="alert alert-{{ notification.type }} alert-dismissible fade show" role="alert">
         <strong>{{ notification.title|title }}</strong> {{ notification.description }}
-
         {% if not notification.is_fixed %}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         {% endif %}
     </div>
-
     {% endfor %}
 
-    <!--  Row 1 -->
     <div class="row">
+
         <div class="col-lg-4">
             <div class="row">
                 <div class="col-lg-12">
-                    <!-- Yearly Breakup -->
                     <div class="card overflow-hidden" id="card-bg">
-                        <h4 class="fw-semibold p-2">
-                            {{ batch.name }} 🔥
-                        </h4>
+                        <h4 class="fw-semibold p-2">{{ batch.name }} 🔥</h4>
                     </div>
                 </div>
-
             </div>
         </div>
 
@@ -295,7 +187,6 @@ active
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card overflow-hidden">
-
                         <div class="card-body p-4">
                             <h5 class="card-title mb-9 fw-semibold">POD ⛅</h5>
                             <div class="row align-items-center">
@@ -303,24 +194,18 @@ active
                                     <h4 class="fw-semibold mb-3" id="pod-title">
                                         <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                     </h4>
-                                    <div class="d-flex align-items-center pb-1" id="pod-status">
-                                        <!-- POD Status injected via JS -->
-                                    </div>
+                                    <div class="d-flex align-items-center pb-1" id="pod-status"></div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="d-flex justify-content-end" id="pod-action-button">
-                                        <!-- POD Button injected via JS -->
-                                    </div>
+                                    <div class="d-flex justify-content-end" id="pod-action-button"></div>
                                 </div>
                             </div>
-
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </div>
+
         <div class="col-lg-4">
             <div class="row">
                 <div class="col-lg-12">
@@ -332,9 +217,7 @@ active
                                     <h4 class="fw-semibold mb-3" id="questions-completed">
                                         <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                                     </h4>
-                                    <div class="d-flex align-items-center mb-3" id="questions-left-container">
-                                        <!-- questions left injected via JS -->
-                                    </div>
+                                    <div class="d-flex align-items-center mb-3" id="questions-left-container"></div>
                                     <div class="d-flex align-items-center" id="all-solved-container">
                                         <div class="me-4"></div>
                                     </div>
@@ -342,13 +225,9 @@ active
                                 <div class="col-4">
                                     <div class="d-flex justify-content-center">
                                         <div class="progress-bar-container">
-
-
-                                            <div class="progress-bar css">
-                                                <progress id="css-progress" min="0" max="100" value="0"></progress>
-
+                                            <div class="circular-progress-bar" id="progress-ring">
+                                                <span id="progress-text">0%</span>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -356,13 +235,10 @@ active
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
     </div>
-
-    <!-- =================================  QUESTIONS TABLE ================================== -->
 
     <div class="card">
         <div class="card-body p-4 d-flex">
@@ -375,8 +251,6 @@ active
     </div>
 
     <div class="row row-cols-1 row-cols-md-3 g-4" id="sheets-container">
-
-        <!-- Sheets loaded dynamically. Skeleton loaders for initial DOM presentation. -->
         <div class="col-md-3">
             <div class="card">
                 <div class="lazy-image-container">
@@ -389,17 +263,47 @@ active
                 </div>
             </div>
         </div>
-
     </div>
 
 </div>
 
 <script>
-    // ========================================
-    // FETCH BATCH DATA VIA DRF API
-    // ========================================
+    // ── PROGRESS RING ANIMATION ───────────────────────────────────────────────
+    function animateProgressRing(targetValue, duration = 1200) {
+        const progressRing = document.getElementById("progress-ring");
+        const progressText = document.getElementById("progress-text");
+        if (!progressRing || !progressText) return;
+
+        const isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+        const innerColor = isDark ? '#212529' : 'white';
+        const trackColor = isDark ? '#ffffff' : '#ecf2ff';
+        const startTime = performance.now();
+
+        function easeOutCubic(t) {
+            return 1 - Math.pow(1 - t, 3);
+        }
+
+        function step(currentTime) {
+            const elapsed = currentTime - startTime;
+            const rawT = Math.min(elapsed / duration, 1);
+            const easedT = easeOutCubic(rawT);
+            const current = Math.round(targetValue * easedT);
+
+            progressRing.style.background = `
+            radial-gradient(closest-side, ${innerColor} 79%, transparent 80% 100%),
+            conic-gradient(#5d87ff ${current}%, ${trackColor} 0)
+        `;
+            progressText.textContent = `${current}%`;
+
+            if (rawT < 1) requestAnimationFrame(step);
+        }
+
+        requestAnimationFrame(step);
+    }
+
+    // ── MAIN ──────────────────────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function () {
-        const batchSlug = "{{ batch.slug }}"; // Keep this from context for routing
+        const batchSlug = "{{ batch.slug }}";
 
         fetch(`/dashboard/api/v1/batch/${batchSlug}/`, {
             method: 'GET',
@@ -416,142 +320,184 @@ active
                     return;
                 }
 
-                // Update POD
+                // ── POD ──────────────────────────────────────────────────────────
                 if (data.pod) {
                     document.getElementById("pod-title").textContent = data.pod.question_title;
                     const podStatus = document.getElementById("pod-status");
+
                     if (data.pod.is_solved_by_user) {
-                        podStatus.innerHTML = `<span class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
-                                            <i class="ti ti-check text-success"></i>
-                                        </span>
-                                        <p class="s-3 mb-0">Problem Solved!</p>`;
-                        document.getElementById("pod-action-button").innerHTML = `<a href="/practice/problem/${data.pod.question_slug}" target="_blank">
-                                            <div class="text-white bg-success rounded-circle p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-check fs-6"></i>
-                                                <span>Done</span>
-                                            </div>
-                                        </a>`;
+                        podStatus.innerHTML = `
+                    <span class="me-2 rounded-circle bg-light-success round-20 d-flex align-items-center justify-content-center">
+                        <i class="ti ti-check text-success"></i>
+                    </span>
+                    <p class="s-3 mb-0">Problem Solved!</p>`;
+                        document.getElementById("pod-action-button").innerHTML = `
+                    <a href="/practice/problem/${data.pod.question_slug}" target="_blank">
+                        <div class="text-white bg-success rounded-circle p-6 d-flex align-items-center justify-content-center">
+                            <i class="ti ti-check fs-6"></i>
+                            <span>Done</span>
+                        </div>
+                    </a>`;
                     } else {
-                        podStatus.innerHTML = `<span class="me-2 rounded-circle bg-danger round-20 d-flex align-items-center text-dark justify-content-center">❌</span><p class="s-3 mb-0">Not Solved</p>`;
-                        document.getElementById("pod-action-button").innerHTML = `<a href="/practice/problem/${data.pod.question_slug}" target="_blank">
-                                            <div class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
-                                                <i class="ti ti-arrow-right fs-6"></i>
-                                                <span>Go</span>
-                                            </div>
-                                        </a>`;
+                        podStatus.innerHTML = `
+                    <span class="me-2 rounded-circle bg-danger round-20 d-flex align-items-center text-dark justify-content-center">❌</span>
+                    <p class="s-3 mb-0">Not Solved</p>`;
+                        document.getElementById("pod-action-button").innerHTML = `
+                    <a href="/practice/problem/${data.pod.question_slug}" target="_blank">
+                        <div class="text-white bg-secondary rounded-circle p-6 d-flex align-items-center justify-content-center">
+                            <i class="ti ti-arrow-right fs-6"></i>
+                            <span>Go</span>
+                        </div>
+                    </a>`;
                     }
                 } else {
                     document.getElementById("pod-title").textContent = "No POD Today";
-                    document.getElementById("pod-status").innerHTML = `<span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center"><i class="ti ti-arrow-right text-danger"></i></span><p class="s-3 mb-0">Not Available</p>`;
-                    document.getElementById("pod-action-button").innerHTML = ``;
+                    document.getElementById("pod-status").innerHTML = `
+                <span class="me-2 rounded-circle bg-light-danger round-20 d-flex align-items-center justify-content-center">
+                    <i class="ti ti-arrow-right text-danger"></i>
+                </span>
+                <p class="s-3 mb-0">Not Available</p>`;
+                    document.getElementById("pod-action-button").innerHTML = "";
                 }
 
-                // Update Progress
+                // ── PROGRESS RING ─────────────────────────────────────────────────
+                animateProgressRing(data.progress_percentage);
+
+                // ── QUESTIONS LEFT ────────────────────────────────────────────────
                 document.getElementById("questions-completed").textContent = `${data.solved_questions}🔥`;
+
                 if (data.questions_left === 0 && data.total_questions > 0) {
-                    document.getElementById("questions-left-container").innerHTML = `<p class="text-success me-1 fs-3 mb-0"><strong>More coming soon!</strong></p>`;
-                    document.getElementById("all-solved-container").innerHTML = `<div class="me-4"><button class="btn btn-sm btn-outline-success fs-2 mb-n1 mt-n2 mx-n1">All Solved</button></div>`;
+                    document.getElementById("questions-left-container").innerHTML = `
+                <p class="text-success me-1 fs-3 mb-0"><strong>More coming soon!</strong></p>`;
+                    document.getElementById("all-solved-container").innerHTML = `
+                <div class="me-4">
+                    <span class="badge bg-dark text-success fs-2 mb-n1 mt-n2 mx-n1">All Solved</span>
+                </div>`;
                 } else {
-                    document.getElementById("questions-left-container").innerHTML = `<p class="text-danger me-1 fs-3 mb-0 d-inline"><strong>${data.questions_left}</strong></p>&nbsp;<p class="text-danger fs-3 mb-0 d-inline">Questions left</p>`;
+                    document.getElementById("questions-left-container").innerHTML = `
+                <p class="text-danger me-1 fs-3 mb-0 d-inline"><strong>${data.questions_left}</strong></p>
+                &nbsp;
+                <p class="text-danger fs-3 mb-0 d-inline">Questions left</p>`;
                 }
 
-                document.getElementById("css-progress").value = data.progress_percentage;
-
-                // Render Sheets
+                // ── SHEETS ────────────────────────────────────────────────────────
                 const sheetsContainer = document.getElementById("sheets-container");
                 sheetsContainer.innerHTML = "";
                 let sheetsHtml = "";
+
                 data.sheets.forEach(sheet => {
-                    let sheetLink = sheet.is_enabled ? `/dashboard/sheet/${sheet.slug}/` : "#";
-                    let actionButton = sheet.is_enabled ? `<a href="${sheetLink}" class="btn btn-outline-secondary w-100">Continue Solving</a>` : `<a href="#" class="btn btn-outline-light-danger w-100 disabled">Currently Unavailable</a>`;
+                    const sheetLink = sheet.is_enabled ? `/dashboard/sheet/${sheet.slug}/` : "#";
+                    const sheetProgress = sheet.progress || 0;
+                    
+                    // Determine the button state based on progress and availability
+                    let actionButton = "";
+                    if (!sheet.is_enabled) {
+                        actionButton = `<button class="btn btn-light w-100 rounded-2 fw-semibold text-muted" disabled>Currently Unavailable</button>`;
+                    } else if (sheetProgress === 100) {
+                        // Solved state! Using a green success outline button to differentiate from ongoing sheets
+                        actionButton = `<a href="${sheetLink}" class="btn btn-outline-success w-100 rounded-2 fw-semibold shadow-sm"><i class="ti ti-check me-1"></i> Solved</a>`;
+                    } else {
+                        // Ongoing state
+                        actionButton = `<a href="${sheetLink}" class="btn btn-primary w-100 rounded-2 fw-semibold shadow-sm">Continue Solving</a>`;
+                    }
+                    
+                    const progressPill = `
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="text-muted fw-semibold" style="font-size: 0.80rem; letter-spacing: 0.5px; text-transform: uppercase;">Progress</span>
+                            <span class="fw-bold" style="color: ${sheetProgress === 100 ? '#13deb9' : '#5d87ff'}; font-size: 0.90rem;">${sheetProgress}%</span>
+                        </div>
+                        <div class="progress rounded-pill" style="height: 6px; background-color: ${sheetProgress === 100 ? 'rgba(19, 222, 185, 0.12)' : 'rgba(93, 135, 255, 0.12)'};">
+                            <div class="progress-bar rounded-pill" role="progressbar"
+                                 style="width: ${sheetProgress}%; background: ${sheetProgress === 100 ? 'linear-gradient(90deg, #13deb9, #39cbab)' : 'linear-gradient(90deg, #5d87ff, #83a5ff)'}; box-shadow: 0 0 8px ${sheetProgress === 100 ? 'rgba(19, 222, 185, 0.4)' : 'rgba(93, 135, 255, 0.4)'};"
+                                 aria-valuenow="${sheetProgress}" aria-valuemin="0" aria-valuemax="100">
+                            </div>
+                        </div>
+                    </div>`;
 
                     sheetsHtml += `
-        <div class="col-md-3">
-            <div class="card">
-                ${sheet.is_enabled ? `<a href="${sheetLink}">` : ''}
-                    <div class="lazy-image-container">
-                        <div class="image-skeleton"></div>
-                        <img data-src="${sheet.thumbnail}" class="card-img-top lazy-image" alt="${sheet.name}"
-                            loading="lazy" />
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">${sheet.name}🔥</h5>
-                        <p class="card-text mb-2">Total Sawal : ${sheet.total_questions}</p>
-                        ${actionButton}
-                    </div>
-                ${sheet.is_enabled ? `</a>` : ''}
-            </div>
-        </div>
-                `;
+                    <div class="col-md-3">
+                        <div class="card border-0 shadow-sm sheet-card">
+                            ${sheet.is_enabled ? `<a href="${sheetLink}" class="text-decoration-none text-reset d-block">` : ''}
+                                <div class="lazy-image-container rounded-top">
+                                    <div class="image-skeleton"></div>
+                                    <img src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" 
+                                         data-src="${sheet.thumbnail}" 
+                                         class="card-img-top lazy-image"
+                                         alt="${sheet.name}" 
+                                         loading="lazy" />
+                                </div>
+                            ${sheet.is_enabled ? `</a>` : ''}
+                            
+                            <div class="card-body d-flex flex-column p-4">
+                                <h5 class="card-title fw-bold mb-2">${sheet.name} 🔥</h5>
+                                <p class=" mb-3" style="font-size: 0.9rem;">
+                                    <i class="ti ti-list-check me-1 text-primary"></i>Total Questions: <span class="fw-bold">${sheet.total_questions}</span>
+                                </p>
+                                
+                                <div class="mt-1">
+                                    ${progressPill}
+                                    ${actionButton}
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
                 });
-                sheetsContainer.innerHTML = sheetsHtml;
 
-                // Kick off lazy loading images
+                sheetsContainer.innerHTML = sheetsHtml;
                 setTimeout(initializeLazyLoading, 100);
             })
-            .catch(err => console.error("Error fetching batch details", err));
+            .catch(err => console.error("Error fetching batch details:", err));
     });
 
-    // ========================================
-    // LAZY LOADING FOR SHEET IMAGES
-    // ========================================
+    // ── LAZY LOADING ──────────────────────────────────────────────────────────
     function initializeLazyLoading() {
         const lazyImages = document.querySelectorAll('.lazy-image');
 
         if ('IntersectionObserver' in window) {
             const imageObserver = new IntersectionObserver((entries, observer) => {
                 entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
-                        const src = img.getAttribute('data-src');
+                    if (!entry.isIntersecting) return;
 
-                        if (src) {
-                            const tempImg = new Image();
+                    const img = entry.target;
+                    const src = img.getAttribute('data-src');
 
-                            tempImg.onload = function () {
-                                img.src = src;
-                                img.classList.add('loaded');
-                                img.classList.add('fade-in');
+                    if (src) {
+                        const tempImg = new Image();
 
-                                // Remove skeleton loader
-                                const skeleton = img.previousElementSibling;
-                                if (skeleton && skeleton.classList.contains('image-skeleton')) {
-                                    skeleton.style.display = 'none';
-                                }
-                            };
+                        tempImg.onload = function () {
+                            img.src = src;
+                            img.classList.add('loaded', 'fade-in');
+                            const skeleton = img.previousElementSibling;
+                            if (skeleton && skeleton.classList.contains('image-skeleton')) {
+                                skeleton.style.display = 'none';
+                            }
+                        };
 
-                            tempImg.onerror = function () {
-                                img.classList.add('error');
-                                img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23333" width="200" height="200"/%3E%3Ctext fill="%23666" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EThumbnail Error%3C/text%3E%3C/svg%3E';
+                        tempImg.onerror = function () {
+                            img.classList.add('error');
+                            img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23333" width="200" height="200"/%3E%3Ctext fill="%23666" font-size="18" x="50%25" y="50%25" text-anchor="middle" dy=".3em"%3EThumbnail Error%3C/text%3E%3C/svg%3E';
+                            const skeleton = img.previousElementSibling;
+                            if (skeleton && skeleton.classList.contains('image-skeleton')) {
+                                skeleton.style.display = 'none';
+                            }
+                        };
 
-                                // Remove skeleton loader
-                                const skeleton = img.previousElementSibling;
-                                if (skeleton && skeleton.classList.contains('image-skeleton')) {
-                                    skeleton.style.display = 'none';
-                                }
-                            };
-
-                            tempImg.src = src;
-                        }
-
-                        observer.unobserve(img);
+                        tempImg.src = src;
                     }
+
+                    observer.unobserve(img);
                 });
-            }, {
-                rootMargin: '50px', // Start loading 50px before entering viewport
-                threshold: 0.01
-            });
+            }, { rootMargin: '50px', threshold: 0.01 });
 
             lazyImages.forEach(img => imageObserver.observe(img));
+
         } else {
-            // Fallback for browsers without Intersection Observer
             lazyImages.forEach(img => {
                 const src = img.getAttribute('data-src');
                 if (src) {
                     img.src = src;
                     img.classList.add('loaded');
-
-                    // Remove skeleton loader
                     const skeleton = img.previousElementSibling;
                     if (skeleton && skeleton.classList.contains('image-skeleton')) {
                         skeleton.style.display = 'none';
