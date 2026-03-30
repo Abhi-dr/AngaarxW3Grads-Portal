@@ -1112,7 +1112,23 @@
                     const text = (btn.textContent || btn.value || '').trim().toLowerCase();
                     const idClass = ((btn.id || '') + ' ' + (btn.className || '')).toLowerCase();
 
-                    if (text === 'search' || idClass.includes('search')) {
+                    const isClearOrReset =
+                        text.includes('clear') ||
+                        text.includes('reset') ||
+                        idClass.includes('clear') ||
+                        idClass.includes('reset');
+                    if (isClearOrReset) {
+                        continue;
+                    }
+
+                    const isSearchByText = text === 'search' || text.includes('search');
+                    const isSearchByMarker =
+                        idClass.includes('search-btn') ||
+                        idClass.includes('searchbutton') ||
+                        idClass.includes('btn-search') ||
+                        idClass.includes('search_button');
+
+                    if (isSearchByText || isSearchByMarker) {
                         return btn;
                     }
                 }
