@@ -12,6 +12,13 @@ def copy_users_to_customuser(apps, schema_editor):
     preserving PKs exactly. Merges all fields from Student/Instructor/Administrator.
     Handles duplicate emails and blank usernames safely with placeholders.
     """
+    # This migration contains MySQL-specific SQL (`SHOW TABLES`, `SET FOREIGN_KEY_CHECKS`)
+    # and is not compatible with sqlite. For local/dev sqlite runs, we skip the data
+    # copy and keep the custom user table empty (users can be created normally).
+    if schema_editor.connection.vendor == "sqlite":
+        print("\ninfo: sqlite backend detected; skipping MySQL-specific user copy migration.")
+        return
+
     with schema_editor.connection.cursor() as cursor:
         # Prevent crash on fresh databases where auth_user was never created
         cursor.execute("SHOW TABLES LIKE 'auth_user'")
@@ -127,9 +134,11 @@ def copy_users_to_customuser(apps, schema_editor):
 
 def reverse_copy(apps, schema_editor):
     with schema_editor.connection.cursor() as cursor:
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
+        if schema_editor.connection.vendor != "sqlite":
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 0;")
         cursor.execute("DELETE FROM accounts_customuser")
-        cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
+        if schema_editor.connection.vendor != "sqlite":
+            cursor.execute("SET FOREIGN_KEY_CHECKS = 1;")
     print("Reversed: accounts_customuser cleared.")
 
 

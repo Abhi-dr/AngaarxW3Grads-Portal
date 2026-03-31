@@ -210,7 +210,7 @@ def add_test_case(request, slug):
         test_case.save()
         
         if question.test_cases.all().count() == 5:
-            messages.success(request, "5 Test cases addedd successfully. Add more questions agr mn kre to!")
+            messages.success(request, "5 test cases added successfully. Add more questions agr mn kre to!")
             return redirect("student_add_question")
         
         messages.success(request, 'Test case added successfully. Add More Test Cases')

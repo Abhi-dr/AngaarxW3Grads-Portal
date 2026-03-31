@@ -291,7 +291,7 @@ def verify_certificate(request):
 
 from django.template import Context, Template
 
-from weasyprint import HTML
+# from weasyprint import HTML
 from django.template import Context, Template
 from django.http import HttpResponse, Http404
 from io import BytesIO
@@ -314,9 +314,9 @@ def download_certificate(request, cert_id):
 
     base_url = settings.STATIC_ROOT  # or your static folder path
 
-    pdf_bytes = HTML(string=html_content, base_url=base_url).write_pdf()
+    # pdf_bytes = HTML(string=html_content, base_url=base_url).write_pdf()
 
-    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    return HttpResponse("PDF generation disabled for local testing")
     response["Content-Disposition"] = f'attachment; filename="{certificate_obj.certificate_id}.pdf"'
     return response
 

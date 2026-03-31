@@ -6,8 +6,14 @@ from home.models import FlamesCourse, FlamesRegistration, FlamesTeam, FlamesTeam
 from .event_models import Event, CertificateTemplate, Certificate
 from django.template.loader import get_template
 from django.template import engines, Template, Context
-from weasyprint import HTML
 from django.http import HttpResponse
+
+# `weasyprint` requires native system libraries. Make it optional so the app can
+# still start in environments without `libgobject`/Pango dependencies.
+try:
+    from weasyprint import HTML  # type: ignore
+except Exception:  # pragma: no cover
+    HTML = None
 
 # ======================================= FLAMES MAIN PAGE ================================
 

@@ -17,9 +17,16 @@ from .event_models import Event, CertificateTemplate, Certificate
 from practice.models import POD, Submission, Batch, Question, Sheet, Streak
 from home.models import Alumni, ReferralCode
 from django.template import engines, Template, Context
-from weasyprint import HTML
 from django.http import HttpResponse
 from django.db.models import Max, Sum
+
+# `weasyprint` requires native system libraries. In some dev environments it may fail
+# to import (e.g., missing `libgobject-2.0-0`), which would otherwise prevent the
+# entire Django app from starting. We treat it as optional.
+try:
+    from weasyprint import HTML  # type: ignore
+except Exception:  # pragma: no cover
+    HTML = None
 
 # ========================================= DASHBOARD =========================================
 

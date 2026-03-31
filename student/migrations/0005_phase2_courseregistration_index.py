@@ -14,10 +14,9 @@ class Migration(migrations.Migration):
         # Powers: "show all courses for this student" and enrollment lookups
         migrations.RunSQL(
             sql="""
-                ALTER TABLE student_courseregistration
-                ADD INDEX idx_coursereg_student_course (student_id, course_id, status),
-                ALGORITHM=INPLACE, LOCK=NONE
+                CREATE INDEX idx_coursereg_student_course
+                ON student_courseregistration (student_id, course_id, status);
             """,
-            reverse_sql="ALTER TABLE student_courseregistration DROP INDEX idx_coursereg_student_course",
+            reverse_sql="DROP INDEX idx_coursereg_student_course ON student_courseregistration;",
         ),
     ]
