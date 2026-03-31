@@ -40,6 +40,7 @@ urlpatterns += [
 urlpatterns += [
     path("flames-26/", flames.flames26, name="flames26"),
     path("flames-26/<slug:track_slug>/", flames.flames26_track_detail, name="flames26_track_detail"),
+    path("flames-26/<slug:track_slug>/register/", flames.flames26_register, name="flames26_register"),
 ]
 
 # ====================================== FLARE ========================================

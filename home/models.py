@@ -70,44 +70,78 @@ class Comment(models.Model):
 # ========================== FLAMES ===========================
 
 class FlamesCourse(models.Model):
-    title = models.CharField(max_length=200)
-    subtitle = models.CharField(max_length=255)
-    description = models.TextField()
-    
-    instructor = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='flames_courses', blank=True)
-    
-    
-    what_you_will_learn = models.TextField(help_text="Enter points separated by new lines")
-    
-    roadmap = models.TextField(help_text="Course roadmap details")
-    
+    title       = models.CharField(max_length=200)
+    subtitle    = models.CharField(max_length=255, blank=True, default='')
+    description = models.TextField(blank=True, null=True, default='')
+
+    instructor  = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name='flames_courses',
+        blank=True
+    )
+
+    what_you_will_learn = models.TextField(
+        help_text="Enter each point on a new line",
+        blank=True, null=True, default=''
+    )
+
     is_active = models.BooleanField(default=True)
-    slug = models.SlugField(unique=True)
-    
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    slug      = models.SlugField(unique=True)
+
+    price          = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    
+
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    icon_class = models.CharField(max_length=50, help_text="Font Awesome icon class")
-    icon_color = models.CharField(max_length=200, help_text="Color for the course card")
-    button_color = models.CharField(max_length=200, help_text="Color for the course button")
-    
+
+    edition = models.ForeignKey(
+        'FlamesEdition', on_delete=models.PROTECT,
+        related_name='courses'
+    )
+
+    LEVEL_CHOICES = [
+        ('Beginner',     'Beginner'),
+        ('Intermediate', 'Intermediate'),
+        ('Advanced',     'Advanced'),
+    ]
+    level = models.CharField(
+        max_length=20, choices=LEVEL_CHOICES,
+        default='Beginner', blank=True,
+        help_text='Difficulty level shown on the course card'
+    )
+
+    # Cosmetic / optional display helpers
+    icon_class   = models.CharField(
+        max_length=100, blank=True, default='fas fa-fire',
+        help_text="Font Awesome icon class (e.g. fas fa-layer-group)"
+    )
+    icon_color   = models.CharField(
+        max_length=50, blank=True, default='#ff6b00',
+        help_text="Icon accent colour (hex or CSS value)"
+    )
+    button_color = models.CharField(
+        max_length=50, blank=True, default='#ff6b00',
+        help_text="Register button colour"
+    )
+
     whatsapp_group_link = models.URLField(blank=True, null=True)
-    
+
+    class Meta:
+        verbose_name        = 'Flames Course'
+        verbose_name_plural = 'Flames Courses'
+        ordering            = ['edition', 'title']
+
     def __str__(self):
-        return self.title
-    
+        return f"{self.title} ({self.edition})"
+
     def get_learning_points(self):
-        """Return what_you_will_learn as a list of points"""
-        return self.what_you_will_learn.strip().split('\n')
-    
+        """Return what_you_will_learn as a list of non-empty points."""
+        return [p.strip() for p in self.what_you_will_learn.strip().split('\n') if p.strip()]
+
     def get_all_instructors(self):
-        """Return a list of all instructors for this course"""
-        names = []
-        for instructor in self.instructor.all():
-            names.append(instructor.first_name)
-        return ' & '.join(names)
+        """Return a formatted string of instructor first names."""
+        names = [i.first_name or i.username for i in self.instructor.all()]
+        return ' & '.join(names) if names else '—'
+
 
 # ================= FLAMES COURSE TESTIMONIALS ======================
 
@@ -132,6 +166,33 @@ class Alumni(models.Model):
     def __str__(self):
         return self.name
 
+# ================= FLAMES EDITION ======================
+
+class FlamesEdition(models.Model):
+    """Root entity for one year of the Flames program (e.g. FLAMES 25, FLAMES 26)."""
+    year = models.PositiveIntegerField(unique=True, help_text="e.g. 2025, 2026")
+    name = models.CharField(max_length=100, help_text='e.g. "FLAMES 25"')
+    is_active = models.BooleanField(
+        default=False,
+        help_text="Only one edition should be active at a time."
+    )
+    registration_open = models.BooleanField(
+        default=False,
+        help_text="Controls whether new registrations are accepted."
+    )
+    start_date = models.DateField(null=True, blank=True)
+    end_date   = models.DateField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-year']
+        verbose_name = 'Flames Edition'
+        verbose_name_plural = 'Flames Editions'
+
+    def __str__(self):
+        return self.name
+
+
 class ReferralCode(models.Model):
     REFERRAL_TYPE_CHOICES = [
         ('ALUMNI', 'Alumni Referral'),
@@ -145,6 +206,10 @@ class ReferralCode(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
+    edition = models.ForeignKey(
+        'FlamesEdition', on_delete=models.PROTECT,
+        null=True, blank=True, related_name='referral_codes'
+    )
     
     def __str__(self):
         if self.referral_type == 'ALUMNI':
@@ -174,7 +239,13 @@ class FlamesRegistration(models.Model):
     team = models.ForeignKey('FlamesTeam', on_delete=models.SET_NULL, null=True, blank=True, related_name='registrations')
     
     course = models.ForeignKey(FlamesCourse, on_delete=models.CASCADE, related_name='registrations')
-    
+    edition = models.ForeignKey(
+        'FlamesEdition', on_delete=models.PROTECT,
+        related_name='registrations'
+    )
+
+    # Stores the student's academic year ("1st Year", "2nd Year", etc.)
+    # NOT the Flames edition year — kept for profile/analytics use.
     year = models.CharField(max_length=20)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -200,6 +271,8 @@ class FlamesRegistration(models.Model):
     original_price = models.IntegerField(blank=True, null=True)
     discounted_price = models.IntegerField(blank=True, null=True)
     payable_amount = models.IntegerField(blank=True, null=True)
+
+    MAX_COURSES_PER_EDITION = 3
     
 
     
@@ -209,7 +282,25 @@ class FlamesRegistration(models.Model):
         for registration in cls.objects.filter(status__isnull=True):
             registration.status = "Pending"
             registration.save(update_fields=['status'])
-            
+
+    def clean(self):
+        """Enforce max 3 course registrations per edition per user."""
+        from django.core.exceptions import ValidationError
+        super().clean()
+        if not self.edition_id or not self.user_id:
+            return
+        qs = FlamesRegistration.objects.filter(
+            user_id=self.user_id,
+            edition_id=self.edition_id,
+        ).exclude(status='Rejected')
+        if self.pk:
+            qs = qs.exclude(pk=self.pk)
+        if qs.count() >= self.MAX_COURSES_PER_EDITION:
+            raise ValidationError(
+                f"A student can register in at most "
+                f"{self.MAX_COURSES_PER_EDITION} courses per Flames edition."
+            )
+
     def save(self, *args, **kwargs):
         # Check if this is a new registration (no ID yet) or price fields haven't been set
         is_new = not self.pk or not self.original_price
@@ -257,6 +348,10 @@ class FlamesTeam(models.Model):
     name = models.CharField(max_length=100)
     team_leader = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='led_flames_teams', null=True, blank=True)
     course = models.ForeignKey(FlamesCourse, on_delete=models.CASCADE, related_name='teams')
+    edition = models.ForeignKey(
+        'FlamesEdition', on_delete=models.PROTECT,
+        related_name='teams'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     is_auto_created = models.BooleanField(default=False)
     status = models.CharField(max_length=20, default="Pending", 

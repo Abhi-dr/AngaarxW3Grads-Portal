@@ -11,6 +11,12 @@ from accounts.models import CustomUser
 from import_export.widgets import ForeignKeyWidget
 
 
+# Custom admin site configuration
+admin.site.site_header = "The Angaar Batch Admin"
+admin.site.site_title = "The Angaar Batch Admin Portal"
+admin.site.index_title = "Welcome to The Angaar Batch Admin Portal"
+
+
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
     list_display = ('title', 'type', 'expiration_date', 'is_fixed', 'is_alert')
@@ -171,12 +177,6 @@ class AssignmentAdmin(admin.ModelAdmin):
 class AssignmentSubmissionAdmin(admin.ModelAdmin):
     list_display = ('assignment', 'student', "status")
     search_fields = ('assignment', 'student', "status")
-
-
-# Custom admin site configuration
-admin.site.site_header = "Course Management System"
-admin.site.site_title = "CMS Admin"
-admin.site.index_title = "Welcome to Course Management System"
 
 
 # ================================== CERTIFICATE MANAGEMENT ==================================

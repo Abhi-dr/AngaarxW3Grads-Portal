@@ -787,128 +787,64 @@ FLAMES 26 | The Angaar Batch
 
             <div class="courses-grid">
 
-                <!-- Track 1: Full Stack with Gen AI -->
-                <div class="course-card" data-aos="fade-up" data-aos-delay="100">
-                    <span class="level-badge badge-beginner">Beginner</span>
-                    <div class="course-icon">
-                        <i class="fas fa-layer-group"></i>
-                    </div>
-                    <h3 class="course-title">Full Stack with Gen AI</h3>
-                    <p class="course-tagline">"Build real products, not clones."</p>
-                    <ul class="course-features">
-                        <li>HTML, CSS, JS → React Frontend</li>
-                        <li>Django Backend + REST APIs</li>
-                        <li>OpenAI / Gemini Integration</li>
-                        <li>Deploy a live AI-powered web app</li>
-                    </ul>
-                    <div class="card-actions">
-                        <a href="{% url 'flames26_track_detail' 'full-stack-gen-ai' %}" class="know-more-btn">
-                            <i class="fas fa-map-marked-alt"></i> Know More
-                        </a>
-                        <a href="#" class="register-btn">
-                            Register <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
+                {% for course in courses %}
+                {% with delay=forloop.counter|add:"0" %}
+                <div class="course-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter }}00">
 
-                <!-- Track 2: DSA with Java/C++ -->
-                <div class="course-card" data-aos="fade-up" data-aos-delay="200">
+                    {# Level badge #}
+                    {% if course.level == "Intermediate" %}
                     <span class="level-badge badge-intermediate">Intermediate</span>
-                    <div class="course-icon">
-                        <i class="fab fa-java"></i>
-                    </div>
-                    <h3 class="course-title">DSA with Java / C++</h3>
-                    <p class="course-tagline">"Stop fearing coding rounds."</p>
-                    <ul class="course-features">
-                        <li>Arrays, Strings, Hashing, Trees</li>
-                        <li>150+ problem patterns solved</li>
-                        <li>Interview-level problem solving</li>
-                        <li>Mock interviews &amp; review sessions</li>
-                    </ul>
-                    <div class="card-actions">
-                        <a href="{% url 'flames26_track_detail' 'dsa-java-cpp' %}" class="know-more-btn">
-                            <i class="fas fa-map-marked-alt"></i> Know More
-                        </a>
-                        <a href="#" class="register-btn">
-                            Register <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Track 3: Data Analytics with AI Tools -->
-                <div class="course-card" data-aos="fade-up" data-aos-delay="300">
+                    {% elif course.level == "Advanced" %}
+                    <span class="level-badge badge-advanced">Advanced</span>
+                    {% else %}
                     <span class="level-badge badge-beginner">Beginner</span>
+                    {% endif %}
+
                     <div class="course-icon">
-                        <i class="fas fa-chart-bar"></i>
+                        <i class="{{ course.icon_class }}"></i>
                     </div>
-                    <h3 class="course-title">Data Analytics with AI Tools</h3>
-                    <p class="course-tagline">"Learn what companies actually use."</p>
+                    <h3 class="course-title">{{ course.title }}</h3>
+                    {% if course.subtitle %}
+                    <p class="course-tagline">{{ course.subtitle }}</p>
+                    {% endif %}
+
+                    {% with points=course.get_learning_points %}
+                    {% if points %}
                     <ul class="course-features">
-                        <li>Python, Pandas, NumPy, Matplotlib</li>
-                        <li>AI-assisted data cleaning &amp; EDA</li>
-                        <li>Power BI / Tableau dashboards</li>
-                        <li>Real dataset capstone project</li>
+                        {% for point in points|slice:":4" %}
+                        <li>{{ point }}</li>
+                        {% endfor %}
                     </ul>
+                    {% endif %}
+                    {% endwith %}
+
                     <div class="card-actions">
-                        <a href="{% url 'flames26_track_detail' 'data-analytics-ai' %}" class="know-more-btn">
+                        {# "Know More" only if a FLAMES26_TRACKS dict entry exists for this slug #}
+                        <a href="{% url 'flames26_track_detail' course.slug %}" class="know-more-btn">
                             <i class="fas fa-map-marked-alt"></i> Know More
                         </a>
-                        <a href="#" class="register-btn">
+                        <a href="{% url 'flames26_register' course.slug %}" class="register-btn">
                             Register <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
+                </div>
+                {% endwith %}
+                {% empty %}
+
+                {# ── Empty state: shown when no DB courses have been added yet ── #}
+                <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
+                    <i class="fas fa-fire" style="font-size: 3rem; color: rgba(255,107,0,.3); margin-bottom: 20px; display: block;"></i>
+                    <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 10px;">Tracks Being Finalised</h3>
+                    <p style="color: #555; font-size: 0.95rem; max-width: 400px; margin: 0 auto;">
+                        The FLAMES '26 curriculum is being locked in. Check back soon — it'll be worth the wait.
+                    </p>
                 </div>
 
-                <!-- Track 4: Gen AI & Agentic AI -->
-                <div class="course-card" data-aos="fade-up" data-aos-delay="400">
-                    <span class="level-badge badge-intermediate">Intermediate</span>
-                    <div class="course-icon">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h3 class="course-title">Gen AI &amp; Agentic AI</h3>
-                    <p class="course-tagline">"Build systems, not prompts."</p>
-                    <ul class="course-features">
-                        <li>LLMs, RAG, Embeddings, VectorDBs</li>
-                        <li>LangChain / LangGraph Agents</li>
-                        <li>Multi-step AI pipelines</li>
-                        <li>Build and deploy an AI Agent</li>
-                    </ul>
-                    <div class="card-actions">
-                        <a href="{% url 'flames26_track_detail' 'gen-ai-agentic' %}" class="know-more-btn">
-                            <i class="fas fa-map-marked-alt"></i> Know More
-                        </a>
-                        <a href="#" class="register-btn">
-                            Register <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Track 5: Mobile App Dev with Gen AI -->
-                <div class="course-card" data-aos="fade-up" data-aos-delay="500">
-                    <span class="level-badge badge-beginner">Beginner</span>
-                    <div class="course-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h3 class="course-title">Mobile App Dev with Gen AI</h3>
-                    <p class="course-tagline">"Ship apps, not ideas."</p>
-                    <ul class="course-features">
-                        <li>Flutter / React Native foundations</li>
-                        <li>AI-powered app features</li>
-                        <li>Firebase backend integration</li>
-                        <li>Publish to Play Store / App Store</li>
-                    </ul>
-                    <div class="card-actions">
-                        <a href="{% url 'flames26_track_detail' 'mobile-app-gen-ai' %}" class="know-more-btn">
-                            <i class="fas fa-map-marked-alt"></i> Know More
-                        </a>
-                        <a href="#" class="register-btn">
-                            Register <i class="fas fa-arrow-right"></i>
-                        </a>
-                    </div>
-                </div>
+                {% endfor %}
 
             </div>
         </div>
+
 
         <!-- ============================================
              REALITY CHECK
