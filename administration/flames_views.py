@@ -6,66 +6,167 @@ from django.views.decorators.http import require_POST
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
 from openpyxl import Workbook
-from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session
+from home.models import FlamesCourse, FlamesRegistration, FlamesCourseTestimonial, FlamesTeam, Alumni, FlamesTeamMember, Session, FlamesEdition
 from accounts.models import CustomUser
+
+
+# ======================================== EDITION SELECTOR ==============================================
+
+@login_required
+def flames_select_edition(request):
+    """
+    Landing page for the FLAMES admin section.
+    Admin picks which edition (year) they want to manage.
+    The selection is stored in the session so all subsequent views are scoped to it.
+    """
+    editions = FlamesEdition.objects.all().order_by('-year')
+    current_edition_id = request.session.get('selected_flames_edition_id')
+    current_edition = None
+    if current_edition_id:
+        try:
+            current_edition = FlamesEdition.objects.get(id=current_edition_id)
+        except FlamesEdition.DoesNotExist:
+            current_edition = None
+
+    context = {
+        'editions': editions,
+        'current_edition': current_edition,
+    }
+    return render(request, 'administration/flames/edition_select.html', context)
+
+
+@login_required
+def flames_set_edition(request):
+    """
+    POST handler: stores the chosen edition id in the session
+    and redirects to the flames courses page.
+    """
+    if request.method == 'POST':
+        edition_id = request.POST.get('edition_id')
+        if edition_id:
+            try:
+                edition = FlamesEdition.objects.get(id=edition_id)
+                # Explicitly set, mark modified, and save the session
+                request.session['selected_flames_edition_id'] = edition.id
+                request.session.modified = True
+                request.session.save()
+                messages.success(request, f'Now viewing FLAMES edition: {edition.name}')
+                # Redirect with edition_id in URL as a fallback safety net
+                from django.urls import reverse
+                return redirect(reverse('admin_flames_courses') + f'?edition_id={edition.id}')
+            except FlamesEdition.DoesNotExist:
+                messages.error(request, 'Edition not found.')
+    return redirect('flames_select_edition')
 
 @login_required
 def flames_courses(request):
     """
-    Admin view for managing FLAMES courses
+    Admin view for managing FLAMES courses, scoped to the session-selected edition.
+    If no edition is selected, redirects to the edition selector.
     """
-    courses = FlamesCourse.objects.all()
-    
-    # Count stats
+    # Accept edition_id from GET param (set by flames_set_edition redirect) OR from session
+    get_edition_id = request.GET.get('edition_id')
+    session_edition_id = request.session.get('selected_flames_edition_id')
+    edition_id = get_edition_id or session_edition_id
+
+    # If the GET param provided a valid id, always refresh the session value
+    if get_edition_id:
+        try:
+            request.session['selected_flames_edition_id'] = int(get_edition_id)
+            request.session.modified = True
+        except (ValueError, TypeError):
+            pass
+
+    if not edition_id:
+        messages.info(request, 'Please select a FLAMES edition first.')
+        return redirect('flames_select_edition')
+
+    try:
+        selected_edition = FlamesEdition.objects.get(id=edition_id)
+    except FlamesEdition.DoesNotExist:
+        request.session.pop('selected_flames_edition_id', None)
+        messages.warning(request, 'The previously selected edition no longer exists. Please select again.')
+        return redirect('flames_select_edition')
+
+    courses = FlamesCourse.objects.filter(edition=selected_edition)
+
+    # Count stats scoped to this edition
     total_courses = courses.count()
-    
-    total_registrations = FlamesRegistration.objects.count()
-    total_completed_registrations = FlamesRegistration.objects.filter(status="Completed").count()
-    total_pending_registrations = FlamesRegistration.objects.filter(status="Pending").count()
-    
+
+    total_registrations = FlamesRegistration.objects.filter(edition=selected_edition).count()
+    total_completed_registrations = FlamesRegistration.objects.filter(edition=selected_edition, status="Completed").count()
+    total_pending_registrations = FlamesRegistration.objects.filter(edition=selected_edition, status="Pending").count()
+
     total_amount = FlamesRegistration.get_total_amount()
-    
+
     context = {
         'courses': courses,
         'total_courses': total_courses,
-        
+        'selected_edition': selected_edition,
+        'all_editions': FlamesEdition.objects.all().order_by('-year'),
+
         'total_registrations': total_registrations,
         'total_completed_registrations': total_completed_registrations,
         'total_pending_registrations': total_pending_registrations,
-        
+
         'total_amount': total_amount,
     }
-    
+
     return render(request, 'administration/flames/courses.html', context)
 
 
 @login_required
 def flames_registrations(request):
     """
-    Admin view for managing FLAMES registrations with filtering capability
+    Admin view for managing FLAMES registrations, scoped to the session-selected edition.
     """
-    registrations = FlamesRegistration.objects.all().select_related('course', 'user', 'team')
-    courses = FlamesCourse.objects.all()
-    
+    # Accept edition_id from GET param OR from session
+    get_edition_id = request.GET.get('edition_id')
+    session_edition_id = request.session.get('selected_flames_edition_id')
+    edition_id = get_edition_id or session_edition_id
+
+    if get_edition_id:
+        try:
+            request.session['selected_flames_edition_id'] = int(get_edition_id)
+            request.session.modified = True
+        except (ValueError, TypeError):
+            pass
+
+    if not edition_id:
+        messages.info(request, 'Please select a FLAMES edition first.')
+        return redirect('flames_select_edition')
+
+    try:
+        selected_edition = FlamesEdition.objects.get(id=edition_id)
+    except FlamesEdition.DoesNotExist:
+        request.session.pop('selected_flames_edition_id', None)
+        messages.warning(request, 'The previously selected edition no longer exists. Please select again.')
+        return redirect('flames_select_edition')
+
+    registrations = FlamesRegistration.objects.filter(edition=selected_edition).select_related('course', 'user', 'team')
+    courses = FlamesCourse.objects.filter(edition=selected_edition)
+
     # Get stats for dashboard
     total_registrations = registrations.count()
     pending_registrations = registrations.filter(status="Pending").count()
     approved_registrations = registrations.filter(status="Approved").count()
     completed_registrations = registrations.filter(status="Completed").count()
-    
+
     # Get unique colleges for filter (from student profiles)
     colleges = registrations.filter(user__isnull=False).values_list('user__college', flat=True).distinct()
-    
+
     context = {
         'registrations': registrations,
         'courses': courses,
         'colleges': colleges,
+        'selected_edition': selected_edition,
+        'all_editions': FlamesEdition.objects.all().order_by('-year'),
         'total_registrations': total_registrations,
         'pending_registrations': pending_registrations,
         'approved_registrations': approved_registrations,
         'completed_registrations': completed_registrations,
     }
-    
+
     return render(request, 'administration/flames/registrations.html', context)
 
 # ======================================== FLAMES COURSE ===================================
@@ -291,7 +392,7 @@ def admin_toggle_course_status(request):
 @login_required
 def admin_registrations_ajax(request):
     """
-    AJAX endpoint for getting filtered registrations data
+    AJAX endpoint for getting filtered registrations data, scoped to the selected edition.
     """
     # Get filter parameters
     course_id = request.GET.get('course')
@@ -300,10 +401,12 @@ def admin_registrations_ajax(request):
     mode = request.GET.get('mode', 'all')  # Default to 'all' if not provided
     search = request.GET.get('search[value]')
     year = request.GET.get('year')
-    
 
-    # Base queryset
+    # Base queryset — scope to session-selected edition if available
+    edition_id = request.session.get('selected_flames_edition_id')
     registrations = FlamesRegistration.objects.all().select_related('course', 'user', 'team')
+    if edition_id:
+        registrations = registrations.filter(edition_id=edition_id)
     
     # Apply filters
     if course_id and course_id != 'all' and course_id != '':

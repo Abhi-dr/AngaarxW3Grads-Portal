@@ -1,0 +1,441 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}FLAMES — Select Edition{% endblock %}
+
+{% block flames_active %}active{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    /* ── Page Layout ───────────────────────────────────── */
+    .edition-page {
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 40px 20px;
+    }
+
+    .edition-hero {
+        text-align: center;
+        margin-bottom: 48px;
+    }
+
+    .edition-hero .flame-icon {
+        font-size: 56px;
+        background: linear-gradient(135deg, #ff6b00, #ff9a42);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        display: block;
+        margin-bottom: 16px;
+        filter: drop-shadow(0 4px 16px rgba(255, 107, 0, 0.35));
+    }
+
+    .edition-hero h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 10px;
+        background: linear-gradient(135deg, #ff6b00, #ffb347);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .edition-hero p {
+        font-size: 1.05rem;
+        color: #b0b0b0;
+        max-width: 480px;
+        margin: 0 auto;
+    }
+
+    /* ── Current Edition Banner ───────────────────────── */
+    .current-edition-banner {
+        background: linear-gradient(135deg, rgba(255, 107, 0, 0.12), rgba(255, 154, 66, 0.08));
+        border: 1px solid rgba(255, 107, 0, 0.35);
+        border-radius: 14px;
+        padding: 16px 24px;
+        margin-bottom: 36px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        max-width: 600px;
+        width: 100%;
+        backdrop-filter: blur(6px);
+    }
+
+    .current-edition-banner .banner-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: rgba(255, 107, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #ff6b00;
+        flex-shrink: 0;
+    }
+
+    .current-edition-banner .banner-text h6 {
+        margin: 0 0 2px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #ff9a42;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .current-edition-banner .banner-text p {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #f0f0f0;
+    }
+
+    .current-edition-banner .banner-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+    }
+
+    /* ── Edition Cards Grid ───────────────────────────── */
+    .editions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 20px;
+        max-width: 900px;
+        width: 100%;
+    }
+
+    .edition-card {
+        position: relative;
+        background: linear-gradient(145deg, #2a2a2a, #1e1e1e);
+        border: 2px solid #3a3a3a;
+        border-radius: 16px;
+        padding: 28px 24px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        overflow: hidden;
+        text-decoration: none !important;
+    }
+
+    .edition-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255, 107, 0, 0.06), transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none; /* Don't intercept clicks — let button underneath work */
+    }
+
+    .edition-card:hover {
+        border-color: #ff6b00;
+        transform: translateY(-6px);
+        box-shadow: 0 16px 40px rgba(255, 107, 0, 0.2);
+    }
+
+    .edition-card:hover::before {
+        opacity: 1;
+    }
+
+    .edition-card.is-active {
+        border-color: rgba(255, 107, 0, 0.5);
+        background: linear-gradient(145deg, #2e1a00, #1e1300);
+    }
+
+    .edition-card.is-selected {
+        border-color: #ff6b00;
+        box-shadow: 0 0 0 3px rgba(255, 107, 0, 0.2), 0 16px 40px rgba(255, 107, 0, 0.25);
+    }
+
+    .edition-card .card-year {
+        font-size: 3rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #ff6b00, #ffb347);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+        margin-bottom: 6px;
+    }
+
+    .edition-card .card-name {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #e0e0e0;
+        margin-bottom: 14px;
+    }
+
+    .edition-card .card-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 16px;
+    }
+
+    .badge-active {
+        background: rgba(56, 203, 137, 0.15);
+        color: #38cb89;
+        border: 1px solid rgba(56, 203, 137, 0.3);
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .badge-reg-open {
+        background: rgba(66, 115, 250, 0.15);
+        color: #4273fa;
+        border: 1px solid rgba(66, 115, 250, 0.3);
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .badge-inactive {
+        background: rgba(150, 150, 150, 0.15);
+        color: #999;
+        border: 1px solid rgba(150, 150, 150, 0.3);
+        border-radius: 20px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .edition-card .card-dates {
+        font-size: 12px;
+        color: #888;
+        margin-bottom: 18px;
+    }
+
+    .edition-card .card-dates i {
+        margin-right: 4px;
+        color: #ff6b00;
+    }
+
+    .card-select-btn {
+        width: 100%;
+        padding: 10px 0;
+        border: none;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #ff6b00, #ff9a42);
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .card-select-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(255, 107, 0, 0.35);
+    }
+
+    .currently-viewing-chip {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        background: linear-gradient(135deg, #ff6b00, #ff9a42);
+        color: #fff;
+        border-radius: 20px;
+        padding: 4px 10px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ── No Editions ───────────────────────────────────── */
+    .no-editions {
+        text-align: center;
+        padding: 60px 20px;
+        max-width: 420px;
+    }
+
+    .no-editions i {
+        font-size: 48px;
+        color: #555;
+        margin-bottom: 16px;
+    }
+
+    .no-editions h4 {
+        color: #e0e0e0;
+        margin-bottom: 8px;
+    }
+
+    .no-editions p {
+        color: #888;
+    }
+
+    /* ── Quick-action bar below cards ─────────────────── */
+    .quick-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 36px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .quick-actions a {
+        padding: 10px 22px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.25s ease;
+    }
+
+    .btn-goto-courses {
+        background: rgba(66, 115, 250, 0.12);
+        border: 1px solid rgba(66, 115, 250, 0.35);
+        color: #4273fa;
+    }
+
+    .btn-goto-courses:hover {
+        background: rgba(66, 115, 250, 0.22);
+        color: #4273fa;
+        transform: translateY(-2px);
+    }
+
+    .btn-goto-regs {
+        background: rgba(56, 203, 137, 0.1);
+        border: 1px solid rgba(56, 203, 137, 0.3);
+        color: #38cb89;
+    }
+
+    .btn-goto-regs:hover {
+        background: rgba(56, 203, 137, 0.2);
+        color: #38cb89;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="edition-page">
+
+        <!-- Hero -->
+        <div class="edition-hero">
+            <i class="fas fa-fire flame-icon"></i>
+            <h1>FLAMES Edition</h1>
+            <p>Select the edition (year) you want to manage. All courses, registrations, and reports will be scoped to your selection.</p>
+        </div>
+
+        <!-- Current selection banner -->
+        {% if current_edition %}
+        <div class="current-edition-banner">
+            <div class="banner-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="banner-text">
+                <h6>Currently Viewing</h6>
+                <p>{{ current_edition.name }} &nbsp;·&nbsp; {{ current_edition.year }}</p>
+            </div>
+            <div class="banner-actions">
+                <a href="{% url 'admin_flames_courses' %}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-book me-1"></i> Courses
+                </a>
+                <a href="{% url 'admin_flames_registrations' %}" class="btn btn-sm btn-outline-success">
+                    <i class="fas fa-users me-1"></i> Registrations
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Edition cards -->
+        {% if editions %}
+        <div class="editions-grid">
+            {% for edition in editions %}
+            <div class="edition-card {% if edition.is_active %}is-active{% endif %} {% if current_edition and current_edition.id == edition.id %}is-selected{% endif %}">
+
+                {% if current_edition and current_edition.id == edition.id %}
+                <span class="currently-viewing-chip">Viewing</span>
+                {% endif %}
+
+                <div class="card-year">{{ edition.year }}</div>
+                <div class="card-name">{{ edition.name }}</div>
+
+                <div class="card-badges">
+                    {% if edition.is_active %}
+                    <span class="badge-active"><i class="fas fa-circle" style="font-size:7px; vertical-align: middle;"></i> Active</span>
+                    {% else %}
+                    <span class="badge-inactive">Inactive</span>
+                    {% endif %}
+
+                    {% if edition.registration_open %}
+                    <span class="badge-reg-open"><i class="fas fa-door-open" style="font-size:10px;"></i> Reg Open</span>
+                    {% endif %}
+                </div>
+
+                {% if edition.start_date or edition.end_date %}
+                <div class="card-dates">
+                    <i class="fas fa-calendar-alt"></i>
+                    {% if edition.start_date %}{{ edition.start_date|date:"M d, Y" }}{% else %}—{% endif %}
+                    &nbsp;→&nbsp;
+                    {% if edition.end_date %}{{ edition.end_date|date:"M d, Y" }}{% else %}—{% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Select this edition -->
+                <form method="POST" action="{% url 'flames_set_edition' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="edition_id" value="{{ edition.id }}">
+                    <button type="submit" class="card-select-btn">
+                        {% if current_edition and current_edition.id == edition.id %}
+                        <i class="fas fa-check"></i> Currently Selected
+                        {% else %}
+                        <i class="fas fa-arrow-right"></i> Select & Continue
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Quick action links (only if an edition is already selected) -->
+        {% if current_edition %}
+        <div class="quick-actions">
+            <a href="{% url 'admin_flames_courses' %}" class="btn-goto-courses">
+                <i class="fas fa-book"></i> View Courses
+            </a>
+            <a href="{% url 'admin_flames_registrations' %}" class="btn-goto-regs">
+                <i class="fas fa-users"></i> View Registrations
+            </a>
+            <a href="{% url 'admin_flames_emails' %}" style="background:rgba(252,190,45,0.1);border:1px solid rgba(252,190,45,0.3);color:#fcbe2d;padding:10px 22px;border-radius:10px;font-size:14px;font-weight:600;text-decoration:none;display:flex;align-items:center;gap:8px;transition:all 0.25s ease;">
+                <i class="fas fa-envelope"></i> Send Emails
+            </a>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- No editions exist yet -->
+        <div class="no-editions">
+            <i class="fas fa-fire-alt"></i>
+            <h4>No FLAMES Editions Found</h4>
+            <p>Create a FLAMES edition from the Django admin panel first, then come back to manage it here.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

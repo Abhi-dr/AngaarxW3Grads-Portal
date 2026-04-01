@@ -229,6 +229,10 @@ urlpatterns += [
 
 # Flames Management 
 urlpatterns += [
+    # Edition selector — the entry point when clicking FLAMES in the sidebar
+    path("flames/", flames_views.flames_select_edition, name="flames_select_edition"),
+    path("flames/set-edition/", flames_views.flames_set_edition, name="flames_set_edition"),
+
     path("flames/courses/", flames_views.flames_courses, name="admin_flames_courses"),
     path("flames/registrations/", flames_views.flames_registrations, name="admin_flames_registrations"),
     
