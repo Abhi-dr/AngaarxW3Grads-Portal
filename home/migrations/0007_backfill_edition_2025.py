@@ -20,15 +20,21 @@ def backfill_to_2025(apps, schema_editor):
     ReferralCode       = apps.get_model('home', 'ReferralCode')
 
     try:
-        ed_2025 = FlamesEdition.objects.get(year=2025)
-    except FlamesEdition.DoesNotExist:
+        ed_2025, created = FlamesEdition.objects.get_or_create(
+            year=2025,
+            defaults={
+                'name': 'FLAMES 25',
+                'is_active': True,
+            }
+        )
+        if created:
+            print("\n[backfill_edition_2025] Created FlamesEdition row: FLAMES 2025")
+        else:
+            print("\n[backfill_edition_2025] Found existing FlamesEdition row: FLAMES 2025")
+    except Exception as e:
         raise RuntimeError(
-            "FLAMES 2025 edition row not found. "
-            "Run the seed script before applying this migration:\n"
-            "  python manage.py shell -c \""
-            "from home.models import FlamesEdition; "
-            "FlamesEdition.objects.get_or_create(year=2025, defaults={'name': 'FLAMES 25'})"
-            "\""
+            f"Could not get or create the FLAMES 2025 edition row: {e}\n"
+            "Check that migration 0006 has been applied first (it creates the FlamesEdition table)."
         )
 
     regs  = FlamesRegistration.objects.filter(edition__isnull=True).update(edition=ed_2025)
