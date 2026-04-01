@@ -9,6 +9,15 @@ from django.db.models import OuterRef, Subquery
 
 from practice.models import Question, Submission
 
+
+def _safe_thumbnail_url(sheet):
+    try:
+        if sheet.thumbnail and getattr(sheet.thumbnail, 'name', None):
+            return sheet.thumbnail.url
+    except Exception:
+        return None
+    return None
+
 # ================================== FETCH ALL SHEETS ==================================
 
 def fetch_all_sheets(request):   
@@ -24,7 +33,7 @@ def fetch_all_sheets(request):
             "id": sheet.id,
             "name": sheet.name,
             "slug": sheet.slug,
-            "thumbnail": sheet.thumbnail.url,
+            "thumbnail": _safe_thumbnail_url(sheet),
             "batches": ", ".join([batch.name for batch in sheet.batches.all()]),
             "questions": sheet.questions.count(),
             "is_enabled": sheet.is_enabled,
