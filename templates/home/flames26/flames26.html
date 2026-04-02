@@ -687,13 +687,33 @@ FLAMES 26 | The Angaar Batch
         padding: 0 24px;
     }
 
-    /* ---- Responsive ---- */
+    /* ---- PERFORMANCE FIXES FOR MOBILE & ANIMATION ---- */
+    [data-aos] {
+        will-change: transform, opacity;
+    }
+
     @media (max-width: 768px) {
         .courses-grid { grid-template-columns: 1fr; }
         .courses-grid .course-card:nth-child(5) { grid-column: auto; max-width: 100%; }
         .proof-grid { grid-template-columns: 1fr; gap: 24px; }
         .card-actions { flex-direction: column; }
         .register-btn, .know-more-btn { justify-content: center; }
+
+        /* Disable heavy blurs on mobile devices */
+        .course-card, 
+        .testimonial-card, 
+        .step-node-card, 
+        .stat-card, 
+        .faq-item {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            background: rgba(30, 30, 30, 0.95); /* Made slightly darker to compensate for lost blur */
+        }
+        
+        /* Remove SVG animation path rendering on mobile to save memory */
+        .route-svg {
+            display: none !important;
+        }
     }
 
     @media (max-width: 480px) {
@@ -710,12 +730,8 @@ FLAMES 26 | The Angaar Batch
 
     <div class="container">
 
-        <!-- ============================================
-             HERO SECTION
-             ============================================ -->
         <div class="showcase-header mt-5" data-aos="fade-up" data-aos-duration="900">
 
-            <!-- Badge sits in its own block wrapper so it stacks ABOVE the h1 -->
             <div class="hero-badge-wrap">
                 <div class="hero-badge">
                     <span class="dot"></span>
@@ -750,12 +766,7 @@ FLAMES 26 | The Angaar Batch
                 <span class="urgency-sep">·</span>
                 <span class="urgency-tag">🎯 Serious Students Only</span>
             </div>
-        </div><!-- /showcase-header -->
-
-        <!-- ============================================
-             STATS ROW
-             ============================================ -->
-        <div class="stats-grid mt-5" data-aos="fade-up" data-aos-duration="800">
+        </div><div class="stats-grid mt-5" data-aos="fade-up" data-aos-duration="800">
             <div class="stat-card">
                 <div class="stat-number" data-target="750">0+</div>
                 <div class="stat-label">Students Trained</div>
@@ -774,9 +785,6 @@ FLAMES 26 | The Angaar Batch
             </div>
         </div>
 
-        <!-- ============================================
-             TRACKS / COURSE CARDS  (right after Hero + Stats)
-             ============================================ -->
         <div class="courses-section" id="tracks" style="padding-top: 70px;">
             <div class="section-header m-0" data-aos="fade-up">
                 <h2 class="section-title">Choose Your Track <i class="fas fa-fire"></i></h2>
@@ -846,9 +854,6 @@ FLAMES 26 | The Angaar Batch
         </div>
 
 
-        <!-- ============================================
-             REALITY CHECK
-             ============================================ -->
         <div class="reality-section" data-aos="fade-up">
             <div class="reality-inner">
                 <span class="section-label" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: #ff6026; display: block; margin-bottom: 12px;">Reality Check</span>
@@ -862,9 +867,6 @@ FLAMES 26 | The Angaar Batch
             </div>
         </div>
 
-        <!-- ============================================
-             WHAT IS FLAMES
-             ============================================ -->
         <div class="what-flames-section" data-aos="fade-up">
             <span class="section-label" style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 3px; color: #ff6026; display: block; margin-bottom: 12px;">What Is FLAMES</span>
             <h2 class="section-title" style="text-align: left;">FLAMES is not a course.</h2>
@@ -876,9 +878,6 @@ FLAMES 26 | The Angaar Batch
             </ul>
         </div>
 
-        <!-- ============================================
-             TESTIMONIALS
-             ============================================ -->
         <div class="testimonials-section" data-aos="fade-up">
             <div class="section-header m-0">
                 <h2 class="section-title">Real Students. Real Results. <i class="fas fa-fire"></i></h2>
@@ -909,23 +908,16 @@ FLAMES 26 | The Angaar Batch
             </div>
         </div>
 
-        <!-- ============================================
-             HOW IT WORKS
-             ============================================ -->
         <div class="how-section" data-aos="fade-up">
             <div class="section-header m-0">
                 <h2 class="section-title">How It Works <i class="fas fa-cogs"></i></h2>
                 <p class="section-description">Simple. Brutal. Effective.</p>
             </div>
 
-            <!-- Journey route with SVG path connecting all 4 steps -->
             <div class="journey-track">
 
-                <!-- SVG route drawn absolutely over the grid -->
-                <!-- Responsive path is handled per breakpoint -->
                 <div class="journey-row">
 
-                    <!-- Step 1 — TOP -->
                     <div class="step-node top" data-aos="fade-down" data-aos-delay="100">
                         <div class="step-node-number">01</div>
                         <div class="step-node-card">
@@ -935,7 +927,6 @@ FLAMES 26 | The Angaar Batch
                         </div>
                     </div>
 
-                    <!-- Step 2 — BOTTOM -->
                     <div class="step-node bottom" data-aos="fade-up" data-aos-delay="200">
                         <div class="step-node-card">
                             <div class="step-node-icon"><i class="fas fa-tasks"></i></div>
@@ -945,7 +936,6 @@ FLAMES 26 | The Angaar Batch
                         <div class="step-node-number" style="margin-top: 16px; margin-bottom: 0;">02</div>
                     </div>
 
-                    <!-- Step 3 — TOP -->
                     <div class="step-node top" data-aos="fade-down" data-aos-delay="300">
                         <div class="step-node-number">03</div>
                         <div class="step-node-card">
@@ -955,7 +945,6 @@ FLAMES 26 | The Angaar Batch
                         </div>
                     </div>
 
-                    <!-- Step 4 — BOTTOM -->
                     <div class="step-node bottom" data-aos="fade-up" data-aos-delay="400">
                         <div class="step-node-card">
                             <div class="step-node-icon"><i class="fas fa-briefcase"></i></div>
@@ -967,9 +956,7 @@ FLAMES 26 | The Angaar Batch
 
                 </div>
 
-                <!-- SVG route path overlaid across the journey -->
                 <svg class="route-svg" viewBox="0 0 1000 200" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Main winding path -->
                     <path
                         d="M 125 60 C 175 60, 200 140, 250 140
                            C 300 140, 325 140, 375 140
@@ -982,20 +969,14 @@ FLAMES 26 | The Angaar Batch
                         stroke-width="2"
                         stroke-dasharray="8 5"
                     />
-                    <!-- Arrow at step 2 -->
                     <polygon points="248,133 260,140 248,147" fill="rgba(255,96,38,0.5)"/>
-                    <!-- Arrow at step 3 -->
                     <polygon points="498,53 510,60 498,67" fill="rgba(255,96,38,0.5)"/>
-                    <!-- Arrow at step 4 -->
                     <polygon points="748,133 760,140 748,147" fill="rgba(255,96,38,0.5)"/>
                 </svg>
 
             </div>
         </div>
 
-        <!-- ============================================
-             FAQ SECTION
-             ============================================ -->
         <div class="faq-section" id="faq" data-aos="fade-up">
             <div class="section-header m-0">
                 <h2 class="section-title">Frequently Asked Questions <i class="fas fa-question-circle"></i></h2>
@@ -1093,9 +1074,6 @@ FLAMES 26 | The Angaar Batch
             </div>
         </div>
 
-        <!-- ============================================
-             FINAL CTA
-             ============================================ -->
         <div class="final-cta-section" data-aos="zoom-in">
             <h2 class="final-heading">
                 This is your<br><span>turning point.</span>
@@ -1109,13 +1087,7 @@ FLAMES 26 | The Angaar Batch
             <p class="final-note">If you're serious… we'll see you inside.</p>
         </div>
 
-    </div><!-- /container -->
-</div><!-- /showcase-page-container -->
-
-<!-- ============================================
-     SCRIPTS
-     ============================================ -->
-<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    </div></div><script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
 
 <script>
@@ -1143,20 +1115,22 @@ FLAMES 26 | The Angaar Batch
         // AOS init
         AOS.init({ duration: 800, easing: 'ease-in-out', once: true, offset: 80 });
 
-        // Particles
-        particlesJS('particles-js', {
-            particles: {
-                number: { value: 35, density: { enable: true, value_area: 900 } },
-                color: { value: "#ff6026" },
-                shape: { type: "circle" },
-                opacity: { value: 0.18, random: true, anim: { enable: true, speed: 1, opacity_min: 0.04, sync: false } },
-                size: { value: 3, random: true },
-                line_linked: { enable: true, distance: 140, color: "#ff6026", opacity: 0.12, width: 1 },
-                move: { enable: true, speed: 0.5, direction: "none", random: true, straight: false, out_mode: "out" }
-            },
-            interactivity: { detect_on: "canvas", events: { onhover: { enable: false }, onclick: { enable: false }, resize: true } },
-            retina_detect: true
-        });
+        // PERFORMANCE FIX: Only load particles on screens wider than 768px
+        if (window.innerWidth > 768) {
+            particlesJS('particles-js', {
+                particles: {
+                    number: { value: 35, density: { enable: true, value_area: 900 } },
+                    color: { value: "#ff6026" },
+                    shape: { type: "circle" },
+                    opacity: { value: 0.18, random: true, anim: { enable: true, speed: 1, opacity_min: 0.04, sync: false } },
+                    size: { value: 3, random: true },
+                    line_linked: { enable: true, distance: 140, color: "#ff6026", opacity: 0.12, width: 1 },
+                    move: { enable: true, speed: 0.5, direction: "none", random: true, straight: false, out_mode: "out" }
+                },
+                interactivity: { detect_on: "canvas", events: { onhover: { enable: false }, onclick: { enable: false }, resize: true } },
+                retina_detect: true
+            });
+        }
 
         // Counter animation
         const counters = document.querySelectorAll('.stat-number[data-target]');
