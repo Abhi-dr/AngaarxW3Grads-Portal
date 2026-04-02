@@ -264,47 +264,54 @@ def admin_add_course(request):
         slug = request.POST.get('slug')
         description = request.POST.get('description')
         what_you_will_learn = request.POST.get('what_you_will_learn')
-        roadmap = request.POST.get('roadmap')
         icon_class = request.POST.get('icon_class')
-        icon_color = request.POST.get('color')
-        button_color = request.POST.get('button_color')
-        instructor_name = request.POST.get('instructor')
-        price = request.POST.get('price')
-        discount_price = request.POST.get('discount_price') or None
+        icon_color = request.POST.get('color', '#ff6b00')
+        button_color = request.POST.get('button_color', '#ff6b00')
+        instructor_id = request.POST.get('instructor')
+        price = request.POST.get('price') or 0
+        discount_price = request.POST.get('discount_price') or 0
         is_active = 'is_active' in request.POST
-        
+
+        # Get edition from session (required FK)
+        edition_id = request.session.get('selected_flames_edition_id')
+        if not edition_id:
+            messages.error(request, 'Please select a FLAMES edition before adding a course.')
+            return redirect('flames_select_edition')
         try:
-            instructor = CustomUser.objects.get(name=instructor_name)
-        except:
-            instructor = None
-        
-        # Create the course
+            edition = FlamesEdition.objects.get(id=edition_id)
+        except FlamesEdition.DoesNotExist:
+            messages.error(request, 'Selected edition not found. Please select a valid edition.')
+            return redirect('flames_select_edition')
+
+        # Create the course (NO instructor here — it's M2M, set after save)
         course = FlamesCourse.objects.create(
             title=title,
             subtitle=subtitle,
             slug=slug,
             description=description,
             what_you_will_learn=what_you_will_learn,
-            roadmap=roadmap,
             icon_class=icon_class,
-            color=icon_color,
+            icon_color=icon_color,
             button_color=button_color,
-            instructor=instructor,
             price=price,
             discount_price=discount_price,
-            is_active=is_active
+            is_active=is_active,
+            edition=edition,
         )
-        
+
+        # Set ManyToMany instructor after creation
+        if instructor_id:
+            try:
+                instructor = CustomUser.objects.get(id=instructor_id)
+                course.instructor.set([instructor])
+            except CustomUser.DoesNotExist:
+                pass
+
+        messages.success(request, f'Course "{title}" added successfully!')
         return redirect('admin_flames_courses')
-    
-    # Get data for form
-    instructors = CustomUser.objects.filter(role='instructor')
-    
-    context = {
-        'instructors': instructors,
-    }
-    
-    return render(request, 'administration/flames/add_course.html', context)
+
+    # The add-course form is a modal in courses.html — redirect to that page on GET
+    return redirect('admin_flames_courses')
 
 
 @login_required
@@ -313,7 +320,7 @@ def admin_edit_course(request, course_id):
     Edit an existing FLAMES course
     """
     course = get_object_or_404(FlamesCourse, id=course_id)
-    
+
     if request.method == 'POST':
         # Extract form data
         title = request.POST.get('title')
@@ -321,47 +328,68 @@ def admin_edit_course(request, course_id):
         slug = request.POST.get('slug')
         description = request.POST.get('description')
         what_you_will_learn = request.POST.get('what_you_will_learn')
-        roadmap = request.POST.get('roadmap')
         icon_class = request.POST.get('icon_class')
-        icon_color = request.POST.get('color')
-        button_color = request.POST.get('button_color')
-        instructor_name = request.POST.get('instructor')
-        price = request.POST.get('price')
-        discount_price = request.POST.get('discount_price') or None
+        icon_color = request.POST.get('color', '#ff6b00')
+        button_color = request.POST.get('button_color', '#ff6b00')
+        instructor_id = request.POST.get('instructor')
+        price = request.POST.get('price') or 0
+        discount_price = request.POST.get('discount_price') or 0
         is_active = 'is_active' in request.POST
-        
-        try:
-            instructor = CustomUser.objects.get(name=instructor_name)
-        except:
-            instructor = None
-        
-        # Update the course
+
+        # Update the course fields (no instructor — it's M2M)
         course.title = title
         course.subtitle = subtitle
         course.slug = slug
         course.description = description
         course.what_you_will_learn = what_you_will_learn
-        course.roadmap = roadmap
         course.icon_class = icon_class
-        course.color = icon_color
+        course.icon_color = icon_color
         course.button_color = button_color
-        course.instructor = instructor
         course.price = price
         course.discount_price = discount_price
         course.is_active = is_active
         course.save()
-        
-        return redirect('admin_flames_courses')
-    
+
+        # Update ManyToMany instructor
+        if instructor_id:
+            try:
+                instructor = CustomUser.objects.get(id=instructor_id)
+                course.instructor.set([instructor])
+            except CustomUser.DoesNotExist:
+                course.instructor.clear()
+        else:
+            course.instructor.clear()
+
+        messages.success(request, f'Course "{title}" updated successfully!')
+        return redirect('admin_course_detail', course_id=course.id)
+
     # Get data for form
     instructors = CustomUser.objects.filter(role='instructor')
-    
+    # Get current instructors for pre-selection
+    current_instructor = course.instructor.first()
+
     context = {
         'course': course,
         'instructors': instructors,
+        'current_instructor': current_instructor,
     }
-    
+
     return render(request, 'administration/flames/edit_course.html', context)
+
+
+@login_required
+def admin_delete_course(request, course_id):
+    """
+    Delete a FLAMES course
+    """
+    course = get_object_or_404(FlamesCourse, id=course_id)
+    if request.method == 'POST':
+        course_title = course.title
+        course.delete()
+        messages.success(request, f'Course "{course_title}" deleted successfully!')
+        return redirect('admin_flames_courses')
+    # GET: show confirmation page (or redirect back)
+    return redirect('admin_flames_courses')
 
 
 @login_required
