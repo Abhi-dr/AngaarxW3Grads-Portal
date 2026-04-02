@@ -14,11 +14,6 @@ from accounts.models import CustomUser
 
 @login_required
 def flames_select_edition(request):
-    """
-    Landing page for the FLAMES admin section.
-    Admin picks which edition (year) they want to manage.
-    The selection is stored in the session so all subsequent views are scoped to it.
-    """
     editions = FlamesEdition.objects.all().order_by('-year')
     current_edition_id = request.session.get('selected_flames_edition_id')
     current_edition = None
@@ -50,7 +45,7 @@ def flames_set_edition(request):
                 request.session['selected_flames_edition_id'] = edition.id
                 request.session.modified = True
                 request.session.save()
-                messages.success(request, f'Now viewing FLAMES edition: {edition.name}')
+                # messages.success(request, f'Now viewing FLAMES edition: {edition.name}')
                 # Redirect with edition_id in URL as a fallback safety net
                 from django.urls import reverse
                 return redirect(reverse('admin_flames_courses') + f'?edition_id={edition.id}')
