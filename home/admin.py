@@ -31,12 +31,13 @@ class FlamesEditionAdmin(admin.ModelAdmin):
 
 @admin.register(FlamesCourse)
 class FlamesCourseAdmin(admin.ModelAdmin):
-    list_display  = ('title', 'edition', 'price', 'discount_price', 'is_active')
+    list_display  = ('title', 'edition', 'display_order', 'price', 'discount_price', 'is_active')
     list_filter   = ('edition', 'is_active')
     list_editable = ('is_active',)
     search_fields = ('title', 'subtitle', 'description')
     prepopulated_fields = {'slug': ('title',)}
     filter_horizontal = ('instructor',)
+    ordering = ('edition', 'display_order', 'id')
 
     fieldsets = (
         ('Core Details', {

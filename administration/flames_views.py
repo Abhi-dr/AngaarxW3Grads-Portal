@@ -1,7 +1,10 @@
+import json
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
+from django.db import transaction
 from django.views.decorators.http import require_POST
 from django.core.mail import EmailMultiAlternatives
 from django.contrib import messages
@@ -92,7 +95,8 @@ def flames_courses(request):
     total_completed_registrations = FlamesRegistration.objects.filter(edition=selected_edition, status="Completed").count()
     total_pending_registrations = FlamesRegistration.objects.filter(edition=selected_edition, status="Pending").count()
 
-    total_amount = FlamesRegistration.get_total_amount()
+
+    total_amount = FlamesRegistration.get_total_amount(edition=selected_edition)
 
     context = {
         'courses': courses,
@@ -108,6 +112,102 @@ def flames_courses(request):
     }
 
     return render(request, 'administration/flames/courses.html', context)
+
+
+@login_required
+def admin_reorder_flames_courses(request):
+    """
+    Reorder FLAMES courses for the currently selected edition.
+    """
+    edition_id = request.GET.get('edition_id') or request.session.get('selected_flames_edition_id')
+    if not edition_id:
+        messages.info(request, 'Please select a FLAMES edition first.')
+        return redirect('flames_select_edition')
+
+    try:
+        selected_edition = FlamesEdition.objects.get(id=edition_id)
+    except FlamesEdition.DoesNotExist:
+        request.session.pop('selected_flames_edition_id', None)
+        messages.warning(request, 'The previously selected edition no longer exists. Please select again.')
+        return redirect('flames_select_edition')
+
+    request.session['selected_flames_edition_id'] = selected_edition.id
+    request.session.modified = True
+
+    courses = FlamesCourse.objects.filter(edition=selected_edition)
+
+    context = {
+        'selected_edition': selected_edition,
+        'courses': courses,
+    }
+    return render(request, 'administration/flames/reorder_courses.html', context)
+
+
+@login_required
+@require_POST
+def admin_save_flames_course_order(request):
+    """
+    Persist course display order for the currently selected FLAMES edition.
+    """
+    edition_id = request.session.get('selected_flames_edition_id')
+    if not edition_id:
+        return JsonResponse({
+            'success': False,
+            'error': 'Please select a FLAMES edition first.',
+        }, status=400)
+
+    try:
+        selected_edition = FlamesEdition.objects.get(id=edition_id)
+    except FlamesEdition.DoesNotExist:
+        request.session.pop('selected_flames_edition_id', None)
+        return JsonResponse({
+            'success': False,
+            'error': 'Selected edition no longer exists.',
+        }, status=400)
+
+    try:
+        payload = json.loads(request.body or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Invalid JSON payload.',
+        }, status=400)
+
+    order = payload.get('order', [])
+    if not isinstance(order, list) or not order:
+        return JsonResponse({
+            'success': False,
+            'error': 'order must be a non-empty list of course IDs.',
+        }, status=400)
+
+    try:
+        ordered_ids = [int(course_id) for course_id in order]
+    except (TypeError, ValueError):
+        return JsonResponse({
+            'success': False,
+            'error': 'order must contain only integer course IDs.',
+        }, status=400)
+
+    edition_courses = list(
+        FlamesCourse.objects.filter(edition=selected_edition).values_list('id', flat=True)
+    )
+    if len(ordered_ids) != len(edition_courses) or set(ordered_ids) != set(edition_courses):
+        return JsonResponse({
+            'success': False,
+            'error': 'Order must include every course from the selected edition exactly once.',
+        }, status=400)
+
+    with transaction.atomic():
+        for index, course_id in enumerate(ordered_ids, start=1):
+            FlamesCourse.objects.filter(
+                id=course_id,
+                edition=selected_edition,
+            ).update(display_order=index)
+
+    return JsonResponse({
+        'success': True,
+        'message': 'Course order saved successfully.',
+    })
 
 
 @login_required

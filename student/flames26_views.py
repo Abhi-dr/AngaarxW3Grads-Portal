@@ -54,7 +54,6 @@ def student_flames26(request):
         available_courses = list(
             FlamesCourse.objects.filter(edition=edition_2026, is_active=True)
             .exclude(id__in=registered_course_ids)
-            .order_by('title')
         )
 
     # Max registrations cap for display

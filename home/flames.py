@@ -318,7 +318,7 @@ def register_flames(request, slug):
 def flames26(request):
     try:
         edition_2026 = FlamesEdition.objects.get(year=2026)
-        courses = FlamesCourse.objects.filter(edition=edition_2026, is_active=True).order_by('title')
+        courses = FlamesCourse.objects.filter(edition=edition_2026, is_active=True)
     except FlamesEdition.DoesNotExist:
         edition_2026 = None
         courses = FlamesCourse.objects.none()
@@ -426,4 +426,3 @@ def flames26_register(request, track_slug):
         "colleges": colleges,
         "prefill":  prefill,
     })
-

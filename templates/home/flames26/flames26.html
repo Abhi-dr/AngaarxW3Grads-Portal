@@ -207,6 +207,15 @@ FLAMES 26 | The Angaar Batch
 
     .course-card:hover::before { transform: scaleX(1); }
 
+    .course-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px 20px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
     .course-icon {
         width: 65px; height: 65px;
         background: linear-gradient(135deg, #ff6026, #ff9a56);
@@ -214,15 +223,15 @@ FLAMES 26 | The Angaar Batch
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 20px;
+        margin-bottom: 0;
         font-size: 2rem;
         color: white;
         flex-shrink: 0;
     }
 
     .level-badge {
-        position: absolute;
-        top: 20px; right: 20px;
+        display: inline-flex;
+        align-items: center;
         font-size: 0.65rem;
         font-weight: 700;
         text-transform: uppercase;
@@ -249,37 +258,59 @@ FLAMES 26 | The Angaar Batch
     }
     /* Twin-pill level progression */
     .level-progression {
-        position: absolute; 
-        top: 16px; 
-        right: 16px;
-        display: inline-flex; 
-        align-items: center; 
-        gap: 4px; /* Slightly increased gap for visual breathing room */
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        flex-wrap: wrap;
+        margin-left: auto;
+        max-width: 100%;
         z-index: 2;
     }
     
     .level-progression .level-badge { 
-        position: static; /* <-- THIS FIXES THE OVERLAP */
+        position: static;
         font-size: 0.6rem; 
         padding: 4px 8px; 
-        white-space: nowrap; /* Prevents text wrapping on very thin mobile screens */
+        white-space: nowrap;
+        flex: 0 0 auto;
     }
     
     .level-progression .lp-arrow { 
         font-size: 0.65rem; 
         color: #888; 
         font-weight: 700; 
+        flex: 0 0 auto;
     }
 
     /* Mobile Responsive Fixes for Twin-Pill */
+    @media (max-width: 768px) {
+        .course-card-header {
+            gap: 14px 16px;
+        }
+
+        .level-progression .level-badge {
+            font-size: 0.55rem;
+            padding: 4px 7px;
+            letter-spacing: 1px;
+        }
+    }
+
     @media (max-width: 480px) {
+        .course-card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
         .level-progression {
-            top: 12px;
-            right: 12px;
+            justify-content: flex-start;
+            margin-left: 0;
+            width: 100%;
             gap: 2px;
         }
+
         .level-progression .level-badge {
-            font-size: 0.55rem; /* Scaled down slightly to prevent overlapping the card icon */
+            font-size: 0.55rem;
             padding: 3px 6px;
             letter-spacing: 1px;
         }
@@ -841,22 +872,25 @@ FLAMES 26 | The Angaar Batch
                 {% with delay=forloop.counter|add:"0" %}
                 <div class="course-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter }}00">
 
-                    {# Twin-pill level progression badge #}
-                    <div class="level-progression">
-                        {% if course.level == "Intermediate" %}
-                        <span class="level-badge badge-intermediate">Intermediate</span>
-                        {% elif course.level == "Advanced" %}
-                        <span class="level-badge badge-advanced">Advanced</span>
-                        {% else %}
-                        <span class="level-badge badge-beginner">Beginner</span>
-                        {% endif %}
-                        <span class="lp-arrow">→</span>
-                        <span class="level-badge badge-advanced">Advanced</span>
+                    <div class="course-card-header">
+                        <div class="course-icon">
+                            <i class="{{ course.icon_class }}"></i>
+                        </div>
+
+                        {# Twin-pill level progression badge #}
+                        <div class="level-progression">
+                            {% if course.level == "Intermediate" %}
+                            <span class="level-badge badge-intermediate">Intermediate</span>
+                            {% elif course.level == "Advanced" %}
+                            <span class="level-badge badge-advanced">Advanced</span>
+                            {% else %}
+                            <span class="level-badge badge-beginner">Beginner</span>
+                            {% endif %}
+                            <span class="lp-arrow">→</span>
+                            <span class="level-badge badge-advanced">Advanced</span>
+                        </div>
                     </div>
 
-                    <div class="course-icon">
-                        <i class="{{ course.icon_class }}"></i>
-                    </div>
                     <h3 class="course-title">{{ course.title }}</h3>
                     {% if course.subtitle %}
                     <p class="course-tagline">{{ course.subtitle }}</p>
