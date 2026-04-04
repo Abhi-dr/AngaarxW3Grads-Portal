@@ -9,6 +9,7 @@ urlpatterns = [
     path('check_username_availability/', views.check_username_availability, name='check_username_availability'),
     path('check_username_exists/', views.check_username_exists, name='check_username_exists'),
     path('check_email_availability/', views.check_email_availability, name='check_email_availability'),
+    path('check_email_exists/', views.check_email_exists, name='check_email_exists'),
     
     path("block_student/<int:id>/", views.block_student, name="block_student"),
     path("unblock_student/<int:id>/", views.unblock_student, name="unblock_student"),

@@ -80,12 +80,12 @@ def validate_referral(request):
     if referral.expires_at and referral.expires_at < timezone.now():
         return JsonResponse({'status': 'error', 'message': 'This referral code has expired.'})
 
-    discounted_price = max(0, course.price - referral.discount_amount)
+    discounted_price = max(0, int(course.discount_price) - referral.discount_amount)
     return JsonResponse({
         'status': 'success',
         'message': 'Valid referral code.',
-        'original_price':    course.price,
-        'discounted_price':  discounted_price,
+        'original_price':    int(course.discount_price),   # base (real) price
+        'discounted_price':  discounted_price,              # after referral deduction
         'discount_amount':   referral.discount_amount,
     })
 
@@ -269,17 +269,17 @@ def register_flames(request, slug):
                 FlamesTeamMember.objects.create(team=team, member=student, is_leader=True)
 
                 for i in range(1, 5):
-                    member_username = request.POST.get(f'team_member_username_{i}')
-                    if member_username:
+                    member_email = request.POST.get(f'team_member_email_{i}', '').strip().lower()
+                    if member_email:
                         try:
-                            member_student = CustomUser.objects.get(username=member_username)
+                            member_student = CustomUser.objects.get(email__iexact=member_email)
                             FlamesTeamMember.objects.create(
                                 team=team, member=member_student, is_leader=False
                             )
                         except CustomUser.DoesNotExist:
                             messages.warning(
                                 request,
-                                f"User '{member_username}' not found and was not added to the team."
+                                f"User with email '{member_email}' not found and was not added to the team."
                             )
 
                 messages.success(request, f"Team '{team_name}' registered for {course.title}!")

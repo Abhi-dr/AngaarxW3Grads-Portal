@@ -687,7 +687,7 @@
 
                 <div class="price-summary" id="price-summary">
                     <div class="ps-row">
-                        <span class="ps-label">Original Price</span>
+                        <span class="ps-label">Course Fee</span>
                         <span class="ps-value" id="ps-original">—</span>
                     </div>
                     <div class="ps-row">
@@ -704,25 +704,32 @@
                 <div class="team-section" id="team-section">
                     <div class="section-divider">Team Members</div>
                     <p style="font-size:.84rem;color:#666;margin-bottom:16px">
-                        Add the usernames of your 4 teammates (they must already have an Angaar account).
+                        Enter the <strong style="color:#ddd">registered email addresses</strong> of your 4 teammates (they must already have an Angaar account).
                     </p>
 
                     {% for i in "1234" %}
-                    <div class="team-member-card">
+                    <div class="team-member-card" id="tm-card-{{ forloop.counter }}">
                         <div class="team-member-header">
                             <div class="member-num">{{ forloop.counter|add:1 }}</div>
                             Teammate {{ forloop.counter|add:1 }}
                         </div>
                         <div class="form-group" style="margin-bottom:0">
                             <div class="input-wrap">
-                                <input type="text" name="team_member_username_{{ forloop.counter }}"
+                                <input type="email"
+                                       name="team_member_email_{{ forloop.counter }}"
                                        id="tm-{{ forloop.counter }}"
                                        class="form-control team-req"
-                                       placeholder="Enter teammate's username">
+                                       placeholder="teammate@email.com"
+                                       autocomplete="off">
                                 <i class="fas fa-check vi" id="tm{{ forloop.counter }}-ok"></i>
                                 <i class="fas fa-times vi" id="tm{{ forloop.counter }}-err"></i>
                             </div>
                             <div class="form-feedback" id="tm{{ forloop.counter }}-fb"></div>
+                            <!-- Real-time name preview -->
+                            <div id="tm{{ forloop.counter }}-name" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);border-radius:8px;font-size:.82rem;color:#aaa">
+                                <i class="fas fa-user-check" style="color:#2ecc71;margin-right:6px"></i>
+                                <span id="tm{{ forloop.counter }}-name-text"></span>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
@@ -1100,39 +1107,97 @@ function checkPasswordMatch() {
 
 if (cpwdInput) cpwdInput.addEventListener('input', checkPasswordMatch);
 
-// ── Team member username debounce check ──────────────────────────
-document.querySelectorAll('.team-req').forEach((input, idx) => {
-    const n = idx + 1;
-    let t = null;
-    input.addEventListener('input', () => {
-        clearTimeout(t);
-        t = setTimeout(() => {
-            const val = input.value.trim();
-            const fb  = document.getElementById(`tm${n}-fb`);
-            if (!val) return;
-            fetch(`/api/check-username/?username=${encodeURIComponent(val)}&exists=1`)
-                .then(r => r.json())
-                .then(d => {
-                    if (fb) {
-                        fb.textContent = d.available === false ? '✓ User found' : '✗ User not found';
-                        fb.className = 'form-feedback ' + (d.available === false ? 'ok' : 'err');
-                    }
-                })
-                .catch(() => {});
-        }, 500);
+// ── Team member email real-time lookup ──────────────────────
+const courseIdForTeam = "{{ course.id|default:'' }}";
+const tmValidState = {}; // track per-slot validity
+
+function lookupTeamEmail(n) {
+    const input = document.getElementById(`tm-${n}`);
+    if (!input) return;
+    const email = input.value.trim().toLowerCase();
+    const okIcon  = document.getElementById(`tm${n}-ok`);
+    const errIcon = document.getElementById(`tm${n}-err`);
+    const fb      = document.getElementById(`tm${n}-fb`);
+    const nameBox = document.getElementById(`tm${n}-name`);
+    const nameTxt = document.getElementById(`tm${n}-name-text`);
+
+    // Reset
+    okIcon.className  = 'fas fa-check vi';
+    errIcon.className = 'fas fa-times vi';
+    if (nameBox) nameBox.style.display = 'none';
+    tmValidState[n] = false;
+
+    if (!email) { if (fb) fb.textContent = ''; return; }
+
+    // Basic email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errIcon.className += ' err';
+        if (fb) { fb.textContent = 'Enter a valid email address'; fb.className = 'form-feedback err'; }
+        return;
+    }
+
+    if (fb) { fb.textContent = 'Looking up…'; fb.className = 'form-feedback'; }
+
+    fetch(`/accounts/check_email_exists/?email=${encodeURIComponent(email)}&course_id=${courseIdForTeam}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.exists) {
+            errIcon.className += ' err';
+            if (fb) { fb.textContent = '✗ No Angaar account found with this email'; fb.className = 'form-feedback err'; }
+            tmValidState[n] = false;
+        } else if (d.already_registered) {
+            errIcon.className += ' err';
+            if (fb) { fb.textContent = '✗ This student is already registered for this course'; fb.className = 'form-feedback err'; }
+            tmValidState[n] = false;
+        } else {
+            okIcon.className += ' ok';
+            if (fb) { fb.textContent = ''; fb.className = 'form-feedback'; }
+            if (nameBox && nameTxt) {
+                nameTxt.textContent = d.full_name;
+                nameBox.style.display = 'block';
+            }
+            tmValidState[n] = true;
+        }
+    })
+    .catch(() => {
+        if (fb) { fb.textContent = 'Lookup failed — check your connection'; fb.className = 'form-feedback err'; }
     });
+}
+
+// Debounced listeners
+[1,2,3,4].forEach(n => {
+    const inp = document.getElementById(`tm-${n}`);
+    if (!inp) return;
+    let t;
+    inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => lookupTeamEmail(n), 500); });
+    inp.addEventListener('blur',  () => lookupTeamEmail(n));
 });
 
 // ── Form submit ──────────────────────────────────────────────────
 const form = document.getElementById('f26RegForm');
 if (form) {
     form.addEventListener('submit', e => {
-        // Password confirmation check (for non-logged-in users)
-        if (pwdInput && cpwdInput && pwdInput.value !== cpwdInput.value) {
-            e.preventDefault();
-            document.getElementById('cpwd-fb').style.display = 'block';
-            cpwdInput.focus();
-            return;
+        // Block submit if any team email slot is empty or invalid
+        const mode = document.getElementById('mode-team').checked ? 'TEAM' : 'SOLO';
+        if (mode === 'TEAM') {
+            for (let n = 1; n <= 4; n++) {
+                const inp = document.getElementById(`tm-${n}`);
+                if (!inp) continue;
+                if (!inp.value.trim()) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Please enter the email for Teammate ${n + 1}.`);
+                    return;
+                }
+                if (!tmValidState[n]) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Teammate ${n + 1}'s email was not verified. Please enter a valid registered email.`);
+                    return;
+                }
+            }
         }
 
         const btn = document.getElementById('submit-btn');
