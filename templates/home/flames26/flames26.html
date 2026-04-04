@@ -238,9 +238,51 @@ FLAMES 26 | The Angaar Batch
     }
 
     .badge-intermediate {
-        background: rgba(255, 96, 38, 0.15);
-        color: #ff6026;
-        border: 1px solid rgba(255, 96, 38, 0.25);
+        background: rgba(52,152,219,.15);
+        color: #2980b9;
+        border: 1px solid rgba(52,152,219,.25);
+    }
+    .badge-advanced {
+        background: rgba(155,89,182,.15);
+        color: #9b59b6;
+        border: 1px solid rgba(155,89,182,.25);
+    }
+    /* Twin-pill level progression */
+    .level-progression {
+        position: absolute; 
+        top: 16px; 
+        right: 16px;
+        display: inline-flex; 
+        align-items: center; 
+        gap: 4px; /* Slightly increased gap for visual breathing room */
+        z-index: 2;
+    }
+    
+    .level-progression .level-badge { 
+        position: static; /* <-- THIS FIXES THE OVERLAP */
+        font-size: 0.6rem; 
+        padding: 4px 8px; 
+        white-space: nowrap; /* Prevents text wrapping on very thin mobile screens */
+    }
+    
+    .level-progression .lp-arrow { 
+        font-size: 0.65rem; 
+        color: #888; 
+        font-weight: 700; 
+    }
+
+    /* Mobile Responsive Fixes for Twin-Pill */
+    @media (max-width: 480px) {
+        .level-progression {
+            top: 12px;
+            right: 12px;
+            gap: 2px;
+        }
+        .level-progression .level-badge {
+            font-size: 0.55rem; /* Scaled down slightly to prevent overlapping the card icon */
+            padding: 3px 6px;
+            letter-spacing: 1px;
+        }
     }
 
     .course-title {
@@ -799,14 +841,18 @@ FLAMES 26 | The Angaar Batch
                 {% with delay=forloop.counter|add:"0" %}
                 <div class="course-card" data-aos="fade-up" data-aos-delay="{{ forloop.counter }}00">
 
-                    {# Level badge #}
-                    {% if course.level == "Intermediate" %}
-                    <span class="level-badge badge-intermediate">Intermediate</span>
-                    {% elif course.level == "Advanced" %}
-                    <span class="level-badge badge-advanced">Advanced</span>
-                    {% else %}
-                    <span class="level-badge badge-beginner">Beginner</span>
-                    {% endif %}
+                    {# Twin-pill level progression badge #}
+                    <div class="level-progression">
+                        {% if course.level == "Intermediate" %}
+                        <span class="level-badge badge-intermediate">Intermediate</span>
+                        {% elif course.level == "Advanced" %}
+                        <span class="level-badge badge-advanced">Advanced</span>
+                        {% else %}
+                        <span class="level-badge badge-beginner">Beginner</span>
+                        {% endif %}
+                        <span class="lp-arrow">→</span>
+                        <span class="level-badge badge-advanced">Advanced</span>
+                    </div>
 
                     <div class="course-icon">
                         <i class="{{ course.icon_class }}"></i>
