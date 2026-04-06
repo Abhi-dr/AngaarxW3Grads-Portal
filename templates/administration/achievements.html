@@ -5,12 +5,11 @@
 
 {% block extra_css %}
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-<link rel="stylesheet" type="text/css"
-    href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.min.css">
+
 
 <!-- Override tom-select's bootstrap5 CSS that breaks dark theme -->
 <style>
-    /* Force body background to stay consistent in dark mode (prevents tom-select from overriding) */
+    /* Force body background to stay consistent in dark mode */
     [data-bs-theme="dark"] body {
         background: linear-gradient(to bottom right, #000000, #4f4f4f) !important;
         background-repeat: no-repeat !important;
@@ -36,44 +35,49 @@
         color: #f0f0f0;
     }
 
-    /* Tom-select selected text: white in dark, black in light */
-    [data-bs-theme="dark"] .ts-wrapper .ts-control,
-    [data-bs-theme="dark"] .ts-wrapper .ts-control input,
-    [data-bs-theme="dark"] .ts-wrapper .ts-control .item {
-        color: #f0f0f0 !important;
-        background-color: #2b3035 !important;
-        border-color: #495057 !important;
+    /* ===== Custom autocomplete dropdown ===== */
+    .student-ac-wrapper {
+        position: relative;
     }
-
-    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown {
-        background-color: #2b3035 !important;
-        border-color: #495057 !important;
+    .student-ac-dropdown {
+        display: none;
+        position: absolute;
+        top: calc(100% + 2px);
+        left: 0;
+        right: 0;
+        z-index: 1060;
+        background: var(--bs-body-bg, #fff);
+        border: 1px solid var(--bs-border-color, #dee2e6);
+        border-radius: 0.5rem;
+        max-height: 280px;
+        overflow-y: auto;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.18);
     }
-
-    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown .option {
-        color: #f0f0f0 !important;
+    [data-bs-theme="dark"] .student-ac-dropdown {
+        background: #2b3035;
+        border-color: #495057;
     }
-
-    [data-bs-theme="dark"] .ts-wrapper .ts-dropdown .active {
-        background: rgba(93, 135, 255, 0.2) !important;
-        color: #fff !important;
+    .student-ac-dropdown.open { display: block; }
+    .student-ac-item {
+        padding: 0.55rem 0.85rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+        transition: background 0.12s;
     }
-
-    [data-bs-theme="dark"] .student-option__name {
-        color: #f0f0f0 !important;
+    .student-ac-item:last-child { border-bottom: none; }
+    .student-ac-item:hover, .student-ac-item.active {
+        background: rgba(13,110,253,0.13);
     }
-
-    [data-bs-theme="dark"] .student-option__meta {
-        color: #adb5bd !important;
-    }
-
-    /* Light theme tom-select - ensure black text */
-    [data-bs-theme="light"] .ts-wrapper .ts-control,
-    [data-bs-theme="light"] .ts-wrapper .ts-control input,
-    [data-bs-theme="light"] .ts-wrapper .ts-control .item {
-        color: #000 !important;
+    .student-ac-item .ac-name { font-weight: 500; }
+    .student-ac-item .ac-meta { font-size: 0.8rem; color: #6c757d; }
+    [data-bs-theme="dark"] .student-ac-item .ac-meta { color: #adb5bd; }
+    .student-ac-empty {
+        padding: 0.75rem 0.85rem;
+        color: #6c757d;
+        font-size: 0.9rem;
     }
 </style>
+
 
 <style>
     .description-truncate {
@@ -220,14 +224,22 @@
                     <form id="achievementForm">
                         <input type="hidden" id="achievementId" value="">
                         <div class="mb-3">
-                            <label for="studentId" class="form-label">Student</label>
-                            <div class="student-select-wrapper">
-                                <select class="form-select" id="studentId" required>
-                                    <option value="">Select Student</option>
-                                </select>
+                            <label class="form-label">Student</label>
+                            <div class="student-ac-wrapper" id="studentAcWrapper">
+                                <!-- Visible search input - text stays as user types -->
+                                <input type="text"
+                                    class="form-control"
+                                    id="studentSearchText"
+                                    placeholder="Search and select student"
+                                    data-live-search-ignore="true"
+                                    autocomplete="off"
+                                    spellcheck="false">
+                                <!-- Hidden input carries the selected student ID -->
+                                <input type="hidden" id="studentId">
+                                <!-- Dropdown results -->
+                                <div class="student-ac-dropdown" id="studentAcDropdown"></div>
                             </div>
-                            <div class="form-text">Search by name or username, then pick the student from the dropdown
-                                list.</div>
+                            <div class="form-text">Search by name or username, then pick the student from the dropdown list.</div>
                         </div>
                         <div class="mb-3">
                             <label for="title" class="form-label">Title</label>
@@ -289,98 +301,190 @@
 
 {% block myjs %}
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
 <script>
     let currentPage = 1;
     let selectedAchievementId = null;
     let achievementsCount = 0;
-    let studentSelect = null;
     let shouldRefreshAchievementsAfterModalClose = false;
+    let currentSearchQuery = '';  // single source of truth for search query
+    let searchTimer = null;       // manual debounce timer
+    let allStudents = [];         // student list cache - populated once on page load
 
-    // Load achievements on page load
+    // ==================== CUSTOM STUDENT AUTOCOMPLETE ====================
+    let acHighlightIndex = -1;
+
+    function setupStudentAutocomplete() {
+        const input    = document.getElementById('studentSearchText');
+        const hidden   = document.getElementById('studentId');
+        const dropdown = document.getElementById('studentAcDropdown');
+
+        // Open / filter on every keystroke
+        input.addEventListener('input', function() {
+            hidden.value = '';          // clear selection when user edits
+            acHighlightIndex = -1;
+            renderAcDropdown(this.value.trim());
+        });
+
+        // Open with existing text on focus
+        input.addEventListener('focus', function() {
+            renderAcDropdown(this.value.trim());
+        });
+
+        // Keyboard navigation
+        input.addEventListener('keydown', function(e) {
+            const items = dropdown.querySelectorAll('.student-ac-item');
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                acHighlightIndex = Math.min(acHighlightIndex + 1, items.length - 1);
+                updateAcHighlight(items);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                acHighlightIndex = Math.max(acHighlightIndex - 1, 0);
+                updateAcHighlight(items);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (acHighlightIndex >= 0 && items[acHighlightIndex]) {
+                    items[acHighlightIndex].click();
+                }
+            } else if (e.key === 'Escape') {
+                closeAcDropdown();
+            }
+        });
+
+        // Close when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('studentAcWrapper').contains(e.target)) {
+                closeAcDropdown();
+            }
+        });
+    }
+
+    function renderAcDropdown(query) {
+        const dropdown = document.getElementById('studentAcDropdown');
+        acHighlightIndex = -1;
+
+        const q = query.toLowerCase();
+        const results = q
+            ? allStudents.filter(s =>
+                s.name.toLowerCase().includes(q) ||
+                s.username.toLowerCase().includes(q) ||
+                s.label.toLowerCase().includes(q))
+            : allStudents.slice(0, 60);
+
+        if (results.length === 0) {
+            dropdown.innerHTML = '<div class="student-ac-empty">No student found</div>';
+        } else {
+            dropdown.innerHTML = results.map((s, i) => `
+                <div class="student-ac-item"
+                     data-id="${s.id}"
+                     data-label="${s.label.replace(/"/g, '&quot;')}"
+                     onclick="selectAcStudent('${s.id}', this.dataset.label)">
+                    <div class="ac-name">${escapeHtml(s.name)}</div>
+                    <div class="ac-meta">@${escapeHtml(s.username)}</div>
+                </div>
+            `).join('');
+        }
+        dropdown.classList.add('open');
+    }
+
+    function selectAcStudent(id, label) {
+        document.getElementById('studentId').value = id;
+        document.getElementById('studentSearchText').value = label;
+        closeAcDropdown();
+    }
+
+    function closeAcDropdown() {
+        document.getElementById('studentAcDropdown').classList.remove('open');
+        acHighlightIndex = -1;
+    }
+
+    function updateAcHighlight(items) {
+        items.forEach((el, i) => el.classList.toggle('active', i === acHighlightIndex));
+        if (items[acHighlightIndex]) {
+            items[acHighlightIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function resetStudentAutocomplete() {
+        document.getElementById('studentSearchText').value = '';
+        document.getElementById('studentId').value = '';
+        closeAcDropdown();
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+    // ==================== END AUTOCOMPLETE ====================
+
+    // Load achievements + students on page load
     document.addEventListener('DOMContentLoaded', () => {
-        initializeStudentSelect();
+        setupStudentAutocomplete();
         loadAchievements();
         loadStudents();
         setupEventListeners();
     });
 
-    function initializeStudentSelect() {
-        studentSelect = new TomSelect('#studentId', {
-            valueField: 'id',
-            labelField: 'label',
-            searchField: ['label', 'name', 'username'],
-            sortField: [{ field: 'name', direction: 'asc' }],
-            options: [],
-            create: false,
-            maxOptions: 8,
-            hideSelected: true,
-            allowEmptyOption: true,
-            openOnFocus: false,
-            placeholder: 'Search and select student',
-            render: {
-                option: function (data, escape) {
-                    return `
-                        <div class="student-option">
-                            <span class="student-option__name">${escape(data.name)}</span>
-                            <span class="student-option__meta">@${escape(data.username)}</span>
-                        </div>
-                    `;
-                },
-                item: function (data, escape) {
-                    return `<div>${escape(data.label)}</div>`;
-                },
-                no_results: function (_, escape) {
-                    return `<div class="py-3 px-3 text-muted">${escape('No student found')}</div>`;
-                }
-            }
-        });
-    }
-
-    // Create stable debounced search function at module scope (not recreated on each keypress)
-    const debouncedSearch = debounce(function () {
-        currentPage = 1;
-        loadAchievements();
-    }, 400);
 
     function setupEventListeners() {
-        // Use 'input' event instead of 'keyup' for reliable value capture
-        // 'input' fires after value is actually updated, preventing TomSelect interference
         const searchEl = document.getElementById('searchInput');
-        searchEl.addEventListener('input', function (e) {
-            e.stopPropagation();
-            debouncedSearch();
+
+        // Simple, clean input handler — TomSelect is disabled when modal is closed,
+        // so no interference is possible.
+        searchEl.addEventListener('input', function () {
+            currentSearchQuery = this.value;
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(() => {
+                currentPage = 1;
+                loadAchievements(currentSearchQuery);
+            }, 400);
         });
 
-        // Search button
+        // Enter key triggers immediate search
+        searchEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(searchTimer);
+                currentPage = 1;
+                loadAchievements(currentSearchQuery);
+            }
+        });
+
+        // Search button — immediate
         document.getElementById('searchButton').addEventListener('click', () => {
+            clearTimeout(searchTimer);
             currentPage = 1;
-            loadAchievements();
+            loadAchievements(currentSearchQuery);
         });
 
         // Clear search
         document.getElementById('clearSearch').addEventListener('click', () => {
+            currentSearchQuery = '';
             document.getElementById('searchInput').value = '';
             currentPage = 1;
-            loadAchievements();
+            loadAchievements('');
         });
 
         // Save achievement
         document.getElementById('saveAchievement').addEventListener('click', saveAchievement);
 
-        // Reset modal on close
+        // Modal OPENING: close any stale dropdown
+        document.getElementById('achievementModal').addEventListener('show.bs.modal', () => {
+            closeAcDropdown();
+        });
+
+        // Modal CLOSED: reset student autocomplete
         document.getElementById('achievementModal').addEventListener('hidden.bs.modal', () => {
             document.getElementById('achievementForm').reset();
             document.getElementById('achievementId').value = '';
             document.getElementById('achievementModalLabel').textContent = 'Add Achievement';
-            if (studentSelect) {
-                studentSelect.close();
-                studentSelect.clear(true);
-                studentSelect.blur();
-            }
+            resetStudentAutocomplete();
             if (shouldRefreshAchievementsAfterModalClose) {
                 shouldRefreshAchievementsAfterModalClose = false;
-                loadAchievements();
+                loadAchievements(currentSearchQuery);
             }
         });
 
@@ -410,9 +514,10 @@
         loader.classList.toggle('d-none', !show);
     }
 
-    function loadAchievements() {
-        const searchQuery = document.getElementById('searchInput').value;
-        const url = `/administration/achievements/api/get?page=${currentPage}&search=${searchQuery}`;
+    function loadAchievements(searchParam) {
+        // Always use the passed param; fall back to stored variable (never re-read the DOM)
+        const searchQuery = (searchParam !== undefined) ? searchParam : currentSearchQuery;
+        const url = `/administration/achievements/api/get?page=${currentPage}&search=${encodeURIComponent(searchQuery)}`;
 
         toggleLoader(true);
         fetch(url)
@@ -534,12 +639,14 @@
     }
 
     function loadStudents() {
+        // Fetch and CACHE student data only - do NOT touch TomSelect here.
+        // TomSelect options are populated in show.bs.modal to avoid any async
+        // race condition that would clear the user's typed text.
         fetch('/accounts/api/students')
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    const selectedStudentId = studentSelect ? studentSelect.getValue() : '';
-                    const studentOptions = data.students
+                    allStudents = data.students
                         .map(student => {
                             const fullName = [student.first_name, student.last_name].filter(Boolean).join(' ').trim() || student.username;
                             return {
@@ -549,25 +656,16 @@
                                 label: `${fullName} (${student.username})`
                             };
                         })
-                        .sort((firstStudent, secondStudent) => firstStudent.name.localeCompare(secondStudent.name));
-
-                    if (studentSelect) {
-                        studentSelect.clearOptions();
-                        studentSelect.addOptions(studentOptions);
-                        if (selectedStudentId && studentSelect.options[selectedStudentId]) {
-                            studentSelect.setValue(selectedStudentId, true);
-                        }
-                        studentSelect.refreshOptions(false);
-                    }
+                        .sort((a, b) => a.name.localeCompare(b.name));
                 }
             })
-            .catch(error => showToast('Error loading students', 'error'));
+            .catch(() => showToast('Error loading students', 'error'));
     }
 
     function saveAchievement() {
         const achievementId = document.getElementById('achievementId').value;
         const data = {
-            student_id: studentSelect ? studentSelect.getValue() : document.getElementById('studentId').value,
+            student_id: document.getElementById('studentId').value,
             title: document.getElementById('title').value,
             description: document.getElementById('description').value,
             achievement_type: document.getElementById('achievementType').value,
@@ -600,15 +698,12 @@
                 if (data.status === 'success') {
                     showToast('Achievement saved successfully', 'success');
                     shouldRefreshAchievementsAfterModalClose = true;
-                    if (studentSelect) {
-                        studentSelect.close();
-                    }
                     $('#achievementModal').modal('hide');
                 } else {
                     showToast(data.message, 'error');
                 }
             })
-            .catch(error => showToast('Error saving achievement', 'error'))
+            .catch(() => showToast('Error saving achievement', 'error'))
             .finally(() => {
                 toggleLoader(false);
             });
@@ -622,21 +717,12 @@
                 if (data.status === 'success') {
                     const achievement = data.data;
                     document.getElementById('achievementId').value = achievement.id;
-                    if (studentSelect) {
-                        const selectedStudentId = String(achievement.student.id);
-                        if (!studentSelect.options[selectedStudentId]) {
-                            const studentName = achievement.student.name || achievement.student.username;
-                            studentSelect.addOption({
-                                id: selectedStudentId,
-                                name: studentName,
-                                username: achievement.student.username,
-                                label: `${studentName} (${achievement.student.username})`
-                            });
-                        }
-                        studentSelect.setValue(selectedStudentId, true);
-                    } else {
-                        document.getElementById('studentId').value = achievement.student.id;
-                    }
+
+                    // Populate the custom autocomplete with the student's details
+                    const studentName = achievement.student.name || achievement.student.username;
+                    const studentLabel = `${studentName} (${achievement.student.username})`;
+                    selectAcStudent(String(achievement.student.id), studentLabel);
+
                     document.getElementById('title').value = achievement.title;
                     document.getElementById('description').value = achievement.description;
                     document.getElementById('achievementType').value = achievement.achievement_type;
@@ -646,7 +732,7 @@
                     $('#achievementModal').modal('show');
                 }
             })
-            .catch(error => showToast('Error loading achievement details', 'error'))
+            .catch(() => showToast('Error loading achievement details', 'error'))
             .finally(() => {
                 toggleLoader(false);
             });
