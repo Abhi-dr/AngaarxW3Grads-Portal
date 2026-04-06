@@ -31,6 +31,18 @@ HEADERS = {
 }
 
 
+def get_default_driver_code(language_id):
+    """Return a safe starter template when no driver code is configured."""
+    lang = int(language_id)
+    default_codes = {
+        71: """# Driver code not configured for this question yet.\n# You can still write a full runnable program and submit.\n\n# USER CODE STARTS HERE\n""",
+        50: """// Driver code not configured for this question yet.\n// You can still write a full runnable program and submit.\n\n// USER CODE STARTS HERE\n""",
+        54: """// Driver code not configured for this question yet.\n// You can still write a full runnable program and submit.\n\n// USER CODE STARTS HERE\n""",
+        62: """// Driver code not configured for this question yet.\n// You can still write a full runnable program and submit.\n\n// USER CODE STARTS HERE\n""",
+    }
+    return default_codes.get(lang, "// Driver code not configured for this language")
+
+
 def execute_code(request):
     print("🛠️ execute_code called")
     
@@ -383,7 +395,8 @@ def return_token(question, source_code, language_id, test_cases, cpu_time_limit,
                 cache.set(driver_code_key, driver_code.complete_driver_code, 3600)
                 source_code = driver_code.complete_driver_code.replace("#USER_CODE#", source_code)
             else:
-                return {"error": "Driver code not found for this language.", "outputs": None, "token": None}
+                # Fallback: allow full runnable source when driver code is missing
+                source_code = source_code
     
     # Generate a cache key based on code content and test cases
     # This allows us to return the same token for identical submissions
@@ -891,7 +904,7 @@ def submit_code(request, slug):
 
 def get_driver_code(request, question_id, language_id):
     question = get_object_or_404(Question, id=question_id)
-    driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()    
+    driver_code = DriverCode.objects.filter(question_id=question_id, language_id=language_id).first()
     if driver_code:
         
         if question.show_complete_driver_code:
@@ -905,7 +918,14 @@ def get_driver_code(request, question_id, language_id):
             return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
         
         return JsonResponse({"success": True, "code": driver_code.visible_driver_code})
-    return JsonResponse({"success": False, "message": "Driver code not found.", "language id": language_id, "question id": question_id}, status=404)
+
+    fallback_code = get_default_driver_code(language_id)
+    return JsonResponse({
+        "success": True,
+        "code": fallback_code,
+        "fallback": True,
+        "message": "Driver code not configured for this question/language."
+    })
 
 # ========================================== RUN CODE AGAINST SAMPLE TEST CASES ==========================================
 

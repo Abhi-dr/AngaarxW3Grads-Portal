@@ -2,9 +2,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.urls import reverse
 from decimal import Decimal
+from datetime import date
+from unittest.mock import patch
 
 from accounts.models import CustomUser
 from home.models import FlamesCourse, FlamesEdition
+from practice.models import Streak
 from practice.models import MCQQuestion
 from student.models import Assignment, Course, CourseSheet
 
@@ -165,3 +168,43 @@ class FlamesCourseOrderingStudentTests(TestCase):
 
 		self.assertEqual(response.status_code, 200)
 		self.assertContains(response, 'Save ₹1000')
+
+
+class RestoreStreakViewTests(TestCase):
+	def setUp(self):
+		self.student = CustomUser.objects.create_user(
+			email='streak-restore@example.com',
+			password='testpass123',
+			role='student',
+			username='streak_restore_user',
+			coins=120,
+		)
+
+	def test_restore_streak_requires_login(self):
+		response = self.client.post(reverse('restore_streak'))
+		self.assertEqual(response.status_code, 302)
+		self.assertIn(reverse('login'), response.url)
+
+	def test_restore_streak_success_deducts_coins_and_restores_count(self):
+		self.client.force_login(self.student)
+		today = date(2026, 4, 6)
+		streak = Streak.objects.create(
+			user=self.student,
+			current_streak=1,
+			previous_streak=5,
+			last_submission_date=today,
+		)
+
+		with patch('practice.models.timezone.localdate', return_value=today):
+			response = self.client.post(reverse('restore_streak'))
+
+		self.assertEqual(response.status_code, 200)
+		payload = response.json()
+		self.assertEqual(payload['status'], 'success')
+		self.assertEqual(payload['current_streak'], 7)
+
+		self.student.refresh_from_db()
+		streak.refresh_from_db()
+		self.assertEqual(self.student.coins, 70)
+		self.assertEqual(streak.current_streak, 7)
+		self.assertEqual(streak.previous_streak, 0)

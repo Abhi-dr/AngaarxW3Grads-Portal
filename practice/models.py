@@ -544,7 +544,7 @@ class POD(models.Model):
 
 class Streak(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    current_streak = models.PositiveIntegerField(default=1)  # Current streak of consecutive submissions
+    current_streak = models.PositiveIntegerField(default=0)  # Current streak of consecutive submission days
     last_submission_date = models.DateField(null=True, blank=True)
     previous_streak = models.PositiveIntegerField(default=0)  # Streak before it was broken (for restore)
 
@@ -574,9 +574,10 @@ class Streak(models.Model):
             self.current_streak += 1
             self.previous_streak = 0  # Reset previous streak since we're continuing
         elif days_gap == 2:
-            # Missed exactly 1 day - save current streak for restore and reset to 0
+            # Missed exactly 1 day.
+            # Preserve prior streak for optional Sparks restore, but still count today's solve.
             self.previous_streak = self.current_streak
-            self.current_streak = 0
+            self.current_streak = 1
         else:
             # Missed more than 1 day - reset to 1 (new streak starts)
             self.previous_streak = 0
@@ -589,7 +590,7 @@ class Streak(models.Model):
         """Check if user can restore their streak after missing exactly 1 day."""
         today = timezone.localdate()
         return (
-            self.current_streak == 0 and
+            self.current_streak == 1 and
             self.previous_streak > 0 and
             self.last_submission_date in {today, today - timedelta(days=1)}
         )
@@ -601,8 +602,8 @@ class Streak(models.Model):
         """
         if self.can_restore_streak():
             today = timezone.localdate()
-            # Restore to the previous streak value + 1 (as if they solved yesterday)
-            self.current_streak = self.previous_streak + 1
+            # Add one day for the missed day while preserving today's solved-day count.
+            self.current_streak = self.previous_streak + self.current_streak + 1
             self.previous_streak = 0  # Clear previous streak after restore
             self.last_submission_date = today
             self.save()
@@ -615,7 +616,7 @@ class Streak(models.Model):
         Class method to update streak for any student.
         This is the main method that should be called from views.
         """
-        streak, created = cls.objects.get_or_create(user=student)
+        streak = cls.get_user_streak(student)
         streak.update_streak()
         return streak
 
@@ -624,7 +625,16 @@ class Streak(models.Model):
         """
         Get or create streak object for a student.
         """
-        streak, created = cls.objects.get_or_create(user=student)
+        streaks = cls.objects.filter(user=student).order_by('-id')
+        streak = streaks.first()
+
+        if streak is None:
+            return cls.objects.create(user=student)
+
+        duplicate_ids = list(streaks.values_list('id', flat=True)[1:])
+        if duplicate_ids:
+            cls.objects.filter(id__in=duplicate_ids).delete()
+
         return streak
 
     def has_solved_today(self):
