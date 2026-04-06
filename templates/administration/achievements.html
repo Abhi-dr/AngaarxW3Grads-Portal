@@ -316,7 +316,7 @@
             maxOptions: 8,
             hideSelected: true,
             allowEmptyOption: true,
-            openOnFocus: true,
+            openOnFocus: false,
             placeholder: 'Search and select student',
             render: {
                 option: function (data, escape) {
@@ -337,12 +337,20 @@
         });
     }
 
+    // Create stable debounced search function at module scope (not recreated on each keypress)
+    const debouncedSearch = debounce(function () {
+        currentPage = 1;
+        loadAchievements();
+    }, 400);
+
     function setupEventListeners() {
-        // Search functionality - on keyup instead of just enter
-        document.getElementById('searchInput').addEventListener('keyup', debounce(() => {
-            currentPage = 1;
-            loadAchievements();
-        }, 500));
+        // Use 'input' event instead of 'keyup' for reliable value capture
+        // 'input' fires after value is actually updated, preventing TomSelect interference
+        const searchEl = document.getElementById('searchInput');
+        searchEl.addEventListener('input', function (e) {
+            e.stopPropagation();
+            debouncedSearch();
+        });
 
         // Search button
         document.getElementById('searchButton').addEventListener('click', () => {
