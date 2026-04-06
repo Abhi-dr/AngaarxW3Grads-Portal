@@ -55,6 +55,8 @@ def student_flames26(request):
             FlamesCourse.objects.filter(edition=edition_2026, is_active=True)
             .exclude(id__in=registered_course_ids)
         )
+        for course in available_courses:
+            course.savings_amount = max(course.price - course.discount_price, 0)
 
     # Max registrations cap for display
     max_courses = FlamesRegistration.MAX_COURSES_PER_EDITION

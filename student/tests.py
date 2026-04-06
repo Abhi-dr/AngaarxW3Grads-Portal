@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.urls import reverse
+from decimal import Decimal
 
 from accounts.models import CustomUser
 from home.models import FlamesCourse, FlamesEdition
@@ -145,3 +146,22 @@ class FlamesCourseOrderingStudentTests(TestCase):
 			[course.title for course in response.context['available_courses']],
 			['AI Track', 'Web Track']
 		)
+
+	def test_student_flames26_dashboard_shows_correct_savings_amount(self):
+		FlamesCourse.objects.create(
+			title='Python Track',
+			subtitle='backend',
+			description='desc',
+			slug='python-track',
+			edition=self.edition_2026,
+			is_active=True,
+			display_order=1,
+			price=Decimal('3999.00'),
+			discount_price=Decimal('2999.00'),
+			icon_class='fas fa-code',
+		)
+
+		response = self.client.get(reverse('student_flames26'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Save ₹1000')

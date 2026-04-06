@@ -10,10 +10,463 @@
 <link rel="stylesheet" href="{% static 'css/home/css/index_merged_final.css' %}">
 <!-- Add Font Awesome for icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .flames26-home-popup {
+        position: fixed;
+        inset: 0;
+        z-index: 1060;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(5, 5, 5, 0.72);
+        backdrop-filter: blur(12px);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+
+    .flames26-home-popup.active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .flames26-home-popup-card {
+        position: relative;
+        width: min(860px, 100%);
+        border-radius: 28px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 96, 38, 0.28);
+        background:
+            radial-gradient(circle at top right, rgba(255, 120, 40, 0.22), transparent 35%),
+            radial-gradient(circle at bottom left, rgba(255, 96, 38, 0.18), transparent 35%),
+            linear-gradient(145deg, #120904 0%, #0d0d0d 48%, #130700 100%);
+        box-shadow:
+            0 32px 90px rgba(0, 0, 0, 0.6),
+            0 0 0 1px rgba(255, 96, 38, 0.06),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        transform: translateY(20px) scale(0.96);
+        transition: transform 0.35s ease;
+    }
+
+    .flames26-home-popup.active .flames26-home-popup-card {
+        transform: translateY(0) scale(1);
+    }
+
+    .flames26-home-popup-glow {
+        position: absolute;
+        inset: auto auto -80px -80px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(255, 96, 38, 0.22), transparent 68%);
+        pointer-events: none;
+    }
+
+    .flames26-home-popup-close {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.06);
+        color: rgba(255, 255, 255, 0.86);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+    .flames26-home-popup-close:hover {
+        background: rgba(255, 96, 38, 0.16);
+        border-color: rgba(255, 96, 38, 0.35);
+        color: #fff;
+        transform: rotate(90deg);
+    }
+
+    .flames26-home-popup-body {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 20px;
+        padding: 28px;
+    }
+
+    .flames26-home-popup-copy {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .flames26-home-popup-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        width: fit-content;
+        padding: 10px 16px;
+        border-radius: 999px;
+        background: rgba(255, 96, 38, 0.12);
+        border: 1px solid rgba(255, 96, 38, 0.22);
+        color: #ffb07a;
+        font-size: 0.82rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+    }
+
+    .flames26-home-popup-title {
+        margin: 0;
+        color: #fff;
+        font-size: clamp(1.8rem, 3.6vw, 3rem);
+        line-height: 0.98;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+    }
+
+    .flames26-home-popup-title span {
+        color: #ff7a33;
+    }
+
+    .flames26-home-popup-text {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.84);
+        font-size: 1.04rem;
+        line-height: 1.7;
+        max-width: 42ch;
+    }
+
+    .flames26-home-popup-points {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .flames26-home-popup-points li {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.92rem;
+        font-weight: 600;
+    }
+
+    .flames26-home-popup-points i {
+        color: #ff7a33;
+    }
+
+    .flames26-home-popup-actions {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .flames26-home-popup-primary,
+    .flames26-home-popup-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-width: 200px;
+        padding: 16px 24px;
+        border-radius: 16px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.25s ease;
+    }
+
+    .flames26-home-popup-primary {
+        background: linear-gradient(135deg, #ff6026, #ff9d45);
+        color: #fff;
+        box-shadow: 0 16px 40px rgba(255, 96, 38, 0.28);
+    }
+
+    .flames26-home-popup-primary:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 22px 48px rgba(255, 96, 38, 0.38);
+    }
+
+    .flames26-home-popup-secondary {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .flames26-home-popup-secondary:hover {
+        color: #fff;
+        border-color: rgba(255, 96, 38, 0.28);
+        background: rgba(255, 96, 38, 0.08);
+    }
+
+    .flames26-home-popup-side {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 14px;
+    }
+
+    .flames26-home-popup-statbox {
+        padding: 22px;
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .flames26-home-popup-statlabel {
+        display: block;
+        margin-bottom: 8px;
+        color: rgba(255, 255, 255, 0.56);
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .flames26-home-popup-statvalue {
+        display: block;
+        color: #fff;
+        font-size: 2.1rem;
+        font-weight: 900;
+        letter-spacing: -0.05em;
+        line-height: 1;
+    }
+
+    .flames26-home-popup-stattext {
+        margin: 10px 0 0;
+        color: rgba(255, 255, 255, 0.74);
+        font-size: 0.92rem;
+        line-height: 1.6;
+    }
+
+    .flames26-home-popup-trackgrid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .flames26-home-popup-track {
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: #fff;
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .flames26-home-popup-track span {
+        display: block;
+        margin-top: 4px;
+        color: rgba(255, 255, 255, 0.58);
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .hero-badge {
+        background: linear-gradient(135deg, rgba(255, 96, 38, 0.24), rgba(255, 157, 69, 0.1));
+        border-color: rgba(255, 96, 38, 0.24);
+    }
+
+    .hero-flames-spotlight {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 22px;
+        padding: 12px 18px;
+        border-radius: 999px;
+        background: rgba(255, 96, 38, 0.1);
+        border: 1px solid rgba(255, 96, 38, 0.18);
+        color: #ffb07a;
+        font-size: 0.92rem;
+        font-weight: 700;
+    }
+
+    .hero-flames-spotlight i {
+        color: #ff7a33;
+    }
+
+    @media (max-width: 900px) {
+        .flames26-home-popup-body {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .flames26-home-popup {
+            align-items: center;
+            padding: 16px;
+            overflow-y: auto;
+        }
+
+        .flames26-home-popup-card {
+            width: min(92vw, 560px);
+            max-height: 88dvh;
+            border-radius: 20px;
+        }
+
+        .flames26-home-popup-close {
+            top: 14px;
+            right: 14px;
+            width: 38px;
+            height: 38px;
+        }
+
+        .flames26-home-popup-body {
+            max-height: calc(88dvh - 2px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 18px 14px 14px;
+            gap: 14px;
+        }
+
+        .flames26-home-popup-badge {
+            font-size: 0.74rem;
+            padding: 8px 12px;
+        }
+
+        .flames26-home-popup-title {
+            font-size: clamp(1.55rem, 7vw, 2.2rem);
+        }
+
+        .flames26-home-popup-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .flames26-home-popup-points {
+            grid-template-columns: 1fr;
+        }
+
+        .flames26-home-popup-points li,
+        .flames26-home-popup-track,
+        .flames26-home-popup-stattext {
+            font-size: 0.84rem;
+        }
+
+        .flames26-home-popup-statbox {
+            padding: 16px;
+            border-radius: 18px;
+        }
+
+        .flames26-home-popup-statvalue {
+            font-size: 1.8rem;
+        }
+
+        .flames26-home-popup-trackgrid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .flames26-home-popup-track {
+            padding: 9px 10px;
+            border-radius: 12px;
+        }
+
+        .flames26-home-popup-actions {
+            flex-direction: column;
+        }
+
+        .flames26-home-popup-primary,
+        .flames26-home-popup-secondary {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .hero-flames-spotlight {
+            font-size: 0.84rem;
+            padding: 10px 14px;
+        }
+    }
+
+    @media (max-width: 420px) {
+        .flames26-home-popup {
+            padding: 12px;
+        }
+
+        .flames26-home-popup-body {
+            max-height: calc(86dvh - 2px);
+            padding: 16px 12px 12px;
+        }
+
+        .flames26-home-popup-trackgrid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+</style>
 
 {% endblock %}
 
 {% block body %}
+
+<div id="flames26HomePopup" class="flames26-home-popup" aria-hidden="true">
+    <div class="flames26-home-popup-card" role="dialog" aria-modal="true" aria-labelledby="flames26HomePopupTitle">
+        <div class="flames26-home-popup-glow"></div>
+        <button id="closeFlames26HomePopup" class="flames26-home-popup-close" aria-label="Close FLAMES 26 popup">
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div class="flames26-home-popup-body">
+            <div class="flames26-home-popup-copy">
+                <div class="flames26-home-popup-badge">
+                    <i class="fas fa-fire"></i> Summer 2026 Spotlight
+                </div>
+                <h2 id="flames26HomePopupTitle" class="flames26-home-popup-title">
+                    Make This Summer <span>Count</span> With FLAMES '26
+                </h2>
+                <p class="flames26-home-popup-text">
+                    The flagship Angaar experience is live now: choose a track, build real projects in 45 days, and leave summer with proof of work instead of just notes.
+                </p>
+
+                <ul class="flames26-home-popup-points">
+                    <li><i class="fas fa-bolt"></i> Real-world track-based learning</li>
+                    <li><i class="fas fa-code-branch"></i> Project-first curriculum</li>
+                    <li><i class="fas fa-users"></i> Mentor-led focused cohorts</li>
+                    <li><i class="fas fa-certificate"></i> Certificate + deployment outcomes</li>
+                </ul>
+
+                <div class="flames26-home-popup-actions">
+                    <a href="{% url 'flames26' %}" class="flames26-home-popup-primary">
+                        <i class="fas fa-rocket"></i> Explore FLAMES '26
+                    </a>
+                    <a href="#flames26-showcase" class="flames26-home-popup-secondary" id="flames26HomePopupSecondary">
+                        <i class="fas fa-arrow-down"></i> Preview Tracks
+                    </a>
+                </div>
+            </div>
+
+            <div class="flames26-home-popup-side">
+                <div class="flames26-home-popup-statbox">
+                    <span class="flames26-home-popup-statlabel">Why It Stands Out</span>
+                    <span class="flames26-home-popup-statvalue">45 Days</span>
+                    <p class="flames26-home-popup-stattext">
+                        Intense enough to transform your skill level, focused enough that you actually finish with a shipped outcome.
+                    </p>
+                </div>
+
+                <div class="flames26-home-popup-trackgrid">
+                    <div class="flames26-home-popup-track">Full Stack<span>Web apps</span></div>
+                    <div class="flames26-home-popup-track">DSA<span>Placements</span></div>
+                    <div class="flames26-home-popup-track">AI/ML<span>Models</span></div>
+                    <div class="flames26-home-popup-track">Analytics<span>Dashboards</span></div>
+                    <div class="flames26-home-popup-track">Android<span>Mobile apps</span></div>
+                    <div class="flames26-home-popup-track">Live Cohort<span>Mentor support</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <section class="section top-section">
     <div class="content-container content-theme-dark">
@@ -136,25 +589,29 @@
 
     <div class="hero-container">
         <div class="hero-badge">
-            <i class="fas fa-fire"></i> The Future of Coding Education
+            <i class="fas fa-fire"></i> FLAMES '26 Is Now Live
+        </div>
+
+        <div class="hero-flames-spotlight">
+            <i class="fas fa-bolt"></i> Summer 2026 flagship program now taking registrations
         </div>
 
         <h1 class="hero-title">
-            Go Beyond the Code.<br>
-            Join The Angaar Batch.
+            Build Something Real This Summer.<br>
+            Start With FLAMES '26.
         </h1>
 
         <p class="hero-subtitle">
-            Master in-demand tech skills through live online classes, exclusive industry events,
-            and hands-on workshops hosted right at your college.
+            FLAMES '26 is the main spotlight at Angaar right now: 45 days, 5 high-impact tracks,
+            live mentorship, and projects that prove what you can actually build.
         </p>
 
         <div class="hero-ctas">
-            <a href="#programs" class="primary-cta">
-                <i class="fas fa-rocket"></i> Explore Our Programs
+            <a href="{% url 'flames26' %}" class="primary-cta">
+                <i class="fas fa-fire"></i> Explore FLAMES '26
             </a>
-            <a href="#college-map" class="secondary-cta">
-                <i class="fas fa-university"></i> Bring a Workshop to Your College
+            <a href="#flames26-showcase" class="secondary-cta">
+                <i class="fas fa-layer-group"></i> Preview All Tracks
             </a>
         </div>
 
@@ -3215,6 +3672,56 @@ Thank you!`;
             .catch(err => {
                 console.error("Failed to load WhatsApp links", err);
             });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const popup = document.getElementById('flames26HomePopup');
+        const closeBtn = document.getElementById('closeFlames26HomePopup');
+        const secondaryBtn = document.getElementById('flames26HomePopupSecondary');
+        const sessionKey = 'flames26_home_popup_seen';
+
+        if (!popup || sessionStorage.getItem(sessionKey)) {
+            return;
+        }
+
+        const setBodyScroll = (locked) => {
+            document.body.style.overflow = locked ? 'hidden' : '';
+        };
+
+        const closePopup = () => {
+            popup.classList.remove('active');
+            popup.setAttribute('aria-hidden', 'true');
+            setBodyScroll(false);
+            sessionStorage.setItem(sessionKey, '1');
+        };
+
+        const openPopup = () => {
+            popup.classList.add('active');
+            popup.setAttribute('aria-hidden', 'false');
+            setBodyScroll(true);
+        };
+
+        window.setTimeout(openPopup, 700);
+
+        closeBtn.addEventListener('click', closePopup);
+
+        popup.addEventListener('click', function (event) {
+            if (event.target === popup) {
+                closePopup();
+            }
+        });
+
+        if (secondaryBtn) {
+            secondaryBtn.addEventListener('click', closePopup);
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && popup.classList.contains('active')) {
+                closePopup();
+            }
+        });
     });
 </script>
 

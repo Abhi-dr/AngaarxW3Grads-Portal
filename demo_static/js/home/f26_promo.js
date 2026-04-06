@@ -70,6 +70,8 @@
 
     // ── Slide-in promo card ─────────────────────────────────────
     function initCard() {
+        if (document.getElementById('flames26HomePopup')) return;
+
         var lastShown  = localStorage.getItem(CARD_KEY);
         var shouldShow = !lastShown || (Date.now() - parseInt(lastShown, 10)) > CARD_TTL;
         if (!shouldShow) return;

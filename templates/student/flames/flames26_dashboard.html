@@ -5,6 +5,7 @@
 {% block title %}FLAMES '26 Dashboard | The Angaar Batch{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
 /* ═══════════════════════════════════════════════════════════
    FLAMES '26 — PREMIUM STUDENT DASHBOARD
@@ -616,7 +617,7 @@ select option { background: #1a1a1a; color: #f0f0f0; }
         {% endif %}
         <span class="price-main">₹{{ course.discount_price }}</span>
         {% if course.price and course.price != course.discount_price %}
-        <span class="price-save">Save ₹{% widthratio course.discount_price course.price 1 %}</span>
+        <span class="price-save">Save ₹{{ course.savings_amount|floatformat:0 }}</span>
         {% endif %}
       </div>
     </div>
