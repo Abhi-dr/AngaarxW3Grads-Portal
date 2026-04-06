@@ -15,12 +15,12 @@
         flex-direction: column;
         align-items: center;
         justify-content: flex-start;
-        padding: 40px 20px;
+        /* padding: 40px 20px; */
     }
 
     .edition-hero {
         text-align: center;
-        margin-bottom: 48px;
+        margin-bottom: 20px;
     }
 
     .edition-hero .flame-icon {
@@ -105,10 +105,12 @@
     /* ── Edition Cards Grid ───────────────────────────── */
     .editions-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(260px, max-content)); /* Changed to auto-fit and max-content to prevent over-stretching */
+        justify-content: center; /* Centers the cards inside the grid */
         gap: 20px;
         max-width: 900px;
         width: 100%;
+        margin: 0 auto; /* Ensures the grid itself stays centered */
     }
 
     .edition-card {
@@ -392,7 +394,7 @@
         <div class="edition-hero">
             <i class="fas fa-fire flame-icon"></i>
             <h1>FLAMES Edition</h1>
-            <p>Select the edition (year) you want to manage. All courses, registrations, and reports will be scoped to your selection.</p>
+            <p>Select the edition (year) you want to manage.</p>
         </div>
 
         <!-- Django Messages -->
