@@ -1,0 +1,991 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block flames26_active %}active{% endblock %}
+{% block title %}FLAMES '26 Dashboard | The Angaar Batch{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   FLAMES '26 — PREMIUM STUDENT DASHBOARD
+   ═══════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --fire: #ff6b00;
+  --fire-dim: rgba(255,107,0,.12);
+  --fire-glow: rgba(255,107,0,.25);
+  --fire-border: rgba(255,107,0,.22);
+  --glass: rgba(255,255,255,.04);
+  --glass-border: rgba(255,255,255,.08);
+  --surface: #111111;
+  --surface2: #181818;
+  --surface3: #202020;
+  --text-muted: #666;
+  --text-dim: #999;
+  --green: #2ecc71;
+  --blue: #3498db;
+  --yellow: #f39c12;
+  --red: #e74c3c;
+}
+
+.f26-page { font-family: 'Inter', sans-serif; padding-bottom: 80px; }
+
+/* ── Hero ─────────────────────────────────────────────────── */
+.f26-hero {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 36px;
+  padding: 36px 36px 32px;
+  background: linear-gradient(135deg, #0f0500 0%, #1a0800 40%, #110400 100%);
+  border: 1px solid var(--fire-border);
+  box-shadow: 0 0 60px rgba(255,107,0,.08), inset 0 1px 0 rgba(255,255,255,.04);
+}
+.f26-hero-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 60% 80% at 90% 50%, rgba(255,107,0,.09) 0%, transparent 70%);
+}
+.f26-hero-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(255,107,0,.03) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(255,107,0,.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.f26-hero-content { position: relative; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.f26-fire-icon {
+  width: 64px; height: 64px; border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,107,0,.2), rgba(255,107,0,.06));
+  border: 1px solid var(--fire-border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(255,107,0,.15);
+}
+.f26-hero-text h1 {
+  font-size: 2rem; font-weight: 900; margin: 0 0 4px;
+  background: linear-gradient(135deg, #fff 0%, #ffb07a 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; letter-spacing: -1px;
+}
+.f26-hero-text p { margin: 0; color: #888; font-size: .9rem; }
+.f26-edition-pill {
+  margin-left: auto;
+  padding: 6px 16px; border-radius: 50px;
+  background: var(--fire-dim); border: 1px solid var(--fire-border);
+  color: var(--fire); font-size: .72rem; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  box-shadow: 0 0 12px rgba(255,107,0,.1);
+}
+
+/* ── Closed banner ────────────────────────────────────────── */
+.reg-closed {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px; margin-bottom: 28px; border-radius: 12px;
+  background: rgba(231,76,60,.07); border: 1px solid rgba(231,76,60,.2);
+  font-size: .88rem; color: #e88;
+}
+.reg-closed i { color: var(--red); }
+
+/* ── Section header ───────────────────────────────────────── */
+.sec-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 22px;
+}
+.sec-head h2 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+.sec-pill {
+  padding: 3px 12px; border-radius: 50px;
+  background: var(--fire-dim); border: 1px solid var(--fire-border);
+  color: var(--fire); font-size: .72rem; font-weight: 700;
+}
+
+/* ── Card grid ────────────────────────────────────────────── */
+.f26-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px; margin-bottom: 52px;
+}
+
+/* ── Registered course card ───────────────────────────────── */
+.reg-card {
+  border-radius: 18px; overflow: hidden;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  display: flex; flex-direction: column;
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+  backdrop-filter: blur(8px);
+}
+.reg-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--fire-border);
+  box-shadow: 0 16px 48px rgba(0,0,0,.4), 0 0 0 1px var(--fire-border);
+}
+
+/* Top accent bar per status */
+.reg-card-accent { height: 3px; }
+.accent-pending  { background: linear-gradient(90deg, var(--yellow), transparent); }
+.accent-approved { background: linear-gradient(90deg, var(--green), transparent); }
+.accent-completed{ background: linear-gradient(90deg, var(--blue), transparent); }
+.accent-rejected { background: linear-gradient(90deg, var(--red), transparent); }
+
+.reg-card-top {
+  padding: 22px 22px 16px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.rc-icon {
+  width: 52px; height: 52px; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; flex-shrink: 0;
+  border: 1px solid var(--glass-border);
+}
+.rc-title { font-size: 1rem; font-weight: 700; margin: 0 0 3px; color: #f0f0f0; }
+.rc-subtitle { font-size: .79rem; color: var(--text-dim); margin: 0; }
+
+/* Status badge */
+.status-dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  display: inline-block; margin-right: 5px;
+}
+.status-badge-f26 {
+  display: inline-flex; align-items: center;
+  padding: 4px 12px; border-radius: 50px; font-size: .73rem; font-weight: 700;
+}
+.s-pending  { background: rgba(243,156,18,.12); color: var(--yellow); border: 1px solid rgba(243,156,18,.2); }
+.s-approved { background: rgba(46,204,113,.12); color: var(--green); border: 1px solid rgba(46,204,113,.2); }
+.s-completed{ background: rgba(52,152,219,.12); color: var(--blue);  border: 1px solid rgba(52,152,219,.2); }
+.s-rejected { background: rgba(231,76,60,.12);  color: var(--red);   border: 1px solid rgba(231,76,60,.2); }
+.dot-pending  { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); animation: pulse-dot 2s infinite; }
+.dot-approved { background: var(--green);  box-shadow: 0 0 6px var(--green); }
+.dot-completed{ background: var(--blue);   box-shadow: 0 0 6px var(--blue); }
+.dot-rejected { background: var(--red); }
+@keyframes pulse-dot {
+  0%,100% { opacity: 1; } 50% { opacity: .4; }
+}
+
+.reg-card-body { padding: 0 22px 18px; flex: 1; }
+.rc-meta-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.04);
+  font-size: .82rem;
+}
+.rc-meta-row:last-child { border-bottom: none; }
+.rc-meta-label { color: var(--text-dim); }
+.rc-meta-val { font-weight: 600; color: #ddd; }
+
+/* Level badges */
+.lp-wrap { display: inline-flex; align-items: center; gap: 5px; }
+.lvl-pill {
+  padding: 2px 10px; border-radius: 50px; font-size: .68rem; font-weight: 700;
+}
+.lvl-beginner     { background: rgba(46,204,113,.12); color: #2ecc71; }
+.lvl-intermediate { background: rgba(52,152,219,.12); color: #3498db; }
+.lvl-advanced     { background: rgba(155,89,182,.12); color: #9b59b6; }
+.lp-arrow { font-size: .65rem; color: #555; }
+
+/* Payment box */
+.payment-box {
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255,107,0,.06);
+  border: 1px solid rgba(255,107,0,.15);
+  font-size: .79rem; color: #cc7700;
+  display: flex; align-items: center; gap: 8px; line-height: 1.4;
+}
+.payment-box i { flex-shrink: 0; font-size: .8rem; color: var(--fire); }
+
+.reg-card-footer {
+  padding: 14px 22px;
+  border-top: 1px solid rgba(255,255,255,.05);
+  background: rgba(0,0,0,.15);
+  display: flex; gap: 8px; align-items: center;
+}
+.btn-view-locked {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 9px; font-size: .8rem; font-weight: 600;
+  background: rgba(255,255,255,.04); color: #555;
+  border: 1px dashed rgba(255,255,255,.1); cursor: not-allowed; user-select: none;
+  position: relative;
+}
+.btn-view-locked::after {
+  content: attr(data-tip);
+  position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); white-space: nowrap;
+  background: #1a1a1a; color: #eee; font-size: .7rem; font-weight: 500;
+  padding: 5px 10px; border-radius: 7px; opacity: 0; pointer-events: none;
+  transition: opacity .2s; z-index: 99;
+  box-shadow: 0 4px 12px rgba(0,0,0,.4);
+}
+.btn-view-locked:hover::after { opacity: 1; }
+.btn-details {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 8px 14px; border-radius: 9px; font-size: .78rem; font-weight: 600;
+  color: #888; border: 1px solid rgba(255,255,255,.08);
+  text-decoration: none; transition: all .2s;
+}
+.btn-details:hover { color: var(--fire); border-color: var(--fire-border); background: var(--fire-dim); }
+
+/* ── Available course card ─────────────────────────────────── */
+.avail-card {
+  border-radius: 18px; overflow: hidden;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  display: flex; flex-direction: column;
+  transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+  backdrop-filter: blur(8px);
+}
+.avail-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--fire-border);
+  box-shadow: 0 20px 56px rgba(0,0,0,.45), 0 0 0 1px var(--fire-border);
+}
+.avail-card-top {
+  padding: 22px 22px 14px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.avail-card-body { padding: 16px 22px; flex: 1; }
+.avail-desc { font-size: .83rem; color: #888; line-height: 1.6; margin-bottom: 14px; }
+
+.learn-list { list-style: none; padding: 0; margin: 0 0 14px; }
+.learn-list li {
+  font-size: .79rem; color: #777; padding: 3px 0 3px 18px; position: relative; line-height: 1.4;
+}
+.learn-list li::before { content: '✓'; position: absolute; left: 0; color: var(--fire); font-weight: 700; }
+
+.course-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.cm-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 50px; font-size: .7rem; font-weight: 600;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+  color: #888;
+}
+
+.price-display { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; }
+.price-cross { font-size: .85rem; text-decoration: line-through; color: #555; }
+.price-main { font-size: 1.3rem; font-weight: 800; color: var(--fire); }
+.price-save { font-size: .72rem; font-weight: 700; color: var(--green); }
+
+.avail-card-footer {
+  padding: 14px 22px;
+  border-top: 1px solid rgba(255,255,255,.05);
+  background: rgba(0,0,0,.15);
+  display: flex; gap: 8px; align-items: center;
+}
+.btn-register {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: 10px;
+  background: linear-gradient(135deg, #ff6b00, #cc4400);
+  color: #fff; font-size: .85rem; font-weight: 700;
+  border: none; cursor: pointer;
+  box-shadow: 0 4px 18px rgba(255,107,0,.3);
+  transition: all .25s; text-decoration: none;
+}
+.btn-register:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,107,0,.45); color: #fff; }
+.btn-register:disabled { background: #333; box-shadow: none; cursor: not-allowed; transform: none; color: #666; }
+.btn-register-outline {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: 10px;
+  background: transparent; color: var(--fire);
+  border: 1px solid var(--fire-border); font-size: .85rem; font-weight: 700;
+  cursor: not-allowed; user-select: none;
+}
+
+/* ── Empty state ──────────────────────────────────────────── */
+.empty-box {
+  text-align: center; padding: 56px 24px; margin-bottom: 36px;
+  border: 1px dashed rgba(255,255,255,.07); border-radius: 18px;
+  background: rgba(255,255,255,.015);
+}
+.empty-icon { font-size: 3rem; margin-bottom: 14px; }
+.empty-box h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; color: #ccc; }
+.empty-box p { color: var(--text-dim); font-size: .87rem; max-width: 340px; margin: 0 auto 22px; }
+
+/* ── How It Works ─────────────────────────────────────────── */
+.hiw {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0; margin: 0 0 52px;
+  border: 1px solid var(--fire-border); border-radius: 18px; overflow: hidden;
+  background: linear-gradient(135deg, rgba(255,107,0,.04), rgba(0,0,0,.2));
+}
+.hiw-step {
+  padding: 26px 22px; display: flex; gap: 14px; align-items: flex-start;
+  border-right: 1px solid rgba(255,107,0,.12);
+}
+.hiw-step:last-child { border-right: none; }
+.hiw-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--fire), #cc4400);
+  color: #fff; font-weight: 800; font-size: .9rem;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(255,107,0,.3);
+}
+.hiw-title { font-size: .9rem; font-weight: 700; margin-bottom: 4px; color: #ddd; }
+.hiw-desc  { font-size: .78rem; color: #666; line-height: 1.5; }
+@media (max-width: 600px) {
+  .hiw { grid-template-columns: 1fr; }
+  .hiw-step { border-right: none; border-bottom: 1px solid rgba(255,107,0,.1); }
+  .hiw-step:last-child { border-bottom: none; }
+}
+
+/* ── FAQ ──────────────────────────────────────────────────── */
+.faq-wrap { margin-bottom: 40px; }
+.faq-head { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.faq-list { display: flex; flex-direction: column; gap: 8px; }
+.faq-item { border: 1px solid rgba(255,255,255,.06); border-radius: 12px; overflow: hidden; transition: border-color .2s; }
+.faq-item:hover { border-color: var(--fire-border); }
+.faq-btn {
+  width: 100%; background: none; border: none; color: #ddd; padding: 14px 18px;
+  font-size: .87rem; font-weight: 600; text-align: left; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  transition: color .2s;
+}
+.faq-btn:hover { color: var(--fire); }
+.faq-chevron { color: var(--fire); font-size: .78rem; transition: transform .3s; flex-shrink:0; }
+.faq-btn[aria-expanded="true"] .faq-chevron { transform: rotate(180deg); }
+.faq-ans {
+  max-height: 0; overflow: hidden; font-size: .83rem; color: #777;
+  line-height: 1.65; padding: 0 18px;
+  transition: max-height .3s ease, padding .15s;
+}
+.faq-ans.open { max-height: 200px; padding: 0 18px 14px; }
+
+/* ── Registration Modal ───────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 9000;
+  background: rgba(0,0,0,.75); backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.reg-modal {
+  background: #131313; border: 1px solid rgba(255,255,255,.1);
+  border-radius: 20px; width: 100%; max-width: 500px;
+  max-height: 92vh; overflow-y: auto; position: relative;
+  animation: slideUp .3s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.06);
+}
+@keyframes slideUp { from { opacity:0; transform: scale(.94) translateY(24px); } to { opacity:1; transform: scale(1) translateY(0); } }
+
+.modal-head {
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.modal-icon {
+  width: 46px; height: 46px; border-radius: 11px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+  background: var(--fire-dim); border: 1px solid var(--fire-border);
+}
+.modal-title { font-size: 1.05rem; font-weight: 700; margin: 0 0 2px; color: #f0f0f0; }
+.modal-sub { font-size: .78rem; color: #666; margin: 0; }
+.modal-x { margin-left: auto; background: none; border: none; color: #555; font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; transition: color .2s; }
+.modal-x:hover { color: #ccc; }
+
+.modal-body-inner { padding: 20px 24px; }
+
+.who-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 9px; margin-bottom: 18px; font-size: .83rem;
+  background: rgba(46,204,113,.07); border: 1px solid rgba(46,204,113,.15); color: #6ed;
+}
+.who-bar strong { color: #aef; }
+
+.mf { margin-bottom: 14px; }
+.mf label { display: block; font-size: .8rem; font-weight: 600; opacity: .65; margin-bottom: 5px; }
+.mf input, .mf select, .mf textarea {
+  width: 100%; padding: 10px 14px; border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.04);
+  font-size: .87rem; color: #f0f0f0; transition: border-color .2s;
+}
+.mf input:focus, .mf select:focus, .mf textarea:focus { outline: none; border-color: var(--fire); }
+.mf input[readonly] { opacity: .5; cursor: not-allowed; }
+.mf-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 480px) { .mf-2 { grid-template-columns: 1fr; } }
+.ref-note { font-size: .76rem; margin-top: 4px; }
+
+.price-box {
+  background: var(--fire-dim); border: 1px solid var(--fire-border);
+  border-radius: 10px; padding: 14px 16px; margin-top: 8px; display: none;
+}
+.pbox-row { display: flex; justify-content: space-between; font-size: .83rem; margin-bottom: 4px; }
+.pbox-row:last-child { margin: 0; font-weight: 700; padding-top: 8px; border-top: 1px solid var(--fire-border); }
+.pbox-green { color: var(--green); }
+.pbox-fire  { color: var(--fire);  font-size: .95rem; }
+
+.err-box {
+  display: none; margin-top: 14px;
+  background: rgba(231,76,60,.08); border: 1px solid rgba(231,76,60,.2);
+  border-radius: 9px; padding: 11px 14px; font-size: .84rem; color: #e88;
+}
+
+.modal-foot {
+  padding: 16px 24px 22px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+.btn-cancel { background: none; border: 1px solid rgba(255,255,255,.1); color: #888; padding: 9px 18px; border-radius: 9px; font-size: .87rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-cancel:hover { border-color: rgba(255,255,255,.18); color: #ccc; }
+.btn-submit-modal {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: linear-gradient(135deg, #ff6b00, #cc4400);
+  color: #fff; padding: 9px 22px; border-radius: 9px;
+  font-size: .88rem; font-weight: 700; border: none; cursor: pointer;
+  box-shadow: 0 4px 18px rgba(255,107,0,.3); transition: all .2s;
+}
+.btn-submit-modal:hover { box-shadow: 0 6px 24px rgba(255,107,0,.45); }
+.btn-submit-modal:disabled { background: #333; box-shadow: none; cursor: not-allowed; }
+
+/* ── Toast ────────────────────────────────────────────────── */
+.f26-toast {
+  position: fixed; bottom: 28px; right: 24px; z-index: 9999;
+  background: #1a1a1a; color: #f0f0f0;
+  padding: 14px 20px; border-radius: 12px;
+  font-size: .86rem; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.5); max-width: 380px;
+  transform: translateY(20px); opacity: 0;
+  transition: all .35s cubic-bezier(.34,1.56,.64,1);
+}
+.f26-toast.show { transform: translateY(0); opacity: 1; }
+.f26-toast.success { border-left: 4px solid var(--green); }
+.f26-toast.error   { border-left: 4px solid var(--red); }
+
+/* ── select option dark ───────────────────────────────────── */
+select option { background: #1a1a1a; color: #f0f0f0; }
+
+@media (max-width: 600px) {
+  .f26-hero { padding: 24px 20px; }
+  .f26-hero-text h1 { font-size: 1.5rem; }
+  .f26-edition-pill { margin-left: 0; }
+  .modal-foot { flex-direction: column-reverse; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="f26-page container-fluid">
+
+{% for message in messages %}
+<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+  {{ message }}
+  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+
+<!-- ══ HERO ══════════════════════════════════════════════════ -->
+<div class="f26-hero">
+  <div class="f26-hero-bg"></div>
+  <div class="f26-hero-grid"></div>
+  <div class="f26-hero-content">
+    <div class="f26-fire-icon">🔥</div>
+    <div class="f26-hero-text">
+      <h1>FLAMES '26</h1>
+      <p>Your summer training dashboard &mdash; track registrations &amp; discover programs.</p>
+    </div>
+    {% if edition %}
+    <span class="f26-edition-pill">{{ edition.name }}</span>
+    {% endif %}
+  </div>
+</div>
+
+{% if not edition %}
+<div class="empty-box">
+  <div class="empty-icon">🏗️</div>
+  <h3>FLAMES 2026 Not Set Up Yet</h3>
+  <p>The program hasn't been configured yet. Check back soon!</p>
+</div>
+{% else %}
+
+{% if not registration_open %}
+<div class="reg-closed">
+  <i class="fas fa-lock"></i>
+  <div><strong>Registrations are currently closed.</strong> You can still view your registered courses below.</div>
+</div>
+{% endif %}
+
+<!-- ══ SECTION A — REGISTERED ══════════════════════════════ -->
+<div class="sec-head">
+  <h2>Your Registered Courses</h2>
+  <span class="sec-pill" id="reg-count">{{ registered_registrations|length }} / {{ max_courses }}</span>
+</div>
+
+{% if registered_registrations %}
+<div class="f26-grid" id="registered-grid">
+  {% for reg in registered_registrations %}
+  <div class="reg-card" id="reg-card-{{ reg.course.slug }}">
+    <div class="reg-card-accent accent-{{ reg.status|lower }}"></div>
+    <div class="reg-card-top">
+      <div class="rc-icon" style="background:rgba({{ reg.course.icon_color|slice:'1:' }},0.12);color:{{ reg.course.icon_color }}">
+        <i class="{{ reg.course.icon_class }}"></i>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="rc-title">{{ reg.course.title }}</div>
+        <div class="rc-subtitle">{{ reg.course.subtitle }}</div>
+        <div style="margin-top:8px">
+          <span class="status-badge-f26 s-{{ reg.status|lower }}">
+            <span class="status-dot dot-{{ reg.status|lower }}"></span>
+            {{ reg.status }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="reg-card-body">
+      <div class="rc-meta-row">
+        <span class="rc-meta-label">Level Path</span>
+        <span class="lp-wrap">
+          <span class="lvl-pill lvl-{{ reg.course.level|lower }}">{{ reg.course.level }}</span>
+          <span class="lp-arrow">→</span>
+          <span class="lvl-pill lvl-advanced">Advanced</span>
+        </span>
+      </div>
+      <div class="rc-meta-row">
+        <span class="rc-meta-label">Registered</span>
+        <span class="rc-meta-val">{{ reg.created_at|date:"d M Y" }}</span>
+      </div>
+      {% if reg.payable_amount %}
+      <div class="rc-meta-row">
+        <span class="rc-meta-label">Amount</span>
+        <span class="rc-meta-val" style="color:var(--fire)">₹{{ reg.payable_amount }}</span>
+      </div>
+      {% endif %}
+      <div class="payment-box">
+        <i class="fas fa-credit-card"></i>
+        Payment link will be shared after registration review via WhatsApp & email.
+      </div>
+    </div>
+    <div class="reg-card-footer">
+      <span class="btn-view-locked" data-tip="Content unlocks when batch starts!">
+        <i class="fas fa-lock" style="font-size:.75em"></i> View Course
+      </span>
+      <a href="{% url 'flames26_track_detail' reg.course.slug %}" class="btn-details">
+        <i class="fas fa-info-circle" style="font-size:.75em"></i> Details
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-box" id="empty-registered">
+  <div class="empty-icon">📋</div>
+  <h3>No courses registered yet</h3>
+  <p>Explore the available FLAMES '26 tracks below and register for your first program!</p>
+  <a href="#available-section" class="btn-register" style="display:inline-flex">
+    <i class="fas fa-arrow-down" style="font-size:.8em"></i> Browse Programs
+  </a>
+</div>
+{% endif %}
+
+<!-- ══ SECTION B — AVAILABLE ════════════════════════════════ -->
+<div id="available-section">
+  <div class="sec-head">
+    <h2>Available Programs</h2>
+    <span class="sec-pill" id="avail-count">{{ available_courses|length }}</span>
+  </div>
+</div>
+
+{% if available_courses %}
+<div class="f26-grid" id="available-grid">
+  {% for course in available_courses %}
+  <div class="avail-card" id="avail-card-{{ course.slug }}" data-slug="{{ course.slug }}">
+    <div class="avail-card-top">
+      <div class="rc-icon" style="background:rgba({{ course.icon_color|slice:'1:' }},0.12);color:{{ course.icon_color }}">
+        <i class="{{ course.icon_class }}"></i>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="rc-title">{{ course.title }}</div>
+        <div class="rc-subtitle">{{ course.subtitle }}</div>
+      </div>
+    </div>
+    <div class="avail-card-body">
+      {% if course.description %}
+      <div class="avail-desc">{{ course.description|truncatewords:20 }}</div>
+      {% endif %}
+      {% with points=course.get_learning_points %}{% if points %}
+      <ul class="learn-list">{% for point in points|slice:':3' %}<li>{{ point }}</li>{% endfor %}</ul>
+      {% endif %}{% endwith %}
+      <div class="course-meta">
+        <span class="lp-wrap">
+          <span class="lvl-pill lvl-{{ course.level|lower }}">{{ course.level }}</span>
+          <span class="lp-arrow">→</span>
+          <span class="lvl-pill lvl-advanced">Advanced</span>
+        </span>
+        <span class="cm-tag"><i class="fas fa-calendar-alt"></i> 45 Days</span>
+      </div>
+      <div class="price-display">
+        {% if course.price and course.price != course.discount_price %}
+        <span class="price-cross">₹{{ course.price }}</span>
+        {% endif %}
+        <span class="price-main">₹{{ course.discount_price }}</span>
+        {% if course.price and course.price != course.discount_price %}
+        <span class="price-save">Save ₹{{ course.savings_amount|floatformat:0 }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="avail-card-footer">
+      {% if registration_open and not at_limit %}
+      <button class="btn-register"
+        onclick="openModal('{{ course.id }}','{{ course.slug }}','{{ course.title|escapejs }}','{{ course.icon_class|escapejs }}','{{ course.icon_color|escapejs }}')">
+        <i class="fas fa-fire" style="font-size:.8em"></i> Register Now
+      </button>
+      {% elif at_limit %}
+      <span class="btn-register-outline"><i class="fas fa-check-double" style="font-size:.8em"></i> Limit Reached</span>
+      {% else %}
+      <span class="btn-register-outline"><i class="fas fa-lock" style="font-size:.8em"></i> Closed</span>
+      {% endif %}
+      <a href="{% url 'flames26_track_detail' course.slug %}" class="btn-details">
+        <i class="fas fa-info-circle" style="font-size:.75em"></i> Details
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% elif at_limit %}
+<div class="empty-box">
+  <div class="empty-icon">🏆</div>
+  <h3>Maximum courses reached!</h3>
+  <p>You've registered for all {{ max_courses }} allowed courses for this edition. You're set!</p>
+</div>
+{% else %}
+<div class="empty-box" id="empty-available">
+  <div class="empty-icon">🎉</div>
+  <h3>You're registered in all available programs!</h3>
+  <p>No more FLAMES '26 tracks to register for right now. Watch this space.</p>
+</div>
+{% endif %}
+
+{% endif %}{# end edition #}
+
+<!-- ══ HOW IT WORKS ══════════════════════════════════════════ -->
+<div class="hiw" role="list">
+  <div class="hiw-step" role="listitem">
+    <div class="hiw-num">1</div>
+    <div><div class="hiw-title">Register Here</div><div class="hiw-desc">Pick your track and submit registration — takes under 2 minutes.</div></div>
+  </div>
+  <div class="hiw-step" role="listitem">
+    <div class="hiw-num">2</div>
+    <div><div class="hiw-title">Get Confirmed</div><div class="hiw-desc">Team reviews your registration and shares access details within 24 hours.</div></div>
+  </div>
+  <div class="hiw-step" role="listitem">
+    <div class="hiw-num">3</div>
+    <div><div class="hiw-title">Join the Cohort</div><div class="hiw-desc">Get added to the WhatsApp group, live sessions start — work begins.</div></div>
+  </div>
+  <div class="hiw-step" role="listitem">
+    <div class="hiw-num">4</div>
+    <div><div class="hiw-title">Ship &amp; Certify</div><div class="hiw-desc">Complete 45 days, present your project, earn your certificate.</div></div>
+  </div>
+</div>
+
+<!-- ══ FAQ ═══════════════════════════════════════════════════ -->
+<div class="faq-wrap">
+  <div class="faq-head"><i class="fas fa-question-circle" style="color:var(--fire)"></i> Frequently Asked Questions</div>
+  <div class="faq-list">
+    {% for q, a in faq_items|default:"" %}{% empty %}
+    <div class="faq-item">
+      <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">When do sessions start?<i class="fas fa-chevron-down faq-chevron"></i></button>
+      <div class="faq-ans">Session dates are shared in your cohort group after registration is confirmed. Keep an eye on your email and WhatsApp.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">Why is "View Course" disabled?<i class="fas fa-chevron-down faq-chevron"></i></button>
+      <div class="faq-ans">The course content portal is under development and will be enabled before your batch starts. All content will be accessible once live sessions begin.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">Can I change my registered track?<i class="fas fa-chevron-down faq-chevron"></i></button>
+      <div class="faq-ans">Track changes are possible within 48 hours of registration, subject to seat availability. Contact us via WhatsApp or email to initiate a switch.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">How will payment work?<i class="fas fa-chevron-down faq-chevron"></i></button>
+      <div class="faq-ans">Payment details will be shared once your registration is reviewed. You'll receive a WhatsApp message and email with the payment link.</div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-btn" onclick="toggleFaq(this)" aria-expanded="false">What if I miss a live session?<i class="fas fa-chevron-down faq-chevron"></i></button>
+      <div class="faq-ans">All sessions are recorded and shared in the cohort group within 24 hours. You won't fall behind even if you miss one.</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+</div>{# /container-fluid #}
+
+<!-- ══ REGISTRATION MODAL ════════════════════════════════════ -->
+<div class="modal-overlay" id="regModal" role="dialog" aria-modal="true"
+     onclick="if(event.target===this)closeModal()">
+  <div class="reg-modal">
+
+    <div class="modal-head">
+      <div class="modal-icon" id="mIcon"><i class="fas fa-fire"></i></div>
+      <div>
+        <div class="modal-title" id="mTitle">Register for Course</div>
+        <div class="modal-sub">FLAMES '26 &mdash; Solo Registration</div>
+      </div>
+      <button class="modal-x" onclick="closeModal()" aria-label="Close">&times;</button>
+    </div>
+
+    <div class="modal-body-inner">
+      <div class="who-bar">
+        <i class="fas fa-user-check"></i>
+        Registering as <strong>{{ user.get_full_name|default:user.username }}</strong>
+        &nbsp;&middot;&nbsp;
+        <span style="opacity:.55">{{ user.email }}</span>
+      </div>
+
+      <form id="modalForm" onsubmit="submitModal(event)">
+        {% csrf_token %}
+        <input type="hidden" id="m-course-id"   name="course_id">
+        <input type="hidden" id="m-course-slug" name="course_slug">
+
+        <div class="mf-2">
+          <div class="mf">
+            <label>Full Name</label>
+            <input type="text" value="{{ user.get_full_name|default:user.username }}" readonly>
+          </div>
+          <div class="mf">
+            <label>Phone <span style="color:var(--fire)">*</span></label>
+            <input type="tel" name="contact_number" id="m-phone" placeholder="10-digit number"
+                   required minlength="10" maxlength="10"
+                   value="{{ user.mobile_number|default:'' }}">
+          </div>
+        </div>
+
+        <div class="mf-2">
+          <div class="mf">
+            <label>Year of Study <span style="color:var(--fire)">*</span></label>
+            <select name="year" required>
+              <option value="">Select year</option>
+              <option value="1st Year">1st Year</option>
+              <option value="2nd Year">2nd Year</option>
+              <option value="3rd Year">3rd Year</option>
+              <option value="4th Year">4th Year</option>
+              <option value="5th Year">5th Year</option>
+              <option value="Graduate">Graduate</option>
+            </select>
+          </div>
+          <div class="mf">
+            <label>Referral Code <span style="opacity:.4;font-weight:400">(optional)</span></label>
+            <input type="text" name="referral_code" id="m-referral" placeholder="e.g. ALM12345">
+            <div class="ref-note" id="m-ref-result"></div>
+          </div>
+        </div>
+
+        <div class="price-box" id="m-price-box">
+          <div class="pbox-row">
+            <span>Course Fee</span><span id="mps-orig">—</span>
+          </div>
+          <div class="pbox-row">
+            <span>Referral Discount</span><span class="pbox-green" id="mps-disc">—</span>
+          </div>
+          <div class="pbox-row">
+            <span>You Pay</span><span class="pbox-fire" id="mps-total">—</span>
+          </div>
+        </div>
+
+        <div class="mf" style="margin-top:14px">
+          <label>Message <span style="opacity:.4;font-weight:400">(optional)</span></label>
+          <textarea name="message" rows="2"
+                    placeholder="Goals, questions, or what excites you most…"
+                    style="resize:vertical"></textarea>
+        </div>
+      </form>
+
+      <div class="err-box" id="m-err"></div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-submit-modal" id="m-submit-btn" onclick="submitModal(event)">
+        <i class="fas fa-fire" style="font-size:.8em"></i>
+        <span id="m-submit-txt">Ignite My Journey</span>
+        <i class="fas fa-spinner" id="m-spinner" style="display:none"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="f26-toast" id="f26Toast" role="alert" aria-live="polite"></div>
+{% endblock %}
+
+{% block myjs %}
+<script>
+// CSRF
+function getCookie(n){const c=document.cookie.split('; ').find(r=>r.startsWith(n+'='));return c?decodeURIComponent(c.split('=')[1]):'';}
+
+// Toast
+function toast(msg,type='success'){
+  const t=document.getElementById('f26Toast');
+  t.className='f26-toast '+type;
+  t.innerHTML=`<i class="fas fa-${type==='success'?'check-circle':'exclamation-circle'}"></i> ${msg}`;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4500);
+}
+
+// FAQ
+function toggleFaq(btn){
+  const ans=btn.nextElementSibling,isOpen=ans.classList.contains('open');
+  document.querySelectorAll('.faq-ans.open').forEach(a=>a.classList.remove('open'));
+  document.querySelectorAll('.faq-btn[aria-expanded="true"]').forEach(b=>b.setAttribute('aria-expanded','false'));
+  if(!isOpen){ans.classList.add('open');btn.setAttribute('aria-expanded','true');}
+}
+
+// Modal
+let cId=null,cSlug=null,refTimer=null;
+
+function openModal(id,slug,title,iconClass,iconColor){
+  cId=id;cSlug=slug;
+  document.getElementById('m-course-id').value=id;
+  document.getElementById('m-course-slug').value=slug;
+  document.getElementById('mTitle').textContent='Register — '+title;
+  const mi=document.getElementById('mIcon');
+  mi.innerHTML=`<i class="${iconClass}"></i>`;
+  mi.style.color=iconColor;
+  document.getElementById('m-err').style.display='none';
+  document.getElementById('m-referral').value='';
+  document.getElementById('m-ref-result').innerHTML='';
+  document.getElementById('m-price-box').style.display='none';
+  document.getElementById('regModal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('regModal').classList.remove('open');
+  document.body.style.overflow='';
+  cId=cSlug=null;
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// Referral live validation
+const refInput=document.getElementById('m-referral');
+if(refInput){
+  refInput.addEventListener('input',()=>{
+    clearTimeout(refTimer);
+    refTimer=setTimeout(validateRef,600);
+  });
+}
+function validateRef(){
+  const code=document.getElementById('m-referral').value.trim();
+  const el=document.getElementById('m-ref-result');
+  const box=document.getElementById('m-price-box');
+  if(!code){el.innerHTML='';box.style.display='none';return;}
+  el.innerHTML='<span style="color:#888;font-size:.76rem">Validating…</span>';
+  const url=`{% url 'validate_referral' %}?code=${encodeURIComponent(code)}&course_id=${cId}&registration_mode=SOLO`;
+  fetch(url,{headers:{'X-Requested-With':'XMLHttpRequest'}})
+    .then(r=>r.json())
+    .then(d=>{
+      if(d.status==='success'){
+        el.innerHTML=`<span style="color:#2ecc71;font-size:.76rem">✓ ${d.message} — ₹${d.discount_amount} off</span>`;
+        document.getElementById('mps-orig').textContent='₹'+d.original_price;
+        document.getElementById('mps-disc').textContent='−₹'+d.discount_amount;
+        document.getElementById('mps-total').textContent='₹'+d.discounted_price;
+        box.style.display='block';
+      } else {
+        el.innerHTML=`<span style="color:#e74c3c;font-size:.76rem">✗ ${d.message}</span>`;
+        box.style.display='none';
+      }
+    })
+    .catch(()=>{el.innerHTML='<span style="color:#e74c3c;font-size:.76rem">Validation failed</span>';});
+}
+
+// Submit
+function submitModal(e){
+  if(e)e.preventDefault();
+  if(!cId)return;
+  const form=document.getElementById('modalForm');
+  const btn=document.getElementById('m-submit-btn');
+  const txt=document.getElementById('m-submit-txt');
+  const spin=document.getElementById('m-spinner');
+  const err=document.getElementById('m-err');
+  if(!form.checkValidity()){form.reportValidity();return;}
+  btn.disabled=true;txt.textContent='Submitting…';spin.style.display='inline-block';err.style.display='none';
+  const fd=new FormData(form);fd.set('course_id',cId);
+  fetch('{% url "ajax_flames26_register" %}',{method:'POST',body:fd,headers:{'X-CSRFToken':getCookie('csrftoken')}})
+    .then(r=>r.json())
+    .then(resp=>{
+      if(resp.status==='success'){
+        // Remove from available grid
+        const avCard=document.getElementById('avail-card-'+cSlug);
+        if(avCard)avCard.remove();
+        // Add to registered grid
+        const reg=resp.registration;
+        let grid=document.getElementById('registered-grid');
+        const emptyReg=document.getElementById('empty-registered');
+        if(emptyReg)emptyReg.remove();
+        if(!grid){
+          grid=document.createElement('div');
+          grid.className='f26-grid';grid.id='registered-grid';
+          document.querySelector('.sec-head').after(grid);
+        }
+        grid.prepend(buildRegCard(reg));
+        updateCounts();
+        closeModal();
+        toast(resp.message,'success');
+      } else {
+        err.textContent=resp.message;err.style.display='block';
+      }
+    })
+    .catch(()=>{err.textContent='Network error — please try again.';err.style.display='block';})
+    .finally(()=>{btn.disabled=false;txt.textContent='Ignite My Journey';spin.style.display='none';});
+}
+
+function buildRegCard(reg){
+  const card=document.createElement('div');
+  card.className='reg-card';card.id='reg-card-'+reg.course_slug;
+  card.innerHTML=`
+    <div class="reg-card-accent accent-pending"></div>
+    <div class="reg-card-top">
+      <div class="rc-icon" style="color:${reg.icon_color};background:rgba(255,107,0,.1)">
+        <i class="${reg.icon_class}"></i>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="rc-title">${reg.course_title}</div>
+        <div class="rc-subtitle">${reg.course_subtitle}</div>
+        <div style="margin-top:8px">
+          <span class="status-badge-f26 s-pending">
+            <span class="status-dot dot-pending"></span> Pending
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="reg-card-body">
+      <div class="rc-meta-row">
+        <span class="rc-meta-label">Level Path</span>
+        <span class="lp-wrap">
+          <span class="lvl-pill lvl-${reg.level.toLowerCase()}">${reg.level}</span>
+          <span class="lp-arrow">→</span>
+          <span class="lvl-pill lvl-advanced">Advanced</span>
+        </span>
+      </div>
+      <div class="rc-meta-row">
+        <span class="rc-meta-label">Registered</span>
+        <span class="rc-meta-val">${reg.created_at}</span>
+      </div>
+      <div class="payment-box">
+        <i class="fas fa-credit-card"></i>
+        Payment link will be shared after registration review via WhatsApp &amp; email.
+      </div>
+    </div>
+    <div class="reg-card-footer">
+      <span class="btn-view-locked" data-tip="Content unlocks when batch starts!">
+        <i class="fas fa-lock" style="font-size:.75em"></i> View Course
+      </span>
+      <a href="/flames-26/${reg.course_slug}/" class="btn-details">
+        <i class="fas fa-info-circle" style="font-size:.75em"></i> Details
+      </a>
+    </div>`;
+  return card;
+}
+
+function updateCounts(){
+  const rc=document.querySelectorAll('#registered-grid .reg-card').length;
+  const ac=document.querySelectorAll('#available-grid .avail-card').length;
+  const max=parseInt('{{ max_courses }}')||3;
+  const rEl=document.getElementById('reg-count');
+  const aEl=document.getElementById('avail-count');
+  if(rEl)rEl.textContent=`${rc} / ${max}`;
+  if(aEl)aEl.textContent=ac;
+  if(rc>=max){
+    document.querySelectorAll('.btn-register:not([disabled])').forEach(b=>{
+      b.disabled=true;
+      b.innerHTML='<i class="fas fa-check-double" style="font-size:.8em"></i> Limit Reached';
+    });
+  }
+}
+</script>
+{% endblock %}

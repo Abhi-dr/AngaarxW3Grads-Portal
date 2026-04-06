@@ -1,0 +1,217 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}Reorder FLAMES Courses | {{ selected_edition.name }}{% endblock %}
+{% block flames_active %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+    .sort-handle {
+        cursor: grab;
+        user-select: none;
+        touch-action: none; /* Prevents scrolling while dragging on touch devices */
+    }
+
+    .sort-handle:active {
+        cursor: grabbing;
+    }
+
+    .sortable-item {
+        transition: background-color 0.15s ease, box-shadow 0.15s ease;
+        border-radius: 0.75rem;
+        background: rgba(255, 255, 255, 0.02);
+    }
+
+    .sortable-chosen {
+        background-color: rgba(255, 107, 0, 0.12) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
+        opacity: 0.96;
+    }
+
+    .sortable-ghost {
+        opacity: 0.35;
+    }
+
+    .course-status-badge {
+        font-size: 0.72rem;
+        border-radius: 999px;
+        padding: 0.35rem 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+    }
+
+    .course-status-badge.is-active {
+        background: rgba(56, 203, 137, 0.12);
+        color: #38cb89;
+    }
+
+    .course-status-badge.is-inactive {
+        background: rgba(242, 78, 30, 0.12);
+        color: #f24e1e;
+    }
+
+    /* Helper for text truncation inside flexbox */
+    .min-w-0 {
+        min-width: 0;
+    }
+    
+    @media (max-width: 576px) {
+        .heading {
+            font-size: 1.25rem !important;
+        }
+        .icon-container {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 0.9rem !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="card mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="pe-2 min-w-0">
+                <h3 class="heading mb-1 text-truncate">
+                    <span class="fw-semibold">Reorder Courses</span>
+                    <span class="fs-6 text-muted d-none d-sm-inline"> | {{ selected_edition.name }}</span>
+                </h3>
+                <small class="text-muted d-block" style="font-size: 0.85rem;">Drag and drop to control how courses appear.</small>
+            </div>
+            
+            <div>
+                <div class="d-none d-md-flex gap-2 flex-wrap">
+                    <!-- <a href="{% url 'flames_select_edition' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-exchange-alt me-1"></i> Switch Edition
+                    </a> -->
+                    <a href="{% url 'admin_flames_courses' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i> Back to Courses
+                    </a>
+                </div>
+
+                <div class="dropdown d-md-none">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="mobileActionsBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-cog me-1"></i> Actions
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="mobileActionsBtn">
+                        
+                        <li>
+                            <a class="dropdown-item" href="{% url 'admin_flames_courses' %}">
+                                <i class="fas fa-arrow-left text-primary me-2"></i> Back to Courses
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-3 p-md-4">
+            <div id="saveAlert" class="alert d-none mb-3"></div>
+
+            <ul class="list-group" id="sortableList">
+                {% for course in courses %}
+                <li class="list-group-item sortable-item d-flex align-items-center flex-wrap flex-sm-nowrap gap-2 gap-md-3 mb-2 border rounded p-2 p-md-3"
+                    data-id="{{ course.id }}">
+                    
+                    <div class="d-flex align-items-center gap-2 gap-md-3 flex-grow-1 min-w-0">
+                        <span class="sort-handle fs-4 text-muted px-1 py-2">☰</span>
+                        <div class="icon-container d-flex align-items-center justify-content-center rounded"
+                            style="width:56px;height:44px;background:{{ course.icon_color }}22;color:{{ course.icon_color }};flex-shrink:0;">
+                            <i class="{{ course.icon_class }}"></i>
+                        </div>
+                        <div class="flex-fill min-w-0">
+                            <div class="fw-semibold text-truncate">{{ course.title }}</div>
+                            <div class="text-muted small text-truncate">
+                                {% if course.subtitle %}{{ course.subtitle }} &nbsp;|&nbsp;{% endif %}
+                                {{ course.level }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-2 ms-auto ps-3 ps-sm-0">
+                        <span class="course-status-badge {% if course.is_active %}is-active{% else %}is-inactive{% endif %} d-none d-sm-inline-block">
+                            {% if course.is_active %}Active{% else %}Inactive{% endif %}
+                        </span>
+                        <span class="badge bg-secondary position-order px-2 py-1 fs-6">—</span>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-center text-muted py-4">No courses found for this edition yet.</li>
+                {% endfor %}
+            </ul>
+
+            <div class="d-flex gap-2 mt-4 flex-wrap">
+                <button class="btn btn-primary flex-grow-1 flex-sm-grow-0" id="saveOrderBtn" onclick="saveOrder()" {% if not courses %}disabled{% endif %}>
+                    <span id="saveBtnText"><i class="fas fa-save me-1"></i>Save Order</span>
+                    <span id="saveBtnSpinner" class="spinner-border spinner-border-sm ms-1 d-none"></span>
+                </button>
+                <a href="{% url 'admin_flames_courses' %}" class="btn btn-outline-secondary flex-grow-1 flex-sm-grow-0">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block myjs %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+    const CSRF = '{{ csrf_token }}';
+    const SAVE_URL = '{% url "admin_save_flames_course_order" %}';
+
+    const sortable = Sortable.create(document.getElementById('sortableList'), {
+        handle: '.sort-handle',
+        animation: 200,
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        onEnd: updatePositionBadges,
+    });
+
+    function updatePositionBadges() {
+        document.querySelectorAll('#sortableList li[data-id]').forEach((li, idx) => {
+            li.querySelector('.position-order').textContent = `#${idx + 1}`;
+        });
+    }
+    updatePositionBadges();
+
+    async function saveOrder() {
+        const order = [...document.querySelectorAll('#sortableList li[data-id]')]
+            .map(li => parseInt(li.dataset.id, 10));
+
+        const alertEl = document.getElementById('saveAlert');
+        alertEl.className = 'alert d-none';
+
+        const btn = document.getElementById('saveOrderBtn');
+        btn.disabled = true;
+        document.getElementById('saveBtnSpinner').classList.remove('d-none');
+
+        try {
+            const res = await fetch(SAVE_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF,
+                },
+                body: JSON.stringify({ order }),
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                alertEl.className = 'alert alert-success';
+                alertEl.textContent = 'Course order saved successfully.';
+            } else {
+                alertEl.className = 'alert alert-danger';
+                alertEl.textContent = data.error || 'Failed to save course order.';
+            }
+        } catch (error) {
+            alertEl.className = 'alert alert-danger';
+            alertEl.textContent = 'Network error. Please try again.';
+        } finally {
+            btn.disabled = false;
+            document.getElementById('saveBtnSpinner').classList.add('d-none');
+        }
+    }
+</script>
+{% endblock %}

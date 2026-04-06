@@ -461,6 +461,40 @@
         .form-row { grid-template-columns: 1fr; }
         .reg-page { padding: 80px 0 60px; }
     }
+
+    /* ── Auth identity pill ──────────────────────────────────── */
+    .logged-in-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(46,204,113,.08);
+        border: 1px solid rgba(46,204,113,.25);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 0.86rem;
+        color: #ccc;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .logged-in-pill strong { color: #fff; }
+
+    /* ── Pre-fill hint ───────────────────────────────────────── */
+    .prefill-note {
+        font-size: 0.72rem;
+        color: #555;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Readonly inputs look distinct but not disabled */
+    input[readonly] {
+        background: rgba(255,255,255,.04) !important;
+        border-color: rgba(255,255,255,.08) !important;
+        color: #999 !important;
+        cursor: not-allowed;
+    }
 </style>
 {% endblock %}
 
@@ -526,6 +560,14 @@
                 Fill in your details. Once submitted, we'll review and confirm your registration.
             </p>
 
+            <!-- Logged-in identity pill -->
+            <div class="logged-in-pill">
+                <i class="fas fa-user-check" style="color:#2ecc71"></i>
+                Registering as <strong>{{ prefill.full_name|default:user.username }}</strong>
+                &nbsp;·&nbsp; <span style="color:#888">{{ prefill.email }}</span>
+                <a href="{% url 'my_profile' %}" style="font-size:.75rem;color:#ff6b00;margin-left:8px">Not you?</a>
+            </div>
+
             {% if messages %}
             {% for message in messages %}
             <div class="msg-box {% if 'success' in message.tags %}success{% endif %}">
@@ -543,24 +585,15 @@
                 <!-- ── Personal Info ────────────────────────── -->
                 <div class="section-divider">Personal Information</div>
 
-                <div class="form-group">
-                    <label class="form-label">Username <span class="req">*</span></label>
-                    <div class="input-wrap">
-                        <input type="text" id="f26-username" name="username" class="form-control"
-                               placeholder="e.g. rahul_dev" required
-                               pattern="^(?!.*\s).{4,30}$" minlength="4" maxlength="30"
-                               {% if user and user.is_authenticated %}value="{{ user.username }}" readonly{% endif %}>
-                        <i class="fas fa-check vi" id="un-ok"></i>
-                        <i class="fas fa-times vi" id="un-err"></i>
-                    </div>
-                    <div class="form-feedback" id="un-fb"></div>
-                </div>
+                <!-- username — always readonly since auth is required -->
+                <input type="hidden" name="username" value="{{ prefill.username }}">
 
                 <div class="form-group">
                     <label class="form-label">Full Name <span class="req">*</span></label>
                     <input type="text" id="f26-name" name="full_name" class="form-control"
                            placeholder="Enter your full name" required
-                           {% if user and user.is_authenticated %}value="{{ user.get_full_name }}"{% endif %}>
+                           value="{{ prefill.full_name }}" readonly>
+                    <div class="prefill-note"><i class="fas fa-lock" style="font-size:.7rem"></i> Auto-filled from your profile</div>
                 </div>
 
                 <div class="form-row">
@@ -569,16 +602,18 @@
                         <div class="input-wrap">
                             <input type="email" id="f26-email" name="email" class="form-control"
                                    placeholder="you@example.com" required
-                                   {% if user and user.is_authenticated %}value="{{ user.email }}" readonly{% endif %}>
+                                   value="{{ prefill.email }}" readonly>
                         </div>
-                        <div class="form-feedback" id="email-fb"></div>
+                        <div class="prefill-note"><i class="fas fa-lock" style="font-size:.7rem"></i> Auto-filled from your profile</div>
                     </div>
                     <div class="form-group">
                         <label class="form-label">Phone <span class="req">*</span></label>
-                        <input type="tel" name="contact_number" class="form-control"
+                        <input type="tel" id="f26-phone" name="contact_number" class="form-control"
                                placeholder="10-digit number" required
                                minlength="10" maxlength="10"
-                               {% if user and user.is_authenticated and user.mobile_number %}value="{{ user.mobile_number }}"{% endif %}>
+                               value="{{ prefill.contact_number }}"
+                               {% if prefill.contact_number %}title="Pre-filled from your profile"{% endif %}>
+                        {% if prefill.contact_number %}<div class="prefill-note"><i class="fas fa-lock" style="font-size:.7rem"></i> Auto-filled from your profile</div>{% endif %}
                     </div>
                 </div>
 
@@ -589,10 +624,14 @@
                             <option value="">Select college</option>
                             {% for c in colleges %}
                             <option value="{{ c }}"
-                                {% if user and user.is_authenticated and user.college == c %}selected{% endif %}>
+                                {% if prefill.college == c %}selected{% endif %}>
                                 {{ c }}
                             </option>
                             {% endfor %}
+                            <!-- If user's college isn't in the list, show it as selected -->
+                            {% if prefill.college and prefill.college not in colleges %}
+                            <option value="{{ prefill.college }}" selected>{{ prefill.college }}</option>
+                            {% endif %}
                         </select>
                     </div>
                     <div class="form-group">
@@ -609,38 +648,7 @@
                     </div>
                 </div>
 
-                <!-- ── Account (hidden if logged in) ─────────── -->
-                {% if not user or not user.is_authenticated %}
-                <div class="section-divider">Create Your Account</div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Password <span class="req">*</span></label>
-                        <div class="input-wrap">
-                            <input type="password" id="f26-pwd" name="password" class="form-control"
-                                   placeholder="Min 8 characters" required minlength="8">
-                        </div>
-                        <div class="pwd-bar"><div class="pwd-bar-fill" id="pwd-fill"></div></div>
-                        <div class="pwd-hints">
-                            <span class="pwd-hint" id="ph-len"><i class="fas fa-circle"></i> 8+ chars</span>
-                            <span class="pwd-hint" id="ph-up"><i class="fas fa-circle"></i> Uppercase</span>
-                            <span class="pwd-hint" id="ph-low"><i class="fas fa-circle"></i> Lowercase</span>
-                            <span class="pwd-hint" id="ph-num"><i class="fas fa-circle"></i> Number</span>
-                            <span class="pwd-hint" id="ph-sym"><i class="fas fa-circle"></i> Symbol</span>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Confirm Password <span class="req">*</span></label>
-                        <div class="input-wrap">
-                            <input type="password" id="f26-cpwd" name="confirm_password" class="form-control"
-                                   placeholder="Re-enter password" required>
-                            <i class="fas fa-check vi" id="cpwd-ok"></i>
-                            <i class="fas fa-times vi" id="cpwd-err"></i>
-                        </div>
-                        <div class="form-feedback err" id="cpwd-fb" style="display:none">Passwords don't match</div>
-                    </div>
-                </div>
-                {% endif %}
+                <!-- Account creation block removed — login is now required before reaching this page -->
 
                 <!-- ── Registration Mode ──────────────────────── -->
                 <div class="section-divider">Registration Mode</div>
@@ -679,7 +687,7 @@
 
                 <div class="price-summary" id="price-summary">
                     <div class="ps-row">
-                        <span class="ps-label">Original Price</span>
+                        <span class="ps-label">Course Fee</span>
                         <span class="ps-value" id="ps-original">—</span>
                     </div>
                     <div class="ps-row">
@@ -696,25 +704,32 @@
                 <div class="team-section" id="team-section">
                     <div class="section-divider">Team Members</div>
                     <p style="font-size:.84rem;color:#666;margin-bottom:16px">
-                        Add the usernames of your 4 teammates (they must already have an Angaar account).
+                        Enter the <strong style="color:#ddd">registered email addresses</strong> of your 4 teammates (they must already have an Angaar account).
                     </p>
 
                     {% for i in "1234" %}
-                    <div class="team-member-card">
+                    <div class="team-member-card" id="tm-card-{{ forloop.counter }}">
                         <div class="team-member-header">
                             <div class="member-num">{{ forloop.counter|add:1 }}</div>
                             Teammate {{ forloop.counter|add:1 }}
                         </div>
                         <div class="form-group" style="margin-bottom:0">
                             <div class="input-wrap">
-                                <input type="text" name="team_member_username_{{ forloop.counter }}"
+                                <input type="email"
+                                       name="team_member_email_{{ forloop.counter }}"
                                        id="tm-{{ forloop.counter }}"
                                        class="form-control team-req"
-                                       placeholder="Enter teammate's username">
+                                       placeholder="teammate@email.com"
+                                       autocomplete="off">
                                 <i class="fas fa-check vi" id="tm{{ forloop.counter }}-ok"></i>
                                 <i class="fas fa-times vi" id="tm{{ forloop.counter }}-err"></i>
                             </div>
                             <div class="form-feedback" id="tm{{ forloop.counter }}-fb"></div>
+                            <!-- Real-time name preview -->
+                            <div id="tm{{ forloop.counter }}-name" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);border-radius:8px;font-size:.82rem;color:#aaa">
+                                <i class="fas fa-user-check" style="color:#2ecc71;margin-right:6px"></i>
+                                <span id="tm{{ forloop.counter }}-name-text"></span>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
@@ -744,6 +759,184 @@
 
     </div><!-- /reg-inner -->
 </div><!-- /reg-page -->
+
+<!-- ══════════════════════════════════════════════════════
+     BELOW-FORM SECTIONS: included / FAQ / testimonials
+══════════════════════════════════════════════════════════ -->
+<div class="container" style="max-width:980px;margin:0 auto;padding:0 24px 80px">
+
+    <!-- ── What you get ──────────────────────────────── -->
+    <div style="margin-bottom:72px">
+        <h2 style="font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.5px">
+            What You Get <i class="fas fa-gift" style="color:#ff6b00;font-size:1.4rem"></i>
+        </h2>
+        <p style="color:#777;margin-bottom:36px">Everything you need to ship a real project — in 45 days.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px">
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-video" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Live Sessions + Recordings</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">All classes are live. Every session is recorded and shared in the cohort group within 24 hours.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-tasks" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Daily Tasks + Reviews</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">One task per day, reviewed at the end of each week. Accountability is built in — not optional.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fab fa-whatsapp" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Private Cohort Community</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">A dedicated WhatsApp group with your batch. Ask questions, share progress, get unstuck fast.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-user-tie" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">1-on-1 Doubt Sessions</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">Scheduled mentor slots for deep dives into your code, project design, or career questions.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-briefcase" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Portfolio-Ready Project</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">You ship a real, deployed project that goes on your GitHub and resume — not a tutorial clone.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-certificate" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Verifiable Certificate</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">A completion certificate tied to your Angaar profile — shareable, verifiable, and career-relevant.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── FAQ ───────────────────────────────────────── -->
+    <div style="margin-bottom:72px">
+        <h2 style="font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.5px">
+            Frequently Asked Questions <i class="fas fa-question-circle" style="color:#ff6b00;font-size:1.4rem"></i>
+        </h2>
+        <p style="color:#777;margin-bottom:36px">Straight answers to the questions we always get.</p>
+
+        <div id="reg-faq-list" style="display:flex;flex-direction:column;gap:12px">
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    Do I need prior experience?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    It depends on the track level. Beginner tracks start from scratch — all you need is a computer and the drive to learn. Intermediate tracks expect you to already know how to write and run basic code.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    How many hours per day does this require?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    Approximately 2–3 focused hours a day. This is an intensive summer training, not a light short course. If you can't commit to that, this isn't the right program for you right now.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    What happens after I submit the form?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    You'll receive an email confirmation with next steps. Our team reviews registrations and sends your payment details and cohort group link within 24 hours.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    Can I register for more than one track?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    Yes — up to 3 tracks per FLAMES edition. But think carefully. Most students who spread across 3 tracks without finishing the first perform poorly. Commit to one, crush it, then add more.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    What is the refund policy?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    Full refunds within 3 days of batch start. After that, no refunds are issued. We encourage you to attend the first session — most students stay once they see what's inside.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    Is this certificate recognized by companies?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    The certificate itself matters less than the portfolio project you build. A deployed project on your GitHub speaks louder than any certificate. That said, the certificate is verifiable via our platform.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Testimonials ───────────────────────────────── -->
+    <div style="margin-bottom:32px">
+        <h2 style="font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.5px">
+            Students Speak <i class="fas fa-quote-right" style="color:#ff6b00;font-size:1.4rem"></i>
+        </h2>
+        <p style="color:#777;margin-bottom:36px">Real words from FLAMES '25 students.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+
+            <div style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:26px">
+                <p style="font-size:.95rem;color:#ccc;line-height:1.75;font-style:italic;margin-bottom:16px;padding-left:14px;border-left:2px solid rgba(255,107,0,.4)">
+                    "I deployed my first Django app with an AI chatbot in week 5. I didn't think that was possible 45 days ago."
+                </p>
+                <p style="font-size:.78rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0">— FLAMES '25 · Full Stack Track</p>
+            </div>
+
+            <div style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:26px">
+                <p style="font-size:.95rem;color:#ccc;line-height:1.75;font-style:italic;margin-bottom:16px;padding-left:14px;border-left:2px solid rgba(255,107,0,.4)">
+                    "I went from not being able to solve a simple array problem to clearing the DSA round at my first placement attempt."
+                </p>
+                <p style="font-size:.78rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0">— FLAMES '25 · DSA Track</p>
+            </div>
+
+            <div style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:26px">
+                <p style="font-size:.95rem;color:#ccc;line-height:1.75;font-style:italic;margin-bottom:16px;padding-left:14px;border-left:2px solid rgba(255,107,0,.4)">
+                    "I built a full dashboard from raw data and presented it like a data analyst. That's what got me my internship."
+                </p>
+                <p style="font-size:.78rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0">— FLAMES '25 · Analytics Track</p>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /below-form sections -->
 
 <!-- particles.js -->
 <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
@@ -914,39 +1107,97 @@ function checkPasswordMatch() {
 
 if (cpwdInput) cpwdInput.addEventListener('input', checkPasswordMatch);
 
-// ── Team member username debounce check ──────────────────────────
-document.querySelectorAll('.team-req').forEach((input, idx) => {
-    const n = idx + 1;
-    let t = null;
-    input.addEventListener('input', () => {
-        clearTimeout(t);
-        t = setTimeout(() => {
-            const val = input.value.trim();
-            const fb  = document.getElementById(`tm${n}-fb`);
-            if (!val) return;
-            fetch(`/api/check-username/?username=${encodeURIComponent(val)}&exists=1`)
-                .then(r => r.json())
-                .then(d => {
-                    if (fb) {
-                        fb.textContent = d.available === false ? '✓ User found' : '✗ User not found';
-                        fb.className = 'form-feedback ' + (d.available === false ? 'ok' : 'err');
-                    }
-                })
-                .catch(() => {});
-        }, 500);
+// ── Team member email real-time lookup ──────────────────────
+const courseIdForTeam = "{{ course.id|default:'' }}";
+const tmValidState = {}; // track per-slot validity
+
+function lookupTeamEmail(n) {
+    const input = document.getElementById(`tm-${n}`);
+    if (!input) return;
+    const email = input.value.trim().toLowerCase();
+    const okIcon  = document.getElementById(`tm${n}-ok`);
+    const errIcon = document.getElementById(`tm${n}-err`);
+    const fb      = document.getElementById(`tm${n}-fb`);
+    const nameBox = document.getElementById(`tm${n}-name`);
+    const nameTxt = document.getElementById(`tm${n}-name-text`);
+
+    // Reset
+    okIcon.className  = 'fas fa-check vi';
+    errIcon.className = 'fas fa-times vi';
+    if (nameBox) nameBox.style.display = 'none';
+    tmValidState[n] = false;
+
+    if (!email) { if (fb) fb.textContent = ''; return; }
+
+    // Basic email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errIcon.className += ' err';
+        if (fb) { fb.textContent = 'Enter a valid email address'; fb.className = 'form-feedback err'; }
+        return;
+    }
+
+    if (fb) { fb.textContent = 'Looking up…'; fb.className = 'form-feedback'; }
+
+    fetch(`/accounts/check_email_exists/?email=${encodeURIComponent(email)}&course_id=${courseIdForTeam}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.exists) {
+            errIcon.className += ' err';
+            if (fb) { fb.textContent = '✗ No Angaar account found with this email'; fb.className = 'form-feedback err'; }
+            tmValidState[n] = false;
+        } else if (d.already_registered) {
+            errIcon.className += ' err';
+            if (fb) { fb.textContent = '✗ This student is already registered for this course'; fb.className = 'form-feedback err'; }
+            tmValidState[n] = false;
+        } else {
+            okIcon.className += ' ok';
+            if (fb) { fb.textContent = ''; fb.className = 'form-feedback'; }
+            if (nameBox && nameTxt) {
+                nameTxt.textContent = d.full_name;
+                nameBox.style.display = 'block';
+            }
+            tmValidState[n] = true;
+        }
+    })
+    .catch(() => {
+        if (fb) { fb.textContent = 'Lookup failed — check your connection'; fb.className = 'form-feedback err'; }
     });
+}
+
+// Debounced listeners
+[1,2,3,4].forEach(n => {
+    const inp = document.getElementById(`tm-${n}`);
+    if (!inp) return;
+    let t;
+    inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => lookupTeamEmail(n), 500); });
+    inp.addEventListener('blur',  () => lookupTeamEmail(n));
 });
 
 // ── Form submit ──────────────────────────────────────────────────
 const form = document.getElementById('f26RegForm');
 if (form) {
     form.addEventListener('submit', e => {
-        // Password confirmation check (for non-logged-in users)
-        if (pwdInput && cpwdInput && pwdInput.value !== cpwdInput.value) {
-            e.preventDefault();
-            document.getElementById('cpwd-fb').style.display = 'block';
-            cpwdInput.focus();
-            return;
+        // Block submit if any team email slot is empty or invalid
+        const mode = document.getElementById('mode-team').checked ? 'TEAM' : 'SOLO';
+        if (mode === 'TEAM') {
+            for (let n = 1; n <= 4; n++) {
+                const inp = document.getElementById(`tm-${n}`);
+                if (!inp) continue;
+                if (!inp.value.trim()) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Please enter the email for Teammate ${n + 1}.`);
+                    return;
+                }
+                if (!tmValidState[n]) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Teammate ${n + 1}'s email was not verified. Please enter a valid registered email.`);
+                    return;
+                }
+            }
         }
 
         const btn = document.getElementById('submit-btn');
@@ -957,6 +1208,23 @@ if (form) {
         spinner.style.display = 'inline-block';
         spinner.classList.add('spin');
     });
+}
+
+// ── Registration page FAQ accordion ─────────────────────────────────────────
+function toggleRFaq(btn) {
+    const ans = btn.nextElementSibling;
+    const isOpen = ans.style.maxHeight && ans.style.maxHeight !== '0px';
+    // Close all
+    document.querySelectorAll('.rfaq-a').forEach(a => { a.style.maxHeight = '0px'; a.style.padding = '0 22px'; });
+    document.querySelectorAll('.rfaq-q i:last-child').forEach(i => i.style.transform = '');
+    document.querySelectorAll('.rfaq-q').forEach(b => b.setAttribute('aria-expanded','false'));
+    // Open clicked
+    if (!isOpen) {
+        ans.style.maxHeight = ans.scrollHeight + 'px';
+        ans.style.padding = '0 22px 16px';
+        btn.querySelector('i:last-child').style.transform = 'rotate(180deg)';
+        btn.setAttribute('aria-expanded','true');
+    }
 }
 </script>
 {% endblock %}

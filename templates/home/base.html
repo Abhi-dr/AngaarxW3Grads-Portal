@@ -129,6 +129,9 @@
         }
     </style>
 
+    <!-- FLAMES '26 promo styles — non-blocking static asset -->
+    <link rel="stylesheet" href="{% static 'css/home/css/f26_promo.css' %}">
+
 </head>
 
 <body oncontextmenu="return false">
@@ -200,7 +203,7 @@
 
                     <li class="nav-item mx-1">
 
-                        
+
 
                         {% if user.role == 'student' %}
 
@@ -251,6 +254,65 @@
         </div>
     </nav>
 
+
+
+    <!-- ═══════════════════════════════════════════════════════
+         FLAMES '26 — TOP ANNOUNCEMENT BAR (dismissed per-session)
+         ═══════════════════════════════════════════════════════ -->
+    <div id="f26-bar" role="banner" aria-label="FLAMES 26 Announcement">
+        <span class="f26-bar-badge">🔥 New</span>
+        <span class="f26-bar-text"><strong>FLAMES '26 is LIVE</strong> — An Intensive 45-day Summer Training</span>
+        <span class="f26-bar-sep"></span>
+        <a href="{% url 'flames26' %}" class="f26-bar-cta">Explore Tracks →</a>
+        <button class="f26-bar-close" onclick="closeF26Bar()" aria-label="Close">✕</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         FLAMES '26 — SLIDE-IN PROMO WIDGET (once per 24h)
+         ═══════════════════════════════════════════════════════ -->
+    <div id="f26-card" role="dialog" aria-label="FLAMES 26 Promotion" aria-modal="false">
+        <div class="f26card-glow"></div>
+
+        <div class="f26card-header">
+            <div class="f26card-eyebrow">
+                <span class="f26card-eyebrow-dot"></span>
+                Just Dropped
+            </div>
+            <h2 class="f26card-title">FLAMES <span>'26</span> is Live 🔥</h2>
+            <button class="f26card-close" onclick="closeF26Card()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="f26card-body">
+            <div class="f26card-pills">
+                <span class="f26card-pill">45 Days</span>
+                <span class="f26card-pill">Live &amp; Online</span>
+                <span class="f26card-pill">5 Tracks</span>
+                <span class="f26card-pill">Certificate</span>
+            </div>
+
+            <ul class="f26card-points">
+                <li><i class="fas fa-check-circle"></i> Build &amp; deploy real-world projects</li>
+                <li><i class="fas fa-check-circle"></i> Full Stack, DSA, AI, Analytics, Mobile</li>
+                <li><i class="fas fa-check-circle"></i> Daily tasks + 1-on-1 mentor sessions</li>
+                <li><i class="fas fa-check-circle"></i> Cohort of focused students — not a crowd</li>
+            </ul>
+
+            <div class="f26card-urgency">
+                <i class="fas fa-fire"></i>
+                Seats are limited per track. Early registrations close first.
+            </div>
+
+            <a href="{% url 'flames26' %}" class="f26card-cta" onclick="closeF26Card()">
+                <i class="fas fa-rocket"></i> See All Tracks
+            </a>
+            <!-- <span class="f26card-skip" onclick="closeF26Card()">No thanks, I'm not interested</span> -->
+        </div>
+    </div>
+
+    <!-- FLAMES '26 promo logic — deferred, never blocks render -->
+    <script defer src="{% static 'js/home/f26_promo.js' %}"></script>
 
     {% block body %}
 

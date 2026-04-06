@@ -73,6 +73,7 @@ class FlamesCourse(models.Model):
     title       = models.CharField(max_length=200)
     subtitle    = models.CharField(max_length=255, blank=True, default='')
     description = models.TextField(blank=True, null=True, default='')
+    display_order = models.PositiveIntegerField(default=0)
 
     instructor  = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
@@ -128,10 +129,20 @@ class FlamesCourse(models.Model):
     class Meta:
         verbose_name        = 'Flames Course'
         verbose_name_plural = 'Flames Courses'
-        ordering            = ['edition', 'title']
+        ordering            = ['edition', 'display_order', 'id']
 
     def __str__(self):
         return f"{self.title} ({self.edition})"
+
+    def save(self, *args, **kwargs):
+        if self._state.adding and self.edition_id and self.display_order == 0:
+            last_order = (
+                FlamesCourse.objects.filter(edition_id=self.edition_id)
+                .aggregate(models.Max('display_order'))
+                .get('display_order__max') or 0
+            )
+            self.display_order = last_order + 1
+        super().save(*args, **kwargs)
 
     def get_learning_points(self):
         """Return what_you_will_learn as a list of non-empty points."""
@@ -331,12 +342,21 @@ class FlamesRegistration(models.Model):
         
     # a function to get the total amount we have generated so par (based on payable amount)
     @classmethod
-    def get_total_amount(cls):
-        total = 0
-        for registration in cls.objects.all():
-            if registration.payable_amount and registration.status == "Completed":
-                total += registration.payable_amount
-                
+    @classmethod
+    def get_total_amount(cls, edition=None):
+        from django.db.models import Sum
+        
+        # Start with all completed registrations that have a payable amount
+        qs = cls.objects.filter(status="Completed", payable_amount__isnull=False)
+        
+        # Filter by edition if one is provided
+        if edition:
+            qs = qs.filter(edition=edition)
+            
+        # Calculate the sum at the database level
+        result = qs.aggregate(total=Sum('payable_amount'))
+        total = result['total'] or 0
+
         # deduct 2% of the total amount as payment gateway charges
         total -= (total * 0.02)
         return total

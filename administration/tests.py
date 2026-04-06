@@ -3,6 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import CustomUser
+from home.models import FlamesCourse, FlamesEdition
 from practice.models import MCQQuestion, Question
 from student.models import Assignment, Course, CourseSheet
 
@@ -94,3 +95,110 @@ class AdminReorderSheetItemsTests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		self.sheet.refresh_from_db()
 		self.assertEqual(self.sheet.custom_order, {f'assignment_{self.assignment.id}': 0})
+
+
+class FlamesCourseReorderAdminTests(TestCase):
+	def setUp(self):
+		self.admin_user = CustomUser.objects.create_user(
+			email='admin-flames@example.com',
+			password='testpass123',
+			role='admin',
+			username='admin_flames_user'
+		)
+		self.admin_user.is_staff = True
+		self.admin_user.save()
+		self.client.force_login(self.admin_user)
+
+		self.edition_2026 = FlamesEdition.objects.create(
+			year=2026,
+			name='FLAMES 26',
+			is_active=True,
+			registration_open=True,
+		)
+		self.edition_2025 = FlamesEdition.objects.create(
+			year=2025,
+			name='FLAMES 25',
+			is_active=False,
+			registration_open=True,
+		)
+
+		self.course_one = FlamesCourse.objects.create(
+			title='Alpha',
+			subtitle='Alpha subtitle',
+			description='desc',
+			slug='alpha',
+			edition=self.edition_2026,
+			is_active=True,
+			display_order=1,
+		)
+		self.course_two = FlamesCourse.objects.create(
+			title='Beta',
+			subtitle='Beta subtitle',
+			description='desc',
+			slug='beta',
+			edition=self.edition_2026,
+			is_active=False,
+			display_order=2,
+		)
+		self.other_edition_course = FlamesCourse.objects.create(
+			title='Gamma',
+			subtitle='Gamma subtitle',
+			description='desc',
+			slug='gamma',
+			edition=self.edition_2025,
+			is_active=True,
+			display_order=1,
+		)
+
+		session = self.client.session
+		session['selected_flames_edition_id'] = self.edition_2026.id
+		session.save()
+
+	def test_reorder_page_loads_for_selected_edition(self):
+		response = self.client.get(reverse('admin_reorder_flames_courses'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, self.edition_2026.name)
+		self.assertContains(response, f'data-id="{self.course_one.id}"')
+		self.assertContains(response, f'data-id="{self.course_two.id}"')
+		self.assertNotContains(response, f'data-id="{self.other_edition_course.id}"')
+
+	def test_save_order_updates_display_order_for_selected_edition(self):
+		response = self.client.post(
+			reverse('admin_save_flames_course_order'),
+			data=f'{{"order":[{self.course_two.id},{self.course_one.id}]}}',
+			content_type='application/json',
+		)
+
+		self.assertEqual(response.status_code, 200)
+		self.course_one.refresh_from_db()
+		self.course_two.refresh_from_db()
+		self.assertEqual(self.course_two.display_order, 1)
+		self.assertEqual(self.course_one.display_order, 2)
+
+	def test_save_order_rejects_course_ids_from_other_edition(self):
+		response = self.client.post(
+			reverse('admin_save_flames_course_order'),
+			data=f'{{"order":[{self.course_one.id},{self.other_edition_course.id}]}}',
+			content_type='application/json',
+		)
+
+		self.assertEqual(response.status_code, 400)
+		self.course_one.refresh_from_db()
+		self.course_two.refresh_from_db()
+		self.assertEqual(self.course_one.display_order, 1)
+		self.assertEqual(self.course_two.display_order, 2)
+
+	def test_courses_page_uses_display_order(self):
+		self.course_one.display_order = 2
+		self.course_one.save(update_fields=['display_order'])
+		self.course_two.display_order = 1
+		self.course_two.save(update_fields=['display_order'])
+
+		response = self.client.get(reverse('admin_flames_courses'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(
+			[course.title for course in response.context['courses']],
+			['Beta', 'Alpha']
+		)

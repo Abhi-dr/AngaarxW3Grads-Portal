@@ -234,6 +234,8 @@ urlpatterns += [
     path("flames/set-edition/", flames_views.flames_set_edition, name="flames_set_edition"),
 
     path("flames/courses/", flames_views.flames_courses, name="admin_flames_courses"),
+    path("flames/courses/reorder/", flames_views.admin_reorder_flames_courses, name="admin_reorder_flames_courses"),
+    path("flames/courses/reorder/save/", flames_views.admin_save_flames_course_order, name="admin_save_flames_course_order"),
     path("flames/registrations/", flames_views.flames_registrations, name="admin_flames_registrations"),
     
     path("flames/registrations/ajax/", flames_views.admin_registrations_ajax, name="admin_registrations_ajax"),
