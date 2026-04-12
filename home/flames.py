@@ -7,6 +7,8 @@ from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.db import transaction
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from accounts.models import CustomUser
 from django_ratelimit.decorators import ratelimit
 
@@ -141,21 +143,14 @@ def register_flames(request, slug):
             return redirect('flames_register', slug=course.slug)
 
         # ── Form data ─────────────────────────────────────────────────
-        full_name         = request.POST.get('full_name')
-        email             = request.POST.get('email').lower()
+        full_name         = (request.POST.get('full_name') or '').strip()
+        email             = (request.POST.get('email') or '').strip().lower()
         contact_number    = request.POST.get('contact_number', '').strip()
-        college           = request.POST.get('college', '')
-        year              = request.POST.get('year')        # academic year ("2nd Year" etc.)
-        message           = request.POST.get('message', '')
-        registration_mode = request.POST.get('registration_mode', 'SOLO')
-        referral_code_text = request.POST.get('referral_code', '')
-
-        if not contact_number.isdigit() or len(contact_number) != 10:
-            return render_error('Contact number must contain exactly 10 digits.')
-
-        name_parts = full_name.split(' ', 1)
-        first_name = name_parts[0]
-        last_name  = name_parts[1] if len(name_parts) > 1 else ''
+        college           = (request.POST.get('college') or '').strip()
+        year              = (request.POST.get('year') or '').strip()       # academic year ("2nd Year" etc.)
+        message           = (request.POST.get('message') or '').strip()
+        registration_mode = (request.POST.get('registration_mode') or 'SOLO').strip().upper()
+        referral_code_text = (request.POST.get('referral_code') or '').strip()
 
         # ── Validate referral code ─────────────────────────────────────
         is_f26 = active_edition and active_edition.year == 2026
@@ -178,6 +173,33 @@ def register_flames(request, slug):
                     "Other"
                 ]
             })
+
+        if not full_name:
+            return render_error('Full name is required.')
+
+        if not email:
+            return render_error('Email is required.')
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            return render_error('Please enter a valid email address.')
+
+        if not college:
+            return render_error('College is required.')
+
+        if not year:
+            return render_error('Year of study is required.')
+
+        if registration_mode not in ('SOLO', 'TEAM'):
+            return render_error('Invalid registration mode selected.')
+
+        if not contact_number.isdigit() or len(contact_number) != 10:
+            return render_error('Contact number must contain exactly 10 digits.')
+
+        name_parts = full_name.split(' ', 1)
+        first_name = name_parts[0]
+        last_name  = name_parts[1] if len(name_parts) > 1 else ''
 
         referral_code = None
         if referral_code_text:
@@ -269,6 +291,43 @@ def register_flames(request, slug):
 
             # ─ Team registration ──────────────────────────────────────
             if registration_mode == 'TEAM':
+                member_students = []
+                team_member_emails = []
+                for i in range(1, 5):
+                    member_email = (request.POST.get(f'team_member_email_{i}') or '').strip().lower()
+                    if not member_email:
+                        return render_error(f'Teammate {i + 1} email is required for team registration.')
+                    team_member_emails.append(member_email)
+
+                if len(set(team_member_emails)) != 4:
+                    return render_error('All teammate emails must be unique.')
+
+                leader_email = (student.email or email).strip().lower()
+                if leader_email in team_member_emails:
+                    return render_error('You cannot add yourself as a teammate.')
+
+                for member_email in team_member_emails:
+                    member_student = CustomUser.objects.filter(email__iexact=member_email).first()
+                    if not member_student:
+                        return render_error(f"User with email '{member_email}' does not exist.")
+
+                    already_direct = FlamesRegistration.objects.filter(
+                        user=member_student,
+                        course=course,
+                    ).exclude(status='Rejected').exists()
+
+                    already_team = FlamesTeamMember.objects.filter(
+                        member=member_student,
+                        team__course=course,
+                    ).exists()
+
+                    if already_direct or already_team:
+                        return render_error(
+                            f"{member_email} is already registered for this course."
+                        )
+
+                    member_students.append(member_student)
+
                 team_name = request.POST.get('team_name') or f"Team {first_name}"
 
                 team = FlamesTeam.objects.create(
@@ -283,19 +342,10 @@ def register_flames(request, slug):
 
                 FlamesTeamMember.objects.create(team=team, member=student, is_leader=True)
 
-                for i in range(1, 5):
-                    member_email = request.POST.get(f'team_member_email_{i}', '').strip().lower()
-                    if member_email:
-                        try:
-                            member_student = CustomUser.objects.get(email__iexact=member_email)
-                            FlamesTeamMember.objects.create(
-                                team=team, member=member_student, is_leader=False
-                            )
-                        except CustomUser.DoesNotExist:
-                            messages.warning(
-                                request,
-                                f"User with email '{member_email}' not found and was not added to the team."
-                            )
+                for member_student in member_students:
+                    FlamesTeamMember.objects.create(
+                        team=team, member=member_student, is_leader=False
+                    )
 
                 messages.success(request, f"Team '{team_name}' registered for {course.title}!")
             else:
