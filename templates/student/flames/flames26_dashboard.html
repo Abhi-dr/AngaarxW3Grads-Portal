@@ -742,7 +742,7 @@ select option { background: #1a1a1a; color: #f0f0f0; }
           <div class="mf">
             <label>Phone <span style="color:var(--fire)">*</span></label>
             <input type="tel" name="contact_number" id="m-phone" placeholder="10-digit number"
-                   required minlength="10" maxlength="10"
+                   required minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Enter exactly 10 digits"
                    value="{{ user.mobile_number|default:'' }}">
           </div>
         </div>
@@ -888,10 +888,20 @@ function submitModal(e){
   if(e)e.preventDefault();
   if(!cId)return;
   const form=document.getElementById('modalForm');
+  const phoneInput=document.getElementById('m-phone');
   const btn=document.getElementById('m-submit-btn');
   const txt=document.getElementById('m-submit-txt');
   const spin=document.getElementById('m-spinner');
   const err=document.getElementById('m-err');
+  const digitsOnly=(phoneInput.value||'').replace(/\D/g,'');
+  phoneInput.value=digitsOnly;
+
+  if(digitsOnly.length!==10){
+    err.textContent='Contact number must contain exactly 10 digits.';
+    err.style.display='block';
+    return;
+  }
+
   if(!form.checkValidity()){form.reportValidity();return;}
   btn.disabled=true;txt.textContent='Submitting…';spin.style.display='inline-block';err.style.display='none';
   const fd=new FormData(form);fd.set('course_id',cId);

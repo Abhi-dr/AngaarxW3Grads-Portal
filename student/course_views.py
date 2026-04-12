@@ -45,9 +45,14 @@ def student_flames_register(request, slug):
     if request.method == 'POST':
         # Get form data
         registration_mode = request.POST.get('registration_mode')
+        contact_number = request.POST.get('contact_number', '').strip()
         year = request.POST.get('year')
         message = request.POST.get('message')
         referral_code_text = request.POST.get('referral_code')
+
+        if not contact_number.isdigit() or len(contact_number) != 10:
+            messages.error(request, "Contact number must contain exactly 10 digits.")
+            return redirect('student_flames_register', slug=course.slug)
 
         # Resolve the active edition for this course (prefer the course's own edition)
         active_edition = course.edition if hasattr(course, 'edition') and course.edition else None

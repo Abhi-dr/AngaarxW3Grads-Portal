@@ -610,9 +610,8 @@
                         <label class="form-label">Phone <span class="req">*</span></label>
                         <input type="tel" id="f26-phone" name="contact_number" class="form-control"
                                placeholder="10-digit number" required
-                               minlength="10" maxlength="10"
-                               value="{{ prefill.contact_number }}"
-                               {% if prefill.contact_number %}title="Pre-filled from your profile"{% endif %}>
+                               minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Enter exactly 10 digits"
+                               value="{{ prefill.contact_number }}">
                         {% if prefill.contact_number %}<div class="prefill-note"><i class="fas fa-lock" style="font-size:.7rem"></i> Auto-filled from your profile</div>{% endif %}
                     </div>
                 </div>
@@ -1109,6 +1108,7 @@ if (cpwdInput) cpwdInput.addEventListener('input', checkPasswordMatch);
 
 // ── Team member email real-time lookup ──────────────────────
 const courseIdForTeam = "{{ course.id|default:'' }}";
+const currentUserEmailForTeam = (document.getElementById('f26-email')?.value || '').trim().toLowerCase();
 const tmValidState = {}; // track per-slot validity
 
 function lookupTeamEmail(n) {
@@ -1133,6 +1133,12 @@ function lookupTeamEmail(n) {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         errIcon.className += ' err';
         if (fb) { fb.textContent = 'Enter a valid email address'; fb.className = 'form-feedback err'; }
+        return;
+    }
+
+    if (email && currentUserEmailForTeam && email === currentUserEmailForTeam) {
+        errIcon.className += ' err';
+        if (fb) { fb.textContent = 'You cannot add yourself as a teammate'; fb.className = 'form-feedback err'; }
         return;
     }
 
@@ -1182,15 +1188,34 @@ if (form) {
         // Block submit if any team email slot is empty or invalid
         const mode = document.getElementById('mode-team').checked ? 'TEAM' : 'SOLO';
         if (mode === 'TEAM') {
+            const seenEmails = new Set();
             for (let n = 1; n <= 4; n++) {
                 const inp = document.getElementById(`tm-${n}`);
                 if (!inp) continue;
-                if (!inp.value.trim()) {
+                const teamEmail = inp.value.trim().toLowerCase();
+                if (!teamEmail) {
                     e.preventDefault();
                     inp.focus();
                     alert(`Please enter the email for Teammate ${n + 1}.`);
                     return;
                 }
+
+                if (teamEmail === currentUserEmailForTeam) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Teammate ${n + 1} cannot be your own email.`);
+                    return;
+                }
+
+                if (seenEmails.has(teamEmail)) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Duplicate email detected for Teammate ${n + 1}. Each teammate must have a unique email.`);
+                    return;
+                }
+
+                seenEmails.add(teamEmail);
+
                 if (!tmValidState[n]) {
                     e.preventDefault();
                     inp.focus();

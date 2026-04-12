@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.db import transaction
 from accounts.models import CustomUser
+from django_ratelimit.decorators import ratelimit
 
 # ===================================== FLAMES PAGE ==============================
 
@@ -41,8 +42,12 @@ def course_detail(request, slug):
 
 # ============================= VALIDATE REFERRAL CODE ==========================
 
+@ratelimit(key='ip', rate='30/m', method=['GET'], block=False)
 def validate_referral(request):
     """Validate referral code and return price details."""
+    if getattr(request, 'limited', False):
+        return JsonResponse({'status': 'error', 'message': 'Too many validation attempts. Please try again shortly.'}, status=429)
+
     if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
 
@@ -99,6 +104,7 @@ def _get_active_edition():
         return None
 
 
+@ratelimit(key='ip', rate='8/m', method=['POST'], block=False)
 def register_flames(request, slug):
     course = get_object_or_404(FlamesCourse, slug=slug, is_active=True)
     # Use the course's own edition as the authoritative edition for this registration.
@@ -121,6 +127,12 @@ def register_flames(request, slug):
             return redirect('student_flames')
 
     if request.method == 'POST':
+        if getattr(request, 'limited', False):
+            messages.error(request, 'Too many registration attempts. Please wait a minute and try again.')
+            if active_edition and active_edition.year == 2026:
+                return redirect('flames26_register', track_slug=course.slug)
+            return redirect('flames_register', slug=course.slug)
+
         # ── Guard: registrations must be open ─────────────────────────
         if not active_edition.registration_open:
             messages.error(request, "Registrations for this edition are currently closed.")
@@ -131,12 +143,15 @@ def register_flames(request, slug):
         # ── Form data ─────────────────────────────────────────────────
         full_name         = request.POST.get('full_name')
         email             = request.POST.get('email').lower()
-        contact_number    = request.POST.get('contact_number')
+        contact_number    = request.POST.get('contact_number', '').strip()
         college           = request.POST.get('college', '')
         year              = request.POST.get('year')        # academic year ("2nd Year" etc.)
         message           = request.POST.get('message', '')
         registration_mode = request.POST.get('registration_mode', 'SOLO')
         referral_code_text = request.POST.get('referral_code', '')
+
+        if not contact_number.isdigit() or len(contact_number) != 10:
+            return render_error('Contact number must contain exactly 10 digits.')
 
         name_parts = full_name.split(' ', 1)
         first_name = name_parts[0]

@@ -216,8 +216,15 @@ def check_username_exists(request):
     return JsonResponse(response_data)
 
 
+@ratelimit(key='ip', rate='40/m', method=['GET'], block=False)
 def check_email_exists(request):
     """Check if a student email exists and return user details (used for team member lookup)."""
+    if getattr(request, 'limited', False):
+        return JsonResponse({
+            'exists': False,
+            'message': 'Too many lookup attempts. Please wait a moment and try again.'
+        }, status=429)
+
     email = request.GET.get('email', '').strip().lower()
     course_id = request.GET.get('course_id')
 

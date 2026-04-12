@@ -975,7 +975,12 @@
         function attachEventHandlers() {
             console.log("Attaching event handlers");
             // Handle row click to show registration details
-            $('#registrationsTable tbody').on('click', 'tr', function () {
+            $('#registrationsTable tbody').on('click', 'tr', function (e) {
+                // Ignore clicks on action controls inside the row (delete/view/approve/reject).
+                if ($(e.target).closest('button, a, .delete-registration, .view-details, .approve-reg, .reject-reg').length) {
+                    return;
+                }
+
                 const data = table.row(this).data();
                 const id = data.id;
 

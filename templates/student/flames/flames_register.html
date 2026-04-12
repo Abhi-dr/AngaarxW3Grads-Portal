@@ -625,7 +625,8 @@ active
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
                                 <input type="tel" class="form-control" id="contact_number" name="contact_number"
-                                    placeholder="Contact Number" value="{{ user.student.mobile_number }}" required>
+                                    placeholder="Contact Number" value="{{ user.student.mobile_number }}" required
+                                    minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Enter exactly 10 digits">
                                 <label for="contact_number">Contact Number</label>
                             </div>
                         </div>
@@ -639,7 +640,7 @@ active
                                     <option value="3rd Year">3rd Year</option>
                                     <option value="4th Year">4th Year</option>
                                     <option value="5th Year">5th Year</option>
-                                    <option value="Graduated">Graduated</option>
+                                    <option value="Graduate">Graduated</option>
                                 </select>
                                 <label for="year">Year of Study</label>
                             </div>
@@ -1004,6 +1005,7 @@ active
         function checkTeamMemberEmail(inputId) {
             const input = document.getElementById(inputId);
             const email = input.value.trim().toLowerCase();
+            const currentUserEmail = (document.getElementById('email')?.value || '').trim().toLowerCase();
             const memberNumber = inputId.split('_').pop();
             const feedbackId   = 'team' + memberNumber + '-feedback';
             const validIconId  = 'team' + memberNumber + '-valid-icon';
@@ -1028,6 +1030,16 @@ active
                 if (feedbackElement) feedbackElement.innerHTML = '<span class="text-danger">Enter a valid email address</span>';
                 if (invalidIcon) invalidIcon.style.display = 'block';
                 if (validIcon)   validIcon.style.display = 'none';
+                return;
+            }
+
+            if (email && currentUserEmail && email === currentUserEmail) {
+                if (feedbackElement) feedbackElement.innerHTML = '<span class="text-danger">You cannot add yourself as a teammate</span>';
+                input.classList.add('is-invalid');
+                input.classList.remove('is-valid');
+                if (invalidIcon) invalidIcon.style.display = 'block';
+                if (validIcon)   validIcon.style.display = 'none';
+                if (nameDisplay) nameDisplay.innerHTML = '';
                 return;
             }
 

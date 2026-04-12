@@ -90,7 +90,7 @@ def ajax_flames26_register(request):
         message         str     optional
         referral_code   str     optional
     """
-    def err(msg, status=400):
+    def err(msg, status=200):
         return JsonResponse({'status': 'error', 'message': msg}, status=status)
 
     # ── Resolve edition ────────────────────────────────────────────────────
@@ -115,9 +115,17 @@ def ajax_flames26_register(request):
 
     year    = request.POST.get('year', '').strip()
     message = request.POST.get('message', '').strip()
+    contact_number = request.POST.get('contact_number', '').strip()
 
     if not year:
         return err("Please select your year of study.")
+
+    if not contact_number.isdigit() or len(contact_number) != 10:
+        return err("Contact number must contain exactly 10 digits.")
+
+    if request.user.mobile_number != contact_number:
+        request.user.mobile_number = contact_number
+        request.user.save(update_fields=['mobile_number'])
 
     with transaction.atomic():
         # ── Race-condition-safe duplicate + limit check ────────────────────
