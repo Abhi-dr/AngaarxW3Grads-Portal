@@ -922,6 +922,10 @@ ul {
     color: #878787;
 }
 
+footer > a {
+    text-decoration: none;
+}
+
 .powered-by {
     position: absolute;
     display: flex;
@@ -957,6 +961,26 @@ ul {
         padding: 3px 7px;
     }
     .powered-by h5 {
+        font-size: 0.9rem;
+    }
+
+    /* Footer W3Grads badge: keep hero corner layout, stack under copyright in footer */
+    footer > a {
+        display: block;
+        text-align: center;
+    }
+
+    footer .powered-by {
+        position: static;
+        justify-content: center;
+        width: fit-content;
+        max-width: 100%;
+        margin: 1.25rem auto 0;
+        flex-wrap: wrap;
+        row-gap: 0.25rem;
+    }
+
+    footer .powered-by h5 {
         font-size: 0.9rem;
     }
 }
