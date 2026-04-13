@@ -9,18 +9,18 @@ from django.contrib.auth import login
 from django.db import transaction
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
+from django.utils.crypto import get_random_string
 from accounts.models import CustomUser
 from django_ratelimit.decorators import ratelimit
 
 # ===================================== FLAMES PAGE ==============================
 
 def flames(request):
-    try:
-        active_edition = FlamesEdition.objects.get(is_active=True)
+    active_edition = FlamesEdition.objects.filter(is_active=True).order_by('-year', '-id').first()
+    if active_edition:
         courses = FlamesCourse.objects.filter(edition=active_edition, is_active=True)
-    except FlamesEdition.DoesNotExist:
+    else:
         # Fallback: show all active courses if no edition is set as active
-        active_edition = None
         courses = FlamesCourse.objects.filter(is_active=True)
     return render(request, "home/flames.html", {
         'courses': courses,
@@ -100,10 +100,7 @@ def validate_referral(request):
 
 def _get_active_edition():
     """Helper: return the currently active FlamesEdition, or None."""
-    try:
-        return FlamesEdition.objects.get(is_active=True)
-    except FlamesEdition.DoesNotExist:
-        return None
+    return FlamesEdition.objects.filter(is_active=True).order_by('-year', '-id').first()
 
 
 @ratelimit(key='ip', rate='8/m', method=['POST'], block=False)
@@ -255,7 +252,7 @@ def register_flames(request, slug):
                 if password:
                     student.set_password(password)
                 else:
-                    student.set_password(CustomUser.objects.make_random_password())
+                    student.set_password(get_random_string(12))
                 student.save()
 
             # ─ Race-condition-safe: lock all registrations for this user+edition ─
@@ -277,21 +274,10 @@ def register_flames(request, slug):
                         return redirect('student_flames26')
                     return redirect('student_flames')
 
-            # ─ Create registration ────────────────────────────────────
-            registration = FlamesRegistration(
-                user=student,
-                course=course,
-                edition=active_edition,   # ← edition wired here
-                year=year,                # student's academic year
-                message=message,
-                registration_mode=registration_mode,
-                referral_code=referral_code
-            )
-            registration.save()
-
-            # ─ Team registration ──────────────────────────────────────
+            # ─ Team validation (must pass before creating registration) ─
+            member_students = []
+            team_name = None
             if registration_mode == 'TEAM':
-                member_students = []
                 team_member_emails = []
                 for i in range(1, 5):
                     member_email = (request.POST.get(f'team_member_email_{i}') or '').strip().lower()
@@ -328,8 +314,22 @@ def register_flames(request, slug):
 
                     member_students.append(member_student)
 
-                team_name = request.POST.get('team_name') or f"Team {first_name}"
+                team_name = (request.POST.get('team_name') or '').strip() or f"Team {first_name}"
 
+            # ─ Create registration ────────────────────────────────────
+            registration = FlamesRegistration(
+                user=student,
+                course=course,
+                edition=active_edition,   # ← edition wired here
+                year=year,                # student's academic year
+                message=message,
+                registration_mode=registration_mode,
+                referral_code=referral_code
+            )
+            registration.save()
+
+            # ─ Team registration ──────────────────────────────────────
+            if registration_mode == 'TEAM':
                 team = FlamesTeam.objects.create(
                     name=team_name,
                     team_leader=student,
@@ -451,7 +451,7 @@ def flames26_register(request, track_slug):
         is_active=True,
     )
 
-    active_edition = _get_active_edition()
+    active_edition = edition_2026
 
     # ── Duplicate-registration guard ──────────────────────────────────────────
     if active_edition:
