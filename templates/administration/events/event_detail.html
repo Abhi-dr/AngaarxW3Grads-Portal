@@ -176,6 +176,20 @@
     </div>
 
     <div id="panel-list">
+        <!-- Search Bar (matches achievements page style) -->
+        <div class="card w-100 mb-3 border-0 shadow-sm">
+            <div class="card-body p-3">
+                <div class="input-group">
+                    <input type="text" class="form-control" id="certSearchInput"
+                        placeholder="Search by student name, email, or certificate ID"
+                        aria-label="Search certificates"
+                        aria-describedby="certSearchBtn">
+                    <button class="btn btn-outline-secondary" type="button" id="certSearchBtn">Search</button>
+                    <button class="btn btn-outline-danger" type="button" id="certClearSearchBtn">Clear</button>
+                </div>
+            </div>
+        </div>
+
         <div class="d-flex justify-content-end mb-3">
             <button id="approveAllBtn" class="btn btn-success text-white shadow-sm rounded-pill px-4"
                 onclick="approveAllCertificates()">
@@ -407,6 +421,8 @@
     const BASE = '/administration/api/v1';
     let deletingCertId = null;
     let searchTimer = null;
+    let certSearchTimer = null;       // debounce for cert search bar
+    let currentCertSearch = '';       // single source of truth for cert search
     let batchStudents = [];
 
     // ─── Tab Switching ─────────────────────────────────────────────
@@ -436,8 +452,47 @@
     let prevPageUrl = null;
     let nextPageUrl = null;
 
+    // ─── Cert Search Bar ────────────────────────────────────────────
+    function setupCertSearchBar() {
+        const searchEl = document.getElementById('certSearchInput');
+
+        searchEl.addEventListener('input', function () {
+            currentCertSearch = this.value;
+            clearTimeout(certSearchTimer);
+            certSearchTimer = setTimeout(() => {
+                loadCertificates();
+            }, 400);
+        });
+
+        searchEl.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                clearTimeout(certSearchTimer);
+                loadCertificates();
+            }
+        });
+
+        document.getElementById('certSearchBtn').addEventListener('click', () => {
+            clearTimeout(certSearchTimer);
+            loadCertificates();
+        });
+
+        document.getElementById('certClearSearchBtn').addEventListener('click', () => {
+            currentCertSearch = '';
+            document.getElementById('certSearchInput').value = '';
+            clearTimeout(certSearchTimer);
+            loadCertificates();
+        });
+    }
+
     // ─── Certificates List ─────────────────────────────────────────
-    async function loadCertificates(url = `${BASE}/certificates/?event_id=${EVENT_ID}`) {
+    async function loadCertificates(url = null) {
+        // Build default URL with event_id + search when no explicit URL is given
+        if (!url) {
+            const params = new URLSearchParams({ event_id: EVENT_ID });
+            if (currentCertSearch) params.set('search', currentCertSearch);
+            url = `${BASE}/certificates/?${params.toString()}`;
+        }
         const res = await fetch(url);
         const data = await res.json();
         const rows = data.results || [];
@@ -962,6 +1017,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        setupCertSearchBar();
         loadCertificates();
         loadBatches();
     });
