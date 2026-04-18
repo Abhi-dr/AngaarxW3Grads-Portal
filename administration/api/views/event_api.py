@@ -97,6 +97,14 @@ class CertificateAdminViewSet(viewsets.ModelViewSet):
         event_id = self.request.query_params.get('event_id')
         if event_id:
             qs = qs.filter(event_id=event_id)
+        search = self.request.query_params.get('search', '').strip()
+        if search:
+            qs = qs.filter(
+                Q(student__first_name__icontains=search) |
+                Q(student__last_name__icontains=search) |
+                Q(student__email__icontains=search) |
+                Q(certificate_id__icontains=search)
+            )
         return qs
 
     def create(self, request, *args, **kwargs):
