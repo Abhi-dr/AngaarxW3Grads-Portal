@@ -180,67 +180,115 @@ class AssignmentSubmissionAdmin(admin.ModelAdmin):
 
 
 # ================================== CERTIFICATE MANAGEMENT ==================================
+#
+# Signatory        — photo + signature preview
+# CertificateTemplate — with TemplateSignatoryInline (ordered signatories)
+# Certificate      — approve action, clear cache action, preview link, import
+#
 
-from import_export.admin import ImportExportModelAdmin
-from .event_models import Event, Certificate, CertificateTemplate
+from import_export.admin import ImportMixin, ImportExportModelAdmin
+from .event_models import Event, Certificate, CertificateTemplate, Signatory, TemplateSignatory
 
 
-@admin.register(Event)
-class EventAdmin(admin.ModelAdmin):
-    list_display = ("name", "code", "start_date", "certificate_template")
-    search_fields = ("name", "code")
-    list_filter = ("start_date", "certificate_template")
-    
-    fieldsets = (
-        (None, {
-            'fields': ('name', 'code', 'description')
-        }),
-        ('Dates', {
-            'fields': ('start_date', 'end_date'),
-        }),
-        ('Certificate Template', {
-            'fields': ('certificate_template',),
-            'description': 'Select the template to use for certificates issued for this event.'
-        }),
-    )
+# ── Signatory ────────────────────────────────────────────────────────────────
 
+@admin.register(Signatory)
+class SignatoryAdmin(admin.ModelAdmin):
+    list_display  = ("name", "designation", "organization", "is_active", "signature_preview")
+    list_filter   = ("is_active",)
+    search_fields = ("name", "designation", "organization")
+    list_editable = ("is_active",)
+    readonly_fields = ("signature_preview",)
+
+    def signature_preview(self, obj):
+        if obj.signature_image:
+            return format_html(
+                '<img src="{}" style="height:50px; background:#222; padding:4px; border-radius:4px;" />',
+                obj.signature_image.url,
+            )
+        return "—"
+    signature_preview.short_description = "Signature Preview"
+
+
+# ── TemplateSignatory Inline ─────────────────────────────────────────────────
+
+class TemplateSignatoryInline(admin.TabularInline):
+    model   = TemplateSignatory
+    extra   = 1
+    fields  = ("signatory", "order")
+    ordering = ("order",)
+    verbose_name        = "Signatory"
+    verbose_name_plural = "Signatories (drag to reorder — lower order = left on certificate)"
+
+
+# ── CertificateTemplate ───────────────────────────────────────────────────────
 
 @admin.register(CertificateTemplate)
 class CertificateTemplateAdmin(admin.ModelAdmin):
-    list_display = ("name", "created_at")
+    list_display  = ("name", "certificate_type", "html_layout", "show_qr", "created_at")
+    list_filter   = ("certificate_type", "html_layout", "show_qr")
     search_fields = ("name",)
-    ordering = ("-created_at",)
-    
+    ordering      = ("-created_at",)
+    inlines       = [TemplateSignatoryInline]
+    readonly_fields = ("slug", "created_at", "updated_at")
+
     fieldsets = (
         (None, {
-            'fields': ('name',)
+            "fields": ("name", "slug", "certificate_type", "html_layout"),
         }),
-        ('Template Content', {
-            'fields': ('html_template',),
-            'classes': ('wide',),
-            'description': 'HTML template with Django template variables like {{ student.first_name }}, {{ event.name }}, etc.'
+        ("Branding", {
+            "fields": ("org_name", "org_logo"),
+        }),
+        ("Certificate Body", {
+            "fields": ("body_text",),
+            "description": (
+                "Supports placeholders: {student_name}, {event_name}, "
+                "{issued_date}, {hours}, {batch_name}"
+            ),
+        }),
+        ("Feature Flags", {
+            "fields": ("show_qr", "show_hours", "show_batch", "hours"),
+        }),
+        ("Timestamps", {
+            "fields": ("created_at", "updated_at"),
+            "classes": ("collapse",),
         }),
     )
-    
-    def get_form(self, request, obj=None, **kwargs):
-        form = super().get_form(request, obj, **kwargs)
-        # Make the html_template field use a textarea widget
-        form.base_fields['html_template'].widget.attrs.update({
-            'rows': 20,
-            'cols': 100,
-            'style': 'font-family: monospace;'
-        })
-        return form
+
+
+# ── Event ─────────────────────────────────────────────────────────────────────
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display  = ("name", "code", "start_date", "end_date", "certificate_template")
+    search_fields = ("name", "code")
+    list_filter   = ("start_date", "certificate_template")
+
+    fieldsets = (
+        (None, {
+            "fields": ("name", "code", "description"),
+        }),
+        ("Dates", {
+            "fields": ("start_date", "end_date"),
+        }),
+        ("Certificate Template", {
+            "fields": ("certificate_template",),
+            "description": "Select the template for certificates issued for this event.",
+        }),
+    )
+
+
+# ── Certificate import resource ───────────────────────────────────────────────
 
 class CertificateImportResource(resources.ModelResource):
     email = fields.Field(column_name="email")
 
     class Meta:
-        model = Certificate
-        import_id_fields = []  # We won't match existing certs by ID
-        fields = ("email",)    # Only importing email column
-        skip_unchanged = True
-        report_skipped = True
+        model           = Certificate
+        import_id_fields = []
+        fields          = ("email",)
+        skip_unchanged  = True
+        report_skipped  = True
 
     def before_import_row(self, row, **kwargs):
         email = row.get("email", "").strip().lower()
@@ -250,42 +298,126 @@ class CertificateImportResource(resources.ModelResource):
         try:
             student = CustomUser.objects.get(email__iexact=email)
         except CustomUser.DoesNotExist:
-            # Skip row if student not found
             row["skip_reason"] = "Student not found"
             return
 
-        event = Event.objects.get(code=row.get("event_code", "").strip())
-        if not event:
-            row["skip_reason"] = "Event not found"
+        event_code = row.get("event_code", "").strip()
+        try:
+            event = Event.objects.get(code=event_code)
+        except Event.DoesNotExist:
+            row["skip_reason"] = f"Event '{event_code}' not found"
             return
 
-        # Create cert if it doesn't exist
-        # Template is now associated with the event, not individual certificates
         Certificate.objects.get_or_create(
             event=event,
             student=student,
-            defaults={
-                "approved": True,
-            }
+            defaults={"approved": True},
         )
 
 
+# ── Certificate ───────────────────────────────────────────────────────────────
+
 @admin.register(Certificate)
-class CertificateImportAdmin(ImportMixin, admin.ModelAdmin):
+class CertificateAdmin(ImportMixin, admin.ModelAdmin):
     resource_class = CertificateImportResource
-    list_display = ("certificate_id", "student", "event", "approved", "issued_date")
-    search_fields = ("certificate_id", "student__first_name", "student__last_name", "student__email")
-    list_filter = ("approved", "event")
-    
+
+    list_display = (
+        "certificate_id", "student", "event", "approved",
+        "issued_date", "has_cached_pdf_display", "preview_link",
+    )
+    list_filter   = ("approved", "event")
+    search_fields = (
+        "certificate_id",
+        "student__first_name", "student__last_name", "student__email",
+    )
+    list_editable = ("approved",)
+    readonly_fields = (
+        "certificate_id", "issued_date",
+        "template_snapshot_display", "preview_link", "has_cached_pdf_display",
+    )
+    actions = ["action_approve", "action_clear_cache", "action_prewarm_cache"]
+
     fieldsets = (
         (None, {
-            'fields': ('event', 'student', 'approved')
+            "fields": ("event", "student", "approved"),
         }),
-        ('Generated Fields', {
-            'fields': ('certificate_id', 'issued_date'),
-            'classes': ('collapse',),
-            'description': 'These fields are automatically generated.'
+        ("Generated Fields", {
+            "fields": ("certificate_id", "issued_date"),
+            "classes": ("collapse",),
+        }),
+        ("Cache & Preview", {
+            "fields": ("has_cached_pdf_display", "preview_link"),
+        }),
+        ("Template Snapshot (frozen at first generation)", {
+            "fields": ("template_snapshot_display",),
+            "classes": ("collapse",),
+            "description": (
+                "This is the frozen template state used to generate the PDF. "
+                "It is written at the time of the first PDF download."
+            ),
         }),
     )
-    
-    readonly_fields = ('certificate_id', 'issued_date')
+
+    # ── Display helpers ───────────────────────────────────────────────────
+
+    def has_cached_pdf_display(self, obj):
+        if obj.has_cached_pdf():
+            return format_html('<span style="color:green; font-weight:bold;">✓ Cached</span>')
+        return format_html('<span style="color:#aaa;">✗ Not cached</span>')
+    has_cached_pdf_display.short_description = "PDF cached?"
+
+    def preview_link(self, obj):
+        if not obj.pk:
+            return "—"
+        url = f"/dashboard/event/{obj.pk}/certificate/view"
+        return format_html('<a href="{}" target="_blank">👁 Preview</a>', url)
+    preview_link.short_description = "Preview"
+
+    def template_snapshot_display(self, obj):
+        import json
+        if not obj.template_snapshot:
+            return "Not generated yet"
+        pretty = json.dumps(obj.template_snapshot, indent=2, ensure_ascii=False)
+        return format_html(
+            '<pre style="font-size:11px; max-height:300px; overflow:auto;">{}</pre>',
+            pretty,
+        )
+    template_snapshot_display.short_description = "Template Snapshot (JSON)"
+
+    # ── Admin actions ─────────────────────────────────────────────────────
+
+    def action_approve(self, request, queryset):
+        updated = queryset.update(approved=True)
+        self.message_user(
+            request,
+            f"{updated} certificate(s) approved.",
+            messages.SUCCESS,
+        )
+    action_approve.short_description = "✅ Approve selected certificates"
+
+    def action_clear_cache(self, request, queryset):
+        count = 0
+        for cert in queryset:
+            cert.invalidate_pdf_cache()
+            count += 1
+        self.message_user(
+            request,
+            f"Cleared PDF cache for {count} certificate(s).",
+            messages.SUCCESS,
+        )
+    action_clear_cache.short_description = "🗑 Clear PDF cache for selected certificates"
+
+    def action_prewarm_cache(self, request, queryset):
+        from .tasks import pre_warm_certificate_pdf
+        count = 0
+        for cert in queryset.filter(approved=True):
+            pre_warm_certificate_pdf.delay(cert.pk)
+            count += 1
+        self.message_user(
+            request,
+            f"Queued PDF pre-generation for {count} certificate(s). "
+            "Check Celery worker logs for progress.",
+            messages.INFO,
+        )
+    action_prewarm_cache.short_description = "🔥 Pre-generate PDFs (Celery async)"
+

@@ -377,3 +377,13 @@ SOCIALACCOUNT_PROVIDERS = {
 CSRF_COOKIE_HTTPONLY = False
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+
+# ─── Certificate System ───────────────────────────────────────────────────────
+
+# Redis TTL for cached certificate PDFs (seconds). Default = 6 hours.
+CERT_PDF_TTL = int(os.getenv("CERT_PDF_TTL", 21600))
+
+# Public base URL — used in QR codes + verification URLs.
+# Must NOT have a trailing slash.
+SITE_URL = os.getenv("SITE_URL", "https://theangaarbatch.in")

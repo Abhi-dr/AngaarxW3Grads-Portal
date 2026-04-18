@@ -1,9 +1,9 @@
 from django.urls import path, include
 from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views, mcq_views, flames26_views
 from .api import (
-    ProfileAPIView, 
-    ChangePasswordAPIView, 
-    UploadProfilePictureAPIView, 
+    ProfileAPIView,
+    ChangePasswordAPIView,
+    UploadProfilePictureAPIView,
     FeedbackAPIView,
     MyCertificatesAPIView,
     ViewCertificateAPIView
@@ -11,11 +11,12 @@ from .api import (
 
 urlpatterns = [
     path("api/v1/", include("student.api.urls")),
-    
+
     path("", views.dashboard, name="student"),
 
-    path("my-certificates", views.my_certificates, name = "my_certificates"),
-    path("event/<int:id>/certificate", views.view_certificate, name="student_view_certificate"),
+    path("my-certificates", views.my_certificates, name="my_certificates"),
+    path("event/<int:id>/certificate/view", views.view_certificate, name="student_view_certificate"),
+    path("certificate/<str:cert_id>/download/", views.download_certificate, name="download_certificate"),
 
     
     # ========================= SESSION WORK =========================

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    {% if is_valid %}Certificate Verified | The Angaar Batch
+    {% else %}Certificate Not Found | The Angaar Batch
+    {% endif %}
+  </title>
+  <meta name="description" content="Verify the authenticity of an Angaar Batch certificate.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --fire: #ff8c00;
+      --fire-dim: rgba(255,140,0,0.6);
+      --cream: #fff8f0;
+      --dark: #0a0603;
+      --surface: #120c05;
+      --border: rgba(255,130,0,0.3);
+    }
+
+    html, body {
+      min-height: 100vh;
+      background: var(--dark);
+      color: var(--cream);
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+    }
+
+    /* ── Page layout ──────────────────────────────────────────────────── */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background:
+        radial-gradient(ellipse at 10% 90%, rgba(255,80,0,0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 90% 10%, rgba(255,140,0,0.08) 0%, transparent 55%),
+        #0a0603;
+    }
+
+    /* ── Brand header ─────────────────────────────────────────────────── */
+    .brand {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .brand-name {
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fire);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+    }
+
+    .brand-tagline {
+      font-size: 11px;
+      color: rgba(255,200,120,0.45);
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    /* ── Verification card ───────────────────────────────────────────── */
+    .card {
+      width: 100%;
+      max-width: 520px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top accent stripe */
+    .card-stripe {
+      height: 3px;
+      background: linear-gradient(90deg, rgba(255,100,0,0.8), rgba(255,180,0,0.8), rgba(255,100,0,0.3));
+    }
+
+    .card-body {
+      padding: 36px 40px 40px;
+    }
+
+    /* ── Status badge ────────────────────────────────────────────────── */
+    .status-badge {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+
+    .status-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+      margin-right: 16px;
+    }
+
+    .status-icon.valid {
+      background: rgba(0,200,100,0.12);
+      border: 1.5px solid rgba(0,220,100,0.35);
+      color: #00e080;
+    }
+
+    .status-icon.invalid {
+      background: rgba(220,50,50,0.12);
+      border: 1.5px solid rgba(220,60,60,0.35);
+      color: #ff4444;
+    }
+
+    .status-label {
+      flex: 1;
+    }
+
+    .status-title {
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .status-title.valid  { color: #00e080; }
+    .status-title.invalid { color: #ff5555; }
+
+    .status-subtitle {
+      font-size: 12px;
+      color: rgba(255,220,160,0.55);
+      margin-top: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Divider ─────────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 0 0 24px 0;
+    }
+
+    /* ── Info table ──────────────────────────────────────────────────── */
+    .info-grid {
+      width: 100%;
+      border-spacing: 0;
+      border-collapse: collapse;
+    }
+
+    .info-grid tr {
+      border-bottom: 1px solid rgba(255,130,0,0.1);
+    }
+
+    .info-grid tr:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,160,80,0.6);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 10px 0;
+      width: 38%;
+      vertical-align: top;
+    }
+
+    .info-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--cream);
+      padding: 10px 0 10px 12px;
+      vertical-align: top;
+      line-height: 1.4;
+    }
+
+    .info-value.cert-id {
+      font-family: 'Rajdhani', monospace;
+      font-size: 12px;
+      color: rgba(255,200,120,0.8);
+      letter-spacing: 1px;
+    }
+
+    /* ── Footer note ─────────────────────────────────────────────────── */
+    .footer-note {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,130,0,0.15);
+      font-size: 11px;
+      color: rgba(200,160,100,0.45);
+      text-align: center;
+      line-height: 1.6;
+    }
+
+    /* ── Invalid state specific ───────────────────────────────────────── */
+    .invalid-note {
+      font-size: 13px;
+      color: rgba(255,200,160,0.65);
+      line-height: 1.7;
+      margin-top: 8px;
+    }
+
+    .cert-id-queried {
+      display: inline-block;
+      margin-top: 12px;
+      background: rgba(255,80,0,0.08);
+      border: 1px solid rgba(255,80,0,0.2);
+      padding: 6px 14px;
+      font-family: monospace;
+      font-size: 12px;
+      color: rgba(255,160,80,0.7);
+      letter-spacing: 1px;
+    }
+
+    /* ── Back link ───────────────────────────────────────────────────── */
+    .back-link {
+      display: inline-block;
+      margin-top: 32px;
+      color: rgba(255,140,0,0.6);
+      font-size: 12px;
+      text-decoration: none;
+      letter-spacing: 1px;
+    }
+
+    .back-link:hover {
+      color: var(--fire);
+    }
+
+    /* ── Scan info chip ──────────────────────────────────────────────── */
+    .scan-chip {
+      display: inline-block;
+      background: rgba(255,130,0,0.08);
+      border: 1px solid rgba(255,130,0,0.2);
+      padding: 3px 10px;
+      font-size: 10px;
+      color: rgba(255,160,80,0.65);
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+
+    <!-- Brand -->
+    <div class="brand">
+      <div class="brand-name">The Angaar Batch</div>
+      <div class="brand-tagline">Certificate Verification System</div>
+    </div>
+
+    <!-- Verification card -->
+    <div class="card">
+      <div class="card-stripe"></div>
+      <div class="card-body">
+
+        <div class="scan-chip">🔍 VERIFYING CERTIFICATE</div>
+
+        {% if is_valid %}
+
+          <!-- VALID state -->
+          <div class="status-badge">
+            <div class="status-icon valid">✓</div>
+            <div class="status-label">
+              <div class="status-title valid">VERIFIED</div>
+              <div class="status-subtitle">This certificate is authentic</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <table class="info-grid">
+            <tr>
+              <td class="info-label">Recipient</td>
+              <td class="info-value">{{ student_name }}</td>
+            </tr>
+            <tr>
+              <td class="info-label">Programme</td>
+              <td class="info-value">{{ event_name }}</td>
+            </tr>
+            <tr>
+              <td class="info-label">Issued On</td>
+              <td class="info-value">{{ issued_date }}</td>
+            </tr>
+            <tr>
+              <td class="info-label">Certificate ID</td>
+              <td class="info-value cert-id">{{ certificate.certificate_id }}</td>
+            </tr>
+            <tr>
+              <td class="info-label">Issued By</td>
+              <td class="info-value">The Angaar Batch</td>
+            </tr>
+          </table>
+
+          <div class="footer-note">
+            This certificate was issued by The Angaar Batch.<br>
+            It has been digitally verified and is authentic.
+          </div>
+
+        {% else %}
+
+          <!-- INVALID state -->
+          <div class="status-badge">
+            <div class="status-icon invalid">✗</div>
+            <div class="status-label">
+              <div class="status-title invalid">NOT FOUND</div>
+              <div class="status-subtitle">Certificate could not be verified</div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <p class="invalid-note">
+            No approved certificate was found matching this ID.
+            This may mean the certificate ID is incorrect, the certificate
+            has been revoked, or it has not yet been approved.
+          </p>
+
+          {% if cert_id %}
+          <div class="cert-id-queried">{{ cert_id }}</div>
+          {% endif %}
+
+          <div class="footer-note">
+            If you believe this is an error, please contact
+            support@theangaarbatch.in with your certificate ID.
+          </div>
+
+        {% endif %}
+
+      </div>
+    </div>
+
+    <a href="https://theangaarbatch.in" class="back-link">← theangaarbatch.in</a>
+
+  </div>
+</body>
+</html>

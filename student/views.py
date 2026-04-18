@@ -1,26 +1,26 @@
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from accounts.views import logout as account_logout
 from django.utils import timezone
 from django.db.models import Q
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from datetime import datetime, timedelta
-
 
 # Phase 2: Student/Instructor are proxy models on the same table as CustomUser.
 # request.user IS already a CustomUser — all fields (coins, dob, role, etc.) are on it directly.
-# We still import Student for queryset filtering where it makes the intent clear.
 from accounts.models import CustomUser
 from student.models import Notification, Anonymous_Message, Feedback, Assignment, AssignmentSubmission, Course
 from .event_models import Event, CertificateTemplate, Certificate
 from practice.models import POD, Submission, Batch, Question, Sheet, Streak
 from home.models import Alumni, ReferralCode
 from django.template import engines, Template, Context
-from weasyprint import HTML
-from django.http import HttpResponse
 from django.db import transaction
 from django.db.models import Max, Sum
+
+logger = logging.getLogger(__name__)
 
 # ========================================= DASHBOARD =========================================
 
@@ -485,28 +485,100 @@ def my_referrals(request):
 
 @login_required(login_url="login")
 def my_certificates(request):
-
-    my_certificates = Certificate.objects.filter(student=request.user).select_related('event')
-
-    parameters = {
-        'my_certificates': my_certificates,
-    }
-
-    return render(request, "student/my_certificates.html", parameters)
+    """
+    Show list of approved certificates for the logged-in student.
+    Simple server-rendered page — no AJAX needed.
+    """
+    certs = (
+        Certificate.objects
+        .filter(student=request.user, approved=True)
+        .select_related("event", "event__certificate_template")
+        .order_by("-issued_date")
+    )
+    return render(request, "student/my_certificates.html", {"my_certificates": certs})
 
 
 # ======================================= VIEW CERTIFICATE ==============================
 
-
-@login_required(login_url='login')
+@login_required(login_url="login")
 def view_certificate(request, id):
-    certificate = get_object_or_404(Certificate, id=id, student=request.user)
-    
-    # Pass certificate ID to template for API call
-    parameters = {
-        'id': id,
-        'certificate': certificate,
-    }
+    """
+    Render the certificate as a FULL standalone HTML page.
+    No intermediate wrapper template — the certificate HTML IS the full response.
+    This avoids AJAX complexity and dark-mode bleed from the main site theme.
+    """
+    from .certificate_generator import render_certificate_html
 
-    return render(request, 'student/view_certificate.html', parameters)
+    certificate = get_object_or_404(Certificate, pk=id, student=request.user, approved=True)
+    html = render_certificate_html(certificate)
+    return HttpResponse(html)
+
+
+# ======================================= DOWNLOAD CERTIFICATE ==========================
+
+@login_required(login_url="login")
+def download_certificate(request, cert_id):
+    """
+    Serve a PDF download of the certificate.
+
+    Pipeline:
+      1. Check Redis for cached PDF bytes (instant if HIT)
+      2. On MISS: acquire Redis lock → generate via WeasyPrint → cache → serve
+      3. Race condition: if lock is held by another request, poll until result
+         is available or generate directly after timeout.
+
+    The WeasyPrint call runs in the Gunicorn worker thread (synchronously)
+    but behind a Redis lock so only one generation runs at a time per cert.
+    Gunicorn workers are async-capable enough for the ~2–4s generation time.
+    """
+    from .certificate_generator import get_or_generate_pdf
+
+    certificate = get_object_or_404(
+        Certificate, certificate_id=cert_id, student=request.user, approved=True
+    )
+
+    try:
+        pdf_bytes = get_or_generate_pdf(certificate)
+    except Exception as exc:
+        logger.exception("PDF generation failed for %s: %s", cert_id, exc)
+        messages.error(request, "Failed to generate PDF. Please try again shortly.")
+        return redirect("my_certificates")
+
+    filename = (
+        f"certificate-{certificate.student_full_name.lower().replace(' ', '-')}"
+        f"-{certificate.certificate_id}.pdf"
+    )
+
+    response = HttpResponse(pdf_bytes, content_type="application/pdf")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    response["Content-Length"] = len(pdf_bytes)
+    response["Cache-Control"] = "private, no-store"  # browser must not cache (Redis handles it)
+    return response
+
+
+# ======================================= VERIFY CERTIFICATE ===========================
+
+def verify_certificate(request, cert_id):
+    """
+    Public certificate verification page — no login required.
+    Accessible via QR code or direct URL.
+    URL: /certificate/verify/<cert_id>/
+    """
+    certificate = Certificate.objects.filter(
+        certificate_id=cert_id, approved=True
+    ).select_related("event", "student").first()
+
+    if certificate:
+        return render(request, "certificates/verify_certificate.html", {
+            "certificate": certificate,
+            "student_name": certificate.student_full_name,
+            "event_name":   certificate.event.name,
+            "issued_date":  certificate.issued_date.strftime("%B %d, %Y"),
+            "is_valid":     True,
+        })
+    else:
+        return render(request, "certificates/verify_certificate.html", {
+            "is_valid":     False,
+            "cert_id":      cert_id,
+        }, status=404)
 

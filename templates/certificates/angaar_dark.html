@@ -1,0 +1,575 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ cert_type_display }} — {{ student_name }}</title>
+  <meta name="robots" content="noindex, nofollow">
+  <style>
+    /*
+     * WeasyPrint-safe CSS only.
+     * NO: CSS variables, gap, filter, backdrop-filter, clip-path, CSS Grid.
+     * YES: flex (with margin), absolute positioning, table, @page, @import.
+     */
+
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Rajdhani:wght@400;500;600&display=swap');
+
+    @page {
+      size: A4 landscape;
+      margin: 0;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 297mm;
+      height: 210mm;
+      overflow: hidden;
+      background: #0a0603;
+    }
+
+    /* ── Main certificate shell ─────────────────────────────────────── */
+    .cert-root {
+      position: relative;
+      width: 297mm;
+      height: 210mm;
+      background: #0a0603;
+      overflow: hidden;
+    }
+
+    /* ── Ember radial glow — bottom-left ────────────────────────────── */
+    .glow-bl {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 180mm;
+      height: 130mm;
+      background: radial-gradient(ellipse at 0% 100%, rgba(255,90,0,0.22) 0%, rgba(180,45,0,0.08) 45%, transparent 70%);
+    }
+
+    /* ── Ember radial glow — top-right ──────────────────────────────── */
+    .glow-tr {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 160mm;
+      height: 110mm;
+      background: radial-gradient(ellipse at 100% 0%, rgba(255,140,0,0.18) 0%, rgba(180,60,0,0.06) 45%, transparent 70%);
+    }
+
+    /* ── Outer border frame ─────────────────────────────────────────── */
+    .border-outer {
+      position: absolute;
+      top: 6mm;
+      left: 6mm;
+      right: 6mm;
+      bottom: 6mm;
+      border: 0.4pt solid rgba(255,130,0,0.55);
+    }
+
+    /* ── Inner border frame ─────────────────────────────────────────── */
+    .border-inner {
+      position: absolute;
+      top: 9mm;
+      left: 9mm;
+      right: 9mm;
+      bottom: 9mm;
+      border: 0.2pt solid rgba(255,130,0,0.30);
+    }
+
+    /* ── Corner ornaments (flame SVG inline) ─────────────────────────── */
+    .corner {
+      position: absolute;
+      width: 14mm;
+      height: 14mm;
+    }
+    .corner-tl { top: 3mm; left: 3mm; }
+    .corner-tr { top: 3mm; right: 3mm; transform: scaleX(-1); }
+    .corner-bl { bottom: 3mm; left: 3mm; transform: scaleY(-1); }
+    .corner-br { bottom: 3mm; right: 3mm; transform: scale(-1,-1); }
+
+    /* ── Top header band ────────────────────────────────────────────── */
+    .header {
+      position: absolute;
+      top: 13mm;
+      left: 16mm;
+      right: 16mm;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .header-logo {
+      width: 18mm;
+      height: 18mm;
+      object-fit: contain;
+    }
+
+    .header-org {
+      margin-left: 4mm;
+      flex: 1;
+    }
+
+    .header-org-name {
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: 8.5pt;
+      font-weight: 600;
+      color: #ff8c00;
+      letter-spacing: 2pt;
+      text-transform: uppercase;
+    }
+
+    .header-org-tagline {
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 7pt;
+      color: rgba(255,200,120,0.6);
+      letter-spacing: 1pt;
+      margin-top: 0.5mm;
+    }
+
+    /* Top divider */
+    .header-rule {
+      position: absolute;
+      top: 33mm;
+      left: 16mm;
+      right: 16mm;
+      height: 0.3pt;
+      background: rgba(255,130,0,0.4);
+    }
+
+    /* ── Cert type title ──────────────────────────────────────────────── */
+    .cert-type {
+      position: absolute;
+      top: 37mm;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: 7.5pt;
+      font-weight: 400;
+      color: rgba(255,160,80,0.75);
+      letter-spacing: 4pt;
+      text-transform: uppercase;
+    }
+
+    /* ── Main title ──────────────────────────────────────────────────── */
+    .cert-title {
+      position: absolute;
+      top: 42mm;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: 22pt;
+      font-weight: 700;
+      color: #ff8c00;
+      letter-spacing: 3pt;
+      text-transform: uppercase;
+    }
+
+    /* ── Presented to ────────────────────────────────────────────────── */
+    .presented-to {
+      position: absolute;
+      top: 69mm;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: 'Cormorant Garamond', 'Georgia', serif;
+      font-style: italic;
+      font-size: 9pt;
+      color: rgba(255,230,180,0.65);
+      letter-spacing: 1pt;
+    }
+
+    /* ── Student name ────────────────────────────────────────────────── */
+    .student-name {
+      position: absolute;
+      top: 75mm;
+      left: 20mm;
+      right: 20mm;
+      text-align: center;
+      font-family: 'Cormorant Garamond', 'Georgia', serif;
+      font-size: 30pt;
+      font-weight: 600;
+      color: #fff8f0;
+      letter-spacing: 1.5pt;
+    }
+
+    /* Name underline */
+    .name-rule {
+      position: absolute;
+      top: 96mm;
+      left: 85mm;
+      right: 85mm;
+      height: 0.4pt;
+      background: rgba(255,130,0,0.5);
+    }
+
+    /* ── Body text ───────────────────────────────────────────────────── */
+    .cert-body {
+      position: absolute;
+      top: 99mm;
+      left: 22mm;
+      right: 22mm;
+      text-align: center;
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 9pt;
+      font-weight: 500;
+      color: rgba(220,190,140,0.85);
+      line-height: 1.6;
+    }
+
+    /* ── Hours badge ─────────────────────────────────────────────────── */
+    .hours-badge {
+      position: absolute;
+      top: 116mm;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: 8pt;
+      color: #ff8c00;
+      letter-spacing: 2pt;
+    }
+
+    /* ── Signature row ───────────────────────────────────────────────── */
+    .sig-row {
+      position: absolute;
+      bottom: 22mm;
+      left: 16mm;
+      right: 16mm;
+    }
+
+    /* Using table for reliable WeasyPrint column alignment */
+    .sig-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    .sig-cell {
+      text-align: center;
+      vertical-align: bottom;
+      padding: 0 4mm;
+    }
+
+    .sig-image {
+      height: 12mm;
+      max-width: 30mm;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto 1.5mm auto;
+    }
+
+    .sig-line {
+      height: 0.4pt;
+      background: rgba(255,130,0,0.5);
+      width: 100%;
+      margin-bottom: 1.5mm;
+    }
+
+    .sig-name {
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 8pt;
+      font-weight: 600;
+      color: #fff8f0;
+      letter-spacing: 0.5pt;
+    }
+
+    .sig-designation {
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 7pt;
+      color: rgba(200,160,100,0.75);
+      margin-top: 0.5mm;
+    }
+
+    /* ── Bottom metadata bar ─────────────────────────────────────────── */
+    .meta-bar {
+      position: absolute;
+      bottom: 12mm;
+      left: 16mm;
+      right: 16mm;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .meta-id {
+      flex: 1;
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 6.5pt;
+      color: rgba(180,130,70,0.65);
+      letter-spacing: 0.5pt;
+    }
+
+    .meta-date {
+      flex: 1;
+      text-align: center;
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 7pt;
+      color: rgba(200,160,100,0.70);
+      letter-spacing: 0.5pt;
+    }
+
+    .meta-verify {
+      flex: 1;
+      text-align: right;
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 6pt;
+      color: rgba(180,130,70,0.55);
+    }
+
+    /* ── QR code ────────────────────────────────────────────────────── */
+    .qr-block {
+      position: absolute;
+      bottom: 14mm;
+      right: 16mm;
+      text-align: center;
+    }
+
+    .qr-img {
+      width: 18mm;
+      height: 18mm;
+      display: block;
+    }
+
+    .qr-label {
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 5.5pt;
+      color: rgba(200,150,80,0.60);
+      letter-spacing: 0.5pt;
+      margin-top: 0.8mm;
+      text-align: center;
+    }
+
+    /* ── Watermark text (very faint) ─────────────────────────────────── */
+    .watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-30deg);
+      font-family: 'Cinzel', 'Georgia', serif;
+      font-size: 48pt;
+      font-weight: 700;
+      color: rgba(255,100,0,0.035);
+      white-space: nowrap;
+      letter-spacing: 6pt;
+      pointer-events: none;
+    }
+
+    /* ── Download button (visible only in browser, hidden in WeasyPrint) */
+    .download-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 9999;
+      background: rgba(10,6,3,0.92);
+      padding: 10px 20px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+
+    .download-btn {
+      background: linear-gradient(135deg, #ff6a00, #ff8c00);
+      color: #0a0603;
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 12pt;
+      font-weight: 700;
+      letter-spacing: 1pt;
+      border: none;
+      padding: 8px 24px;
+      cursor: pointer;
+      border-radius: 3px;
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 12px;
+    }
+
+    .back-link {
+      color: rgba(255,160,80,0.7);
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 10pt;
+      text-decoration: none;
+      margin-right: 16px;
+    }
+
+    .verify-link {
+      color: rgba(180,130,70,0.65);
+      font-family: 'Rajdhani', 'Arial', sans-serif;
+      font-size: 9pt;
+      text-decoration: none;
+      margin-left: auto;
+    }
+
+    @media print {
+      .download-bar { display: none !important; }
+      body { margin: 0; }
+    }
+
+    /* WeasyPrint hides @media screen blocks — so download-bar won't appear in PDF */
+    @media screen {
+      html, body {
+        background: #111;
+        min-height: 100vh;
+        width: 100%;
+      }
+      .cert-root {
+        margin: 52px auto 40px auto;
+        box-shadow: 0 8px 60px rgba(255,100,0,0.25);
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Browser-only download/nav bar (invisible in WeasyPrint PDF) -->
+  <div class="download-bar">
+    <a href="/dashboard/my-certificates" class="back-link">← My Certificates</a>
+    <a href="/dashboard/certificate/{{ certificate.certificate_id }}/download/" class="download-btn">
+      ⬇ Download PDF
+    </a>
+    <a href="{{ verify_url }}" target="_blank" class="verify-link">Verify ↗</a>
+  </div>
+
+  <div class="cert-root">
+
+    <!-- Background ember glows -->
+    <div class="glow-bl"></div>
+    <div class="glow-tr"></div>
+
+    <!-- Watermark -->
+    <div class="watermark">ANGAAR</div>
+
+    <!-- Border frames -->
+    <div class="border-outer"></div>
+    <div class="border-inner"></div>
+
+    <!-- Corner ornaments (flame SVG) -->
+    <div class="corner corner-tl">
+      <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+        <path d="M4 52 C4 30 18 20 28 4 C22 16 30 22 26 34 C30 28 36 30 32 42 C36 36 44 38 38 52 Z"
+              fill="none" stroke="rgba(255,130,0,0.55)" stroke-width="1.2"/>
+        <line x1="4" y1="52" x2="52" y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+        <line x1="4" y1="4"  x2="4"  y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+      </svg>
+    </div>
+    <div class="corner corner-tr">
+      <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+        <path d="M4 52 C4 30 18 20 28 4 C22 16 30 22 26 34 C30 28 36 30 32 42 C36 36 44 38 38 52 Z"
+              fill="none" stroke="rgba(255,130,0,0.55)" stroke-width="1.2"/>
+        <line x1="4" y1="52" x2="52" y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+        <line x1="4" y1="4"  x2="4"  y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+      </svg>
+    </div>
+    <div class="corner corner-bl">
+      <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+        <path d="M4 52 C4 30 18 20 28 4 C22 16 30 22 26 34 C30 28 36 30 32 42 C36 36 44 38 38 52 Z"
+              fill="none" stroke="rgba(255,130,0,0.55)" stroke-width="1.2"/>
+        <line x1="4" y1="52" x2="52" y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+        <line x1="4" y1="4"  x2="4"  y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+      </svg>
+    </div>
+    <div class="corner corner-br">
+      <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+        <path d="M4 52 C4 30 18 20 28 4 C22 16 30 22 26 34 C30 28 36 30 32 42 C36 36 44 38 38 52 Z"
+              fill="none" stroke="rgba(255,130,0,0.55)" stroke-width="1.2"/>
+        <line x1="4" y1="52" x2="52" y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+        <line x1="4" y1="4"  x2="4"  y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+      </svg>
+    </div>
+
+    <!-- Header: Logo + Org name -->
+    <div class="header">
+      {% if org_logo_url %}
+        <img src="{{ org_logo_url }}" class="header-logo" alt="{{ org_name }}">
+      {% endif %}
+      <div class="header-org" style="{% if not org_logo_url %}margin-left:0;{% endif %}">
+        <div class="header-org-name">{{ org_name }}</div>
+        <div class="header-org-tagline">Igniting Careers &nbsp;·&nbsp; Building Futures</div>
+      </div>
+    </div>
+
+    <div class="header-rule"></div>
+
+    <!-- Certificate type -->
+    <div class="cert-type">{{ cert_type_display }}</div>
+
+    <!-- Main title -->
+    <div class="cert-title">Certificate</div>
+
+    <!-- Presented to -->
+    <div class="presented-to">This certificate is proudly presented to</div>
+
+    <!-- Student name -->
+    <div class="student-name">{{ student_name }}</div>
+
+    <!-- Name underline rule -->
+    <div class="name-rule"></div>
+
+    <!-- Body text -->
+    <div class="cert-body">{{ body_text }}</div>
+
+    <!-- Hours badge (optional) -->
+    {% if show_hours and hours %}
+    <div class="hours-badge">Duration: {{ hours }} Hours</div>
+    {% endif %}
+
+    <!-- Signatures -->
+    {% if signatories %}
+    <div class="sig-row">
+      <table class="sig-table">
+        <tr>
+          {% for sig in signatories %}
+          <td class="sig-cell">
+            {% if sig.signature_image_url %}
+              <img src="{{ sig.signature_image_url }}" class="sig-image" alt="{{ sig.name }}">
+            {% else %}
+              <!-- Placeholder space when no signature image -->
+              <div style="height:12mm;"></div>
+            {% endif %}
+            <div class="sig-line"></div>
+            <div class="sig-name">{{ sig.name }}</div>
+            <div class="sig-designation">{{ sig.designation }}</div>
+            {% if sig.organization %}
+            <div class="sig-designation">{{ sig.organization }}</div>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+      </table>
+    </div>
+    {% endif %}
+
+    <!-- Bottom meta bar -->
+    <div class="meta-bar">
+      <div class="meta-id">
+        Certificate ID: {{ certificate_id }}
+      </div>
+      <div class="meta-date">
+        Issued on {{ issued_date }}
+      </div>
+      <div class="meta-verify">
+        {% if not qr_base64 %}
+          Verify at: {{ verify_url }}
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- QR Code -->
+    {% if show_qr and qr_base64 %}
+    <div class="qr-block">
+      <img src="data:image/png;base64,{{ qr_base64 }}" class="qr-img" alt="Verification QR">
+      <div class="qr-label">Scan to verify</div>
+    </div>
+    {% endif %}
+
+  </div><!-- /.cert-root -->
+
+</body>
+</html>
