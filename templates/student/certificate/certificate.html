@@ -1,0 +1,255 @@
+{% extends "student/base.html" %}
+{% load static %}
+
+{% block title %}{{ cert_type_display }} | {{ student_name }}{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── Page background ──────────────────────────────────────────── */
+  .cert-page-wrapper {
+    width: 100%;
+    min-height: calc(100vh - 70px);
+    padding: 24px 16px 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Page heading card ────────────────────────────────────────── */
+  .cert-heading-card {
+    width: 100%;
+    max-width: 297mm;
+    margin-bottom: 20px;
+  }
+
+  .cert-heading-card .card-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .cert-heading-card .heading-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .cert-heading-card .heading-left h3 {
+    margin: 0;
+  }
+
+  .cert-heading-card .heading-left .breadcrumb-back {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+    transition: color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .cert-heading-card .heading-left .breadcrumb-back:hover {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+  }
+
+  .cert-heading-card .heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .btn-verify {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .btn-verify:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.9);
+    text-decoration: none;
+  }
+
+  .btn-download-cert {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    padding: 8px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .btn-download-cert:hover {
+    background: #1d4ed8;
+    color: #ffffff;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.4);
+  }
+
+  /* ── Certificate container ────────────────────────────────────── */
+  .cert-display {
+    width: 297mm;
+    max-width: 100%;
+    box-shadow: 0 8px 60px rgba(0, 0, 0, 0.5), 0 2px 20px rgba(0, 0, 0, 0.6);
+    line-height: 0;
+    overflow: hidden;
+    border-radius: 4px;
+  }
+
+  /* ── Responsive scaling ───────────────────────────────────────── */
+  @media (max-width: 1160px) {
+    .cert-display {
+      width: 100%;
+      overflow: hidden;
+    }
+    .cert-display .angaar-cert .cert-root {
+      transform-origin: top left;
+    }
+  }
+
+  /* ── Below-cert meta row ──────────────────────────────────────── */
+  .cert-meta {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 0.5px;
+    width: 100%;
+    max-width: 297mm;
+  }
+
+  .cert-meta .cert-id-chip {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3px 10px;
+    font-family: monospace;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+    cursor: pointer;
+    border-radius: 3px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .cert-meta .cert-id-chip:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  /* ── Copy toast ───────────────────────────────────────────────── */
+  .copy-toast {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: rgba(0, 180, 80, 0.92);
+    color: white; font-size: 13px; font-weight: 600;
+    padding: 10px 20px; border-radius: 4px;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.2s, transform 0.2s;
+    pointer-events: none; z-index: 9999;
+  }
+  .copy-toast.show { opacity: 1; transform: translateY(0); }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid cert-page-wrapper">
+
+  <!-- Page heading with actions -->
+  <div class="card cert-heading-card">
+    <div class="card-body">
+
+      <div class="heading-left">
+        <h3 class="heading">
+          <span class="fw-semibold">{{ certificate.event.name }}</span>
+        </h3>
+        <p class="text-muted mb-0" style="font-size: 12px;">
+          Issued on {{ issued_date }} &nbsp;·&nbsp; ID: <code>{{ certificate.certificate_id }}</code>
+        </p>
+      </div>
+
+      <div class="heading-actions">
+        <!-- <a href="{{ verify_url }}" target="_blank" class="btn-verify">
+          🔍 Verify ↗
+        </a> -->
+        <a href="{% url 'download_certificate' cert_id=certificate.certificate_id %}" class="btn-download-cert">
+          ⬇ Download PDF
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Certificate rendered directly -->
+  <div class="cert-display" id="certDisplay">
+    {% include "certificates/angaar_dark.html" %}
+  </div>
+
+  <!-- Below-cert meta -->
+  <div class="cert-meta">
+    <span>Issued {{ issued_date }}</span>
+    <span class="cert-id-chip" title="Click to copy" onclick="copyCertId('{{ certificate.certificate_id }}')">
+      {{ certificate.certificate_id }}
+    </span>
+    <span style="margin-left: auto; opacity: 0.6;">Click ID to copy</span>
+  </div>
+
+</div>
+
+<div id="copyToast" class="copy-toast">✓ Certificate ID copied!</div>
+
+<script>
+  function scaleCert() {
+    const display = document.getElementById('certDisplay');
+    const root    = display ? display.querySelector('.cert-root') : null;
+    if (!root) return;
+    const certNaturalW = root.scrollWidth;
+    const available    = display.clientWidth;
+    if (available < certNaturalW) {
+      const scale = available / certNaturalW;
+      root.style.transform       = 'scale(' + scale + ')';
+      root.style.transformOrigin = 'top left';
+      display.style.height       = (root.scrollHeight * scale) + 'px';
+    } else {
+      root.style.transform = '';
+      display.style.height = '';
+    }
+  }
+  window.addEventListener('load', scaleCert);
+  window.addEventListener('resize', scaleCert);
+
+  function copyCertId(id) {
+    navigator.clipboard.writeText(id).then(showToast).catch(function () {
+      var ta = document.createElement('textarea');
+      ta.value = id;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); showToast(); } catch(e) {}
+      document.body.removeChild(ta);
+    });
+  }
+  function showToast() {
+    var t = document.getElementById('copyToast');
+    t.classList.add('show');
+    setTimeout(function() { t.classList.remove('show'); }, 2200);
+  }
+</script>
+{% endblock %}

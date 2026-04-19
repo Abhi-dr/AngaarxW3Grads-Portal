@@ -5,6 +5,7 @@
 {% block title %}The Angaar Batch | My Certificates{% endblock %}
 
 {% block extra_css %}
+
 <style>
   .cert-grid {
     display: grid;
@@ -14,74 +15,73 @@
   }
 
   .cert-card {
-    background: linear-gradient(135deg, rgba(255,100,0,0.07) 0%, rgba(10,6,3,0.5) 100%);
-    border: 1px solid rgba(255,130,0,0.25);
-    border-radius: 4px;
-    padding: 24px;
+    background: #212529;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 22px;
     position: relative;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .cert-card:hover {
-    border-color: rgba(255,140,0,0.55);
-    box-shadow: 0 4px 24px rgba(255,100,0,0.12);
+    border-color: rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
   }
 
+  /* Remove the orange accent bar entirely */
   .cert-card-accent {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #ff6a00, #ff8c00, rgba(255,140,0,0.2));
+    display: none;
   }
 
   .cert-event-name {
-    font-size: 14px;
-    font-weight: 700;
-    color: #ff8c00;
-    letter-spacing: 0.3px;
-    margin-bottom: 6px;
-    line-height: 1.3;
+    font-size: 15px;
+    font-weight: 600;
+    color: #f0f0f0;
+    letter-spacing: 0.2px;
+    margin-bottom: 5px;
+    line-height: 1.4;
   }
 
   .cert-date {
     font-size: 12px;
-    color: rgba(255,200,120,0.55);
+    color: rgba(255, 255, 255, 0.4);
     margin-bottom: 16px;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
   }
 
   .cert-id-row {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     margin-bottom: 18px;
   }
 
   .cert-id-label {
-    font-size: 10px;
-    color: rgba(200,150,80,0.6);
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.5px;
+    font-weight: 600;
     flex-shrink: 0;
   }
 
   .cert-id-value {
-    font-size: 11px;
+    font-size: 12px;
     font-family: monospace;
-    color: rgba(255,200,130,0.75);
-    background: rgba(255,100,0,0.06);
-    border: 1px solid rgba(255,100,0,0.15);
-    padding: 2px 8px;
+    color: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px 10px;
     cursor: pointer;
     transition: border-color 0.15s;
     flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    border-radius: 3px;
   }
 
   .cert-id-value:hover {
-    border-color: rgba(255,140,0,0.4);
+    border-color: rgba(255, 255, 255, 0.25);
   }
 
   .cert-actions {
@@ -89,55 +89,58 @@
     gap: 10px;
   }
 
+  /* View button — matches "View More" style from My Courses page */
   .btn-view {
     flex: 1;
     display: inline-block;
     text-align: center;
-    background: rgba(255,130,0,0.12);
-    border: 1px solid rgba(255,130,0,0.35);
-    color: #ff8c00;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.75);
     font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    padding: 8px 14px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    padding: 9px 14px;
     text-decoration: none;
-    border-radius: 3px;
-    transition: background 0.2s, border-color 0.2s;
+    border-radius: 4px;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
   }
 
   .btn-view:hover {
-    background: rgba(255,130,0,0.22);
-    border-color: rgba(255,140,0,0.6);
-    color: #ffaa30;
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #ffffff;
     text-decoration: none;
   }
 
+  /* Download button — solid blue/teal matching the site's action buttons */
   .btn-download {
     flex: 1;
     display: inline-block;
     text-align: center;
-    background: linear-gradient(135deg, rgba(255,106,0,0.9), rgba(255,140,0,0.85));
-    color: #0a0603;
+    background: #2563eb;
+    color: #ffffff;
     font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 8px 14px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    padding: 9px 14px;
     text-decoration: none;
-    border-radius: 3px;
+    border-radius: 4px;
     border: none;
-    transition: opacity 0.2s;
+    transition: background 0.2s, box-shadow 0.2s;
   }
 
   .btn-download:hover {
-    opacity: 0.88;
-    color: #0a0603;
+    background: #1d4ed8;
+    color: #ffffff;
     text-decoration: none;
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.4);
   }
 
   .empty-state {
     text-align: center;
     padding: 64px 20px;
-    color: rgba(255,200,120,0.4);
+    color: rgba(255, 255, 255, 0.3);
   }
 
   .empty-state-icon {
@@ -150,7 +153,7 @@
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 8px;
-    color: rgba(255,200,120,0.6);
+    color: rgba(255, 255, 255, 0.5);
   }
 
   .empty-state-text {
@@ -163,7 +166,7 @@
     position: fixed;
     bottom: 28px;
     right: 28px;
-    background: rgba(0,180,80,0.92);
+    background: rgba(0, 180, 80, 0.92);
     color: white;
     font-size: 13px;
     font-weight: 600;
@@ -181,6 +184,7 @@
     transform: translateY(0);
   }
 </style>
+
 {% endblock %}
 
 {% block body %}
@@ -201,49 +205,48 @@
         <span class="fs-4"> | Angaar x W3Grads</span>
       </h3>
       <p class="text-muted mb-0" style="font-size:13px; margin-top:4px;">
-        All your approved certificates are listed below. Click <strong>View</strong> to see the full certificate, or <strong>Download PDF</strong> to save it.
+        All your approved certificates are listed below. Click <strong>View</strong> to see the full certificate, or
+        <strong>Download PDF</strong> to save it.
       </p>
     </div>
   </div>
 
   {% if my_certificates %}
-    <div class="cert-grid">
-      {% for cert in my_certificates %}
-      <div class="cert-card">
-        <div class="cert-card-accent"></div>
+  <div class="cert-grid">
+    {% for cert in my_certificates %}
+    <div class="cert-card">
+      <div class="cert-card-accent"></div>
 
-        <div class="cert-event-name">{{ cert.event.name }}</div>
-        <div class="cert-date">Issued on {{ cert.issued_date|date:"F j, Y" }}</div>
+      <div class="cert-event-name">{{ cert.event.name }}</div>
+      <div class="cert-date">Issued on {{ cert.issued_date|date:"F j, Y" }}</div>
 
-        <div class="cert-id-row">
-          <span class="cert-id-label">ID</span>
-          <span class="cert-id-value"
-                id="cert-id-{{ cert.pk }}"
-                title="Click to copy"
-                onclick="copyCertId('{{ cert.certificate_id }}')">{{ cert.certificate_id }}</span>
-        </div>
-
-        <div class="cert-actions">
-          <a href="/dashboard/event/{{ cert.pk }}/certificate/view" class="btn-view" target="_blank">
-            👁 View
-          </a>
-          <a href="/dashboard/certificate/{{ cert.certificate_id }}/download/" class="btn-download">
-            ⬇ Download PDF
-          </a>
-        </div>
+      <div class="cert-id-row">
+        <span class="cert-id-label">ID</span>
+        <span class="cert-id-value" id="cert-id-{{ cert.pk }}" title="Click to copy"
+          onclick="copyCertId('{{ cert.certificate_id }}')">{{ cert.certificate_id }}</span>
       </div>
-      {% endfor %}
+
+      <div class="cert-actions">
+        <a href="{% url 'student_view_certificate' id=cert.pk %}" class="btn-view">
+          View
+        </a>
+        <a href="{% url 'download_certificate' cert_id=cert.certificate_id %}" class="btn-download">
+          ⬇ Download PDF
+        </a>
+      </div>
     </div>
+    {% endfor %}
+  </div>
 
   {% else %}
-    <div class="empty-state">
-      <span class="empty-state-icon">🏆</span>
-      <div class="empty-state-title">No Certificates Yet</div>
-      <p class="empty-state-text">
-        You don't have any approved certificates yet.<br>
-        Complete a programme to earn one!
-      </p>
-    </div>
+  <div class="empty-state">
+    <span class="empty-state-icon">🏆</span>
+    <div class="empty-state-title">No Certificates Yet</div>
+    <p class="empty-state-text">
+      You don't have any approved certificates yet.<br>
+      Complete a programme to earn one!
+    </p>
+  </div>
   {% endif %}
 
 </div>
@@ -253,9 +256,9 @@
 
 <script>
   function copyCertId(certId) {
-    navigator.clipboard.writeText(certId).then(function() {
+    navigator.clipboard.writeText(certId).then(function () {
       showToast();
-    }).catch(function() {
+    }).catch(function () {
       // Fallback for older browsers
       const ta = document.createElement('textarea');
       ta.value = certId;
@@ -263,7 +266,7 @@
       ta.style.opacity = '0';
       document.body.appendChild(ta);
       ta.select();
-      try { document.execCommand('copy'); showToast(); } catch (e) {}
+      try { document.execCommand('copy'); showToast(); } catch (e) { }
       document.body.removeChild(ta);
     });
   }
@@ -271,7 +274,7 @@
   function showToast() {
     const toast = document.getElementById('copyToast');
     toast.classList.add('show');
-    setTimeout(function() { toast.classList.remove('show'); }, 2200);
+    setTimeout(function () { toast.classList.remove('show'); }, 2200);
   }
 </script>
 

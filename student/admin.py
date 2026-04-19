@@ -323,7 +323,7 @@ class CertificateAdmin(ImportMixin, admin.ModelAdmin):
 
     list_display = (
         "certificate_id", "student", "event", "approved",
-        "issued_date", "has_cached_pdf_display", "preview_link",
+        "issued_date", "preview_link",
     )
     list_filter   = ("approved", "event")
     search_fields = (
@@ -333,9 +333,9 @@ class CertificateAdmin(ImportMixin, admin.ModelAdmin):
     list_editable = ("approved",)
     readonly_fields = (
         "certificate_id", "issued_date",
-        "template_snapshot_display", "preview_link", "has_cached_pdf_display",
+        "template_snapshot_display", "preview_link",
     )
-    actions = ["action_approve", "action_clear_cache", "action_prewarm_cache"]
+    actions = ["action_approve"]
 
     fieldsets = (
         (None, {
@@ -345,26 +345,19 @@ class CertificateAdmin(ImportMixin, admin.ModelAdmin):
             "fields": ("certificate_id", "issued_date"),
             "classes": ("collapse",),
         }),
-        ("Cache & Preview", {
-            "fields": ("has_cached_pdf_display", "preview_link"),
+        ("Preview", {
+            "fields": ("preview_link",),
         }),
         ("Template Snapshot (frozen at first generation)", {
             "fields": ("template_snapshot_display",),
             "classes": ("collapse",),
             "description": (
-                "This is the frozen template state used to generate the PDF. "
-                "It is written at the time of the first PDF download."
+                "Frozen copy of the template state captured at PDF generation time."
             ),
         }),
     )
 
     # ── Display helpers ───────────────────────────────────────────────────
-
-    def has_cached_pdf_display(self, obj):
-        if obj.has_cached_pdf():
-            return format_html('<span style="color:green; font-weight:bold;">✓ Cached</span>')
-        return format_html('<span style="color:#aaa;">✗ Not cached</span>')
-    has_cached_pdf_display.short_description = "PDF cached?"
 
     def preview_link(self, obj):
         if not obj.pk:
@@ -376,7 +369,7 @@ class CertificateAdmin(ImportMixin, admin.ModelAdmin):
     def template_snapshot_display(self, obj):
         import json
         if not obj.template_snapshot:
-            return "Not generated yet"
+            return "None — will be written on first PDF download."
         pretty = json.dumps(obj.template_snapshot, indent=2, ensure_ascii=False)
         return format_html(
             '<pre style="font-size:11px; max-height:300px; overflow:auto;">{}</pre>',
@@ -394,30 +387,3 @@ class CertificateAdmin(ImportMixin, admin.ModelAdmin):
             messages.SUCCESS,
         )
     action_approve.short_description = "✅ Approve selected certificates"
-
-    def action_clear_cache(self, request, queryset):
-        count = 0
-        for cert in queryset:
-            cert.invalidate_pdf_cache()
-            count += 1
-        self.message_user(
-            request,
-            f"Cleared PDF cache for {count} certificate(s).",
-            messages.SUCCESS,
-        )
-    action_clear_cache.short_description = "🗑 Clear PDF cache for selected certificates"
-
-    def action_prewarm_cache(self, request, queryset):
-        from .tasks import pre_warm_certificate_pdf
-        count = 0
-        for cert in queryset.filter(approved=True):
-            pre_warm_certificate_pdf.delay(cert.pk)
-            count += 1
-        self.message_user(
-            request,
-            f"Queued PDF pre-generation for {count} certificate(s). "
-            "Check Celery worker logs for progress.",
-            messages.INFO,
-        )
-    action_prewarm_cache.short_description = "🔥 Pre-generate PDFs (Celery async)"
-

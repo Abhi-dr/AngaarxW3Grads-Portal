@@ -1,523 +1,496 @@
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>{{ cert_type_display }} — {{ student_name }}</title>
-  <meta name="robots" content="noindex, nofollow">
-  <style>
-    /*
-     * WeasyPrint-safe CSS only.
-     * NO: CSS variables, gap, filter, backdrop-filter, clip-path, CSS Grid.
-     * YES: flex (with margin), absolute positioning, table, @page, @import.
-     */
 
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Rajdhani:wght@400;500;600&display=swap');
+<style>
+  /* ── Scoped entirely to .angaar-cert ─────────────────────────── */
+  .angaar-cert {
+    font-family: 'Cinzel Decorative', 'Georgia', serif;
+    box-sizing: border-box;
+  }
 
-    @page {
-      size: A4 landscape;
-      margin: 0;
-    }
+  .angaar-cert * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    line-height: normal;
+  }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  /* A4 landscape at 96dpi  ≈ 1122 × 793px */
+  .angaar-cert .cert-root {
+    position: relative;
+    width: 297mm;
+    height: 210mm;
+    background: #ffffff;
+    overflow: hidden;
+    display: block;
+  }
 
-    html, body {
-      width: 297mm;
-      height: 210mm;
-      overflow: hidden;
-      background: #0a0603;
-    }
+  /* ── Deep Navy side bars ──────────────────────────────────────── */
+  .angaar-cert .bar-left,
+  .angaar-cert .bar-right {
+    position: absolute;
+    top: 0;
+    width: 9mm;
+    height: 100%;
+    background: linear-gradient(180deg,
+        #040F1E 0%,
+        #071A2E 15%,
+        #0A2540 35%,
+        #112E50 55%,
+        #0A2540 75%,
+        #071A2E 90%,
+        #040F1E 100%);
+  }
 
-    /* ── Main certificate shell ─────────────────────────────────────── */
-    .cert-root {
-      position: relative;
-      width: 297mm;
-      height: 210mm;
-      background: #0a0603;
-      overflow: hidden;
-    }
+  .angaar-cert .bar-left  { left: 0; }
+  .angaar-cert .bar-right { right: 0; }
 
-    /* ── Ember radial glow — bottom-left ────────────────────────────── */
-    .glow-bl {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 180mm;
-      height: 130mm;
-      background: radial-gradient(ellipse at 0% 100%, rgba(255,90,0,0.22) 0%, rgba(180,45,0,0.08) 45%, transparent 70%);
-    }
+  /* ── Inner accent stripe on bars ─────────────────────────────── */
+  .angaar-cert .bar-left::after,
+  .angaar-cert .bar-right::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(100,160,220,0.25) 30%,
+        rgba(100,160,220,0.40) 50%,
+        rgba(100,160,220,0.25) 70%,
+        transparent 100%);
+  }
+  .angaar-cert .bar-left::after  { right: 0; }
+  .angaar-cert .bar-right::after { left: 0; }
 
-    /* ── Ember radial glow — top-right ──────────────────────────────── */
-    .glow-tr {
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 160mm;
-      height: 110mm;
-      background: radial-gradient(ellipse at 100% 0%, rgba(255,140,0,0.18) 0%, rgba(180,60,0,0.06) 45%, transparent 70%);
-    }
+  /* ── Border frames (deep navy) ────────────────────────────────── */
+  .angaar-cert .border-outer {
+    position: absolute;
+    top: 6mm; left: 13mm; right: 13mm; bottom: 6mm;
+    border: 0.5pt solid rgba(7,26,46,0.55);
+  }
+  .angaar-cert .border-inner {
+    position: absolute;
+    top: 9mm; left: 16mm; right: 16mm; bottom: 9mm;
+    border: 0.25pt solid rgba(7,26,46,0.30);
+  }
 
-    /* ── Outer border frame ─────────────────────────────────────────── */
-    .border-outer {
-      position: absolute;
-      top: 6mm;
-      left: 6mm;
-      right: 6mm;
-      bottom: 6mm;
-      border: 0.4pt solid rgba(255,130,0,0.55);
-    }
+  /* ── Corner ornaments ─────────────────────────────────────────── */
+  .angaar-cert .corner { position: absolute; width: 14mm; height: 14mm; }
+  .angaar-cert .corner-tl { top: 3mm; left: 11mm; }
+  .angaar-cert .corner-tr { top: 3mm; right: 11mm; }
+  .angaar-cert .corner-bl { bottom: 3mm; left: 11mm; }
+  .angaar-cert .corner-br { bottom: 3mm; right: 11mm; }
 
-    /* ── Inner border frame ─────────────────────────────────────────── */
-    .border-inner {
-      position: absolute;
-      top: 9mm;
-      left: 9mm;
-      right: 9mm;
-      bottom: 9mm;
-      border: 0.2pt solid rgba(255,130,0,0.30);
-    }
+  /* ── Header ───────────────────────────────────────────────────── */
+  .angaar-cert .cert-header {
+    position: absolute;
+    top: 14mm; left: 24mm; right: 24mm;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    z-index: 2;
+  }
+  .angaar-cert .header-logo {
+    height: 18mm;
+    width: auto;
+    max-width: 20mm;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+  .angaar-cert .header-org {
+    margin-left: 4mm;
+    flex: 1;
+  }
+  .angaar-cert .header-org-name {
+    font-family: 'Cinzel Decorative', 'Georgia', serif;
+    font-size: 14pt;
+    font-weight: 700;
+    color: #071A2E;
+    letter-spacing: 2pt;
+    text-transform: uppercase;
+  }
+  .angaar-cert .header-org-tagline {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 10pt;
+    color: rgba(7,26,46,0.52);
+    letter-spacing: 1pt;
+    margin-top: 1.8mm;
+  }
+  .angaar-cert .cert-type-label {
+    font-family: 'Georgia', serif;
+    font-size: 10pt;
+    color: rgba(7,26,46,0.50);
+    letter-spacing: 2.5pt;
+    text-transform: uppercase;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
 
-    /* ── Corner ornaments (flame SVG inline) ─────────────────────────── */
-    .corner {
-      position: absolute;
-      width: 14mm;
-      height: 14mm;
-    }
-    .corner-tl { top: 3mm; left: 3mm; }
-    .corner-tr { top: 3mm; right: 3mm; transform: scaleX(-1); }
-    .corner-bl { bottom: 3mm; left: 3mm; transform: scaleY(-1); }
-    .corner-br { bottom: 3mm; right: 3mm; transform: scale(-1,-1); }
+  /* Header rule — two-tone for depth */
+  .angaar-cert .header-rule {
+    position: absolute;
+    top: 35mm;
+    left: 24mm; right: 24mm;
+    height: 0;
+    z-index: 2;
+  }
+  .angaar-cert .header-rule::before {
+    content: '';
+    display: block;
+    height: 0.5pt;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(7,26,46,0.55) 20%,
+        rgba(7,26,46,0.75) 50%,
+        rgba(7,26,46,0.55) 80%,
+        transparent 100%);
+  }
+  .angaar-cert .header-rule::after {
+    content: '';
+    display: block;
+    height: 0.3pt;
+    margin-top: 1.2pt;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(7,26,46,0.20) 20%,
+        rgba(7,26,46,0.30) 50%,
+        rgba(7,26,46,0.20) 80%,
+        transparent 100%);
+  }
 
-    /* ── Top header band ────────────────────────────────────────────── */
-    .header {
-      position: absolute;
-      top: 13mm;
-      left: 16mm;
-      right: 16mm;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
+  /* ── Certificate type eyebrow ─────────────────────────────────── */
+  .angaar-cert .cert-eyebrow {
+    position: absolute;
+    top: 38.5mm;
+    left: 0; right: 0;
+    text-align: center;
+    font-family: 'Georgia', serif;
+    font-size: 10pt;
+    font-weight: 400;
+    color: rgba(7,26,46,0.55);
+    letter-spacing: 4.5pt;
+    text-transform: uppercase;
+  }
 
-    .header-logo {
-      width: 18mm;
-      height: 18mm;
-      object-fit: contain;
-    }
+  /* ── Certificate main title ───────────────────────────────────── */
+  .angaar-cert .cert-title {
+    position: absolute;
+    top: 44mm;
+    left: 0; right: 0;
+    text-align: center;
+    font-family: 'Cinzel Decorative', 'Georgia', serif;
+    font-size: 40pt;
+    font-weight: 700;
+    color: #071A2E;
+    letter-spacing: 3pt;
+    text-transform: uppercase;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.6), 0 -1px 0 rgba(7,26,46,0.08);
+  }
 
-    .header-org {
-      margin-left: 4mm;
-      flex: 1;
-    }
+  /* ── Divider beneath title ────────────────────────────────────── */
+  .angaar-cert .title-rule-l {
+    position: absolute;
+    top: 66mm;
+    left: 24mm; right: 156mm;
+    height: 0.4pt;
+    background: linear-gradient(90deg, transparent, rgba(7,26,46,0.45));
+  }
+  .angaar-cert .title-rule-r {
+    position: absolute;
+    top: 66mm;
+    left: 156mm; right: 24mm;
+    height: 0.4pt;
+    background: linear-gradient(90deg, rgba(7,26,46,0.45), transparent);
+  }
+  .angaar-cert .title-rule-diamond {
+    position: absolute;
+    top: 64mm;
+    left: 0; right: 0;
+    text-align: center;
+  }
 
-    .header-org-name {
-      font-family: 'Cinzel', 'Georgia', serif;
-      font-size: 8.5pt;
-      font-weight: 600;
-      color: #ff8c00;
-      letter-spacing: 2pt;
-      text-transform: uppercase;
-    }
+  /* ── Presented to ─────────────────────────────────────────────── */
+  .angaar-cert .presented-to {
+    position: absolute;
+    top: 70mm;
+    left: 0; right: 0;
+    text-align: center;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 12pt;
+    color: rgba(7,26,46,0.58);
+    letter-spacing: 0.8pt;
+  }
 
-    .header-org-tagline {
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 7pt;
-      color: rgba(255,200,120,0.6);
-      letter-spacing: 1pt;
-      margin-top: 0.5mm;
-    }
+  /* ── Student name — tighter to title, grounded with bg band ──── */
+  .angaar-cert .student-name-wrap {
+    position: absolute;
+    top: 77mm;
+    left: 20mm; right: 20mm;
+    text-align: center;
+    padding: 2.5mm 0 3mm;
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(7,26,46,0.030) 20%,
+        rgba(7,26,46,0.050) 50%,
+        rgba(7,26,46,0.030) 80%,
+        transparent 100%);
+  }
+  .angaar-cert .student-name {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+    font-size: 44pt;
+    font-weight: 600;
+    font-style: italic;
+    color: #071A2E;
+    letter-spacing: 1.5pt;
+  }
 
-    /* Top divider */
-    .header-rule {
-      position: absolute;
-      top: 33mm;
-      left: 16mm;
-      right: 16mm;
-      height: 0.3pt;
-      background: rgba(255,130,0,0.4);
-    }
+  /* ── Name rule ────────────────────────────────────────────────── */
+  .angaar-cert .name-rule {
+    position: absolute;
+    top: 107mm;
+    left: 80mm; right: 80mm;
+    height: 0;
+  }
+  .angaar-cert .name-rule::before {
+    content: '';
+    display: block;
+    height: 0.5pt;
+    background: linear-gradient(90deg, transparent, rgba(7,26,46,0.60), transparent);
+  }
+  .angaar-cert .name-rule::after {
+    content: '';
+    display: block;
+    height: 0.25pt;
+    margin-top: 1pt;
+    background: linear-gradient(90deg, transparent, rgba(7,26,46,0.22), transparent);
+  }
 
-    /* ── Cert type title ──────────────────────────────────────────────── */
-    .cert-type {
-      position: absolute;
-      top: 37mm;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-family: 'Cinzel', 'Georgia', serif;
-      font-size: 7.5pt;
-      font-weight: 400;
-      color: rgba(255,160,80,0.75);
-      letter-spacing: 4pt;
-      text-transform: uppercase;
-    }
+  /* ── Body text ────────────────────────────────────────────────── */
+  .angaar-cert .cert-body {
+    position: absolute;
+    top: 111mm;
+    left: 36mm; right: 36mm;
+    text-align: center;
+    font-family: 'Georgia', serif;
+    font-size: 13.5pt;
+    color: #1A2A3A;
+    line-height: 1.72;
+  }
 
-    /* ── Main title ──────────────────────────────────────────────────── */
-    .cert-title {
-      position: absolute;
-      top: 42mm;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-family: 'Cinzel', 'Georgia', serif;
-      font-size: 22pt;
-      font-weight: 700;
-      color: #ff8c00;
-      letter-spacing: 3pt;
-      text-transform: uppercase;
-    }
+  /* ── Hours badge ──────────────────────────────────────────────── */
+  .angaar-cert .hours-badge {
+    position: absolute;
+    top: 143mm;
+    left: 0; right: 0;
+    text-align: center;
+    font-family: 'Georgia', serif;
+    font-size: 11.5pt;
+    color: #071A2E;
+    letter-spacing: 2pt;
+  }
 
-    /* ── Presented to ────────────────────────────────────────────────── */
-    .presented-to {
-      position: absolute;
-      top: 69mm;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-family: 'Cormorant Garamond', 'Georgia', serif;
-      font-style: italic;
-      font-size: 9pt;
-      color: rgba(255,230,180,0.65);
-      letter-spacing: 1pt;
-    }
+  /* ── Signatures ───────────────────────────────────────────────── */
+  .angaar-cert .sig-row {
+    position: absolute;
+    bottom: 28mm;
+    left: 24mm; right: 24mm;
+  }
+  .angaar-cert .sig-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  .angaar-cert .sig-cell  { text-align: center; vertical-align: bottom; padding: 0 4mm; }
+  .angaar-cert .sig-image {
+    height: 35mm;
+    max-width: 62mm;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto -40px auto;
+  }
+  .angaar-cert .sig-line {
+    height: 0.4pt;
+    background: linear-gradient(90deg, transparent 0%, rgba(7,26,46,0.55) 30%, rgba(7,26,46,0.55) 70%, transparent 100%);
+    width: 100%;
+    margin-bottom: 1.8mm;
+  }
+  .angaar-cert .sig-name {
+    font-family: 'Georgia', serif;
+    font-size: 13pt;
+    font-weight: 700;
+    color: #071A2E;
+    letter-spacing: 0.5pt;
+  }
+  .angaar-cert .sig-designation {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 11pt;
+    color: rgba(7,26,46,0.60);
+    margin-top: 0.6mm;
+  }
 
-    /* ── Student name ────────────────────────────────────────────────── */
-    .student-name {
-      position: absolute;
-      top: 75mm;
-      left: 20mm;
-      right: 20mm;
-      text-align: center;
-      font-family: 'Cormorant Garamond', 'Georgia', serif;
-      font-size: 30pt;
-      font-weight: 600;
-      color: #fff8f0;
-      letter-spacing: 1.5pt;
-    }
+  /* ── Bottom meta bar ──────────────────────────────────────────── */
+  .angaar-cert .meta-bar {
+    position: absolute;
+    bottom: 11.5mm;
+    left: 24mm; right: 24mm;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+  .angaar-cert .meta-id {
+    flex: 1;
+    font-family: 'Courier New', monospace;
+    font-size: 8.5pt;
+    color: rgba(7,26,46,0.50);
+    letter-spacing: 0.5pt;
+  }
+  .angaar-cert .meta-date {
+    flex: 1;
+    text-align: center;
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 11pt;
+    color: rgba(7,26,46,0.60);
+  }
+  .angaar-cert .meta-verify {
+    flex: 1;
+    text-align: right;
+    font-family: 'Courier New', monospace;
+    font-size: 8.5pt;
+    color: rgba(7,26,46,0.45);
+  }
 
-    /* Name underline */
-    .name-rule {
-      position: absolute;
-      top: 96mm;
-      left: 85mm;
-      right: 85mm;
-      height: 0.4pt;
-      background: rgba(255,130,0,0.5);
-    }
+  /* ── QR ───────────────────────────────────────────────────────── */
+  .angaar-cert .qr-block  { position: absolute; bottom: 9mm; right: 24mm; text-align: center; }
+  .angaar-cert .qr-img    {
+    width: 25mm;
+    height: 25mm;
+    display: block;
+    border: 0.8px solid rgba(7,26,46,0.25);
+    padding: 1mm;
+    background: #fff;
+  }
+  .angaar-cert .qr-label  {
+    font-family: 'Georgia', serif;
+    font-size: 8.5pt;
+    color: rgba(7,26,46,0.50);
+    letter-spacing: 0.5pt;
+    margin-top: 0.8mm;
+    text-transform: uppercase;
+  }
 
-    /* ── Body text ───────────────────────────────────────────────────── */
-    .cert-body {
-      position: absolute;
-      top: 99mm;
-      left: 22mm;
-      right: 22mm;
-      text-align: center;
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 9pt;
-      font-weight: 500;
-      color: rgba(220,190,140,0.85);
-      line-height: 1.6;
-    }
+  /* ── Watermark ────────────────────────────────────────────────── */
+  .angaar-cert .watermark {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-25deg);
+    font-family: 'Georgia', serif;
+    font-size: 50pt;
+    font-weight: 700;
+    color: rgba(7,26,46,0.032);
+    white-space: nowrap;
+    letter-spacing: 6pt;
+    pointer-events: none;
+  }
+</style>
 
-    /* ── Hours badge ─────────────────────────────────────────────────── */
-    .hours-badge {
-      position: absolute;
-      top: 116mm;
-      left: 0;
-      right: 0;
-      text-align: center;
-      font-family: 'Cinzel', 'Georgia', serif;
-      font-size: 8pt;
-      color: #ff8c00;
-      letter-spacing: 2pt;
-    }
-
-    /* ── Signature row ───────────────────────────────────────────────── */
-    .sig-row {
-      position: absolute;
-      bottom: 22mm;
-      left: 16mm;
-      right: 16mm;
-    }
-
-    /* Using table for reliable WeasyPrint column alignment */
-    .sig-table {
-      width: 100%;
-      border-collapse: collapse;
-      table-layout: fixed;
-    }
-
-    .sig-cell {
-      text-align: center;
-      vertical-align: bottom;
-      padding: 0 4mm;
-    }
-
-    .sig-image {
-      height: 12mm;
-      max-width: 30mm;
-      object-fit: contain;
-      display: block;
-      margin: 0 auto 1.5mm auto;
-    }
-
-    .sig-line {
-      height: 0.4pt;
-      background: rgba(255,130,0,0.5);
-      width: 100%;
-      margin-bottom: 1.5mm;
-    }
-
-    .sig-name {
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 8pt;
-      font-weight: 600;
-      color: #fff8f0;
-      letter-spacing: 0.5pt;
-    }
-
-    .sig-designation {
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 7pt;
-      color: rgba(200,160,100,0.75);
-      margin-top: 0.5mm;
-    }
-
-    /* ── Bottom metadata bar ─────────────────────────────────────────── */
-    .meta-bar {
-      position: absolute;
-      bottom: 12mm;
-      left: 16mm;
-      right: 16mm;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-
-    .meta-id {
-      flex: 1;
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 6.5pt;
-      color: rgba(180,130,70,0.65);
-      letter-spacing: 0.5pt;
-    }
-
-    .meta-date {
-      flex: 1;
-      text-align: center;
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 7pt;
-      color: rgba(200,160,100,0.70);
-      letter-spacing: 0.5pt;
-    }
-
-    .meta-verify {
-      flex: 1;
-      text-align: right;
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 6pt;
-      color: rgba(180,130,70,0.55);
-    }
-
-    /* ── QR code ────────────────────────────────────────────────────── */
-    .qr-block {
-      position: absolute;
-      bottom: 14mm;
-      right: 16mm;
-      text-align: center;
-    }
-
-    .qr-img {
-      width: 18mm;
-      height: 18mm;
-      display: block;
-    }
-
-    .qr-label {
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 5.5pt;
-      color: rgba(200,150,80,0.60);
-      letter-spacing: 0.5pt;
-      margin-top: 0.8mm;
-      text-align: center;
-    }
-
-    /* ── Watermark text (very faint) ─────────────────────────────────── */
-    .watermark {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) rotate(-30deg);
-      font-family: 'Cinzel', 'Georgia', serif;
-      font-size: 48pt;
-      font-weight: 700;
-      color: rgba(255,100,0,0.035);
-      white-space: nowrap;
-      letter-spacing: 6pt;
-      pointer-events: none;
-    }
-
-    /* ── Download button (visible only in browser, hidden in WeasyPrint) */
-    .download-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 9999;
-      background: rgba(10,6,3,0.92);
-      padding: 10px 20px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-    }
-
-    .download-btn {
-      background: linear-gradient(135deg, #ff6a00, #ff8c00);
-      color: #0a0603;
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 12pt;
-      font-weight: 700;
-      letter-spacing: 1pt;
-      border: none;
-      padding: 8px 24px;
-      cursor: pointer;
-      border-radius: 3px;
-      text-decoration: none;
-      display: inline-block;
-      margin-right: 12px;
-    }
-
-    .back-link {
-      color: rgba(255,160,80,0.7);
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 10pt;
-      text-decoration: none;
-      margin-right: 16px;
-    }
-
-    .verify-link {
-      color: rgba(180,130,70,0.65);
-      font-family: 'Rajdhani', 'Arial', sans-serif;
-      font-size: 9pt;
-      text-decoration: none;
-      margin-left: auto;
-    }
-
-    @media print {
-      .download-bar { display: none !important; }
-      body { margin: 0; }
-    }
-
-    /* WeasyPrint hides @media screen blocks — so download-bar won't appear in PDF */
-    @media screen {
-      html, body {
-        background: #111;
-        min-height: 100vh;
-        width: 100%;
-      }
-      .cert-root {
-        margin: 52px auto 40px auto;
-        box-shadow: 0 8px 60px rgba(255,100,0,0.25);
-      }
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Browser-only download/nav bar (invisible in WeasyPrint PDF) -->
-  <div class="download-bar">
-    <a href="/dashboard/my-certificates" class="back-link">← My Certificates</a>
-    <a href="/dashboard/certificate/{{ certificate.certificate_id }}/download/" class="download-btn">
-      ⬇ Download PDF
-    </a>
-    <a href="{{ verify_url }}" target="_blank" class="verify-link">Verify ↗</a>
-  </div>
-
+<!-- Certificate visual -->
+<div class="angaar-cert">
   <div class="cert-root">
 
-    <!-- Background ember glows -->
-    <div class="glow-bl"></div>
-    <div class="glow-tr"></div>
+    <!-- Deep navy side bars -->
+    <div class="bar-left"></div>
+    <div class="bar-right"></div>
 
     <!-- Watermark -->
-    <div class="watermark">ANGAAR</div>
+    <div class="watermark">ANGAAR HAI 🔥</div>
 
     <!-- Border frames -->
     <div class="border-outer"></div>
     <div class="border-inner"></div>
 
-    <!-- Corner ornaments (flame SVG) -->
+    <!-- Corner ornaments -->
     <div class="corner corner-tl">
       <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-        <path d="M4 52 C4 30 18 20 28 4 C22 16 30 22 26 34 C30 28 36 30 32 42 C36 36 44 38 38 52 Z"
-              fill="none" stroke="rgba(255,130,0,0.55)" stroke-width="1.2"/>
-        <line x1="4" y1="52" x2="52" y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
-        <line x1="4" y1="4"  x2="4"  y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+        <polygon points="28,4 52,28 28,52 4,28" fill="none" stroke="rgba(7,26,46,0.60)" stroke-width="1.2"/>
+        <polygon points="28,14 42,28 28,42 14,28" fill="rgba(7,26,46,0.07)" stroke="rgba(7,26,46,0.28)" stroke-width="0.7"/>
+        <circle cx="28" cy="28" r="3.5" fill="rgba(7,26,46,0.60)"/>
+        <line x1="4" y1="28" x2="4" y2="4" stroke="rgba(7,26,46,0.40)" stroke-width="0.8"/>
+        <line x1="4" y1="4" x2="28" y2="4" stroke="rgba(7,26,46,0.40)" stroke-width="0.8"/>
       </svg>
     </div>
     <div class="corner corner-tr">
       <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-        <path d="M4 52 C4 30 18 20 28 4 C22 16 30 22 26 34 C30 28 36 30 32 42 C36 36 44 38 38 52 Z"
-              fill="none" stroke="rgba(255,130,0,0.55)" stroke-width="1.2"/>
-        <line x1="4" y1="52" x2="52" y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
-        <line x1="4" y1="4"  x2="4"  y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+        <polygon points="28,4 52,28 28,52 4,28" fill="none" stroke="rgba(7,26,46,0.60)" stroke-width="1.2"/>
+        <polygon points="28,14 42,28 28,42 14,28" fill="rgba(7,26,46,0.07)" stroke="rgba(7,26,46,0.28)" stroke-width="0.7"/>
+        <circle cx="28" cy="28" r="3.5" fill="rgba(7,26,46,0.60)"/>
+        <line x1="52" y1="28" x2="52" y2="4" stroke="rgba(7,26,46,0.40)" stroke-width="0.8"/>
+        <line x1="52" y1="4" x2="28" y2="4" stroke="rgba(7,26,46,0.40)" stroke-width="0.8"/>
       </svg>
     </div>
     <div class="corner corner-bl">
       <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-        <path d="M4 52 C4 30 18 20 28 4 C22 16 30 22 26 34 C30 28 36 30 32 42 C36 36 44 38 38 52 Z"
-              fill="none" stroke="rgba(255,130,0,0.55)" stroke-width="1.2"/>
-        <line x1="4" y1="52" x2="52" y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
-        <line x1="4" y1="4"  x2="4"  y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+        <polygon points="28,4 52,28 28,52 4,28" fill="none" stroke="rgba(7,26,46,0.60)" stroke-width="1.2"/>
+        <polygon points="28,14 42,28 28,42 14,28" fill="rgba(7,26,46,0.07)" stroke="rgba(7,26,46,0.28)" stroke-width="0.7"/>
+        <circle cx="28" cy="28" r="3.5" fill="rgba(7,26,46,0.60)"/>
+        <line x1="4" y1="28" x2="4" y2="52" stroke="rgba(7,26,46,0.40)" stroke-width="0.8"/>
+        <line x1="4" y1="52" x2="28" y2="52" stroke="rgba(7,26,46,0.40)" stroke-width="0.8"/>
       </svg>
     </div>
     <div class="corner corner-br">
       <svg viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-        <path d="M4 52 C4 30 18 20 28 4 C22 16 30 22 26 34 C30 28 36 30 32 42 C36 36 44 38 38 52 Z"
-              fill="none" stroke="rgba(255,130,0,0.55)" stroke-width="1.2"/>
-        <line x1="4" y1="52" x2="52" y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
-        <line x1="4" y1="4"  x2="4"  y2="52" stroke="rgba(255,130,0,0.4)" stroke-width="0.8"/>
+        <polygon points="28,4 52,28 28,52 4,28" fill="none" stroke="rgba(7,26,46,0.60)" stroke-width="1.2"/>
+        <polygon points="28,14 42,28 28,42 14,28" fill="rgba(7,26,46,0.07)" stroke="rgba(7,26,46,0.28)" stroke-width="0.7"/>
+        <circle cx="28" cy="28" r="3.5" fill="rgba(7,26,46,0.60)"/>
+        <line x1="52" y1="28" x2="52" y2="52" stroke="rgba(7,26,46,0.40)" stroke-width="0.8"/>
+        <line x1="52" y1="52" x2="28" y2="52" stroke="rgba(7,26,46,0.40)" stroke-width="0.8"/>
       </svg>
     </div>
 
-    <!-- Header: Logo + Org name -->
-    <div class="header">
+    <!-- Header: Logo + Org + cert type label -->
+    <div class="cert-header">
       {% if org_logo_url %}
-        <img src="{{ org_logo_url }}" class="header-logo" alt="{{ org_name }}">
+      <img src="{{ org_logo_url }}" class="header-logo" alt="{{ org_name }}">
       {% endif %}
-      <div class="header-org" style="{% if not org_logo_url %}margin-left:0;{% endif %}">
+      <div class="header-org" {% if not org_logo_url %}style="margin-left:0"{% endif %}>
         <div class="header-org-name">{{ org_name }}</div>
         <div class="header-org-tagline">Igniting Careers &nbsp;·&nbsp; Building Futures</div>
       </div>
+      <div class="cert-type-label">{{ cert_type_display }}</div>
     </div>
-
     <div class="header-rule"></div>
 
-    <!-- Certificate type -->
-    <div class="cert-type">{{ cert_type_display }}</div>
+    <!-- Eyebrow -->
+    <div class="cert-eyebrow">{{ cert_type_display }}</div>
 
     <!-- Main title -->
     <div class="cert-title">Certificate</div>
 
+    <!-- Title rules + diamond -->
+    <div class="title-rule-l"></div>
+    <div class="title-rule-r"></div>
+    <div class="title-rule-diamond">
+      <svg viewBox="0 0 18 12" xmlns="http://www.w3.org/2000/svg" width="18" height="12">
+        <polygon points="9,1 17,6 9,11 1,6" fill="rgba(7,26,46,0.68)" stroke="rgba(7,26,46,0.38)" stroke-width="0.5"/>
+      </svg>
+    </div>
+
     <!-- Presented to -->
     <div class="presented-to">This certificate is proudly presented to</div>
 
-    <!-- Student name -->
-    <div class="student-name">{{ student_name }}</div>
+    <!-- Student name — now wrapped for visual grounding -->
+    <div class="student-name-wrap">
+      <div class="student-name">{{ student_name }}</div>
+    </div>
 
-    <!-- Name underline rule -->
+    <!-- Name rule -->
     <div class="name-rule"></div>
 
     <!-- Body text -->
     <div class="cert-body">{{ body_text }}</div>
 
-    <!-- Hours badge (optional) -->
+    <!-- Hours badge -->
     {% if show_hours and hours %}
-    <div class="hours-badge">Duration: {{ hours }} Hours</div>
+    <div class="hours-badge">&#9670; &nbsp; Duration: {{ hours }} Hours &nbsp; &#9670;</div>
     {% endif %}
 
     <!-- Signatures -->
@@ -528,17 +501,14 @@
           {% for sig in signatories %}
           <td class="sig-cell">
             {% if sig.signature_image_url %}
-              <img src="{{ sig.signature_image_url }}" class="sig-image" alt="{{ sig.name }}">
+            <img src="{{ sig.signature_image_url }}" class="sig-image" alt="{{ sig.name }}">
             {% else %}
-              <!-- Placeholder space when no signature image -->
-              <div style="height:12mm;"></div>
+            <div style="height:15mm;"></div>
             {% endif %}
             <div class="sig-line"></div>
             <div class="sig-name">{{ sig.name }}</div>
             <div class="sig-designation">{{ sig.designation }}</div>
-            {% if sig.organization %}
-            <div class="sig-designation">{{ sig.organization }}</div>
-            {% endif %}
+            {% if sig.organization %}<div class="sig-designation">{{ sig.organization }}</div>{% endif %}
           </td>
           {% endfor %}
         </tr>
@@ -548,28 +518,12 @@
 
     <!-- Bottom meta bar -->
     <div class="meta-bar">
-      <div class="meta-id">
-        Certificate ID: {{ certificate_id }}
-      </div>
-      <div class="meta-date">
-        Issued on {{ issued_date }}
-      </div>
+      <div class="meta-id">Certificate ID: {{ certificate_id }}</div>
+      <div class="meta-date">Issued on {{ issued_date }}</div>
       <div class="meta-verify">
-        {% if not qr_base64 %}
-          Verify at: {{ verify_url }}
-        {% endif %}
+        {% if not qr_base64 %}Verify at: {{ verify_url }}{% endif %}
       </div>
     </div>
-
-    <!-- QR Code -->
-    {% if show_qr and qr_base64 %}
-    <div class="qr-block">
-      <img src="data:image/png;base64,{{ qr_base64 }}" class="qr-img" alt="Verification QR">
-      <div class="qr-label">Scan to verify</div>
-    </div>
-    {% endif %}
 
   </div><!-- /.cert-root -->
-
-</body>
-</html>
+</div><!-- /.angaar-cert -->

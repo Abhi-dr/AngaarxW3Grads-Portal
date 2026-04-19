@@ -495,7 +495,7 @@ def my_certificates(request):
         .select_related("event", "event__certificate_template")
         .order_by("-issued_date")
     )
-    return render(request, "student/my_certificates.html", {"my_certificates": certs})
+    return render(request, "student/certificate/my_certificates.html", {"my_certificates": certs})
 
 
 # ======================================= VIEW CERTIFICATE ==============================
@@ -503,15 +503,17 @@ def my_certificates(request):
 @login_required(login_url="login")
 def view_certificate(request, id):
     """
-    Render the certificate as a FULL standalone HTML page.
-    No intermediate wrapper template — the certificate HTML IS the full response.
-    This avoids AJAX complexity and dark-mode bleed from the main site theme.
+    Renders the certificate inside the student dashboard.
+    The certificate fragment (angaar_dark.html) is included directly
+    in certificate.html via Django's {% include %} tag.
     """
-    from .certificate_generator import render_certificate_html
+    from .certificate_generator import build_context, get_fragment_path
 
     certificate = get_object_or_404(Certificate, pk=id, student=request.user, approved=True)
-    html = render_certificate_html(certificate)
-    return HttpResponse(html)
+    ctx = build_context(certificate)
+    ctx["certificate"]   = certificate
+    ctx["template_path"] = get_fragment_path(certificate)  # for any nested includes if needed
+    return render(request, "student/certificate/certificate.html", ctx)
 
 
 # ======================================= DOWNLOAD CERTIFICATE ==========================
@@ -519,26 +521,17 @@ def view_certificate(request, id):
 @login_required(login_url="login")
 def download_certificate(request, cert_id):
     """
-    Serve a PDF download of the certificate.
-
-    Pipeline:
-      1. Check Redis for cached PDF bytes (instant if HIT)
-      2. On MISS: acquire Redis lock → generate via WeasyPrint → cache → serve
-      3. Race condition: if lock is held by another request, poll until result
-         is available or generate directly after timeout.
-
-    The WeasyPrint call runs in the Gunicorn worker thread (synchronously)
-    but behind a Redis lock so only one generation runs at a time per cert.
-    Gunicorn workers are async-capable enough for the ~2–4s generation time.
+    Generate and serve a PDF certificate download.
+    WeasyPrint runs synchronously — no Redis, no Celery.
     """
-    from .certificate_generator import get_or_generate_pdf
+    from .certificate_generator import generate_pdf_bytes
 
     certificate = get_object_or_404(
         Certificate, certificate_id=cert_id, student=request.user, approved=True
     )
 
     try:
-        pdf_bytes = get_or_generate_pdf(certificate)
+        pdf_bytes = generate_pdf_bytes(certificate)
     except Exception as exc:
         logger.exception("PDF generation failed for %s: %s", cert_id, exc)
         messages.error(request, "Failed to generate PDF. Please try again shortly.")
@@ -552,7 +545,7 @@ def download_certificate(request, cert_id):
     response = HttpResponse(pdf_bytes, content_type="application/pdf")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     response["Content-Length"] = len(pdf_bytes)
-    response["Cache-Control"] = "private, no-store"  # browser must not cache (Redis handles it)
+    response["Cache-Control"] = "private, max-age=0"
     return response
 
 

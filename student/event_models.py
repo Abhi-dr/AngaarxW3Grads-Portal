@@ -311,22 +311,6 @@ class Certificate(models.Model):
         from django.urls import reverse
         return reverse("download_certificate", kwargs={"cert_id": self.certificate_id})
 
-    def get_view_url(self):
-        return f"/dashboard/event/{self.pk}/certificate/view"
-
-    def invalidate_pdf_cache(self):
-        """Remove the cached PDF from Redis."""
-        from django.core.cache import cache
-        redis_client = cache.client.get_client(write=True)
-        redis_client.delete(f"cert_pdf:{self.certificate_id}")
-        redis_client.delete(f"cert_pdf_lock:{self.certificate_id}")
-
-    def has_cached_pdf(self):
-        """Check if a cached PDF exists in Redis."""
-        from django.core.cache import cache
-        redis_client = cache.client.get_client()
-        return redis_client.exists(f"cert_pdf:{self.certificate_id}") == 1
-
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Import resource helper (kept for django-import-export compatibility)
