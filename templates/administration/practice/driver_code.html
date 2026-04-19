@@ -1,9 +1,8 @@
 {% extends "administration/base.html" %}
 {% load static %}
 
-{% block problem_active %}
-active
-{% endblock %}
+{% block problem_active %}{% if not from_course %}active{% endif %}{% endblock %}
+{% block my_batches_active %}{% if from_course %}active{% endif %}{% endblock %}
 
 {% block title %}
 Driver Code | {{ question.title }}

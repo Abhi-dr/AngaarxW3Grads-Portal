@@ -234,9 +234,17 @@ def edit_sheet(request, course_slug, sheet_slug):
         messages.success(request, "Sheet updated successfully.")
         return redirect('instructor_jovac', slug=course.slug)
 
+    thumbnail_url = None
+    try:
+        if sheet.thumbnail and getattr(sheet.thumbnail, 'name', None):
+            thumbnail_url = sheet.thumbnail.url
+    except Exception:
+        thumbnail_url = None
+
     context = {
         'course': course,
         'sheet': sheet,
+        'thumbnail_url': thumbnail_url,
     }
     return render(request, 'instructor/jovac/edit_sheet.html', context)
 

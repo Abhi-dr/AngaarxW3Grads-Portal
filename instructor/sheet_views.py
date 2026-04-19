@@ -141,10 +141,19 @@ def edit_sheet(request, slug):
         messages.success(request, "Sheet updated successfully!")
         return redirect('instructor_sheet', slug=sheet.slug)
     
+    thumbnail_url = None
+    try:
+        if sheet.thumbnail and getattr(sheet.thumbnail, 'name', None):
+            thumbnail_url = sheet.thumbnail.url
+    except Exception:
+        thumbnail_url = None
+
     parameters = {
         "instructor": instructor,
         "sheet": sheet,
-        "batches": batches
+        "batches": batches,
+        "selected_batch_ids": list(sheet.batches.values_list('id', flat=True)),
+        "thumbnail_url": thumbnail_url,
     }
     
     return render(request, 'instructor/sheet/edit_sheet.html', parameters)
@@ -606,15 +615,41 @@ def download_leaderboard_excel(request, slug):
 def test_cases(request, slug):
     
     instructor = CustomUser.objects.get(id=request.user.id)
+    referer = request.META.get('HTTP_REFERER', '')
+    from_course = (
+        request.GET.get('from_course') in ['1', 'true', 'True']
+        or '/instructor/course/' in referer
+        or 'from_course=1' in referer
+    )
     
     question = Question.objects.get(slug=slug)
     
     test_cases = TestCase.objects.filter(question=question)
     
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'success',
+            'question': {
+                'slug': question.slug,
+                'title': question.title,
+            },
+            'test_cases': [
+                {
+                    'id': tc.id,
+                    'input_data': tc.input_data or '',
+                    'expected_output': tc.expected_output or '',
+                    'explaination': getattr(tc, 'explaination', '') or '',
+                    'is_sample': tc.is_sample,
+                }
+                for tc in test_cases
+            ],
+        })
+
     parameters = {
         'instructor': instructor,
         'question': question,
-        'test_cases': test_cases
+        'test_cases': test_cases,
+        'from_course': from_course,
     }
     return render(request, 'instructor/sheet/test_cases.html', parameters)
 
@@ -665,6 +700,7 @@ def add_test_case(request, slug):
 def edit_test_case(request, id):
     
     instructor = CustomUser.objects.get(id=request.user.id)
+    from_course = request.GET.get('from_course') in ['1', 'true', 'True']
     
     test_case = TestCase.objects.get(id=id)
     
@@ -679,10 +715,26 @@ def edit_test_case(request, id):
         test_case.is_sample = is_sample
 
         test_case.save()
+
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'message': 'Test case updated successfully.',
+                'test_case': {
+                    'id': test_case.id,
+                    'input_data': test_case.input_data,
+                    'expected_output': test_case.expected_output,
+                    'is_sample': test_case.is_sample,
+                    'explaination': getattr(test_case, 'explaination', '') or ''
+                }
+            })
         
         
         messages.success(request, 'Test case updated successfully')
-        return redirect('instructor_test_cases', slug=test_case.question.slug)
+        target = reverse('instructor_test_cases', kwargs={'slug': test_case.question.slug})
+        if from_course:
+            target = f"{target}?from_course=1"
+        return redirect(target)
     
     parameters = {
         'instructor': instructor,
@@ -699,11 +751,21 @@ def edit_test_case(request, id):
 def delete_test_case(request, id):
     
     test_case = TestCase.objects.get(id=id)
+    from_course = request.GET.get('from_course') in ['1', 'true', 'True']
     
     test_case.delete()
-    
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Test case deleted successfully.'
+        })
+
     messages.success(request, 'Test case deleted successfully')
-    return redirect('instructor_test_cases', slug=test_case.question.slug)
+    target = reverse('instructor_test_cases', kwargs={'slug': test_case.question.slug})
+    if from_course:
+        target = f"{target}?from_course=1"
+    return redirect(target)
 
 
 # ======================================== DRIVER CODE ======================================
@@ -713,6 +775,12 @@ def delete_test_case(request, id):
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def driver_code(request, slug):
     question = Question.objects.get(slug=slug)
+    referer = request.META.get('HTTP_REFERER', '')
+    from_course = (
+        request.GET.get('from_course') in ['1', 'true', 'True']
+        or '/instructor/course/' in referer
+        or 'from_course=1' in referer
+    )
     
     driver_codes = {
     code.language_id: {
@@ -756,6 +824,7 @@ def driver_code(request, slug):
     parameters = {
         'question': question,
         'driver_codes': mark_safe(json.dumps(driver_codes)),
+        'from_course': from_course,
     }
 
     return render(request, 'instructor/sheet/driver_code.html', parameters)

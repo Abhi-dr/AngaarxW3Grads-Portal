@@ -229,12 +229,12 @@
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-dark">
                                         <li>
-                                            <a href="{% url 'test_cases' question.slug %}"
+                                            <a href="{% url 'test_cases' question.slug %}{% if from_course %}?from_course=1{% endif %}"
                                                 class="btn btn-success mt-1 text-blue w-100">Test Cases
                                                 ({{ question.test_cases.count }})</a>
                                         </li>
                                         <li>
-                                            <a href="{% url 'driver_code' question.slug %}"
+                                            <a href="{% url 'driver_code' question.slug %}{% if from_course %}?from_course=1{% endif %}"
                                                 class="btn btn-warning mt-1 text-blue w-100">
                                                 Driver Codes
                                             </a>

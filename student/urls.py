@@ -1,5 +1,5 @@
 from django.urls import path, include
-from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views, mcq_views
+from . import batch_views, views, doubt_solver, hackathon_views, flames_views, course_views, jovac_views, mcq_views, flames26_views
 from .api import (
     ProfileAPIView, 
     ChangePasswordAPIView, 
@@ -75,7 +75,11 @@ urlpatterns += [
     
     # ---- PAYMENT URLS ----
     path('payment/', include('student.payment_urls')),
-    
+
+    # ---- FLAMES 26 STUDENT DASHBOARD ----
+    path('flames-26/', flames26_views.student_flames26, name='student_flames26'),
+    path('flames-26/register/ajax/', flames26_views.ajax_flames26_register, name='ajax_flames26_register'),
+
     # path('flames/teams/create/<int:registration_id>/', flames.student_create_team, name='student_create_team'),
     # path('flames/teams/add-member/<int:team_id>/', flames.student_add_team_member, name='student_add_team_member'),
     # path('flames/teams/remove-member/<int:member_id>/', flames.student_remove_team_member, name='student_remove_team_member'),

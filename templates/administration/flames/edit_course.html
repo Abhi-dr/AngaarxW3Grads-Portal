@@ -95,7 +95,12 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="instructor" class="form-label">Instructor</label>
-                            <input type="text" class="form-control" id="instructor" name="instructor" value="{{ course.instructor }}" required>
+                            <select class="form-select" id="instructor" name="instructor">
+                                <option value="">-- No Instructor --</option>
+                                {% for inst in instructors %}
+                                <option value="{{ inst.id }}" {% if current_instructor and current_instructor.id == inst.id %}selected{% endif %}>{{ inst.first_name }} {{ inst.last_name }} ({{ inst.email }})</option>
+                                {% endfor %}
+                            </select>
                         </div>
                     </div>
                     <div class="col-md-6">
@@ -158,11 +163,7 @@
                     <textarea class="form-control" id="what_you_will_learn" name="what_you_will_learn" rows="4" placeholder="Enter points separated by new lines" required>{{ course.what_you_will_learn }}</textarea>
                 </div>
                 
-                <div class="mb-3">
-                    <label for="roadmap" class="form-label">Course Roadmap</label>
-                    <textarea class="form-control" id="roadmap" name="roadmap" rows="4" placeholder="Enter roadmap points separated by new lines" required>{{ course.roadmap }}</textarea>
-                </div>
-                
+
                 <div class="form-check mb-3">
                     <input class="form-check-input" type="checkbox" id="is_active" name="is_active" {% if course.is_active %}checked{% endif %}>
                     <label class="form-check-label" for="is_active">Active Course</label>

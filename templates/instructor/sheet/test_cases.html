@@ -5,16 +5,24 @@
 Test Cases🔥
 {% endblock %}
 
-{% block sheet_active %}
-active
-{% endblock %}
+{% block sheet_active %}{% if not from_course %}active{% endif %}{% endblock %}
+{% block batch_active %}{% if from_course %}active{% endif %}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
 
 <style>
-    pre{
+    pre {
         color: #d7d7d7;
+    }
+
+    pre.tc-text {
+        max-height: 80px;
+        overflow: auto;
+        font-size: 0.8rem;
+        margin: 0;
+        white-space: pre-wrap;
+        word-break: break-word;
     }
 </style>
 {% endblock %}
@@ -24,37 +32,30 @@ active
 
 <div class="container-fluid">
 
-
-
-    <div class="card">
-        <div class="card-body position-relative">
-            <h3 class="heading">
-                <span class="fw-semibold">Test Cases for {{ question.title }}</span>
-                <span class="fs-4"> | 🔥Total: {{ test_cases.count }}🔥</span>
-            </h3>
-            <!-- "i" info icon -->
-            <i class="ti ti-help position-absolute top-0 end-0 m-3" data-bs-toggle="modal" data-bs-target="#infoModal"
-                style="cursor: pointer; font-size: 25px;"></i>
-        </div>
-
-        <div class="row mx-2">
-            <div class="col-md-4 mb-3">
-                <button type="button" class="btn btn-outline-primary w-100" data-bs-toggle="modal"
-                    data-bs-target="#addTestCaseModal">
-                    Add Test Case
-                </button>
+    <div class="card mb-4">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2 position-relative">
+            <div>
+                <h3 class="heading mb-0">
+                    <span class="fw-semibold">Test Cases</span>
+                    <span class="fs-5 text-muted"> | {{ question.title }}</span>
+                </h3>
+                <span class="text-muted small">Total: <strong>{{ test_cases.count }}</strong></span>
             </div>
-            <div class="col-md-4 mb-3">
-                <button type="button" class="btn btn-outline-warning w-100" data-bs-toggle="modal"
-                    data-bs-target="#addTestCaseUsingJsonModal">
-                    Add Test Case using JSON
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTestCaseModal">
+                    <i class="ti ti-plus me-1"></i>Add Test Case
                 </button>
-            </div>
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'instructor_driver_code' question.slug %}" class="btn btn-outline-warning w-100">
-                    Driver Code
+                <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#addTestCaseUsingJsonModal">
+                    <i class="ti ti-json me-1"></i>Add via JSON
+                </button>
+                <a href="{% url 'instructor_driver_code' question.slug %}{% if from_course %}?from_course=1{% endif %}" class="btn btn-outline-secondary">
+                    <i class="ti ti-code me-1"></i>Driver Code
                 </a>
             </div>
+
+            <i class="ti ti-help position-absolute top-0 end-0 m-3" data-bs-toggle="modal" data-bs-target="#infoModal"
+                style="cursor: pointer; font-size: 25px;"></i>
         </div>
     </div>
 
@@ -94,7 +95,13 @@ active
                             </th>
                             <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">
-                                    Expected
+                                    Expected Output
+                                </h6>
+                            </th>
+
+                            <th class="border-bottom-0">
+                                <h6 class="fw-semibold mb-0">
+                                    Explanation
                                 </h6>
                             </th>
 
@@ -106,13 +113,7 @@ active
 
                             <th class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">
-                                    Action#1
-                                </h6>
-                            </th>
-
-                            <th class="border-bottom-0">
-                                <h6 class="fw-semibold mb-0">
-                                    Action#2
+                                    Actions
                                 </h6>
                             </th>
 
@@ -125,7 +126,11 @@ active
 
                         {% for test_case in test_cases %}
 
-                        <tr>
+                        <tr data-testcase-id="{{ test_case.id }}"
+                            data-input="{{ test_case.input_data|default:''|escapejs }}"
+                            data-output="{{ test_case.expected_output|default:''|escapejs }}"
+                            data-explain="{{ test_case.explaination|default:''|escapejs }}"
+                            data-sample="{% if test_case.is_sample %}1{% else %}0{% endif %}">
                             <td class="border-bottom-0">
                                 <h6 class="fw-semibold mb-0">{{ forloop.counter }}</h6>
                             </td>
@@ -148,13 +153,12 @@ active
 
                             <td class="border-bottom-0">
                                 <p class="fw-semibold mb-0">
-                                    <!-- <button class="btn btn-sm btn-dark fw-semibold mb-1 text-wrap"
-                                        data-bs-toggle="modal" data-bs-target="#questionModal" style="width: 50%;"
-                                        data-title="{{ test_case.input_data }}"
-                                        data-description="{{ test_case.expected_output|linebreaksbr }}"
-                                        title="{{ test_case.input_data }}">View</button> -->
-                                    {{ test_case.expected_output|linebreaksbr }}
+                                    <pre class="tc-text">{{ test_case.expected_output }}</pre>
                                 </p>
+                            </td>
+
+                            <td class="border-bottom-0">
+                                <small>{{ test_case.explaination|default:"—" }}</small>
                             </td>
 
                             <td class="border-bottom-0">
@@ -169,17 +173,8 @@ active
 
                             <td class="border-bottom-0">
                                 <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'instructor_edit_test_case' test_case.id %}"
-                                        class="btn btn-outline-secondary float-end">Modify</a>
-                                </div>
-                            </td>
-
-
-                            <td class="border-bottom-0">
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="{% url 'instructor_delete_test_case' test_case.id %}"
-                                        class="btn btn-danger float-end"
-                                        onclick="return confirm('Pakka delete krna h soch le ek baar or!!!');">Delete</a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary js-edit-testcase">Edit</button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger js-delete-testcase">Delete</button>
                                 </div>
                             </td>
                         </tr>
@@ -232,6 +227,39 @@ active
         </div>
     </div>
     {% endautoescape %}
+
+    <div class="modal fade" id="editTestCaseModal" tabindex="-1" aria-labelledby="editTestCaseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editTestCaseModalLabel">Edit Test Case</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="editTestCaseForm" method="POST">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <input type="hidden" id="editTestCaseId">
+                        <div class="mb-3">
+                            <label for="editInputData" class="form-label">Input Data</label>
+                            <textarea class="form-control" id="editInputData" name="input_data" rows="4"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editExpectedOutput" class="form-label">Expected Output</label>
+                            <textarea class="form-control" id="editExpectedOutput" name="expected_output" rows="4" required></textarea>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="editIsSample" name="is_sample">
+                            <label class="form-check-label" for="editIsSample">Is Sample Test Case?</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Update Test Case</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     {% autoescape off %}
     <!-- Add Test Case Modal  using JSON-->
@@ -297,6 +325,175 @@ active
 </div>
 
 <script>
+    const csrfToken = '{{ csrf_token }}';
+    const questionSlug = "{{ question.slug }}";
+    const tbody = document.querySelector('table tbody');
+
+    function renderInputCell(value) {
+        if (!value) {
+            return '<h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="No Input Data">No Input Data</h6>';
+        }
+        return `
+            <h6 class="fw-semibold mb-1" data-bs-toggle="tooltip" data-bs-placement="top" title="${value.replace(/"/g, '&quot;')}">
+                ${value.length > 10 ? `${value.slice(0, 10)}...` : value}
+            </h6>
+        `;
+    }
+
+    function renderExpectedCell(value) {
+        return `<pre class="tc-text">${value || ''}</pre>`;
+    }
+
+    function renderSampleBadge(isSample) {
+        return isSample ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>';
+    }
+
+    function renderExplainCell(value) {
+        return `<small>${value || '—'}</small>`;
+    }
+
+    function renderRow(tc, idx) {
+        return `
+            <tr data-testcase-id="${tc.id}" data-input="${(tc.input_data || '').replace(/"/g, '&quot;')}" data-output="${(tc.expected_output || '').replace(/"/g, '&quot;')}" data-explain="${(tc.explaination || '').replace(/"/g, '&quot;')}" data-sample="${tc.is_sample ? '1' : '0'}">
+                <td class="border-bottom-0"><h6 class="fw-semibold mb-0">${idx}</h6></td>
+                <td class="border-bottom-0">${renderInputCell(tc.input_data || '')}</td>
+                <td class="border-bottom-0">${renderExpectedCell(tc.expected_output || '')}</td>
+                <td class="border-bottom-0">${renderExplainCell(tc.explaination || '')}</td>
+                <td class="border-bottom-0">${renderSampleBadge(!!tc.is_sample)}</td>
+                <td class="border-bottom-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-secondary js-edit-testcase">Edit</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger js-delete-testcase">Delete</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }
+
+    function renderLoading() {
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">Loading test cases...</td></tr>';
+        }
+    }
+
+    function renderEmpty() {
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No test cases found.</td></tr>';
+        }
+    }
+
+    async function loadTestCases() {
+        renderLoading();
+        try {
+            const response = await fetch(`/instructor/test_cases/${questionSlug}/`, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const payload = await response.json();
+            if (!response.ok || payload.status !== 'success') {
+                throw new Error(payload.message || 'Failed to load test cases.');
+            }
+
+            const rows = payload.test_cases || [];
+            if (!rows.length) {
+                renderEmpty();
+                return;
+            }
+
+            tbody.innerHTML = rows.map((tc, index) => renderRow(tc, index + 1)).join('');
+        } catch (error) {
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger py-4">Unable to load test cases right now.</td></tr>';
+            }
+        }
+    }
+
+    document.addEventListener('click', function (event) {
+        const editBtn = event.target.closest('.js-edit-testcase');
+        if (editBtn) {
+            const row = editBtn.closest('tr');
+            if (!row) return;
+            document.getElementById('editTestCaseId').value = row.dataset.testcaseId || '';
+            document.getElementById('editInputData').value = row.dataset.input || '';
+            document.getElementById('editExpectedOutput').value = row.dataset.output || '';
+            document.getElementById('editIsSample').checked = row.dataset.sample === '1';
+
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('editTestCaseModal'));
+            modal.show();
+            return;
+        }
+
+        const deleteBtn = event.target.closest('.js-delete-testcase');
+        if (deleteBtn) {
+            const row = deleteBtn.closest('tr');
+            if (!row) return;
+            const id = row.dataset.testcaseId;
+            if (!id) return;
+            if (!confirm('Pakka delete krna h soch le ek baar or!!!')) return;
+
+            fetch(`/instructor/delete_test_case/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': csrfToken,
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        row.remove();
+                    } else {
+                        alert(data.message || 'Unable to delete test case.');
+                    }
+                })
+                .catch(() => alert('An error occurred. Please try again.'));
+        }
+    });
+
+    document.getElementById('editTestCaseForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const id = document.getElementById('editTestCaseId').value;
+        if (!id) return;
+
+        const formData = new FormData(event.target);
+
+        fetch(`/instructor/edit_test_case/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken,
+            },
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status !== 'success') {
+                    alert(data.message || 'Unable to update test case.');
+                    return;
+                }
+
+                const row = document.querySelector(`tr[data-testcase-id="${data.test_case.id}"]`);
+                if (row) {
+                    row.dataset.input = data.test_case.input_data || '';
+                    row.dataset.output = data.test_case.expected_output || '';
+                    row.dataset.explain = data.test_case.explaination || '';
+                    row.dataset.sample = data.test_case.is_sample ? '1' : '0';
+
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        cells[1].innerHTML = renderInputCell(data.test_case.input_data || '');
+                        cells[2].innerHTML = renderExpectedCell(data.test_case.expected_output || '');
+                        cells[3].innerHTML = renderExplainCell(data.test_case.explaination || '');
+                        cells[4].innerHTML = renderSampleBadge(!!data.test_case.is_sample);
+                    }
+                }
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editTestCaseModal'));
+                if (modal) {
+                    modal.hide();
+                }
+            })
+            .catch(() => alert('An error occurred. Please try again.'));
+    });
     document.getElementById('addTestCaseForm').addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -317,21 +514,9 @@ active
                     alert(data.message);
 
                     // Update the test cases table dynamically
-                    const newRow = `
-                    <tr>
-                        <td class="border-bottom-0"> <h6 class="fw-semibold mb-0">${data.test_case.id}</h6> </td>
-                        <td>${data.test_case.input_data}</td>
-                        <td>${data.test_case.expected_output}</td>
-                        <td>${data.test_case.is_sample ? '<span class="badge bg-success">Yes</span>' : '<span class="badge bg-danger">No</span>'}</td>
-                        <td>
-                            <a href="/edit-test-case/${data.test_case.id}/" class="btn btn-outline-secondary">Modify</a>
-                        </td>
-                        <td>
-                            <a href="/delete-test-case/${data.test_case.id}/" class="btn btn-danger">Delete</a>
-                        </td>
-                    </tr>
-                `;
-                    document.querySelector('table tbody').insertAdjacentHTML('beforeend', newRow);
+                    const currentRows = tbody.querySelectorAll('tr');
+                    const newRow = renderRow(data.test_case, currentRows.length + 1);
+                    tbody.insertAdjacentHTML('beforeend', newRow);
 
                     // Close the modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addTestCaseModal'));
@@ -372,7 +557,7 @@ active
                     // Reset the form
                     form.reset();
                     modal.hide()
-                    window.location.reload();
+                    loadTestCases();
                 } else {
                     modal.hide()
                     alert(data.message);
@@ -383,6 +568,8 @@ active
                 alert('An error occurred. Please try again.');
             });
     });
+
+    loadTestCases();
 
 </script>
 

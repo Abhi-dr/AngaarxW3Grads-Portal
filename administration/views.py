@@ -668,6 +668,59 @@ def fetch_view_student_profile(request,id):
 
 @login_required(login_url='login')
 @staff_member_required(login_url='login')
+@admin_required
+def update_student_profile(request, id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'message': 'Invalid JSON payload'}, status=400)
+
+    student = get_object_or_404(CustomUser, id=id, role='student')
+
+    username = (payload.get('username') or '').strip()
+    email = (payload.get('email') or '').strip()
+    first_name = (payload.get('first_name') or '').strip()
+    last_name = (payload.get('last_name') or '').strip()
+
+    if not username:
+        return JsonResponse({'success': False, 'message': 'Username is required'}, status=400)
+    if not email:
+        return JsonResponse({'success': False, 'message': 'Email is required'}, status=400)
+
+    if CustomUser.objects.filter(username__iexact=username).exclude(id=student.id).exists():
+        return JsonResponse({'success': False, 'message': 'Username already exists'}, status=400)
+
+    if CustomUser.objects.filter(email__iexact=email).exclude(id=student.id).exists():
+        return JsonResponse({'success': False, 'message': 'Email already exists'}, status=400)
+
+    student.username = username
+    student.email = email
+    student.first_name = first_name
+    student.last_name = last_name
+    student.mobile_number = (payload.get('mobile_number') or '').strip() or None
+    student.college = (payload.get('college') or '').strip() or None
+    student.linkedin_id = (payload.get('linkedin_id') or '').strip() or None
+    student.github_id = (payload.get('github_id') or '').strip() or None
+
+    dob = (payload.get('dob') or '').strip()
+    if dob:
+        try:
+            student.dob = datetime.datetime.strptime(dob, '%Y-%m-%d').date()
+        except ValueError:
+            return JsonResponse({'success': False, 'message': 'Invalid date format. Use YYYY-MM-DD.'}, status=400)
+    else:
+        student.dob = None
+
+    student.save()
+
+    return JsonResponse({'success': True, 'message': 'Student profile updated successfully'})
+
+
+@login_required(login_url='login')
+@staff_member_required(login_url='login')
 def get_user_stats(request):
     """Get user statistics for the admin dashboard"""
     if request.method == 'GET':

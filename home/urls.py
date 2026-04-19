@@ -22,7 +22,7 @@ urlpatterns = [
 
 ]
 
-# ====================================== FLAMES ========================================
+# ====================================== FLAMES 25 ========================================
 
 
 urlpatterns += [
@@ -32,6 +32,15 @@ urlpatterns += [
     
     path("flames/<slug:slug>/register/", flames.register_flames, name="flames_register"),
     path("flames/validate-referral/", flames.validate_referral, name="validate_referral"),
+]
+
+# ====================================== FLAMES 26 ========================================
+
+
+urlpatterns += [
+    path("flames-26/", flames.flames26, name="flames26"),
+    path("flames-26/<slug:track_slug>/", flames.flames26_track_detail, name="flames26_track_detail"),
+    path("flames-26/<slug:track_slug>/register/", flames.flames26_register, name="flames26_register"),
 ]
 
 # ====================================== FLARE ========================================

@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Article, Comment, FlamesCourse, FlamesCourseTestimonial, \
-    FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, Session, FreeClassWhatsappGroupLink 
+    FlamesRegistration, Alumni, ReferralCode, FlamesTeam, FlamesTeamMember, \
+    Session, FreeClassWhatsappGroupLink, FlamesEdition
 
 @admin.register(Article)
 class ArticleAdmin(admin.ModelAdmin):
@@ -22,19 +23,56 @@ class CommentAdmin(admin.ModelAdmin):
 
 # ================== FLAMES ===================
 
+@admin.register(FlamesEdition)
+class FlamesEditionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'year', 'is_active', 'registration_open', 'start_date', 'end_date')
+    list_editable = ('is_active', 'registration_open')
+    ordering = ('-year',)
+
+@admin.register(FlamesCourse)
 class FlamesCourseAdmin(admin.ModelAdmin):
-    list_display = ('title', 'is_active', 'created_at')
-    list_filter = ('is_active',)
+    list_display  = ('title', 'edition', 'display_order', 'price', 'discount_price', 'is_active')
+    list_filter   = ('edition', 'is_active')
+    list_editable = ('is_active',)
     search_fields = ('title', 'subtitle', 'description')
     prepopulated_fields = {'slug': ('title',)}
+    filter_horizontal = ('instructor',)
+    ordering = ('edition', 'display_order', 'id')
 
+    fieldsets = (
+        ('Core Details', {
+            'fields': ('edition', 'title', 'slug', 'subtitle', 'level', 'description', 'is_active'),
+        }),
+        ('Pricing', {
+            'fields': ('price', 'discount_price'),
+        }),
+        ('Content', {
+            'fields': ('what_you_will_learn',),
+            'description': 'Enter each point on a new line.',
+        }),
+        ('Instructors', {
+            'fields': ('instructor',),
+        }),
+        ('Display / Branding', {
+            'classes': ('collapse',),
+            'fields': ('icon_class', 'icon_color', 'button_color'),
+            'description': 'Optional. Defaults are pre-filled.',
+        }),
+        ('Links', {
+            'classes': ('collapse',),
+            'fields': ('whatsapp_group_link',),
+        }),
+    )
+
+
+@admin.register(FlamesCourseTestimonial)
 class FlamesCourseTestimonialAdmin(admin.ModelAdmin):
     list_display = ('student_name', 'course', 'rating')
     list_filter = ('course', 'rating')
 
 class FlamesRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'course', 'created_at', 'get_payable_amount', 'status')
-    list_filter = ('course', 'year', 'created_at', 'registration_mode', 'status')
+    list_display = ('user', 'course', 'edition', 'year', 'created_at', 'get_payable_amount', 'status')
+    list_filter = ('edition', 'course', 'status', 'registration_mode', 'created_at')
     search_fields = ('user__username', 'user__email', 'team__name', "payment_id")
     
     def get_team_name(self, obj):
@@ -102,8 +140,8 @@ class ReferralCodeAdmin(admin.ModelAdmin):
     generate_team_codes.short_description = "Generate team referral codes"
 
 class FlamesTeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'team_leader', 'course')
-    list_filter = ('course',)
+    list_display = ('name', 'team_leader', 'course', 'edition')
+    list_filter = ('edition', 'course')
     search_fields = ('name', 'team_leader__username')
     
     
@@ -112,8 +150,6 @@ class FlamesTeamMemberAdmin(admin.ModelAdmin):
     list_filter = ('team',)
     search_fields = ('team__name', 'student__username')
 
-admin.site.register(FlamesCourse, FlamesCourseAdmin)
-admin.site.register(FlamesCourseTestimonial, FlamesCourseTestimonialAdmin)
 admin.site.register(FlamesRegistration, FlamesRegistrationAdmin)
 admin.site.register(Alumni, AlumniAdmin)
 admin.site.register(ReferralCode, ReferralCodeAdmin)

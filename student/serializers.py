@@ -38,8 +38,8 @@ class ProfileSerializer(serializers.ModelSerializer):
             "profile_pic_url",
             "profile_score",
         ]
-        # username, coins are visible but not directly editable via PATCH
-        read_only_fields = ["id", "username", "coins", "profile_score", "profile_pic_url"]
+        # coins are system-managed; other profile fields can be edited via PATCH
+        read_only_fields = ["id", "coins", "profile_score", "profile_pic_url"]
 
     # ── Computed fields ──────────────────────────────────────────
     def get_profile_score(self, obj):

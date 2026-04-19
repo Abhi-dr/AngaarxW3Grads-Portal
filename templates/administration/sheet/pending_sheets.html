@@ -1,6 +1,7 @@
 {% extends 'administration/base.html' %}
 
 {% load custom_filters %}
+{% load static %}
 
 {% block sheet_active %}
 active
@@ -58,7 +59,11 @@ Administration | Pending Sheets
             <h5 class="card-title fw-semibold mb-0"></h5>
             <div class="card">
                 <a href="{% url 'administrator_sheet' sheet.slug %}">
+                    {% if sheet.thumbnail and sheet.thumbnail.name %}
                     <img src="{{ sheet.thumbnail.url }}" class="card-img-top" alt="Sheet Thumbnail" />
+                    {% else %}
+                    <img src="{% static 'img/student/default-avatar.svg' %}" class="card-img-top" alt="Sheet Thumbnail" />
+                    {% endif %}
                     <div class="card-body">
                         <h5 class="card-title">
                             {{ sheet.name }}🔥

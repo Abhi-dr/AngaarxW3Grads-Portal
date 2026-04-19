@@ -1,4 +1,4 @@
-﻿{% load static %}
+{% load static %}
 
 <!doctype html>
 <html lang="en" data-bs-theme="dark">
@@ -650,7 +650,7 @@
 
                         <li class="sidebar-item">
                             <a class="sidebar-link {% block flames_active %} {% endblock %}"
-                                href="{% url 'admin_flames_courses' %}" aria-expanded="false">
+                                href="{% url 'flames_select_edition' %}" aria-expanded="false">
                                 <span>
                                     <i class="ti ti-flame"></i>
                                 </span>
@@ -856,7 +856,7 @@
                             <li class="nav-item dropdown">
                                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2"
                                     data-bs-toggle="dropdown" aria-expanded="false">
-                                    <img src="{{ user.profile_pic.url }}" alt="" width="35" height="35"
+                                    <img src="{% if user.profile_pic %}{{ user.profile_pic.url }}{% else %}{% static 'img/student/default-avatar.svg' %}{% endif %}" alt="Admin Avatar" width="35" height="35"
                                         class="rounded-circle">
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
@@ -1093,6 +1093,11 @@
         (function () {
             const typingTimers = new WeakMap();
 
+            function isLiveSearchOptOut(input) {
+                return input.hasAttribute('data-live-search-ignore') ||
+                    input.getAttribute('data-live-search-ignore') === 'true';
+            }
+
             function looksLikeSearchInput(input) {
                 const attrs = [
                     input.type || '',
@@ -1112,7 +1117,23 @@
                     const text = (btn.textContent || btn.value || '').trim().toLowerCase();
                     const idClass = ((btn.id || '') + ' ' + (btn.className || '')).toLowerCase();
 
-                    if (text === 'search' || idClass.includes('search')) {
+                    const isClearOrReset =
+                        text.includes('clear') ||
+                        text.includes('reset') ||
+                        idClass.includes('clear') ||
+                        idClass.includes('reset');
+                    if (isClearOrReset) {
+                        continue;
+                    }
+
+                    const isSearchByText = text === 'search' || text.includes('search');
+                    const isSearchByMarker =
+                        idClass.includes('search-btn') ||
+                        idClass.includes('searchbutton') ||
+                        idClass.includes('btn-search') ||
+                        idClass.includes('search_button');
+
+                    if (isSearchByText || isSearchByMarker) {
                         return btn;
                     }
                 }
@@ -1164,6 +1185,10 @@
                     return;
                 }
 
+                if (isLiveSearchOptOut(target)) {
+                    return;
+                }
+
                 if (event.isComposing) {
                     return;
                 }
@@ -1191,6 +1216,10 @@
                 }
 
                 if (!isSupportedInput(target)) {
+                    return;
+                }
+
+                if (isLiveSearchOptOut(target)) {
                     return;
                 }
 

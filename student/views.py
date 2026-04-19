@@ -19,6 +19,7 @@ from home.models import Alumni, ReferralCode
 from django.template import engines, Template, Context
 from weasyprint import HTML
 from django.http import HttpResponse
+from django.db import transaction
 from django.db.models import Max, Sum
 
 # ========================================= DASHBOARD =========================================
@@ -386,36 +387,33 @@ def leveller(request):
 
 # ============================================ RESTORE STREAK =======================================
 
+@login_required(login_url="login")
 def restore_streak(request):
-    if request.method == 'POST' and request.user.is_authenticated:
-        student = request.user  # CustomUser — Streak FK points to it, coins field is direct
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+    with transaction.atomic():
+        student = CustomUser.objects.select_for_update().get(id=request.user.id)
         streak = Streak.get_user_streak(student)
-        
-        # Check if streak can be restored using the model method
+
         if not streak.can_restore_streak():
             return JsonResponse({'status': 'error', 'message': 'Streak cannot be restored. You can only restore if you missed exactly 1 day.'})
-        
-        if student.coins >= 50:
-            student.coins -= 50
-            student.save()
-            
-            # Use the model's restore_streak method
-            if streak.restore_streak():
-                return JsonResponse({
-                    'status': 'success', 
-                    'message': 'Streak restored successfully!',
-                    'current_streak': streak.current_streak,
-                    'coins_remaining': student.coins
-                })
-            else:
-                # Refund coins if restore failed
-                student.coins += 50
-                student.save()
-                return JsonResponse({'status': 'error', 'message': 'Failed to restore streak.'})
-        else:
+
+        if student.coins < 50:
             return JsonResponse({'status': 'error', 'message': 'Not enough coins to restore streak. You need 50 coins.'})
-    
-    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+        student.coins -= 50
+        student.save(update_fields=['coins'])
+
+        if not streak.restore_streak():
+            return JsonResponse({'status': 'error', 'message': 'Failed to restore streak.'})
+
+        return JsonResponse({
+            'status': 'success',
+            'message': 'Streak restored successfully!',
+            'current_streak': streak.current_streak,
+            'coins_remaining': student.coins
+        })
 
 
 # ============================================ TOTAL SCORE ==========================================

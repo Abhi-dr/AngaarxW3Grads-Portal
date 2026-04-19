@@ -11,6 +11,7 @@ urlpatterns = [
     
     path("view_student_profile/<int:id>", views.view_student_profile, name="administration_view_student_profile"),
     path("fetch_view_student_profile/<int:id>", views.fetch_view_student_profile, name="fetch_view_student_profile"),
+    path("update_student_profile/<int:id>", views.update_student_profile, name="update_student_profile"),
     
     path("attendance_visualizer/", views.attendance_visualizer, name="attendance_visualizer"),
     path('process_attendance_excel/', views.process_attendance_excel, name='process_attendance_excel'),
@@ -228,7 +229,13 @@ urlpatterns += [
 
 # Flames Management 
 urlpatterns += [
+    # Edition selector — the entry point when clicking FLAMES in the sidebar
+    path("flames/", flames_views.flames_select_edition, name="flames_select_edition"),
+    path("flames/set-edition/", flames_views.flames_set_edition, name="flames_set_edition"),
+
     path("flames/courses/", flames_views.flames_courses, name="admin_flames_courses"),
+    path("flames/courses/reorder/", flames_views.admin_reorder_flames_courses, name="admin_reorder_flames_courses"),
+    path("flames/courses/reorder/save/", flames_views.admin_save_flames_course_order, name="admin_save_flames_course_order"),
     path("flames/registrations/", flames_views.flames_registrations, name="admin_flames_registrations"),
     
     path("flames/registrations/ajax/", flames_views.admin_registrations_ajax, name="admin_registrations_ajax"),
@@ -241,6 +248,7 @@ urlpatterns += [
     
     path("flames/course/add/", flames_views.admin_add_course, name="admin_add_course"),
     path("flames/course/edit/<int:course_id>/", flames_views.admin_edit_course, name="admin_edit_course"),
+    path("flames/course/delete/<int:course_id>/", flames_views.admin_delete_course, name="admin_delete_course"),
     path("flames/toggle-course-status/", flames_views.admin_toggle_course_status, name="admin_toggle_course_status"),
     path("flames/registration-details/", flames_views.admin_registration_details, name="admin_registration_details"),
     path("flames/update-registration-status/", flames_views.admin_update_registration_status, name="admin_update_registration_status"),

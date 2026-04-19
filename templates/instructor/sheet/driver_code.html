@@ -1,9 +1,8 @@
 {% extends "instructor/base.html" %}
 {% load static %}
 
-{% block sheet_active %}
-active
-{% endblock %}
+{% block sheet_active %}{% if not from_course %}active{% endif %}{% endblock %}
+{% block batch_active %}{% if from_course %}active{% endif %}{% endblock %}
 
 {% block title %}
 Driver Code | {{ question.title }}

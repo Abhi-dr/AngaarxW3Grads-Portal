@@ -1,0 +1,1255 @@
+{% extends "home/base.html" %}
+{% load static %}
+
+{% block title %}Register for {{ course.title }} | FLAMES '26 | Angaar{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/home/css/index.css' %}">
+<link rel="stylesheet" href="{% static 'css/home/css/flames.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<style>
+    html { scroll-behavior: smooth; }
+    body { background: #0B0B0B; overflow-x: hidden; }
+
+    /* ── Background ─────────────────────────────────────────── */
+    .reg-bg {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background:
+            radial-gradient(circle at 15% 25%, rgba(255,107,0,.13) 0%, transparent 35%),
+            radial-gradient(circle at 85% 75%, rgba(255,107,0,.08) 0%, transparent 40%);
+    }
+    #particles-js {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    }
+
+    /* ── Page wrapper ───────────────────────────────────────── */
+    .reg-page {
+        position: relative; z-index: 1;
+        padding: 100px 0 80px;
+        min-height: 100vh;
+    }
+
+    .reg-inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 40px;
+        align-items: start;
+    }
+
+    /* ── Left panel: track info ─────────────────────────────── */
+    .track-panel {
+        position: sticky;
+        top: 100px;
+    }
+
+    .flames26-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,107,0,.12);
+        border: 1px solid rgba(255,107,0,.3);
+        border-radius: 100px;
+        padding: 6px 16px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #ff6b00;
+        margin-bottom: 28px;
+    }
+
+    .track-title {
+        font-size: clamp(1.8rem, 3vw, 2.6rem);
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.15;
+        margin-bottom: 12px;
+    }
+
+    .track-tagline {
+        font-size: 1rem;
+        color: #888;
+        font-style: italic;
+        margin-bottom: 28px;
+    }
+
+    .track-meta-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 32px;
+    }
+
+    .track-meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255,255,255,.05);
+        border: 1px solid rgba(255,255,255,.08);
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        color: #bbb;
+    }
+
+    .track-meta-chip i { color: #ff6b00; font-size: 0.75rem; }
+
+    .what-you-get {
+        background: rgba(255,107,0,.06);
+        border: 1px solid rgba(255,107,0,.15);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    .wg-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #ff6b00;
+        margin-bottom: 16px;
+    }
+
+    .wg-list {
+        list-style: none;
+        margin: 0; padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .wg-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #ccc;
+        line-height: 1.4;
+    }
+
+    .wg-list li::before {
+        content: '';
+        width: 6px; height: 6px;
+        background: #ff6b00;
+        border-radius: 50%;
+        margin-top: 5px;
+        flex-shrink: 0;
+    }
+
+    .price-card {
+        background: rgba(30,30,30,.6);
+        border: 1px solid rgba(255,255,255,.07);
+        border-radius: 16px;
+        padding: 20px 24px;
+        backdrop-filter: blur(10px);
+    }
+
+    .price-label { font-size: 0.8rem; color: #666; margin-bottom: 4px; }
+
+    .price-row {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+    }
+
+    .price-original {
+        font-size: 1rem;
+        color: #555;
+        text-decoration: line-through;
+    }
+
+    .price-current {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #ff6b00;
+    }
+
+    .price-note {
+        font-size: 0.78rem;
+        color: #2ecc71;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+
+    /* ── Right panel: form ──────────────────────────────────── */
+    .form-panel {
+        background: rgba(18,18,18,.7);
+        border: 1px solid rgba(255,255,255,.07);
+        border-radius: 20px;
+        padding: 44px 40px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 30px 80px rgba(0,0,0,.5);
+    }
+
+    .form-panel-title {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 6px;
+    }
+
+    .form-panel-sub {
+        font-size: 0.88rem;
+        color: #666;
+        margin-bottom: 32px;
+    }
+
+    .section-divider {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+        color: #ff6b00;
+        border-bottom: 1px solid rgba(255,107,0,.2);
+        padding-bottom: 8px;
+        margin: 28px 0 22px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+
+    .form-label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #aaa;
+        margin-bottom: 7px;
+        letter-spacing: 0.3px;
+    }
+
+    .form-label .req { color: #ff6b00; margin-left: 2px; }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.09);
+        border-radius: 10px;
+        color: #fff;
+        font-size: 0.93rem;
+        transition: border-color .25s, box-shadow .25s;
+        outline: none;
+    }
+
+    .form-control::placeholder { color: #444; }
+
+    .form-control:focus {
+        border-color: #ff6b00;
+        box-shadow: 0 0 0 3px rgba(255,107,0,.15);
+    }
+
+    .form-control.is-invalid { border-color: #e74c3c; box-shadow: 0 0 0 3px rgba(231,76,60,.15); }
+    .form-control.is-valid   { border-color: #2ecc71; box-shadow: 0 0 0 3px rgba(46,204,113,.15); }
+
+    .form-feedback { font-size: 0.78rem; margin-top: 5px; }
+    .form-feedback.ok  { color: #2ecc71; }
+    .form-feedback.err { color: #e74c3c; }
+
+    /* input + icon wrapper */
+    .input-wrap { position: relative; }
+    .input-wrap .vi {
+        position: absolute; right: 12px; top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.8rem; display: none;
+    }
+    .input-wrap .vi.ok  { color: #2ecc71; display: block; }
+    .input-wrap .vi.err { color: #e74c3c; display: block; }
+
+    /* two-col grid */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    /* registration mode toggle */
+    .mode-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 0;
+    }
+
+    .mode-option { display: none; }
+
+    .mode-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 14px 10px;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.09);
+        border-radius: 12px;
+        color: #888;
+        cursor: pointer;
+        transition: all .25s;
+        text-align: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .mode-label i { font-size: 1.3rem; color: #555; transition: color .25s; }
+
+    .mode-option:checked + .mode-label {
+        background: rgba(255,107,0,.12);
+        border-color: #ff6b00;
+        color: #fff;
+    }
+
+    .mode-option:checked + .mode-label i { color: #ff6b00; }
+
+    /* password strength */
+    .pwd-bar {
+        height: 3px;
+        background: rgba(255,255,255,.08);
+        border-radius: 2px;
+        margin-top: 8px;
+        overflow: hidden;
+    }
+
+    .pwd-bar-fill {
+        height: 100%;
+        width: 0;
+        border-radius: 2px;
+        transition: width .3s, background .3s;
+    }
+
+    .pwd-hints {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+    }
+
+    .pwd-hint {
+        font-size: 0.72rem;
+        color: #555;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: color .2s;
+    }
+
+    .pwd-hint.met { color: #2ecc71; }
+
+    /* team section */
+    .team-section { display: none; }
+
+    .team-member-card {
+        background: rgba(255,255,255,.03);
+        border: 1px solid rgba(255,255,255,.07);
+        border-radius: 12px;
+        padding: 18px 20px;
+        margin-bottom: 14px;
+    }
+
+    .team-member-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #ddd;
+        margin-bottom: 12px;
+    }
+
+    .member-num {
+        width: 24px; height: 24px;
+        background: #ff6b00;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.72rem; font-weight: 800; color: #fff;
+        flex-shrink: 0;
+    }
+
+    /* referral */
+    .referral-result {
+        font-size: 0.82rem;
+        margin-top: 6px;
+        min-height: 18px;
+        color: #888;
+    }
+
+    /* price summary */
+    .price-summary {
+        background: rgba(255,107,0,.06);
+        border: 1px solid rgba(255,107,0,.2);
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-top: 20px;
+        display: none;
+    }
+
+    .ps-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.88rem;
+        margin-bottom: 8px;
+    }
+
+    .ps-row:last-child { margin-bottom: 0; }
+    .ps-label { color: #aaa; }
+    .ps-value { color: #fff; font-weight: 700; }
+    .ps-value.green { color: #2ecc71; }
+    .ps-value.orange { color: #ff6b00; font-size: 1.05rem; }
+
+    /* submit */
+    .submit-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #ff6b00, #ff9a40);
+        border: none;
+        border-radius: 50px;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        letter-spacing: .5px;
+        transition: all .3s;
+        box-shadow: 0 10px 30px rgba(255,107,0,.35);
+        margin-top: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 40px rgba(255,107,0,.45);
+    }
+
+    .submit-btn:disabled { background: #333; box-shadow: none; cursor: not-allowed; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { animation: spin .8s linear infinite; }
+
+    /* messages */
+    .msg-box {
+        background: rgba(231,76,60,.12);
+        border: 1px solid rgba(231,76,60,.3);
+        border-radius: 10px;
+        padding: 14px 18px;
+        font-size: 0.88rem;
+        color: #ffdddd;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .msg-box.success {
+        background: rgba(46,204,113,.12);
+        border-color: rgba(46,204,113,.3);
+        color: #d4f5e2;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 900px) {
+        .reg-inner { grid-template-columns: 1fr; }
+        .track-panel { position: static; }
+        .form-panel { padding: 32px 24px; }
+    }
+
+    @media (max-width: 560px) {
+        .form-row { grid-template-columns: 1fr; }
+        .reg-page { padding: 80px 0 60px; }
+    }
+
+    /* ── Auth identity pill ──────────────────────────────────── */
+    .logged-in-pill {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(46,204,113,.08);
+        border: 1px solid rgba(46,204,113,.25);
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 0.86rem;
+        color: #ccc;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    .logged-in-pill strong { color: #fff; }
+
+    /* ── Pre-fill hint ───────────────────────────────────────── */
+    .prefill-note {
+        font-size: 0.72rem;
+        color: #555;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    /* Readonly inputs look distinct but not disabled */
+    input[readonly] {
+        background: rgba(255,255,255,.04) !important;
+        border-color: rgba(255,255,255,.08) !important;
+        color: #999 !important;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="particles-js"></div>
+<div class="reg-bg"></div>
+
+<div class="reg-page">
+    <div class="reg-inner">
+
+        <!-- ==================== LEFT: TRACK PANEL ==================== -->
+        <div class="track-panel">
+            <span class="flames26-badge">
+                <i class="fas fa-fire"></i> FLAMES '26
+            </span>
+
+            <h1 class="track-title">{{ course.title }}</h1>
+            {% if course.subtitle %}
+            <p class="track-tagline">{{ course.subtitle }}</p>
+            {% endif %}
+
+            <div class="track-meta-row">
+                <span class="track-meta-chip">
+                    <i class="fas fa-calendar-alt"></i> 45 Days
+                </span>
+                <span class="track-meta-chip">
+                    <i class="fas fa-signal"></i> {{ course.level }}
+                </span>
+                <span class="track-meta-chip">
+                    <i class="fas fa-laptop-code"></i> Summer 2026
+                </span>
+            </div>
+
+            {% with points=course.get_learning_points %}
+            {% if points %}
+            <div class="what-you-get">
+                <div class="wg-title">What you'll build</div>
+                <ul class="wg-list">
+                    {% for point in points|slice:":4" %}
+                    <li>{{ point }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <div class="price-card">
+                <div class="price-label">Program Fee</div>
+                <div class="price-row">
+                    {% if course.price != course.discount_price %}
+                    <span class="price-original">₹{{ course.price }}</span>
+                    {% endif %}
+                    <span class="price-current">₹{{ course.discount_price }}</span>
+                </div>
+                <div class="price-note">✓ Referral code applicable</div>
+            </div>
+        </div><!-- /track-panel -->
+
+        <!-- ==================== RIGHT: FORM ==================== -->
+        <div class="form-panel">
+            <div class="form-panel-title">Secure Your Spot 🔥</div>
+            <p class="form-panel-sub">
+                Fill in your details. Once submitted, we'll review and confirm your registration.
+            </p>
+
+            <!-- Logged-in identity pill -->
+            <div class="logged-in-pill">
+                <i class="fas fa-user-check" style="color:#2ecc71"></i>
+                Registering as <strong>{{ prefill.full_name|default:user.username }}</strong>
+                &nbsp;·&nbsp; <span style="color:#888">{{ prefill.email }}</span>
+                <a href="{% url 'my_profile' %}" style="font-size:.75rem;color:#ff6b00;margin-left:8px">Not you?</a>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="msg-box {% if 'success' in message.tags %}success{% endif %}">
+                <i class="fas {% if 'success' in message.tags %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+
+            <form id="f26RegForm" method="POST" action="{% url 'flames_register' course.slug %}">
+                {% csrf_token %}
+                <input type="hidden" name="course_id" value="{{ course.id }}">
+
+                <!-- ── Personal Info ────────────────────────── -->
+                <div class="section-divider">Personal Information</div>
+
+                <!-- username — always readonly since auth is required -->
+                <input type="hidden" name="username" value="{{ prefill.username }}">
+
+                <div class="form-group">
+                    <label class="form-label">Full Name <span class="req">*</span></label>
+                    <input type="text" id="f26-name" name="full_name" class="form-control"
+                           placeholder="Enter your full name" required
+                           value="{{ prefill.full_name }}" readonly>
+                    <div class="prefill-note"><i class="fas fa-lock" style="font-size:.7rem"></i> Auto-filled from your profile</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Email <span class="req">*</span></label>
+                        <div class="input-wrap">
+                            <input type="email" id="f26-email" name="email" class="form-control"
+                                   placeholder="you@example.com" required
+                                   value="{{ prefill.email }}" readonly>
+                        </div>
+                        <div class="prefill-note"><i class="fas fa-lock" style="font-size:.7rem"></i> Auto-filled from your profile</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone <span class="req">*</span></label>
+                        <input type="tel" id="f26-phone" name="contact_number" class="form-control"
+                               placeholder="10-digit number" required
+                               minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Enter exactly 10 digits"
+                               value="{{ prefill.contact_number }}">
+                        {% if prefill.contact_number %}<div class="prefill-note"><i class="fas fa-lock" style="font-size:.7rem"></i> Auto-filled from your profile</div>{% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">College / University <span class="req">*</span></label>
+                        <select name="college" class="form-control" required>
+                            <option value="">Select college</option>
+                            {% for c in colleges %}
+                            <option value="{{ c }}"
+                                {% if prefill.college == c %}selected{% endif %}>
+                                {{ c }}
+                            </option>
+                            {% endfor %}
+                            <!-- If user's college isn't in the list, show it as selected -->
+                            {% if prefill.college and prefill.college not in colleges %}
+                            <option value="{{ prefill.college }}" selected>{{ prefill.college }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Year of Study <span class="req">*</span></label>
+                        <select name="year" class="form-control" required>
+                            <option value="">Select year</option>
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year</option>
+                            <option value="5th Year">5th Year</option>
+                            <option value="Graduate">Graduate</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Account creation block removed — login is now required before reaching this page -->
+
+                <!-- ── Registration Mode ──────────────────────── -->
+                <div class="section-divider">Registration Mode</div>
+
+                <div class="form-group">
+                    <label class="form-label">How are you joining? <span class="req">*</span></label>
+                    <div class="mode-toggle">
+                        <div>
+                            <input type="radio" name="registration_mode" id="mode-solo"
+                                   class="mode-option" value="SOLO" required onchange="onModeChange()">
+                            <label class="mode-label" for="mode-solo">
+                                <i class="fas fa-user"></i>
+                                Solo
+                                <small style="font-size:.7rem;font-weight:400;color:#666">Individual</small>
+                            </label>
+                        </div>
+                        <div>
+                            <input type="radio" name="registration_mode" id="mode-team"
+                                   class="mode-option" value="TEAM" onchange="onModeChange()">
+                            <label class="mode-label" for="mode-team">
+                                <i class="fas fa-users"></i>
+                                Team
+                                <small style="font-size:.7rem;font-weight:400;color:#666">5 members</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Referral code (solo only) ─────────────── -->
+                <div class="form-group" id="referral-wrap">
+                    <label class="form-label">Referral Code <small style="font-weight:400;color:#555">(optional)</small></label>
+                    <input type="text" id="f26-referral" name="referral_code" class="form-control"
+                           placeholder="e.g. ALMXYZ123">
+                    <div class="referral-result" id="referral-result"></div>
+                </div>
+
+                <div class="price-summary" id="price-summary">
+                    <div class="ps-row">
+                        <span class="ps-label">Course Fee</span>
+                        <span class="ps-value" id="ps-original">—</span>
+                    </div>
+                    <div class="ps-row">
+                        <span class="ps-label">Referral Discount</span>
+                        <span class="ps-value green" id="ps-discount">—</span>
+                    </div>
+                    <div class="ps-row" style="border-top:1px solid rgba(255,255,255,.06);padding-top:10px;margin-top:4px">
+                        <span class="ps-label" style="font-weight:700;color:#fff">You Pay</span>
+                        <span class="ps-value orange" id="ps-total">—</span>
+                    </div>
+                </div>
+
+                <!-- ── Team members ──────────────────────────── -->
+                <div class="team-section" id="team-section">
+                    <div class="section-divider">Team Members</div>
+                    <p style="font-size:.84rem;color:#666;margin-bottom:16px">
+                        Enter the <strong style="color:#ddd">registered email addresses</strong> of your 4 teammates (they must already have an Angaar account).
+                    </p>
+
+                    {% for i in "1234" %}
+                    <div class="team-member-card" id="tm-card-{{ forloop.counter }}">
+                        <div class="team-member-header">
+                            <div class="member-num">{{ forloop.counter|add:1 }}</div>
+                            Teammate {{ forloop.counter|add:1 }}
+                        </div>
+                        <div class="form-group" style="margin-bottom:0">
+                            <div class="input-wrap">
+                                <input type="email"
+                                       name="team_member_email_{{ forloop.counter }}"
+                                       id="tm-{{ forloop.counter }}"
+                                       class="form-control team-req"
+                                       placeholder="teammate@email.com"
+                                       autocomplete="off">
+                                <i class="fas fa-check vi" id="tm{{ forloop.counter }}-ok"></i>
+                                <i class="fas fa-times vi" id="tm{{ forloop.counter }}-err"></i>
+                            </div>
+                            <div class="form-feedback" id="tm{{ forloop.counter }}-fb"></div>
+                            <!-- Real-time name preview -->
+                            <div id="tm{{ forloop.counter }}-name" style="display:none;margin-top:8px;padding:8px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.2);border-radius:8px;font-size:.82rem;color:#aaa">
+                                <i class="fas fa-user-check" style="color:#2ecc71;margin-right:6px"></i>
+                                <span id="tm{{ forloop.counter }}-name-text"></span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- ── Message to instructor ─────────────────── -->
+                <div class="section-divider">Anything Else?</div>
+                <div class="form-group">
+                    <label class="form-label">Message to Instructor <small style="font-weight:400;color:#555">(optional)</small></label>
+                    <textarea name="message" class="form-control" rows="3"
+                              placeholder="Goals, questions, or what excites you most about this track…"
+                              style="resize:vertical"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submit-btn">
+                    <i class="fas fa-fire"></i>
+                    <span id="submit-text">Ignite My Journey</span>
+                    <i class="fas fa-spinner" id="submit-spinner" style="display:none"></i>
+                </button>
+
+                <p style="font-size:.75rem;color:#444;text-align:center;margin-top:16px">
+                    By registering you agree to show up and put in the work. 🔥
+                </p>
+
+            </form>
+        </div><!-- /form-panel -->
+
+    </div><!-- /reg-inner -->
+</div><!-- /reg-page -->
+
+<!-- ══════════════════════════════════════════════════════
+     BELOW-FORM SECTIONS: included / FAQ / testimonials
+══════════════════════════════════════════════════════════ -->
+<div class="container" style="max-width:980px;margin:0 auto;padding:0 24px 80px">
+
+    <!-- ── What you get ──────────────────────────────── -->
+    <div style="margin-bottom:72px">
+        <h2 style="font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.5px">
+            What You Get <i class="fas fa-gift" style="color:#ff6b00;font-size:1.4rem"></i>
+        </h2>
+        <p style="color:#777;margin-bottom:36px">Everything you need to ship a real project — in 45 days.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px">
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-video" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Live Sessions + Recordings</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">All classes are live. Every session is recorded and shared in the cohort group within 24 hours.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-tasks" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Daily Tasks + Reviews</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">One task per day, reviewed at the end of each week. Accountability is built in — not optional.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fab fa-whatsapp" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Private Cohort Community</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">A dedicated WhatsApp group with your batch. Ask questions, share progress, get unstuck fast.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-user-tie" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">1-on-1 Doubt Sessions</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">Scheduled mentor slots for deep dives into your code, project design, or career questions.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-briefcase" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Portfolio-Ready Project</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">You ship a real, deployed project that goes on your GitHub and resume — not a tutorial clone.</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.18);border-radius:14px;padding:22px;display:flex;gap:16px;align-items:flex-start">
+                <i class="fas fa-certificate" style="font-size:1.5rem;color:#ff6b00;flex-shrink:0;margin-top:2px"></i>
+                <div>
+                    <div style="font-size:.93rem;font-weight:700;color:#fff;margin-bottom:4px">Verifiable Certificate</div>
+                    <div style="font-size:.82rem;color:#888;line-height:1.5">A completion certificate tied to your Angaar profile — shareable, verifiable, and career-relevant.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── FAQ ───────────────────────────────────────── -->
+    <div style="margin-bottom:72px">
+        <h2 style="font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.5px">
+            Frequently Asked Questions <i class="fas fa-question-circle" style="color:#ff6b00;font-size:1.4rem"></i>
+        </h2>
+        <p style="color:#777;margin-bottom:36px">Straight answers to the questions we always get.</p>
+
+        <div id="reg-faq-list" style="display:flex;flex-direction:column;gap:12px">
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    Do I need prior experience?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    It depends on the track level. Beginner tracks start from scratch — all you need is a computer and the drive to learn. Intermediate tracks expect you to already know how to write and run basic code.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    How many hours per day does this require?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    Approximately 2–3 focused hours a day. This is an intensive summer training, not a light short course. If you can't commit to that, this isn't the right program for you right now.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    What happens after I submit the form?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    You'll receive an email confirmation with next steps. Our team reviews registrations and sends your payment details and cohort group link within 24 hours.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    Can I register for more than one track?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    Yes — up to 3 tracks per FLAMES edition. But think carefully. Most students who spread across 3 tracks without finishing the first perform poorly. Commit to one, crush it, then add more.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    What is the refund policy?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    Full refunds within 3 days of batch start. After that, no refunds are issued. We encourage you to attend the first session — most students stay once they see what's inside.
+                </div>
+            </div>
+
+            <div class="rfaq-item" style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;overflow:hidden">
+                <button class="rfaq-q" onclick="toggleRFaq(this)" aria-expanded="false"
+                    style="width:100%;background:none;border:none;color:#fff;padding:18px 22px;font-size:.95rem;font-weight:600;text-align:left;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px">
+                    Is this certificate recognized by companies?
+                    <i class="fas fa-chevron-down" style="color:#ff6b00;font-size:.85rem;transition:transform .3s;flex-shrink:0"></i>
+                </button>
+                <div class="rfaq-a" style="max-height:0;overflow:hidden;transition:max-height .35s ease,padding .2s;color:#aaa;font-size:.9rem;line-height:1.7;padding:0 22px">
+                    The certificate itself matters less than the portfolio project you build. A deployed project on your GitHub speaks louder than any certificate. That said, the certificate is verifiable via our platform.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ── Testimonials ───────────────────────────────── -->
+    <div style="margin-bottom:32px">
+        <h2 style="font-size:1.8rem;font-weight:900;color:#fff;margin-bottom:6px;letter-spacing:-.5px">
+            Students Speak <i class="fas fa-quote-right" style="color:#ff6b00;font-size:1.4rem"></i>
+        </h2>
+        <p style="color:#777;margin-bottom:36px">Real words from FLAMES '25 students.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px">
+
+            <div style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:26px">
+                <p style="font-size:.95rem;color:#ccc;line-height:1.75;font-style:italic;margin-bottom:16px;padding-left:14px;border-left:2px solid rgba(255,107,0,.4)">
+                    "I deployed my first Django app with an AI chatbot in week 5. I didn't think that was possible 45 days ago."
+                </p>
+                <p style="font-size:.78rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0">— FLAMES '25 · Full Stack Track</p>
+            </div>
+
+            <div style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:26px">
+                <p style="font-size:.95rem;color:#ccc;line-height:1.75;font-style:italic;margin-bottom:16px;padding-left:14px;border-left:2px solid rgba(255,107,0,.4)">
+                    "I went from not being able to solve a simple array problem to clearing the DSA round at my first placement attempt."
+                </p>
+                <p style="font-size:.78rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0">— FLAMES '25 · DSA Track</p>
+            </div>
+
+            <div style="background:rgba(30,30,30,.6);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:26px">
+                <p style="font-size:.95rem;color:#ccc;line-height:1.75;font-style:italic;margin-bottom:16px;padding-left:14px;border-left:2px solid rgba(255,107,0,.4)">
+                    "I built a full dashboard from raw data and presented it like a data analyst. That's what got me my internship."
+                </p>
+                <p style="font-size:.78rem;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:1px;margin:0">— FLAMES '25 · Analytics Track</p>
+            </div>
+
+        </div>
+    </div>
+
+</div><!-- /below-form sections -->
+
+<!-- particles.js -->
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script>
+particlesJS('particles-js',{particles:{number:{value:35,density:{enable:true,value_area:900}},color:{value:'#ff6b00'},shape:{type:'circle'},opacity:{value:0.2,random:true},size:{value:2.5,random:true},line_linked:{enable:true,distance:140,color:'#ff6b00',opacity:0.1,width:1},move:{enable:true,speed:0.6,random:true,out_mode:'out'}},interactivity:{detect_on:'canvas',events:{onhover:{enable:false},onclick:{enable:false},resize:true}},retina_detect:true});
+</script>
+
+<script>
+// ── Referral validation ──────────────────────────────────────────
+const courseId   = "{{ course.id|default:'' }}";
+let referralTimer = null;
+
+function validateReferral() {
+    const code = document.getElementById('f26-referral').value.trim();
+    const mode = document.querySelector('input[name="registration_mode"]:checked')?.value || '';
+    const resultEl = document.getElementById('referral-result');
+    const summary  = document.getElementById('price-summary');
+
+    if (!code) { resultEl.innerHTML = ''; summary.style.display = 'none'; return; }
+    if (!mode) {
+        resultEl.innerHTML = '<span style="color:#e74c3c">Select registration mode first</span>';
+        return;
+    }
+
+    resultEl.innerHTML = '<span style="color:#888">Validating…</span>';
+
+    const url = `{% url 'validate_referral' %}?code=${encodeURIComponent(code)}&course_id=${courseId}&registration_mode=${mode}`;
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                resultEl.innerHTML = `<span style="color:#2ecc71">✓ ${data.message} — ₹${data.discount_amount} off</span>`;
+                document.getElementById('ps-original').textContent = '₹' + data.original_price;
+                document.getElementById('ps-discount').textContent = '−₹' + data.discount_amount;
+                document.getElementById('ps-total').textContent   = '₹' + data.discounted_price;
+                summary.style.display = 'block';
+            } else {
+                resultEl.innerHTML = `<span style="color:#e74c3c">✗ ${data.message}</span>`;
+                summary.style.display = 'none';
+            }
+        })
+        .catch(() => { resultEl.innerHTML = '<span style="color:#e74c3c">Validation failed</span>'; });
+}
+
+const refInput = document.getElementById('f26-referral');
+if (refInput) {
+    refInput.addEventListener('input', () => {
+        clearTimeout(referralTimer);
+        referralTimer = setTimeout(validateReferral, 600);
+    });
+}
+
+// ── Mode toggle ──────────────────────────────────────────────────
+function onModeChange() {
+    const isTeam = document.getElementById('mode-team').checked;
+    document.getElementById('team-section').style.display = isTeam ? 'block' : 'none';
+    document.getElementById('referral-wrap').style.display = isTeam ? 'none' : 'block';
+
+    document.querySelectorAll('.team-req').forEach(el => {
+        isTeam ? el.setAttribute('required','') : el.removeAttribute('required');
+    });
+
+    // clear referral on team switch
+    if (isTeam && refInput) {
+        refInput.value = '';
+        document.getElementById('referral-result').innerHTML = '';
+        document.getElementById('price-summary').style.display = 'none';
+    }
+}
+
+// ── Username availability check ──────────────────────────────────
+const unInput = document.getElementById('f26-username');
+let unTimer = null;
+
+if (unInput && !unInput.readOnly) {
+    unInput.addEventListener('input', () => {
+        clearTimeout(unTimer);
+        unTimer = setTimeout(() => {
+            const val = unInput.value.trim();
+            const ok  = document.getElementById('un-ok');
+            const err = document.getElementById('un-err');
+            const fb  = document.getElementById('un-fb');
+
+            ok.className = 'fas fa-check vi';
+            err.className = 'fas fa-times vi';
+
+            if (!val || val.length < 4 || /\s/.test(val)) {
+                err.className += ' err';
+                fb.textContent = 'At least 4 characters, no spaces';
+                fb.className = 'form-feedback err';
+                return;
+            }
+
+            fetch(`/api/check-username/?username=${encodeURIComponent(val)}`)
+                .then(r => r.json())
+                .then(d => {
+                    if (d.available) {
+                        ok.className += ' ok';
+                        fb.textContent = 'Username available ✓';
+                        fb.className = 'form-feedback ok';
+                    } else {
+                        err.className += ' err';
+                        fb.textContent = d.message || 'Username taken';
+                        fb.className = 'form-feedback err';
+                    }
+                })
+                .catch(() => {
+                    // Silently ignore if endpoint doesn't exist
+                    if (val.length >= 4 && !/\s/.test(val)) {
+                        ok.className += ' ok';
+                        fb.textContent = '';
+                    }
+                });
+        }, 500);
+    });
+}
+
+// ── Password strength ────────────────────────────────────────────
+const pwdInput = document.getElementById('f26-pwd');
+const cpwdInput = document.getElementById('f26-cpwd');
+
+if (pwdInput) {
+    const fill  = document.getElementById('pwd-fill');
+    const hints = {
+        len: document.getElementById('ph-len'),
+        up:  document.getElementById('ph-up'),
+        low: document.getElementById('ph-low'),
+        num: document.getElementById('ph-num'),
+        sym: document.getElementById('ph-sym'),
+    };
+
+    const colors = ['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#27ae60'];
+
+    pwdInput.addEventListener('input', () => {
+        const v = pwdInput.value;
+        const checks = {
+            len: v.length >= 8,
+            up:  /[A-Z]/.test(v),
+            low: /[a-z]/.test(v),
+            num: /\d/.test(v),
+            sym: /[!@#$%^&*(),.?":{}|<>]/.test(v),
+        };
+        let score = Object.values(checks).filter(Boolean).length;
+
+        fill.style.width   = (score * 20) + '%';
+        fill.style.background = colors[score - 1] || '#333';
+
+        for (const [k, met] of Object.entries(checks)) {
+            hints[k].classList.toggle('met', met);
+        }
+
+        // Re-check confirm
+        if (cpwdInput && cpwdInput.value) checkPasswordMatch();
+    });
+}
+
+function checkPasswordMatch() {
+    if (!pwdInput || !cpwdInput) return;
+    const match = pwdInput.value === cpwdInput.value && cpwdInput.value !== '';
+    const okEl  = document.getElementById('cpwd-ok');
+    const errEl = document.getElementById('cpwd-err');
+    const fb    = document.getElementById('cpwd-fb');
+
+    okEl.className  = 'fas fa-check vi' + (match ? ' ok' : '');
+    errEl.className = 'fas fa-times vi' + (!match && cpwdInput.value ? ' err' : '');
+    fb.style.display = (!match && cpwdInput.value) ? 'block' : 'none';
+}
+
+if (cpwdInput) cpwdInput.addEventListener('input', checkPasswordMatch);
+
+// ── Team member email real-time lookup ──────────────────────
+const courseIdForTeam = "{{ course.id|default:'' }}";
+const currentUserEmailForTeam = (document.getElementById('f26-email')?.value || '').trim().toLowerCase();
+const tmValidState = {}; // track per-slot validity
+
+function lookupTeamEmail(n) {
+    const input = document.getElementById(`tm-${n}`);
+    if (!input) return;
+    const email = input.value.trim().toLowerCase();
+    const okIcon  = document.getElementById(`tm${n}-ok`);
+    const errIcon = document.getElementById(`tm${n}-err`);
+    const fb      = document.getElementById(`tm${n}-fb`);
+    const nameBox = document.getElementById(`tm${n}-name`);
+    const nameTxt = document.getElementById(`tm${n}-name-text`);
+
+    // Reset
+    okIcon.className  = 'fas fa-check vi';
+    errIcon.className = 'fas fa-times vi';
+    if (nameBox) nameBox.style.display = 'none';
+    tmValidState[n] = false;
+
+    if (!email) { if (fb) fb.textContent = ''; return; }
+
+    // Basic email format check
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errIcon.className += ' err';
+        if (fb) { fb.textContent = 'Enter a valid email address'; fb.className = 'form-feedback err'; }
+        return;
+    }
+
+    if (email && currentUserEmailForTeam && email === currentUserEmailForTeam) {
+        errIcon.className += ' err';
+        if (fb) { fb.textContent = 'You cannot add yourself as a teammate'; fb.className = 'form-feedback err'; }
+        return;
+    }
+
+    if (fb) { fb.textContent = 'Looking up…'; fb.className = 'form-feedback'; }
+
+    fetch(`/accounts/check_email_exists/?email=${encodeURIComponent(email)}&course_id=${courseIdForTeam}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(r => r.json())
+    .then(d => {
+        if (!d.exists) {
+            errIcon.className += ' err';
+            if (fb) { fb.textContent = '✗ No Angaar account found with this email'; fb.className = 'form-feedback err'; }
+            tmValidState[n] = false;
+        } else if (d.already_registered) {
+            errIcon.className += ' err';
+            if (fb) { fb.textContent = '✗ This student is already registered for this course'; fb.className = 'form-feedback err'; }
+            tmValidState[n] = false;
+        } else {
+            okIcon.className += ' ok';
+            if (fb) { fb.textContent = ''; fb.className = 'form-feedback'; }
+            if (nameBox && nameTxt) {
+                nameTxt.textContent = d.full_name;
+                nameBox.style.display = 'block';
+            }
+            tmValidState[n] = true;
+        }
+    })
+    .catch(() => {
+        if (fb) { fb.textContent = 'Lookup failed — check your connection'; fb.className = 'form-feedback err'; }
+    });
+}
+
+// Debounced listeners
+[1,2,3,4].forEach(n => {
+    const inp = document.getElementById(`tm-${n}`);
+    if (!inp) return;
+    let t;
+    inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => lookupTeamEmail(n), 500); });
+    inp.addEventListener('blur',  () => lookupTeamEmail(n));
+});
+
+// ── Form submit ──────────────────────────────────────────────────
+const form = document.getElementById('f26RegForm');
+if (form) {
+    form.addEventListener('submit', e => {
+        // Block submit if any team email slot is empty or invalid
+        const mode = document.getElementById('mode-team').checked ? 'TEAM' : 'SOLO';
+        if (mode === 'TEAM') {
+            const seenEmails = new Set();
+            for (let n = 1; n <= 4; n++) {
+                const inp = document.getElementById(`tm-${n}`);
+                if (!inp) continue;
+                const teamEmail = inp.value.trim().toLowerCase();
+                if (!teamEmail) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Please enter the email for Teammate ${n + 1}.`);
+                    return;
+                }
+
+                if (teamEmail === currentUserEmailForTeam) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Teammate ${n + 1} cannot be your own email.`);
+                    return;
+                }
+
+                if (seenEmails.has(teamEmail)) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Duplicate email detected for Teammate ${n + 1}. Each teammate must have a unique email.`);
+                    return;
+                }
+
+                seenEmails.add(teamEmail);
+
+                if (!tmValidState[n]) {
+                    e.preventDefault();
+                    inp.focus();
+                    alert(`Teammate ${n + 1}'s email was not verified. Please enter a valid registered email.`);
+                    return;
+                }
+            }
+        }
+
+        const btn = document.getElementById('submit-btn');
+        const txt = document.getElementById('submit-text');
+        const spinner = document.getElementById('submit-spinner');
+        btn.disabled = true;
+        txt.textContent = 'Submitting…';
+        spinner.style.display = 'inline-block';
+        spinner.classList.add('spin');
+    });
+}
+
+// ── Registration page FAQ accordion ─────────────────────────────────────────
+function toggleRFaq(btn) {
+    const ans = btn.nextElementSibling;
+    const isOpen = ans.style.maxHeight && ans.style.maxHeight !== '0px';
+    // Close all
+    document.querySelectorAll('.rfaq-a').forEach(a => { a.style.maxHeight = '0px'; a.style.padding = '0 22px'; });
+    document.querySelectorAll('.rfaq-q i:last-child').forEach(i => i.style.transform = '');
+    document.querySelectorAll('.rfaq-q').forEach(b => b.setAttribute('aria-expanded','false'));
+    // Open clicked
+    if (!isOpen) {
+        ans.style.maxHeight = ans.scrollHeight + 'px';
+        ans.style.padding = '0 22px 16px';
+        btn.querySelector('i:last-child').style.transform = 'rotate(180deg)';
+        btn.setAttribute('aria-expanded','true');
+    }
+}
+</script>
+{% endblock %}

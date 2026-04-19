@@ -100,11 +100,19 @@ def edit_sheet(request, slug):
         messages.success(request, "Sheet updated successfully!")
         return redirect('administrator_sheet', slug=sheet.slug)
     
+    thumbnail_url = None
+    try:
+        if sheet.thumbnail and getattr(sheet.thumbnail, 'name', None):
+            thumbnail_url = sheet.thumbnail.url
+    except Exception:
+        thumbnail_url = None
+
     parameters = {
         "administrator": administrator,
         "sheet": sheet,
         "selected_batch_ids": list(sheet.batches.values_list('id', flat=True)),
-        "batches": batches
+        "batches": batches,
+        "thumbnail_url": thumbnail_url,
     }
     
     return render(request, 'administration/sheet/edit_sheet.html', parameters)

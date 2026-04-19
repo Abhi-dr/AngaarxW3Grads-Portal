@@ -553,7 +553,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
-                                <input type="tel" class="form-control" id="contact_number" name="contact_number" placeholder="Contact Number" required>
+                                <input type="tel" class="form-control" id="contact_number" name="contact_number" placeholder="Contact Number" required
+                                    minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Enter exactly 10 digits">
                                 <label for="contact_number">Contact Number</label>
                             </div>
                         </div>
@@ -711,7 +712,8 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-floating mb-3">
-                                <input type="tel" class="form-control" id="member_contact_${memberCount}" name="member_contact_${memberCount}" placeholder="Contact Number" required>
+                                <input type="tel" class="form-control" id="member_contact_${memberCount}" name="member_contact_${memberCount}" placeholder="Contact Number" required
+                                    minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Enter exactly 10 digits">
                                 <label for="member_contact_${memberCount}">Contact Number</label>
                             </div>
                         </div>

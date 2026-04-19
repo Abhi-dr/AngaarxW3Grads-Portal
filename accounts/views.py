@@ -215,6 +215,43 @@ def check_username_exists(request):
     
     return JsonResponse(response_data)
 
+
+@ratelimit(key='ip', rate='40/m', method=['GET'], block=False)
+def check_email_exists(request):
+    """Check if a student email exists and return user details (used for team member lookup)."""
+    if getattr(request, 'limited', False):
+        return JsonResponse({
+            'exists': False,
+            'message': 'Too many lookup attempts. Please wait a moment and try again.'
+        }, status=429)
+
+    email = request.GET.get('email', '').strip().lower()
+    course_id = request.GET.get('course_id')
+
+    if not email:
+        return JsonResponse({'exists': False})
+
+    student = CustomUser.objects.filter(email__iexact=email).first()
+    exists = student is not None
+
+    response_data = {'exists': exists}
+
+    if exists:
+        response_data['full_name'] = f"{student.first_name} {student.last_name}".strip() or student.username
+        response_data['email'] = student.email
+
+        if course_id:
+            from home.models import FlamesRegistration, FlamesTeamMember
+            direct_registration = FlamesRegistration.objects.filter(
+                user=student, course_id=course_id
+            ).exists()
+            team_membership = FlamesTeamMember.objects.filter(
+                member=student, team__course_id=course_id
+            ).exists()
+            response_data['already_registered'] = direct_registration or team_membership
+
+    return JsonResponse(response_data)
+
 # ====================== check email availability ====================
 def check_email_availability(request):
     email = request.GET.get('email', '')

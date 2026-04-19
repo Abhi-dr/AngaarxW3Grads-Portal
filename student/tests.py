@@ -1,8 +1,13 @@
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.urls import reverse
+from decimal import Decimal
+from datetime import date
+from unittest.mock import patch
 
 from accounts.models import CustomUser
+from home.models import FlamesCourse, FlamesEdition
+from practice.models import Streak
 from practice.models import MCQQuestion
 from student.models import Assignment, Course, CourseSheet
 
@@ -64,3 +69,142 @@ class JovacMcqNavigationTests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		expected_next = f"{reverse('submit_assignment', kwargs={'assignment_id': self.assignment.id})}?sheet={self.sheet.slug}"
 		self.assertEqual(response.context['next_question_url'], expected_next)
+
+
+class FlamesCourseOrderingStudentTests(TestCase):
+	def setUp(self):
+		self.student = CustomUser.objects.create_user(
+			email='ordered-student@example.com',
+			password='testpass123',
+			role='student',
+			username='ordered_student'
+		)
+		self.client.force_login(self.student)
+
+		self.active_edition = FlamesEdition.objects.create(
+			year=2025,
+			name='FLAMES 25',
+			is_active=True,
+			registration_open=True,
+		)
+		self.edition_2026 = FlamesEdition.objects.create(
+			year=2026,
+			name='FLAMES 26',
+			is_active=False,
+			registration_open=True,
+		)
+
+	def test_student_flames_dashboard_available_courses_use_display_order(self):
+		FlamesCourse.objects.create(
+			title='Zeta Batch',
+			subtitle='zeta',
+			description='desc',
+			slug='zeta-batch',
+			edition=self.active_edition,
+			is_active=True,
+			display_order=1,
+		)
+		FlamesCourse.objects.create(
+			title='Alpha Batch',
+			subtitle='alpha',
+			description='desc',
+			slug='alpha-batch',
+			edition=self.active_edition,
+			is_active=True,
+			display_order=2,
+		)
+
+		response = self.client.get(reverse('student_flames'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(
+			[course.title for course in response.context['available_courses']],
+			['Zeta Batch', 'Alpha Batch']
+		)
+
+	def test_student_flames26_dashboard_available_courses_use_display_order(self):
+		FlamesCourse.objects.create(
+			title='Web Track',
+			subtitle='web',
+			description='desc',
+			slug='web-track',
+			edition=self.edition_2026,
+			is_active=True,
+			display_order=2,
+		)
+		FlamesCourse.objects.create(
+			title='AI Track',
+			subtitle='ai',
+			description='desc',
+			slug='ai-track-student',
+			edition=self.edition_2026,
+			is_active=True,
+			display_order=1,
+		)
+
+		response = self.client.get(reverse('student_flames26'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertEqual(
+			[course.title for course in response.context['available_courses']],
+			['AI Track', 'Web Track']
+		)
+
+	def test_student_flames26_dashboard_shows_correct_savings_amount(self):
+		FlamesCourse.objects.create(
+			title='Python Track',
+			subtitle='backend',
+			description='desc',
+			slug='python-track',
+			edition=self.edition_2026,
+			is_active=True,
+			display_order=1,
+			price=Decimal('3999.00'),
+			discount_price=Decimal('2999.00'),
+			icon_class='fas fa-code',
+		)
+
+		response = self.client.get(reverse('student_flames26'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'Save ₹1000')
+
+
+class RestoreStreakViewTests(TestCase):
+	def setUp(self):
+		self.student = CustomUser.objects.create_user(
+			email='streak-restore@example.com',
+			password='testpass123',
+			role='student',
+			username='streak_restore_user',
+			coins=120,
+		)
+
+	def test_restore_streak_requires_login(self):
+		response = self.client.post(reverse('restore_streak'))
+		self.assertEqual(response.status_code, 302)
+		self.assertIn(reverse('login'), response.url)
+
+	def test_restore_streak_success_deducts_coins_and_restores_count(self):
+		self.client.force_login(self.student)
+		today = date(2026, 4, 6)
+		streak = Streak.objects.create(
+			user=self.student,
+			current_streak=1,
+			previous_streak=5,
+			last_submission_date=today,
+		)
+
+		with patch('practice.models.timezone.localdate', return_value=today):
+			response = self.client.post(reverse('restore_streak'))
+
+		self.assertEqual(response.status_code, 200)
+		payload = response.json()
+		self.assertEqual(payload['status'], 'success')
+		self.assertEqual(payload['current_streak'], 7)
+
+		self.student.refresh_from_db()
+		streak.refresh_from_db()
+		self.assertEqual(self.student.coins, 70)
+		self.assertEqual(streak.current_streak, 7)
+		self.assertEqual(streak.previous_streak, 0)

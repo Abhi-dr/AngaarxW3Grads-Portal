@@ -100,6 +100,7 @@ class CustomUser(AbstractUser):
     # Auth state
     is_changed_password  = models.BooleanField(default=False)
     is_email_verified    = models.BooleanField(default=False)
+    is_submission        = models.BooleanField(default=False)
 
     # Required for email-based login
     # email is already declared with unique=True above — satisfies auth.W004

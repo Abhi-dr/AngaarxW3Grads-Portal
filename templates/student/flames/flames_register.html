@@ -625,7 +625,8 @@ active
                         <div class="col-md-6">
                             <div class="form-floating mb-3">
                                 <input type="tel" class="form-control" id="contact_number" name="contact_number"
-                                    placeholder="Contact Number" value="{{ user.student.mobile_number }}" required>
+                                    placeholder="Contact Number" value="{{ user.student.mobile_number }}" required
+                                    minlength="10" maxlength="10" pattern="[0-9]{10}" inputmode="numeric" title="Enter exactly 10 digits">
                                 <label for="contact_number">Contact Number</label>
                             </div>
                         </div>
@@ -639,7 +640,7 @@ active
                                     <option value="3rd Year">3rd Year</option>
                                     <option value="4th Year">4th Year</option>
                                     <option value="5th Year">5th Year</option>
-                                    <option value="Graduated">Graduated</option>
+                                    <option value="Graduate">Graduated</option>
                                 </select>
                                 <label for="year">Year of Study</label>
                             </div>
@@ -876,14 +877,17 @@ active
                         <div class="col-md-12 mb-3">
                             <div class="position-relative">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="team_member_username_${memberCount - 1}" name="team_member_username_${memberCount - 1}" placeholder="Username" required>
-                                    <label for="team_member_username_${memberCount - 1}">Username</label>
+                                    <input type="email" class="form-control"
+                                        id="team_member_email_${memberCount - 1}"
+                                        name="team_member_email_${memberCount - 1}"
+                                        placeholder="Email" required autocomplete="off">
+                                    <label for="team_member_email_${memberCount - 1}">Teammate Email Address</label>
                                 </div>
                                 <i class="fas fa-check text-success" id="team${memberCount - 1}-valid-icon" style="display: none; position: absolute; right: 10px; top: 15px;"></i>
                                 <i class="fas fa-times text-danger" id="team${memberCount - 1}-invalid-icon" style="display: none; position: absolute; right: 10px; top: 15px;"></i>
                             </div>
                             <div id="team${memberCount - 1}-feedback" class="form-text mt-1"></div>
-                            <div class="form-text mt-1">Enter the username of the team member (must be a registered student)</div>
+                            <div class="form-text mt-1" style="color:#888">Enter the registered email address of this teammate.</div>
                             <div id="team${memberCount - 1}-name-display" class="mt-2"></div>
                         </div>
                         </div>
@@ -974,7 +978,7 @@ active
                         discountRow.style.display = 'flex';
                         discountValue.textContent = `-₹${data.discount_amount}`;
 
-                        // Calculate new total
+                        // Calculate new total based on discount_price (the real base price)
                         const originalPrice = parseFloat("{{ course.discount_price }}");
                         const newTotal = Math.max(0, originalPrice - data.discount_amount);
                         totalPrice.textContent = `₹${newTotal}`;
@@ -997,89 +1001,98 @@ active
                 });
         });
 
-        // Check team member username exists
-        function checkTeamMemberUsername(inputId) {
+        // Check team member email exists
+        function checkTeamMemberEmail(inputId) {
             const input = document.getElementById(inputId);
-            const username = input.value;
+            const email = input.value.trim().toLowerCase();
+            const currentUserEmail = (document.getElementById('email')?.value || '').trim().toLowerCase();
             const memberNumber = inputId.split('_').pop();
-            const feedbackId = 'team' + memberNumber + '-feedback';
-            const validIconId = 'team' + memberNumber + '-valid-icon';
-            const invalidIconId = 'team' + memberNumber + '-invalid-icon';
-            const nameDisplayId = 'team' + memberNumber + '-name-display';
+            const feedbackId   = 'team' + memberNumber + '-feedback';
+            const validIconId  = 'team' + memberNumber + '-valid-icon';
+            const invalidIconId= 'team' + memberNumber + '-invalid-icon';
+            const nameDisplayId= 'team' + memberNumber + '-name-display';
 
             const feedbackElement = document.getElementById(feedbackId);
-            const validIcon = document.getElementById(validIconId);
+            const validIcon   = document.getElementById(validIconId);
             const invalidIcon = document.getElementById(invalidIconId);
             const nameDisplay = document.getElementById(nameDisplayId);
 
-            if (!username) {
-                feedbackElement.innerHTML = '';
-                validIcon.style.display = 'none';
-                invalidIcon.style.display = 'none';
+            if (!email) {
+                if (feedbackElement) feedbackElement.innerHTML = '';
+                if (validIcon)   validIcon.style.display = 'none';
+                if (invalidIcon) invalidIcon.style.display = 'none';
                 if (nameDisplay) nameDisplay.innerHTML = '';
                 return;
             }
 
-            // Show loading state
-            feedbackElement.innerHTML = '<span class="text-info">Checking username...</span>';
+            // Basic format check
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                if (feedbackElement) feedbackElement.innerHTML = '<span class="text-danger">Enter a valid email address</span>';
+                if (invalidIcon) invalidIcon.style.display = 'block';
+                if (validIcon)   validIcon.style.display = 'none';
+                return;
+            }
 
-            // Get the course ID
+            if (email && currentUserEmail && email === currentUserEmail) {
+                if (feedbackElement) feedbackElement.innerHTML = '<span class="text-danger">You cannot add yourself as a teammate</span>';
+                input.classList.add('is-invalid');
+                input.classList.remove('is-valid');
+                if (invalidIcon) invalidIcon.style.display = 'block';
+                if (validIcon)   validIcon.style.display = 'none';
+                if (nameDisplay) nameDisplay.innerHTML = '';
+                return;
+            }
+
+            if (feedbackElement) feedbackElement.innerHTML = '<span class="text-info">Looking up…</span>';
+
             const courseId = "{{ course.id }}";
-
-            // Make API call to check if username exists
-
-
-
-            fetch(`/accounts/check_username_exists/?username=${encodeURIComponent(username)}&course_id=${courseId}`)
+            fetch(`/accounts/check_email_exists/?email=${encodeURIComponent(email)}&course_id=${courseId}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.exists) {
-                        if (data.already_registered) {
-                            // Student already registered for this course
-                            feedbackElement.innerHTML = '<span class="text-danger">This student is already registered for this course</span>';
-                            input.classList.add('is-invalid');
-                            input.classList.remove('is-valid');
-                            validIcon.style.display = 'none';
-                            invalidIcon.style.display = 'block';
-                            if (nameDisplay) nameDisplay.innerHTML = '';
-                        } else {
-                            // Username exists and not registered, valid team member
-                            feedbackElement.innerHTML = '<span class="text-success">Username verified</span>';
-                            input.classList.add('is-valid');
-                            input.classList.remove('is-invalid');
-                            validIcon.style.display = 'block';
-                            invalidIcon.style.display = 'none';
-
-                            // Display student name
-                            if (nameDisplay) {
-                                nameDisplay.innerHTML = `<div class="alert alert-info mt-2 mb-0 py-2">
-                                    <strong>Student:</strong> ${data.full_name} (${data.email})
-                                </div>`;
-                            }
-                        }
-                    } else {
-                        // Username doesn't exist
-                        feedbackElement.innerHTML = '<span class="text-danger">Username not found</span>';
+                    if (!data.exists) {
+                        feedbackElement.innerHTML = '<span class="text-danger">✗ No Angaar account found with this email</span>';
                         input.classList.add('is-invalid');
                         input.classList.remove('is-valid');
-                        validIcon.style.display = 'none';
-                        invalidIcon.style.display = 'block';
+                        if (validIcon)   validIcon.style.display = 'none';
+                        if (invalidIcon) invalidIcon.style.display = 'block';
                         if (nameDisplay) nameDisplay.innerHTML = '';
+                    } else if (data.already_registered) {
+                        feedbackElement.innerHTML = '<span class="text-danger">✗ This student is already registered for this course</span>';
+                        input.classList.add('is-invalid');
+                        input.classList.remove('is-valid');
+                        if (validIcon)   validIcon.style.display = 'none';
+                        if (invalidIcon) invalidIcon.style.display = 'block';
+                        if (nameDisplay) nameDisplay.innerHTML = '';
+                    } else {
+                        feedbackElement.innerHTML = '<span class="text-success">✓ Student found</span>';
+                        input.classList.add('is-valid');
+                        input.classList.remove('is-invalid');
+                        if (validIcon)   validIcon.style.display = 'block';
+                        if (invalidIcon) invalidIcon.style.display = 'none';
+                        if (nameDisplay) {
+                            nameDisplay.innerHTML = `<div class="alert alert-success mt-2 mb-0 py-2">
+                                <strong>Student:</strong> ${data.full_name}
+                            </div>`;
+                        }
                     }
                 })
-                .catch(error => {
-                    feedbackElement.innerHTML = '<span class="text-danger">Error checking username</span>';
-                    console.error('Error:', error);
+                .catch(() => {
+                    if (feedbackElement) feedbackElement.innerHTML = '<span class="text-danger">Lookup failed</span>';
                     if (nameDisplay) nameDisplay.innerHTML = '';
                 });
         }
 
-        // Add event listeners for team member username validation
+        // Add event listeners for team member email validation
         document.addEventListener('input', function (e) {
-            if (e.target && e.target.id && e.target.id.startsWith('team_member_username_')) {
-                checkTeamMemberUsername(e.target.id);
+            if (e.target && e.target.id && e.target.id.startsWith('team_member_email_')) {
+                checkTeamMemberEmail(e.target.id);
             }
         });
+        document.addEventListener('blur', function (e) {
+            if (e.target && e.target.id && e.target.id.startsWith('team_member_email_')) {
+                checkTeamMemberEmail(e.target.id);
+            }
+        }, true);
 
         // Form validation before submission
         const registrationForm = document.getElementById('registration-form');
@@ -1116,23 +1129,23 @@ active
                 const duplicateUsernames = [];
 
                 for (let i = 1; i < memberCount; i++) {
-                    const memberInput = document.getElementById(`team_member_username_${i}`);
+                    const memberInput = document.getElementById(`team_member_email_${i}`);
                     if (!memberInput || !memberInput.value.trim()) {
                         allValid = false;
-                        emptyMember = i + 1; // +1 because we're showing member numbers starting from 2
+                        emptyMember = i + 1;
                         break;
                     } else if (!memberInput.classList.contains('is-valid')) {
                         allValid = false;
-                        invalidMember = i + 1; // +1 because we're showing member numbers starting from 2
+                        invalidMember = i + 1;
                         break;
                     }
 
-                    // Check for duplicate usernames
-                    const username = memberInput.value.trim().toLowerCase();
-                    if (usernameValues.includes(username)) {
+                    // Check for duplicate emails
+                    const emailVal = memberInput.value.trim().toLowerCase();
+                    if (usernameValues.includes(emailVal)) {
                         duplicateUsernames.push(i + 1);
                     } else {
-                        usernameValues.push(username);
+                        usernameValues.push(emailVal);
                     }
                 }
 
