@@ -92,6 +92,33 @@
             margin: 0;
         }
 
+        /* Footer "Powered by W3Grads" — scoped to footer so hero sections keep their own layout */
+        footer > a {
+            text-decoration: none;
+        }
+
+        footer .powered-by {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            bottom: 15px;
+            right: 15px;
+            padding: 5px 10px;
+            border-radius: 8px;
+            color: #ffffff;
+        }
+
+        footer .powered-by h5 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        footer .powered-by .logo-img {
+            width: 100px;
+            height: auto;
+            margin-left: 8px;
+        }
+
         @media (max-width: 768px) {
             .custom-footer-section {
                 flex: 100%;
@@ -102,6 +129,29 @@
             .custom-footer-content {
                 flex-direction: column;
                 gap: 20px;
+            }
+
+            footer > a {
+                display: block;
+                text-align: center;
+            }
+
+            footer .powered-by {
+                position: static;
+                justify-content: center;
+                width: fit-content;
+                max-width: 100%;
+                margin: 1.25rem auto 0;
+                flex-wrap: wrap;
+                row-gap: 0.25rem;
+            }
+
+            footer .powered-by h5 {
+                font-size: 0.9rem;
+            }
+
+            footer .powered-by .logo-img {
+                width: 90px;
             }
         }
     </style>
@@ -383,7 +433,7 @@
 
         </div>
         <a target="_blank" href="https://www.w3grads.com/">
-            <div class="powered-by" style="position: absolute">
+            <div class="powered-by">
                 <h5 class="text-white">Powered By</h5>
                 <img src="{% static 'img/home/w3logo.png' %}" class="logo-img" alt="W3Grads Logo">
             </div>

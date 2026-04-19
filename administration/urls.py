@@ -50,7 +50,7 @@ urlpatterns = [
     path('upload_administrator_profile', views.upload_administrator_profile, name='upload_administrator_profile'),
     path("change_administrator_password", views.change_administrator_password, name="change_administrator_password"),
     
-    # ============================ PROBLMES WORK ==========================
+    # ============================ PROBLEMS WORK ==========================
     
     path("administrator_problems/", problem_views.administrator_problems, name="administrator_problems"),
     path("fetch_problems/", problem_views.fetch_problems, name="administrator_fetch_problems"),
