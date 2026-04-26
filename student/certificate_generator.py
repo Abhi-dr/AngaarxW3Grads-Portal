@@ -208,9 +208,20 @@ def generate_pdf_bytes(certificate) -> bytes:
     Returns raw PDF bytes. Called directly from the download view.
     """
     from weasyprint import HTML as WeasyprintHTML
+    import os
 
     html_string = render_certificate_html(certificate)
     logger.info("Generating PDF for %s", certificate.certificate_id)
+
+    # Replace relative media URLs with absolute local file URIs to prevent
+    # WeasyPrint from deadlocking on HTTP fetches against the dev server.
+    media_url = getattr(settings, "MEDIA_URL", "/media/")
+    media_root = getattr(settings, "MEDIA_ROOT", "")
+    if media_url and media_root:
+        local_media_uri = f"file://{os.path.abspath(media_root)}/"
+        # e.g., src="/media/" becomes src="file:///path/to/media/"
+        html_string = html_string.replace(f'src="{media_url}', f'src="{local_media_uri}')
+        html_string = html_string.replace(f"src='{media_url}", f"src='{local_media_uri}")
 
     pdf_bytes = WeasyprintHTML(
         string=html_string,
