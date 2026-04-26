@@ -29,6 +29,21 @@ from datetime import timedelta
 
 from practice.models import Streak
 
+
+def _build_tokenized_search_q(search_text, fields):
+    """Match multi-word input by requiring each token to appear in any search field."""
+    tokens = [token for token in search_text.split() if token]
+    if not tokens:
+        return Q()
+
+    combined_q = Q()
+    for token in tokens:
+        token_q = Q()
+        for field in fields:
+            token_q |= Q(**{f"{field}__icontains": token})
+        combined_q &= token_q
+    return combined_q
+
 # ======================================== ADMINISTRATION ======================================
 
 @login_required(login_url='login')
@@ -126,11 +141,10 @@ def fetch_all_students(request):
     # Apply search filter if query is present
     if query:
         students = students.filter(
-            Q(id__icontains=query) |
-            Q(username__icontains=query) |
-            Q(first_name__icontains=query) |
-            Q(last_name__icontains=query) |
-            Q(email__icontains=query)
+            _build_tokenized_search_q(
+                query,
+                ['id', 'username', 'first_name', 'last_name', 'email']
+            )
         )
     
     # Get students with birthdays today

@@ -14,6 +14,21 @@ from administration.api.serializers.event_serializers import (
 )
 
 
+def _build_tokenized_search_q(search_text, fields):
+    """Match multi-word input by requiring each token to appear in any search field."""
+    tokens = [token for token in search_text.split() if token]
+    if not tokens:
+        return Q()
+
+    combined_q = Q()
+    for token in tokens:
+        token_q = Q()
+        for field in fields:
+            token_q |= Q(**{f"{field}__icontains": token})
+        combined_q &= token_q
+    return combined_q
+
+
 # ─────────────────────────────────────────────────────────────
 # Certificate Template CRUD
 # ─────────────────────────────────────────────────────────────
@@ -100,10 +115,15 @@ class CertificateAdminViewSet(viewsets.ModelViewSet):
         search = self.request.query_params.get('search', '').strip()
         if search:
             qs = qs.filter(
-                Q(student__first_name__icontains=search) |
-                Q(student__last_name__icontains=search) |
-                Q(student__email__icontains=search) |
-                Q(certificate_id__icontains=search)
+                _build_tokenized_search_q(
+                    search,
+                    [
+                        'student__first_name',
+                        'student__last_name',
+                        'student__email',
+                        'certificate_id',
+                    ],
+                )
             )
         return qs
 
@@ -194,7 +214,7 @@ class CertificateAdminViewSet(viewsets.ModelViewSet):
             return Response({'success': False, 'error': 'Query must be at least 2 characters.'}, status=400)
 
         students = CustomUser.objects.filter(
-            Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(email__icontains=q),
+            _build_tokenized_search_q(q, ['first_name', 'last_name', 'email', 'username']),
         ).order_by('first_name')[:20]
 
         serializer = StudentSearchSerializer(students, many=True)
