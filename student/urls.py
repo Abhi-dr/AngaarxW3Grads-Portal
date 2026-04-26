@@ -80,6 +80,8 @@ urlpatterns += [
     # ---- FLAMES 26 STUDENT DASHBOARD ----
     path('flames-26/', flames26_views.student_flames26, name='student_flames26'),
     path('flames-26/register/ajax/', flames26_views.ajax_flames26_register, name='ajax_flames26_register'),
+    path('flames-26/delete-registration/ajax/', flames26_views.ajax_flames26_delete_registration, name='ajax_flames26_delete_registration'),
+    path('flames-26/course-details/ajax/<slug:slug>/', flames26_views.ajax_flames26_course_details, name='ajax_flames26_course_details'),
 
     # path('flames/teams/create/<int:registration_id>/', flames.student_create_team, name='student_create_team'),
     # path('flames/teams/add-member/<int:team_id>/', flames.student_add_team_member, name='student_add_team_member'),

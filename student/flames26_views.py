@@ -190,3 +190,60 @@ def ajax_flames26_register(request):
             'created_at':      registration.created_at.strftime('%b %d, %Y'),
         }
     })
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AJAX — DELETE PENDING REGISTRATION
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required(login_url='login')
+@require_POST
+def ajax_flames26_delete_registration(request):
+    """
+    Allows a student to delete their FLAMES '26 registration,
+    only if it is currently in 'Pending' status.
+    """
+    registration_id = request.POST.get('registration_id')
+    if not registration_id:
+        return JsonResponse({'status': 'error', 'message': 'Registration ID is required.'}, status=400)
+        
+    registration = FlamesRegistration.objects.filter(
+        id=registration_id, 
+        user=request.user
+    ).first()
+    
+    if not registration:
+        return JsonResponse({'status': 'error', 'message': 'Registration not found or unauthorized.'}, status=404)
+        
+    if registration.status != 'Pending':
+        return JsonResponse({'status': 'error', 'message': 'Only pending registrations can be deleted.'}, status=400)
+        
+    registration.delete()
+    return JsonResponse({'status': 'success', 'message': 'Registration deleted successfully.'})
+
+# ══════════════════════════════════════════════════════════════════════════════
+# AJAX — COURSE DETAILS MODAL
+# ══════════════════════════════════════════════════════════════════════════════
+
+@login_required(login_url='login')
+def ajax_flames26_course_details(request, slug):
+    """
+    Returns the full course details as JSON for the Ninja-themed modal.
+    """
+    course = FlamesCourse.objects.filter(slug=slug, is_active=True).first()
+    if not course:
+        return JsonResponse({'status': 'error', 'message': 'Course not found.'}, status=404)
+        
+    return JsonResponse({
+        'status': 'success',
+        'course': {
+            'title': course.title,
+            'subtitle': course.subtitle,
+            'description': course.description,
+            'what_you_will_learn': course.get_learning_points(),
+            'price': float(course.price) if course.price else 0,
+            'discount_price': float(course.discount_price) if course.discount_price else 0,
+            'level': course.level,
+            'icon_class': course.icon_class,
+            'icon_color': course.icon_color,
+        }
+    })

@@ -208,8 +208,8 @@
 }
 .btn-view-locked::after {
   content: attr(data-tip);
-  position: absolute; bottom: calc(100% + 8px); left: 50%;
-  transform: translateX(-50%); white-space: nowrap;
+  position: absolute; bottom: calc(100% + 8px); left: 0;
+  white-space: nowrap;
   background: #1a1a1a; color: #eee; font-size: .7rem; font-weight: 500;
   padding: 5px 10px; border-radius: 7px; opacity: 0; pointer-events: none;
   transition: opacity .2s; z-index: 99;
@@ -458,6 +458,179 @@ select option { background: #1a1a1a; color: #f0f0f0; }
   .f26-edition-pill { margin-left: 0; }
   .modal-foot { flex-direction: column-reverse; }
 }
+/* ── Ninja Details Modal – full redesign ─────────────────────── */
+#detailsModal.modal-overlay {
+  align-items: center;
+  padding: 16px;
+}
+.ninja-modal {
+  max-width: 620px;
+  width: 100%;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #0d0d0f;
+  border: 1px solid rgba(255,107,0,0.25);
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 32px 80px rgba(0,0,0,0.8), 0 0 60px rgba(255,107,0,0.06);
+  position: relative;
+  overflow: hidden;
+  transform: translateY(24px) scale(0.97);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+.modal-overlay.open .ninja-modal {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+/* top glow bar */
+.ninja-modal::before {
+  content: "";
+  position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #ff6b00 40%, #ff9d00 60%, transparent 100%);
+  z-index: 2;
+}
+/* Hero section — fixed, doesn't scroll */
+.nm-hero {
+  flex-shrink: 0;
+  padding: 28px 28px 0;
+  position: relative;
+  background: linear-gradient(180deg, rgba(255,107,0,0.07) 0%, transparent 100%);
+}
+.nm-hero-row { display: flex; align-items: flex-start; gap: 16px; padding-bottom: 20px; }
+.nm-icon {
+  flex-shrink: 0;
+  width: 56px; height: 56px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  background: rgba(255,107,0,0.1);
+  border: 1px solid rgba(255,107,0,0.25);
+}
+.nm-hero-text { flex: 1; min-width: 0; }
+.nm-title {
+  font-size: 1.25rem; font-weight: 800; color: #fff;
+  margin-bottom: 5px; line-height: 1.2; letter-spacing: -0.3px;
+}
+.nm-subtitle { font-size: 0.8rem; color: #666; font-family: 'Courier New', monospace; }
+.nm-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.nm-badge {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px;
+  padding: 3px 10px; border-radius: 4px;
+}
+.nm-badge-level { background: rgba(255,107,0,0.12); color: #ff8c00; border: 1px solid rgba(255,107,0,0.25); }
+.nm-badge-days  { background: rgba(255,255,255,0.05); color: #888; border: 1px solid rgba(255,255,255,0.1); }
+/* Stats row */
+.nm-stats {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  margin: 0;
+}
+.nm-stat {
+  padding: 14px 16px; text-align: center;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.nm-stat:last-child { border-right: none; }
+.nm-stat-label { font-size: 0.65rem; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.nm-stat-val   { font-size: 1rem; font-weight: 700; color: #fff; }
+.nm-stat-val.fire { color: #ff6b00; }
+/* Scrollable body */
+.nm-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px 28px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,107,0,0.3) transparent;
+}
+.nm-body::-webkit-scrollbar { width: 4px; }
+.nm-body::-webkit-scrollbar-track { background: transparent; }
+.nm-body::-webkit-scrollbar-thumb { background: rgba(255,107,0,0.35); border-radius: 4px; }
+/* Description */
+.nm-section-label {
+  font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+  color: #ff6b00; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+}
+.nm-section-label::after {
+  content: ""; flex: 1; height: 1px; background: rgba(255,107,0,0.15);
+}
+.nm-desc {
+  font-size: 0.88rem; color: #bbb; line-height: 1.65;
+  margin-bottom: 24px; white-space: pre-wrap;
+}
+/* Learning points */
+.nm-points { margin-bottom: 24px; }
+.nm-points ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.nm-points li {
+  display: flex; gap: 10px; align-items: flex-start;
+  font-size: 0.85rem; color: #ccc; line-height: 1.5;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 6px; padding: 10px 12px;
+  transition: border-color 0.2s;
+}
+.nm-points li:hover { border-color: rgba(255,107,0,0.2); }
+.nm-points li i { color: #ff6b00; font-size: 0.7rem; margin-top: 3px; flex-shrink: 0; }
+/* Skeleton loader */
+.nm-skeleton { animation: nm-shimmer 1.5s infinite; border-radius: 4px; background: rgba(255,255,255,0.06); }
+.nm-sk-title  { height: 22px; width: 60%; margin-bottom: 8px; }
+.nm-sk-sub    { height: 14px; width: 35%; margin-bottom: 20px; }
+.nm-sk-line   { height: 12px; margin-bottom: 8px; }
+.nm-sk-line:nth-child(2) { width: 90%; }
+.nm-sk-line:nth-child(3) { width: 75%; }
+.nm-sk-line:nth-child(4) { width: 85%; }
+@keyframes nm-shimmer {
+  0%   { opacity: 0.4; }
+  50%  { opacity: 0.8; }
+  100% { opacity: 0.4; }
+}
+/* Close button */
+.nm-close {
+  position: absolute; top: 16px; right: 20px; z-index: 10;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
+  color: #777; width: 30px; height: 30px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: pointer; transition: all 0.2s; line-height: 1;
+}
+.nm-close:hover { background: rgba(255,107,0,0.15); border-color: rgba(255,107,0,0.3); color: #ff6b00; }
+/* Responsive */
+@media (max-width: 600px) {
+  .nm-hero { padding: 20px 18px 0; }
+  .nm-body  { padding: 18px 18px 24px; }
+  .nm-stats { grid-template-columns: repeat(3, 1fr); }
+  .nm-stat  { padding: 12px 8px; }
+  .nm-stat-label { font-size: 0.6rem; }
+  .nm-stat-val   { font-size: 0.9rem; }
+  .nm-title { font-size: 1.05rem; }
+  .nm-icon  { width: 46px; height: 46px; font-size: 1.2rem; }
+}
+
+/* ── Delete Button & Confirmation Modal ────────────────────────── */
+.btn-delete-reg {
+  position: absolute; top: 12px; right: 12px;
+  background: rgba(255,0,0,0.1); border: 1px solid rgba(255,0,0,0.2);
+  color: #ff4444; width: 30px; height: 30px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; z-index: 10;
+}
+.btn-delete-reg:hover { background: #ff4444; color: #fff; }
+
+.confirm-modal {
+  max-width: 400px; width: 90%; background: #151515; border-radius: 12px;
+  padding: 25px; text-align: center; border: 1px solid #333;
+}
+.confirm-icon {
+  width: 60px; height: 60px; border-radius: 50%; background: rgba(255,68,68,0.1);
+  color: #ff4444; font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 15px;
+}
+.confirm-title { font-size: 1.1rem; color: #fff; font-weight: 600; margin-bottom: 10px; }
+.confirm-text { font-size: 0.85rem; color: #888; margin-bottom: 25px; }
+.confirm-actions { display: flex; gap: 10px; justify-content: center; }
+.btn-confirm-cancel { padding: 8px 16px; border-radius: 6px; background: #222; color: #ccc; border: 1px solid #333; cursor: pointer; transition: background 0.2s; }
+.btn-confirm-cancel:hover { background: #333; }
+.btn-confirm-delete { padding: 8px 16px; border-radius: 6px; background: #ff4444; color: #fff; border: none; cursor: pointer; transition: background 0.2s; font-weight: 600;}
+.btn-confirm-delete:hover { background: #ff2222; }
+
 </style>
 {% endblock %}
 
@@ -513,6 +686,11 @@ select option { background: #1a1a1a; color: #f0f0f0; }
   {% for reg in registered_registrations %}
   <div class="reg-card" id="reg-card-{{ reg.course.slug }}">
     <div class="reg-card-accent accent-{{ reg.status|lower }}"></div>
+    {% if reg.status|lower == 'pending' %}
+    <button class="btn-delete-reg" onclick="confirmDeleteReg('{{ reg.id }}', '{{ reg.course.title|escapejs }}')" title="Delete Registration">
+      <i class="fas fa-trash"></i>
+    </button>
+    {% endif %}
     <div class="reg-card-top">
       <div class="rc-icon" style="background:rgba({{ reg.course.icon_color|slice:'1:' }},0.12);color:{{ reg.course.icon_color }}">
         <i class="{{ reg.course.icon_class }}"></i>
@@ -556,9 +734,9 @@ select option { background: #1a1a1a; color: #f0f0f0; }
       <span class="btn-view-locked" data-tip="Content unlocks when batch starts!">
         <i class="fas fa-lock" style="font-size:.75em"></i> View Course
       </span>
-      <a href="{% url 'flames26_track_detail' reg.course.slug %}" class="btn-details">
+      <button type="button" onclick="openCourseDetails('{{ reg.course.slug }}')" class="btn-details">
         <i class="fas fa-info-circle" style="font-size:.75em"></i> Details
-      </a>
+      </button>
     </div>
   </div>
   {% endfor %}
@@ -632,9 +810,9 @@ select option { background: #1a1a1a; color: #f0f0f0; }
       {% else %}
       <span class="btn-register-outline"><i class="fas fa-lock" style="font-size:.8em"></i> Closed</span>
       {% endif %}
-      <a href="{% url 'flames26_track_detail' course.slug %}" class="btn-details">
+      <button type="button" onclick="openCourseDetails('{{ course.slug }}')" class="btn-details">
         <i class="fas fa-info-circle" style="font-size:.75em"></i> Details
-      </a>
+      </button>
     </div>
   </div>
   {% endfor %}
@@ -706,6 +884,80 @@ select option { background: #1a1a1a; color: #f0f0f0; }
 </div>
 
 </div>{# /container-fluid #}
+
+<!-- ══ COURSE DETAILS MODAL (Ninja Theme) ══ -->
+<div class="modal-overlay" id="detailsModal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeDetailsModal()">
+  <div class="ninja-modal">
+    <button class="nm-close" onclick="closeDetailsModal()" aria-label="Close">&times;</button>
+
+    <!-- Fixed hero — always visible -->
+    <div class="nm-hero" id="cd-hero">
+      <div class="nm-hero-row">
+        <div class="nm-icon" id="cd-icon"><i class="fas fa-fire"></i></div>
+        <div class="nm-hero-text">
+          <div class="nm-title" id="cd-title">Loading...</div>
+          <div class="nm-subtitle" id="cd-subtitle"></div>
+          <div class="nm-badges">
+            <span class="nm-badge nm-badge-level" id="cd-level-badge"></span>
+            <span class="nm-badge nm-badge-days">45 Days</span>
+          </div>
+        </div>
+      </div>
+      <!-- Stats strip -->
+      <div class="nm-stats">
+        <div class="nm-stat">
+          <div class="nm-stat-label">Level</div>
+          <div class="nm-stat-val" id="cd-level">—</div>
+        </div>
+        <div class="nm-stat">
+          <div class="nm-stat-label">Duration</div>
+          <div class="nm-stat-val">45 Days</div>
+        </div>
+        <div class="nm-stat">
+          <div class="nm-stat-label">Course Fee</div>
+          <div class="nm-stat-val fire" id="cd-price">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollable body -->
+    <div class="nm-body" id="cd-body">
+      <!-- Skeleton shown while loading -->
+      <div id="cd-skeleton">
+        <div class="nm-skeleton nm-sk-title"></div>
+        <div class="nm-skeleton nm-sk-sub"></div>
+        <div class="nm-skeleton nm-sk-line" style="width:95%"></div>
+        <div class="nm-skeleton nm-sk-line"></div>
+        <div class="nm-skeleton nm-sk-line"></div>
+        <div class="nm-skeleton nm-sk-line" style="width:60%"></div>
+      </div>
+
+      <!-- Real content -->
+      <div id="cd-content" style="display:none;">
+        <div class="nm-section-label">About this track</div>
+        <div class="nm-desc" id="cd-desc"></div>
+
+        <div class="nm-points" id="cd-points-container" style="display:none;">
+          <div class="nm-section-label">What You Will Learn</div>
+          <ul id="cd-points"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DELETE REGISTRATION CONFIRMATION MODAL ════════════════════════════════════ -->
+<div class="modal-overlay" id="deleteConfirmModal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeConfirmModal()">
+  <div class="confirm-modal">
+    <div class="confirm-icon"><i class="fas fa-exclamation-triangle"></i></div>
+    <div class="confirm-title">Delete Registration?</div>
+    <div class="confirm-text">Are you sure you want to delete your pending registration for <strong id="del-course-name"></strong>? This action cannot be undone.</div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-cancel" onclick="closeConfirmModal()">Cancel</button>
+      <button class="btn-confirm-delete" id="btn-execute-delete" onclick="executeDeleteReg()">Delete Registration</button>
+    </div>
+  </div>
+</div>
 
 <!-- ══ REGISTRATION MODAL ════════════════════════════════════ -->
 <div class="modal-overlay" id="regModal" role="dialog" aria-modal="true"
@@ -975,9 +1227,9 @@ function buildRegCard(reg){
       <span class="btn-view-locked" data-tip="Content unlocks when batch starts!">
         <i class="fas fa-lock" style="font-size:.75em"></i> View Course
       </span>
-      <a href="/flames-26/${reg.course_slug}/" class="btn-details">
+      <button type="button" onclick="openCourseDetails('${reg.course_slug}')" class="btn-details">
         <i class="fas fa-info-circle" style="font-size:.75em"></i> Details
-      </a>
+      </button>
     </div>`;
   return card;
 }
@@ -997,5 +1249,134 @@ function updateCounts(){
     });
   }
 }
+
+// ── Course Details Ninja Modal ──────────────────────────────────────
+function openCourseDetails(slug) {
+  const modal    = document.getElementById('detailsModal');
+  const skeleton = document.getElementById('cd-skeleton');
+  const content  = document.getElementById('cd-content');
+
+  // Reset to skeleton state
+  skeleton.style.display = 'block';
+  content.style.display  = 'none';
+  document.getElementById('cd-title').textContent    = 'Loading...';
+  document.getElementById('cd-subtitle').textContent = '';
+  document.getElementById('cd-level-badge').textContent = '';
+  document.getElementById('cd-level').textContent    = '—';
+  document.getElementById('cd-price').textContent    = '—';
+  document.getElementById('cd-desc').textContent     = '';
+  document.getElementById('cd-points').innerHTML     = '';
+  document.getElementById('cd-points-container').style.display = 'none';
+  document.getElementById('cd-body').scrollTop = 0;
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  const url = `{% url 'ajax_flames26_course_details' slug='TEMP_SLUG' %}`.replace('TEMP_SLUG', slug);
+  fetch(url, {headers: {'X-Requested-With': 'XMLHttpRequest'}})
+    .then(r => r.json())
+    .then(data => {
+      if (data.status === 'success') {
+        const c = data.course;
+        // Hero section
+        document.getElementById('cd-title').textContent    = c.title;
+        document.getElementById('cd-subtitle').textContent = c.subtitle || '';
+        document.getElementById('cd-level-badge').textContent = c.level;
+        document.getElementById('cd-level').textContent    = c.level;
+        document.getElementById('cd-price').textContent    = c.discount_price > 0 ? `₹${c.discount_price}` : 'Free';
+        // Icon
+        const icon = document.getElementById('cd-icon');
+        icon.innerHTML      = `<i class="${c.icon_class}"></i>`;
+        icon.style.color        = c.icon_color;
+        icon.style.background   = `rgba(${hexToRgb(c.icon_color)}, 0.12)`;
+        icon.style.borderColor  = `rgba(${hexToRgb(c.icon_color)}, 0.25)`;
+        // Description
+        document.getElementById('cd-desc').textContent = c.description || 'No description available.';
+        // Learning points
+        if (c.what_you_will_learn && c.what_you_will_learn.length > 0) {
+          document.getElementById('cd-points').innerHTML =
+            c.what_you_will_learn.map(p => `<li><i class="fas fa-check"></i> <span>${p}</span></li>`).join('');
+          document.getElementById('cd-points-container').style.display = 'block';
+        }
+        // Show real content
+        skeleton.style.display = 'none';
+        content.style.display  = 'block';
+      } else {
+        document.getElementById('cd-desc').textContent = data.message || 'Error loading details.';
+        skeleton.style.display = 'none';
+        content.style.display  = 'block';
+      }
+    })
+    .catch(() => {
+      document.getElementById('cd-desc').textContent = 'Network error — please try again.';
+      skeleton.style.display = 'none';
+      content.style.display  = 'block';
+    });
+}
+function hexToRgb(hex) {
+  if (!hex || !hex.startsWith('#')) return '255, 107, 0';
+  let c = hex.substring(1).split('');
+  if(c.length === 3) c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+  c = '0x' + c.join('');
+  return [(c>>16)&255, (c>>8)&255, c&255].join(', ');
+}
+function closeDetailsModal() {
+  document.getElementById('detailsModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Delete Registration Confirmation Modal ───────────────────────────────────
+let pendingDeleteId = null;
+function confirmDeleteReg(id, title) {
+  pendingDeleteId = id;
+  document.getElementById('del-course-name').textContent = title;
+  document.getElementById('deleteConfirmModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeConfirmModal() {
+  pendingDeleteId = null;
+  document.getElementById('deleteConfirmModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function executeDeleteReg() {
+  if(!pendingDeleteId) return;
+  const btn = document.getElementById('btn-execute-delete');
+  const ogText = btn.textContent;
+  btn.textContent = 'Deleting...';
+  btn.disabled = true;
+
+  const fd = new FormData();
+  fd.append('registration_id', pendingDeleteId);
+
+  fetch('{% url "ajax_flames26_delete_registration" %}', {
+    method: 'POST',
+    body: fd,
+    headers: {'X-CSRFToken': getCookie('csrftoken')}
+  })
+  .then(r => r.json())
+  .then(resp => {
+    if(resp.status === 'success') {
+      toast(resp.message, 'success');
+      setTimeout(() => window.location.reload(), 800);
+    } else {
+      toast(resp.message, 'error');
+      btn.textContent = ogText;
+      btn.disabled = false;
+      closeConfirmModal();
+    }
+  })
+  .catch(() => {
+    toast('Network Error', 'error');
+    btn.textContent = ogText;
+    btn.disabled = false;
+    closeConfirmModal();
+  });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeDetailsModal();
+    closeConfirmModal();
+  }
+});
 </script>
 {% endblock %}
